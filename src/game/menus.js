@@ -10,7 +10,7 @@ import { TYPES } from '../data/types.js';
 import { creatureIcon, silhouette } from '../gfx/creatures.js';
 import { panel, say, choose, ask, closeDialog, toast, fmt } from './ui.js';
 import { state, settings, saveSettings, addItem, removeItem, spend, earn, hasItem, badgeCount, PARTY_MAX, markCaught } from './state.js';
-import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gainExp, canEvolve } from './creature.js';
+import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gainExp, canEvolve, tmCompatible, stoneEvolution } from './creature.js';
 import { applyItem, STATUS_SHORT } from './battle-engine.js';
 import { saveGame, listSaves } from '../save/index.js';
 import { MAPS } from '../data/maps.js';
@@ -58,12 +58,14 @@ function suspend(el, fn) {
 export async function openPauseMenu() {
   const S = state();
   sfx('confirm');
+  let flight = null;
   while (true) {
     const entries = [];
     if (S.flags.dex) entries.push(['PokeDex', openDex]);
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
     if (hasItem('mapa_uruguay')) entries.push(['Mapa', openMap]);
+    if (hasItem('silbato')) entries.push(['Vuelo', async () => { flight = await pickFlight(); }]);
     entries.push([S.player.name, openCard]);
     entries.push(['Guardar', openSave]);
     entries.push(['Opciones', openOptions]);
@@ -71,7 +73,21 @@ export async function openPauseMenu() {
     const i = await choose(entries.map((e) => e[0]), { cls: 'menu-pause' });
     if (i < 0 || !entries[i][1]) return;
     await entries[i][1]();
+    if (flight) {
+      const { flyTo } = await import('./world.js');
+      return flyTo(flight);
+    }
   }
+}
+
+/** Silbato del Hornero: pick a visited city to fly to. Returns the destination or null. */
+async function pickFlight() {
+  const { flyPoints, worldState } = await import('./world.js');
+  if (worldState.map?.indoor) { await say('Acá adentro no se puede usar.'); return null; }
+  const pts = flyPoints();
+  if (!pts.length) { await say('Todavía no conocés ninguna ciudad adonde volar.'); return null; }
+  const i = await choose(pts.map((p) => p.name), { cls: 'menu-sub' });
+  return i < 0 ? null : pts[i];
 }
 
 // ---------------------------------------------------------------- PARTY
@@ -189,6 +205,8 @@ const POCKETS = [['items', 'Objetos'], ['balls', 'Pokeballs'], ['key', 'Clave']]
 
 function itemUsable(key, c) {
   const it = ITEMS[key];
+  if (it.tm) return tmCompatible(c.species, it.tm) && !c.moves.some((m) => m.id === it.tm);
+  if (it.stone) return !!stoneEvolution(c, key);
   if (it.revive) return c.hp <= 0;
   if (c.hp <= 0) return false;
   if (it.heal && c.hp < maxHp(c)) return true;
@@ -241,7 +259,12 @@ export function openBag({ mode = 'field', wild = false } = {}) {
           return close({ item: key });
         }
         if (it.repel) return say('¡No es momento de usar eso!');
+        if (it.tm || it.stone) return say('Mejor usala fuera de combate.');
         if (it.rareCandy) return say('Mejor usala fuera de combate.');
+        if (it.xstat) {
+          const act = S.party.findIndex((c) => c.hp > 0);
+          return close({ item: key, target: act });
+        }
         const t = await openParty({ mode: 'item', title: `Usar ${it.name}` });
         if (t < 0) return;
         if (!itemUsable(key, S.party[t])) return say('No tendría ningún efecto.');
@@ -275,10 +298,24 @@ async function useInField(key) {
     sfx('confirm');
     return say(`Usaste ${it.name}. Las criaturas débiles no se van a acercar.`);
   }
+  if (it.xstat) return say('Solo se puede usar en combate.');
   const t = await openParty({ mode: 'item', title: `Usar ${it.name}` });
   if (t < 0) return;
   const c = S.party[t];
   if (!itemUsable(key, c)) return say('No tendría ningún efecto.');
+  if (it.tm) {
+    const { learnFlow } = await import('./battle-scene.js');
+    await learnFlow(c, it.tm);
+    // Solo se gasta si la criatura realmente aprendió el movimiento.
+    if (c.moves.some((m) => m.id === it.tm)) removeItem(key, 1);
+    return;
+  }
+  if (it.stone) {
+    const { evolutionScene } = await import('./battle-scene.js');
+    const to = stoneEvolution(c, key);
+    removeItem(key, 1);
+    return evolutionScene(c, to);
+  }
   removeItem(key, 1);
   if (it.rareCandy) {
     const { learnFlow, evolutionScene } = await import('./battle-scene.js');
@@ -332,7 +369,7 @@ export function openDex() {
               h('div', { class: 'chips' }, sp.types.map(typeChip)),
               h('p', { text: isCaught ? sp.desc : 'Atrapalo para saber más sobre esta criatura.' }),
               isCaught ? h('div', { class: 'base-stats' }, STAT_KEYS.map((s, j) => h('div', { class: 'row' }, h('span', { text: STAT_NAMES[s] }), h('i', { style: { '--v': sp.base[j] / 160 } }), h('b', { text: String(sp.base[j]) })))) : null,
-              sp.evo && isCaught ? h('p', { class: 'small', text: `Evoluciona en el nivel ${sp.evo.lvl}.` }) : null,
+              sp.evo && isCaught ? h('p', { class: 'small', text: sp.evo.stone ? `Evoluciona con ${ITEMS[sp.evo.stone].name}.` : `Evoluciona en el nivel ${sp.evo.lvl}.` }) : null,
             )),
           h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }));
         el.append(detail);

@@ -50,6 +50,7 @@ export const TILE_INFO = {
   y: { name: 'fachada gimnasio roca', solid: true },
   e: { name: 'emblema roca', solid: true },
   z: { name: 'torre', solid: true },
+  '%': { name: 'zarzal', solid: true },
   // interiors
   i: { name: 'piso' },
   Y: { name: 'piso gimnasio' },
@@ -135,6 +136,13 @@ const DRAW = {
       px(g, (off + 1) % T, y, '#7ab8f0', 4, 1);
       px(g, (off + 9) % T, y + 2, '#5aa4e8', 3, 1);
     }
+  },
+  '%': (g, r) => {
+    grass(g, r);
+    g.fillStyle = '#3a5a22'; g.beginPath(); g.arc(8, 9, 7, 0, 7); g.fill();
+    g.fillStyle = '#4e7a2e'; g.beginPath(); g.arc(6, 7, 4.5, 0, 7); g.fill(); g.beginPath(); g.arc(11, 9, 4, 0, 7); g.fill();
+    for (let i = 0; i < 9; i++) px(g, r.int(2, 13), r.int(3, 13), '#2a3a14', 1, 3);
+    px(g, 4, 5, '#8a5a3a', 1, 1); px(g, 10, 11, '#8a5a3a', 1, 1); px(g, 12, 6, '#8a5a3a', 1, 1);
   },
   '#': (g, r) => {
     grass(g, r);

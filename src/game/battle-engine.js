@@ -372,6 +372,10 @@ export class BattleEngine {
     const it = ITEMS[itemKey];
     const c = this.party[targetIndex];
     ev.push({ t: 'text', msg: `Usaste ${it.name}.` });
+    if (it.xstat) {
+      this.#changeStage(0, it.xstat, 1, ev);
+      return;
+    }
     const res = applyItem(itemKey, c);
     if (res) {
       if (c === this.p.c) ev.push({ t: 'heal', side: 0 }, { t: 'hud' });

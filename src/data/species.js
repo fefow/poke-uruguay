@@ -253,7 +253,8 @@ function buildLines() {
       const last = i === L.mons.length - 1;
       const single = L.mons.length === 1;
       const catchRate = single ? 90 : last ? 60 : i === 0 ? 190 : 110;
-      const evo = last ? null : { lvl: L.evo[i], to: L.mons[i + 1][0] };
+      const step = L.evo[i];
+      const evo = last ? null : typeof step === 'string' ? { lvl: 1, stone: step, to: L.mons[i + 1][0] } : { lvl: step, to: L.mons[i + 1][0] };
       out.push({
         id: 0, key, name, types, base: statsFor(bst, L.role), catchRate, baseExp: expFor(bst), learn: learnsetFor(types, L.role), desc,
         art: { plan, c1, c2, c3, feats: feats ? feats.split(' ') : [], size }, evo,

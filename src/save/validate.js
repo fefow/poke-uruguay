@@ -20,9 +20,9 @@ const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'rival1', 'rival2', 'rival3', 'rival4',
   'badge1', 'badge2', 'badge3', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
-  'got_mapa', 'got_cana', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min',
+  'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min',
 ]);
-const FLAG_PATTERN = /^(tr|it|v)_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl)_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 
@@ -139,6 +139,9 @@ export function validateSave(d) {
   if (bag.esfera_celeste) e('Pokeball Celeste no se puede obtener');
   if (bag.mapa_uruguay && !flags.got_mapa) e('Mapa de Uruguay sin haberlo recibido');
   if (bag.cana_pescar && !flags.got_cana) e('Caña de Pescar sin haberla recibido');
+  if (bag.machete && !flags.got_machete) e('Machete sin haberlo recibido');
+  if (bag.canoa && !flags.got_canoa) e('Canoa sin haberla recibido');
+  if (bag.silbato && !flags.pp_clear) e('Silbato del Hornero sin haber vencido al Equipo PP');
 
   // Dex
   const seen = (d.dex?.seen ?? []).filter((k) => SPECIES[k]);

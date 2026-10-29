@@ -1,6 +1,6 @@
 // Static checks on world data: row widths, NPC/item placement, doors, exits.
 import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.js';
-const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVyeCQIUt'.split(''));
+const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVyeCQIUt%'.split(''));
 let problems = 0;
 const bad = (m) => { problems++; console.log('✗', m); };
 for (const [id, m] of Object.entries(MAPS)) {
@@ -26,8 +26,14 @@ for (const [id, m] of Object.entries(MAPS)) {
   const signs = m.tiles.join('').split('').filter((c) => c === 'S').length;
   if (!m.indoor && (m.signs?.length ?? 0) !== signs) bad(`${id} has ${signs} signs but ${m.signs?.length ?? 0} texts`);
 }
+// Silbato del Hornero lands below each Policlínica door: it must be walkable.
+for (const [id, m] of Object.entries(OUTDOOR)) {
+  m.tiles.forEach((r, y) => { const x = r.indexOf('IIDII'); if (x >= 0 && SOLID.has(m.tiles[y + 1]?.[x + 2] ?? '#')) bad(`${id} fly point blocked`); });
+}
+// warps must land on walkable tiles
+for (const [id, m] of Object.entries(MAPS)) for (const w of m.warps ?? []) { const t = MAPS[w.to]?.tiles[w.ty]?.[w.tx]; if (t == null || SOLID.has(t)) bad(`${id} warp lands on '${t}'`); }
 // every interior reachable
-const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(OUTDOOR).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
+const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(MAPS).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
 for (const id of Object.keys(INTERIOR)) if (!linked.has(id)) bad(`interior ${id} is not linked from any door`);
 console.log(problems ? `${problems} problem(s)` : 'maps OK');
 process.exit(problems ? 1 : 0);

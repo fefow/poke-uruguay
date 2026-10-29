@@ -29,24 +29,24 @@ const rival = (api, stage, prize, intro, lose, after) => ({
 export const LEADERS = {
   lucia: {
     id: 'leader_lucia', name: 'Lucía', cls: 'Líder', look: 'leader_water', ai: 'smart', items: ['mate'],
-    team: [['lobito', 8], ['mbigua', 8], ['carpincho', 10]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 3,
+    team: [['lobito', 8], ['mbigua', 8], ['carpincho', 10]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 3, tm: 'mt_cascada',
     intro: ['Soy Lucía, líder del Gimnasio de Montevideo.', 'Entreno en la Rambla todas las mañanas, haga frío o calor.', 'Veamos si resistís la corriente del Plata.'],
     lose: 'Me superaste. Fue una derrota limpia.',
-    after: ['Te ganaste la Medalla Montevideo. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo Niebla opera en la costa este. Andá con cuidado.'],
+    after: ['Te ganaste la Medalla Montevideo. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo PP opera en la costa este. Andá con cuidado.'],
   },
   sofia: {
     id: 'leader_sofia', name: 'Sofía', cls: 'Líder', look: 'leader_elec', ai: 'smart', items: ['mate'],
-    team: [['luciernito', 16], ['cotorrayo', 17], ['luceron', 19]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 5,
+    team: [['luciernito', 16], ['cotorrayo', 17], ['luceron', 19]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 5, tm: 'mt_descarga',
     intro: ['Bienvenido a Punta del Este. Soy Sofía.', 'Mis criaturas acumulan la electricidad de las tormentas de verano.', 'Preparate para el combate.'],
     lose: 'Me quedé sin respuesta. Buen combate.',
-    after: ['La Medalla Maldonado es tuya.', 'El Equipo Niebla robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
+    after: ['La Medalla Maldonado es tuya.', 'El Equipo PP robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
   },
   aparicio: {
     id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'gaucho', ai: 'smart', items: ['mate_dulce'],
-    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5,
+    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
     intro: ['Buenas. Soy Aparicio.', 'Cuido estas sierras desde hace sesenta años.', 'La piedra de la quebrada lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía años que nadie me ganaba.',
-    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo Niebla subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
+    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo PP subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
   },
 };
 
@@ -139,7 +139,7 @@ export const SCRIPTS = {
     await api.say(['Buen combate. Ya atendí a sus criaturas.',
       'Ahora, {player}: el país es grande. Hay tres Gimnasios, en Montevideo, Punta del Este y Treinta y Tres.',
       'Si conseguís las tres medallas, podés desafiar al Campeón en el Estadio Centenario.',
-      'Y tené cuidado con el Equipo Niebla. Últimamente aparece una niebla extraña en la costa.',
+      'Y tené cuidado con el Equipo PP. Últimamente aparece una niebla extraña en la costa.',
       'Tu madre puede curar a tus criaturas en casa. Buen viaje.'], { name: 'Maestro Tabárez' });
   },
 
@@ -167,17 +167,46 @@ export const SCRIPTS = {
   },
 
   async gift_pir(api) {
-    if (api.flag('gift_pir')) return api.say('Cada verano vienen turistas de todo el continente.', { name: 'Veraneante' });
-    await api.say('Alquilo esta casa todos los veranos. Llevate unos alfajores, que me sobraron.', { name: 'Veraneante' });
-    await api.give('alfajor', 2);
-    api.setFlag('gift_pir');
+    if (!api.flag('gift_pir')) {
+      await api.say('Alquilo esta casa todos los veranos. Llevate unos alfajores, que me sobraron.', { name: 'Veraneante' });
+      await api.give('alfajor', 2);
+      api.setFlag('gift_pir');
+    }
+    if (!api.flag('got_machete')) {
+      await api.say(['Mi marido dejó esto en el cobertizo. Con el monte que hay, a vos te va a servir más que a nosotros.', 'Es un machete. Parate frente a un zarzal y apretá A para abrirte paso.'], { name: 'Veraneante' });
+      await api.give('machete', 1);
+      api.setFlag('got_machete');
+      return;
+    }
+    await api.say('Cada verano vienen turistas de todo el continente.', { name: 'Veraneante' });
   },
 
   async gift_pal(api) {
-    if (api.flag('gift_pal')) return api.say('Si te gusta el mar, no dejes de probar la pesca en La Paloma.', { name: 'Surfista' });
-    await api.say('Me mudé acá por las olas. Tomá, unas Superballs que ya no uso.', { name: 'Surfista' });
-    await api.give('superesfera', 3);
-    api.setFlag('gift_pal');
+    if (!api.flag('gift_pal')) {
+      await api.say('Me mudé acá por las olas. Tomá, unas Superballs que ya no uso.', { name: 'Surfista' });
+      await api.give('superesfera', 3);
+      api.setFlag('gift_pal');
+    }
+    if (!api.flag('got_canoa')) {
+      await api.say(['Tengo una canoa de más, de cuando remaba por el arroyo.', 'Con ella podés navegar: caminá hacia el agua y subís sola.', 'Dicen que hay islitas con tesoros frente a las playas.'], { name: 'Surfista' });
+      await api.give('canoa', 1);
+      api.setFlag('got_canoa');
+      return;
+    }
+    await api.say('Si te gusta el mar, no dejes de probar la pesca en La Paloma.', { name: 'Surfista' });
+  },
+
+  async garua(api) {
+    if (api.flag('pp_clear')) return api.say('Mi plan fracasó. Esta vez de verdad.', { name: 'Garúa' });
+    await api.say(['Así que lograste llegar hasta acá.', 'Soy Garúa, comandante del Equipo PP.', 'Brumario cayó, pero las máquinas siguen en pie. Con ellas, la niebla vuelve en cuestión de semanas.', 'Desde esta fábrica se va a gobernar el clima del país.'], { name: 'Garúa' });
+    const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'boss', ai: 'smart', team: [['yarara', 38], ['cuervon', 39], ['lobomarino', 39], ['pombero', 40], ['caudillo', 41]], prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
+    if (res !== 'win') return;
+    api.setFlag('pp_clear');
+    await api.say(['Está bien. Me rindo.', 'Llevate esto. Lo usábamos para vigilar el país desde el aire.', 'Silbá y un hornero te lleva a cualquier ciudad que ya conozcas.'], { name: 'Garúa' });
+    await api.give('silbato', 1);
+    await api.give('mt_vendaval', 1);
+    await api.say('El Equipo PP quedó desarticulado. Las máquinas de niebla se apagaron una por una.');
+    await api.npcLeave('garua');
   },
 
   async gift_min(api) {
@@ -238,12 +267,14 @@ export const SCRIPTS = {
     api.sfx('levelup');
     await api.say(`¡{player} recibió la ${L.badgeName}!`);
     await api.give(L.reward, L.rewardQty);
+    await api.give(L.tm, 1);
+    await api.say(['Tomá también esta MT. Enseña un movimiento nuevo a una criatura compatible.'], { name: L.name });
     await api.say(L.after, { name: L.name });
   },
 
   async bruma(api) {
-    await api.say(['Un entrometido más.', 'Soy Bruma, del Equipo Niebla.', 'Sin la lámpara del faro, la niebla cubre la costa y nadie ve lo que hacemos.', 'No vas a arruinar nuestros planes.'], { name: 'Bruma' });
-    const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. Niebla', look: 'boss', ai: 'smart', team: [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]], prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
+    await api.say(['Un entrometido más.', 'Soy Bruma, del Equipo PP.', 'Sin la lámpara del faro, la niebla cubre la costa y nadie ve lo que hacemos.', 'No vas a arruinar nuestros planes.'], { name: 'Bruma' });
+    const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. PP', look: 'boss', ai: 'smart', team: [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]], prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
     if (res !== 'win') return;
     await api.say(['Llevate tu lámpara.', 'Igual es tarde: el jefe Brumario ya va camino a la Quebrada de los Cuervos.', 'Con el Pampero en nuestro poder, la niebla será permanente.'], { name: 'Bruma' });
     await api.give('lampara', 1);
@@ -259,7 +290,7 @@ export const SCRIPTS = {
       await api.give('superesfera', 5);
       await api.give('alfajor', 2);
       api.setFlag('lamp_returned');
-      await api.say(['La policía ya abrió la Ruta 8, al norte de Montevideo.', 'Dicen que el Equipo Niebla fue hacia la Quebrada de los Cuervos.'], { name: 'Farero' });
+      await api.say(['La policía ya abrió la Ruta 8, al norte de Montevideo.', 'Dicen que el Equipo PP fue hacia la Quebrada de los Cuervos.'], { name: 'Farero' });
       return;
     }
     if (api.flag('lamp_returned')) return api.say('Gracias a vos, los barcos navegan seguros.', { name: 'Farero' });
@@ -268,7 +299,7 @@ export const SCRIPTS = {
 
   async rival_r8(api) {
     if (api.flag('rival3')) return;
-    await api.say(['{player}, ya sé lo del Equipo Niebla.', 'Pero antes de ir a la Quebrada, veamos quién es más fuerte.'], { name: '{rival}' });
+    await api.say(['{player}, ya sé lo del Equipo PP.', 'Pero antes de ir a la Quebrada, veamos quién es más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 1200, null, 'Sos un rival duro.', null), { canLose: true });
     api.setFlag('rival3');
     if (res === 'win') await api.say(['Bien. Andá vos primero. Yo te cubro.', 'Pero en el Centenario te gano.'], { name: '{rival}' });
@@ -281,14 +312,14 @@ export const SCRIPTS = {
   },
 
   async brumario(api) {
-    await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo Niebla.', 'El Pampero limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
-    const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe Niebla', look: 'boss', ai: 'smart', team: [['yarara', 33], ['zorromonte', 33], ['cuervon', 34], ['lobomarino', 35]], prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
+    await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP.', 'El Pampero limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
+    const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'boss', ai: 'smart', team: [['yarara', 33], ['zorromonte', 33], ['cuervon', 34], ['lobomarino', 35]], prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('quebrada_clear');
     await api.flash();
     api.sfx('evolve');
     await api.say(['Un viento helado baja de las sierras.', 'Una silueta enorme, con alas de tormenta, cruza el cielo.', 'El Pampero se aleja hacia el sur. La niebla se disipa.'],);
-    await api.say(['Mi plan ha fracasado. El Equipo Niebla se disuelve.', 'Quizás un cielo despejado no sea tan malo.'], { name: 'Brumario' });
+    await api.say(['Mi plan ha fracasado. El Equipo PP se disuelve.', 'Quizás un cielo despejado no sea tan malo.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
     await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme.', 'El Estadio Centenario ya abrió sus puertas para vos. La Liga te espera en Montevideo."']);
   },

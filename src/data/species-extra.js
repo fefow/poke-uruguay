@@ -30,7 +30,7 @@ export const LINES = [
     ['corcel', 'Corcel', null, 'quad', '#c8441a', '#5a2410', '#ffa02a', 'ears_pointy snout_long legs_long tail_bushy mane', 1.1, 'Su crin arde cuando acelera. Deja huellas chamuscadas en el pasto.'],
     ['crinfuego', 'Crinfuego', 'lucha', 'quad', '#d83a10', '#3a1408', '#ffd040', 'ears_pointy snout_long legs_long tail_bushy mane', 1.3, 'Un corcel de leyenda. Los viejos jinetes decían verlo en las noches de tormenta.'],
   ] },
-  { t: 'fuego', role: 's', bst: PAIR, evo: [21], mons: [
+  { t: 'fuego', role: 's', bst: PAIR, evo: ['piedra_agata'], mons: [
     ['pavesa', 'Pavesa', null, 'wisp', '#ff8a2a', '#d8441a', '#ffe05c', '', 0.85, 'Una chispa viva que flota sobre las brasas. Se apaga si nadie la alimenta.'],
     ['fogata', 'Fogata', 'psiquico', 'wisp', '#ff6a1a', '#b0301a', '#fff08a', 'halo', 1.1, 'Reúne otras chispas a su alrededor. En invierno da calor a quienes se acercan.'],
   ] },
@@ -83,11 +83,11 @@ export const LINES = [
     ['cumulo', 'Cúmulo', 'volador', 'wisp', '#6a789a', '#4a5878', '#ffe44a', 'cloud', 1.1, 'Guarda rayos en su interior y los descarga hacia el suelo. Avanza empujada por el viento.'],
     ['tormenton', 'Tormentón', 'agua', 'wisp', '#3a4668', '#222c48', '#fff27a', 'cloud', 1.3, 'Una tormenta con voluntad propia. Donde pasa, el cielo se oscurece y el aire pesa.'],
   ] },
-  { t: 'electrico', role: 'a', bst: PAIR, evo: [24], mons: [
+  { t: 'electrico', role: 'a', bst: PAIR, evo: ['piedra_agata'], mons: [
     ['anguila', 'Anguila', null, 'snake', '#4a6a5a', '#8ad0c0', '#f2e05c', 'pattern', 0.95, 'Vive en los fondos barrosos y aturde a sus presas con descargas.'],
     ['temblador', 'Temblador', 'agua', 'snake', '#2a5a6a', '#9af0e8', '#ffe44a', 'pattern fangs', 1.15, 'Puede paralizar a un animal grande con una sola descarga.'],
   ] },
-  { t: 'electrico', role: 'f', bst: PAIR, evo: [22], mons: [
+  { t: 'electrico', role: 'f', bst: PAIR, evo: ['piedra_agata'], mons: [
     ['murcielago', 'Murciélago', 'volador', 'moth', '#5a4a6a', '#8a7a9a', '#ffe44a', 'bat', 0.95, 'Se orienta con chasquidos eléctricos. Pasa el día colgado en galpones abandonados.'],
     ['vespertino', 'Vespertino', 'siniestro', 'moth', '#3a2a4a', '#6a5a7a', '#ffe44a', 'bat', 1.2, 'Sale al anochecer en grandes bandadas. Su chillido produce chispas.'],
   ] },
@@ -104,7 +104,7 @@ export const LINES = [
     ['tucotuco', 'Tucotuco', null, 'rodent', '#9a7248', '#5a3e22', '#e8d0a0', 'claws whiskers', 1.05, 'Sus túneles forman redes enormes. Siente las vibraciones a metros de distancia.'],
     ['tucoterra', 'Tucoterra', 'roca', 'rodent', '#8a6238', '#4a3018', '#d8c090', 'claws whiskers', 1.3, 'Remueve toneladas de tierra en una noche. El suelo se hunde donde hizo su madriguera.'],
   ] },
-  { t: 'tierra', role: 't', bst: PAIR, evo: [28], mons: [
+  { t: 'tierra', role: 't', bst: PAIR, evo: ['piedra_basalto'], mons: [
     ['tatu', 'Tatú', null, 'armadillo', '#7a6a58', '#5a4a3a', '#c8b898', '', 0.95, 'Un armadillo de escudo duro y paso lento. Cava en busca de raíces e insectos.'],
     ['tatucarreta', 'Tatú Carreta', 'roca', 'armadillo', '#6a5a48', '#4a3a2a', '#b8a888', 'spikes', 1.25, 'Un gigante blindado de la antigua fauna. Su caparazón resiste golpes enormes.'],
   ] },
@@ -112,7 +112,7 @@ export const LINES = [
     ['cangrejo', 'Cangrejo', null, 'crab', '#a87a4a', '#d8602a', '#3a2a1a', '', 0.9, 'Vive en cuevas de barro de las costas del Plata. Sale con la marea baja.'],
     ['centollon', 'Centollón', 'agua', 'crab', '#8a5a30', '#e04a1a', '#3a2a1a', '', 1.2, 'Sus tenazas rompen la roca y la concha por igual.'],
   ] },
-  { t: 'tierra', role: 't', bst: PAIR, evo: [27], mons: [
+  { t: 'tierra', role: 't', bst: PAIR, evo: ['piedra_basalto'], mons: [
     ['hormiguero', 'Hormiguero', null, 'quad', '#7a7a6a', '#3a3a30', '#d8d0b0', 'snout_long tail_bushy ears_round', 0.95, 'Su lengua larga entra en los hormigueros sin esfuerzo.'],
     ['tamandua', 'Tamanduá', 'lucha', 'quad', '#6a6a5a', '#2a2a22', '#d8d0b0', 'snout_long tail_bushy ears_round', 1.25, 'Se defiende con garras poderosas. Se alza ante pumas y jaguares.'],
   ] },
@@ -123,7 +123,7 @@ export const LINES = [
     ['carabo', 'Cárabo', 'psiquico', 'owl', '#8a7a62', '#4a3a2a', '#d8c8a0', '', 1.05, 'Ve perfectamente en la oscuridad. Su ulular anuncia cambios en el tiempo.'],
     ['buho', 'Búho', 'volador', 'owl', '#5a4a3a', '#2a1e14', '#e8c070', '', 1.3, 'Dueño de la noche rural. Pocos se atreven a mirarlo a los ojos.'],
   ] },
-  { t: 'siniestro', role: 'b', bst: PAIR, evo: [23], mons: [
+  { t: 'siniestro', role: 'b', bst: PAIR, evo: ['piedra_amatista'], mons: [
     ['comadreja', 'Comadreja', null, 'quad', '#8a8a82', '#4a4a44', '#f2f0e6', 'snout_long ears_round tail_bushy mask', 0.9, 'Se hace la muerta cuando la acorralan. Es más lista de lo que parece.'],
     ['zarigueya', 'Zarigüeya', 'veneno', 'quad', '#6a6a62', '#3a3a34', '#e8e4d8', 'snout_long ears_round tail_bushy mask', 1.15, 'Su cola prensil le permite colgarse de las ramas. Sorprende con un mordisco certero.'],
   ] },
@@ -179,11 +179,11 @@ export const LINES = [
     ['fatuo', 'Fatuo', 'fuego', 'wisp', '#a8e8d0', '#5ac0a0', '#f2fffa', 'halo', 1.1, 'Flota a ras del suelo. Los viajeros dicen que prefiere guiarlos lejos del camino.'],
     ['luzmala', 'Luz Mala', 'fuego', 'wisp', '#d8f0ff', '#8ad0f0', '#ffffff', 'halo lantern', 1.3, 'La luz de las leyendas rurales. Aparece donde algo quedó enterrado, y nadie sabe por qué.'],
   ] },
-  { t: 'psiquico', role: 's', bst: PAIR, evo: [28], mons: [
+  { t: 'psiquico', role: 's', bst: PAIR, evo: ['piedra_amatista'], mons: [
     ['franciscana', 'Franciscana', 'agua', 'whale', '#9aa8b8', '#e8eef4', '#c8e0f0', '', 0.62, 'El delfín más pequeño del Plata. Se comunica con sonidos que parecen un idioma.'],
     ['tonina', 'Tonina', 'agua', 'whale', '#6a7a90', '#dde4ec', '#9adcff', '', 0.9, 'Nada junto a los barcos y salta entre las olas. Su inteligencia sorprende a los pescadores.'],
   ] },
-  { t: 'psiquico', role: 'a', bst: PAIR, evo: [27], mons: [
+  { t: 'psiquico', role: 'a', bst: PAIR, evo: ['piedra_amatista'], mons: [
     ['tatadios', 'Tata Dios', 'bicho', 'bug', '#7ac048', '#5a9a30', '#e8f0a0', 'antennae wings4', 0.9, 'Una mantis que permanece en una postura casi de rezo. Percibe los movimientos antes de que ocurran.'],
     ['mantis', 'Mantis', 'bicho', 'bug', '#5a9a30', '#3a7a20', '#f0f8b0', 'antennae wings4', 1.2, 'Su sentido del tiempo es perfecto. Golpea en el instante exacto.'],
   ] },
@@ -232,11 +232,11 @@ export const LINES = [
     ['pedrusco', 'Pedrusco', null, 'golem', '#8c8c84', '#6a6a62', '#d8d8d0', 'moss', 1.05, 'Se endurece con el sol. Es difícil moverlo una vez que se planta.'],
     ['penasco', 'Peñasco', 'tierra', 'golem', '#7a7a74', '#5a5a54', '#c8c8c0', 'moss', 1.3, 'Una montaña pequeña que camina. Su peso hace temblar el suelo.'],
   ] },
-  { t: 'roca', role: 's', bst: PAIR, evo: [28], mons: [
+  { t: 'roca', role: 's', bst: PAIR, evo: ['piedra_basalto'], mons: [
     ['geoda', 'Geoda', null, 'golem', '#8c8478', '#6a6258', '#b070e8', 'crystals', 0.95, 'Parece una piedra común hasta que se abre y muestra un interior violeta.'],
     ['amatista', 'Amatista', 'psiquico', 'golem', '#7a6a8a', '#5a4a6a', '#c890f8', 'crystals', 1.2, 'Los cristales de su espalda brillan con luz propia. Proviene de las canteras de Artigas.'],
   ] },
-  { t: 'roca', role: 't', bst: PAIR, evo: [32], mons: [
+  { t: 'roca', role: 't', bst: PAIR, evo: ['piedra_basalto'], mons: [
     ['fosil', 'Fósil', null, 'armadillo', '#b8a888', '#8a7a5a', '#6a5a40', '', 0.95, 'Un resto antiguo que cobra vida al contacto con la humedad. Conserva memoria de eras pasadas.'],
     ['gliptodonte', 'Gliptodonte', 'tierra', 'armadillo', '#9a8a68', '#6a5a3a', '#4a3a28', 'spikes', 1.3, 'Un animal blindado de la prehistoria. Su caparazón era una armadura completa.'],
   ] },

@@ -630,9 +630,9 @@ async function handleCatch(foe) {
 }
 
 /** Standalone evolution animation (also used by Garrapiñada). */
-export async function evolutionScene(c) {
+export async function evolutionScene(c, forcedTo = null) {
   const from = c.species;
-  const to = canEvolve(c);
+  const to = forcedTo ?? canEvolve(c);
   if (!to) return;
   const prev = getRenderer();
   const prevMusic = currentTrack();
@@ -666,7 +666,7 @@ export async function evolutionScene(c) {
     await tween(300, (p) => (flashP = p));
     showing = to;
     const oldName = displayName(c);
-    evolve(c);
+    evolve(c, to);
     await tween(400, (p) => (flashP = 1 - p));
     flashP = 0;
     sfx('levelup');

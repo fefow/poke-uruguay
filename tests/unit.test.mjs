@@ -2,7 +2,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { computeDamage, makeBattler, BattleEngine, applyItem } from '../src/game/battle-engine.js';
-import { createCreature, calcStats, expForLevel, gainExp, legalMoves } from '../src/game/creature.js';
+import { createCreature, calcStats, expForLevel, gainExp, legalMoves, tmCompatible } from '../src/game/creature.js';
+import { ITEMS } from '../src/data/items.js';
 import { effectiveness } from '../src/data/types.js';
 import { MOVES } from '../src/data/moves.js';
 import { SPECIES } from '../src/data/species.js';
@@ -82,7 +83,20 @@ test('items heal and revive correctly', () => {
 test('legal moves include pre-evolution moves', () => {
   const set = legalMoves('ceibarbol', 40);
   assert.ok(set.has('somnifero'));
-  assert.ok(!set.has('terremoto'));
+  assert.ok(!set.has('psiquico'));
+});
+
+test('MT: compatibilidad por tipo y legalidad', () => {
+  assert.ok(tmCompatible('tejuchispa', 'parrillada'));
+  assert.ok(!tmCompatible('tejuchispa', 'cascada'));
+  assert.ok(legalMoves('tejuchispa', 5).has('parrillada'));
+  assert.ok(!legalMoves('tejuchispa', 5).has('cascada'));
+});
+
+test('piedras: la evolución por piedra no depende del nivel', () => {
+  const stoned = Object.values(SPECIES).filter((s) => s.evo?.stone);
+  assert.ok(stoned.length >= 8);
+  for (const s of stoned) assert.ok(ITEMS[s.evo.stone]?.stone === s.evo.stone, s.key);
 });
 
 function goodSave() {

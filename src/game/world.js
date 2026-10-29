@@ -64,6 +64,7 @@ function linkWorld() {
 // ---------------------------------------------------------------- state
 const W_ = {
   map: null,
+  tiles: null,
   npcs: [],
   items: [],
   legend: null,
@@ -84,13 +85,14 @@ const req = (r) => !r || (typeof r === 'string' ? flag(r) : r(flagsObj()));
 function tileAt(x, y) {
   const m = W_.map;
   if (x < 0 || y < 0 || x >= m.w || y >= m.h) return null;
-  return m.tiles[y][x];
+  return (W_.tiles ?? m.tiles)[y][x];
 }
 
-function solidAt(x, y, { ignorePlayer = false, self = null } = {}) {
+function solidAt(x, y, { ignorePlayer = false, self = null, player = false } = {}) {
   const ch = tileAt(x, y);
   if (ch == null) return true;
-  if (TILE_INFO[ch]?.solid) return true;
+  // With the canoe, the player can sail on water.
+  if (TILE_INFO[ch]?.solid && !(player && ch === '~' && hasItem('canoa'))) return true;
   if (W_.npcs.some((n) => n !== self && n.visible && n.x === x && n.y === y)) return true;
   if (W_.items.some((it) => it.x === x && it.y === y)) return true;
   if (W_.legend && W_.legend.x === x && W_.legend.y === y) return true;
@@ -117,6 +119,13 @@ export function loadMap(id, x, y, dir = 'down') {
   if (changed) logInfo(`Entró a ${id}`);
   if (!m.indoor) S.flags[`v_${id}`] = true;
   W_.map = m;
+  // Thickets already cut with the machete stay cut (flag cl_<map>_<x>_<y>).
+  W_.tiles = m.tiles.slice();
+  m.tiles.forEach((row, y) => {
+    for (let x = 0; x < row.length; x++) {
+      if (row[x] === '%' && S.flags[`cl_${id}_${x}_${y}`]) W_.tiles[y] = W_.tiles[y].slice(0, x) + '.' + W_.tiles[y].slice(x + 1);
+    }
+  });
   if (changed) W_.npcs = [];
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
   S.pos = { map: id, x, y, dir };
@@ -205,7 +214,7 @@ function tryMove(d) {
     if (!req(door.req)) return void runScript(async () => { await say(door.deny ?? 'Está cerrado.'); });
     return void runScript(() => enterInterior(door.to));
   }
-  if (solidAt(nx, ny)) return bump();
+  if (solidAt(nx, ny, { player: true })) return bump();
   p.from = { x: p.x, y: p.y };
   p.x = nx;
   p.y = ny;
@@ -388,6 +397,7 @@ function interact() {
   }
   if (tileAt(p.x + dx, p.y + dy) === 'B') return void runScript(() => say(worldRng.pick(BOOKS)));
   if (tileAt(p.x + dx, p.y + dy) === 'P' && !n) return void runScript(() => openPC());
+  if (tileAt(p.x + dx, p.y + dy) === '%') return void runScript(() => cutBush(p.x + dx, p.y + dy));
   if (tileAt(p.x + dx, p.y + dy) === '~') return void runScript(() => fish());
 }
 
@@ -435,6 +445,35 @@ async function legendEncounter(L) {
   else if (res === 'win') await say(`${SPECIES[L.species].name} desapareció… Quizás vuelva más tarde.`);
   if (res === 'lose') await blackout();
   refreshEntities();
+}
+
+async function cutBush(x, y) {
+  if (!hasItem('machete')) return say('Un zarzal espeso y espinoso. Con algo filoso se podría abrir paso.');
+  await say('Un zarzal espeso. Con el Machete se puede abrir paso.');
+  if (!(await ask('¿Cortar el zarzal?'))) return;
+  sfx('select');
+  setFlag(`cl_${W_.map.id}_${x}_${y}`);
+  W_.tiles[y] = W_.tiles[y].slice(0, x) + '.' + W_.tiles[y].slice(x + 1);
+  await say('¡Despejaste el camino!');
+}
+
+/** Cities the Silbato del Hornero can reach: visited maps with a Policlínica facade. */
+export function flyPoints() {
+  linkWorld();
+  const out = [];
+  for (const [id, m] of Object.entries(OUTDOOR)) {
+    if (!flag(`v_${id}`)) continue;
+    for (let y = 0; y < m.tiles.length; y++) {
+      const x = m.tiles[y].indexOf('IIDII');
+      if (x >= 0) { out.push({ id, name: m.name, x: x + 2, y: y + 1 }); break; }
+    }
+  }
+  return out;
+}
+
+export async function flyTo(pt) {
+  sfx('door');
+  await doWarp(pt.id, pt.x, pt.y, 'down');
 }
 
 /** Fishing: needs the rod and a `fish` table on the map. */
@@ -607,7 +646,7 @@ function drawWorld(g, t) {
   const x1 = Math.min(m.w - 1, Math.ceil((cx + VW) / T));
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
-    const row = m.tiles[y];
+    const row = W_.tiles[y];
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme), x * T - cx, y * T - cy);
   }
   // ground items
@@ -631,6 +670,10 @@ function drawWorld(g, t) {
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
     const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : 0) : n.moving ? frameIdx : 0;
     shadow(g, sx + 8, sy + 13, 5.5, 2.2);
+    if (player && tileAt(p.x, p.y) === '~') {
+      g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
+      g.fillStyle = '#a87a4a'; g.beginPath(); g.ellipse(sx + 8, sy + 11, 8, 3, 0, 0, 7); g.fill();
+    }
     g.drawImage(charSprite(look, n.dir, f), sx, sy - 4);
     // tall grass covers your feet
     const tx = player ? p.x : n.x;

@@ -4,6 +4,7 @@
 
 import { SPECIES } from '../data/species.js';
 import { MOVES } from '../data/moves.js';
+import { TM_MOVES } from '../data/items.js';
 import { clamp } from '../core/util.js';
 import { worldRng } from '../core/rng.js';
 
@@ -37,11 +38,18 @@ export function defaultMoves(speciesKey, level) {
   return unique.slice(-4);
 }
 
+/** MT rule: the move shares a type with the species, or is Normal. */
+export function tmCompatible(speciesKey, moveId) {
+  const t = MOVES[moveId].type;
+  return t === 'normal' || SPECIES[speciesKey].types.includes(t);
+}
+
 /** Every move a species could legitimately know at this level (incl. pre-evolutions). */
 export function legalMoves(speciesKey, level) {
   const set = new Set();
   const visit = (key) => {
     for (const [l, m] of SPECIES[key].learn) if (l <= level) set.add(m);
+    for (const m of TM_MOVES) if (tmCompatible(key, m)) set.add(m);
   };
   visit(speciesKey);
   for (const s of Object.values(SPECIES)) {
@@ -114,11 +122,17 @@ export function gainExp(c, amount) {
 
 export function canEvolve(c) {
   const evo = SPECIES[c.species].evo;
-  return evo && c.level >= evo.lvl ? evo.to : null;
+  return evo && !evo.stone && c.level >= evo.lvl ? evo.to : null;
 }
 
-export function evolve(c) {
-  const to = canEvolve(c);
+/** Evolution target if this stone works on the creature, else null. */
+export function stoneEvolution(c, stoneKey) {
+  const evo = SPECIES[c.species].evo;
+  return evo?.stone === stoneKey ? evo.to : null;
+}
+
+export function evolve(c, forcedTo = null) {
+  const to = forcedTo ?? canEvolve(c);
   if (!to) return null;
   const oldMax = maxHp(c);
   c.species = to;

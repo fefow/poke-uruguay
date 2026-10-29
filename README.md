@@ -1,6 +1,6 @@
 # Poke Uruguay: Aventuras en tierras charruas
 
-A single-player, 2D creature-collecting RPG set in Uruguay. Explore from Colonia del Sacramento to the Quebrada de los Cuervos, catch 42 original creatures inspired by Uruguayan wildlife (carpincho, ñandú, hornero, tero, yacaré, lobo marino…), beat three gyms, stop Equipo Niebla, and become Champion at the Estadio Centenario. After the credits the game keeps going, with legendary creatures to find and a Champion rematch.
+A single-player, 2D creature-collecting RPG set in Uruguay. Explore from Colonia del Sacramento to the Quebrada de los Cuervos, catch 42 original creatures inspired by Uruguayan wildlife (carpincho, ñandú, hornero, tero, yacaré, lobo marino…), beat three gyms, stop Equipo PP, and become Champion at the Estadio Centenario. After the credits the game keeps going, with legendary creatures to find and a Champion rematch.
 
 No Nintendo names or assets are used. All art is generated in code (canvas pixel art), all music is chiptune synthesized with Web Audio.
 
@@ -48,7 +48,7 @@ Copy `dist/` to any static host (nginx, Caddy…). Serve it over HTTPS so the of
 - 8 regions: Colonia, Ruta 1, Montevideo (Rambla, Palacio Salvo, Estadio Centenario), Ruta Interbalnearia, Punta del Este (La Mano), Cabo Polonio, Ruta 8, Treinta y Tres / Quebrada de los Cuervos. 17 interiors.
 - 42 creatures across 13 types, 3 starters (Ceibito, Tejuchispa, Carpinchito), evolutions, 60+ moves (Danza Candombe, Mate Amargo, Garra Charrúa, Rayo Pampero…).
 - Items with local flavor: Té de Marcela, Mate, Dulce de Leche, Chivito, Alfajor, Torta Frita, Garrapiñada.
-- Story: rival Facu, Maestro Tabárez, three gym leaders, Equipo Niebla (Bruma, Brumario), Champion Obdulio, hall of fame, credits, post-game legendaries (Pamperón, Ballenaplata, Soldemayo).
+- Story: rival Facu, Maestro Tabárez, three gym leaders, Equipo PP (Bruma, Brumario, Garúa), Champion Obdulio, hall of fame, credits, post-game legendaries (Pamperón, Ballenaplata, Soldemayo).
 
 ### Modern web features used
 
