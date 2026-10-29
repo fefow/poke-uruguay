@@ -63,7 +63,8 @@ export const input = {
 };
 
 addEventListener('keydown', (e) => {
-  if (e.target instanceof HTMLInputElement) return; // name entry field
+  // Name entry field and bug-panel notes
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
   const action = KEYMAP[e.code];
   if (!action) return;
   e.preventDefault();

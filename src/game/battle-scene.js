@@ -15,6 +15,7 @@ import { state, settings, earn, markSeen, markCaught, removeItem, PARTY_MAX } fr
 import { createCreature, displayName, maxHp, expForLevel, gainExp, learnMove, canEvolve, evolve, calcStats, STAT_KEYS, STAT_NAMES } from './creature.js';
 import { openParty, openBag } from './menus.js';
 import { sanitizeName } from '../core/util.js';
+import { info as logInfo } from '../core/debuglog.js';
 
 const BG = {
   field: ['#9ad4f2', '#d8f0ff', '#78c850', '#5aa83c'],
@@ -207,6 +208,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   const prevRenderer = getRenderer();
   const prevMusic = currentTrack();
   engine = new BattleEngine({ party: S.party, foes, wild, trainer });
+  logInfo(`Batalla ${wild ? 'salvaje' : `vs ${trainer?.name ?? 'entrenador'}`}: ${foes.map((f) => `${f.species} nv${f.level}`).join(', ')}`);
   Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
   playMusic(music);
   sfx('encounter');
@@ -255,6 +257,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
 
     // ---- outcome
     const result = engine.over;
+    logInfo(`Fin de batalla: ${result}`);
     if (result === 'win' && trainer) {
       A.foeTrainer = trainer.look ?? 'boy';
       A.trainerX = 160;

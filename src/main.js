@@ -7,15 +7,31 @@ import { mountTouchControls, pollGamepads, input } from './core/input.js';
 import { initAudio, setVolumes, sfx } from './core/audio.js';
 import { h, nextFrame, viewTransition, wait } from './core/util.js';
 import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './game/ui.js';
-import { state, setState, newState, settings } from './game/state.js';
+import { state, setState, newState, settings, badgeCount } from './game/state.js';
 import { loadMap, updateWorld, worldState } from './game/world.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
 import { openOptions } from './game/menus.js';
-import { initSaves, listSaves, loadGame, saveGame } from './save/index.js';
+import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
+import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
 import { SAVE_CONFIG } from './save/config.js';
 
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
+
+// ---------------------------------------------------------------- bug log
+installErrorCapture();
+setContext(() => {
+  const S = state();
+  const m = worldState.map?.id;
+  const p = worldState.player;
+  return {
+    mode,
+    where: m ? `${m} (${p?.x},${p?.y})` : mode,
+    party: S?.party.map((c) => `${c.species} nv${c.level} ${c.hp}PS`) ?? [],
+    badges: S ? badgeCount() : 0,
+    playtime: S ? Math.round(S.stats.playtime) : 0,
+  };
+});
 
 // ---------------------------------------------------------------- loop
 let last = performance.now();
@@ -37,6 +53,7 @@ async function boot() {
   mountScreen($('#view'));
   mountUI($('#ui'));
   mountTouchControls($('#touch'));
+  mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   setVolumes(settings);
   requestAnimationFrame(frame);
 

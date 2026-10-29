@@ -13,6 +13,7 @@ import { input } from '../core/input.js';
 import { sfx, playMusic } from '../core/audio.js';
 import { worldRng } from '../core/rng.js';
 import { h, wait } from '../core/util.js';
+import { info as logInfo } from '../core/debuglog.js';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.js';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX } from './state.js';
 import { createCreature, heal as healCreature, displayName } from './creature.js';
@@ -112,6 +113,7 @@ export function loadMap(id, x, y, dir = 'down') {
   const m = MAPS[id];
   const S = state();
   const changed = W_.map?.id !== id;
+  if (changed) logInfo(`Entró a ${id}`);
   W_.map = m;
   if (changed) W_.npcs = [];
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
