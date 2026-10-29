@@ -21,7 +21,12 @@ export const PLACES = deepFreeze([
   { id: 'cabo', name: 'Cabo Polonio', kind: 'place', lon: -53.77, lat: -34.4, note: 'Faro' },
   { id: 'minas', name: 'Minas', kind: 'loc', lon: -55.24, lat: -34.37, note: 'Mate: Canarias' },
   { id: 'quebrada', name: 'Treinta y Tres', kind: 'city', lon: -54.38, lat: -33.23, color: '#a48e48', note: 'Gimnasio de Roca' },
-  { id: 'durazno', name: 'Durazno', kind: 'loc', lon: -56.5, lat: -33.0, note: 'Zona de ceniza y magma' },
+  { id: 'durazno', name: 'Durazno', kind: 'city', lon: -56.5, lat: -33.0, color: '#e8702a', note: 'Gimnasio de Fuego' },
+  { id: 'tacuarembo', name: 'Tacuarembó', kind: 'city', lon: -56.0, lat: -31.72, color: '#4aa03c', note: 'Gimnasio de Planta' },
+  { id: 'rivera', name: 'Rivera', kind: 'city', lon: -55.7, lat: -30.95, color: '#c8402a', note: 'Gimnasio de Lucha · Torre de Niebla' },
+  { id: 'salto', name: 'Salto', kind: 'city', lon: -57.75, lat: -31.38, color: '#8a5ad0', note: 'Gimnasio Psíquico · Represa' },
+  { id: 'paysandu', name: 'Paysandú', kind: 'loc', lon: -57.9, lat: -32.3, note: 'Pan Casero y Alfajor Triple' },
+  { id: 'fraybentos', name: 'Fray Bentos', kind: 'city', lon: -58.0, lat: -33.1, color: '#c8506a', note: 'Gimnasio Siniestro · Frigorífico Anglo' },
 ]);
 
 // Mapas de ruta: se muestran entre los dos lugares que unen.
@@ -29,12 +34,18 @@ export const ROUTES = deepFreeze({
   ruta1: ['colonia', 'rosario'],
   interbalnearia: ['montevideo', 'piriapolis'],
   ruta8: ['montevideo', 'minas'],
+  ruta5: ['durazno', 'tacuarembo'],
+  ruta30: ['tacuarembo', 'rivera'],
+  ruta31: ['tacuarembo', 'salto'],
+  ruta3: ['salto', 'paysandu'],
+  ruta24: ['paysandu', 'fraybentos'],
 });
 
 // Líneas que unen los lugares en orden de recorrido.
 export const LINKS = deepFreeze([
   ['colonia', 'rosario'], ['rosario', 'montevideo'], ['montevideo', 'piriapolis'], ['piriapolis', 'punta'],
   ['punta', 'paloma'], ['paloma', 'cabo'], ['montevideo', 'minas'], ['minas', 'quebrada'], ['minas', 'durazno'],
+  ['durazno', 'tacuarembo'], ['tacuarembo', 'rivera'], ['tacuarembo', 'salto'], ['salto', 'paysandu'], ['paysandu', 'fraybentos'],
 ]);
 
 export const VIEW = { w: 340, h: 250, lon0: -59.76, lon1: -52.04, lat0: -29.9, lat1: -35.2 };
@@ -81,12 +92,15 @@ export const DEPARTMENTS = deepFreeze([
 export const PLACE_DEPT = deepFreeze({
   colonia: 'colonia', rosario: 'colonia', montevideo: 'montevideo', piriapolis: 'maldonado', punta: 'maldonado',
   paloma: 'rocha', cabo: 'rocha', minas: 'lavalleja', quebrada: 'treintaytres', durazno: 'durazno',
+  tacuarembo: 'tacuarembo', rivera: 'rivera', salto: 'salto', paysandu: 'paysandu', fraybentos: 'rionegro',
 });
 
 // Zona (bioma) de cada mapa con criaturas salvajes.
 export const MAP_BIOME = deepFreeze({
   ruta1: ['campo'], rosario: ['playa'], interbalnearia: ['ciudad', 'playa'], piriapolis: ['playa'], punta: ['playa'], paloma: ['playa'], cabo: ['playa'],
   ruta8: ['campo', 'ciudad'], minas: ['hielo', 'campo'], quebrada: ['campo', 'bosque'], durazno: ['magma'],
+  ruta5: ['campo', 'bosque'], tacuarembo: ['bosque'], ruta30: ['bosque'], rivera: ['bosque', 'ciudad'], ruta31: ['campo', 'bosque'], salto: ['campo', 'ciudad'],
+  ruta3: ['campo'], paysandu: ['campo'], ruta24: ['campo'], fraybentos: ['ciudad', 'campo'],
 });
 
 // Adornos del mapa (pinos y cerros), en [lon, lat].

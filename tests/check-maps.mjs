@@ -1,6 +1,6 @@
 // Static checks on world data: row widths, NPC/item placement, doors, exits.
 import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.js';
-const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVyeCQIUt%^'.split(''));
+const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVyeCQIUt%^123456789!@$&*+'.split(''));
 let problems = 0;
 const bad = (m) => { problems++; console.log('✗', m); };
 for (const [id, m] of Object.entries(MAPS)) {
@@ -35,5 +35,29 @@ for (const [id, m] of Object.entries(MAPS)) for (const w of m.warps ?? []) { con
 // every interior reachable
 const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(MAPS).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
 for (const id of Object.keys(INTERIOR)) if (!linked.has(id)) bad(`interior ${id} is not linked from any door`);
+// connectivity: from the first walkable edge tile of an outdoor map, every exit, door front and NPC/item is reachable
+const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~'); }; // thickets (machete) and water (canoe) count as passable
+for (const [id, m] of Object.entries(OUTDOOR)) {
+  const h = m.tiles.length; const w = m.tiles[0].length;
+  const starts = [];
+  for (const side of Object.keys(m.exits ?? {})) {
+    const cells = side === 'e' ? m.tiles.map((_, y) => [w - 1, y]) : side === 'w' ? m.tiles.map((_, y) => [0, y]) : side === 'n' ? [...m.tiles[0]].map((_, x) => [x, 0]) : [...m.tiles[h - 1]].map((_, x) => [x, h - 1]);
+    for (const [x, y] of cells) if (walkable(m, x, y)) starts.push([x, y, side]);
+  }
+  if (!starts.length) continue;
+  const seen = new Set([`${starts[0][0]},${starts[0][1]}`]);
+  const q = [[starts[0][0], starts[0][1]]];
+  while (q.length) {
+    const [x, y] = q.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx; const ny = y + dy;
+      if (walkable(m, nx, ny) && !seen.has(`${nx},${ny}`)) { seen.add(`${nx},${ny}`); q.push([nx, ny]); }
+    }
+  }
+  for (const [x, y, side] of starts) if (!seen.has(`${x},${y}`)) bad(`${id} exit ${side} tile ${x},${y} is cut off from the rest of the map`);
+  m.tiles.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'D' && !seen.has(`${x},${y + 1}`)) bad(`${id} door at ${x},${y} has no reachable front tile`); }));
+  for (const n of m.npcs ?? []) if (n.look !== null && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
+  for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`)) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
+}
 console.log(problems ? `${problems} problem(s)` : 'maps OK');
 process.exit(problems ? 1 : 0);

@@ -18,11 +18,13 @@ const LINES = {
 };
 const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'rival1', 'rival2', 'rival3', 'rival4',
-  'badge1', 'badge2', 'badge3', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
+  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
+  'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_brumario', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
+  'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
-const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-4])_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-9])_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 
@@ -91,9 +93,17 @@ export function validateSave(d) {
     if (!STORY_FLAGS.has(k) && !FLAG_PATTERN.test(k)) { e(`marca desconocida "${k}"`); continue; }
     flags[k] = true;
   }
-  if (flags.badge2 && !flags.badge1) e('medallas fuera de orden');
-  if (flags.badge3 && !flags.badge2) e('medallas fuera de orden');
-  if (flags.champion && !(flags.badge3 && flags.quebrada_clear && flags.rival4)) e('campeón sin completar la Liga');
+  // Story order: every medal needs the previous one, and each PP hideout needs its medal.
+  for (let i = 2; i <= 8; i++) if (flags[`badge${i}`] && !flags[`badge${i - 1}`]) e('medallas fuera de orden');
+  if (flags.pp_clear && !(flags.badge4 && flags.quebrada_clear)) e('la fábrica de Minas no pudo haberse completado');
+  if (flags.torre_clear && !(flags.badge5 && flags.pp_clear)) e('la Torre de Niebla no pudo haberse completado');
+  if (flags.badge6 && !flags.torre_clear) e('medalla de Rivera sin haber apagado la Torre');
+  if (flags.represa_clear && !(flags.badge6 && flags.torre_clear)) e('la Represa no pudo haberse completado');
+  if (flags.anglo_clear && !(flags.badge7 && flags.represa_clear)) e('el Frigorífico no pudo haberse completado');
+  if (flags.badge8 && !flags.anglo_clear) e('medalla de Fray Bentos sin haber vencido a Calima');
+  for (let i = 2; i <= 4; i++) if (flags[`elite${i}`] && !flags[`elite${i - 1}`]) e('Alto Mando fuera de orden');
+  if (flags.elite1 && !(flags.badge8 && flags.anglo_clear)) e('Alto Mando sin las ocho medallas');
+  if (flags.champion && !(flags.badge8 && flags.anglo_clear && flags.elite4 && flags.rival4)) e('campeón sin completar la Liga');
 
   // Position
   const pos = d.pos ?? {};

@@ -132,6 +132,16 @@ export const LOOKS = {
   brumario: { h: '#e8e8f0', H: '#e8e8f0', s: '#e8c8a8', S: '#c8a888', c: '#2a2a3a', C: '#14141e', p: '#14141e', b: '#8a8aa0' },
   garua: { h: '#9aa8a8', H: '#2a4a4a', s: '#d8b898', S: '#b89878', c: '#3a7a7a', C: '#1e4a4a', p: '#1e2e2e', b: '#0e1a1a' },
   leader_gaucho: { h: '#e8e8e8', H: '#1a1a1a', s: '#c8946a', S: '#a8744a', c: '#8a2a2a', C: '#4a1a1a', p: '#e8e0d0', b: '#3a2a1a' },
+  leader_fire: { h: '#c8402a', H: '#c8402a', s: '#d8a070', S: '#b88050', c: '#e8702a', C: '#a83a1a', p: '#3a2a2a', b: '#1a1210', long: true },
+  leader_forest: { h: '#6a4a2a', H: '#3a6a3a', s: '#e8b890', S: '#c89870', c: '#4a8a3a', C: '#2f5a2a', p: '#5a4a2a', b: '#2a1a10' },
+  leader_dojo: { h: '#2a1a1a', H: '#2a1a1a', s: '#f2c8a0', S: '#d8a880', c: '#f4f4f4', C: '#c8c8d0', p: '#f4f4f4', b: '#2a2a2a', long: true },
+  leader_psy: { h: '#e8e8f0', H: '#e8e8f0', s: '#e8c8a8', S: '#c8a888', c: '#6a3a9a', C: '#3e2266', p: '#3e2266', b: '#1a1020' },
+  leader_dark: { h: '#c8c8d8', H: '#c8c8d8', s: '#e8d0c8', S: '#c8b0a8', c: '#2a2a3a', C: '#14141e', p: '#14141e', b: '#0a0a12', long: true },
+  calima: { h: '#a8a8b8', H: '#a8a8b8', s: '#e8c8a8', S: '#c8a888', c: '#f2f2f2', C: '#c8c8d8', p: '#22222e', b: '#14141e' },
+  elite1: { h: '#6a4a2a', H: '#6a4a2a', s: '#f2c8a0', S: '#d8a880', c: '#7ac8f0', C: '#3f86c8', p: '#f2f2f2', b: '#2a5a9a', long: true },
+  elite2: { h: '#3a2a1a', H: '#e8b02a', s: '#c8946a', S: '#a8744a', c: '#a8782c', C: '#6a4a1a', p: '#5a4a3a', b: '#2a1a10' },
+  elite3: { h: '#4a2a5a', H: '#3a6a3a', s: '#e8c8b8', S: '#c8a898', c: '#4a2a6a', C: '#2f1a4a', p: '#2a1a3a', b: '#1a1020', long: true },
+  elite4: { h: '#1a1a1a', H: '#1a1a1a', s: '#a87a5a', S: '#8a5a3a', c: '#f2f2f2', C: '#c8c8d0', p: '#2a3a8a', b: '#f2f2f2' },
   oldman: { h: '#e8e8e8', H: '#8a6a4a', s: '#e8b890', S: '#c89870', c: '#8a6a4a', C: '#5a4a3a', p: '#4a4a4a', b: '#2a1a10' },
   girl: { h: '#c8862a', H: '#f2c02a', s: '#f2c8a0', S: '#d8a880', c: '#f2c02a', C: '#c8902a', p: '#5aa8e8', b: '#c83a3a', long: true },
   boy: { h: '#3a2a1a', H: '#3a2a1a', s: '#d8a070', S: '#b88050', c: '#4ac04a', C: '#2a8a2a', p: '#3a5a8a', b: '#2a2a2a' },
@@ -210,6 +220,62 @@ const DECO = {
     if (dir === 'down') { d(10, 10, '#f8f8f8', 2, 2); d(1, 10, '#14141e', 2, 1); d(1, 11, '#f8d040', 2, 1); }
     else if (dir === 'up') { d(6, 9, '#f8f8f8', 1, 4); d(7, 9, '#f8f8f8', 2, 1); d(7, 11, '#f8f8f8', 2, 1); d(8, 12, '#f8f8f8', 1, 1); }
     else d(6, 11, '#f8d040', 2, 1);
+  },
+  leader_fire: (d, dir) => {
+    d(3, 3, '#ff9a2a', 10, 1);
+    if (dir === 'down') { d(5, 9, '#5a3a1a', 6, 4); d(7, 10, '#3a2a10', 2, 2); }
+    else if (dir === 'up') d(5, 9, '#5a3a1a', 6, 4);
+    else d(5, 9, '#5a3a1a', 5, 3);
+  },
+  leader_forest: (d, dir) => {
+    d(2, 1, '#2f5a2a', 12, 2); d(3, 0, '#2f5a2a', 9, 1);
+    if (dir === 'down') { d(5, 7, '#6a4a2a', 6, 2); d(7, 10, '#b8f090', 2, 2); }
+    else if (dir === 'side') { d(8, 7, '#6a4a2a', 3, 2); d(6, 10, '#b8f090', 1, 2); }
+  },
+  leader_dojo: (d, dir) => {
+    d(3, 3, '#e0263a', 10, 1);
+    if (dir === 'down') { d(3, 12, '#14141e', 10, 1); d(7, 9, '#c8c8d0', 2, 3); }
+    else if (dir === 'up') d(3, 12, '#14141e', 10, 1);
+    else d(4, 12, '#14141e', 8, 1);
+  },
+  leader_psy: (d, dir) => {
+    if (dir === 'down') { d(4, 6, '#1a1a24', 8, 1); d(6, 10, '#f8d040', 1, 1); d(9, 11, '#f8d040', 1, 1); d(7, 12, '#f8d040', 1, 1); d(3, 12, '#3e2266', 10, 2); }
+    else if (dir === 'up') { d(6, 10, '#f8d040', 1, 1); d(9, 11, '#f8d040', 1, 1); d(3, 12, '#3e2266', 10, 2); }
+    else { d(8, 6, '#1a1a24', 4, 1); d(6, 11, '#f8d040', 1, 1); d(4, 12, '#3e2266', 8, 2); }
+  },
+  leader_dark: (d, dir) => {
+    if (dir === 'down') { d(7, 10, '#e8e0f0', 2, 2); d(8, 10, '#14141e', 1, 2); d(3, 12, '#14141e', 10, 2); d(6, 8, '#8a2a4a', 4, 1); }
+    else if (dir === 'up') d(3, 12, '#14141e', 10, 2);
+    else { d(6, 10, '#e8e0f0', 1, 2); d(4, 12, '#14141e', 8, 2); }
+  },
+  // Calima: white coat, dark round glasses, red tie and the PP badge.
+  calima: (d, dir) => {
+    if (dir === 'down') { d(4, 6, '#14141e', 8, 1); d(7, 9, '#e0263a', 2, 3); d(4, 10, '#14141e', 1, 3); d(11, 10, '#14141e', 1, 3); d(10, 10, '#f8d040', 1, 1); }
+    else if (dir === 'up') { d(7, 9, '#c8c8d8', 2, 4); }
+    else { d(8, 6, '#14141e', 4, 1); d(6, 9, '#e0263a', 1, 3); }
+  },
+  elite1: (d, dir) => {
+    d(3, 3, '#2a2a3a', 10, 1);
+    if (dir !== 'up') { d(4, 2, '#8ac8f0', 3, 1); d(9, 2, '#8ac8f0', 3, 1); }
+    if (dir === 'down') { d(3, 10, '#f2f2f2', 2, 2); d(11, 10, '#f2f2f2', 2, 2); }
+  },
+  elite2: (d, dir) => {
+    d(3, 2, '#e8b02a', 10, 1); d(5, 1, '#f8d040', 6, 1);
+    if (dir === 'down') { d(3, 10, '#5a3a1a', 10, 1); d(7, 9, '#f8d040', 2, 1); }
+    else if (dir === 'up') d(3, 10, '#5a3a1a', 10, 1);
+    else d(4, 10, '#5a3a1a', 8, 1);
+  },
+  elite3: (d, dir) => {
+    d(3, 3, '#2f1a4a', 10, 1);
+    if (dir === 'down') { d(5, 7, '#2f1a4a', 6, 1); d(4, 9, '#8a5ad0', 8, 1); d(7, 11, '#8a5ad0', 2, 1); }
+    else if (dir === 'up') d(4, 9, '#8a5ad0', 8, 1);
+    else { d(8, 7, '#2f1a4a', 3, 1); d(5, 9, '#8a5ad0', 6, 1); }
+  },
+  elite4: (d, dir) => {
+    d(3, 3, '#2a3a8a', 10, 1);
+    if (dir === 'down') { d(7, 10, '#2a3a8a', 2, 1); d(10, 10, '#f8d040', 2, 2); d(1, 10, '#e0263a', 2, 1); }
+    else if (dir === 'up') { d(6, 9, '#2a3a8a', 1, 4); d(7, 9, '#2a3a8a', 2, 1); d(7, 11, '#2a3a8a', 2, 1); d(8, 12, '#2a3a8a', 1, 1); }
+    else d(6, 11, '#2a3a8a', 3, 1);
   },
   mom: (d, dir) => { if (dir === 'down') d(5, 10, '#f8f8f8', 6, 4); else if (dir !== 'up') d(5, 10, '#f8f8f8', 5, 3); },
 };

@@ -577,7 +577,7 @@ export function openMap() {
 export function openCard() {
   const S = state();
   return panel('panel-card', (el, close) => {
-    const badges = [['badge1', 'Montevideo', '#3f86e0'], ['badge2', 'Maldonado', '#e8c21c'], ['badge3', 'Treinta y Tres', '#a48e48']];
+    const badges = [['badge1', 'Montevideo', '#3f86e0'], ['badge2', 'Maldonado', '#e8c21c'], ['badge3', 'Treinta y Tres', '#a48e48'], ['badge4', 'Durazno', '#e8702a'], ['badge5', 'Tacuarembó', '#4aa03c'], ['badge6', 'Rivera', '#c8402a'], ['badge7', 'Salto', '#8a5ad0'], ['badge8', 'Fray Bentos', '#c8506a']];
     el.append(
       h('header', { class: 'panel-title' }, h('span', { text: 'Carnet de Entrenador' }), h('span', { text: `ID ${S.player.id}` })),
       h('div', { class: 'card-body' },

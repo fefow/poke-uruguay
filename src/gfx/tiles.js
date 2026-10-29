@@ -525,6 +525,59 @@ const GYM_ROCA = {
 
 const THEMES = { poli: POLI_T, gym_agua: GYM_AGUA, gym_elec: GYM_ELEC, gym_roca: GYM_ROCA };
 
+
+// ---- gym families for the later cities: roof, facade and emblem tiles plus an interior theme ----
+const disc = (g, cx, cy, r, col) => { g.fillStyle = col; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill(); };
+const EMBLEMS = {
+  fuego: (g) => { g.fillStyle = '#ff9a2a'; g.beginPath(); g.moveTo(8, 2.5); g.bezierCurveTo(12, 6, 12.5, 9, 11, 11.5); g.bezierCurveTo(10, 13, 6, 13, 5, 11.5); g.bezierCurveTo(3.5, 9, 5, 7, 6, 6); g.bezierCurveTo(6.5, 7.5, 7, 7.5, 8, 2.5); g.fill(); g.fillStyle = '#ffe44a'; g.beginPath(); g.arc(8, 10.5, 2, 0, 7); g.fill(); },
+  planta: (g) => { g.fillStyle = '#7ed858'; g.beginPath(); g.moveTo(3.5, 12.5); g.bezierCurveTo(3, 6, 8, 3, 12.5, 3.5); g.bezierCurveTo(13, 9, 9, 12.5, 3.5, 12.5); g.fill(); px(g, 3, 12, '#2f7a34', 6, 1); g.strokeStyle = '#2f7a34'; g.lineWidth = 1; g.beginPath(); g.moveTo(4, 12); g.lineTo(10, 6); g.stroke(); },
+  lucha: (g) => { px(g, 4, 5, '#f2e0c0', 8, 6); px(g, 4, 5, '#d8b890', 8, 1); for (let i = 0; i < 4; i++) px(g, 4 + i * 2, 3, '#f2e0c0', 2, 2); px(g, 4, 11, '#d8b890', 8, 1); px(g, 5, 12, '#e0263a', 6, 1); },
+  psiquico: (g) => { disc(g, 8, 8, 4.2, '#f4f0ff'); disc(g, 8, 8, 2.4, '#8a4ad8'); disc(g, 8, 8, 1, '#1a1a2a'); px(g, 3, 8, '#f4f0ff', 1, 1); px(g, 12, 8, '#f4f0ff', 1, 1); },
+  siniestro: (g) => { disc(g, 8, 8, 4.8, '#e8e0f0'); disc(g, 10, 7, 4.3, '#2a2a3a'); },
+};
+function gymFamily(ids, k) {
+  const [R, F, E] = ids;
+  DRAW[R] = (g) => {
+    px(g, 0, 0, k.roof, T, T); px(g, 0, 0, k.roofLight, T, 1); px(g, 0, 15, k.roofDark, T, 1);
+    for (let y = 3; y < 15; y += 4) for (let x = ((y - 3) / 4) % 2 ? 4 : 0; x < T; x += 8) { px(g, x, y, k.roofLight, 5, 1); px(g, x + 1, y + 1, k.roofDark, 3, 1); }
+  };
+  DRAW[F] = (g) => {
+    px(g, 0, 0, k.wall, T, T); px(g, 0, 0, k.roofDark, T, 1);
+    px(g, 0, 1, k.wallDark, 3, 15); px(g, 13, 1, k.wallDark, 3, 15); px(g, 0, 1, k.wallLight, 1, 15);
+    px(g, 4, 3, k.trim, 8, 10); px(g, 5, 2, k.trim, 6, 1); px(g, 5, 3, k.door, 6, 9); px(g, 5, 3, k.doorLight, 6, 1); px(g, 5, 7, k.doorLight, 6, 1);
+    px(g, 0, 14, k.wallDark, T, 2);
+  };
+  DRAW[E] = (g) => {
+    DRAW[R](g);
+    disc(g, 8, 8, 7.5, k.roofDark); disc(g, 8, 8, 6.2, k.rim); disc(g, 8, 8, 5, k.roof);
+    EMBLEMS[k.type](g);
+  };
+  TILE_INFO[R] = { name: `techo gimnasio ${k.type}`, solid: true };
+  TILE_INFO[F] = { name: `fachada gimnasio ${k.type}`, solid: true };
+  TILE_INFO[E] = { name: `emblema ${k.type}`, solid: true };
+  const [BL, BR] = banner(`gym_${k.type}`, (g) => {
+    px(g, 0, 0, k.wallIn, 32, 16); px(g, 0, 0, k.rim, 32, 1); px(g, 0, 15, k.roofDark, 32, 1);
+    disc(g, 16, 8, 6.4, k.roofDark); disc(g, 16, 8, 5.4, k.roof);
+    g.save(); g.translate(8, 0); EMBLEMS[k.type](g); g.restore();
+  });
+  const floor = (g) => { px(g, 0, 0, k.floorA, T, T); px(g, 0, 15, k.floorB, T, 1); px(g, 15, 0, k.floorB, 1, T); px(g, 3, 3, k.floorB, 2, 2); px(g, 10, 9, k.floorB, 3, 1); };
+  THEMES[`gym_${k.type}`] = {
+    Y: floor,
+    x: (g) => { px(g, 0, 0, k.wallIn, T, T); px(g, 0, 11, k.roofDark, T, 5); px(g, 0, 10, k.rim, T, 1); px(g, 2, 4, k.wallInLight, 5, 1); px(g, 9, 6, k.wallInLight, 5, 1); },
+    X: BL,
+    Z: BR,
+    N: (g) => { floor(g); px(g, 4, 11, k.roofDark, 8, 4); disc(g, 8, 7, 4.5, k.accent); disc(g, 8, 7, 2.5, k.roofLight); },
+    A: (g) => { px(g, 0, 0, k.roof, T, T); px(g, 1, 0, k.rim, 1, T); px(g, 14, 0, k.rim, 1, T); px(g, 5, 6, k.roofLight, 6, 1); px(g, 5, 11, k.roofLight, 6, 1); },
+    m: (g) => { floor(g); px(g, 1, 3, k.roofDark, 14, 10); px(g, 2, 4, k.roof, 12, 8); px(g, 3, 5, k.rim, 10, 1); },
+    T: (g) => { floor(g); px(g, 1, 3, k.roofDark, 14, 9); px(g, 1, 3, k.rim, 14, 3); },
+  };
+}
+gymFamily(['1', '2', '3'], { type: 'fuego', roof: '#a83a1a', roofLight: '#e8702a', roofDark: '#5a1a0a', rim: '#ffb040', wall: '#d8b898', wallDark: '#a87a58', wallLight: '#f2dcc0', trim: '#5a1a0a', door: '#e8602a', doorLight: '#ffb040', wallIn: '#6a2a1a', wallInLight: '#a8502a', floorA: '#3a2a2a', floorB: '#e8602a', accent: '#e8702a' });
+gymFamily(['4', '5', '6'], { type: 'planta', roof: '#2f7a34', roofLight: '#6cc04c', roofDark: '#1a4a1e', rim: '#b8f090', wall: '#e8e0b8', wallDark: '#b8a878', wallLight: '#fff8d8', trim: '#1a4a1e', door: '#4aa03c', doorLight: '#b8f090', wallIn: '#2a5a2a', wallInLight: '#4a8a3a', floorA: '#9ac870', floorB: '#78a858', accent: '#4aa03c' });
+gymFamily(['7', '8', '9'], { type: 'lucha', roof: '#a82a2a', roofLight: '#e86a5a', roofDark: '#5a1414', rim: '#f8e0c0', wall: '#f4ecdc', wallDark: '#c8b898', wallLight: '#ffffff', trim: '#5a1414', door: '#c8402a', doorLight: '#f8e0c0', wallIn: '#7a2a2a', wallInLight: '#b04a3a', floorA: '#d8c898', floorB: '#b8a468', accent: '#c8402a' });
+gymFamily(['!', '@', '$'], { type: 'psiquico', roof: '#6a3a9a', roofLight: '#a878e0', roofDark: '#2e1a4e', rim: '#e8d8ff', wall: '#d8ccee', wallDark: '#a898c8', wallLight: '#f4eeff', trim: '#2e1a4e', door: '#8a5ad0', doorLight: '#e8d8ff', wallIn: '#3a2a6a', wallInLight: '#6a4aa8', floorA: '#2a2a4a', floorB: '#5a4a8a', accent: '#8a5ad0' });
+gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a5a78', roofDark: '#12121c', rim: '#c8506a', wall: '#585870', wallDark: '#3a3a4e', wallLight: '#7a7a94', trim: '#12121c', door: '#2a2a3a', doorLight: '#c8506a', wallIn: '#1e1e2c', wallInLight: '#3a3a52', floorA: '#2a2a34', floorB: '#3e3e4c', accent: '#c8506a' });
+
 const cache = new Map();
 
 export function tileCanvas(ch, frame = 0, theme = null) {

@@ -14,6 +14,8 @@ const BASE_ITEMS = {
   mate_dulce: { mate: true, name: 'Mate: Canarias', pocket: 'items', price: 1200, heal: 60, desc: 'Un mate fuerte, de yerba canaria. Recupera 60 PS.' },
   dulce_de_leche: { mate: true, name: 'Mate: Moncayo', pocket: 'items', price: 2500, heal: 120, desc: 'El mate completo, con todo. Recupera 120 PS.' },
   chivito: { name: 'Chivito', pocket: 'items', price: 3000, heal: 9999, cure: 'all', desc: 'El sándwich nacional. Restaura PS y cura problemas de estado.' },
+  alfajor_triple: { name: 'Alfajor Triple', pocket: 'items', price: 4000, revive: 1, desc: 'Triple de dulce de leche. Reanima a una criatura debilitada con todos sus PS.' },
+  pan_casero: { name: 'Pan Casero', pocket: 'items', price: 3500, pp: 99, desc: 'Recién horneado. Restaura todos los PP de cada movimiento.' },
   ruda: { name: 'Ruda', pocket: 'items', price: 100, cure: 'psn', desc: 'Hierba de agosto. Cura el envenenamiento.' },
   linimento: { name: 'Linimento', pocket: 'items', price: 200, cure: 'par', desc: 'Cura la parálisis.' },
   aloe: { name: 'Aloe', pocket: 'items', price: 250, cure: 'brn', desc: 'Calma las quemaduras.' },
@@ -43,7 +45,7 @@ const BASE_ITEMS = {
 
 // Máquinas de movimientos (MT): se consumen al usarse. Una criatura puede aprender
 // el movimiento si comparte tipo con él o si es de tipo Normal (ver tmCompatible).
-export const TM_MOVES = ['terremoto', 'psiquico', 'triturar', 'descarga', 'parrillada', 'cascada', 'bomba_lodo', 'tormenta_ceibo', 'avalancha', 'zumbido', 'punio_gaucho', 'vendaval'];
+export const TM_MOVES = ['terremoto', 'psiquico', 'triturar', 'descarga', 'parrillada', 'cascada', 'bomba_lodo', 'tormenta_ceibo', 'avalancha', 'zumbido', 'punio_gaucho', 'vendaval', 'fogon', 'megaagotar', 'garra_charrua', 'premonicion', 'sombra_nocturna'];
 for (const m of TM_MOVES) {
   BASE_ITEMS[`mt_${m}`] = { name: `MT ${MOVES[m].name}`, pocket: 'items', price: 3000, tm: m, desc: `Enseña ${MOVES[m].name} (${MOVES[m].power} de poder) a una criatura compatible. Se gasta al usarla.` };
 }

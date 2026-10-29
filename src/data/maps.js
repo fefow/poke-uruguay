@@ -3,10 +3,11 @@
 // order; interior mats ('m') lead back to the door you entered from.
 // Scripts receive the game `api` (see game/script-api.js).
 
-const TR = (id, name, cls, team, prize, intro, lose, after, look = 'boy') => ({ id, name, cls, team, prize, intro, lose, after, look });
+
+import { TR, room, HOUSE, POLI, SHOP, GYM, nurse, pc, poli, shop } from './map-kit.js';
 
 // ---------------------------------------------------------------- OUTDOORS
-export const OUTDOOR = {
+const BASE_OUTDOOR = {
   colonia: {
     name: 'Colonia del Sacramento',
     music: 'town',
@@ -107,7 +108,7 @@ export const OUTDOOR = {
       '##############################',
     ],
     doors: [
-      { to: 'estadio', req: (f) => f.badge3 && f.quebrada_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan 3 medallas y hayan protegido al Pampero.'] },
+      { to: 'liga_1', req: (f) => f.badge8 && f.anglo_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 8 medallas y hayan detenido al Equipo PP.'] },
       'gym_mvd', 'palacio', 'poli_mvd', 'shop_mvd', 'casa_mvd',
     ],
     fish: [['pejerrey', 8, 10, 55], ['aguaviva', 8, 10, 30], ['anguila', 9, 11, 15]],
@@ -463,7 +464,7 @@ export const OUTDOOR = {
       '#..f.....=..........q....#',
       '######.......#############',
     ],
-    doors: ['shop_min', 'casa_min', { to: 'pp_1', req: 'quebrada_clear', deny: 'La puerta de la fábrica está sellada con candados. Todavía hay mucha niebla en las sierras, y alguien adentro.' }],
+    doors: ['shop_min', 'casa_min', { to: 'pp_1', req: (f) => f.quebrada_clear && f.badge4, deny: 'La puerta de la fábrica está sellada con candados. Hay mucha niebla en las sierras, y alguien adentro. Antes conviene visitar Durazno, al oeste.' }],
     signs: ['MINAS\nCapital del departamento de Lavalleja. Entre sierras, cerros y el agua más pura del país.'],
     exits: { s: { to: 'ruta8' }, n: { to: 'quebrada' }, w: { to: 'durazno', req: 'badge3', deny: 'Un camino de ceniza baja hacia el oeste. El aire quema: todavía no estás listo para ese calor.' } },
     enc: { rate: 0.1, list: [['tatadios', 24, 26, 14], ['pararrayo', 25, 27, 10], ['cuchilla', 25, 27, 10], ['cerro', 25, 27, 10], ['pombero', 25, 27, 8], ['lobomarino', 26, 27, 6], ['gatomontes', 24, 26, 14], ['cotorrayo', 24, 26, 14], ['criollo', 25, 27, 6], ['candil', 25, 27, 6], ['tapir', 25, 27, 6], ['fosil', 25, 27, 6]] },
@@ -477,100 +478,10 @@ export const OUTDOOR = {
     items: [{ x: 23, y: 5, item: 'alfajor', id: 'min_item1' }],
     legend: { x: 21, y: 4, species: 'yaguarete', level: 65, flag: 'caught_yaguarete', cond: (f) => f.champion && f.caught_pamperon && f.caught_ballenaplata && f.caught_soldemayo, text: 'Entre los cerros, unos ojos dorados te observan. Una presencia enorme llena el aire.' },
   },
-  durazno: {
-    name: 'Durazno',
-    music: 'town',
-    bg: 'canyon',
-    locality: true,
-    tiles: [
-      'KKKKKKKKKKKKKKKKKKKKKKKKKK',
-      'K``;;;;;;```^^^``````````K',
-      'K``;;;;;;```^^^``````````K',
-      'K``UUUUU`````````ooooo```K',
-      'K``UUUUU`````````ooooo```K',
-      'K``ttDtt`````````HwDwH````',
-      'K=========================',
-      'K```````````=`````````S``K',
-      'K^^``````R``=```R````````K',
-      'K^^`````````=`;;;;;;;````K',
-      'K``R``R`````=`;;;;;;;^^^`K',
-      'K`````````R`=`;;;;;;;^^^`K',
-      'K`;;;;;`````=`;;;;;;;^^^`K',
-      'K`;;;;;`````=`;;;;;;;````K',
-      'K`;;;;;`^^^`=```````````RK',
-      'K`;;;;;`^^^`=````````````K',
-      'K`;;;;;`````=``````R`````K',
-      'KKKKKKKKKKKKKKKKKKKKKKKKKK',
-    ],
-    doors: ['shop_dur', 'casa_dur'],
-    signs: ['DURAZNO\nEn el centro del país el verano pega fuerte. Dicen que bajo la ceniza todavía hay brasas de un antiguo volcán.'],
-    exits: { e: { to: 'minas' } },
-    enc: { rate: 0.12, list: [['corcel', 27, 29, 16], ['pavesa', 26, 28, 16], ['fogata', 28, 30, 10], ['alacran', 26, 28, 16], ['escorpio', 28, 30, 10], ['tucoterra', 27, 29, 10], ['pedrusco', 27, 29, 12], ['aguaraflama', 30, 31, 4], ['alazan', 27, 29, 6], ['guijarro', 27, 29, 6], ['geoda', 27, 29, 6], ['arenisca', 27, 29, 6]] },
-    npcs: [
-      { x: 8, y: 7, look: 'gaucho', dir: 'right', sight: 3, trainer: TR('dur_a', 'Rodrigo', 'Herrero', [['corcel', 29], ['alacran', 28]], 720, 'El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Con este calor, hasta el hierro trabaja solo.', 'gaucho') },
-      { x: 15, y: 7, look: 'girl', dir: 'left', sight: 3, trainer: TR('dur_b', 'Camila', 'Geóloga', [['tucoterra', 29], ['pedrusco', 29]], 740, 'Estudio por qué el suelo guarda tanto calor.', 'Buen resultado.', 'Debajo de la ceniza hay mucha energía.', 'girl') },
-      { x: 14, y: 6, look: 'oldman', text: ['Hace décadas no llueve como antes. La ceniza lo cubre todo.', 'Las criaturas de fuego se sienten cómodas acá.'] },
-    ],
-    items: [{ x: 24, y: 15, item: 'piedra_agata', id: 'dur_item1' }, { x: 23, y: 2, item: 'dulce_de_leche', id: 'dur_item2' }],
-  },
 };
 
 // ---------------------------------------------------------------- INTERIORS
-function room(rows, extra) {
-  return { indoor: true, music: 'town', bg: 'indoor', tiles: rows, ...extra };
-}
-
-const HOUSE = [
-  'xxXxxxxXxx',
-  'BBiiiiiiiE',
-  'iiiiiiiiii',
-  'iiiTTiiiiN',
-  'iiiTTiiiii',
-  'iiiiiiiiii',
-  'Niiiiiiiii',
-  'iiiimmiiii',
-];
-const POLI = [
-  'xxXxxxxxxXxx',
-  'iiiiiiiiiPii',
-  'iinnnnnnniii',
-  'iiiiiiiiiiii',
-  'NiiiiiiiiiiN',
-  'iiAAAAAAAAii',
-  'iEEiiiiiiEEi',
-  'iiiiimmiiiii',
-];
-const SHOP = [
-  'xxXxxxxXxx',
-  'BBBiiiiBBB',
-  'iiiiiiiiii',
-  'nnniiiiiii',
-  'iiiiiiiiii',
-  'iiiiiiiBBi',
-  'Niiiiiiiii',
-  'iiiimmiiii',
-];
-const GYM = [
-  'xxxxxXZxxxxx',
-  'NYYYYYYYYYYN',
-  'YYYYYAAYYYYY',
-  'YYYYYAAYYYYY',
-  'NNNYYAAYYNNN',
-  'YYYYYAAYYYYY',
-  'YYYYYAAYYYYY',
-  'YYNNNAANNNYY',
-  'YYYYYAAYYYYY',
-  'YYYYYAAYYYYY',
-  'NYYYYAAYYYYN',
-  'YYYYYmmYYYYY',
-];
-
-const nurse = { x: 5, y: 1, look: 'nurse', dir: 'down', script: 'nurse' };
-const pc = { x: 9, y: 1, look: null, script: 'pc' };
-const poli = (name) => room(POLI, { name, theme: 'poli', heal: true, npcs: [nurse, pc, { x: 2, y: 5, look: 'oldman', wander: true, text: ['La Policlínica atiende gratis. Es un servicio público.'] }] });
-const shop = (name, stock) => room(SHOP, { name, npcs: [{ x: 1, y: 2, look: 'clerk', dir: 'down', script: 'shop', stock }] });
-
-export const INTERIOR = {
+const BASE_INTERIOR = {
   casa_jugador: room(HOUSE, {
     name: 'Tu casa',
     heal: true,
@@ -758,8 +669,9 @@ export const INTERIOR = {
     'ZYYYYYYYYYYZ',
     'YYYYYmmYYYYY',
   ], {
-    name: 'Estadio Centenario',
+    name: 'Estadio Centenario: la final',
     music: 'title',
+    exitTo: { map: 'liga_4', x: 5, y: 1 },
     npcs: [
       { x: 5, y: 2, look: 'champion', dir: 'down', script: 'champion' },
       { x: 5, y: 7, look: 'rival', dir: 'down', id: 'rival_final', cond: (f) => !f.rival4, script: 'rival_final' },
@@ -771,4 +683,8 @@ export const INTERIOR = {
   }),
 };
 
+import { ACT2_OUTDOOR, ACT2_INTERIOR } from './maps-act2.js';
+
+export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR };
+export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR };
 export const MAPS = { ...OUTDOOR, ...INTERIOR };

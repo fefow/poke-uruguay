@@ -76,7 +76,7 @@ export function markCaught(key) {
 }
 
 export function badgeCount() {
-  return ['badge1', 'badge2', 'badge3'].filter(flag).length;
+  return ['badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8'].filter(flag).length;
 }
 
 // ---- Settings (per device, not part of the save) ------------------------------

@@ -421,14 +421,14 @@ async function talkTo(n) {
 
 // Rematches: common trainers can be challenged again after each medal (and the Liga),
 // with stronger and already evolved teams. Rivals, leaders and bosses use scripts, not this path.
-const RM_BONUS = [0, 6, 10, 15, 20];
+const RM_BONUS = [0, 4, 7, 10, 13, 16, 19, 22, 25, 28];
 function rematchTier() {
   return badgeCount() + (flag('champion') ? 1 : 0);
 }
 
 function rematchTeam(team, tier) {
   return team.map(([sp, lv]) => {
-    const level = Math.min(60, lv + RM_BONUS[tier]);
+    const level = Math.min(90, lv + RM_BONUS[tier]);
     let key = sp;
     for (let evo = SPECIES[key].evo; evo && !evo.stone && level >= evo.lvl; evo = SPECIES[key].evo) key = evo.to;
     return [key, level];
