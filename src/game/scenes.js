@@ -4,7 +4,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.js';
 import { charSprite } from '../gfx/characters.js';
 import { DEX_ORDER, SPECIES } from '../data/species.js';
 import { playMusic, sfx } from '../core/audio.js';
-import { input } from '../core/input.js';
+import { input, keyName } from '../core/input.js';
 import { h, wait, sanitizeName, formatTime } from '../core/util.js';
 import { say, choose, textInput, fadeOut, fadeIn, uiRoot, closeDialog } from './ui.js';
 import { state } from './state.js';
@@ -73,7 +73,7 @@ export function titleRenderer(g, t) {
   g.drawImage(creatureSprite('pamperon'), px, 30 + Math.sin(t / 500) * 6, 48, 48);
   g.globalAlpha = 1;
   text(g, 'Poke Uruguay', W / 2, 38, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
-  text(g, 'La Leyenda del Pampero', W / 2, 72, { size: 8, align: 'center', color: '#f8d040', shadow: '#2a1830' });
+  text(g, 'Aventuras en tierras charruas', W / 2, 72, { size: 8, align: 'center', color: '#f8d040', shadow: '#2a1830' });
   // starters parade on the shore
   const keys = ['ceibito', 'tejuchispa', 'carpinchito'];
   keys.forEach((k, i) => {
@@ -87,25 +87,180 @@ export function startTitle() {
   playMusic('title');
 }
 
+
+// ---------------------------------------------------------------- INTRO CINEMATIC
+const sky = (g, stops) => {
+  const grd = g.createLinearGradient(0, 0, 0, H);
+  stops.forEach(([o, c]) => grd.addColorStop(o, c));
+  g.fillStyle = grd;
+  g.fillRect(0, 0, W, H);
+};
+const stars = (g, t, n = 50, maxY = 120) => {
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = (Math.floor(t / 400) + i) % 5 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.3)';
+    g.fillRect((i * 97) % W, (i * 53) % maxY, i % 7 ? 1 : 2, i % 7 ? 1 : 2);
+  }
+};
+/** Rolling hills drawn as a sine silhouette; `speed` scrolls it for parallax. */
+const hills = (g, t, y, amp, col, speed, wl = 90) => {
+  g.fillStyle = col;
+  g.beginPath();
+  g.moveTo(0, H);
+  for (let x = 0; x <= W; x += 4) g.lineTo(x, y + Math.sin((x + t * speed) / wl * Math.PI * 2) * amp + Math.sin((x + t * speed) / (wl * 0.37)) * amp * 0.3);
+  g.lineTo(W, H);
+  g.fill();
+};
+const ceibo = (g, x, y, s = 1) => {
+  g.fillStyle = '#1a2a1a'; g.fillRect(x - 1 * s, y - 14 * s, 2 * s, 14 * s);
+  g.beginPath(); g.arc(x, y - 16 * s, 8 * s, 0, 7); g.fill();
+  g.fillStyle = '#e0263a'; for (const [dx, dy] of [[-4, -18], [3, -20], [0, -14], [5, -15]]) g.fillRect(x + dx * s, y + dy * s, 2 * s, 2 * s);
+};
+
+const CINEMATIC = [
+  {
+    dur: 6500,
+    lines: ['Entre el río y el océano existe una tierra', 'de cuchillas, arroyos y cielo abierto.'],
+    draw(g, t, p) {
+      sky(g, [[0, '#070a22'], [0.6, '#1d2a5c'], [1, '#3a3a7a']]);
+      stars(g, t);
+      g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 1;
+      if (p > 0.15 && p < 0.55) { const q = (p - 0.15) / 0.4; g.beginPath(); g.moveTo(60 + q * 200, 20 + q * 50); g.lineTo(60 + q * 200 - 18, 20 + q * 50 - 7); g.stroke(); }
+      hills(g, t, 190, 6, '#0d1230', 0.004, 140);
+      hills(g, t, 205, 5, '#070a1c', 0.008, 100);
+      ceibo(g, 250 - p * 20, 200, 1.4);
+    },
+  },
+  {
+    dur: 6500,
+    lines: ['Sus costas son recorridas por criaturas', 'que nadan, cantan y esperan la marea.'],
+    draw(g, t, p) {
+      sky(g, [[0, '#2a3a7a'], [0.45, '#e86a4a'], [0.62, '#f8c070'], [0.621, '#2a6ab0'], [1, '#143a68']]);
+      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(230, 132 - p * 14, 18, 0, 7); g.fill();
+      for (let i = 0; i < 16; i++) { g.fillStyle = `rgba(255,224,150,${0.5 - i * 0.025})`; const w = 30 - i * 1.3 + Math.sin(t / 300 + i) * 5; g.fillRect(230 - w / 2, 150 + i * 5, w, 1); }
+      g.fillStyle = 'rgba(255,255,255,0.12)';
+      for (let i = 0; i < 12; i++) g.fillRect((i * 61 + t / 30) % W, 160 + (i * 17) % 70, 18, 1);
+      const bob = Math.sin(t / 500) * 3;
+      g.drawImage(creatureSprite('ballenaplata'), 40 + p * 40, 105 + bob, 100, 100);
+      if (Math.floor(t / 900) % 2) { g.fillStyle = 'rgba(220,240,255,0.8)'; g.fillRect(70 + p * 40, 104 + bob, 2, 8); g.fillRect(68 + p * 40, 100 + bob, 6, 3); }
+    },
+  },
+  {
+    dur: 6500,
+    lines: ['En sus campos y sierras viven criaturas', 'que acompañan a la gente desde siempre.'],
+    draw(g, t, p) {
+      sky(g, [[0, '#4a90d8'], [0.7, '#bfe4f8'], [1, '#e8f4d0']]);
+      g.fillStyle = 'rgba(255,255,255,0.85)';
+      for (const [x, y, r] of [[40, 40, 14], [150, 28, 10], [250, 54, 16]]) { const cx = (x + t / 60) % (W + 60) - 30; g.beginPath(); g.arc(cx, y, r, 0, 7); g.arc(cx + r, y + 3, r * 0.8, 0, 7); g.arc(cx - r, y + 3, r * 0.7, 0, 7); g.fill(); }
+      hills(g, t, 130, 14, '#7ab860', 0.01, 160);
+      hills(g, t, 160, 10, '#5aa046', 0.02, 120);
+      hills(g, t, 190, 8, '#3a8038', 0.04, 90);
+      const cycle = (t / 18) % (W + 120);
+      g.drawImage(creatureSprite('nandulin'), W - cycle, 148 + Math.abs(Math.sin(t / 120)) * -3, 56, 56);
+      g.drawImage(creatureSprite('teruterito'), ((t / 26) % (W + 100)) - 60, 70 + Math.sin(t / 400) * 8, 40, 40);
+      ceibo(g, 60 - p * 30, 188, 1.6);
+    },
+  },
+  {
+    dur: 7000,
+    lines: ['Dicen que cuando el Pampero cruza el cielo,', 'el país entero se detiene a mirarlo.'],
+    draw(g, t, p) {
+      sky(g, [[0, '#14182c'], [0.5, '#3a4466'], [1, '#6a6a7a']]);
+      g.fillStyle = 'rgba(30,34,56,0.9)';
+      for (let i = 0; i < 9; i++) { const x = (i * 47 + t / 25) % (W + 80) - 40; g.beginPath(); g.arc(x, 24 + (i % 3) * 16, 26, 0, 7); g.arc(x + 24, 30 + (i % 3) * 16, 20, 0, 7); g.fill(); }
+      const flash = (Math.floor(t / 700) % 4 === 2) && (t % 700 < 140);
+      if (flash) {
+        g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(0, 0, W, H);
+        g.strokeStyle = '#fff8c0'; g.lineWidth = 2; g.beginPath();
+        let x = 60 + (Math.floor(t / 700) * 53) % 200, y = 30; g.moveTo(x, y);
+        while (y < 170) { x += (Math.sin(y * 3.1 + x) * 9) | 0; y += 14; g.lineTo(x, y); }
+        g.stroke();
+      }
+      hills(g, t, 190, 6, '#1a2030', 0.01, 140);
+      const k = Math.min(1, p * 1.5);
+      g.globalAlpha = 0.35 + 0.65 * k;
+      g.drawImage(creatureSprite('pamperon'), 120 + (1 - k) * 160, 50 - k * 10 + Math.sin(t / 300) * 4, 130 * (0.5 + k * 0.5), 130 * (0.5 + k * 0.5));
+      g.globalAlpha = 1;
+    },
+  },
+  {
+    dur: 4200,
+    lines: [],
+    draw(g, t, p) {
+      sky(g, [[0, '#1d2a5c'], [0.5, '#e86a4a'], [1, '#f8d070']]);
+      g.save(); g.translate(160, 120); g.rotate(t / 9000); g.fillStyle = 'rgba(248,208,64,0.6)';
+      for (let i = 0; i < 16; i++) { g.rotate(Math.PI / 8); g.beginPath(); g.moveTo(-6, -40); g.lineTo(0, i % 2 ? -110 : -90); g.lineTo(6, -40); g.fill(); }
+      g.restore();
+      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(160, 120, 38, 0, 7); g.fill();
+      const a = Math.min(1, p * 3);
+      g.globalAlpha = a;
+      text(g, 'Poke Uruguay', W / 2, 96, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
+      text(g, 'Aventuras en tierras charruas', W / 2, 132, { size: 8, align: 'center', color: '#fff6c0', shadow: '#2a1830' });
+      g.globalAlpha = 1;
+    },
+  },
+];
+
+async function playCinematic() {
+  let idx = 0;
+  let start = performance.now();
+  let skipAll = false;
+  setRenderer((g, t) => {
+    const sc = CINEMATIC[Math.min(idx, CINEMATIC.length - 1)];
+    const el = performance.now() - start;
+    const p = Math.min(1, el / sc.dur);
+    g.imageSmoothingEnabled = false;
+    sc.draw(g, t, p);
+    if (sc.lines.length) {
+      const a = Math.min(1, el / 700) * Math.min(1, (sc.dur - el) / 500 + 0.4);
+      g.fillStyle = `rgba(8,8,24,${0.62 * a})`; g.fillRect(0, H - 52, W, 52);
+      g.globalAlpha = a;
+      sc.lines.forEach((ln, i) => text(g, ln, W / 2, H - 42 + i * 16, { size: 7, align: 'center', color: '#fff' }));
+      g.globalAlpha = 1;
+    }
+    // letterbox + fades
+    g.fillStyle = '#000'; g.fillRect(0, 0, W, 14);
+    const fade = Math.max(1 - el / 500, (el - (sc.dur - 500)) / 500, 0);
+    if (fade > 0) { g.fillStyle = `rgba(0,0,0,${Math.min(1, fade)})`; g.fillRect(0, 0, W, H); }
+    text(g, `${keyName('a')}: pasar   ${keyName('b')}: saltar`, W - 6, 3, { size: 6, align: 'right', color: '#9aa0c0', shadow: null });
+  });
+  await fadeIn(350);
+  const off = input.push((a) => {
+    if (a === 'b' || a === 'start') skipAll = true;
+    else if (a === 'a') { start = performance.now() - CINEMATIC[idx].dur; }
+  });
+  for (idx = 0; idx < CINEMATIC.length && !skipAll; idx++) {
+    start = performance.now();
+    while (!skipAll && performance.now() - start < CINEMATIC[idx].dur) await wait(60);
+  }
+  off();
+  idx = CINEMATIC.length - 1;
+  await fadeOut(350);
+}
+
 // ---------------------------------------------------------------- INTRO
 export async function newGameIntro() {
+  await playCinematic();
   let showProf = true;
   let mon = null;
   setRenderer((g, t) => {
-    const grd = g.createLinearGradient(0, 0, 0, H);
-    grd.addColorStop(0, '#2a3a6a');
-    grd.addColorStop(1, '#5aa8e8');
-    g.fillStyle = grd;
-    g.fillRect(0, 0, W, H);
-    g.fillStyle = 'rgba(255,255,255,0.08)';
-    for (let i = 0; i < 9; i++) g.fillRect(0, i * 28 + 10, W, 10);
-    if (showProf) g.drawImage(charSprite('prof', 'down', 0), 0, 0, 16, 17, 112, 40, 96, 102);
+    // Laboratory: wall with shelves, wooden floor
+    g.fillStyle = '#e6d8b8'; g.fillRect(0, 0, W, 150);
+    g.fillStyle = '#a87a4a'; g.fillRect(0, 150, W, H - 150);
+    g.fillStyle = '#8a5a2a'; for (let y = 156; y < H; y += 14) g.fillRect(0, y, W, 2);
+    g.fillStyle = '#6a4020'; g.fillRect(0, 144, W, 6);
+    for (const x of [14, 226]) {
+      g.fillStyle = '#6a4020'; g.fillRect(x, 24, 80, 76);
+      for (const y of [30, 58, 86]) { g.fillStyle = '#3a2010'; g.fillRect(x + 4, y + 18, 72, 3); for (let b = 0; b < 8; b++) { g.fillStyle = ['#c83a3a', '#3a7ad8', '#4a9a4a', '#f2c02a'][(b + y) % 4]; g.fillRect(x + 6 + b * 9, y, 7, 18); } }
+    }
+    g.fillStyle = '#8ac8f0'; g.fillRect(124, 20, 72, 52); g.fillStyle = '#5a4a3a'; g.fillRect(122, 18, 76, 3); g.fillRect(122, 71, 76, 3); g.fillRect(122, 18, 3, 56); g.fillRect(195, 18, 3, 56); g.fillRect(158, 18, 4, 56);
+    g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(128, 24, 12, 4);
+    if (showProf) g.drawImage(charSprite('prof', 'down', 0), 0, 0, 16, 17, 112, 52, 96, 102);
     if (mon) g.drawImage(creatureSprite(mon), 210, 80 + Math.sin(t / 300) * 2, 80, 80);
   });
   playMusic('town');
   await fadeIn(400);
   await say(['Bienvenido al mundo de Poke Uruguay.', 'Soy el Maestro Tabárez. Dirigí a la selección durante años y hoy me dedico a estudiar a las criaturas de este país.'], { name: 'Maestro Tabárez' });
-  mon = 'carpinchito';
+  mon = 'carpincho';
   sfx('confirm');
   await say(['En este país conviven personas y criaturas.', 'Algunas nadan en el Río de la Plata, otras recorren las praderas o vuelan sobre las sierras.',
     'La gente trabaja con ellas, las entrena y, a veces, combate con ellas.'], { name: 'Maestro Tabárez' });
@@ -157,7 +312,7 @@ export async function hallOfFame() {
 
 // ---------------------------------------------------------------- CREDITS
 const CREDITS = [
-  ['Poke Uruguay', 'La Leyenda del Pampero'],
+  ['Poke Uruguay', 'Aventuras en tierras charruas'],
   ['Una aventura por el Uruguay', ''],
   ['Diseño y programación', 'Hecho con Claude para Dusius'],
   ['Lugares', 'Colonia · Montevideo · Punta del Este'],

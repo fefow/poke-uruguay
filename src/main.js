@@ -10,7 +10,7 @@ import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './ga
 import { state, setState, newState, settings, badgeCount } from './game/state.js';
 import { loadMap, updateWorld, worldState, runScript } from './game/world.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
-import { openOptions } from './game/menus.js';
+import { openOptions, openMap } from './game/menus.js';
 import { createCreature } from './game/creature.js';
 import { mountHud, updateHud, flashSaved } from './game/hud.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
@@ -58,7 +58,7 @@ async function boot() {
   mountScreen($('#view'));
   mountUI($('#ui'));
   mountTouchControls($('#touch'));
-  mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()) });
+  mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   setVolumes(settings);
   requestAnimationFrame(frame);

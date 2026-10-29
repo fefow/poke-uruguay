@@ -80,6 +80,25 @@ export const MOVES = deepFreeze({
   golpe_karate: M('Golpe Karate', 'lucha', 'fis', 50, 100, 25, 'Golpe de canto. Golpe crítico fácil.', { crit: 1 }),
   patada_baja: M('Patada Baja', 'lucha', 'fis', 65, 100, 20, 'Patada de ñandú a las piernas.'),
   garra_charrua: M('Garra Charrúa', 'lucha', 'fis', 120, 100, 5, 'Coraje que nunca se rinde. Baja la Defensa propia.', { self: { def: -1, spd: -1 }, selfAlways: true }),
+  // --- ampliación de la Dex ---
+  colmillo_fuego: M('Colmillo Fuego', 'fuego', 'fis', 65, 95, 15, 'Muerde con las fauces al rojo. Puede quemar.', { status: 'brn', chance: 0.15 }),
+  punio_trueno: M('Puño Trueno', 'electrico', 'fis', 75, 100, 15, 'Un puñetazo cargado de electricidad. Puede paralizar.', { status: 'par', chance: 0.15 }),
+  descarga: M('Descarga', 'electrico', 'esp', 65, 100, 20, 'Suelta la carga acumulada. Puede paralizar.', { status: 'par', chance: 0.2 }),
+  campo_arado: M('Campo Arado', 'tierra', 'fis', 60, 100, 20, 'Levanta el suelo como un arado.'),
+  piedra_afilada: M('Piedra Afilada', 'roca', 'fis', 100, 80, 5, 'Lasca cortante. Golpe crítico fácil.', { crit: 1 }),
+  derrumbe: M('Derrumbe', 'roca', 'fis', 65, 95, 15, 'Hace caer parte de la ladera sobre el rival.'),
+  viento_cortante: M('Viento Cortante', 'volador', 'esp', 55, 95, 25, 'Ráfaga afilada. Golpe crítico fácil.', { crit: 1 }),
+  aguijon: M('Aguijón', 'bicho', 'fis', 80, 100, 15, 'Un aguijonazo profundo.'),
+  telarana: M('Telaraña', 'bicho', 'esp', 50, 100, 25, 'Hilos que atrapan y debilitan.', { foe: { spe: -1 }, chance: 0.3 }),
+  dardo_venenoso: M('Dardo Venenoso', 'veneno', 'fis', 60, 100, 20, 'Clava un dardo tóxico. Puede envenenar.', { status: 'psn', chance: 0.3 }),
+  gas_venenoso: M('Gas Venenoso', 'veneno', 'est', 0, 90, 20, 'Una nube que envenena al rival.', { status: 'psn', chance: 1 }),
+  hipnosis: M('Hipnosis', 'psiquico', 'est', 0, 60, 20, 'Una mirada que adormece.', { status: 'slp', chance: 1 }),
+  premonicion: M('Premonición', 'psiquico', 'esp', 70, 100, 15, 'Anticipa el movimiento y golpea primero con la mente.'),
+  sombra_nocturna: M('Sombra Nocturna', 'siniestro', 'esp', 65, 100, 15, 'Una sombra que cae sobre el rival.'),
+  punio_gaucho: M('Puño Gaucho', 'lucha', 'fis', 70, 100, 20, 'Puñetazo de peón de estancia.'),
+  barrida: M('Barrida', 'lucha', 'fis', 45, 100, 25, 'Barre las piernas. Puede bajar la Velocidad.', { foe: { spe: -1 }, chance: 0.3 }),
+  escudo_barro: M('Escudo de Barro', 'tierra', 'est', 0, 100, 15, 'Se cubre de barro: sube la Defensa.', { self: { def: 1 } }),
+  tormenta_ceibo: M('Tormenta de Pétalos', 'planta', 'esp', 85, 95, 10, 'Un remolino de pétalos rojos.'),
 });
 
 export const STRUGGLE = deepFreeze(M('Forcejeo', 'normal', 'fis', 50, 100, 1, 'Último recurso.', { recoil: 0.25, never: true }));

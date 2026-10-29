@@ -115,6 +115,7 @@ export function loadMap(id, x, y, dir = 'down') {
   const S = state();
   const changed = W_.map?.id !== id;
   if (changed) logInfo(`Entró a ${id}`);
+  if (!m.indoor) S.flags[`v_${id}`] = true;
   W_.map = m;
   if (changed) W_.npcs = [];
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
@@ -387,7 +388,7 @@ function interact() {
   }
   if (tileAt(p.x + dx, p.y + dy) === 'B') return void runScript(() => say(worldRng.pick(BOOKS)));
   if (tileAt(p.x + dx, p.y + dy) === 'P' && !n) return void runScript(() => openPC());
-  if (tileAt(p.x + dx, p.y + dy) === '~') return void runScript(() => say('El agua está turbia. Mejor no meterse.'));
+  if (tileAt(p.x + dx, p.y + dy) === '~') return void runScript(() => fish());
 }
 
 const BOOKS = [
@@ -434,6 +435,22 @@ async function legendEncounter(L) {
   else if (res === 'win') await say(`${SPECIES[L.species].name} desapareció… Quizás vuelva más tarde.`);
   if (res === 'lose') await blackout();
   refreshEntities();
+}
+
+/** Fishing: needs the rod and a `fish` table on the map. */
+async function fish() {
+  if (!hasItem('cana_pescar')) return say('El agua está turbia. Mejor no meterse.');
+  const list = W_.map.fish;
+  if (!list) return say('Acá no parece haber nada que pescar.');
+  if (!state().party.some((c) => c.hp > 0)) return say('Tus criaturas están debilitadas. Mejor no arriesgarse.');
+  await say('Lanzaste la caña al agua…');
+  sfx('select');
+  await wait(900 + worldRng.int(0, 1200));
+  if (!worldRng.chance(0.75)) return say('No picó nada. Probá de nuevo.');
+  sfx('encounter');
+  await say('¡Algo picó!');
+  const e = worldRng.weighted(list.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
+  await wildBattle(e.sp, worldRng.int(e.lo, e.hi));
 }
 
 async function wildBattle(sp, lvl) {

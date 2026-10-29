@@ -29,24 +29,24 @@ const rival = (api, stage, prize, intro, lose, after) => ({
 export const LEADERS = {
   lucia: {
     id: 'leader_lucia', name: 'Lucía', cls: 'Líder', look: 'leader_water', ai: 'smart', items: ['mate'],
-    team: [['lobito', 8], ['mbigua', 8], ['carpincho', 10]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Rambla', reward: 'mate', rewardQty: 3,
+    team: [['lobito', 8], ['mbigua', 8], ['carpincho', 10]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 3,
     intro: ['Soy Lucía, líder del Gimnasio de Montevideo.', 'Entreno en la Rambla todas las mañanas, haga frío o calor.', 'Veamos si resistís la corriente del Plata.'],
     lose: 'Me superaste. Fue una derrota limpia.',
-    after: ['Te ganaste la Medalla Rambla. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo Niebla opera en la costa este. Andá con cuidado.'],
+    after: ['Te ganaste la Medalla Montevideo. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo Niebla opera en la costa este. Andá con cuidado.'],
   },
   sofia: {
     id: 'leader_sofia', name: 'Sofía', cls: 'Líder', look: 'leader_elec', ai: 'smart', items: ['mate'],
-    team: [['luciernito', 16], ['cotorrayo', 17], ['luceron', 19]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Ola', reward: 'superesfera', rewardQty: 5,
+    team: [['luciernito', 16], ['cotorrayo', 17], ['luceron', 19]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 5,
     intro: ['Bienvenido a Punta del Este. Soy Sofía.', 'Mis criaturas acumulan la electricidad de las tormentas de verano.', 'Preparate para el combate.'],
     lose: 'Me quedé sin respuesta. Buen combate.',
-    after: ['La Medalla Ola es tuya.', 'El Equipo Niebla robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
+    after: ['La Medalla Maldonado es tuya.', 'El Equipo Niebla robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
   },
   aparicio: {
     id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'gaucho', ai: 'smart', items: ['mate_dulce'],
-    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Quebrada', reward: 'ultraesfera', rewardQty: 5,
+    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5,
     intro: ['Buenas. Soy Aparicio.', 'Cuido estas sierras desde hace sesenta años.', 'La piedra de la quebrada lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía años que nadie me ganaba.',
-    after: ['La Medalla Quebrada es tuya.', 'El jefe del Equipo Niebla subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
+    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo Niebla subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
   },
 };
 
@@ -91,12 +91,12 @@ export const SCRIPTS = {
           'Soy el Maestro Tabárez. Durante años dirigí a la selección; hoy estudio a las criaturas del Uruguay.',
           'Viven en los montes, las playas, las sierras y hasta en la Rambla.',
           'Hoy vas a elegir a tu primer compañero.',
-          'En la mesa hay tres Esferas. Elegí con calma: esa criatura te va a acompañar mucho tiempo.',
+          'En la mesa hay tres Pokeballs. Elegí con calma: esa criatura te va a acompañar mucho tiempo.',
         ], { name: 'Maestro Tabárez' });
         await api.say('¿Y yo? Llegué primero.', { name: '{rival}' });
         await api.say('Paciencia, {rival}. Vos elegís después.', { name: 'Maestro Tabárez' });
       } else {
-        await api.say('Elegí una de las Esferas de la mesa.', { name: 'Maestro Tabárez' });
+        await api.say('Elegí una de las Pokeballs de la mesa.', { name: 'Maestro Tabárez' });
       }
       return;
     }
@@ -104,7 +104,7 @@ export const SCRIPTS = {
     const seen = api.state.dex.seen.length;
     const caught = api.state.dex.caught.length;
     await api.say([`Veamos tu PokeDex. Viste ${seen} y capturaste ${caught} especies.`,
-      caught >= 39 ? 'Un registro casi completo. Es un trabajo notable.' : caught >= 20 ? 'Buen avance. Seguí recorriendo el país.' : 'Todavía quedan muchas especies por registrar. Seguí explorando.'], { name: 'Maestro Tabárez' });
+      caught >= 120 ? 'Un registro casi completo. Es un trabajo notable.' : caught >= 60 ? 'Buen avance. Seguí recorriendo el país.' : 'Todavía quedan muchas especies por registrar. Seguí explorando.'], { name: 'Maestro Tabárez' });
   },
 
   async starter(api, npc) {
@@ -126,7 +126,7 @@ export const SCRIPTS = {
     await api.say(`¡{player} recibió a ${sp.name}!`);
     const rk = COUNTER[key];
     await api.say([`Entonces yo me quedo con ${SPECIES[rk].name}.`, 'Tiene desventaja contra el tuyo, pero no pienso ponértelo fácil.'], { name: '{rival}' });
-    await api.say(['Llevate también esto: la PokeDex.', 'Registra cada criatura que veas o captures.', 'Y unas Esferas para capturar criaturas salvajes.'], { name: 'Maestro Tabárez' });
+    await api.say(['Llevate también esto: la PokeDex.', 'Registra cada criatura que veas o captures.', 'Y unas Pokeballs para capturar criaturas salvajes.'], { name: 'Maestro Tabárez' });
     await api.give('uru_dex', 1);
     await api.give('esfera', 5);
     api.setFlag('dex');
@@ -148,6 +148,43 @@ export const SCRIPTS = {
     await api.say(['Un entrenador joven. Tomá, para el camino.'], { name: 'Abuelo' });
     await api.give('esfera', 3);
     api.setFlag('gift_r1');
+  },
+
+  async gift_mapa(api) {
+    if (api.flag('got_mapa')) return api.say(['El Mapa de Uruguay te muestra dónde estás y qué lugares ya visitaste.', 'Abrilo desde el menú o con la tecla T.'], { name: 'Guía de turismo' });
+    await api.say(['Bienvenido a Montevideo. Trabajo en la oficina de turismo del Palacio.', 'Tomá, un mapa del país. Te marca las ciudades y las localidades.'], { name: 'Guía de turismo' });
+    await api.give('mapa_uruguay', 1);
+    api.setFlag('got_mapa');
+    await api.say('Entre ciudad y ciudad hay localidades sin gimnasio, pero con almacenes y gente con cosas útiles.', { name: 'Guía de turismo' });
+  },
+
+  async gift_cana(api) {
+    if (api.flag('got_cana')) return api.say('Parate frente al agua y apretá el botón A. Cada orilla tiene sus propias criaturas.', { name: 'Pescador' });
+    await api.say(['Hace cuarenta años que pesco en estos arroyos.', 'Ya estoy grande para andar con tanta caña. Tomá, que te va a servir.'], { name: 'Pescador' });
+    await api.give('cana_pescar', 1);
+    api.setFlag('got_cana');
+    await api.say('Parate frente al agua y apretá el botón A. Algunas criaturas solo se encuentran así.', { name: 'Pescador' });
+  },
+
+  async gift_pir(api) {
+    if (api.flag('gift_pir')) return api.say('Cada verano vienen turistas de todo el continente.', { name: 'Veraneante' });
+    await api.say('Alquilo esta casa todos los veranos. Llevate unos alfajores, que me sobraron.', { name: 'Veraneante' });
+    await api.give('alfajor', 2);
+    api.setFlag('gift_pir');
+  },
+
+  async gift_pal(api) {
+    if (api.flag('gift_pal')) return api.say('Si te gusta el mar, no dejes de probar la pesca en La Paloma.', { name: 'Surfista' });
+    await api.say('Me mudé acá por las olas. Tomá, unas Superballs que ya no uso.', { name: 'Surfista' });
+    await api.give('superesfera', 3);
+    api.setFlag('gift_pal');
+  },
+
+  async gift_min(api) {
+    if (api.flag('gift_min')) return api.say('Un buen mate se toma despacio y con buena compañía.', { name: 'Paisano' });
+    await api.say('Los de acá tomamos mate con el agua de las sierras. Probalo, que es de lo mejor.', { name: 'Paisano' });
+    await api.give('mate_dulce', 2);
+    api.setFlag('gift_min');
   },
 
   async gift_garrapinada(api) {

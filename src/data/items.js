@@ -3,10 +3,10 @@ import { deepFreeze } from '../core/util.js';
 // pocket: 'items' | 'balls' | 'key'
 // use: what the item does; validated in game/items logic, never trusted from saves.
 export const ITEMS = deepFreeze({
-  esfera: { name: 'Esfera', pocket: 'balls', price: 200, ball: 1, desc: 'Una esfera de cuero para atrapar criaturas salvajes.' },
-  superesfera: { name: 'Superesfera', pocket: 'balls', price: 600, ball: 1.5, desc: 'Mejor que la Esfera. Cosida a mano en Tacuarembó.' },
-  ultraesfera: { name: 'Ultraesfera', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Muy efectiva.' },
-  esfera_celeste: { name: 'Esfera Celeste', pocket: 'balls', price: 0, ball: 255, desc: 'Celeste como la camiseta. Atrapa sin fallar.' },
+  esfera: { name: 'Pokeball', pocket: 'balls', price: 200, ball: 1, desc: 'Una bola de cuero para atrapar criaturas salvajes.' },
+  superesfera: { name: 'Superball', pocket: 'balls', price: 600, ball: 1.5, desc: 'Mejor que la Pokeball. Cosida a mano en Tacuarembó.' },
+  ultraesfera: { name: 'Ultraball', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Muy efectiva.' },
+  esfera_celeste: { name: 'Pokeball Celeste', pocket: 'balls', price: 0, ball: 255, desc: 'Celeste como la camiseta. Atrapa sin fallar.' },
 
   te_marcela: { mate: true, name: 'Mate Lavado', pocket: 'items', price: 300, heal: 20, desc: 'Un mate ya muy cebado, suave. Tomándolo se recuperan 20 PS.' },
   mate: { mate: true, name: 'Mate Cebado', pocket: 'items', price: 700, heal: 60, desc: 'Un mate recién cebado, bien caliente. Tomándolo se recuperan 60 PS.' },
@@ -24,6 +24,8 @@ export const ITEMS = deepFreeze({
 
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
   lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
+  mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
+  cana_pescar: { name: 'Caña de Pescar', pocket: 'key', price: 0, desc: 'Parada frente al agua, tirá la caña con el botón A para pescar criaturas acuáticas.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
 });
 

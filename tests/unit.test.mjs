@@ -141,3 +141,32 @@ test('pure-JS SHA-256/HMAC match known vectors', () => {
   assert.equal(hex(sha256(new TextEncoder().encode('abc'))), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   assert.equal(hex(hmacSha256(new TextEncoder().encode('key'), new TextEncoder().encode('The quick brown fox jumps over the lazy dog'))), 'f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8');
 });
+
+test('Dex: 151 criaturas, 81 base, 70 evoluciones, 5 legendarias, tipos parejos', async () => {
+  const { DEX_ORDER } = await import('../src/data/species.js');
+  const { TYPES } = await import('../src/data/types.js');
+  assert.equal(DEX_ORDER.length, 151);
+  const evolved = new Set(DEX_ORDER.map((k) => SPECIES[k].evo?.to).filter(Boolean));
+  assert.equal(DEX_ORDER.length - evolved.size, 81);
+  assert.equal(DEX_ORDER.filter((k) => SPECIES[k].legendary).length, 5);
+  const byType = {};
+  for (const k of DEX_ORDER) byType[SPECIES[k].types[0]] = (byType[SPECIES[k].types[0]] ?? 0) + 1;
+  for (const t of Object.keys(TYPES)) assert.ok(byType[t] === 11 || byType[t] === 12, `${t}: ${byType[t]}`);
+  DEX_ORDER.forEach((k, i) => {
+    const s = SPECIES[k];
+    assert.equal(s.id, i + 1);
+    if (s.evo) assert.ok(SPECIES[s.evo.to], `${k} evoluciona a algo que no existe`);
+    assert.ok(s.learn.length >= 4, `${k} aprende pocos movimientos`);
+    for (const [, m] of s.learn) assert.ok(MOVES[m], `${k}: movimiento ${m} no existe`);
+  });
+});
+
+test('toda criatura no legendaria se puede conseguir (inicial, salvaje o pesca) o es evolución', async () => {
+  const { MAPS } = await import('../src/data/maps.js');
+  const { DEX_ORDER, STARTERS } = await import('../src/data/species.js');
+  const found = new Set(STARTERS);
+  for (const m of Object.values(MAPS)) for (const [sp] of [...(m.enc?.list ?? []), ...(m.fish ?? [])]) found.add(sp);
+  const evolved = new Set(DEX_ORDER.map((k) => SPECIES[k].evo?.to).filter(Boolean));
+  const missing = DEX_ORDER.filter((k) => !SPECIES[k].legendary && !evolved.has(k) && !found.has(k));
+  assert.deepEqual(missing, []);
+});

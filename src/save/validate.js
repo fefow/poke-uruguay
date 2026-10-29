@@ -19,9 +19,10 @@ const LINES = {
 const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'rival1', 'rival2', 'rival3', 'rival4',
   'badge1', 'badge2', 'badge3', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
-  'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo',
+  'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
+  'got_mapa', 'got_cana', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min',
 ]);
-const FLAG_PATTERN = /^(tr|it)_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v)_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 
@@ -120,7 +121,7 @@ export function validateSave(d) {
   if (starterLines.length > 1) e('más de un inicial');
   if (starterLines.length === 1 && (!chosen || !LINES[chosen].includes(starterLines[0].species))) e('inicial no coincide con el elegido');
   // Legendaries: only after becoming champion, at most one each.
-  for (const leg of ['pamperon', 'ballenaplata', 'soldemayo']) {
+  for (const leg of ['pamperon', 'ballenaplata', 'soldemayo', 'yaguarete', 'ombu']) {
     const n = all.filter((c) => c.species === leg).length;
     if (n > 1 || (n === 1 && !(flags.champion && flags[`caught_${leg}`]))) e(`${SPECIES[leg].name} no se pudo haber atrapado`);
   }
@@ -135,7 +136,9 @@ export function validateSave(d) {
     bag[k] = q;
   }
   if (bag.lampara && !(flags.cabo_clear && !flags.lamp_returned)) e('Lámpara del Faro imposible');
-  if (bag.esfera_celeste) e('Esfera Celeste no se puede obtener');
+  if (bag.esfera_celeste) e('Pokeball Celeste no se puede obtener');
+  if (bag.mapa_uruguay && !flags.got_mapa) e('Mapa de Uruguay sin haberlo recibido');
+  if (bag.cana_pescar && !flags.got_cana) e('Caña de Pescar sin haberla recibido');
 
   // Dex
   const seen = (d.dex?.seen ?? []).filter((k) => SPECIES[k]);

@@ -1,4 +1,4 @@
-# Poke Uruguay: La Leyenda del Pampero
+# Poke Uruguay: Aventuras en tierras charruas
 
 A single-player, 2D creature-collecting RPG set in Uruguay. Explore from Colonia del Sacramento to the Quebrada de los Cuervos, catch 42 original creatures inspired by Uruguayan wildlife (carpincho, ñandú, hornero, tero, yacaré, lobo marino…), beat three gyms, stop Equipo Niebla, and become Champion at the Estadio Centenario. After the credits the game keeps going, with legendary creatures to find and a Champion rematch.
 

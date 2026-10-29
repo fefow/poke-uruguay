@@ -344,7 +344,7 @@ export class BattleEngine {
     if (!ball) return false;
     ev.push({ t: 'throw', item: itemKey });
     if (!this.wild) {
-      ev.push({ t: 'block' }, { t: 'text', msg: '¡El entrenador bloqueó la Esfera!' }, { t: 'text', msg: '¡No se puede robar!' });
+      ev.push({ t: 'block' }, { t: 'text', msg: '¡El entrenador bloqueó la Pokeball!' }, { t: 'text', msg: '¡No se puede robar!' });
       return false;
     }
     const c = this.f.c;
@@ -364,7 +364,7 @@ export class BattleEngine {
       ev.push({ t: 'text', msg: `¡Atrapaste a ${displayName(c)}!` }, { t: 'end', result: 'caught' });
       return true;
     }
-    ev.push({ t: 'text', msg: ['¡Se escapó de la Esfera!', '¡Casi! Faltó muy poco.', '¡Parecía capturado!', '¡Por un pelo!'][shakes] });
+    ev.push({ t: 'text', msg: ['¡Se escapó de la Pokeball!', '¡Casi! Faltó muy poco.', '¡Parecía capturado!', '¡Por un pelo!'][shakes] });
     return false;
   }
 

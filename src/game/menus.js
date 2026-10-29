@@ -13,6 +13,8 @@ import { state, settings, saveSettings, addItem, removeItem, spend, earn, hasIte
 import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gainExp, canEvolve } from './creature.js';
 import { applyItem, STATUS_SHORT } from './battle-engine.js';
 import { saveGame, listSaves } from '../save/index.js';
+import { MAPS } from '../data/maps.js';
+import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, project } from '../data/atlas.js';
 import { SAVE_CONFIG } from '../save/config.js';
 
 // ---------------------------------------------------------------- helpers
@@ -61,6 +63,7 @@ export async function openPauseMenu() {
     if (S.flags.dex) entries.push(['PokeDex', openDex]);
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
+    if (hasItem('mapa_uruguay')) entries.push(['Mapa', openMap]);
     entries.push([S.player.name, openCard]);
     entries.push(['Guardar', openSave]);
     entries.push(['Opciones', openOptions]);
@@ -182,7 +185,7 @@ export function openSummary(index) {
 }
 
 // ---------------------------------------------------------------- BAG
-const POCKETS = [['items', 'Objetos'], ['balls', 'Esferas'], ['key', 'Clave']];
+const POCKETS = [['items', 'Objetos'], ['balls', 'Pokeballs'], ['key', 'Clave']];
 
 function itemUsable(key, c) {
   const it = ITEMS[key];
@@ -263,8 +266,9 @@ async function useInField(key) {
   const S = state();
   const it = ITEMS[key];
   if (key === 'uru_dex') return openDex();
+  if (key === 'mapa_uruguay') return openMap();
   if (it.pocket === 'key') return say(it.desc);
-  if (it.ball) return say('¡Las Esferas se usan en combate!');
+  if (it.ball) return say('¡Las Pokeballs se usan en combate!');
   if (it.repel) {
     S.repel = it.repel;
     removeItem(key, 1);
@@ -344,11 +348,64 @@ export function openDex() {
   });
 }
 
+// ---------------------------------------------------------------- MAP
+/** Where the player is, as a point on the atlas: a place id, or a spot between two places for routes. */
+function atlasHere() {
+  const S = state();
+  let m = MAPS[S.pos.map];
+  if (m?.indoor) m = MAPS[m.exitTo?.map] ?? m;
+  const id = m?.id;
+  const place = PLACES.find((p) => p.id === id);
+  if (place) return { id, at: project(place.lon, place.lat), label: place.name };
+  if (ROUTES[id]) {
+    const [a, b] = ROUTES[id].map((k) => PLACES.find((p) => p.id === k));
+    const pa = project(a.lon, a.lat);
+    const pb = project(b.lon, b.lat);
+    return { id, at: [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2], label: m.name };
+  }
+  return null;
+}
+
+export function openMap() {
+  const S = state();
+  const visited = (id) => !!S.flags[`v_${id}`];
+  const here = atlasHere();
+  const pts = Object.fromEntries(PLACES.map((p) => [p.id, project(p.lon, p.lat)]));
+  const land = OUTLINE.map(([lo, la]) => project(lo, la).join(',')).join(' ');
+  const links = LINKS.map(([a, b]) => `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" class="${visited(a) && visited(b) ? 'is-seen' : ''}"/>`).join('');
+  const dots = PLACES.map((p, i) => {
+    const [x, y] = pts[p.id];
+    const seen = visited(p.id);
+    const fill = seen ? (p.color ?? '#fff') : '#8a8fa8';
+    const shape = p.kind === 'city'
+      ? `<circle cx="${x}" cy="${y}" r="7.5" fill="${fill}" class="dot"/>`
+      : p.kind === 'loc' ? `<rect x="${x - 6.5}" y="${y - 6.5}" width="13" height="13" fill="${fill}" class="dot"/>` : `<path d="M${x} ${y - 8} L${x + 7.5} ${y + 6} L${x - 7.5} ${y + 6} Z" fill="${fill}" class="dot"/>`;
+    return `${shape}<text x="${x}" y="${y + (p.kind === 'place' ? 4.2 : 2.6)}" text-anchor="middle" class="num">${i + 1}</text>`;
+  }).join('');
+  const marker = here ? `<g class="you" transform="translate(${here.at[0]} ${here.at[1]})"><circle r="11"/><circle r="3.5" class="core"/></g>` : '';
+  const svg = `<svg viewBox="0 0 ${VIEW.w} ${VIEW.h}" role="img" aria-label="Mapa de Uruguay"><rect width="${VIEW.w}" height="${VIEW.h}" class="sea"/><polygon points="${land}" class="land"/><g class="links">${links}</g>${dots}${marker}</svg>`;
+  return panel('panel-map', (el, close) => {
+    const list = h('ul', { class: 'map-list' }, PLACES.map((p) => h('li', { class: `${visited(p.id) ? 'is-seen' : ''} ${here?.id === p.id ? 'is-here' : ''}` },
+      h('i', { class: `k-${p.kind}`, style: { '--c': visited(p.id) ? p.color ?? '#fff' : '#8a8fa8' }, text: String(PLACES.indexOf(p) + 1) }),
+      h('span', { text: visited(p.id) ? p.name : '???' }),
+      h('small', { text: visited(p.id) ? p.note : '' }))));
+    const wrap = h('div', { class: 'map-body' }, h('div', { class: 'map-svg' }), list);
+    wrap.firstChild.innerHTML = svg;
+    el.append(
+      h('header', { class: 'panel-title' }, h('span', { text: 'Mapa de Uruguay' }), h('span', { text: here ? `Estás en: ${here.label}` : '' })),
+      wrap,
+      h('p', { class: 'map-key', text: '● Ciudad con gimnasio   ■ Localidad (almacén, objetos)   ▲ Lugar especial' }),
+      h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
+    );
+    return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };
+  });
+}
+
 // ---------------------------------------------------------------- CARD
 export function openCard() {
   const S = state();
   return panel('panel-card', (el, close) => {
-    const badges = [['badge1', 'Rambla', '#3f86e0'], ['badge2', 'Ola', '#e8c21c'], ['badge3', 'Quebrada', '#a48e48']];
+    const badges = [['badge1', 'Montevideo', '#3f86e0'], ['badge2', 'Maldonado', '#e8c21c'], ['badge3', 'Treinta y Tres', '#a48e48']];
     el.append(
       h('header', { class: 'panel-title' }, h('span', { text: 'Carnet de Entrenador' }), h('span', { text: `ID ${S.player.id}` })),
       h('div', { class: 'card-body' },
@@ -378,19 +435,18 @@ export function openOptions() {
       { label: 'Música', get: () => `${Math.round(settings.music * 10)}`, step: (d) => (settings.music = clamp(Math.round((settings.music + d * 0.1) * 10) / 10, 0, 1)) },
       { label: 'Efectos', get: () => `${Math.round(settings.sfx * 10)}`, step: (d) => (settings.sfx = clamp(Math.round((settings.sfx + d * 0.1) * 10) / 10, 0, 1)) },
       { label: 'Animaciones', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
+      { label: 'Controles', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },
     ];
     const items = rows.map((r) => h('li', {}, h('span', { text: r.label }), h('b', { text: '' })));
-    const refresh = () => rows.forEach((r, i) => (items[i].querySelector('b').textContent = `◀ ${r.get()} ▶`));
+    const refresh = () => rows.forEach((r, i) => (items[i].querySelector('b').textContent = r.noArrows ? `▶ ${r.get()}` : `◀ ${r.get()} ▶`));
     refresh();
     el.append(h('header', { class: 'panel-title', text: 'Opciones' }), h('ul', { class: 'options-list' }, items),
-      h('div', { class: 'controls-help' },
-        h('p', { text: 'Controles: Flechas/WASD mover · Espacio (mantener) = caminar 1,5x más rápido · Z = A · X/Shift = B · Enter/Esc/M = Menú · N música · O ajustes · P equipo' }),
-        h('p', { text: 'También funciona con gamepad y con los botones táctiles.' })),
       h('footer', { class: 'panel-foot', text: `←→ cambiar · ${keyName('b')} volver` }));
     const nav = listNav(items, {
       onCancel: () => { saveSettings(); setVolumes(settings); close(); },
-      onPick: () => {},
+      onPick: (i) => { if (rows[i].noArrows) { sfx('select'); rows[i].step(); } },
       extra: (a, i) => {
+        if (rows[i].noArrows) return false;
         if (a === 'left' || a === 'right' || a === 'a') {
           rows[i].step(a === 'left' ? -1 : 1);
           setVolumes(settings);
@@ -402,6 +458,29 @@ export function openOptions() {
       },
     });
     return nav;
+  });
+}
+
+const CONTROLS = [
+  ['Flechas / W A S D', 'Mover al personaje'],
+  ['Z / J', 'Aceptar, hablar, interactuar (botón A)'],
+  ['X / K / Shift / Retroceso', 'Cancelar, volver (botón B)'],
+  ['Espacio (mantener)', 'Caminar 1,5x más rápido'],
+  ['Enter / Esc / M / Tab', 'Abrir el menú (en el menú, Enter acepta)'],
+  ['N', 'Silenciar o activar la música'],
+  ['O', 'Abrir ajustes'],
+  ['P', 'Mostrar u ocultar el equipo'],
+  ['T', 'Abrir el Mapa de Uruguay (cuando lo tengas)'],
+  ['F2', 'Panel de errores y notas'],
+  ['Gamepad / pantalla táctil', 'Cruz = mover · A y B = botones del mismo nombre'],
+];
+
+export function openControls() {
+  return panel('panel-controls', (el, close) => {
+    el.append(h('header', { class: 'panel-title', text: 'Controles' }),
+      h('dl', { class: 'controls-list' }, CONTROLS.flatMap(([k, d]) => [h('dt', { text: k }), h('dd', { text: d })])),
+      h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }));
+    return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };
   });
 }
 
@@ -489,7 +568,7 @@ async function buyFlow(stock) {
     await say('¡Acá tenés! Gracias.', { name: 'Almacenero' });
     if (k === 'esfera' && q >= 10) {
       addItem('superesfera', 1);
-      await say('Por comprar 10, te regalo una Superesfera.', { name: 'Almacenero' });
+      await say('Por comprar 10, te regalo una Superball.', { name: 'Almacenero' });
     }
   }
 }

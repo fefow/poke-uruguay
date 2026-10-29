@@ -1,4 +1,6 @@
 import { deepFreeze } from '../core/util.js';
+import { MOVES } from './moves.js';
+import { LINES, LEGENDS } from './species-extra.js';
 
 // Original creatures inspired by Uruguayan wildlife and culture.
 // base: [hp, atk, def, spa, spd, spe]
@@ -7,7 +9,7 @@ const S = (id, key, name, types, base, catchRate, baseExp, learn, desc, art, evo
   id, key, name, types, base, catchRate, baseExp, learn, desc, art, evo, ...extra,
 });
 
-const LIST = [
+const BASE_LIST = [
   // --- Starters -------------------------------------------------------
   S(1, 'ceibito', 'Ceibo', ['planta'], [45, 49, 49, 63, 63, 45], 45, 64,
     [[1, 'placaje'], [1, 'grunido'], [5, 'absorber'], [9, 'latigo_cepa'], [13, 'somnifero'], [17, 'hoja_afilada'], [24, 'megaagotar'], [30, 'mate_amargo']],
@@ -202,6 +204,76 @@ const LIST = [
     { plan: 'sun', c1: '#f2c02a', c2: '#d8901a', c3: '#ffe88a', feats: [], size: 1.4 },
     null, { legendary: true, mythic: true }),
 ];
+
+// ---------------------------------------------------------------- generated roster
+const ROLE_W = { a: [1, 1.35, 1, 0.7, 0.85, 0.95], s: [1, 0.7, 0.9, 1.4, 1, 0.95], t: [1.35, 0.9, 1.4, 0.8, 1.2, 0.55], f: [0.85, 1, 0.75, 1, 0.8, 1.45], b: [1, 1, 1, 1, 1, 1] };
+const statsFor = (bst, role) => {
+  const w = ROLE_W[role];
+  const sum = w.reduce((a, b) => a + b, 0);
+  return w.map((x) => Math.max(20, Math.round((bst * x) / sum)));
+};
+const expFor = (bst) => Math.round(Math.pow(bst / 100, 2.3) * 4.6);
+
+const SLOTS = [[1, 45], [1, 45], [6, 50], [10, 58], [14, 66], [19, 78], [24, 90], [30, 96], [36, 105], [43, 115], [50, 130]];
+const damaging = (type) => Object.entries(MOVES).filter(([, m]) => m.type === type && m.power > 0);
+const STATUS_BY_TYPE = {
+  veneno: 'gas_venenoso', psiquico: 'hipnosis', bicho: 'disparo_demora', electrico: 'onda_trueno', planta: 'somnifero',
+  tierra: 'escudo_barro', roca: 'defensa_ferrea', siniestro: 'maquinacion', fuego: 'malicioso', agua: 'malicioso', volador: 'chirrido', lucha: 'candombe', normal: 'grunido',
+};
+const UTILITY = { a: 'candombe', s: 'meditacion', t: 'mate_amargo', f: 'candombe', b: 'mate_amargo' };
+
+/** Deterministic learnset: strongest suitable move of the species' types at each slot. */
+function learnsetFor(types, role) {
+  const [prim, sec] = types;
+  const taken = new Set();
+  const out = [];
+  SLOTS.forEach(([lvl, cap], i) => {
+    const pools = i === 0 ? [damaging(prim)] : i === 1 ? [damaging('normal')] : sec && i % 2 === 0 ? [damaging(sec), damaging(prim)] : (sec ? [damaging(prim), damaging(sec)] : [damaging(prim)]);
+    for (const pool of pools) {
+      const cands = pool
+        .filter(([k, m]) => !taken.has(k) && m.power <= cap && (i > 1 || m.power <= 70))
+        .map(([k, m]) => [k, m.power + ((role === 's') === (m.cat === 'esp') ? 20 : 0)])
+        .sort((x, y) => y[1] - x[1]);
+      if (cands.length) { taken.add(cands[0][0]); out.push([lvl, cands[0][0]]); return; }
+    }
+  });
+  const st = STATUS_BY_TYPE[prim];
+  if (st && !taken.has(st)) { taken.add(st); out.push([16, st]); }
+  const ut = role === 's' && prim !== 'psiquico' ? 'mate_amargo' : UTILITY[role];
+  if (!taken.has(ut) && MOVES[ut]) out.push([26, ut]);
+  return out.sort((x, y) => x[0] - y[0]);
+}
+
+function buildLines() {
+  const out = [];
+  for (const L of LINES) {
+    L.mons.forEach(([key, name, sec, plan, c1, c2, c3, feats, size, desc], i) => {
+      const types = sec ? [L.t, sec] : [L.t];
+      const bst = L.bst[Math.min(i, L.bst.length - 1)];
+      const last = i === L.mons.length - 1;
+      const single = L.mons.length === 1;
+      const catchRate = single ? 90 : last ? 60 : i === 0 ? 190 : 110;
+      const evo = last ? null : { lvl: L.evo[i], to: L.mons[i + 1][0] };
+      out.push({
+        id: 0, key, name, types, base: statsFor(bst, L.role), catchRate, baseExp: expFor(bst), learn: learnsetFor(types, L.role), desc,
+        art: { plan, c1, c2, c3, feats: feats ? feats.split(' ') : [], size }, evo,
+      });
+    });
+  }
+  return out;
+}
+
+function buildLegends() {
+  return LEGENDS.map((l) => ({
+    id: 0, key: l.key, name: l.name, types: l.types, base: l.base, catchRate: 3, baseExp: 270, learn: l.learn, desc: l.desc,
+    art: { plan: l.plan, c1: l.c1, c2: l.c2, c3: l.c3, feats: l.feats, size: l.size }, evo: null, legendary: true, ...(l.mythic ? { mythic: true } : {}),
+  }));
+}
+
+// Dex order: the original 39 regular species, the new lines, then the five legendaries.
+const REGULAR = BASE_LIST.filter((s) => !s.legendary);
+const OLD_LEGENDS = BASE_LIST.filter((s) => s.legendary);
+const LIST = [...REGULAR, ...buildLines(), ...OLD_LEGENDS, ...buildLegends()].map((s, i) => ({ ...s, id: i + 1 }));
 
 export const SPECIES = deepFreeze(Object.fromEntries(LIST.map((s) => [s.key, s])));
 export const DEX_ORDER = deepFreeze(LIST.map((s) => s.key));

@@ -48,6 +48,54 @@ const SIDE = [
   '....oCCCCCCo....',
   '....opppppo.....',
 ];
+const P_DOWN = [
+  '....oooooooo....',
+  '...oHHHHHHHHo...',
+  '..oHHHHwwHHHHo..',
+  '.orrrrrrrrrrrro.',
+  '..ohssssssssho..',
+  '..osesssssseso..',
+  '..osssssssssso..',
+  '...oRRRRRRRRo...',
+  '.osccccccccccso.',
+  '.osccwwwwwwccso.',
+  '.osCccccccccCso.',
+  '..oCCCCCCCCCCo..',
+  '..oppppppppppo..',
+  '...opppoopppo...',
+];
+const P_UP = [
+  '....oooooooo....',
+  '...oHHHHHHHHo...',
+  '..oHHHHwwHHHHo..',
+  '..oHHHHHHHHHHo..',
+  '..ohhhhhhhhhho..',
+  '..ohhhhhhhhhho..',
+  '..ohhhhhhhhhho..',
+  '...oRRRRRRRRo...',
+  '.osBBBBBBBBBBso.',
+  '.osBBccBBccBBso.',
+  '.osBBBBBBBBBBso.',
+  '..oCBBBBBBBBCo..',
+  '..oppppppppppo..',
+  '...opppoopppo...',
+];
+const P_SIDE = [
+  '....oooooooo....',
+  '...oHHHHHHHHo...',
+  '...oHHHHHHHHHro.',
+  '...ohhhhrrrrrro.',
+  '...ohhsssssssso.',
+  '...ohhsssssseo..',
+  '...ohhsssssssso.',
+  '....oRRRRRRo....',
+  '..oBBoccccco....',
+  '..oBBosccccso...',
+  '..oBBoCccccso...',
+  '...oBoCCCCCCo...',
+  '....oppppppo....',
+  '....opppppo.....',
+];
 const LEGS = {
   down: [['...oppo..oppo...', '...obbo..obbo...'], ['...oppo..oppo...', '...obbo...oo....'], ['...oppo..oppo...', '....oo...obbo...']],
   up: [['...oppo..oppo...', '...obbo..obbo...'], ['...oppo..oppo...', '...obbo...oo....'], ['...oppo..oppo...', '....oo...obbo...']],
@@ -55,8 +103,9 @@ const LEGS = {
 };
 
 export const LOOKS = {
-  player_m: { h: '#e8e8f0', H: '#5aa8e8', s: '#f2c8a0', S: '#d8a880', c: '#5aa8e8', C: '#3a78b8', p: '#2a3a5a', b: '#3a2a20' },
-  player_f: { h: '#8a4a2a', H: '#f2f2f2', s: '#f2c8a0', S: '#d8a880', c: '#f2f2f2', C: '#5aa8e8', p: '#3a78b8', b: '#3a2a20', long: true },
+  // The player has its own silhouette: celeste cap and jersey, red scarf, orange backpack.
+  player_m: { h: '#3a2a1a', H: '#6cb4ee', r: '#2a6aae', s: '#f2c8a0', S: '#d8a880', c: '#6cb4ee', C: '#3f86c8', w: '#ffffff', R: '#e0263a', B: '#e8a02a', p: '#22222e', b: '#f2f2f2' },
+  player_f: { h: '#8a4a2a', H: '#6cb4ee', r: '#2a6aae', s: '#f2c8a0', S: '#d8a880', c: '#6cb4ee', C: '#3f86c8', w: '#ffffff', R: '#e0263a', B: '#e8a02a', p: '#22222e', b: '#f2f2f2', long: true },
   rival: { h: '#2a2a3a', H: '#2a2a3a', s: '#e8b890', S: '#c89870', c: '#e0263a', C: '#a01a2a', p: '#2a2a2a', b: '#1a1a1a' },
   prof: { h: '#d8d8d8', H: '#d8d8d8', s: '#f2c8a0', S: '#d8a880', c: '#f8f8f8', C: '#c8c8d0', p: '#5a4a3a', b: '#2a1a10' },
   mom: { h: '#5a2a1a', H: '#5a2a1a', s: '#f2c8a0', S: '#d8a880', c: '#e86a8a', C: '#b84a6a', p: '#5a5a8a', b: '#2a2a2a', long: true },
@@ -100,7 +149,8 @@ export function charSprite(look, dir, frame = 0) {
   c.width = 16;
   c.height = 17;
   const g = c.getContext('2d');
-  const body = dir === 'down' ? DOWN : dir === 'up' ? UP : SIDE;
+  const isP = look.startsWith('player');
+  const body = isP ? (dir === 'down' ? P_DOWN : dir === 'up' ? P_UP : P_SIDE) : dir === 'down' ? DOWN : dir === 'up' ? UP : SIDE;
   const legs = LEGS[dir === 'left' || dir === 'right' ? 'side' : dir][frame];
   const flip = dir === 'left';
   const bob = frame ? 0 : 1;

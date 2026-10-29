@@ -34,6 +34,16 @@ export const TILE_INFO = {
   l: { name: 'base faro', solid: true },
   M: { name: 'La Mano', solid: true },
   Z: { name: 'tribuna', solid: true },
+  // gym facades, one family per city: water, electric, rock
+  G: { name: 'techo gimnasio agua', solid: true },
+  h: { name: 'fachada gimnasio agua', solid: true },
+  a: { name: 'emblema agua', solid: true },
+  J: { name: 'techo gimnasio eléctrico', solid: true },
+  j: { name: 'fachada gimnasio eléctrico', solid: true },
+  d: { name: 'emblema eléctrico', solid: true },
+  V: { name: 'techo gimnasio roca', solid: true },
+  y: { name: 'fachada gimnasio roca', solid: true },
+  e: { name: 'emblema roca', solid: true },
   z: { name: 'torre', solid: true },
   // interiors
   i: { name: 'piso' },
@@ -216,6 +226,61 @@ const DRAW = {
   z: (g) => {
     px(g, 0, 0, '#e8e4dc', T, T);
     px(g, 5, 0, '#c8c4bc', 6, T); px(g, 6, 2, '#5a5a6a', 4, 3);
+  },
+  // ---- gym facades (outdoor) ----
+  G: (g) => {
+    px(g, 0, 0, '#2a6ab0', T, T); px(g, 0, 0, '#7ac0f8', T, 1); px(g, 0, 15, '#143a68', T, 1);
+    for (let y = 3; y < 15; y += 4) for (let x = ((y - 3) / 4) % 2 ? 4 : 0; x < T; x += 8) { px(g, x, y, '#5a9ad8', 5, 1); px(g, x + 1, y + 1, '#1d4f8a', 3, 1); }
+  },
+  h: (g) => {
+    px(g, 0, 0, '#e8f2fa', T, T); px(g, 0, 0, '#1d4f8a', T, 1);
+    px(g, 0, 1, '#bcd8ee', 3, 15); px(g, 0, 1, '#ffffff', 1, 15); px(g, 13, 1, '#bcd8ee', 3, 15); px(g, 15, 1, '#8fb4d4', 1, 15);
+    px(g, 4, 3, '#1d4f8a', 8, 10); px(g, 5, 2, '#1d4f8a', 6, 1); px(g, 5, 3, '#3f9ae0', 6, 9); px(g, 5, 3, '#a8dcff', 6, 1); px(g, 5, 7, '#7ac0f8', 6, 1);
+    px(g, 0, 14, '#8fb4d4', T, 2);
+  },
+  a: (g) => {
+    DRAW.G(g);
+    g.fillStyle = '#143a68'; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
+    g.fillStyle = '#e8f6ff'; g.beginPath(); g.arc(8, 8, 6.2, 0, 7); g.fill();
+    g.fillStyle = '#2a6ab0'; g.beginPath(); g.arc(8, 8, 5, 0, 7); g.fill();
+    g.fillStyle = '#e8f6ff'; g.beginPath(); g.moveTo(8, 3); g.bezierCurveTo(11.5, 7, 12, 8, 12, 9.2); g.arc(8, 9.2, 4, 0, Math.PI); g.bezierCurveTo(4, 8, 4.5, 7, 8, 3); g.fill();
+    g.fillStyle = '#7ac0f8'; g.fillRect(6, 9, 2, 2);
+  },
+  J: (g) => {
+    px(g, 0, 0, '#2c2d3a', T, T); px(g, 0, 0, '#5a5c70', T, 1); px(g, 0, 15, '#1a1a24', T, 1);
+    hazard(g, 11); px(g, 2, 3, '#5a5c70', 2, 2); px(g, 11, 3, '#5a5c70', 2, 2); px(g, 6, 6, '#3a3b4c', 4, 2);
+  },
+  j: (g) => {
+    px(g, 0, 0, '#454656', T, T); px(g, 0, 0, '#f2c02a', T, 1);
+    px(g, 0, 1, '#2c2d3a', 3, 15); px(g, 13, 1, '#2c2d3a', 3, 15); px(g, 1, 3, '#f2c02a', 1, 9); px(g, 14, 3, '#f2c02a', 1, 9);
+    px(g, 4, 3, '#1a1a24', 8, 9); px(g, 5, 4, '#5ae0ff', 6, 7); px(g, 5, 4, '#c8f8ff', 6, 1); px(g, 7, 4, '#23232e', 2, 7);
+    hazard(g, 12);
+  },
+  d: (g) => {
+    DRAW.J(g);
+    g.fillStyle = '#1a1a24'; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
+    g.fillStyle = '#f2c02a'; g.beginPath(); g.arc(8, 8, 6.2, 0, 7); g.fill();
+    g.fillStyle = '#23232e'; g.beginPath(); g.arc(8, 8, 5, 0, 7); g.fill();
+    g.fillStyle = '#ffe44a'; g.beginPath(); g.moveTo(9.5, 3); g.lineTo(5, 8.6); g.lineTo(7.8, 8.6); g.lineTo(6.5, 13); g.lineTo(11.5, 7); g.lineTo(8.8, 7); g.closePath(); g.fill();
+  },
+  V: (g) => {
+    px(g, 0, 0, '#7a5a38', T, T); px(g, 0, 0, '#c49a4c', T, 1); px(g, 0, 15, '#4a3018', T, 1);
+    for (let y = 4; y < 15; y += 5) { px(g, 0, y, '#5a3e22', T, 1); for (let x = ((y - 4) / 5) % 2 ? 0 : 6; x < T; x += 12) px(g, x, y - 4, '#5a3e22', 1, 4); }
+    px(g, 2, 2, '#9a7848', 3, 1); px(g, 9, 7, '#9a7848', 4, 1);
+  },
+  y: (g) => {
+    px(g, 0, 0, '#cdb48a', T, T); px(g, 0, 0, '#7a5a38', T, 2);
+    px(g, 0, 7, '#a98f66', T, 1); px(g, 0, 14, '#a98f66', T, 2); px(g, 4, 2, '#a98f66', 1, 5); px(g, 11, 8, '#a98f66', 1, 6);
+    px(g, 0, 2, '#a98f66', 3, 12); px(g, 13, 2, '#a98f66', 3, 12); px(g, 0, 2, '#e6d4ac', 1, 12);
+    px(g, 5, 8, '#3a2814', 6, 5); px(g, 5, 8, '#1a1008', 6, 1);
+  },
+  e: (g) => {
+    DRAW.V(g);
+    g.fillStyle = '#3a2814'; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
+    g.fillStyle = '#c49a4c'; g.beginPath(); g.arc(8, 8, 6.2, 0, 7); g.fill();
+    g.fillStyle = '#6a4a2a'; g.beginPath(); g.arc(8, 8, 5, 0, 7); g.fill();
+    g.fillStyle = '#a8a8a0'; g.beginPath(); g.moveTo(3.5, 12); g.lineTo(6.5, 6); g.lineTo(8.3, 8.4); g.lineTo(10, 4); g.lineTo(12.6, 12); g.closePath(); g.fill();
+    g.fillStyle = '#d0d0c8'; g.fillRect(9, 4, 2, 2);
   },
   i: (g, r) => {
     px(g, 0, 0, '#c8945a', T, T);
