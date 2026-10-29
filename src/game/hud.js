@@ -86,9 +86,8 @@ export function updateHud(now) {
   party.replaceChildren(...S.party.map((c) => {
     const max = maxHp(c);
     const pct = Math.max(0, Math.min(1, c.hp / max));
-    return h('li', { class: `hud-mon${c.hp <= 0 ? ' is-down' : ''}` },
-      h('img', { src: creatureIcon(c.species), alt: '', width: 32, height: 32 }),
-      h('span', { class: 'hud-mon-name', text: displayName(c) }),
+    return h('li', { class: `hud-mon${c.hp <= 0 ? ' is-down' : ''}`, title: `${displayName(c)} Nv${c.level} · ${c.hp}/${max} PS` },
+      h('img', { src: creatureIcon(c.species), alt: displayName(c), width: 32, height: 32 }),
       h('span', { class: 'hud-mon-lv', text: `Nv${c.level}` }),
       h('span', { class: `hud-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) }, role: 'img', 'aria-label': `${c.hp} de ${max} PS` }));
   }));

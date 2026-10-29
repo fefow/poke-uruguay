@@ -8,9 +8,9 @@ export const ITEMS = deepFreeze({
   ultraesfera: { name: 'Ultraesfera', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Muy efectiva.' },
   esfera_celeste: { name: 'Esfera Celeste', pocket: 'balls', price: 0, ball: 255, desc: 'Celeste como la camiseta. Atrapa sin fallar.' },
 
-  te_marcela: { name: 'Té de Marcela', pocket: 'items', price: 300, heal: 20, desc: 'Infusión de marcela. Recupera 20 PS.' },
-  mate: { name: 'Mate', pocket: 'items', price: 700, heal: 60, desc: 'Un mate bien cebado. Recupera 60 PS.' },
-  mate_dulce: { name: 'Mate Dulce', pocket: 'items', price: 1200, heal: 150, desc: 'Mate con azúcar. Recupera 150 PS.' },
+  te_marcela: { mate: true, name: 'Mate Lavado', pocket: 'items', price: 300, heal: 20, desc: 'Un mate ya muy cebado, suave. Tomándolo se recuperan 20 PS.' },
+  mate: { mate: true, name: 'Mate Cebado', pocket: 'items', price: 700, heal: 60, desc: 'Un mate recién cebado, bien caliente. Tomándolo se recuperan 60 PS.' },
+  mate_dulce: { mate: true, name: 'Mate Dulce', pocket: 'items', price: 1200, heal: 150, desc: 'Mate con azúcar y yuyos. Tomándolo se recuperan 150 PS.' },
   dulce_de_leche: { name: 'Dulce de Leche', pocket: 'items', price: 2500, heal: 9999, desc: 'Una cucharada restaura todos los PS.' },
   chivito: { name: 'Chivito', pocket: 'items', price: 3000, heal: 9999, cure: 'all', desc: 'El sándwich nacional. Restaura PS y cura problemas de estado.' },
   ruda: { name: 'Ruda', pocket: 'items', price: 100, cure: 'psn', desc: 'Hierba de agosto. Cura el envenenamiento.' },

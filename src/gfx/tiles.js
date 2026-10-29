@@ -275,17 +275,133 @@ const DRAW = {
   O: (g) => px(g, 0, 0, '#141018', T, T),
 };
 
+
+// ---------------------------------------------------------------- themed interiors
+// A map with `theme: 'x'` redraws the interior tile characters (floor, wall, counter…)
+// with its own look, so clinics and each city's gym are recognisable at a glance.
+const bannerCache = new Map();
+/** Two 16x16 halves of a 32x16 banner whose emblem is painted by `paint(g)`. */
+function banner(name, paint) {
+  const whole = () => {
+    if (!bannerCache.has(name)) {
+      const c = document.createElement('canvas');
+      c.width = 32;
+      c.height = 16;
+      paint(c.getContext('2d'));
+      bannerCache.set(name, c);
+    }
+    return bannerCache.get(name);
+  };
+  return [(g) => g.drawImage(whole(), 0, 0, 16, 16, 0, 0, 16, 16), (g) => g.drawImage(whole(), 16, 0, 16, 16, 0, 0, 16, 16)];
+}
+
+const clinicFloor = (g) => {
+  px(g, 0, 0, '#e9f5f1', T, T);
+  px(g, 0, 0, '#d4e8e2', 8, 8); px(g, 8, 8, '#d4e8e2', 8, 8);
+  px(g, 0, 15, '#bcd8d0', T, 1); px(g, 15, 0, '#bcd8d0', 1, T);
+};
+const clinicWall = (g) => {
+  px(g, 0, 0, '#d9efe9', T, T);
+  px(g, 0, 11, '#ffffff', T, 5); px(g, 0, 10, '#3aa89a', T, 1); px(g, 0, 15, '#2a8a7e', T, 1);
+};
+
+const POLI_T = {
+  i: clinicFloor,
+  x: clinicWall,
+  X: (g) => {
+    clinicWall(g);
+    px(g, 2, 1, '#ffffff', 12, 9); px(g, 2, 1, '#2a8a7e', 12, 1); px(g, 2, 9, '#2a8a7e', 12, 1); px(g, 2, 1, '#2a8a7e', 1, 9); px(g, 13, 1, '#2a8a7e', 1, 9);
+    px(g, 6, 2, '#e0263a', 4, 7); px(g, 4, 4, '#e0263a', 8, 3);
+  },
+  n: (g) => {
+    clinicFloor(g);
+    px(g, 0, 3, '#3aa89a', T, 11); px(g, 0, 2, '#ffffff', T, 4); px(g, 0, 6, '#2a8a7e', T, 1); px(g, 0, 13, '#2a8a7e', T, 1);
+  },
+  A: (g) => { px(g, 0, 0, '#7ec8c0', T, T); px(g, 0, 0, '#5ab0a6', T, 1); px(g, 0, 15, '#5ab0a6', T, 1); },
+  P: (g) => {
+    clinicFloor(g);
+    px(g, 2, 2, '#f4f4f4', 12, 13); px(g, 2, 2, '#bfc8cc', 12, 1); px(g, 4, 4, '#2a3a4a', 8, 5); px(g, 5, 5, '#5ae0a0', 3, 1);
+    px(g, 4, 11, '#e0263a', 2, 2); px(g, 8, 11, '#3aa89a', 2, 2);
+  },
+  N: (g) => {
+    clinicFloor(g);
+    px(g, 5, 10, '#e8e8e8', 6, 5); px(g, 5, 10, '#bfc8cc', 6, 1);
+    g.fillStyle = '#3a9a44'; g.beginPath(); g.arc(8, 7, 5, 0, 7); g.fill();
+  },
+  m: (g) => { clinicFloor(g); px(g, 1, 3, '#2a8a7e', 14, 10); px(g, 2, 4, '#3aa89a', 12, 8); px(g, 7, 5, '#ffffff', 2, 6); px(g, 5, 7, '#ffffff', 6, 2); },
+  E: (g) => {
+    clinicFloor(g);
+    px(g, 1, 2, '#9aa8ac', 14, 13); px(g, 2, 3, '#ffffff', 12, 4); px(g, 2, 7, '#3aa89a', 12, 7); px(g, 2, 7, '#2a8a7e', 12, 1);
+  },
+};
+
+const GYM_FLOOR_LINES = (g, base, line, accent) => { px(g, 0, 0, base, T, T); px(g, 0, 15, line, T, 1); px(g, 15, 0, line, 1, T); if (accent) px(g, 7, 7, accent, 2, 2); };
+
+const [DROP_L, DROP_R] = banner('drop', (g) => {
+  px(g, 0, 0, '#1d4f8a', 32, 16); px(g, 0, 0, '#3f86e0', 32, 1); px(g, 0, 15, '#143a68', 32, 1);
+  g.fillStyle = '#e8f6ff'; g.beginPath(); g.moveTo(16, 1.5); g.bezierCurveTo(21, 7, 22, 9, 22, 10.5); g.arc(16, 10.5, 6, 0, Math.PI); g.bezierCurveTo(10, 9, 11, 7, 16, 1.5); g.fill();
+  g.fillStyle = '#7ac0f8'; g.beginPath(); g.arc(14, 11, 2, 0, 7); g.fill();
+});
+const GYM_AGUA = {
+  Y: (g) => { GYM_FLOOR_LINES(g, '#cfe6f6', '#a9cfe8'); px(g, 2, 4, '#8fc0e4', 5, 1); px(g, 9, 11, '#8fc0e4', 5, 1); },
+  x: (g) => { px(g, 0, 0, '#2a6ab0', T, T); px(g, 0, 11, '#1d4f8a', T, 5); px(g, 0, 10, '#7ac0f8', T, 1); px(g, 2, 4, '#5a9ad8', 5, 1); px(g, 9, 6, '#5a9ad8', 5, 1); },
+  X: DROP_L,
+  Z: DROP_R,
+  N: (g) => { GYM_FLOOR_LINES(g, '#cfe6f6', '#a9cfe8'); px(g, 1, 3, '#2a4a6a', 14, 12); px(g, 2, 4, '#3f9ae0', 12, 9); px(g, 4, 6, '#f2c02a', 3, 1); px(g, 5, 7, '#f2c02a', 1, 1); px(g, 9, 9, '#e8672c', 3, 1); px(g, 11, 8, '#e8672c', 1, 1); px(g, 2, 4, '#a8dcff', 12, 1); },
+  A: (g) => { px(g, 0, 0, '#2a6ab0', T, T); px(g, 1, 0, '#e8f6ff', 1, T); px(g, 14, 0, '#e8f6ff', 1, T); px(g, 4, 6, '#5a9ad8', 8, 1); px(g, 4, 11, '#5a9ad8', 8, 1); },
+  m: (g) => { GYM_FLOOR_LINES(g, '#cfe6f6', '#a9cfe8'); px(g, 1, 3, '#1d4f8a', 14, 10); px(g, 2, 4, '#3f86e0', 12, 8); },
+  T: (g) => { GYM_FLOOR_LINES(g, '#cfe6f6', '#a9cfe8'); px(g, 1, 3, '#2a6ab0', 14, 9); px(g, 1, 3, '#5a9ad8', 14, 3); },
+};
+
+const [BOLT_L, BOLT_R] = banner('bolt', (g) => {
+  px(g, 0, 0, '#23232e', 32, 16); px(g, 0, 0, '#f2c02a', 32, 1); px(g, 0, 15, '#f2c02a', 32, 1);
+  g.fillStyle = '#ffe44a'; g.beginPath(); g.moveTo(18, 1); g.lineTo(11, 9); g.lineTo(15.5, 9); g.lineTo(13, 15); g.lineTo(21, 6.5); g.lineTo(16.5, 6.5); g.closePath(); g.fill();
+  g.fillStyle = '#fff6a8'; g.fillRect(16, 3, 1, 3);
+});
+const hazard = (g, y) => { for (let x = -16; x < 32; x += 8) { g.fillStyle = '#f2c02a'; g.beginPath(); g.moveTo(x, y + 4); g.lineTo(x + 4, y); g.lineTo(x + 8, y); g.lineTo(x + 4, y + 4); g.fill(); } };
+const GYM_ELEC = {
+  Y: (g) => { px(g, 0, 0, '#454656', T, T); px(g, 0, 15, '#2c2d3a', T, 1); px(g, 15, 0, '#2c2d3a', 1, T); px(g, 3, 3, '#5a5c70', 10, 1); px(g, 3, 3, '#5a5c70', 1, 6); px(g, 3, 8, '#f2c02a', 2, 1); },
+  x: (g) => { px(g, 0, 0, '#2c2d3a', T, T); px(g, 0, 11, '#1a1a24', T, 5); hazard(g, 10); px(g, 3, 3, '#f2c02a', 1, 4); px(g, 8, 2, '#5ae0ff', 3, 1); px(g, 10, 3, '#5ae0ff', 1, 3); },
+  X: BOLT_L,
+  Z: BOLT_R,
+  N: (g) => { px(g, 0, 0, '#454656', T, T); px(g, 0, 15, '#2c2d3a', T, 1); px(g, 4, 11, '#23232e', 8, 4); px(g, 7, 6, '#7a7c90', 2, 6); g.fillStyle = '#8af0ff'; g.beginPath(); g.arc(8, 5, 4, 0, 7); g.fill(); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(8, 5, 1.8, 0, 7); g.fill(); },
+  A: (g) => { px(g, 0, 0, '#23232e', T, T); hazard(g, 0); hazard(g, 12); px(g, 6, 7, '#f2c02a', 4, 2); },
+  m: (g) => { px(g, 0, 0, '#454656', T, T); px(g, 1, 3, '#23232e', 14, 10); px(g, 2, 4, '#f2c02a', 12, 8); px(g, 3, 5, '#23232e', 10, 6); },
+  T: (g) => { px(g, 0, 0, '#454656', T, T); px(g, 1, 3, '#23232e', 14, 9); px(g, 1, 3, '#7a7c90', 14, 3); },
+};
+
+const [ROCK_L, ROCK_R] = banner('rock', (g) => {
+  px(g, 0, 0, '#6a4a2a', 32, 16); px(g, 0, 0, '#c49a4c', 32, 1); px(g, 0, 15, '#4a3018', 32, 1);
+  g.fillStyle = '#a8a8a0'; g.beginPath(); g.moveTo(7, 14); g.lineTo(13, 5); g.lineTo(17, 9); g.lineTo(21, 3); g.lineTo(26, 14); g.closePath(); g.fill();
+  g.fillStyle = '#d0d0c8'; g.beginPath(); g.moveTo(21, 3); g.lineTo(18.5, 7.5); g.lineTo(21, 7); g.lineTo(23, 7.5); g.closePath(); g.fill();
+  g.fillStyle = '#5a5a54'; g.fillRect(14, 10, 1, 4); g.fillRect(21, 9, 1, 5);
+});
+const stoneFloor = (g) => { px(g, 0, 0, '#cdb48a', T, T); px(g, 0, 7, '#a98f66', T, 1); px(g, 0, 15, '#a98f66', T, 1); px(g, 4, 0, '#a98f66', 1, 7); px(g, 11, 8, '#a98f66', 1, 7); px(g, 8, 3, '#b89e74', 2, 1); };
+const GYM_ROCA = {
+  Y: stoneFloor,
+  x: (g) => { px(g, 0, 0, '#7a5a38', T, T); px(g, 0, 5, '#5a3e22', T, 1); px(g, 0, 10, '#5a3e22', T, 1); px(g, 4, 0, '#5a3e22', 1, 5); px(g, 11, 5, '#5a3e22', 1, 5); px(g, 6, 10, '#5a3e22', 1, 6); px(g, 0, 15, '#4a3018', T, 1); },
+  X: ROCK_L,
+  Z: ROCK_R,
+  N: (g) => { stoneFloor(g); g.fillStyle = '#8c8c84'; g.beginPath(); g.moveTo(2, 14); g.lineTo(4, 5); g.lineTo(9, 2); g.lineTo(13, 6); g.lineTo(14, 14); g.closePath(); g.fill(); g.fillStyle = '#b4b4ac'; g.fillRect(5, 5, 4, 2); g.fillStyle = '#5a5a54'; g.fillRect(9, 8, 1, 5); },
+  A: (g) => { px(g, 0, 0, '#a8552a', T, T); px(g, 1, 0, '#e8c070', 1, T); px(g, 14, 0, '#e8c070', 1, T); px(g, 5, 4, '#7a3a1a', 6, 2); px(g, 5, 10, '#7a3a1a', 6, 2); },
+  m: (g) => { stoneFloor(g); px(g, 1, 3, '#5a3e22', 14, 10); px(g, 2, 4, '#a8552a', 12, 8); },
+  T: (g) => { stoneFloor(g); px(g, 1, 3, '#7a5a38', 14, 9); px(g, 1, 3, '#a98f66', 14, 3); },
+};
+
+const THEMES = { poli: POLI_T, gym_agua: GYM_AGUA, gym_elec: GYM_ELEC, gym_roca: GYM_ROCA };
+
 const cache = new Map();
 
-export function tileCanvas(ch, frame = 0) {
+export function tileCanvas(ch, frame = 0, theme = null) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;
-  const key = ch + f;
+  const draw = (theme && THEMES[theme]?.[ch]) || null;
+  const key = (draw ? `${theme}|` : '') + ch + f;
   let c = cache.get(key);
   if (!c) {
     c = mk();
     const g = c.getContext('2d');
-    (DRAW[ch] ?? DRAW.O)(g, new Rng(ch.charCodeAt(0) * 97 + 13), f);
+    (draw ?? DRAW[ch] ?? DRAW.O)(g, new Rng(ch.charCodeAt(0) * 97 + 13), f);
     cache.set(key, c);
   }
   return c;
@@ -297,4 +413,5 @@ export function buildTileset(onProgress) {
     for (let f = 0; f < (TILE_INFO[k].anim ? 4 : 1); f++) tileCanvas(k, f);
     onProgress?.((i + 1) / keys.length);
   });
+  for (const [theme, set] of Object.entries(THEMES)) for (const ch of Object.keys(set)) tileCanvas(ch, 0, theme);
 }

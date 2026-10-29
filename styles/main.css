@@ -753,32 +753,32 @@ button { font: inherit; color: inherit; }
   position: absolute;
   top: 11cqi;
   right: 1.6cqi;
-  inline-size: 33cqi;
+  inline-size: 15cqi;
   margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.7cqi;
+  gap: 0.6cqi;
+  pointer-events: auto;
   &[hidden] { display: none; }
 }
 .hud-mon {
   display: grid;
-  grid-template: 'icon name lv' auto 'icon bar bar' auto / 6.6cqi 1fr auto;
+  grid-template: 'icon lv' auto 'icon bar' auto / 6cqi 1fr;
   align-items: center;
-  column-gap: 1cqi;
-  padding: 0.5cqi 1.2cqi 0.5cqi 0.5cqi;
+  column-gap: 0.8cqi;
+  padding: 0.3cqi 1cqi 0.3cqi 0.3cqi;
   color: var(--paper);
-  background: oklch(0.16 0.05 270 / 0.66);
-  border-inline-start: 0.7cqi solid var(--celeste);
+  background: oklch(0.16 0.05 270 / 0.62);
+  border-inline-start: 0.6cqi solid var(--celeste);
   border-radius: 1cqi;
   backdrop-filter: blur(3px);
   font-family: var(--font-pixel);
-  font-size: 1.9cqi;
-  & img { grid-area: icon; inline-size: 6.6cqi; block-size: 6.6cqi; image-rendering: pixelated; }
+  font-size: 1.7cqi;
+  & img { grid-area: icon; inline-size: 6cqi; block-size: 6cqi; image-rendering: pixelated; }
   &.is-down { opacity: 0.5; filter: grayscale(1); }
 }
-.hud-mon-name { grid-area: name; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hud-mon-lv { grid-area: lv; opacity: 0.75; }
+.hud-mon-lv { grid-area: lv; opacity: 0.8; }
 .hud-bar {
   grid-area: bar;
   block-size: 1.2cqi;

@@ -450,7 +450,7 @@ export function applyItem(itemKey, c) {
   if (it.heal && c.hp < maxHp(c)) {
     const before = c.hp;
     c.hp = Math.min(maxHp(c), c.hp + it.heal);
-    msg = `${name} recuperó ${c.hp - before} PS.`;
+    msg = `${name} ${it.mate ? 'tomó un mate y ' : ''}recuperó ${c.hp - before} PS.`;
   }
   if (it.cure && c.status && (it.cure === 'all' || it.cure === c.status)) {
     c.status = null;

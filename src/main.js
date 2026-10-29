@@ -11,6 +11,7 @@ import { state, setState, newState, settings, badgeCount } from './game/state.js
 import { loadMap, updateWorld, worldState, runScript } from './game/world.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
 import { openOptions } from './game/menus.js';
+import { createCreature } from './game/creature.js';
 import { mountHud, updateHud, flashSaved } from './game/hud.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
@@ -19,7 +20,7 @@ import { SAVE_CONFIG } from './save/config.js';
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();

@@ -41,7 +41,7 @@ export const OUTDOOR = {
       { x: 20, y: 13, look: 'girl', wander: true, text: ['Los turistas vienen desde Buenos Aires en barco.', 'Dicen que en las noches de niebla el faro se ve borroso.'] },
       { x: 8, y: 11, look: 'oldman', text: ['Cuando yo era joven, había Ceibos en todas las orillas.', 'Ahora casi solo los cuida el Maestro Tabárez.'] },
       { x: 14, y: 12, look: 'boy', cond: (f) => !f.has_starter, text: ['¿Vas al laboratorio? Hoy entregan criaturas.'] },
-      { x: 14, y: 12, look: 'boy', cond: (f) => f.has_starter, text: ['Buen compañero te tocó. Cuidalo.', 'Si se debilita, pasá por tu casa: tu madre siempre tiene té de marcela.'] },
+      { x: 14, y: 12, look: 'boy', cond: (f) => f.has_starter, text: ['Buen compañero te tocó. Cuidalo.', 'Si se debilita, pasá por tu casa: tu madre siempre tiene el mate listo.'] },
     ],
   },
 
@@ -338,13 +338,13 @@ const HOUSE = [
   'iiiimmiiii',
 ];
 const POLI = [
-  'xxxXxxxxXxxx',
+  'xxXxxxxxxXxx',
   'iiiiiiiiiPii',
   'iinnnnnnniii',
   'iiiiiiiiiiii',
   'NiiiiiiiiiiN',
   'iiAAAAAAAAii',
-  'iiiiiiiiiiii',
+  'iEEiiiiiiEEi',
   'iiiiimmiiiii',
 ];
 const SHOP = [
@@ -358,7 +358,7 @@ const SHOP = [
   'iiiimmiiii',
 ];
 const GYM = [
-  'xxxxxXXxxxxx',
+  'xxxxxXZxxxxx',
   'NYYYYYYYYYYN',
   'YYYYYAAYYYYY',
   'YYYYYAAYYYYY',
@@ -374,7 +374,7 @@ const GYM = [
 
 const nurse = { x: 5, y: 1, look: 'nurse', dir: 'down', script: 'nurse' };
 const pc = { x: 9, y: 1, look: null, script: 'pc' };
-const poli = (name) => room(POLI, { name, heal: true, npcs: [nurse, pc, { x: 2, y: 5, look: 'oldman', wander: true, text: ['La Policlínica atiende gratis. Es un servicio público.'] }] });
+const poli = (name) => room(POLI, { name, theme: 'poli', heal: true, npcs: [nurse, pc, { x: 2, y: 5, look: 'oldman', wander: true, text: ['La Policlínica atiende gratis. Es un servicio público.'] }] });
 const shop = (name, stock) => room(SHOP, { name, npcs: [{ x: 1, y: 2, look: 'clerk', dir: 'down', script: 'shop', stock }] });
 
 export const INTERIOR = {
@@ -460,28 +460,31 @@ export const INTERIOR = {
   shop_tyt: shop('Almacén de Treinta y Tres', ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'dulce_de_leche', 'chivito', 'alfajor', 'torta_frita', 'ruda', 'linimento', 'aloe', 'despertador', 'repelente']),
   gym_mvd: room(GYM, {
     name: 'Gimnasio de Montevideo',
+    theme: 'gym_agua',
     npcs: [
       { x: 5, y: 2, look: 'leader_water', dir: 'down', script: 'leader', leader: 'lucia' },
-      { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Nadador', [['lobito', 10], ['carpinchito', 10]], 200, 'Entreno en la Rambla con Lucía.', 'Perdí.', 'Lucía usa tipo Agua. ¿Tenés algo de tipo Planta o Eléctrico?', 'swimmer') },
-      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Nadadora', [['mbigua', 11]], 220, 'Al agua.', 'Me hundí.', 'Lucía es muy buena. Suerte.', 'girl') },
+      { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Nadador', [['lobito', 8], ['carpinchito', 8]], 200, 'Entreno en la Rambla con Lucía.', 'Perdí.', 'Lucía usa tipo Agua. ¿Tenés algo de tipo Planta o Eléctrico?', 'swimmer') },
+      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Nadadora', [['mbigua', 9]], 220, 'Al agua.', 'Me hundí.', 'Lucía es muy buena. Suerte.', 'girl') },
       { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Bienvenido al Gimnasio de Montevideo.', 'La líder Lucía usa criaturas de tipo Agua.', 'Las de tipo Planta y Eléctrico tienen ventaja.'] },
     ],
   }),
   gym_pde: room(GYM, {
     name: 'Gimnasio de Punta del Este',
+    theme: 'gym_elec',
     npcs: [
       { x: 5, y: 2, look: 'leader_elec', dir: 'down', script: 'leader', leader: 'sofia' },
-      { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Electricista', [['luciernito', 17], ['luciernito', 17]], 340, 'Cuidado con los cables.', 'Cortocircuito.', 'Sofía es rapidísima.', 'boy') },
-      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Modelo', [['cotorrayo', 18]], 360, 'Punta es glamour y voltaje.', 'Perdí.', 'Las criaturas de tipo Tierra no reciben daño eléctrico.', 'girl') },
+      { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Electricista', [['luciernito', 14], ['luciernito', 14]], 340, 'Cuidado con los cables.', 'Cortocircuito.', 'Sofía es rapidísima.', 'boy') },
+      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Modelo', [['cotorrayo', 15]], 360, 'Punta es glamour y voltaje.', 'Perdí.', 'Las criaturas de tipo Tierra no reciben daño eléctrico.', 'girl') },
       { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Gimnasio de Punta del Este.', 'Sofía usa tipo Eléctrico. El tipo Tierra es inmune a la electricidad.'] },
     ],
   }),
   gym_tyt: room(GYM, {
     name: 'Gimnasio de Treinta y Tres',
+    theme: 'gym_roca',
     npcs: [
       { x: 5, y: 2, look: 'gaucho', dir: 'down', script: 'leader', leader: 'aparicio' },
-      { x: 8, y: 6, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('g3_a', 'Peón Ramiro', 'Peón', [['mulitin', 27], ['hornerazo', 27]], 540, 'La piedra no se quiebra.', 'Se quebró.', 'El agua y la planta le hacen daño a la roca.', 'gaucho') },
-      { x: 3, y: 9, look: 'boy', dir: 'right', sight: 4, trainer: TR('g3_b', 'Tropero Lalo', 'Tropero', [['nanduro', 28]], 560, 'Ninguna tropa me detiene.', 'Perdí.', 'Don Aparicio combate desde antes de que vos nacieras.', 'boy') },
+      { x: 8, y: 6, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('g3_a', 'Peón Ramiro', 'Peón', [['mulitin', 24], ['hornerazo', 24]], 540, 'La piedra no se quiebra.', 'Se quebró.', 'El agua y la planta le hacen daño a la roca.', 'gaucho') },
+      { x: 3, y: 9, look: 'boy', dir: 'right', sight: 4, trainer: TR('g3_b', 'Tropero Lalo', 'Tropero', [['nanduro', 25]], 560, 'Ninguna tropa me detiene.', 'Perdí.', 'Don Aparicio combate desde antes de que vos nacieras.', 'boy') },
       { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Gimnasio de Treinta y Tres.', 'Don Aparicio usa tipo Roca y Tierra. Agua y Planta son tus mejores aliados.'] },
     ],
   }),

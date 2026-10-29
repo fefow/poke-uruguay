@@ -67,7 +67,7 @@ export const SCRIPTS = {
       await api.say(['{player}, por fin te levantaste.', 'El Maestro Tabárez te espera en su laboratorio.', 'Es el edificio de techo violeta. Hoy empieza tu viaje.'], { name: 'Madre' });
       return;
     }
-    await api.say(['Sentate y descansá un rato.', 'Te preparo un té de marcela.'], { name: 'Madre' });
+    await api.say(['Sentate y descansá un rato.', 'Te cebo unos mates.'], { name: 'Madre' });
     await api.healParty();
     await api.say('Listo. Tus criaturas están recuperadas. Cuidate.', { name: 'Madre' });
   },

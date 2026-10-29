@@ -138,9 +138,9 @@ function showBanner(name) {
 export function updateWorld(dt, now) {
   W_.anim += dt;
   const p = W_.player;
-  if (W_.scriptRunning) return;
-  // NPC movement
+  // NPCs keep animating during scripts: trainers walking up to you or leaving the scene depend on it.
   for (const n of W_.npcs) updateNpc(n, now, dt);
+  if (W_.scriptRunning) return;
 
   if (p.moving) {
     p.t += dt;
@@ -591,7 +591,7 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = m.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme), x * T - cx, y * T - cy);
   }
   // ground items
   for (const it of W_.items) drawBallIcon(g, it.x * T - cx + 8, it.y * T - cy + 9);
