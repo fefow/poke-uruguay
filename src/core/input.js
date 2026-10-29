@@ -8,7 +8,8 @@ const KEYMAP = {
   ArrowDown: 'down', KeyS: 'down',
   ArrowLeft: 'left', KeyA: 'left',
   ArrowRight: 'right', KeyD: 'right',
-  KeyZ: 'a', Space: 'a', KeyJ: 'a', Enter: 'a',
+  KeyZ: 'a', KeyJ: 'a', Enter: 'a',
+  Space: 'run', // held: walk 1.5x faster
   KeyX: 'b', Backspace: 'b', KeyK: 'b', ShiftLeft: 'b', ShiftRight: 'b',
   Escape: 'start', KeyM: 'start', Tab: 'start',
 };

@@ -1,4 +1,4 @@
-/* UruMon — one deliberate dark look: night over the Río de la Plata,
+/* Poke Uruguay — one deliberate dark look: night over the Río de la Plata,
    celeste + sun gold from the flag, paper-white dialog boxes. */
 @property --hp { syntax: '<number>'; inherits: false; initial-value: 1; }
 @property --exp { syntax: '<number>'; inherits: false; initial-value: 0; }
@@ -511,7 +511,7 @@ button { font: inherit; color: inherit; }
   }
 }
 @keyframes spin { to { rotate: 1turn; } }
-.loader-title { margin: 0; font-family: var(--font-pixel); font-size: 8cqi; letter-spacing: 0.04em; text-shadow: 0.6cqi 0.6cqi 0 var(--celeste-deep); }
+.loader-title { margin: 0; font-family: var(--font-pixel); font-size: 5.6cqi; letter-spacing: 0.04em; text-shadow: 0.6cqi 0.6cqi 0 var(--celeste-deep); }
 .loader-sub { margin: -1cqi 0 1cqi; color: var(--sun); font-family: var(--font-pixel); font-size: 2.4cqi; letter-spacing: 0.08em; }
 .loader-track { width: 60cqi; height: 3cqi; border: 2px solid var(--paper); border-radius: 99px; padding: 2px; }
 .loader-bar { height: 100%; width: calc(var(--p) * 100%); border-radius: 99px; background: linear-gradient(90deg, var(--celeste), var(--sun)); transition: --p 0.25s; }

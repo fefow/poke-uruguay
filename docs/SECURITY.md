@@ -1,6 +1,6 @@
 # Security and anti-cheat
 
-UruMon runs entirely in the browser today, so the honest starting point is this: **anything that lives on the player's device can be changed by the player.** A determined person with DevTools, a debugger or a patched copy of the game can always cheat in their own local game. What the game does is make cheating hard, make tampered saves fail to load, and set up the server phase so the server, not the browser, decides what is true.
+Poke Uruguay runs entirely in the browser today, so the honest starting point is this: **anything that lives on the player's device can be changed by the player.** A determined person with DevTools, a debugger or a patched copy of the game can always cheat in their own local game. What the game does is make cheating hard, make tampered saves fail to load, and set up the server phase so the server, not the browser, decides what is true.
 
 ## What is protected now (localStorage phase)
 

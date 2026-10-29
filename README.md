@@ -1,4 +1,4 @@
-# UruMon: La Leyenda del Pampero
+# Poke Uruguay: La Leyenda del Pampero
 
 A single-player, 2D creature-collecting RPG set in Uruguay. Explore from Colonia del Sacramento to the Quebrada de los Cuervos, catch 42 original creatures inspired by Uruguayan wildlife (carpincho, ñandú, hornero, tero, yacaré, lobo marino…), beat three gyms, stop Equipo Niebla, and become Champion at the Estadio Centenario. After the credits the game keeps going, with legendary creatures to find and a Champion rematch.
 
@@ -13,7 +13,7 @@ npm run dev        # serves the folder at http://localhost:8080
 
 Open `http://localhost:8080`. No build step is needed in development: the game is plain ES modules.
 
-**Controls:** arrows / WASD move · Z, Enter or Space = A · X or Shift = B (hold to run) · Esc or M = menu. Gamepads work, and phones get on-screen touch controls.
+**Controls:** arrows / WASD move · hold Space to walk 1.5x faster · Z or Enter = A · X or Shift = B (hold to run) · Esc or M = menu. Gamepads work, and phones get on-screen touch controls.
 
 ## Build and deploy to a VPS
 

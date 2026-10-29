@@ -28,8 +28,8 @@ await writeFile('dist/index.html', html.replace('src="src/main.js"', 'src="game.
 
 // Single file: CSS + JS inlined, no external files except Google Fonts.
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];
-const single = `<title>UruMon</title>
-<meta name="description" content="UruMon: La Leyenda del Pampero. Un juego de criaturas 2D ambientado en el Uruguay.">
+const single = `<title>Poke Uruguay</title>
+<meta name="description" content="Poke Uruguay: La Leyenda del Pampero. Un juego de criaturas 2D ambientado en el Uruguay.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap">
 <style>
 ${css}

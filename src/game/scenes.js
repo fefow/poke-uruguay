@@ -72,7 +72,7 @@ export function titleRenderer(g, t) {
   g.globalAlpha = 0.85;
   g.drawImage(creatureSprite('pamperon'), px, 30 + Math.sin(t / 500) * 6, 48, 48);
   g.globalAlpha = 1;
-  text(g, 'UruMon', W / 2, 36, { size: 28, align: 'center', color: '#fff', shadow: '#1d2a5c' });
+  text(g, 'Poke Uruguay', W / 2, 38, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
   text(g, 'La Leyenda del Pampero', W / 2, 72, { size: 8, align: 'center', color: '#f8d040', shadow: '#2a1830' });
   // starters parade on the shore
   const keys = ['ceibito', 'tejuchispa', 'carpinchito'];
@@ -104,7 +104,7 @@ export async function newGameIntro() {
   });
   playMusic('town');
   await fadeIn(400);
-  await say(['¡Hola! ¡Bienvenido al mundo de UruMon!', 'Me llamo Arazá, pero todos me dicen la Profesora.'], { name: 'Prof. Arazá' });
+  await say(['¡Hola! ¡Bienvenido al mundo de Poke Uruguay!', 'Me llamo Arazá, pero todos me dicen la Profesora.'], { name: 'Prof. Arazá' });
   mon = 'carpinchito';
   sfx('confirm');
   await say(['En este país viven criaturas maravillosas.', 'Algunas nadan en el Río de la Plata, otras corren por las praderas o vuelan sobre las sierras.',
@@ -157,7 +157,7 @@ export async function hallOfFame() {
 
 // ---------------------------------------------------------------- CREDITS
 const CREDITS = [
-  ['UruMon', 'La Leyenda del Pampero'],
+  ['Poke Uruguay', 'La Leyenda del Pampero'],
   ['Una aventura por el Uruguay', ''],
   ['Diseño y programación', 'Hecho con Claude para Dusius'],
   ['Lugares', 'Colonia · Montevideo · Punta del Este'],

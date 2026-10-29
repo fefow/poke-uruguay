@@ -383,7 +383,7 @@ export function openOptions() {
     refresh();
     el.append(h('header', { class: 'panel-title', text: 'Opciones' }), h('ul', { class: 'options-list' }, items),
       h('div', { class: 'controls-help' },
-        h('p', { text: 'Controles: Flechas/WASD mover · Z/Enter/Espacio = A · X/Shift = B (mantener para correr) · Esc/M = Menú' }),
+        h('p', { text: 'Controles: Flechas/WASD mover · Espacio (mantener) = caminar 1,5x más rápido · Z/Enter = A · X/Shift = B (mantener para correr) · Esc/M = Menú' }),
         h('p', { text: 'También funciona con gamepad y con los botones táctiles.' })),
       h('footer', { class: 'panel-foot', text: '←→ cambiar · B volver' }));
     const nav = listNav(items, {

@@ -22,6 +22,7 @@ import { openPauseMenu, openShop, openPC } from './menus.js';
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
 const RUN_MS = 115;
+const SPACE_MS = Math.round(WALK_MS / 1.5); // Space: 1.5x walking speed
 
 // ---------------------------------------------------------------- linking
 let linked = false;
@@ -206,7 +207,7 @@ function tryMove(d) {
   p.y = ny;
   p.moving = true;
   p.t = 0;
-  p.dur = input.held('b') ? RUN_MS : WALK_MS;
+  p.dur = input.held('b') ? RUN_MS : input.held('run') ? SPACE_MS : WALK_MS;
   p.step++;
 }
 
