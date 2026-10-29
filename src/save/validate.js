@@ -22,7 +22,7 @@ const STORY_FLAGS = new Set([
   'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min',
 ]);
-const FLAG_PATTERN = /^(tr|it|v|cl)_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-4])_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 

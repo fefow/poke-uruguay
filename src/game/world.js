@@ -16,7 +16,7 @@ import { worldRng } from '../core/rng.js';
 import { h, wait } from '../core/util.js';
 import { info as logInfo } from '../core/debuglog.js';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.js';
-import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX } from './state.js';
+import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX, badgeCount } from './state.js';
 import { createCreature, heal as healCreature, displayName } from './creature.js';
 import { runBattle } from './battle-scene.js';
 import { openPauseMenu, openShop, openPC } from './menus.js';
@@ -419,9 +419,33 @@ async function talkTo(n) {
   if (d.text) return say(d.text);
 }
 
+// Rematches: common trainers can be challenged again after each medal (and the Liga),
+// with stronger and already evolved teams. Rivals, leaders and bosses use scripts, not this path.
+const RM_BONUS = [0, 6, 10, 15, 20];
+function rematchTier() {
+  return badgeCount() + (flag('champion') ? 1 : 0);
+}
+
+function rematchTeam(team, tier) {
+  return team.map(([sp, lv]) => {
+    const level = Math.min(60, lv + RM_BONUS[tier]);
+    let key = sp;
+    for (let evo = SPECIES[key].evo; evo && !evo.stone && level >= evo.lvl; evo = SPECIES[key].evo) key = evo.to;
+    return [key, level];
+  });
+}
+
 async function trainerTalk(n) {
   const t = n.def.trainer;
-  if (flag(`tr_${t.id}`)) return say(t.after, { name: t.name });
+  if (flag(`tr_${t.id}`)) {
+    const tier = rematchTier();
+    if (tier < 1 || flag(`rm${tier}_${t.id}`)) return say(t.after, { name: t.name });
+    await say([t.after, 'Estuve entrenando desde la última vez.'].flat().filter(Boolean), { name: t.name });
+    if (!(await ask('¿Aceptás una revancha?'))) return;
+    const res = await api.battle({ ...t, intro: ['Ahora no me vas a ganar tan fácil.'], team: rematchTeam(t.team, tier), prize: Math.round(t.prize * (1 + tier * 0.8)) });
+    if (res === 'win') setFlag(`rm${tier}_${t.id}`);
+    return;
+  }
   const res = await api.battle(t);
   if (res === 'win') {
     setFlag(`tr_${t.id}`);
