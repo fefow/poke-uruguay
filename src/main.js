@@ -98,10 +98,19 @@ async function boot() {
     const [msg, fn] = steps[i];
     setP(i / steps.length, msg);
     await nextFrame();
+    const t0 = performance.now();
     await fn((p) => setP((i + p) / steps.length));
+    // Fake loading: every step lasts at least LOADER_STEP_MS and the bar fills smoothly.
+    let el;
+    while ((el = performance.now() - t0) < LOADER_STEP_MS) {
+      setP((i + Math.min(1, el / LOADER_STEP_MS)) / steps.length);
+      await nextFrame();
+    }
+    setP((i + 1) / steps.length);
     await nextFrame();
   }
   setP(1, '¡Listo!');
+  await wait(500);
   const start = $('#loader-start');
   start.hidden = false;
   start.focus();
@@ -122,10 +131,12 @@ async function boot() {
 }
 
 // ---------------------------------------------------------------- title
+const LOADER_STEP_MS = 900;
+
 async function titleScreen() {
   mode = 'title';
   startTitle();
-  const press = h('div', { class: 'title-press', text: 'Presioná Enter o hacé clic para empezar' });
+  const press = h('div', { class: 'title-press', text: 'Presioná Enter para empezar' });
   uiRoot().append(press);
   press.addEventListener('click', () => input.press('a'));
   await input.waitFor(['a', 'start']);

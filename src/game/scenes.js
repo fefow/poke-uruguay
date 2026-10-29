@@ -65,12 +65,25 @@ function drawSky(g, t) {
   }
 }
 
+/** Draws a sprite with its wings beating: columns away from the body swing up and down with the flap phase. */
+function drawFlapping(g, img, x, y, w, h, t, { speed = 160, amp = 0.22 } = {}) {
+  const sw = img.width, sh = img.height, cols = 48;
+  const half = cols / 2, cw = w / cols;
+  const flap = Math.sin(t / speed);
+  for (let i = 0; i < cols; i++) {
+    const d = (i + 0.5 - half) / half;
+    const lift = -(Math.abs(d) ** 1.6) * flap * amp * h;
+    const body = Math.sin(t / speed * 0.5) * 0.02 * h;
+    g.drawImage(img, (i * sw) / cols, 0, sw / cols, sh, x + i * cw, y + lift + body, cw + 0.6, h * (1 + Math.abs(d) * flap * 0.05));
+  }
+}
+
 export function titleRenderer(g, t) {
   drawSky(g, t);
   // flying Pamperón silhouette
   const px = ((t / 18) % (W + 200)) - 100;
   g.globalAlpha = 0.85;
-  g.drawImage(creatureSprite('pamperon'), px, 30 + Math.sin(t / 500) * 6, 48, 48);
+  drawFlapping(g, creatureSprite('pamperon'), px, 30 + Math.sin(t / 500) * 6, 48, 48, t);
   g.globalAlpha = 1;
   text(g, 'Poke Uruguay', W / 2, 38, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
   text(g, 'Aventuras en tierras charruas', W / 2, 72, { size: 8, align: 'center', color: '#f8d040', shadow: '#2a1830' });
@@ -178,7 +191,7 @@ const CINEMATIC = [
       hills(g, t, 190, 6, '#1a2030', 0.01, 140);
       const k = Math.min(1, p * 1.5);
       g.globalAlpha = 0.35 + 0.65 * k;
-      g.drawImage(creatureSprite('pamperon'), 120 + (1 - k) * 160, 50 - k * 10 + Math.sin(t / 300) * 4, 130 * (0.5 + k * 0.5), 130 * (0.5 + k * 0.5));
+      drawFlapping(g, creatureSprite('pamperon'), 120 + (1 - k) * 160, 50 - k * 10 + Math.sin(t / 300) * 4, 130 * (0.5 + k * 0.5), 130 * (0.5 + k * 0.5), t, { speed: 210, amp: 0.2 });
       g.globalAlpha = 1;
     },
   },

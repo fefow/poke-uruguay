@@ -294,7 +294,7 @@ button { font: inherit; color: inherit; }
   left: 50%;
   translate: -50% 0;
   font-family: var(--font-pixel);
-  font-size: 2.8cqi;
+  font-size: 2.1cqi;
   color: var(--paper);
   text-shadow: 2px 2px 0 var(--night);
   animation: blink 1.8s ease-in-out infinite;
