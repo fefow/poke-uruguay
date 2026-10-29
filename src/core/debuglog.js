@@ -127,6 +127,10 @@ export function clearLog() {
   onChange();
 }
 
+export function buildJson({ build = '?' } = {}) {
+  return JSON.stringify({ app: 'poke-uruguay', exported: new Date().toISOString(), build, userAgent: navigator.userAgent, state: ctx(), entries }, null, 2);
+}
+
 export function buildReport({ build = '?' } = {}) {
   const c = ctx();
   const lines = [
@@ -219,6 +223,14 @@ export function mountDebugPanel({ blockInput, getBuild }) {
         a.remove();
         say('Descargando el .txt…');
       } }, 'Descargar .txt'),
+      h('button', { type: 'button', onclick: () => {
+        const blob = new Blob([buildJson({ build: getBuild?.() })], { type: 'application/json' });
+        const a = h('a', { href: URL.createObjectURL(blob), download: `poke-uruguay-errores-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json` });
+        document.body.append(a);
+        a.click();
+        a.remove();
+        say('Descargando el .json…');
+      } }, 'Descargar .json'),
       h('button', { type: 'button', onclick: () => {
         const body = report();
         const max = 6000; // keep the URL under GitHub's limit
