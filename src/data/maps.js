@@ -158,7 +158,7 @@ export const OUTDOOR = {
     ],
     signs: ['RUTA INTERBALNEARIA\n← Montevideo   Punta del Este →\nAtlántida, Piriápolis y la costa de oro.'],
     exits: { w: { to: 'montevideo' }, e: { to: 'piriapolis' } },
-    enc: { rate: 0.12, list: [['butia', 10, 13, 22], ['mulitin', 10, 13, 18], ['teruterito', 11, 13, 15], ['benteve', 11, 13, 15], ['yararita', 10, 12, 14], ['venadito', 11, 13, 10], ['mbigua', 12, 13, 6], ['gaviota', 11, 13, 12], ['cangrejo', 11, 13, 10], ['oveja', 10, 12, 12], ['pavesa', 12, 13, 6]] },
+    enc: { rate: 0.12, list: [['butia', 10, 13, 22], ['cardo', 10, 12, 8], ['mulitin', 10, 13, 18], ['teruterito', 11, 13, 15], ['benteve', 11, 13, 15], ['yararita', 10, 12, 14], ['venadito', 11, 13, 10], ['mbigua', 12, 13, 6], ['gaviota', 11, 13, 12], ['cangrejo', 11, 13, 10], ['oveja', 10, 12, 12], ['pavesa', 12, 13, 6]] },
     fish: [['pejerrey', 11, 13, 50], ['aguaviva', 11, 13, 30], ['anguila', 12, 13, 20]],
     npcs: [
       { x: 8, y: 4, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('ib_a', 'Santi', 'Surfista', [['mbigua', 13], ['lobito', 13]], 260, 'Las olas en La Paloma están muy buenas, pero primero un combate.', 'Me revolcaron.', 'Andá a Punta del Este: ahí está el segundo gimnasio.', 'swimmer') },

@@ -66,7 +66,7 @@ test('exp curve and level up', () => {
   const c = mon('ceibito', 5);
   const ev = gainExp(c, expForLevel(9) - c.exp);
   assert.equal(c.level, 9);
-  assert.ok(ev.some((e) => e.type === 'learn' && e.move === 'latigo_cepa'));
+  assert.ok(ev.some((e) => e.type === 'learn' && e.move === 'megaagotar'));
 });
 
 test('items heal and revive correctly', () => {
