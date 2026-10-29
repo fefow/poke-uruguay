@@ -2,6 +2,7 @@
 // notes in localStorage, and exports them as a .txt / clipboard / GitHub issue.
 // Read-only with respect to game state: it never changes a save.
 import { h, safeStorage } from './util.js';
+import { REPORT_CONFIG } from '../save/config.js';
 
 const KEY = 'pokeuy:debuglog';
 const MAX = 400;
@@ -9,6 +10,17 @@ const REPO_ISSUES = 'https://github.com/fefow/poke-uruguay/issues/new';
 const store = safeStorage();
 
 let entries = load();
+let getBuildFn = () => '?';
+let sent = 0; // per page load, to avoid flooding the table
+let queue = [];
+let timer = 0;
+const clientId = (() => {
+  try {
+    let id = store.getItem('pokeuy:clientid');
+    if (!id) store.setItem('pokeuy:clientid', (id = crypto.randomUUID()));
+    return id;
+  } catch { return 'anon'; }
+})();
 let contextFn = () => ({});
 let onChange = () => {};
 
@@ -49,6 +61,40 @@ export function log(level, msg, detail) {
   persist();
   onChange();
   if (level === 'error') flashBadge();
+  if (level !== 'info') enqueue(e);
+}
+
+// ---- automatic online upload (only when REPORT_CONFIG.enabled)
+function enqueue(e) {
+  if (!REPORT_CONFIG.enabled || sent >= 40) return;
+  queue.push(e);
+  clearTimeout(timer);
+  timer = setTimeout(flush, e.level === 'note' ? 0 : 2000);
+}
+async function flush() {
+  const batch = queue.splice(0, 10);
+  if (!batch.length) return;
+  sent += batch.length;
+  const rows = batch.map((e) => ({
+    client_id: clientId,
+    build: String(getBuildFn() ?? '').slice(0, 64),
+    level: e.level,
+    msg: e.msg,
+    detail: e.detail ?? null,
+    location: e.where || null,
+    ctx: e.ctx ?? null,
+    user_agent: navigator.userAgent.slice(0, 400),
+  }));
+  try {
+    const res = await fetch(`${REPORT_CONFIG.url}/rest/v1/bug_reports`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: REPORT_CONFIG.anonKey, Authorization: `Bearer ${REPORT_CONFIG.anonKey}`, Prefer: 'return=minimal' },
+      body: JSON.stringify(rows),
+      keepalive: true,
+    });
+    if (!res.ok) throw new Error(res.status);
+  } catch { /* offline: the local log still has it */ }
+  if (queue.length) timer = setTimeout(flush, 2000);
 }
 
 export const info = (msg) => log('info', msg);
@@ -118,6 +164,7 @@ function flashBadge() {
  * panel is open and return a function that restores it.
  */
 export function mountDebugPanel({ blockInput, getBuild }) {
+  getBuildFn = getBuild ?? getBuildFn;
   badge = h('button', { class: 'bug-btn', type: 'button', title: 'Panel de errores (F2)', 'aria-label': 'Abrir panel de errores' }, '🐞');
   document.body.append(badge);
   flashBadge();
@@ -191,7 +238,7 @@ export function mountDebugPanel({ blockInput, getBuild }) {
 
     panelEl = h('section', { class: 'bug-panel', role: 'dialog', 'aria-label': 'Panel de errores' },
       h('header', {}, h('strong', { text: '🐞 Registro de errores' }), h('button', { type: 'button', class: 'bug-close', 'aria-label': 'Cerrar', onclick: close }, '✕')),
-      h('p', { class: 'bug-help', text: 'Los errores se guardan solos en este navegador. Podés sumar notas y después copiar, descargar o mandar todo a GitHub.' }),
+      h('p', { class: 'bug-help', text: REPORT_CONFIG.enabled ? 'Los errores y tus notas se envían solos online. También podés copiar o descargar el reporte.' : 'Los errores se guardan solos en este navegador. Podés sumar notas y después copiar, descargar o mandar todo a GitHub.' }),
       list, note, actions, status);
     document.body.append(panelEl);
   };
