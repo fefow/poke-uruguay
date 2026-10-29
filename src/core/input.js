@@ -14,6 +14,9 @@ const KEYMAP = {
   Escape: 'start', KeyM: 'start', Tab: 'start',
 };
 
+/** Label for an action in on-screen hints: real keys on desktop, A/B on touch devices. */
+export const keyName = (action) => (matchMedia('(pointer: coarse)').matches ? { a: 'A', b: 'B' }[action] : { a: 'Z', b: 'X' }[action]);
+
 const held = new Set();
 const queue = [];
 const handlers = [];

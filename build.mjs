@@ -23,7 +23,7 @@ const html = await readFile('index.html', 'utf8');
 await writeFile('dist/game.js', js);
 await copyFile('styles/main.css', 'dist/styles/main.css');
 for (const f of ['manifest.webmanifest', 'icon.svg']) await copyFile(f, `dist/${f}`);
-const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.js'", "'./game.js'");
+const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.js'", "'./game.js'").replace('__BUILD__', Date.now().toString(36));
 await writeFile('dist/sw.js', sw);
 await writeFile('dist/index.html', html.replace('src="src/main.js"', 'src="game.js"'));
 

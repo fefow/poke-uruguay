@@ -272,11 +272,11 @@ button { font: inherit; color: inherit; }
   font-size: 2.8cqi;
   color: var(--paper);
   text-shadow: 2px 2px 0 var(--night);
-  animation: blink 1.2s steps(2) infinite;
+  animation: blink 1.8s ease-in-out infinite;
   cursor: pointer;
   white-space: nowrap;
 }
-@keyframes blink { 50% { opacity: 0.2; } }
+@keyframes blink { 50% { opacity: 0.35; } }
 
 .creature-pop {
   position: absolute;
@@ -516,7 +516,7 @@ button { font: inherit; color: inherit; }
 .loader-track { width: 60cqi; height: 3cqi; border: 2px solid var(--paper); border-radius: 99px; padding: 2px; }
 .loader-bar { height: 100%; width: calc(var(--p) * 100%); border-radius: 99px; background: linear-gradient(90deg, var(--celeste), var(--sun)); transition: --p 0.25s; }
 .loader-meta { margin: 0; font-size: 3.2cqi; color: oklch(0.85 0.03 235); display: flex; gap: 3cqi; font-variant-numeric: tabular-nums; }
-.loader-start { justify-self: center; font-size: 3cqi; animation: blink 1.2s steps(2) infinite; }
+.loader-start { justify-self: center; font-size: 3cqi; animation: blink 1.8s ease-in-out infinite; }
 
 /* ---------------------------------------------------------------- touch */
 .touch {
@@ -567,7 +567,7 @@ button { font: inherit; color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
 ::view-transition-old(loader) { animation: 0.4s ease both fade-out; }
@@ -797,3 +797,19 @@ button { font: inherit; color: inherit; }
 }
 
 .hud.in-battle .hud-tools { display: none; }
+
+.hud-saved {
+  position: absolute;
+  right: 2cqi;
+  bottom: 2cqi;
+  padding: 0.6cqi 1.8cqi;
+  border-radius: 99px;
+  font-family: var(--font-pixel);
+  font-size: 1.8cqi;
+  color: var(--paper);
+  background: oklch(0.16 0.05 270 / 0.7);
+  opacity: 0;
+  &::before { content: '✓ '; color: oklch(0.8 0.17 145); }
+  &.is-on { animation: saved-fade 1.8s ease both; }
+}
+@keyframes saved-fade { 0%, 100% { opacity: 0; } 12%, 70% { opacity: 0.9; } }

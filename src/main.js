@@ -3,7 +3,7 @@ import { mountScreen, render } from './gfx/screen.js';
 import { buildTileset } from './gfx/tiles.js';
 import { buildAllSprites } from './gfx/creatures.js';
 import { charSprite, LOOKS } from './gfx/characters.js';
-import { mountTouchControls, pollGamepads, input } from './core/input.js';
+import { mountTouchControls, pollGamepads, input, keyName } from './core/input.js';
 import { initAudio, setVolumes, sfx } from './core/audio.js';
 import { h, nextFrame, viewTransition, wait } from './core/util.js';
 import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './game/ui.js';
@@ -11,7 +11,7 @@ import { state, setState, newState, settings, badgeCount } from './game/state.js
 import { loadMap, updateWorld, worldState, runScript } from './game/world.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
 import { openOptions } from './game/menus.js';
-import { mountHud, updateHud } from './game/hud.js';
+import { mountHud, updateHud, flashSaved } from './game/hud.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
 import { SAVE_CONFIG } from './save/config.js';
@@ -123,7 +123,7 @@ async function boot() {
 async function titleScreen() {
   mode = 'title';
   startTitle();
-  const press = h('div', { class: 'title-press', text: 'Presioná A o tocá para empezar' });
+  const press = h('div', { class: 'title-press', text: matchMedia('(pointer: coarse)').matches ? 'Tocá para empezar' : 'Presioná Enter o hacé clic para empezar' });
   uiRoot().append(press);
   press.addEventListener('click', () => input.press('a'));
   await input.waitFor(['a', 'start']);
@@ -139,7 +139,7 @@ async function titleScreen() {
     if (pick === 'options') await openOptions();
     else if (pick === 'credits') { await credits(); await fadeIn(300); startTitle(); }
     else if (pick === 'continue') { if (await continueGame(saves)) return; }
-    else if (pick === 'new') { await startNewGame(); return; }
+    else if (pick === 'new') { if (await startNewGame()) return; }
   }
 }
 
@@ -164,15 +164,28 @@ async function continueGame(saves) {
 }
 
 async function startNewGame() {
+  // Autosave needs a slot: use the first free one, or ask which one to replace.
+  const saves = await listSaves().catch(() => []);
+  const used = new Set(saves.map((s) => s.slot));
+  let slot = Array.from({ length: SAVE_CONFIG.slots }, (_, i) => i + 1).find((n) => !used.has(n));
+  if (!slot) {
+    await say('Todas las ranuras están ocupadas. ¿Cuál querés reemplazar con la nueva partida?', { keep: true });
+    const i = await choose([...saves.map((s) => `Ranura ${s.slot} · ${s.summary.name}`), 'Cancelar'], { cls: 'menu-slots' });
+    closeDialog();
+    if (i < 0 || i >= saves.length) return false;
+    slot = saves[i].slot;
+  }
   await fadeOut(300);
-  newState({ name: 'Gurí', look: 'player_m' });
+  newState({ name: 'Jugador', look: 'player_m' });
+  state().slot = slot;
   await newGameIntro();
   loadMap('casa_jugador', 6, 5, 'down');
   mode = 'game';
   await fadeIn(500);
   worldState.scriptRunning = true;
-  await say(['¡Hoy es el día! Vas a recibir tu primera criatura.', 'Hablá con tu madre antes de salir. (Z para hablar · Enter para abrir el menú)']);
+  await say(['¡Hoy es el día! Vas a recibir tu primera criatura.', `Hablá con tu madre antes de salir. (${keyName('a')} para hablar · Enter para abrir el menú)`]);
   worldState.scriptRunning = false;
+  return true;
 }
 
 async function enterGame() {
@@ -183,16 +196,26 @@ async function enterGame() {
   await fadeIn(300);
 }
 
-// Quiet autosave when the tab is hidden (only into the slot already in use).
-document.addEventListener('visibilitychange', () => {
+// Autosave into the slot in use: every few seconds when something changed,
+// and when the tab is hidden or closed.
+let lastSaved = '';
+function autosave(force = false) {
   const S = state();
-  if (document.visibilityState === 'hidden' && mode === 'game' && S?.slot && !worldState.scriptRunning) {
-    saveGame(S.slot, S).catch(() => {});
-  }
-});
+  if (mode !== 'game' || !S?.slot || worldState.scriptRunning || document.querySelector('.bhud')) return;
+  const sig = `${S.pos.map}|${S.pos.x}|${S.pos.y}|${S.stats.steps}|${S.stats.battlesWon}|${S.party.length}|${Object.keys(S.flags).length}|${Math.floor(S.stats.playtime / 60)}`;
+  if (!force && sig === lastSaved) return;
+  lastSaved = sig;
+  saveGame(S.slot, S).then(() => flashSaved()).catch((err) => console.warn('Autoguardado falló:', err.message));
+}
+setInterval(autosave, 6000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') autosave(true); });
+addEventListener('pagehide', () => autosave(true));
 
 // Offline support when hosted on its own (https, top-level window).
 if ('serviceWorker' in navigator && location.protocol === 'https:' && window.top === window && document.querySelector('link[rel=manifest]')) {
+  // When a new deploy takes over, reload once so players never keep playing an old build.
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !worldState.scriptRunning) location.reload(); });
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 

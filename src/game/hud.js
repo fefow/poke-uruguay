@@ -7,7 +7,7 @@ import { settings, saveSettings, state } from './state.js';
 import { creatureIcon } from '../gfx/creatures.js';
 import { displayName, maxHp } from './creature.js';
 
-let el, speed, party, btnMusic, btnParty;
+let el, speed, party, btnMusic, btnParty, savedEl;
 let isGame = () => false;
 let lastMusic = 0.5;
 let sig = '';
@@ -38,7 +38,8 @@ export function mountHud({ screen, game, openSettings }) {
   btnMusic = h('button', { type: 'button', class: 'hud-btn', 'aria-label': 'Música' });
   btnParty = h('button', { type: 'button', class: 'hud-btn', title: 'Mostrar u ocultar equipo (P)', 'aria-label': 'Equipo' }, '▤');
   const btnSet = h('button', { type: 'button', class: 'hud-btn', title: 'Ajustes (O)', 'aria-label': 'Ajustes' }, '⚙');
-  el = h('div', { class: 'hud' }, h('div', { class: 'hud-tools' }, btnMusic, btnSet, btnParty), speed, party);
+  savedEl = h('div', { class: 'hud-saved', 'aria-hidden': 'true', text: 'Guardado' });
+  el = h('div', { class: 'hud' }, h('div', { class: 'hud-tools' }, btnMusic, btnSet, btnParty), speed, party, savedEl);
   screen.append(el);
 
   const toggleMusic = () => setMusic(settings.music === 0);
@@ -87,4 +88,12 @@ export function updateHud(now) {
       h('span', { class: 'hud-mon-lv', text: `Nv${c.level}` }),
       h('span', { class: `hud-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) }, role: 'img', 'aria-label': `${c.hp} de ${max} PS` }));
   }));
+}
+
+/** Brief "saved" indicator after an autosave. */
+export function flashSaved() {
+  if (!savedEl) return;
+  savedEl.classList.remove('is-on');
+  void savedEl.offsetWidth;
+  savedEl.classList.add('is-on');
 }

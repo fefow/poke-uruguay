@@ -1,6 +1,7 @@
 // Panels: pause menu, party, summary, bag, PokeDex, trainer card, options,
 // save, shop and PC storage.
 import { h, clamp, formatTime, pad } from '../core/util.js';
+import { keyName } from '../core/input.js';
 import { sfx, setVolumes } from '../core/audio.js';
 import { SPECIES, DEX_ORDER } from '../data/species.js';
 import { MOVES } from '../data/moves.js';
@@ -169,7 +170,7 @@ export function openSummary(index) {
             h('div', { class: 'row' }, typeChip(d.type), h('b', { text: d.name }), h('span', { text: `PP ${m.pp}/${d.pp}` })),
             h('div', { class: 'small', text: `${d.cat === 'est' ? 'Estado' : d.cat === 'fis' ? 'Físico' : 'Especial'} · Pot. ${d.power || '—'} · Prec. ${d.acc} — ${d.desc}` }));
         })),
-        h('footer', { class: 'panel-foot', text: '↑↓ cambiar · B volver' }),
+        h('footer', { class: 'panel-foot', text: `↑↓ cambiar · ${keyName('b')} volver` }),
       );
     };
     render();
@@ -202,7 +203,7 @@ export function openBag({ mode = 'field', wild = false } = {}) {
     const tabs = h('nav', { class: 'bag-tabs' });
     const list = h('ul', { class: 'bag-list' });
     const desc = h('p', { class: 'bag-desc' });
-    el.append(h('header', { class: 'panel-title', text: 'Mochila' }), tabs, list, desc, h('footer', { class: 'panel-foot', text: '←→ bolsillo · A usar · B volver' }));
+    el.append(h('header', { class: 'panel-title', text: 'Mochila' }), tabs, list, desc, h('footer', { class: 'panel-foot', text: `←→ bolsillo · ${keyName('a')} usar · ${keyName('b')} volver` }));
     let keys = [];
     let nav;
     const render = (start = 0) => {
@@ -308,7 +309,7 @@ export function openDex() {
         h('span', { class: 'name', text: known ? sp.name : '???' }));
     });
     grid.append(...rows);
-    el.append(head, grid, h('footer', { class: 'panel-foot', text: 'A ver detalle · B volver' }));
+    el.append(head, grid, h('footer', { class: 'panel-foot', text: `${keyName('a')} ver detalle · ${keyName('b')} volver` }));
     let detail = null;
     const nav = listNav(rows, {
       cols: 4,
@@ -329,7 +330,7 @@ export function openDex() {
               isCaught ? h('div', { class: 'base-stats' }, STAT_KEYS.map((s, j) => h('div', { class: 'row' }, h('span', { text: STAT_NAMES[s] }), h('i', { style: { '--v': sp.base[j] / 160 } }), h('b', { text: String(sp.base[j]) })))) : null,
               sp.evo && isCaught ? h('p', { class: 'small', text: `Evoluciona en el nivel ${sp.evo.lvl}.` }) : null,
             )),
-          h('footer', { class: 'panel-foot', text: 'B volver' }));
+          h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }));
         el.append(detail);
       },
     });
@@ -363,7 +364,7 @@ export function openCard() {
       ),
       h('ul', { class: 'badges' }, badges.map(([f, n, col]) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col } }, h('i'), h('span', { text: n })))),
       S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : null,
-      h('footer', { class: 'panel-foot', text: 'B volver' }),
+      h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
     );
     return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };
   });
@@ -385,7 +386,7 @@ export function openOptions() {
       h('div', { class: 'controls-help' },
         h('p', { text: 'Controles: Flechas/WASD mover · Espacio (mantener) = caminar 1,5x más rápido · Z = A · X/Shift = B · Enter/Esc/M = Menú · N música · O ajustes · P equipo' }),
         h('p', { text: 'También funciona con gamepad y con los botones táctiles.' })),
-      h('footer', { class: 'panel-foot', text: '←→ cambiar · B volver' }));
+      h('footer', { class: 'panel-foot', text: `←→ cambiar · ${keyName('b')} volver` }));
     const nav = listNav(items, {
       onCancel: () => { saveSettings(); setVolumes(settings); close(); },
       onPick: () => {},
