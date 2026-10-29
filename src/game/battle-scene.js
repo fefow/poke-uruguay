@@ -31,6 +31,7 @@ const A = {
   bg: 'field', t: 0,
   foe: null, ply: null, // species keys
   foeX: 0, plyX: 0, foeY: 0, plyY: 0,
+  foeSX: 1, foeSY: 1, foeRot: 0, foeGlow: 0, plySX: 1, plySY: 1, plyRot: 0, plyGlow: 0, proj: null,
   foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0,
   foeTrainer: null, trainerX: 0,
   playerTrainerX: 0, showPlayerTrainer: false,
@@ -81,25 +82,10 @@ function drawBattle(g, t) {
     const spr = charSprite(state().player.look, 'up', 0);
     g.drawImage(spr, 0, 0, 16, 17, 60 + A.playerTrainerX, 180 - 70, 48, 68);
   }
-  // foe creature
-  if (A.foe && A.foeVis) {
-    const bob = Math.round(Math.sin(t / 300) * 1);
-    g.globalAlpha = A.foeAlpha;
-    const spr = creatureSprite(A.foe);
-    g.drawImage(spr, 236 - SPRITE / 2 + A.foeX, 106 - SPRITE + A.foeY + bob);
-    if (A.foeFlash && Math.floor(t / 60) % 2) { g.globalCompositeOperation = 'lighter'; g.drawImage(spr, 236 - SPRITE / 2 + A.foeX, 106 - SPRITE + A.foeY + bob); g.globalCompositeOperation = 'source-over'; }
-    g.globalAlpha = 1;
-  }
-  if (A.ply && A.plyVis) {
-    const bob = Math.round(Math.sin(t / 260 + 1) * 1);
-    g.globalAlpha = A.plyAlpha;
-    const spr = creatureSprite(A.ply, { back: true });
-    // Player side drawn larger (closer to camera).
-    const S = SPRITE * 1.25;
-    g.drawImage(spr, 84 - S / 2 + A.plyX, 184 - S + A.plyY + bob, S, S);
-    if (A.plyFlash && Math.floor(t / 60) % 2) { g.globalCompositeOperation = 'lighter'; g.drawImage(spr, 84 - S / 2 + A.plyX, 184 - S + A.plyY + bob, S, S); g.globalCompositeOperation = 'source-over'; }
-    g.globalAlpha = 1;
-  }
+  // creatures: breathing idle + per-side transform (offset, squash and stretch, rotation, glow)
+  if (A.foe && A.foeVis) drawCreature(g, creatureSprite(A.foe), 236, 106, SPRITE, 'foe', t, 0);
+  if (A.ply && A.plyVis) drawCreature(g, creatureSprite(A.ply, { back: true }), 84, 184, SPRITE * 1.25, 'ply', t, 1);
+  if (A.proj) drawProjectile(g, A.proj);
   if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake);
   if (A.fx) drawFx(g, A.fx, t);
   g.restore();
@@ -107,6 +93,37 @@ function drawBattle(g, t) {
   if (tint && A.bg !== 'indoor') { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
   vignette(g, 0.9);
   if (A.tint) { g.fillStyle = A.tint; g.fillRect(0, 0, W, H); }
+}
+
+function drawCreature(g, spr, cx, base, size, side, t, phase) {
+  const breath = Math.sin(t / 650 + phase);
+  const flash = A[`${side}Flash`] && Math.floor(t / 60) % 2;
+  g.save();
+  g.globalAlpha = A[`${side}Alpha`];
+  g.translate(cx + A[`${side}X`], base + A[`${side}Y`] + Math.sin(t / 500 + phase) * 1.2);
+  g.rotate(A[`${side}Rot`]);
+  g.scale(A[`${side}SX`] * (1 - breath * 0.012), A[`${side}SY`] * (1 + breath * 0.025));
+  g.drawImage(spr, -size / 2, -size, size, size);
+  const glow = A[`${side}Glow`];
+  if (flash || glow) {
+    g.globalCompositeOperation = 'lighter';
+    g.globalAlpha = A[`${side}Alpha`] * (flash ? 1 : glow * 0.7);
+    g.drawImage(spr, -size / 2, -size, size, size);
+  }
+  g.restore();
+}
+
+function drawProjectile(g, pr) {
+  g.save();
+  for (let i = 5; i >= 0; i--) {
+    const q = Math.max(0, pr.p - i * 0.05);
+    const x = pr.x1 + (pr.x2 - pr.x1) * q;
+    const y = pr.y1 + (pr.y2 - pr.y1) * q - Math.sin(q * Math.PI) * 14;
+    g.globalAlpha = 0.9 - i * 0.14;
+    g.fillStyle = i ? pr.color : '#fff';
+    g.beginPath(); g.arc(x, y, 6 - i * 0.7, 0, 7); g.fill();
+  }
+  g.restore();
 }
 
 function drawBall(g, x, y, shake = 0) {
@@ -144,12 +161,17 @@ function drawFx(g, fx, t) {
   g.restore();
 }
 
-async function tween(ms, fn) {
+const easeOut = (p) => 1 - (1 - p) ** 3;
+const easeIn = (p) => p * p;
+const easeInOut = (p) => (p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2);
+const easeOutBack = (p) => 1 + 2.70158 * (p - 1) ** 3 + 1.70158 * (p - 1) ** 2;
+
+async function tween(ms, fn, ease = (p) => p) {
   const t0 = performance.now();
   return new Promise((res) => {
     const step = () => {
       const p = clamp((performance.now() - t0) / ms, 0, 1);
-      fn(p);
+      fn(ease(p));
       if (p < 1) requestAnimationFrame(step);
       else res();
     };
@@ -223,7 +245,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   const prevMusic = currentTrack();
   engine = new BattleEngine({ party: S.party, foes, wild, trainer });
   logInfo(`Batalla ${wild ? 'salvaje' : `vs ${trainer?.name ?? 'entrenador'}`}: ${foes.map((f) => `${f.species} nv${f.level}`).join(', ')}`);
-  Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
+  Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeSX: 1, foeSY: 1, foeRot: 0, foeGlow: 0, plySX: 1, plySY: 1, plyRot: 0, plyGlow: 0, proj: null, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
   playMusic(music);
   sfx('encounter');
   await introFlash();
@@ -237,7 +259,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     if (wild) {
       A.foe = foes[0].species;
       A.foeX = 160;
-      await tween(500, (p) => (A.foeX = 160 * (1 - p)));
+      await tween(650, (p) => (A.foeX = 160 * (1 - p)), easeOut);
       markSeen(foes[0].species);
       setHud('foe', foes[0], { instant: true });
       await say(`¡Apareció un ${displayName(foes[0])} salvaje!`, { battle: true, auto: 1400 });
@@ -321,6 +343,19 @@ async function introFlash() {
   await wait(120);
 }
 
+/** Creature appears out of the ball: grows with a little overshoot while fading in. */
+async function popIn(side) {
+  A[`${side}Alpha`] = 0;
+  await tween(380, (p) => {
+    A[`${side}SX`] = A[`${side}SY`] = 0.35 + 0.65 * p;
+    A[`${side}Alpha`] = Math.min(1, p * 3);
+    A[`${side}Glow`] = 1 - Math.min(1, p * 1.4);
+  }, easeOutBack);
+  A[`${side}SX`] = A[`${side}SY`] = 1;
+  A[`${side}Alpha`] = 1;
+  A[`${side}Glow`] = 0;
+}
+
 async function sendOutFoe(c) {
   A.foe = c.species;
   A.foeVis = false;
@@ -329,8 +364,7 @@ async function sendOutFoe(c) {
   await tween(250, (p) => (A.ball.y = 60 + p * 30));
   A.ball = null;
   A.foeVis = true;
-  A.foeAlpha = 0;
-  await tween(250, (p) => (A.foeAlpha = p));
+  await popIn('foe');
   markSeen(c.species);
   setHud('foe', c, { instant: true });
 }
@@ -343,8 +377,7 @@ async function sendOutPlayer(c) {
   await tween(300, (p) => { A.ball.x = 30 + p * 54; A.ball.y = 110 + Math.sin(p * Math.PI) * -30 + p * 50; });
   A.ball = null;
   A.plyVis = true;
-  A.plyAlpha = 0;
-  await tween(220, (p) => (A.plyAlpha = p));
+  await popIn('ply');
   setHud('ply', c, { instant: true });
 }
 
@@ -420,11 +453,10 @@ async function play(events, leveled) {
         const side = e.side === 0 ? 'ply' : 'foe';
         sfx(e.eff > 1 ? 'super' : e.eff < 1 ? 'weak' : 'hit');
         A[e.side === 0 ? 'plyFlash' : 'foeFlash'] = 1;
-        if (e.eff > 1) A.shakeScreen = 3;
+        hitReaction(side, e.side === 0 ? -1 : 1, e.eff);
         setHud(side, e.side === 0 ? engine.p.c : engine.f.c);
         await wait(520);
         A.plyFlash = A.foeFlash = 0;
-        A.shakeScreen = 0;
         break;
       }
       case 'heal':
@@ -451,10 +483,15 @@ async function play(events, leveled) {
       }
       case 'faint': {
         sfx('faint');
-        const key = e.side === 0 ? 'plyY' : 'foeY';
-        await tween(400, (p) => (A[key] = p * 60));
-        A[e.side === 0 ? 'plyVis' : 'foeVis'] = false;
-        A[key] = 0;
+        const sd = e.side === 0 ? 'ply' : 'foe';
+        await tween(520, (p) => {
+          A[`${sd}Y`] = 26 * p;
+          A[`${sd}SY`] = 1 - 0.75 * p;
+          A[`${sd}SX`] = 1 + 0.12 * p;
+          A[`${sd}Alpha`] = 1 - p;
+        }, easeIn);
+        A[`${sd}Vis`] = false;
+        A[`${sd}Y`] = 0; A[`${sd}SX`] = A[`${sd}SY`] = 1; A[`${sd}Alpha`] = 1;
         if (e.side === 0) hud.ply.hidden = true;
         else hud.foe.hidden = true;
         break;
@@ -501,19 +538,58 @@ async function play(events, leveled) {
   }
 }
 
+/** Defender recoils away from the attacker, squashes, then settles; the screen shakes on strong hits. */
+function hitReaction(sd, dir, eff) {
+  if (!settings.anims) return;
+  const push = eff > 1 ? 15 : eff < 1 ? 5 : 9;
+  (async () => {
+    await tween(90, (p) => { A[`${sd}X`] = dir * push * p; A[`${sd}SX`] = 1 - 0.07 * p; A[`${sd}SY`] = 1 + 0.05 * p; }, easeOut);
+    await tween(260, (p) => { A[`${sd}X`] = dir * push * (1 - p); A[`${sd}SX`] = 0.93 + 0.07 * p; A[`${sd}SY`] = 1.05 - 0.05 * p; }, easeOut);
+  })();
+  if (eff > 1) tween(420, (p) => (A.shakeScreen = 4 * (1 - p)));
+}
+
 async function attackAnim(side, type, kind) {
   if (!settings.anims) return;
-  const key = side === 0 ? 'plyX' : 'foeX';
+  const me = side === 0 ? 'ply' : 'foe';
   const dir = side === 0 ? 1 : -1;
-  if (kind === 'fis') {
-    await tween(120, (p) => (A[key] = dir * 16 * p));
-    await tween(120, (p) => (A[key] = dir * 16 * (1 - p)));
-  }
   const color = TYPES[type]?.color ?? '#fff';
   const target = kind === 'status' ? side : 1 - side;
-  A.fx = { kind: kind === 'status' ? 'status' : 'hit', color, x: target === 0 ? 84 : 236, y: target === 0 ? 140 : 70, start: performance.now(), dur: 420 };
-  await wait(380);
-  A.fx = null;
+  const at = (sd) => (sd === 0 ? [84, 140] : [236, 72]);
+  const burst = () => {
+    const fx = { kind: kind === 'status' ? 'status' : 'hit', color, x: at(target)[0], y: at(target)[1], start: performance.now(), dur: 420 };
+    A.fx = fx;
+    setTimeout(() => { if (A.fx === fx) A.fx = null; }, 450);
+  };
+  if (kind === 'fis') {
+    // wind-up, dash into the target, hold on impact, recover
+    await tween(170, (p) => { A[`${me}X`] = -dir * 9 * p; A[`${me}SX`] = 1 + 0.06 * p; A[`${me}SY`] = 1 - 0.09 * p; }, easeOut);
+    await tween(110, (p) => { A[`${me}X`] = dir * (-9 + 45 * p); A[`${me}SX`] = 1.06 - 0.12 * p; A[`${me}SY`] = 0.91 + 0.12 * p; }, easeIn);
+    burst();
+    await wait(90);
+    // recover while the damage reaction plays
+    tween(300, (p) => { A[`${me}X`] = dir * 36 * (1 - p); A[`${me}SX`] = 0.94 + 0.06 * p; A[`${me}SY`] = 1.03 - 0.03 * p; }, easeInOut).then(() => { A[`${me}X`] = 0; A[`${me}SX`] = A[`${me}SY`] = 1; });
+  } else if (kind === 'status') {
+    // sway and glow on the user
+    await tween(420, (p) => {
+      A[`${me}X`] = Math.sin(p * Math.PI * 4) * 4 * (1 - p);
+      A[`${me}Glow`] = Math.sin(p * Math.PI);
+      A[`${me}SY`] = 1 + 0.05 * Math.sin(p * Math.PI);
+    });
+    A[`${me}X`] = 0; A[`${me}Glow`] = 0; A[`${me}SY`] = 1;
+    burst();
+    await wait(300);
+  } else {
+    // special: charge (grow and glow), launch an orb that travels, then burst on the target
+    await tween(300, (p) => { A[`${me}Glow`] = p; A[`${me}SX`] = A[`${me}SY`] = 1 + 0.1 * p; A[`${me}X`] = -dir * 4 * p; }, easeOut);
+    const [x1, y1] = at(side);
+    const [x2, y2] = at(1 - side);
+    await tween(300, (p) => { A.proj = { x1, y1: y1 - 10, x2, y2: y2 - 10, p, color }; A[`${me}X`] = -dir * 4 * (1 - p); A[`${me}SX`] = A[`${me}SY`] = 1.1 - 0.1 * p; A[`${me}Glow`] = 1 - p; }, easeIn);
+    A.proj = null;
+    A[`${me}X`] = 0; A[`${me}SX`] = A[`${me}SY`] = 1; A[`${me}Glow`] = 0;
+    burst();
+    await wait(120);
+  }
 }
 
 async function throwAnim() {
@@ -522,9 +598,9 @@ async function throwAnim() {
   await tween(500, (p) => { A.ball.x = 40 + p * 196; A.ball.y = 170 - Math.sin(p * Math.PI) * 100 - p * 100; A.ball.shake = p * 12; });
   A.ball.shake = 0;
   // creature gets sucked in
-  await tween(250, (p) => { A.foeAlpha = 1 - p; });
+  await tween(300, (p) => { A.foeAlpha = 1 - p; A.foeSX = A.foeSY = 1 - 0.7 * p; A.foeGlow = p; }, easeIn);
   A.foeVis = false;
-  A.foeAlpha = 1;
+  A.foeAlpha = 1; A.foeSX = A.foeSY = 1; A.foeGlow = 0;
   await tween(250, (p) => (A.ball.y = 70 + p * 26));
 }
 
