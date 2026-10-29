@@ -134,5 +134,5 @@ export function learnMove(c, moveId, replaceIndex = null) {
 
 /** EXP yielded when this creature faints. */
 export function expYield(c, trainer = false) {
-  return Math.floor((SPECIES[c.species].baseExp * c.level) / 7 * (trainer ? 1.5 : 1));
+  return Math.floor((SPECIES[c.species].baseExp * c.level) / 5 * (trainer ? 1.5 : 1));
 }

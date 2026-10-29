@@ -7,7 +7,7 @@ import { settings, saveSettings, state } from './state.js';
 import { creatureIcon } from '../gfx/creatures.js';
 import { displayName, maxHp } from './creature.js';
 
-let el, speed, party, btnMusic, btnParty, savedEl;
+let el, speed, party, btnMusic, btnParty, btnMenu, savedEl;
 let isGame = () => false;
 let lastMusic = 0.5;
 let sig = '';
@@ -25,7 +25,8 @@ function syncButtons() {
   const on = settings.music > 0;
   btnMusic.textContent = on ? '♪' : '♪̸';
   btnMusic.classList.toggle('is-off', !on);
-  btnMusic.title = on ? 'Silenciar música (N)' : 'Activar música (N)';
+  btnMusic.dataset.tip = on ? 'Silenciar música (N)' : 'Activar música (N)';
+  btnParty.dataset.tip = settings.hudParty ? 'Ocultar equipo (P)' : 'Mostrar equipo (P)';
   btnMusic.setAttribute('aria-pressed', String(!on));
   btnParty.classList.toggle('is-off', !settings.hudParty);
   btnParty.setAttribute('aria-pressed', String(!!settings.hudParty));
@@ -36,10 +37,11 @@ export function mountHud({ screen, game, openSettings }) {
   speed = h('div', { class: 'hud-speed', 'aria-hidden': 'true' }, h('b', { text: '▶▶' }), h('span', { text: 'x1,5' }));
   party = h('ol', { class: 'hud-party', 'aria-label': 'Equipo' });
   btnMusic = h('button', { type: 'button', class: 'hud-btn', 'aria-label': 'Música' });
-  btnParty = h('button', { type: 'button', class: 'hud-btn', title: 'Mostrar u ocultar equipo (P)', 'aria-label': 'Equipo' }, '▤');
-  const btnSet = h('button', { type: 'button', class: 'hud-btn', title: 'Ajustes (O)', 'aria-label': 'Ajustes' }, '⚙');
+  btnParty = h('button', { type: 'button', class: 'hud-btn', 'aria-label': 'Equipo' }, '▤');
+  btnMenu = h('button', { type: 'button', class: 'hud-btn', 'data-tip': 'Menú y mochila (Enter)', 'aria-label': 'Menú' }, '☰');
+  const btnSet = h('button', { type: 'button', class: 'hud-btn', 'data-tip': 'Ajustes (O)', 'aria-label': 'Ajustes' }, '⚙');
   savedEl = h('div', { class: 'hud-saved', 'aria-hidden': 'true', text: 'Guardado' });
-  el = h('div', { class: 'hud' }, h('div', { class: 'hud-tools' }, btnMusic, btnSet, btnParty), speed, party, savedEl);
+  el = h('div', { class: 'hud' }, h('div', { class: 'hud-tools' }, btnMenu, btnMusic, btnSet, btnParty), speed, party, savedEl);
   screen.append(el);
 
   const toggleMusic = () => setMusic(settings.music === 0);
@@ -48,8 +50,9 @@ export function mountHud({ screen, game, openSettings }) {
   btnMusic.addEventListener('click', toggleMusic);
   btnParty.addEventListener('click', toggleParty);
   btnSet.addEventListener('click', settingsNow);
+  btnMenu.addEventListener('click', () => { if (isGame() && !input.busy) input.press('start'); });
   // Don't steal focus from the game keys.
-  for (const b of [btnMusic, btnParty, btnSet]) b.addEventListener('pointerdown', (e) => e.preventDefault());
+  for (const b of [btnMenu, btnMusic, btnParty, btnSet]) b.addEventListener('pointerdown', (e) => e.preventDefault());
 
   addEventListener('keydown', (e) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -69,6 +72,7 @@ export function updateHud(now) {
   const visible = game && !inBattle;
   el.hidden = !game;
   el.classList.toggle('in-battle', inBattle);
+  el.classList.toggle('is-busy', input.busy && !inBattle);
   speed.classList.toggle('is-on', visible && input.held('run'));
   if (now < nextPoll) return;
   nextPoll = now + 250;

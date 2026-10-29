@@ -567,7 +567,9 @@ button { font: inherit; color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+  /* Stop looping decoration but let one-shot animations (banner, toasts) play normally. */
+  .loader-flag b, .loader-start, .title-press, .dialog-arrow { animation: none !important; }
 }
 
 ::view-transition-old(loader) { animation: 0.4s ease both fade-out; }
@@ -576,7 +578,7 @@ button { font: inherit; color: inherit; }
 /* ---------------------------------------------------------------- bug panel */
 .bug-btn {
   position: fixed;
-  top: max(8px, env(safe-area-inset-top));
+  bottom: max(8px, env(safe-area-inset-bottom));
   right: max(8px, env(safe-area-inset-right));
   z-index: 1000;
   inline-size: 36px;
@@ -608,7 +610,7 @@ button { font: inherit; color: inherit; }
 .bug-panel {
   position: fixed;
   inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) auto;
-  top: max(52px, calc(env(safe-area-inset-top) + 52px));
+  top: max(8px, env(safe-area-inset-top));
   z-index: 1001;
   inline-size: min(440px, calc(100vw - 16px));
   display: flex;
@@ -696,7 +698,7 @@ button { font: inherit; color: inherit; }
 .hud {
   position: absolute;
   inset: 0;
-  z-index: 8;
+  z-index: 12;
   pointer-events: none;
   font-size: 4.2cqi;
   font-variant-ligatures: none;
@@ -704,7 +706,7 @@ button { font: inherit; color: inherit; }
 .hud-tools {
   position: absolute;
   top: 1.6cqi;
-  left: 1.6cqi;
+  right: 1.6cqi;
   display: flex;
   gap: 1cqi;
   pointer-events: auto;
@@ -813,3 +815,26 @@ button { font: inherit; color: inherit; }
   &.is-on { animation: saved-fade 1.8s ease both; }
 }
 @keyframes saved-fade { 0%, 100% { opacity: 0; } 12%, 70% { opacity: 0.9; } }
+
+.hud.is-busy .hud-tools, .hud.is-busy .hud-party { display: none; }
+.hud-btn {
+  position: relative;
+  &::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 1cqi);
+    right: 0;
+    padding: 0.8cqi 1.6cqi;
+    border-radius: 1cqi;
+    white-space: nowrap;
+    font: 600 2.6cqi/1.2 system-ui, sans-serif;
+    color: var(--paper);
+    background: oklch(0.14 0.05 270 / 0.95);
+    border: 0.3cqi solid oklch(1 0 0 / 0.25);
+    opacity: 0;
+    translate: 0 -0.6cqi;
+    pointer-events: none;
+    transition: opacity 0.12s, translate 0.12s;
+  }
+  &:hover::after, &:focus-visible::after { opacity: 1; translate: 0; }
+}

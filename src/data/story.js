@@ -2,22 +2,25 @@
 // NPC that triggered it. Text uses Rioplatense Spanish ("vos"), in a sober tone aimed at adults.
 import { SPECIES } from './species.js';
 
-const COUNTER = { ceibito: 'tejuchispa', tejuchispa: 'carpinchito', carpinchito: 'ceibito' };
+// The rival picks the creature the player's starter is strong against (like the modern games),
+// so the first fights are winnable without grinding.
+const COUNTER = { ceibito: 'carpinchito', tejuchispa: 'ceibito', carpinchito: 'tejuchispa' };
 const LINE = {
   ceibito: ['ceibito', 'ceibal', 'ceibarbol'],
   tejuchispa: ['tejuchispa', 'tejubrasa', 'tejufogon'],
   carpinchito: ['carpinchito', 'carpincho', 'carpinchon'],
 };
 
-function rivalTeam(api, stage) {
-  const line = LINE[COUNTER[api.starterKey()]];
+export function rivalTeamFor(playerStarter, stage) {
+  const line = LINE[COUNTER[playerStarter]];
   return [
     [[line[0], 5]],
-    [['teruterito', 9], [line[0], 11]],
-    [['teruterazo', 24], ['hornerazo', 24], ['zorromonte', 25], [line[1], 27]],
-    [['teruterazo', 37], ['zorromonte', 37], ['hornerazo', 38], ['yacaron', 38], [line[2], 41]],
+    [['teruterito', 6], [line[0], 8]],
+    [['teruterazo', 18], ['hornerazo', 18], ['zorrigris', 19], [line[1], 21]],
+    [['teruterazo', 30], ['zorromonte', 30], ['hornerazo', 31], ['yacaron', 31], [line[2], 34]],
   ][stage];
 }
+const rivalTeam = (api, stage) => rivalTeamFor(api.starterKey(), stage);
 
 const rival = (api, stage, prize, intro, lose, after) => ({
   id: `rival_${stage}`, name: '{rival}', cls: 'Rival', look: 'rival', team: rivalTeam(api, stage), prize, intro, lose, after, ai: stage >= 2 ? 'smart' : 'basic',
@@ -26,21 +29,21 @@ const rival = (api, stage, prize, intro, lose, after) => ({
 export const LEADERS = {
   lucia: {
     id: 'leader_lucia', name: 'Lucía', cls: 'Líder', look: 'leader_water', ai: 'smart', items: ['mate'],
-    team: [['lobito', 12], ['mbigua', 12], ['carpincho', 14]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Rambla', reward: 'mate', rewardQty: 3,
+    team: [['lobito', 8], ['mbigua', 8], ['carpincho', 10]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Rambla', reward: 'mate', rewardQty: 3,
     intro: ['Soy Lucía, líder del Gimnasio de Montevideo.', 'Entreno en la Rambla todas las mañanas, haga frío o calor.', 'Veamos si resistís la corriente del Plata.'],
     lose: 'Me superaste. Fue una derrota limpia.',
     after: ['Te ganaste la Medalla Rambla. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo Niebla opera en la costa este. Andá con cuidado.'],
   },
   sofia: {
     id: 'leader_sofia', name: 'Sofía', cls: 'Líder', look: 'leader_elec', ai: 'smart', items: ['mate'],
-    team: [['luciernito', 19], ['cotorrayo', 20], ['luceron', 22]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Ola', reward: 'superesfera', rewardQty: 5,
+    team: [['luciernito', 16], ['cotorrayo', 17], ['luceron', 19]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Ola', reward: 'superesfera', rewardQty: 5,
     intro: ['Bienvenido a Punta del Este. Soy Sofía.', 'Mis criaturas acumulan la electricidad de las tormentas de verano.', 'Preparate para el combate.'],
     lose: 'Me quedé sin respuesta. Buen combate.',
     after: ['La Medalla Ola es tuya.', 'El Equipo Niebla robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
   },
   aparicio: {
     id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'gaucho', ai: 'smart', items: ['mate_dulce'],
-    team: [['mulitin', 29], ['hornerazo', 30], ['tortugal', 30], ['mulitron', 32]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Quebrada', reward: 'ultraesfera', rewardQty: 5,
+    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Quebrada', reward: 'ultraesfera', rewardQty: 5,
     intro: ['Buenas. Soy Aparicio.', 'Cuido estas sierras desde hace sesenta años.', 'La piedra de la quebrada lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía años que nadie me ganaba.',
     after: ['La Medalla Quebrada es tuya.', 'El jefe del Equipo Niebla subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
@@ -49,7 +52,7 @@ export const LEADERS = {
 
 const CHAMPION = (rematch) => ({
   id: rematch ? 'champion_rematch' : 'champion', name: 'Obdulio', cls: 'Campeón', look: 'champion', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
-  team: [['nanduro', 40], ['zorromonte', 40], ['yacaron', 41], ['lobomarino', 41], ['gatomontes', 41], ['aguaraflama', 43]].map(([s, l]) => [s, l + (rematch ? 14 : 0)]),
+  team: [['nanduro', 38], ['zorromonte', 38], ['yacaron', 39], ['lobomarino', 39], ['gatomontes', 39], ['aguaraflama', 41]].map(([s, l]) => [s, l + (rematch ? 14 : 0)]),
   prize: rematch ? 12000 : 8000,
   intro: rematch
     ? ['Volviste, {player}. El Centenario siempre está abierto para una revancha.', 'Esta vez no me reservo nada.']
@@ -122,7 +125,7 @@ export const SCRIPTS = {
     api.sfx('catch');
     await api.say(`¡{player} recibió a ${sp.name}!`);
     const rk = COUNTER[key];
-    await api.say([`Entonces yo me quedo con ${SPECIES[rk].name}.`, 'Tiene ventaja sobre el tuyo.'], { name: '{rival}' });
+    await api.say([`Entonces yo me quedo con ${SPECIES[rk].name}.`, 'Tiene desventaja contra el tuyo, pero no pienso ponértelo fácil.'], { name: '{rival}' });
     await api.say(['Llevate también esto: la PokeDex.', 'Registra cada criatura que veas o captures.', 'Y unas Esferas para capturar criaturas salvajes.'], { name: 'Maestro Tabárez' });
     await api.give('uru_dex', 1);
     await api.give('esfera', 5);
@@ -157,10 +160,14 @@ export const SCRIPTS = {
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
     await api.say(['{player}, te estaba esperando.', 'Ya capturé una criatura nueva en la Ruta 1.', 'Veamos si seguís teniendo tanta suerte.'], { name: '{rival}' });
-    const res = await api.battle(rival(api, 1, 400, null, 'Otra vez perdí. ¿Cómo lo hacés?', null));
-    if (res !== 'win') return;
+    const res = await api.battle(rival(api, 1, 400, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
-    await api.say(['Voy al gimnasio antes que vos.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Voy al gimnasio antes que vos.'], { name: '{rival}' });
+    else {
+      api.healParty({ silent: true });
+      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Voy al gimnasio antes que vos.'], { name: '{rival}' });
+      await api.say('Tus criaturas quedaron recuperadas.');
+    }
     await api.npcLeave('rival_mvd');
   },
 
@@ -225,10 +232,14 @@ export const SCRIPTS = {
   async rival_r8(api) {
     if (api.flag('rival3')) return;
     await api.say(['{player}, ya sé lo del Equipo Niebla.', 'Pero antes de ir a la Quebrada, veamos quién es más fuerte.'], { name: '{rival}' });
-    const res = await api.battle(rival(api, 2, 1200, null, 'Sos un rival duro.', null));
-    if (res !== 'win') return;
+    const res = await api.battle(rival(api, 2, 1200, null, 'Sos un rival duro.', null), { canLose: true });
     api.setFlag('rival3');
-    await api.say(['Bien. Andá vos primero. Yo te cubro.', 'Pero en el Centenario te gano.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Bien. Andá vos primero. Yo te cubro.', 'Pero en el Centenario te gano.'], { name: '{rival}' });
+    else {
+      api.healParty({ silent: true });
+      await api.say(['Todavía te falta. No pasa nada: entrená y volvé a medirte conmigo en el Centenario.', 'Andá vos primero. Yo te cubro.'], { name: '{rival}' });
+      await api.say('Tus criaturas quedaron recuperadas.');
+    }
     await api.npcLeave('rival_r8');
   },
 
@@ -248,10 +259,14 @@ export const SCRIPTS = {
   async rival_final(api) {
     if (api.flag('rival4')) return;
     await api.say(['Llegaste, {player}.', 'Desde Colonia que te vengo siguiendo.', 'Esta es mi revancha. Voy con todo.'], { name: '{rival}' });
-    const res = await api.battle(rival(api, 3, 4000, null, 'Sos mejor que yo. Lo admito.', null));
-    if (res !== 'win') return;
+    const res = await api.battle(rival(api, 3, 4000, null, 'Sos mejor que yo. Lo admito.', null), { canLose: true });
     api.setFlag('rival4');
-    await api.say(['Andá. El Campeón te espera arriba.', 'Y ganale. Si no, quedo mal yo también.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Andá. El Campeón te espera arriba.', 'Y ganale. Si no, quedo mal yo también.'], { name: '{rival}' });
+    else {
+      api.healParty({ silent: true });
+      await api.say(['Esta vez gané yo, pero el Campeón es otra cosa. Andá, te espera arriba.', 'Y ganale. Si no, quedo mal yo también.'], { name: '{rival}' });
+      await api.say('Tus criaturas quedaron recuperadas.');
+    }
     await api.npcLeave('rival_final');
   },
 

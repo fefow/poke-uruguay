@@ -569,8 +569,8 @@ function drawWorld(g, t) {
   const ppos = entityPos(p);
   const mw = m.w * T;
   const mh = m.h * T;
-  // Small interiors are drawn at 2x so they fill the screen instead of floating in black.
-  const Z = m.indoor && mw * 2 <= W && mh * 2 <= H * 1.15 ? 2 : 1;
+  // Interiors are zoomed so the room always covers the whole canvas (the camera scrolls the rest).
+  const Z = m.indoor ? Math.min(2.5, Math.max(1, Math.ceil(Math.max(W / mw, H / mh) * 4) / 4)) : 1;
   const VW = W / Z;
   const VH = H / Z;
   // camera
