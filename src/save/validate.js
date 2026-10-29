@@ -20,7 +20,7 @@ const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'rival1', 'rival2', 'rival3', 'rival4',
   'badge1', 'badge2', 'badge3', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
-  'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min',
+  'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
 ]);
 const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-4])_[a-z0-9_]{1,40}$/;
 

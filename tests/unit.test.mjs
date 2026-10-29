@@ -184,3 +184,38 @@ test('toda criatura no legendaria se puede conseguir (inicial, salvaje o pesca) 
   const missing = DEX_ORDER.filter((k) => !SPECIES[k].legendary && !evolved.has(k) && !found.has(k));
   assert.deepEqual(missing, []);
 });
+
+test('captura: nivel, vida, rareza y pokeball cuentan', async () => {
+  const { catchValue, catchProbability } = await import('../src/game/capture.js');
+  const P = (o) => catchProbability(catchValue({ catchRate: 190, level: 5, hp: 20, maxHp: 20, ball: 1, ...o }));
+  // menos vida y mejor pokeball, más chance
+  assert.ok(P({ hp: 3 }) > P({}));
+  assert.ok(P({ ball: 2 }) > P({ ball: 1.5 }) && P({ ball: 1.5 }) > P({ ball: 1 }));
+  // un nivel bajo es más fácil que uno alto con la misma vida y bola
+  assert.ok(P({ level: 5 }) > P({ level: 30 }) && P({ level: 30 }) > P({ level: 60 }));
+  // una criatura rara a vida completa con una Pokeball común casi no se captura
+  assert.ok(P({ catchRate: 3, level: 60 }) < 0.02);
+  // la rara con Ultraball, poca vida y dormida mejora pero sigue siendo difícil
+  const hard = P({ catchRate: 3, level: 60, ball: 2, hp: 1, status: 'slp' });
+  assert.ok(hard > P({ catchRate: 3, level: 60 }) && hard < 0.3);
+  // la Pokeball Celeste siempre atrapa
+  assert.equal(P({ ball: 255, catchRate: 3, level: 60 }), 1);
+});
+
+test('huir de un entrenador no gasta el turno', () => {
+  const party = [mon('tejuchispa', 10)];
+  const e = new BattleEngine({ party, foes: [mon('ceibito', 10, 2)], wild: false, trainer: { ai: 'basic', items: [] }, seed: 3 });
+  const hp = party[0].hp;
+  const ev = e.turn({ type: 'run' });
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].t, 'text');
+  assert.equal(party[0].hp, hp);
+});
+
+test('los eventos de daño y curación llevan los PS en ese momento', () => {
+  const party = [mon('ceibito', 12)];
+  party[0].hp = 5;
+  const e = new BattleEngine({ party, foes: [mon('tejuchispa', 12, 4)], wild: true, seed: 11 });
+  const ev = e.turn({ type: 'move', index: party[0].moves.findIndex((m) => m.id === 'absorber') });
+  for (const x of ev) if (x.t === 'damage' || x.t === 'heal') assert.ok(Number.isInteger(x.hp), `${x.t} sin hp`);
+});

@@ -51,6 +51,9 @@ export const TILE_INFO = {
   e: { name: 'emblema roca', solid: true },
   z: { name: 'torre', solid: true },
   '%': { name: 'zarzal', solid: true },
+  '`': { name: 'ceniza' },
+  ';': { name: 'brasas', enc: true },
+  '^': { name: 'magma', solid: true, anim: true },
   // interiors
   i: { name: 'piso' },
   Y: { name: 'piso gimnasio' },
@@ -136,6 +139,22 @@ const DRAW = {
       px(g, (off + 1) % T, y, '#7ab8f0', 4, 1);
       px(g, (off + 9) % T, y + 2, '#5aa4e8', 3, 1);
     }
+  },
+  '`': (g, r) => speckle(g, r, '#4a4650', ['#5a5660', '#3a363e', '#403c46', '#e8672c55'], 18),
+  ';': (g, r) => {
+    speckle(g, r, '#4a4650', ['#5a5660', '#3a363e'], 10);
+    for (let i = 0; i < 7; i++) {
+      const x = r.int(1, 14), y = r.int(4, 14);
+      px(g, x, y, '#a82a1a', 1, 3); px(g, x + 1, y + 1, '#e8672c', 1, 2); px(g, x - 1, y + 1, '#f2c02a', 1, 1);
+    }
+  },
+  '^': (g, r, frame) => {
+    px(g, 0, 0, '#9a2a14', T, T);
+    for (let i = 0; i < 6; i++) {
+      const x = (r.int(0, 12) + frame * 3 + i * 5) % 14, y = (r.int(0, 12) + frame * 2) % 14;
+      px(g, x, y, '#e8672c', 4, 3); px(g, x + 1, y, '#ffb43a', 2, 1);
+    }
+    px(g, 0, 0, '#3a1a14', T, 1); px(g, 0, 15, '#3a1a14', T, 1);
   },
   '%': (g, r) => {
     grass(g, r);

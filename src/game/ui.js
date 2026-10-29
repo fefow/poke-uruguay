@@ -48,7 +48,7 @@ export async function say(text, opts = {}) {
     const pop = input.push((a) => {
       if (a === 'a' || a === 'b') skip = true;
     });
-    const delay = SPEEDS[settings.textSpeed] ?? 18;
+    const delay = (SPEEDS[settings.textSpeed] ?? 18) / (input.held('run') ? 2 : 1);
     for (let i = 0; i < msg.length && !skip; i++) {
       dialogText.textContent = msg.slice(0, i + 1);
       if (i % 2 === 0 && msg[i] !== ' ') sfx('select');
@@ -60,7 +60,7 @@ export async function say(text, opts = {}) {
     if (opts.auto && !(opts.keep && last)) {
       // Advance on A/B or after a pause, whichever comes first.
       await new Promise((res) => {
-        const timer = setTimeout(() => { popAuto(); res(); }, opts.auto);
+        const timer = setTimeout(() => { popAuto(); res(); }, opts.auto / (input.held('run') ? 2 : 1));
         const popAuto = input.push((a) => {
           if (a === 'a' || a === 'b') { clearTimeout(timer); popAuto(); res(); }
         });
@@ -91,8 +91,8 @@ export function choose(options, { cancel = true, cls = '', title = null, start =
     const items = opts.map((o, i) =>
       h('li', { class: o.disabled ? 'is-disabled' : '', role: 'option', onclick: () => { idx = i; render(); pick(); } },
         o.icon ? h('img', { class: 'item-icon', src: o.icon, alt: '' }) : null,
-        h('span', { class: 'label', text: fmt(o.label) }),
-        o.hint ? h('span', { class: 'hint', text: o.hint }) : null),
+        o.content ?? h('span', { class: 'label', text: fmt(o.label) }),
+        o.content ? null : o.hint ? h('span', { class: 'hint', text: o.hint }) : null),
     );
     const list = h('ul', { class: 'menu-list', role: 'listbox' }, items);
     const box = h('div', { class: `menu ${cls}` }, title ? h('div', { class: 'menu-title', text: fmt(title) }) : null, list);

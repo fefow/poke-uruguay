@@ -14,7 +14,7 @@ import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gain
 import { applyItem, STATUS_SHORT } from './battle-engine.js';
 import { saveGame, listSaves } from '../save/index.js';
 import { MAPS } from '../data/maps.js';
-import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, TREES, HILLS, project } from '../data/atlas.js';
+import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, BIOMES, DEPARTMENTS, PLACE_DEPT, project } from '../data/atlas.js';
 import { charSprite } from '../gfx/characters.js';
 import { itemIcon } from '../gfx/items.js';
 import { SAVE_CONFIG } from '../save/config.js';
@@ -41,8 +41,12 @@ function listNav(items, { onPick, onCancel, onMove, start = 0, cols = 1, extra }
     if (extra?.(a, idx)) return;
     const n = items.length;
     if (!n) { if (a === 'b' || a === 'start') onCancel(); return; }
-    if (a === 'up') { idx = (idx - cols + n) % n; sfx('select'); render(); }
-    else if (a === 'down') { idx = (idx + cols) % n; sfx('select'); render(); }
+    // In a grid, up/down only move between rows when there is more than one row.
+    if (a === 'up' || a === 'down') {
+      if (cols > 1 && n <= cols) return;
+      idx = a === 'up' ? (idx - cols + n) % n : (idx + cols) % n;
+      sfx('select'); render();
+    }
     else if (a === 'left' && cols > 1) { idx = (idx - 1 + n) % n; sfx('select'); render(); }
     else if (a === 'right' && cols > 1) { idx = (idx + 1) % n; sfx('select'); render(); }
     else if (a === 'a') onPick(idx);
@@ -126,6 +130,7 @@ export function openParty({ mode = 'field', active = -1, title } = {}) {
     const makeNav = (start) => {
       nav = listNav(rows, {
         start,
+        cols: 3,
         onCancel: () => { if (mode === 'forced') return sfx('bump'); if (swapFrom != null) { swapFrom = null; build(); nav = makeNav(start); return; } close(-1); },
         onPick: (i) => suspend(el, () => pick(i)),
       });
@@ -405,32 +410,80 @@ function atlasHere() {
   return null;
 }
 
+// Blocky region map (like the classic Town Map): every cell belongs to the nearest department.
+const CELL = 4;
+let regionCache = null;
+function mapRegions() {
+  if (regionCache) return regionCache;
+  const poly = OUTLINE.map(([lo, la]) => project(lo, la));
+  const inside = (x, y) => {
+    let c = false;
+    for (let a = 0, b = poly.length - 1; a < poly.length; b = a++) {
+      const [xa, ya] = poly[a];
+      const [xb, yb] = poly[b];
+      if ((ya > y) !== (yb > y) && x < ((xb - xa) * (y - ya)) / (yb - ya) + xa) c = !c;
+    }
+    return c;
+  };
+  const centers = DEPARTMENTS.map((d) => ({ ...d, at: project(d.lon, d.lat), w: d.w ?? 1 }));
+  const cols = Math.ceil(VIEW.w / CELL);
+  const rows = Math.ceil(VIEW.h / CELL);
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * CELL + CELL / 2;
+      const y = r * CELL + CELL / 2;
+      if (!inside(x, y)) continue;
+      let best = null;
+      let bd = Infinity;
+      for (const d of centers) {
+        const k = Math.hypot(d.at[0] - x, d.at[1] - y) / d.w;
+        if (k < bd) { bd = k; best = d.id; }
+      }
+      grid[r][c] = best;
+    }
+  }
+  const paths = {};
+  let borders = '';
+  let coast = '';
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const id = grid[r][c];
+      if (!id) continue;
+      const x = c * CELL;
+      const y = r * CELL;
+      paths[id] = `${paths[id] ?? ''}M${x} ${y}h${CELL}v${CELL}h-${CELL}z`;
+      const right = c + 1 < cols ? grid[r][c + 1] : null;
+      const down = r + 1 < rows ? grid[r + 1][c] : null;
+      const left = c ? grid[r][c - 1] : null;
+      const up = r ? grid[r - 1][c] : null;
+      if (right && right !== id) borders += `M${x + CELL} ${y}v${CELL}`;
+      if (down && down !== id) borders += `M${x} ${y + CELL}h${CELL}`;
+      if (!right) coast += `M${x + CELL} ${y}v${CELL}`;
+      if (!down) coast += `M${x} ${y + CELL}h${CELL}`;
+      if (!left) coast += `M${x} ${y}v${CELL}`;
+      if (!up) coast += `M${x} ${y}h${CELL}`;
+    }
+  }
+  regionCache = { paths, borders, coast, grid };
+  return regionCache;
+}
+
 export function openMap() {
   const S = state();
   const visited = (id) => !!S.flags[`v_${id}`];
   const here = atlasHere();
   const pts = Object.fromEntries(PLACES.map((p) => [p.id, project(p.lon, p.lat)]));
-  const land = OUTLINE.map(([lo, la]) => project(lo, la).join(',')).join(' ');
-  const outline = (dy) => `<polygon points="${OUTLINE.map(([lo, la]) => { const [x, y] = project(lo, la); return `${x},${y + dy}`; }).join(' ')}"`;
-  // Roads: slightly curved so the map reads like a board-game overworld.
-  const road = ([a, b], i) => {
-    const [x1, y1] = pts[a];
-    const [x2, y2] = pts[b];
-    const k = i % 2 ? 6 : -6;
-    const cx = (x1 + x2) / 2 - ((y2 - y1) / Math.hypot(x2 - x1, y2 - y1)) * k;
-    const cy = (y1 + y2) / 2 + ((x2 - x1) / Math.hypot(x2 - x1, y2 - y1)) * k;
-    return `M${x1} ${y1} Q${cx} ${cy} ${x2} ${y2}`;
-  };
-  const roads = LINKS.map(road);
-  const pine = ([lo, la]) => { const [x, y] = project(lo, la); return `<g transform="translate(${x} ${y})"><path d="M0 -9 L5 0 L-5 0 Z" class="pine"/><path d="M0 -5 L6 5 L-6 5 Z" class="pine"/><rect x="-1" y="5" width="2" height="3" class="trunk"/></g>`; };
-  const hill = ([lo, la]) => { const [x, y] = project(lo, la); return `<path d="M${x - 9} ${y} a9 9 0 0 1 18 0 Z" class="hill"/><circle cx="${x - 3}" cy="${y - 4}" r="1" class="eye"/><circle cx="${x + 3}" cy="${y - 4}" r="1" class="eye"/>`; };
-  const cloud = (x, y, sc) => `<g transform="translate(${x} ${y}) scale(${sc})" class="cloud"><ellipse cx="0" cy="0" rx="12" ry="6"/><ellipse cx="-7" cy="2" rx="8" ry="5"/><ellipse cx="8" cy="2" rx="9" ry="5"/></g>`;
+  const reg = mapRegions();
+  const biomeOf = Object.fromEntries(DEPARTMENTS.map((d) => [d.id, BIOMES[d.biome]]));
+  const deptPaths = DEPARTMENTS.map((d) => `<path d="${reg.paths[d.id] ?? ''}" fill="${biomeOf[d.id].color}"/>`).join('');
+  const roads = LINKS.map(([a, b]) => `M${pts[a][0]} ${pts[a][1]}L${pts[b][0]} ${pts[b][1]}`).join('');
   const dots = PLACES.map((p) => {
     const [x, y] = pts[p.id];
-    const cls = `node k-${p.kind} ${visited(p.id) ? 'is-seen' : ''}`;
-    const gym = p.kind === 'city' ? `<circle cx="${x}" cy="${y - 0.5}" r="2.6" fill="${p.color ?? '#fff'}" class="pip"/>` : '';
-    const mark = p.kind === 'place' ? `<path d="M${x} ${y - 5} L${x + 3.5} ${y + 2} L${x - 3.5} ${y + 2} Z" class="pip" fill="#fff"/>` : '';
-    return `<g class="${cls}"><ellipse cx="${x}" cy="${y + 2.4}" rx="8" ry="5.2" class="base"/><ellipse cx="${x}" cy="${y}" rx="8" ry="5.2" class="top"/>${gym}${mark}</g>`;
+    const seen = visited(p.id) ? 'is-seen' : '';
+    if (p.kind === 'city') return `<g class="node k-city ${seen}"><rect x="${x - 6}" y="${y - 6}" width="12" height="12"/><rect x="${x - 2.5}" y="${y - 2.5}" width="5" height="5" fill="${p.color ?? '#fff'}" class="pip"/></g>`;
+    if (p.kind === 'place') return `<g class="node k-place ${seen}"><path d="M${x} ${y - 7}L${x + 6.5} ${y}L${x} ${y + 7}L${x - 6.5} ${y}Z"/></g>`;
+    return `<g class="node k-loc ${seen}"><circle cx="${x}" cy="${y}" r="5.5"/></g>`;
   }).join('');
   const pc = charSprite(S.player.look, 'down', 0);
   const face = document.createElement('canvas');
@@ -443,27 +496,38 @@ export function openMap() {
   fg.drawImage(pc, 2, 0, 12, 11, 4, 5, 32, 29);
   fg.restore();
   const faceUrl = face.toDataURL();
-  const svg = `<svg viewBox="0 0 ${VIEW.w} ${VIEW.h}" role="img" aria-label="Mapa de Uruguay">
-    <defs><linearGradient id="sea-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b92c4"/><stop offset="1" stop-color="#3f78ad"/></linearGradient></defs>
-    
-    <g class="waves"><path d="M18 205q4-4 8 0t8 0t8 0M26 213q4-4 8 0t8 0M10 222q4-4 8 0t8 0t8 0"/></g>
-    ${outline(7)} class="shade"/>
-    ${outline(0)} class="land"/>
-    <g class="decor">${TREES.map(pine).join('')}${HILLS.map(hill).join('')}</g>
-    <g class="roads">${roads.map((d) => `<path d="${d}" class="r-edge"/>`).join('')}${roads.map((d) => `<path d="${d}" class="r-fill"/>`).join('')}</g>
+  const grid = Array.from({ length: Math.floor(VIEW.w / 20) + 1 }, (_, i) => `M${i * 20} 0V${VIEW.h}`).join('') + Array.from({ length: Math.floor(VIEW.h / 20) + 1 }, (_, i) => `M0 ${i * 20}H${VIEW.w}`).join('');
+  const svg = `<svg viewBox="0 0 ${VIEW.w} ${VIEW.h}" role="img" aria-label="Mapa de Uruguay" shape-rendering="crispEdges">
+    <rect width="${VIEW.w}" height="${VIEW.h}" class="sea"/><path d="${grid}" class="sea-grid"/>
+    <g class="land">${deptPaths}</g>
+    <path id="map-sel" class="sel" d=""/>
+    <path d="${reg.borders}" class="borders"/><path d="${reg.coast}" class="coast"/>
+    <path d="${roads}" class="r-edge"/><path d="${roads}" class="r-fill"/>
     ${dots}
-    <g id="map-cursor" class="cursor"><ellipse rx="11.5" ry="7.5"/></g>
-    ${here ? `<image id="map-face" class="face" href="${faceUrl}" x="${here.at[0] - 10}" y="${here.at[1] - 28}" width="20" height="20"/>` : ''}
-    ${cloud(40, 40, 1.2)}${cloud(285, 215, 1.1)}${cloud(300, 120, 0.8)}${cloud(36, 150, 0.8)}${cloud(215, 18, 0.9)}
-    <g class="title"><text x="272" y="64">URUGUAY</text>${Array.from({ length: 9 }, (_, i) => `<rect x="251" y="${10 + i * 3.4}" width="42" height="3.4" fill="${i % 2 ? '#5aa8e8' : '#fff'}"/>`).join('')}<rect x="251" y="10" width="17" height="17" fill="#fff"/><circle cx="259.5" cy="18.5" r="5" fill="#f2c02a" stroke="#c8902a" stroke-width="0.8"/></g>
+    <g id="map-cursor" class="cursor"><rect x="-10" y="-10" width="20" height="20"/></g>
+    ${here ? `<image id="map-face" class="face" href="${faceUrl}" x="${here.at[0] - 10}" y="${here.at[1] - 29}" width="20" height="20"/>` : ''}
   </svg>`;
+  // Which element types actually show up around a place (from its real encounter table).
+  const wildTypes = (id) => {
+    const tot = {};
+    for (const [sp, , , w] of MAPS[id]?.enc?.list ?? []) for (const t of SPECIES[sp].types) tot[t] = (tot[t] ?? 0) + w;
+    return Object.entries(tot).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t]) => t);
+  };
+  const chip = (t) => h('span', { class: 'type-chip', style: { '--type': TYPES[t].color }, text: TYPES[t].name });
   return panel('panel-map', (el, close) => {
     const wrap = h('div', { class: 'map-svg' });
     wrap.innerHTML = svg;
-    const tag = h('div', { class: 'map-tag' }, h('b', { class: 'tag-name' }), h('small', { class: 'tag-note' }));
+    const f = (cls) => h('div', { class: cls });
+    const info = h('aside', { class: 'map-info' },
+      f('mi-name'), f('mi-kind'),
+      h('div', { class: 'mi-block' }, h('small', { text: 'Departamento' }), f('mi-dept')),
+      h('div', { class: 'mi-block' }, h('small', { text: 'Zona' }), h('div', { class: 'mi-zone' }, h('i', { class: 'mi-sw' }), h('b', { class: 'mi-zname' })), f('mi-ztypes')),
+      h('div', { class: 'mi-block' }, h('small', { text: 'Criaturas que aparecen' }), f('mi-wild')),
+      f('mi-note'),
+    );
     el.append(
       h('header', { class: 'panel-title' }, h('span', { text: 'Mapa' }), h('span', { text: here ? `Estás en: ${here.label}` : '' })),
-      wrap, tag,
+      h('div', { class: 'map-body' }, wrap, info),
       h('footer', { class: 'panel-foot', text: `←→↑↓ moverte por el mapa · ${keyName('b')} volver` }),
     );
     // Cursor graph: neighbours along the roads, picked by direction like the classic overworld map.
@@ -473,13 +537,25 @@ export function openMap() {
     const dist = (id) => Math.hypot(pts[id][0] - here.at[0], pts[id][1] - here.at[1]);
     let cur = !here ? PLACES[0].id : pts[here.id] ? here.id : PLACES.map((p) => p.id).sort((x, y) => dist(x) - dist(y))[0];
     const cursor = wrap.querySelector('#map-cursor');
+    const sel = wrap.querySelector('#map-sel');
+    const q = (c) => info.querySelector(c);
     const show = () => {
-      const p = PLACES.find((q) => q.id === cur);
+      const p = PLACES.find((o) => o.id === cur);
+      const dept = DEPARTMENTS.find((d) => d.id === PLACE_DEPT[cur]);
+      const biome = BIOMES[dept.biome];
       const [x, y] = pts[cur];
-      cursor.setAttribute('transform', `translate(${x} ${y + 1})`);
+      cursor.setAttribute('transform', `translate(${x} ${y})`);
+      sel.setAttribute('d', reg.paths[dept.id] ?? '');
       const seen = visited(cur);
-      tag.querySelector('.tag-name').textContent = seen ? p.name : '???';
-      tag.querySelector('.tag-note').textContent = seen ? `${p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial'} · ${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Todavía no fuiste a este lugar.';
+      q('.mi-name').textContent = seen ? p.name : '???';
+      q('.mi-kind').textContent = p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial';
+      q('.mi-dept').textContent = dept.name;
+      q('.mi-sw').style.background = biome.color;
+      q('.mi-zname').textContent = biome.name;
+      q('.mi-ztypes').replaceChildren(...biome.types.map(chip));
+      const wt = wildTypes(cur);
+      q('.mi-wild').replaceChildren(...(wt.length ? wt.map(chip) : [h('span', { class: 'mi-none', text: 'Ninguna' })]));
+      q('.mi-note').textContent = seen ? `${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Todavía no fuiste a este lugar.';
     };
     show();
     return (a) => {
@@ -567,7 +643,7 @@ const CONTROLS = [
   ['Flechas / W A S D', 'Mover al personaje'],
   ['Z / J', 'Aceptar, hablar, interactuar (botón A)'],
   ['X / K / Shift / Retroceso', 'Cancelar, volver (botón B)'],
-  ['Espacio (mantener)', 'Caminar 1,5x más rápido'],
+  ['Espacio (mantener)', 'Doble velocidad: caminar y combates'],
   ['Enter / Esc / M / Tab', 'Abrir el menú (en el menú, Enter acepta)'],
   ['N', 'Silenciar o activar la música'],
   ['O', 'Abrir ajustes'],

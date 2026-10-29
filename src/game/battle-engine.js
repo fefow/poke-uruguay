@@ -6,6 +6,7 @@ import { SPECIES } from '../data/species.js';
 import { ITEMS } from '../data/items.js';
 import { TYPES, effectiveness } from '../data/types.js';
 import { Rng } from '../core/rng.js';
+import { catchValue, shakeChance } from './capture.js';
 import { calcStats, displayName, maxHp, expYield } from './creature.js';
 import { clamp } from '../core/util.js';
 
@@ -89,6 +90,8 @@ export class BattleEngine {
   /** action: {type:'move', index} | {type:'switch', index} | {type:'item', item, target} | {type:'ball', item} | {type:'run'} */
   turn(action) {
     if (this.over) return [];
+    // Running from a trainer is refused without spending the turn: the foe does not get a free attack.
+    if (action.type === 'run' && !this.wild) return [{ t: 'text', msg: '¡No podés huir de un combate contra un entrenador!' }];
     this.#log.push({ t: this.turnNo, ...action });
     this.turnNo++;
     const ev = [];
@@ -151,7 +154,7 @@ export class BattleEngine {
         return;
       }
       user.c.status = null;
-      ev.push({ t: 'text', msg: `¡${uName} se despertó!` }, { t: 'hud' });
+      ev.push({ t: 'text', msg: `¡${uName} se despertó!` }, { t: 'hud', php: this.p.c.hp, fhp: this.f.c.hp });
     }
     if (user.c.status === 'par' && this.#rng.chance(0.25)) {
       ev.push({ t: 'text', msg: `¡${uName} está paralizado! No se puede mover.` }, { t: 'statusAnim', side, status: 'par' });
@@ -181,7 +184,7 @@ export class BattleEngine {
     ev.push({ t: 'anim', side, move: move.type, kind: move.cat });
     const dealt = Math.min(target.c.hp, r.dmg);
     target.c.hp -= dealt;
-    ev.push({ t: 'damage', side: 1 - side, amount: dealt, eff: r.eff });
+    ev.push({ t: 'damage', side: 1 - side, amount: dealt, eff: r.eff, hp: target.c.hp });
     if (r.crit) ev.push({ t: 'text', msg: '¡Golpe crítico!' });
     if (r.eff > 1) ev.push({ t: 'text', msg: '¡Es súper eficaz!' });
     else if (r.eff < 1) ev.push({ t: 'text', msg: 'No es muy eficaz…' });
@@ -189,13 +192,13 @@ export class BattleEngine {
       const healed = Math.min(maxHp(user.c) - user.c.hp, Math.max(1, Math.floor(dealt * move.fx.drain)));
       if (healed > 0) {
         user.c.hp += healed;
-        ev.push({ t: 'heal', side }, { t: 'text', msg: `¡${tName} perdió energía!` });
+        ev.push({ t: 'heal', side, hp: user.c.hp }, { t: 'text', msg: `¡${tName} perdió energía!` });
       }
     }
     if (move.fx.recoil && dealt > 0) {
       const rec = Math.min(user.c.hp, Math.max(1, Math.floor(dealt * move.fx.recoil)));
       user.c.hp -= rec;
-      ev.push({ t: 'damage', side, amount: rec, eff: 1 }, { t: 'text', msg: `${uName} también se lastimó.` });
+      ev.push({ t: 'damage', side, amount: rec, eff: 1, hp: user.c.hp }, { t: 'text', msg: `${uName} también se lastimó.` });
     }
     if (target.c.hp > 0 || move.fx.selfAlways) this.#applyEffects(side, move, ev, false);
   }
@@ -210,7 +213,7 @@ export class BattleEngine {
       const amt = Math.min(maxHp(user.c) - user.c.hp, Math.floor(maxHp(user.c) * fx.heal));
       if (amt > 0) {
         user.c.hp += amt;
-        ev.push({ t: 'heal', side }, { t: 'text', msg: `${this.name(side)} recuperó energía.` });
+        ev.push({ t: 'heal', side, hp: user.c.hp }, { t: 'text', msg: `${this.name(side)} recuperó energía.` });
       } else ev.push({ t: 'text', msg: '¡Sus PS ya están al máximo!' });
       did = true;
     }
@@ -236,7 +239,7 @@ export class BattleEngine {
     if (SPECIES[b.c.species].types.includes(IMMUNE[status])) return false;
     b.c.status = status;
     if (status === 'slp') b.sleep = this.#rng.int(1, 3);
-    ev.push({ t: 'statusAnim', side, status }, { t: 'hud' }, { t: 'text', msg: `¡${this.name(side)} está ${STATUS_NAMES[status]}!` });
+    ev.push({ t: 'statusAnim', side, status }, { t: 'hud', php: this.p.c.hp, fhp: this.f.c.hp }, { t: 'text', msg: `¡${this.name(side)} está ${STATUS_NAMES[status]}!` });
     return true;
   }
 
@@ -261,7 +264,7 @@ export class BattleEngine {
       if (b.c.status === 'brn' || b.c.status === 'psn') {
         const d = Math.min(b.c.hp, Math.max(1, Math.floor(maxHp(b.c) / 8)));
         b.c.hp -= d;
-        ev.push({ t: 'statusAnim', side, status: b.c.status }, { t: 'damage', side, amount: d, eff: 1 },
+        ev.push({ t: 'statusAnim', side, status: b.c.status }, { t: 'damage', side, amount: d, eff: 1, hp: b.c.hp },
           { t: 'text', msg: b.c.status === 'brn' ? `${this.name(side)} sufre por la quemadura.` : `${this.name(side)} sufre por el veneno.` });
       }
     }
@@ -348,13 +351,11 @@ export class BattleEngine {
       return false;
     }
     const c = this.f.c;
-    const mx = maxHp(c);
-    const statusBonus = c.status === 'slp' ? 2 : c.status ? 1.5 : 1;
-    const a = Math.min(255, (((3 * mx - 2 * c.hp) * SPECIES[c.species].catchRate * ball) / (3 * mx)) * statusBonus);
+    const a = catchValue({ catchRate: SPECIES[c.species].catchRate, level: c.level, hp: c.hp, maxHp: maxHp(c), ball, status: c.status });
     let shakes = 0;
-    if (ball >= 255 || a >= 255) shakes = 4;
+    if (a >= 255) shakes = 4;
     else {
-      const b = 65536 / Math.pow(255 / Math.max(1, a), 0.1875);
+      const b = 65536 * shakeChance(a);
       while (shakes < 4 && this.#rng.int(0, 65535) < b) shakes++;
     }
     const caught = shakes === 4;
@@ -378,7 +379,7 @@ export class BattleEngine {
     }
     const res = applyItem(itemKey, c);
     if (res) {
-      if (c === this.p.c) ev.push({ t: 'heal', side: 0 }, { t: 'hud' });
+      if (c === this.p.c) ev.push({ t: 'heal', side: 0, hp: c.hp }, { t: 'hud', php: this.p.c.hp, fhp: this.f.c.hp });
       ev.push({ t: 'text', msg: res });
     }
   }
@@ -424,7 +425,7 @@ export class BattleEngine {
     const it = ITEMS[itemKey];
     ev.push({ t: 'text', msg: `¡${this.trainer.name} usó ${it.name}!` });
     const res = applyItem(itemKey, this.f.c);
-    ev.push({ t: 'heal', side: 1 }, { t: 'hud' });
+    ev.push({ t: 'heal', side: 1, hp: this.f.c.hp }, { t: 'hud', php: this.p.c.hp, fhp: this.f.c.hp });
     if (res) ev.push({ t: 'text', msg: res.replace(displayName(this.f.c), this.name(1)) });
   }
 

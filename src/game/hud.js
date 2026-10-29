@@ -1,4 +1,4 @@
-// In-canvas HUD: quick buttons (music, settings, team), a x1,5 speed badge
+// In-canvas HUD: quick buttons (music, settings, team), a x2 speed badge
 // while Space is held, and a live team panel. Read-only over game state.
 import { h } from '../core/util.js';
 import { input } from '../core/input.js';
@@ -34,7 +34,7 @@ function syncButtons() {
 
 export function mountHud({ screen, game, openSettings, openMap }) {
   isGame = game;
-  speed = h('div', { class: 'hud-speed', 'aria-hidden': 'true' }, h('b', { text: '▶▶' }), h('span', { text: 'x1,5' }));
+  speed = h('div', { class: 'hud-speed', 'aria-hidden': 'true' }, h('b', { text: '▶▶' }), h('span', { text: 'x2' }));
   party = h('ol', { class: 'hud-party', 'aria-label': 'Equipo' });
   btnMusic = h('button', { type: 'button', class: 'hud-btn', 'aria-label': 'Música' });
   btnParty = h('button', { type: 'button', class: 'hud-btn', 'aria-label': 'Equipo' }, '▤');

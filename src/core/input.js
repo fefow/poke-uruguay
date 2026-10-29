@@ -9,7 +9,7 @@ const KEYMAP = {
   ArrowLeft: 'left', KeyA: 'left',
   ArrowRight: 'right', KeyD: 'right',
   KeyZ: 'a', KeyJ: 'a', Enter: 'enter',
-  Space: 'run', // held: walk 1.5x faster
+  Space: 'run', // held: 2x speed (walking, battle animations and text)
   KeyX: 'b', Backspace: 'b', KeyK: 'b', ShiftLeft: 'b', ShiftRight: 'b',
   Escape: 'start', KeyM: 'start', Tab: 'start',
 };

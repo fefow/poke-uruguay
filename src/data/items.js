@@ -4,9 +4,9 @@ import { MOVES } from './moves.js';
 // pocket: 'items' | 'balls' | 'key'
 // use: what the item does; validated in game/items logic, never trusted from saves.
 const BASE_ITEMS = {
-  esfera: { name: 'Pokeball', pocket: 'balls', price: 200, ball: 1, desc: 'Una bola de cuero para atrapar criaturas salvajes.' },
-  superesfera: { name: 'Superball', pocket: 'balls', price: 600, ball: 1.5, desc: 'Mejor que la Pokeball. Cosida a mano en Tacuarembó.' },
-  ultraesfera: { name: 'Ultraball', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Muy efectiva.' },
+  esfera: { name: 'Pokeball', pocket: 'balls', price: 200, ball: 1, desc: 'Una bola de cuero para atrapar criaturas salvajes. Efectividad ×1.' },
+  superesfera: { name: 'Superball', pocket: 'balls', price: 600, ball: 1.5, desc: 'Mejor que la Pokeball. Cosida a mano en Tacuarembó. Efectividad ×1,5.' },
+  ultraesfera: { name: 'Ultraball', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Efectividad ×2. Ideal para criaturas raras o de nivel alto.' },
   esfera_celeste: { name: 'Pokeball Celeste', pocket: 'balls', price: 0, ball: 255, desc: 'Celeste como la camiseta. Atrapa sin fallar.' },
 
   te_marcela: { mate: true, name: 'Mate: Sara', pocket: 'items', price: 300, heal: 20, desc: 'El mate más suave, casi lavado. Recupera 20 PS.' },

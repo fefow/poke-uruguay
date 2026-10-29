@@ -72,7 +72,7 @@ export const OUTDOOR = {
     ],
     signs: ['RUTA 1\n← Colonia del Sacramento   Montevideo →'],
     exits: { w: { to: 'colonia' }, e: { to: 'rosario' } },
-    enc: { rate: 0.12, list: [['teruterito', 2, 3, 28], ['hornerito', 2, 3, 22], ['nandulin', 3, 4, 14], ['zorrigris', 3, 4, 14], ['ternero', 2, 4, 14], ['oruga', 2, 4, 14], ['tuco', 3, 4, 14], ['venadito', 4, 4, 4]] },
+    enc: { rate: 0.12, list: [['teruterito', 2, 3, 28], ['hornerito', 2, 3, 22], ['nandulin', 3, 4, 14], ['hormiga', 2, 4, 14], ['ternero', 2, 4, 14], ['oruga', 2, 4, 14], ['tuco', 3, 4, 14], ['venadito', 4, 4, 4]] },
     fish: [['pejerrey', 3, 5, 70], ['camalote', 3, 5, 30]],
     npcs: [
       { x: 9, y: 5, look: 'boy', dir: 'down', sight: 4, trainer: TR('r1_a', 'Mateo', 'Aprendiz', [['oruga', 3], ['tuco', 3]], 80, 'Tenés una criatura. Veamos qué tal te va.', 'Me ganaste.', 'Voy a entrenar más en el pastizal.') },
@@ -158,7 +158,7 @@ export const OUTDOOR = {
     ],
     signs: ['RUTA INTERBALNEARIA\n← Montevideo   Punta del Este →\nAtlántida, Piriápolis y la costa de oro.'],
     exits: { w: { to: 'montevideo' }, e: { to: 'piriapolis' } },
-    enc: { rate: 0.12, list: [['butia', 10, 13, 22], ['cardo', 10, 12, 8], ['mulitin', 10, 13, 18], ['teruterito', 11, 13, 15], ['benteve', 11, 13, 15], ['yararita', 10, 12, 14], ['venadito', 11, 13, 10], ['mbigua', 12, 13, 6], ['gaviota', 11, 13, 12], ['cangrejo', 11, 13, 10], ['oveja', 10, 12, 12], ['pavesa', 12, 13, 6]] },
+    enc: { rate: 0.12, list: [['cardo', 11, 13, 6], ['comadreja', 10, 13, 22], ['pejerrey', 10, 12, 8], ['mulitin', 10, 13, 18], ['teruterito', 11, 13, 15], ['benteve', 11, 13, 15], ['yararita', 10, 12, 14], ['venadito', 11, 13, 10], ['mbigua', 12, 13, 6], ['gaviota', 11, 13, 12], ['cangrejo', 11, 13, 10], ['oveja', 10, 12, 12], ['chimango', 12, 13, 6], ['nimbo', 11, 13, 6], ['lechuza', 11, 13, 6], ['pibe', 11, 13, 6], ['coati', 11, 13, 6]] },
     fish: [['pejerrey', 11, 13, 50], ['aguaviva', 11, 13, 30], ['anguila', 12, 13, 20]],
     npcs: [
       { x: 8, y: 4, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('ib_a', 'Santi', 'Surfista', [['mbigua', 13], ['lobito', 13]], 260, 'Las olas en La Paloma están muy buenas, pero primero un combate.', 'Me revolcaron.', 'Andá a Punta del Este: ahí está el segundo gimnasio.', 'swimmer') },
@@ -195,7 +195,7 @@ export const OUTDOOR = {
     doors: ['gym_pde', 'poli_pde', 'shop_pde'],
     signs: ['PUNTA DEL ESTE\nPlaya Brava ↓ — Puerto ↘\n"Los Dedos" esperan en la arena.'],
     exits: { w: { to: 'piriapolis' }, e: { to: 'paloma' } },
-    enc: { rate: 0.1, list: [['mbigua', 14, 16, 30], ['benteve', 14, 16, 25], ['lobito', 14, 16, 15], ['cotorrayo', 15, 16, 15], ['teruterazo', 16, 17, 5], ['flamenco', 15, 17, 6], ['criollo', 15, 17, 8], ['alazan', 15, 17, 8], ['hormiguero', 14, 16, 8]] },
+    enc: { rate: 0.1, list: [['mbigua', 14, 16, 30], ['benteve', 14, 16, 25], ['lobito', 14, 16, 15], ['cotorrayo', 15, 16, 15], ['teruterazo', 16, 17, 5], ['flamenco', 15, 17, 6], ['tarantula', 15, 17, 8], ['gaviota', 15, 17, 8], ['hormiguero', 14, 16, 8]] },
     fish: [['aguaviva', 15, 17, 40], ['pejerrey', 15, 17, 30], ['franciscana', 16, 17, 15], ['anguila', 15, 17, 15]],
     npcs: [
       { x: 6, y: 12, look: 'girl', text: ['La Mano es una escultura de dedos que emergen de la arena.', 'Es un recordatorio para los bañistas: la playa Brava es peligrosa.'] },
@@ -232,7 +232,7 @@ export const OUTDOOR = {
     signs: [],
     exits: { w: { to: 'paloma' } },
     warps: [{ x: 9, y: 4, to: 'faro_cabo', tx: 4, ty: 6 }],
-    enc: { rate: 0.12, list: [['lobito', 17, 20, 30], ['tortugal', 18, 20, 12], ['mbigua', 17, 19, 20], ['cotorrayo', 17, 19, 18], ['butia', 17, 19, 20], ['alacran', 18, 20, 10], ['fosil', 18, 20, 6], ['ciempies', 18, 20, 10]] },
+    enc: { rate: 0.12, list: [['lobito', 17, 20, 30], ['tortugal', 18, 20, 12], ['mbigua', 17, 19, 20], ['cotorrayo', 17, 19, 18], ['tatu', 17, 19, 20], ['pejerrey', 18, 20, 10], ['hormiguero', 18, 20, 6], ['chimango', 18, 20, 10]] },
     fish: [['franciscana', 18, 20, 30], ['aguaviva', 18, 20, 40], ['anguila', 18, 20, 30]],
     npcs: [
       { x: 2, y: 7, look: 'keeper', cond: (f) => !f.cabo_clear, text: ['El Equipo PP se llevó la lámpara del faro.', 'Sin luz, los barcos pueden chocar contra las rocas.'] },
@@ -273,7 +273,7 @@ export const OUTDOOR = {
     ],
     signs: ['RUTA 8 — Brigadier General Juan Antonio Lavalleja\n↑ Treinta y Tres / Quebrada de los Cuervos   ↓ Montevideo'],
     exits: { s: { to: 'montevideo' }, n: { to: 'minas' } },
-    enc: { rate: 0.13, list: [['gatomontes', 22, 25, 15], ['venadito', 22, 24, 18], ['cotorrayo', 22, 24, 15], ['luciernito', 22, 24, 15], ['yararita', 23, 25, 15], ['yacarito', 22, 24, 12], ['zorrigris', 23, 25, 8], ['aguaraflama', 24, 24, 2], ['tamborilero', 23, 25, 8], ['boleador', 23, 25, 8], ['fanal', 23, 25, 8], ['tarantula', 23, 25, 8], ['viuda', 23, 25, 8]] },
+    enc: { rate: 0.13, list: [['tala', 22, 24, 6], ['gatomontes', 22, 25, 15], ['venadito', 22, 24, 18], ['cotorrayo', 22, 24, 15], ['luciernito', 22, 24, 15], ['yararita', 23, 25, 15], ['yacarito', 22, 24, 12], ['zorrigris', 23, 25, 8], ['aguaraflama', 24, 24, 2], ['tamborilero', 23, 25, 8], ['boleador', 23, 25, 8], ['fanal', 23, 25, 8], ['tarantula', 23, 25, 8], ['viuda', 23, 25, 8], ['huron', 23, 25, 6], ['peon', 23, 25, 6], ['caudillo', 23, 25, 6]] },
     fish: [['anguila', 22, 25, 40], ['camalote', 22, 25, 40], ['pejerrey', 22, 24, 20]],
     npcs: [
       { x: 15, y: 15, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('r8_a', 'Don Ceferino', 'Gaucho', [['nanduro', 25], ['venadito', 24]], 500, 'Por la Ruta 8 solo pasan los que tienen coraje.', 'Está bien, pasaste.', 'Que te vaya bien en el camino.', 'gaucho') },
@@ -314,7 +314,7 @@ export const OUTDOOR = {
     doors: ['casa_tyt', 'poli_tyt', 'gym_tyt', 'shop_tyt'],
     signs: ['TREINTA Y TRES — QUEBRADA DE LOS CUERVOS\nPrimer Área Protegida del Uruguay. Cuidá la naturaleza.'],
     exits: { s: { to: 'minas' } },
-    enc: { rate: 0.13, list: [['cuervon', 26, 29, 25], ['mulitin', 26, 28, 15], ['picaflorin', 27, 29, 12], ['zorrigris', 27, 29, 15], ['yacarito', 26, 28, 13], ['gatomontes', 27, 29, 12], ['mulitron', 29, 30, 8], ['curupi', 27, 29, 6]] },
+    enc: { rate: 0.13, list: [['cuervon', 26, 29, 25], ['mulitin', 26, 28, 15], ['picaflorin', 27, 29, 12], ['oruga', 27, 29, 15], ['butia', 26, 28, 13], ['gatomontes', 27, 29, 12], ['mulitron', 29, 30, 8], ['curupi', 27, 29, 6], ['sapo', 27, 29, 6], ['ciempies', 27, 29, 6]] },
     fish: [['camalote', 26, 29, 50], ['anguila', 26, 29, 40], ['pejerrey', 26, 28, 10]],
     npcs: [
       { x: 12, y: 2, look: 'boss', dir: 'down', id: 'brumario', cond: (f) => f.badge3 && !f.quebrada_clear, script: 'brumario' },
@@ -354,7 +354,7 @@ export const OUTDOOR = {
     doors: ['shop_ros', 'casa_ros'],
     signs: ['ROSARIO\nLocalidad del departamento de Colonia. Aquí termina el campo y empieza el camino a la capital.'],
     exits: { w: { to: 'ruta1' }, e: { to: 'montevideo' } },
-    enc: { rate: 0.1, list: [['pibe', 6, 8, 16], ['sapo', 6, 8, 16], ['comadreja', 7, 9, 14], ['chimango', 7, 9, 14], ['hormiga', 6, 8, 14], ['guijarro', 7, 9, 12], ['tala', 7, 9, 10], ['cascarudo', 7, 9, 10]] },
+    enc: { rate: 0.1, list: [['tuco', 6, 8, 16], ['gaviota', 6, 8, 16], ['tatu', 7, 9, 14], ['chimango', 7, 9, 14], ['hormiga', 6, 8, 14], ['yacarito', 7, 9, 12], ['lobito', 7, 9, 10], ['cascarudo', 7, 9, 10]] },
     fish: [['pejerrey', 6, 9, 60], ['camalote', 6, 8, 30], ['aguaviva', 7, 9, 10]],
     npcs: [
       { x: 8, y: 8, look: 'boy', dir: 'right', sight: 4, trainer: TR('ros_a', 'Beto', 'Pescador', [['pejerrey', 7], ['sapo', 7]], 160, 'Hoy no pican. Mejor combatamos.', 'Me ganaste.', 'Con una caña de pescar vas a poder sacar criaturas del agua.', 'boy') },
@@ -391,7 +391,7 @@ export const OUTDOOR = {
     doors: ['casa_pir', 'shop_pir'],
     signs: ['PIRIÁPOLIS\nBalneario fundado a principios del siglo XX. Al fondo se ve el Cerro San Antonio.'],
     exits: { w: { to: 'interbalnearia' }, e: { to: 'punta' } },
-    enc: { rate: 0.1, list: [['peon', 12, 14, 14], ['lechuza', 12, 14, 12], ['avispa', 12, 14, 14], ['geoda', 13, 15, 10], ['murcielago', 12, 14, 12], ['tatu', 12, 14, 12], ['carpintero', 13, 15, 12], ['nimbo', 13, 15, 10]] },
+    enc: { rate: 0.1, list: [['pejerrey', 12, 14, 14], ['gaviota', 12, 14, 12], ['avispa', 12, 14, 14], ['chimango', 13, 15, 10], ['murcielago', 12, 14, 12], ['tatu', 12, 14, 12], ['carpintero', 13, 15, 12], ['tuco', 13, 15, 10]] },
     fish: [['pejerrey', 12, 15, 50], ['aguaviva', 12, 15, 30], ['anguila', 13, 15, 20]],
     npcs: [
       { x: 14, y: 9, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('pir_a', 'Mauro', 'Guardavidas', [['gaviota', 13], ['aguaviva', 13]], 260, 'Estoy de guardia, pero un combate no le hace mal a nadie.', 'Buen combate.', 'Cuidado con las aguavivas: dejan ronchas.', 'swimmer') },
@@ -427,7 +427,7 @@ export const OUTDOOR = {
     doors: ['shop_pal', 'casa_pal'],
     signs: ['LA PALOMA\nBalneario del departamento de Rocha. Faro de 1874 sobre la Punta del Diablo, más al este.'],
     exits: { w: { to: 'punta' }, e: { to: 'cabo' } },
-    enc: { rate: 0.1, list: [['coati', 16, 18, 14], ['huron', 16, 18, 12], ['garza', 16, 18, 14], ['arenisca', 17, 19, 10], ['tapir', 17, 19, 10], ['candil', 16, 18, 12], ['gaviota', 16, 18, 14], ['cangrejo', 16, 18, 14]] },
+    enc: { rate: 0.1, list: [['tatu', 16, 18, 14], ['pejerrey', 16, 18, 12], ['garza', 16, 18, 14], ['chimango', 17, 19, 10], ['hormiguero', 17, 19, 10], ['tuco', 16, 18, 12], ['gaviota', 16, 18, 14], ['cangrejo', 16, 18, 14]] },
     fish: [['pejerrey', 16, 19, 40], ['aguaviva', 16, 19, 30], ['franciscana', 17, 19, 15], ['anguila', 17, 19, 15]],
     npcs: [
       { x: 12, y: 9, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('pal_a', 'Gonzalo', 'Surfista', [['gaviota', 17], ['cangrejo', 17]], 340, 'Las olas están perfectas. Después de este combate, voy al agua.', 'Me revolcaste.', 'La corriente de Rocha es fuerte. Cuidado al meterse.', 'swimmer') },
@@ -449,7 +449,7 @@ export const OUTDOOR = {
       '#KKKKK......=.......KKKKK#',
       '#KKKKK,,,,..=...q.....KKK#',
       '#KKK..,,,,..=............#',
-      '#.....,,,,..=..,,,,,.....#',
+      '......,,,,..=..,,,,,.....#',
       '#...........=..,,,,,.....#',
       '#...f.......=..,,,,,..f..#',
       '#..........S=............#',
@@ -465,8 +465,8 @@ export const OUTDOOR = {
     ],
     doors: ['shop_min', 'casa_min', { to: 'pp_1', req: 'quebrada_clear', deny: 'La puerta de la fábrica está sellada con candados. Todavía hay mucha niebla en las sierras, y alguien adentro.' }],
     signs: ['MINAS\nCapital del departamento de Lavalleja. Entre sierras, cerros y el agua más pura del país.'],
-    exits: { s: { to: 'ruta8' }, n: { to: 'quebrada' } },
-    enc: { rate: 0.1, list: [['tatadios', 24, 26, 14], ['pararrayo', 25, 27, 10], ['cuchilla', 25, 27, 10], ['cerro', 25, 27, 10], ['pombero', 25, 27, 8], ['caudillo', 26, 27, 6], ['gatomontes', 24, 26, 14], ['cotorrayo', 24, 26, 14]] },
+    exits: { s: { to: 'ruta8' }, n: { to: 'quebrada' }, w: { to: 'durazno', req: 'badge3', deny: 'Un camino de ceniza baja hacia el oeste. El aire quema: todavía no estás listo para ese calor.' } },
+    enc: { rate: 0.1, list: [['tatadios', 24, 26, 14], ['pararrayo', 25, 27, 10], ['cuchilla', 25, 27, 10], ['cerro', 25, 27, 10], ['pombero', 25, 27, 8], ['lobomarino', 26, 27, 6], ['gatomontes', 24, 26, 14], ['cotorrayo', 24, 26, 14], ['criollo', 25, 27, 6], ['candil', 25, 27, 6], ['tapir', 25, 27, 6], ['fosil', 25, 27, 6]] },
     npcs: [
       { x: 7, y: 9, look: 'boy', dir: 'right', sight: 4, trainer: TR('min_a', 'Ramiro', 'Serrano', [['tatadios', 25], ['cerro', 26]], 520, 'Crecí entre estas sierras. Las conozco mejor que nadie.', 'Se nota que estás hecho para el camino.', 'Más adelante está la Quebrada de los Cuervos. El aire es distinto.', 'boy') },
       { x: 18, y: 6, look: 'girl', dir: 'left', sight: 3, trainer: TR('min_b', 'Marina', 'Guía de sierra', [['cuchilla', 26], ['pararrayo', 26]], 540, 'Si querés subir al cerro, antes demostrame que podés.', 'Podés subir.', 'La Virgen del Verdún se ve desde muchos puntos de la ciudad.', 'girl') },
@@ -476,6 +476,42 @@ export const OUTDOOR = {
     ],
     items: [{ x: 23, y: 5, item: 'alfajor', id: 'min_item1' }],
     legend: { x: 21, y: 4, species: 'yaguarete', level: 65, flag: 'caught_yaguarete', cond: (f) => f.champion && f.caught_pamperon && f.caught_ballenaplata && f.caught_soldemayo, text: 'Entre los cerros, unos ojos dorados te observan. Una presencia enorme llena el aire.' },
+  },
+  durazno: {
+    name: 'Durazno',
+    music: 'town',
+    bg: 'canyon',
+    locality: true,
+    tiles: [
+      'KKKKKKKKKKKKKKKKKKKKKKKKKK',
+      'K``;;;;;;```^^^``````````K',
+      'K``;;;;;;```^^^``````````K',
+      'K``UUUUU`````````ooooo```K',
+      'K``UUUUU`````````ooooo```K',
+      'K``ttDtt`````````HwDwH````',
+      'K=========================',
+      'K```````````=`````````S``K',
+      'K^^``````R``=```R````````K',
+      'K^^`````````=`;;;;;;;````K',
+      'K``R``R`````=`;;;;;;;^^^`K',
+      'K`````````R`=`;;;;;;;^^^`K',
+      'K`;;;;;`````=`;;;;;;;^^^`K',
+      'K`;;;;;`````=`;;;;;;;````K',
+      'K`;;;;;`^^^`=```````````RK',
+      'K`;;;;;`^^^`=````````````K',
+      'K`;;;;;`````=``````R`````K',
+      'KKKKKKKKKKKKKKKKKKKKKKKKKK',
+    ],
+    doors: ['shop_dur', 'casa_dur'],
+    signs: ['DURAZNO\nEn el centro del país el verano pega fuerte. Dicen que bajo la ceniza todavía hay brasas de un antiguo volcán.'],
+    exits: { e: { to: 'minas' } },
+    enc: { rate: 0.12, list: [['corcel', 27, 29, 16], ['pavesa', 26, 28, 16], ['fogata', 28, 30, 10], ['alacran', 26, 28, 16], ['escorpio', 28, 30, 10], ['tucoterra', 27, 29, 10], ['pedrusco', 27, 29, 12], ['aguaraflama', 30, 31, 4], ['alazan', 27, 29, 6], ['guijarro', 27, 29, 6], ['geoda', 27, 29, 6], ['arenisca', 27, 29, 6]] },
+    npcs: [
+      { x: 8, y: 7, look: 'gaucho', dir: 'right', sight: 3, trainer: TR('dur_a', 'Rodrigo', 'Herrero', [['corcel', 29], ['alacran', 28]], 720, 'El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Con este calor, hasta el hierro trabaja solo.', 'gaucho') },
+      { x: 15, y: 7, look: 'girl', dir: 'left', sight: 3, trainer: TR('dur_b', 'Camila', 'Geóloga', [['tucoterra', 29], ['pedrusco', 29]], 740, 'Estudio por qué el suelo guarda tanto calor.', 'Buen resultado.', 'Debajo de la ceniza hay mucha energía.', 'girl') },
+      { x: 14, y: 6, look: 'oldman', text: ['Hace décadas no llueve como antes. La ceniza lo cubre todo.', 'Las criaturas de fuego se sienten cómodas acá.'] },
+    ],
+    items: [{ x: 24, y: 15, item: 'piedra_agata', id: 'dur_item1' }, { x: 23, y: 2, item: 'dulce_de_leche', id: 'dur_item2' }],
   },
 };
 
@@ -661,6 +697,11 @@ export const INTERIOR = {
   casa_pal: room(HOUSE, {
     name: 'Casa en La Paloma',
     npcs: [{ x: 6, y: 3, look: 'swimmer', dir: 'left', script: 'gift_pal' }],
+  }),
+  shop_dur: shop('Almacén de Durazno', ['superesfera', 'ultraesfera', 'mate_dulce', 'dulce_de_leche', 'alfajor', 'aloe', 'refuerzo_ataque', 'refuerzo_especial', 'piedra_agata', 'mt_parrillada']),
+  casa_dur: room(HOUSE, {
+    name: 'Casa en Durazno',
+    npcs: [{ x: 6, y: 3, look: 'oldman', dir: 'left', script: 'gift_dur' }],
   }),
   casa_min: room(HOUSE, {
     name: 'Casa en Minas',

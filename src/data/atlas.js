@@ -21,6 +21,7 @@ export const PLACES = deepFreeze([
   { id: 'cabo', name: 'Cabo Polonio', kind: 'place', lon: -53.77, lat: -34.4, note: 'Faro' },
   { id: 'minas', name: 'Minas', kind: 'loc', lon: -55.24, lat: -34.37, note: 'Mate: Canarias' },
   { id: 'quebrada', name: 'Treinta y Tres', kind: 'city', lon: -54.38, lat: -33.23, color: '#a48e48', note: 'Gimnasio de Roca' },
+  { id: 'durazno', name: 'Durazno', kind: 'loc', lon: -56.5, lat: -33.0, note: 'Zona de ceniza y magma' },
 ]);
 
 // Mapas de ruta: se muestran entre los dos lugares que unen.
@@ -33,7 +34,7 @@ export const ROUTES = deepFreeze({
 // Líneas que unen los lugares en orden de recorrido.
 export const LINKS = deepFreeze([
   ['colonia', 'rosario'], ['rosario', 'montevideo'], ['montevideo', 'piriapolis'], ['piriapolis', 'punta'],
-  ['punta', 'paloma'], ['paloma', 'cabo'], ['montevideo', 'minas'], ['minas', 'quebrada'],
+  ['punta', 'paloma'], ['paloma', 'cabo'], ['montevideo', 'minas'], ['minas', 'quebrada'], ['minas', 'durazno'],
 ]);
 
 export const VIEW = { w: 340, h: 250, lon0: -59.76, lon1: -52.04, lat0: -29.9, lat1: -35.2 };
@@ -41,6 +42,52 @@ export const project = (lon, lat) => [
   Math.round(((lon - VIEW.lon0) / (VIEW.lon1 - VIEW.lon0)) * VIEW.w * 10) / 10,
   Math.round(((VIEW.lat0 - lat) / (VIEW.lat0 - VIEW.lat1)) * VIEW.h * 10) / 10,
 ];
+
+// Departamentos y zonas ------------------------------------------------------
+// Cada departamento pertenece a una zona (bioma) que decide qué elementos aparecen allí.
+export const BIOMES = deepFreeze({
+  playa: { name: 'Costa y arena', color: '#ecd9a0', edge: '#c8b070', types: ['agua', 'tierra', 'volador', 'bicho'] },
+  ciudad: { name: 'Ciudad', color: '#b4bccf', edge: '#8a93aa', types: ['electrico', 'normal', 'siniestro', 'lucha', 'veneno'] },
+  campo: { name: 'Campo', color: '#b4cc72', edge: '#8aa44c', types: ['normal', 'planta', 'tierra', 'volador', 'bicho'] },
+  bosque: { name: 'Monte', color: '#5f9f58', edge: '#3f7a3c', types: ['planta', 'bicho', 'veneno'] },
+  magma: { name: 'Ceniza y magma', color: '#e0805a', edge: '#b05030', types: ['fuego', 'tierra', 'roca'] },
+  hielo: { name: 'Sierra helada', color: '#cfe6f2', edge: '#9cc4d8', types: ['psiquico', 'agua', 'roca'] },
+});
+
+// w: peso para repartir el territorio (los departamentos chicos achican su zona).
+export const DEPARTMENTS = deepFreeze([
+  { id: 'artigas', name: 'Artigas', lon: -56.9, lat: -30.5, biome: 'campo' },
+  { id: 'salto', name: 'Salto', lon: -57.3, lat: -31.5, biome: 'campo' },
+  { id: 'paysandu', name: 'Paysandú', lon: -57.6, lat: -32.3, biome: 'campo' },
+  { id: 'rionegro', name: 'Río Negro', lon: -57.4, lat: -32.95, biome: 'campo' },
+  { id: 'soriano', name: 'Soriano', lon: -57.7, lat: -33.6, biome: 'campo' },
+  { id: 'colonia', name: 'Colonia', lon: -57.45, lat: -34.25, biome: 'playa', w: 0.8 },
+  { id: 'rivera', name: 'Rivera', lon: -55.5, lat: -31.1, biome: 'bosque' },
+  { id: 'tacuarembo', name: 'Tacuarembó', lon: -55.9, lat: -32.1, biome: 'bosque', w: 1.2 },
+  { id: 'durazno', name: 'Durazno', lon: -56.5, lat: -33.0, biome: 'magma' },
+  { id: 'flores', name: 'Flores', lon: -56.9, lat: -33.55, biome: 'magma', w: 0.55 },
+  { id: 'florida', name: 'Florida', lon: -56.0, lat: -33.9, biome: 'magma', w: 0.8 },
+  { id: 'sanjose', name: 'San José', lon: -56.8, lat: -34.35, biome: 'campo', w: 0.7 },
+  { id: 'canelones', name: 'Canelones', lon: -55.95, lat: -34.6, biome: 'ciudad', w: 0.65 },
+  { id: 'montevideo', name: 'Montevideo', lon: -56.2, lat: -34.85, biome: 'ciudad', w: 0.3 },
+  { id: 'lavalleja', name: 'Lavalleja', lon: -55.3, lat: -34.0, biome: 'hielo', w: 0.9 },
+  { id: 'maldonado', name: 'Maldonado', lon: -54.8, lat: -34.6, biome: 'playa', w: 0.65 },
+  { id: 'rocha', name: 'Rocha', lon: -54.0, lat: -34.1, biome: 'playa' },
+  { id: 'treintaytres', name: 'Treinta y Tres', lon: -54.2, lat: -33.2, biome: 'campo' },
+  { id: 'cerrolargo', name: 'Cerro Largo', lon: -54.2, lat: -32.4, biome: 'campo' },
+]);
+
+// Departamento de cada lugar del mapa.
+export const PLACE_DEPT = deepFreeze({
+  colonia: 'colonia', rosario: 'colonia', montevideo: 'montevideo', piriapolis: 'maldonado', punta: 'maldonado',
+  paloma: 'rocha', cabo: 'rocha', minas: 'lavalleja', quebrada: 'treintaytres', durazno: 'durazno',
+});
+
+// Zona (bioma) de cada mapa con criaturas salvajes.
+export const MAP_BIOME = deepFreeze({
+  ruta1: ['campo'], rosario: ['playa'], interbalnearia: ['ciudad', 'playa'], piriapolis: ['playa'], punta: ['playa'], paloma: ['playa'], cabo: ['playa'],
+  ruta8: ['campo', 'ciudad'], minas: ['hielo', 'campo'], quebrada: ['campo', 'bosque'], durazno: ['magma'],
+});
 
 // Adornos del mapa (pinos y cerros), en [lon, lat].
 export const TREES = deepFreeze([

@@ -8,7 +8,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.js';
 import { charSprite } from '../gfx/characters.js';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.js';
 import { vignette } from '../gfx/fx.js';
-import { h, wait, clamp } from '../core/util.js';
+import { h, wait as baseWait, clamp } from '../core/util.js';
 import { sfx, playMusic, currentTrack } from '../core/audio.js';
 import { input } from '../core/input.js';
 import { say, choose, ask, closeDialog, uiRoot, textInput, fmt } from './ui.js';
@@ -166,7 +166,12 @@ const easeIn = (p) => p * p;
 const easeInOut = (p) => (p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2);
 const easeOutBack = (p) => 1 + 2.70158 * (p - 1) ** 3 + 1.70158 * (p - 1) ** 2;
 
-async function tween(ms, fn, ease = (p) => p) {
+// Holding Space doubles the pace of battle animations and waits.
+const pace = () => (input.held('run') ? 2 : 1);
+const wait = (ms) => baseWait(ms / pace());
+
+async function tween(rawMs, fn, ease = (p) => p) {
+  const ms = rawMs / pace();
   const t0 = performance.now();
   return new Promise((res) => {
     const step = () => {
@@ -201,7 +206,7 @@ function buildHud() {
   hud = { layer, foe, ply, balls };
 }
 
-function setHud(which, c, { instant = false } = {}) {
+function setHud(which, c, { instant = false, hp = c?.hp } = {}) {
   const el = hud[which];
   el.hidden = !c;
   if (!c) return;
@@ -211,13 +216,13 @@ function setHud(which, c, { instant = false } = {}) {
   const st = el.querySelector('.bhud-status');
   st.textContent = c.status ? STATUS_SHORT[c.status] : '';
   st.dataset.status = c.status ?? '';
-  const ratio = c.hp / maxHp(c);
+  const ratio = hp / maxHp(c);
   const fill = el.querySelector('.hpbar-fill');
   fill.classList.toggle('no-anim', instant);
   fill.style.setProperty('--hp', ratio);
   fill.dataset.level = ratio > 0.5 ? 'good' : ratio > 0.2 ? 'mid' : 'low';
   const hpTxt = el.querySelector('.bhud-hp');
-  if (hpTxt) hpTxt.textContent = `${Math.max(0, c.hp)}/${maxHp(c)}`;
+  if (hpTxt) hpTxt.textContent = `${Math.max(0, hp)}/${maxHp(c)}`;
   const exp = el.querySelector('.expbar-fill');
   if (exp) {
     const lo = expForLevel(c.level), hi = expForLevel(c.level + 1);
@@ -421,16 +426,26 @@ async function chooseMove(c) {
   closeDialog();
   const info = h('div', { class: 'move-info' });
   uiRoot().append(info);
+  const CAT = { fis: 'Físico', esp: 'Especial', est: 'Estado' };
   const opts = c.moves.map((m) => {
     const d = MOVES[m.id];
-    return { label: d.name, hint: `${m.pp}/${d.pp}`, disabled: m.pp <= 0 && c.moves.some((x) => x.pp > 0) };
+    const content = h('div', { class: 'mv' },
+      h('span', { class: 'mv-name', text: d.name }),
+      h('span', { class: 'mv-sub' },
+        h('i', { class: 'mv-dot', style: { '--type': TYPES[d.type].color } }),
+        h('span', { text: `PP ${m.pp}/${d.pp}` })));
+    return { label: d.name, content, disabled: m.pp <= 0 && c.moves.some((x) => x.pp > 0) };
   });
   const show = (i) => {
     const d = MOVES[c.moves[i].id];
     info.replaceChildren(
-      h('span', { class: 'type-chip', style: { '--type': TYPES[d.type].color }, text: TYPES[d.type].name }),
-      h('span', { text: d.cat === 'est' ? 'Estado' : `Pot. ${d.power}` }),
-      h('span', { text: `Prec. ${d.acc}` }),
+      h('div', { class: 'mi-head' },
+        h('span', { class: 'type-chip', style: { '--type': TYPES[d.type].color }, text: TYPES[d.type].name }),
+        h('span', { class: 'mi-cat', text: CAT[d.cat] })),
+      h('dl', { class: 'mi-stats' },
+        h('dt', { text: 'Poder' }), h('dd', { text: d.cat === 'est' || !d.power ? '—' : String(d.power) }),
+        h('dt', { text: 'Precisión' }), h('dd', { text: d.fx?.never ? '—' : String(d.acc) })),
+      h('p', { class: 'mi-desc', text: d.desc }),
     );
   };
   const r = await choose(opts, { cls: 'menu-moves', onMove: show, cols: 2 });
@@ -454,19 +469,19 @@ async function play(events, leveled) {
         sfx(e.eff > 1 ? 'super' : e.eff < 1 ? 'weak' : 'hit');
         A[e.side === 0 ? 'plyFlash' : 'foeFlash'] = 1;
         hitReaction(side, e.side === 0 ? -1 : 1, e.eff);
-        setHud(side, e.side === 0 ? engine.p.c : engine.f.c);
+        setHud(side, e.side === 0 ? engine.p.c : engine.f.c, { hp: e.hp });
         await wait(520);
         A.plyFlash = A.foeFlash = 0;
         break;
       }
       case 'heal':
         sfx('heal');
-        setHud(e.side === 0 ? 'ply' : 'foe', e.side === 0 ? engine.p.c : engine.f.c);
+        setHud(e.side === 0 ? 'ply' : 'foe', e.side === 0 ? engine.p.c : engine.f.c, { hp: e.hp });
         await wait(400);
         break;
       case 'hud':
-        setHud('ply', engine.p.c);
-        setHud('foe', engine.f.c);
+        setHud('ply', engine.p.c, { hp: e.php });
+        setHud('foe', engine.f.c, { hp: e.fhp });
         break;
       case 'stat':
         sfx(e.up ? 'stat_up' : 'stat_down');

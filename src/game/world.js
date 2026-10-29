@@ -25,7 +25,7 @@ import { drawItem } from '../gfx/items.js';
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
 const RUN_MS = 115;
-const SPACE_MS = Math.round(WALK_MS / 1.5); // Space: 1.5x walking speed
+const SPACE_MS = Math.round(WALK_MS / 2); // Space: 2x speed
 
 // ---------------------------------------------------------------- linking
 let linked = false;

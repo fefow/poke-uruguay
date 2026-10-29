@@ -209,6 +209,14 @@ export const SCRIPTS = {
     await api.npcLeave('garua');
   },
 
+  async gift_dur(api) {
+    if (api.flag('gift_dur')) return api.say('El calor se aguanta mejor con un buen mate.', { name: 'Vecino' });
+    await api.say(['No es fácil vivir con este calor.', 'Pero la gente de acá se las arregla. Llevate esto, que no lo uso.'], { name: 'Vecino' });
+    await api.give('piedra_agata', 1);
+    await api.give('aloe', 5);
+    api.setFlag('gift_dur');
+  },
+
   async gift_min(api) {
     if (api.flag('gift_min')) return api.say('Un buen mate se toma despacio y con buena compañía.', { name: 'Paisano' });
     await api.say('Los de acá tomamos mate con el agua de las sierras. Probalo, que es de lo mejor.', { name: 'Paisano' });
