@@ -14,7 +14,7 @@ export function SCRIPTS_FOR_TEST(rate) {
   for (const key of Object.keys(LINES)) {
     console.log(`\n== starter ${key}`);
     for (const lv of [5, 6]) rate(`rival 1 | starter lvl ${lv}`, [[key, lv]], rivalTeamFor(key, 0), 'basic');
-    for (const lv of [8, 9, 10]) rate(`rival 2 | lead ${lv} +2 mons`, team(key, lv, [['teruterito', 3], ['zorrigris', 4]]), rivalTeamFor(key, 1), 'basic');
+    for (const lv of [12, 13, 14]) rate(`rival 2 | lead ${lv} +2 mons`, team(key, lv, [['teruterito', 3], ['zorrigris', 4]]), rivalTeamFor(key, 1), 'basic');
     for (const lv of [12, 14, 16]) rate(`gym 1 Lucía | lead ${lv} +2 mons`, team(key, lv, [['teruterito', 2], ['zorrigris', 3]]), LEADERS.lucia.team, 'smart');
     for (const lv of [22, 24, 26]) rate(`gym 2 Sofía | lead ${lv} +2 mons`, team(key, lv, [['teruterazo', 3], ['zorromonte', 3]]), LEADERS.sofia.team, 'smart');
     for (const lv of [24, 26, 28]) rate(`rival 3 | lead ${lv} +2 mons`, team(key, lv, [['teruterazo', 3], ['zorromonte', 3]]), rivalTeamFor(key, 2), 'smart');

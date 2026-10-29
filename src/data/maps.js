@@ -127,9 +127,9 @@ export const OUTDOOR = {
       { x: 18, y: 6, look: 'boy', text: ['La líder del gimnasio, Lucía, entrena en el mar todos los días.', 'Sus criaturas son de tipo Agua. Planta y Eléctrico le hacen daño.'] },
       { x: 24, y: 13, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
       { x: 4, y: 6, look: 'grunt', cond: (f) => f.badge1 && !f.cabo_clear, text: ['¿Qué mirás? El Equipo PP va a cubrir todo el país.', 'Sin faros, nadie va a ver lo que hacemos.'] },
-      { x: 2, y: 7, look: 'rival', dir: 'right', id: 'rival_mvd', cond: (f) => !f.rival2, script: 'rival_mvd' },
+      { x: 2, y: 7, look: 'rival', dir: 'right', id: 'rival_mvd', cond: (f) => f.badge1 && !f.rival2, script: 'rival_mvd' },
     ],
-    triggers: [{ x: 0, y: 6, w: 3, h: 4, cond: (f) => !f.rival2, script: 'rival_mvd' }],
+    triggers: [{ x: 0, y: 6, w: 3, h: 4, cond: (f) => f.badge1 && !f.rival2, script: 'rival_mvd' }],
   },
 
   interbalnearia: {

@@ -3,7 +3,7 @@ import { mountScreen, render } from './gfx/screen.js';
 import { buildTileset } from './gfx/tiles.js';
 import { buildAllSprites } from './gfx/creatures.js';
 import { charSprite, LOOKS } from './gfx/characters.js';
-import { mountTouchControls, pollGamepads, input, keyName } from './core/input.js';
+import { pollGamepads, input, keyName } from './core/input.js';
 import { initAudio, setVolumes, sfx } from './core/audio.js';
 import { h, nextFrame, viewTransition, wait } from './core/util.js';
 import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './game/ui.js';
@@ -57,7 +57,6 @@ function frame(now) {
 async function boot() {
   mountScreen($('#view'));
   mountUI($('#ui'));
-  mountTouchControls($('#touch'));
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   setVolumes(settings);
@@ -124,7 +123,7 @@ async function boot() {
 async function titleScreen() {
   mode = 'title';
   startTitle();
-  const press = h('div', { class: 'title-press', text: matchMedia('(pointer: coarse)').matches ? 'Tocá para empezar' : 'Presioná Enter o hacé clic para empezar' });
+  const press = h('div', { class: 'title-press', text: 'Presioná Enter o hacé clic para empezar' });
   uiRoot().append(press);
   press.addEventListener('click', () => input.press('a'));
   await input.waitFor(['a', 'start']);

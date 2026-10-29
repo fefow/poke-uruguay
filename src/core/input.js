@@ -14,8 +14,8 @@ const KEYMAP = {
   Escape: 'start', KeyM: 'start', Tab: 'start',
 };
 
-/** Label for an action in on-screen hints: real keys on desktop, A/B on touch devices. */
-export const keyName = (action) => (matchMedia('(pointer: coarse)').matches ? { a: 'A', b: 'B' }[action] : { a: 'Z', b: 'X' }[action]);
+/** Label for an action in on-screen hints (desktop keyboard). */
+export const keyName = (action) => ({ a: 'Z', b: 'X' }[action]);
 
 const held = new Set();
 const queue = [];
@@ -82,36 +82,6 @@ addEventListener('keyup', (e) => {
   else if (action) held.delete(action);
 });
 addEventListener('blur', () => held.clear());
-
-// ---- Touch controls -------------------------------------------------------
-export function mountTouchControls(root) {
-  const pads = root.querySelectorAll('[data-action]');
-  for (const btn of pads) {
-    const action = btn.dataset.action;
-    let repeat;
-    const down = (e) => {
-      e.preventDefault();
-      btn.setPointerCapture?.(e.pointerId);
-      held.add(action);
-      press(action);
-      btn.classList.add('is-down');
-      navigator.vibrate?.(8);
-      if (['up', 'down', 'left', 'right'].includes(action)) {
-        clearInterval(repeat);
-        repeat = setInterval(() => input.busy && press(action), 180);
-      }
-    };
-    const up = () => {
-      held.delete(action);
-      btn.classList.remove('is-down');
-      clearInterval(repeat);
-    };
-    btn.addEventListener('pointerdown', down);
-    btn.addEventListener('pointerup', up);
-    btn.addEventListener('pointercancel', up);
-    btn.addEventListener('lostpointercapture', up);
-  }
-}
 
 // ---- Gamepad ----------------------------------------------------------------
 const padPrev = {};

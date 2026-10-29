@@ -15,7 +15,7 @@ export function rivalTeamFor(playerStarter, stage) {
   const line = LINE[COUNTER[playerStarter]];
   return [
     [[line[0], 5]],
-    [['teruterito', 6], [line[0], 7]],
+    [['zorrigris', 11], [line[0], 13]],
     [['teruterazo', 17], ['hornerazo', 17], ['zorrigris', 18], [line[1], 20]],
     [['teruterazo', 29], ['zorromonte', 29], ['hornerazo', 30], ['yacaron', 30], [line[2], 33]],
   ][stage];
@@ -225,13 +225,13 @@ export const SCRIPTS = {
 
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
-    await api.say(['{player}, te estaba esperando.', 'Ya capturé una criatura nueva en la Ruta 1.', 'Veamos si seguís teniendo tanta suerte.'], { name: '{rival}' });
-    const res = await api.battle(rival(api, 1, 400, null, 'Perdí. Buen combate.', null), { canLose: true });
+    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Lucía.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
+    const res = await api.battle(rival(api, 1, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
-    if (res === 'win') await api.say(['Voy al gimnasio antes que vos.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Yo sigo hacia Punta del Este. Nos vemos allá.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
-      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Voy al gimnasio antes que vos.'], { name: '{rival}' });
+      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Yo sigo hacia Punta del Este. Nos vemos allá.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_mvd');

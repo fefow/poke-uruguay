@@ -2,8 +2,8 @@
   "name": "Poke Uruguay: La Leyenda del Pampero",
   "short_name": "PokeUY",
   "start_url": "./",
-  "display": "fullscreen",
-  "orientation": "any",
+  "display": "standalone",
+  "orientation": "landscape",
   "background_color": "#14183a",
   "theme_color": "#14183a",
   "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
