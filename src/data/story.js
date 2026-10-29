@@ -15,9 +15,9 @@ export function rivalTeamFor(playerStarter, stage) {
   const line = LINE[COUNTER[playerStarter]];
   return [
     [[line[0], 5]],
-    [['teruterito', 6], [line[0], 8]],
-    [['teruterazo', 18], ['hornerazo', 18], ['zorrigris', 19], [line[1], 21]],
-    [['teruterazo', 30], ['zorromonte', 30], ['hornerazo', 31], ['yacaron', 31], [line[2], 34]],
+    [['teruterito', 6], [line[0], 7]],
+    [['teruterazo', 17], ['hornerazo', 17], ['zorrigris', 18], [line[1], 20]],
+    [['teruterazo', 29], ['zorromonte', 29], ['hornerazo', 30], ['yacaron', 30], [line[2], 33]],
   ][stage];
 }
 const rivalTeam = (api, stage) => rivalTeamFor(api.starterKey(), stage);
@@ -29,14 +29,14 @@ const rival = (api, stage, prize, intro, lose, after) => ({
 export const LEADERS = {
   lucia: {
     id: 'leader_lucia', name: 'Lucía', cls: 'Líder', look: 'leader_water', ai: 'smart', items: ['mate'],
-    team: [['lobito', 8], ['mbigua', 8], ['carpincho', 10]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 3, tm: 'mt_cascada',
+    team: [['lobito', 7], ['mbigua', 7], ['carpincho', 9]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 3, tm: 'mt_cascada',
     intro: ['Soy Lucía, líder del Gimnasio de Montevideo.', 'Entreno en la Rambla todas las mañanas, haga frío o calor.', 'Veamos si resistís la corriente del Plata.'],
     lose: 'Me superaste. Fue una derrota limpia.',
     after: ['Te ganaste la Medalla Montevideo. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo PP opera en la costa este. Andá con cuidado.'],
   },
   sofia: {
     id: 'leader_sofia', name: 'Sofía', cls: 'Líder', look: 'leader_elec', ai: 'smart', items: ['mate'],
-    team: [['luciernito', 16], ['cotorrayo', 17], ['luceron', 19]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 5, tm: 'mt_descarga',
+    team: [['luciernito', 15], ['cotorrayo', 16], ['luceron', 18]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 5, tm: 'mt_descarga',
     intro: ['Bienvenido a Punta del Este. Soy Sofía.', 'Mis criaturas acumulan la electricidad de las tormentas de verano.', 'Preparate para el combate.'],
     lose: 'Me quedé sin respuesta. Buen combate.',
     after: ['La Medalla Maldonado es tuya.', 'El Equipo PP robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],

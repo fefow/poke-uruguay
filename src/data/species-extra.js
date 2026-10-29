@@ -114,7 +114,7 @@ export const LINES = [
   ] },
   { t: 'tierra', role: 't', bst: PAIR, evo: ['piedra_basalto'], mons: [
     ['hormiguero', 'Hormiguero', null, 'quad', '#7a7a6a', '#3a3a30', '#d8d0b0', 'snout_long tail_bushy ears_round', 0.95, 'Su lengua larga entra en los hormigueros sin esfuerzo.'],
-    ['tamandua', 'Tamanduá', 'lucha', 'quad', '#6a6a5a', '#2a2a22', '#d8d0b0', 'snout_long tail_bushy ears_round', 1.25, 'Se defiende con garras poderosas. Se alza ante pumas y jaguares.'],
+    ['tamandua', 'Oso Hormiguero', 'lucha', 'quad', '#6a6a5a', '#2a2a22', '#d8d0b0', 'snout_long tail_bushy ears_round', 1.25, 'Se defiende con garras poderosas. Se alza ante pumas y jaguares.'],
   ] },
 
   // ---------------------------------------------------------------- SINIESTRO
@@ -125,11 +125,11 @@ export const LINES = [
   ] },
   { t: 'siniestro', role: 'b', bst: PAIR, evo: ['piedra_amatista'], mons: [
     ['comadreja', 'Comadreja', null, 'quad', '#8a8a82', '#4a4a44', '#f2f0e6', 'snout_long ears_round tail_bushy mask', 0.9, 'Se hace la muerta cuando la acorralan. Es más lista de lo que parece.'],
-    ['zarigueya', 'Zarigüeya', 'veneno', 'quad', '#6a6a62', '#3a3a34', '#e8e4d8', 'snout_long ears_round tail_bushy mask', 1.15, 'Su cola prensil le permite colgarse de las ramas. Sorprende con un mordisco certero.'],
+    ['zarigueya', 'Comadreja Overa', 'veneno', 'quad', '#6a6a62', '#3a3a34', '#e8e4d8', 'snout_long ears_round tail_bushy mask', 1.15, 'Su cola prensil le permite colgarse de las ramas. Sorprende con un mordisco certero.'],
   ] },
   { t: 'siniestro', role: 'f', bst: PAIR, evo: [25], mons: [
     ['huron', 'Hurón', null, 'cat', '#6a6a6a', '#2a2a2a', '#e8e8e8', '', 0.9, 'Esbelto y rápido, persigue presas por las madrigueras.'],
-    ['grison', 'Grisón', 'lucha', 'cat', '#5a5a5e', '#1a1a1e', '#d8d8d8', '', 1.15, 'Ataca con una rapidez que sorprende a presas más grandes.'],
+    ['grison', 'Hurón Mayor', 'lucha', 'cat', '#5a5a5e', '#1a1a1e', '#d8d8d8', '', 1.15, 'Ataca con una rapidez que sorprende a presas más grandes.'],
   ] },
 
   // ---------------------------------------------------------------- BICHO
@@ -200,7 +200,7 @@ export const LINES = [
 
   // ---------------------------------------------------------------- LUCHA
   { t: 'lucha', role: 'a', bst: TRIO, evo: [16, 34], mons: [
-    ['pibe', 'Pibe', null, 'biped', '#6cb4ee', '#e8b890', '#ffffff', 'gloves', 0.9, 'Un joven luchador de barrio que entrena en la cancha. Nunca deja de correr.'],
+    ['pibe', 'Gurí', null, 'biped', '#6cb4ee', '#e8b890', '#ffffff', 'gloves', 0.9, 'Un joven luchador de barrio que entrena en la cancha. Nunca deja de correr.'],
     ['volante', 'Volante', null, 'biped', '#4a8ad8', '#d8a070', '#ffffff', '', 1.05, 'Domina la mitad de la cancha. Recupera y reparte sin perder la calma.'],
     ['capitan', 'Capitán', 'normal', 'biped', '#2a6ab8', '#c89060', '#f2c02a', 'gloves', 1.28, 'Lidera con garra y con el ejemplo. Su espíritu de equipo inspira a los demás.'],
   ] },
@@ -214,7 +214,7 @@ export const LINES = [
   ] },
   { t: 'lucha', role: 'b', bst: PAIR, evo: [25], mons: [
     ['coati', 'Coatí', null, 'cat', '#9a6a3a', '#4a3018', '#f2e8d0', '', 0.9, 'Explora en grupo y no se asusta con facilidad. Su cola anillada es inconfundible.'],
-    ['coatimundi', 'Coatimundi', 'normal', 'cat', '#8a5a2a', '#3a2410', '#f2e8d0', '', 1.2, 'El macho solitario es más fuerte y hábil de lo que aparenta.'],
+    ['coatimundi', 'Coatí Mayor', 'normal', 'cat', '#8a5a2a', '#3a2410', '#f2e8d0', '', 1.2, 'El macho solitario es más fuerte y hábil de lo que aparenta.'],
   ] },
   { t: 'lucha', role: 'b', bst: [440], evo: [], mons: [
     ['tamborilero', 'Tamborilero', 'normal', 'biped', '#c83a3a', '#8a5a30', '#f2c02a', 'drum', 1.0, 'Marca el ritmo en las calles del barrio Sur. Su compás hace bailar a quien lo escucha.'],

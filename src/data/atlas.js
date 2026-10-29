@@ -36,8 +36,15 @@ export const LINKS = deepFreeze([
   ['punta', 'paloma'], ['paloma', 'cabo'], ['montevideo', 'minas'], ['minas', 'quebrada'],
 ]);
 
-export const VIEW = { w: 300, h: 280, lon0: -58.7, lon1: -53.0, lat0: -30.0, lat1: -35.2 };
+export const VIEW = { w: 340, h: 250, lon0: -59.76, lon1: -52.04, lat0: -29.9, lat1: -35.2 };
 export const project = (lon, lat) => [
   Math.round(((lon - VIEW.lon0) / (VIEW.lon1 - VIEW.lon0)) * VIEW.w * 10) / 10,
   Math.round(((VIEW.lat0 - lat) / (VIEW.lat0 - VIEW.lat1)) * VIEW.h * 10) / 10,
 ];
+
+// Adornos del mapa (pinos y cerros), en [lon, lat].
+export const TREES = deepFreeze([
+  [-57.4, -30.7], [-57.2, -31.6], [-56.8, -30.5], [-56.2, -31.3], [-55.6, -31.2], [-55.0, -31.9], [-54.3, -32.4], [-56.9, -32.4],
+  [-57.5, -33.3], [-56.6, -33.4], [-55.9, -33.9], [-55.3, -32.9], [-54.2, -33.9], [-54.7, -34.4], [-57.0, -34.3], [-55.7, -32.2],
+]);
+export const HILLS = deepFreeze([[-56.4, -32.0], [-55.2, -33.3], [-54.6, -31.9], [-56.6, -30.9], [-54.1, -33.0], [-55.9, -33.1]]);

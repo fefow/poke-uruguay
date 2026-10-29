@@ -14,7 +14,8 @@ import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gain
 import { applyItem, STATUS_SHORT } from './battle-engine.js';
 import { saveGame, listSaves } from '../save/index.js';
 import { MAPS } from '../data/maps.js';
-import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, project } from '../data/atlas.js';
+import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, TREES, HILLS, project } from '../data/atlas.js';
+import { charSprite } from '../gfx/characters.js';
 import { SAVE_CONFIG } from '../save/config.js';
 
 // ---------------------------------------------------------------- helpers
@@ -409,32 +410,95 @@ export function openMap() {
   const here = atlasHere();
   const pts = Object.fromEntries(PLACES.map((p) => [p.id, project(p.lon, p.lat)]));
   const land = OUTLINE.map(([lo, la]) => project(lo, la).join(',')).join(' ');
-  const links = LINKS.map(([a, b]) => `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" class="${visited(a) && visited(b) ? 'is-seen' : ''}"/>`).join('');
-  const dots = PLACES.map((p, i) => {
+  const outline = (dy) => `<polygon points="${OUTLINE.map(([lo, la]) => { const [x, y] = project(lo, la); return `${x},${y + dy}`; }).join(' ')}"`;
+  // Roads: slightly curved so the map reads like a board-game overworld.
+  const road = ([a, b], i) => {
+    const [x1, y1] = pts[a];
+    const [x2, y2] = pts[b];
+    const k = i % 2 ? 6 : -6;
+    const cx = (x1 + x2) / 2 - ((y2 - y1) / Math.hypot(x2 - x1, y2 - y1)) * k;
+    const cy = (y1 + y2) / 2 + ((x2 - x1) / Math.hypot(x2 - x1, y2 - y1)) * k;
+    return `M${x1} ${y1} Q${cx} ${cy} ${x2} ${y2}`;
+  };
+  const roads = LINKS.map(road);
+  const pine = ([lo, la]) => { const [x, y] = project(lo, la); return `<g transform="translate(${x} ${y})"><path d="M0 -9 L5 0 L-5 0 Z" class="pine"/><path d="M0 -5 L6 5 L-6 5 Z" class="pine"/><rect x="-1" y="5" width="2" height="3" class="trunk"/></g>`; };
+  const hill = ([lo, la]) => { const [x, y] = project(lo, la); return `<path d="M${x - 9} ${y} a9 9 0 0 1 18 0 Z" class="hill"/><circle cx="${x - 3}" cy="${y - 4}" r="1" class="eye"/><circle cx="${x + 3}" cy="${y - 4}" r="1" class="eye"/>`; };
+  const cloud = (x, y, sc) => `<g transform="translate(${x} ${y}) scale(${sc})" class="cloud"><ellipse cx="0" cy="0" rx="12" ry="6"/><ellipse cx="-7" cy="2" rx="8" ry="5"/><ellipse cx="8" cy="2" rx="9" ry="5"/></g>`;
+  const dots = PLACES.map((p) => {
     const [x, y] = pts[p.id];
-    const seen = visited(p.id);
-    const fill = seen ? (p.color ?? '#fff') : '#8a8fa8';
-    const shape = p.kind === 'city'
-      ? `<circle cx="${x}" cy="${y}" r="7.5" fill="${fill}" class="dot"/>`
-      : p.kind === 'loc' ? `<rect x="${x - 6.5}" y="${y - 6.5}" width="13" height="13" fill="${fill}" class="dot"/>` : `<path d="M${x} ${y - 8} L${x + 7.5} ${y + 6} L${x - 7.5} ${y + 6} Z" fill="${fill}" class="dot"/>`;
-    return `${shape}<text x="${x}" y="${y + (p.kind === 'place' ? 4.2 : 2.6)}" text-anchor="middle" class="num">${i + 1}</text>`;
+    const cls = `node k-${p.kind} ${visited(p.id) ? 'is-seen' : ''}`;
+    const gym = p.kind === 'city' ? `<circle cx="${x}" cy="${y - 0.5}" r="2.6" fill="${p.color ?? '#fff'}" class="pip"/>` : '';
+    const mark = p.kind === 'place' ? `<path d="M${x} ${y - 5} L${x + 3.5} ${y + 2} L${x - 3.5} ${y + 2} Z" class="pip" fill="#fff"/>` : '';
+    return `<g class="${cls}"><ellipse cx="${x}" cy="${y + 2.4}" rx="8" ry="5.2" class="base"/><ellipse cx="${x}" cy="${y}" rx="8" ry="5.2" class="top"/>${gym}${mark}</g>`;
   }).join('');
-  const marker = here ? `<g class="you" transform="translate(${here.at[0]} ${here.at[1]})"><circle r="11"/><circle r="3.5" class="core"/></g>` : '';
-  const svg = `<svg viewBox="0 0 ${VIEW.w} ${VIEW.h}" role="img" aria-label="Mapa de Uruguay"><rect width="${VIEW.w}" height="${VIEW.h}" class="sea"/><polygon points="${land}" class="land"/><g class="links">${links}</g>${dots}${marker}</svg>`;
+  const pc = charSprite(S.player.look, 'down', 0);
+  const face = document.createElement('canvas');
+  face.width = face.height = 40;
+  const fg = face.getContext('2d');
+  fg.imageSmoothingEnabled = false;
+  fg.fillStyle = '#fff'; fg.beginPath(); fg.arc(20, 20, 19, 0, 7); fg.fill();
+  fg.strokeStyle = '#16141e'; fg.lineWidth = 2; fg.stroke();
+  fg.save(); fg.beginPath(); fg.arc(20, 20, 17.5, 0, 7); fg.clip();
+  fg.drawImage(pc, 2, 0, 12, 11, 4, 5, 32, 29);
+  fg.restore();
+  const faceUrl = face.toDataURL();
+  const svg = `<svg viewBox="0 0 ${VIEW.w} ${VIEW.h}" role="img" aria-label="Mapa de Uruguay">
+    <defs><linearGradient id="sea-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b92c4"/><stop offset="1" stop-color="#3f78ad"/></linearGradient></defs>
+    
+    <g class="waves"><path d="M18 205q4-4 8 0t8 0t8 0M26 213q4-4 8 0t8 0M10 222q4-4 8 0t8 0t8 0"/></g>
+    ${outline(7)} class="shade"/>
+    ${outline(0)} class="land"/>
+    <g class="decor">${TREES.map(pine).join('')}${HILLS.map(hill).join('')}</g>
+    <g class="roads">${roads.map((d) => `<path d="${d}" class="r-edge"/>`).join('')}${roads.map((d) => `<path d="${d}" class="r-fill"/>`).join('')}</g>
+    ${dots}
+    <g id="map-cursor" class="cursor"><ellipse rx="11.5" ry="7.5"/></g>
+    ${here ? `<image id="map-face" class="face" href="${faceUrl}" x="${here.at[0] - 10}" y="${here.at[1] - 28}" width="20" height="20"/>` : ''}
+    ${cloud(40, 40, 1.2)}${cloud(285, 215, 1.1)}${cloud(300, 120, 0.8)}${cloud(36, 150, 0.8)}${cloud(215, 18, 0.9)}
+    <g class="title"><text x="272" y="64">URUGUAY</text>${Array.from({ length: 9 }, (_, i) => `<rect x="251" y="${10 + i * 3.4}" width="42" height="3.4" fill="${i % 2 ? '#5aa8e8' : '#fff'}"/>`).join('')}<rect x="251" y="10" width="17" height="17" fill="#fff"/><circle cx="259.5" cy="18.5" r="5" fill="#f2c02a" stroke="#c8902a" stroke-width="0.8"/></g>
+  </svg>`;
   return panel('panel-map', (el, close) => {
-    const list = h('ul', { class: 'map-list' }, PLACES.map((p) => h('li', { class: `${visited(p.id) ? 'is-seen' : ''} ${here?.id === p.id ? 'is-here' : ''}` },
-      h('i', { class: `k-${p.kind}`, style: { '--c': visited(p.id) ? p.color ?? '#fff' : '#8a8fa8' }, text: String(PLACES.indexOf(p) + 1) }),
-      h('span', { text: visited(p.id) ? p.name : '???' }),
-      h('small', { text: visited(p.id) ? p.note : '' }))));
-    const wrap = h('div', { class: 'map-body' }, h('div', { class: 'map-svg' }), list);
-    wrap.firstChild.innerHTML = svg;
+    const wrap = h('div', { class: 'map-svg' });
+    wrap.innerHTML = svg;
+    const tag = h('div', { class: 'map-tag' }, h('b', { class: 'tag-name' }), h('small', { class: 'tag-note' }));
     el.append(
-      h('header', { class: 'panel-title' }, h('span', { text: 'Mapa de Uruguay' }), h('span', { text: here ? `Estás en: ${here.label}` : '' })),
-      wrap,
-      h('p', { class: 'map-key', text: '● Ciudad con gimnasio   ■ Localidad (almacén, objetos)   ▲ Lugar especial' }),
-      h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
+      h('header', { class: 'panel-title' }, h('span', { text: 'Mapa' }), h('span', { text: here ? `Estás en: ${here.label}` : '' })),
+      wrap, tag,
+      h('footer', { class: 'panel-foot', text: `←→↑↓ moverte por el mapa · ${keyName('b')} volver` }),
     );
-    return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };
+    // Cursor graph: neighbours along the roads, picked by direction like the classic overworld map.
+    const nb = Object.fromEntries(PLACES.map((p) => [p.id, []]));
+    for (const [a, b] of LINKS) { nb[a].push(b); nb[b].push(a); }
+    const dirs = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
+    const dist = (id) => Math.hypot(pts[id][0] - here.at[0], pts[id][1] - here.at[1]);
+    let cur = !here ? PLACES[0].id : pts[here.id] ? here.id : PLACES.map((p) => p.id).sort((x, y) => dist(x) - dist(y))[0];
+    const cursor = wrap.querySelector('#map-cursor');
+    const show = () => {
+      const p = PLACES.find((q) => q.id === cur);
+      const [x, y] = pts[cur];
+      cursor.setAttribute('transform', `translate(${x} ${y + 1})`);
+      const seen = visited(cur);
+      tag.querySelector('.tag-name').textContent = seen ? p.name : '???';
+      tag.querySelector('.tag-note').textContent = seen ? `${p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial'} · ${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Todavía no fuiste a este lugar.';
+    };
+    show();
+    return (a) => {
+      if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); return; }
+      const d = dirs[a];
+      if (!d) return;
+      const [cx, cy] = pts[cur];
+      let best = null;
+      let bestScore = 0.35;
+      for (const id of nb[cur]) {
+        const [x, y] = pts[id];
+        const len = Math.hypot(x - cx, y - cy);
+        const score = ((x - cx) * d[0] + (y - cy) * d[1]) / len;
+        if (score > bestScore) { bestScore = score; best = id; }
+      }
+      if (!best) return void sfx('bump');
+      cur = best;
+      sfx('select');
+      show();
+    };
   });
 }
 
