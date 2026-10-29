@@ -13,7 +13,7 @@ import { vignette, shadow, backdrop, mapGlow, motes, grade } from '../gfx/fx.js'
 import { input } from '../core/input.js';
 import { sfx, playMusic } from '../core/audio.js';
 import { worldRng } from '../core/rng.js';
-import { h, wait } from '../core/util.js';
+import { h, wait, clamp } from '../core/util.js';
 import { info as logInfo } from '../core/debuglog.js';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.js';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX, badgeCount } from './state.js';
@@ -507,12 +507,28 @@ async function fish() {
   const list = W_.map.fish;
   if (!list) return say('Acá no parece haber nada que pescar.');
   if (!state().party.some((c) => c.hp > 0)) return say('Tus criaturas están debilitadas. Mejor no arriesgarse.');
-  await say('Lanzaste la caña al agua…');
-  sfx('select');
-  await wait(900 + worldRng.int(0, 1200));
-  if (!worldRng.chance(0.75)) return say('No picó nada. Probá de nuevo.');
-  sfx('encounter');
-  await say('¡Algo picó!');
+  const pl = W_.player;
+  const [dx, dy] = DIRS[pl.dir];
+  const fs = (W_.fishing = { phase: 'cast', tx: pl.x + dx, ty: pl.y + dy, dx, dy, t0: null });
+  const to = (phase) => { fs.phase = phase; fs.t0 = null; };
+  try {
+    sfx('select');
+    await say('Lanzaste la caña al agua…', { auto: 700 });
+    to('wait');
+    await wait(1100 + worldRng.int(0, 1500));
+    if (!worldRng.chance(0.75)) {
+      to('nothing');
+      await wait(1100);
+      W_.fishing = null;
+      return say('No picó nada. Probá de nuevo.');
+    }
+    to('bite');
+    sfx('encounter');
+    await wait(650);
+    await say('¡Algo picó!', { auto: 600 });
+  } finally {
+    W_.fishing = null;
+  }
   const e = worldRng.weighted(list.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
   await wildBattle(e.sp, worldRng.int(e.lo, e.hi));
 }
@@ -579,6 +595,12 @@ export const api = {
     else S.box.push(c);
     return c;
   },
+  /** Gym rematches unlock every two gyms (badges, Liga, PP base) after the one being challenged. */
+  gymRematchTier(order) {
+    const progress = badgeCount() + (flag('champion') ? 1 : 0) + (flag('pp_clear') ? 1 : 0);
+    return clamp(Math.floor((progress - order) / 2), 0, 4);
+  },
+  rematchTeam,
   async healParty({ silent = false } = {}) {
     for (const c of state().party) healCreature(c);
     if (!silent) {
@@ -708,6 +730,7 @@ function drawWorld(g, t) {
     const ty = player ? p.y : n.y;
     if (TILE_INFO[tileAt(tx, ty)]?.enc && !n.moving) g.drawImage(tileCanvas(','), 0, 10, 16, 6, sx, sy + 10, 16, 6);
   }
+  if (W_.fishing) drawFishing(g, cx, cy, t);
   if (W_.emote) {
     const pos = entityPos(W_.emote.npc);
     const ex = Math.round(pos.x - cx) + 4;
@@ -723,6 +746,71 @@ function drawWorld(g, t) {
   }
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
+}
+
+/** Rod, line and bobber while fishing: cast arc, idle bobbing with ripples, a bite splash, or reeling in empty. */
+function drawFishing(g, cx, cy, t) {
+  const f = W_.fishing;
+  f.t0 ??= t;
+  const age = t - f.t0;
+  const ppos = entityPos(W_.player);
+  const hx = Math.round(ppos.x - cx) + 8 + f.dx * 4;
+  const hy = Math.round(ppos.y - cy) + 6 + f.dy * 2;
+  const tipx = hx + f.dx * 8 + (f.dx ? 0 : 3);
+  const tipy = hy + f.dy * 8 - 6;
+  // rod
+  g.fillStyle = '#6a4a2a';
+  for (let i = 0; i <= 8; i++) g.fillRect(Math.round(hx + (tipx - hx) * (i / 8)), Math.round(hy + (tipy - hy) * (i / 8)), 1, 1);
+  const wx = f.tx * T - cx + 8;
+  const wy = f.ty * T - cy + 9;
+  let bx = wx, by = wy, dip = 0, slack = 0;
+  if (f.phase === 'cast') {
+    const q = Math.min(1, age / 450);
+    bx = tipx + (wx - tipx) * q;
+    by = tipy + (wy - tipy) * q - Math.sin(q * Math.PI) * 14;
+  } else if (f.phase === 'wait') {
+    by += Math.sin(age / 380) * 0.8;
+  } else if (f.phase === 'bite') {
+    dip = Math.abs(Math.sin(age / 70)) * 3 + 1;
+    by += dip;
+  } else if (f.phase === 'nothing') {
+    const q = Math.max(0, (age - 500) / 550);
+    bx = wx + (tipx - wx) * Math.min(1, q);
+    by = wy + (tipy - wy) * Math.min(1, q) - Math.sin(Math.min(1, q) * Math.PI) * 6;
+    slack = 3;
+  }
+  // line
+  g.fillStyle = 'rgba(255,255,255,0.8)';
+  const steps = 14;
+  for (let i = 0; i <= steps; i++) {
+    const q = i / steps;
+    g.fillRect(Math.round(tipx + (bx - tipx) * q), Math.round(tipy + (by - tipy) * q + Math.sin(q * Math.PI) * slack), 1, 1);
+  }
+  const landed = f.phase !== 'cast' || age > 450;
+  const afloat = f.phase === 'wait' || f.phase === 'bite' || (f.phase === 'nothing' && age < 500);
+  if (landed && afloat) {
+    // ripples
+    const r = ((age / 700) % 1);
+    g.strokeStyle = `rgba(255,255,255,${0.55 * (1 - r)})`;
+    g.lineWidth = 1;
+    g.beginPath(); g.ellipse(wx, wy + 1, 2 + r * 7, 1 + r * 3, 0, 0, 7); g.stroke();
+    if (f.phase === 'bite') {
+      g.strokeStyle = 'rgba(255,255,255,0.8)';
+      const r2 = (age / 260) % 1;
+      g.beginPath(); g.ellipse(wx, wy + 1, 3 + r2 * 9, 1.5 + r2 * 4, 0, 0, 7); g.stroke();
+      g.fillStyle = '#d8f0ff';
+      for (const [ox, oy] of [[-4, -3], [4, -4], [0, -6], [-6, -1], [6, -1]]) g.fillRect(Math.round(wx + ox * (0.5 + (age / 260) % 1 * 0.6)), Math.round(wy + oy * (0.5 + (age / 260) % 1 * 0.7)), 1, 1);
+    }
+  }
+  // bobber
+  g.fillStyle = '#f8f8f8'; g.fillRect(Math.round(bx) - 1, Math.round(by) - 1, 3, 3);
+  g.fillStyle = '#e0263a'; g.fillRect(Math.round(bx) - 1, Math.round(by) - 2, 3, 2);
+  g.fillStyle = '#1a1a24'; g.fillRect(Math.round(bx) - 2, Math.round(by) - 1, 1, 1); g.fillRect(Math.round(bx) + 2, Math.round(by) - 1, 1, 1);
+  if (f.phase === 'bite') {
+    const ex = Math.round(ppos.x - cx) + 4, ey = Math.round(ppos.y - cy) - 18;
+    g.fillStyle = '#fff'; g.fillRect(ex, ey, 9, 11);
+    g.fillStyle = '#1a1a24'; g.fillRect(ex + 3, ey + 2, 3, 5); g.fillRect(ex + 3, ey + 8, 3, 2);
+  }
 }
 
 function drawFog(g, t) {

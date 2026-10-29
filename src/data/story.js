@@ -28,21 +28,21 @@ const rival = (api, stage, prize, intro, lose, after) => ({
 
 export const LEADERS = {
   lucia: {
-    id: 'leader_lucia', name: 'Lucía', cls: 'Líder', look: 'leader_water', ai: 'smart', items: ['mate'],
+    order: 1, id: 'leader_lucia', name: 'Lucía', cls: 'Líder', look: 'leader_water', ai: 'smart', items: ['mate'],
     team: [['lobito', 7], ['mbigua', 7], ['carpincho', 9]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 3, tm: 'mt_cascada',
     intro: ['Soy Lucía, líder del Gimnasio de Montevideo.', 'Entreno en la Rambla todas las mañanas, haga frío o calor.', 'Veamos si resistís la corriente del Plata.'],
     lose: 'Me superaste. Fue una derrota limpia.',
     after: ['Te ganaste la Medalla Montevideo. Con ella la policía te deja pasar a la Interbalnearia.', 'Se dice que el Equipo PP opera en la costa este. Andá con cuidado.'],
   },
   sofia: {
-    id: 'leader_sofia', name: 'Sofía', cls: 'Líder', look: 'leader_elec', ai: 'smart', items: ['mate'],
+    order: 2, id: 'leader_sofia', name: 'Sofía', cls: 'Líder', look: 'leader_elec', ai: 'smart', items: ['mate'],
     team: [['luciernito', 15], ['cotorrayo', 16], ['luceron', 18]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 5, tm: 'mt_descarga',
     intro: ['Bienvenido a Punta del Este. Soy Sofía.', 'Mis criaturas acumulan la electricidad de las tormentas de verano.', 'Preparate para el combate.'],
     lose: 'Me quedé sin respuesta. Buen combate.',
     after: ['La Medalla Maldonado es tuya.', 'El Equipo PP robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
   },
   aparicio: {
-    id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'leader_gaucho', ai: 'smart', items: ['mate_dulce'],
+    order: 3, id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'leader_gaucho', ai: 'smart', items: ['mate_dulce'],
     team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
     intro: ['Buenas. Soy Aparicio.', 'Cuido estas sierras desde hace sesenta años.', 'La piedra de la quebrada lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía años que nadie me ganaba.',
@@ -265,13 +265,25 @@ export const SCRIPTS = {
   async leader(api, npc) {
     const L = LEADERS[npc.leader];
     if (api.flag(L.badge)) {
-      await api.say(L.after, { name: L.name });
+      // A rematch opens every two gyms, so the leader has had time to train.
+      const tier = api.gymRematchTier(L.order);
+      if (tier < 1 || api.flag(`rm${tier}_${L.id}`)) return api.say(L.after, { name: L.name });
+      await api.say(['Volviste. Estuve entrenando desde la última vez.', 'Esta vez no me contengo.'], { name: L.name });
+      if (!(await api.ask('¿Aceptás la revancha?'))) return;
+      const res = await api.battle({ ...L, intro: null, team: api.rematchTeam(L.team, tier), prize: Math.round(L.prize * (1 + tier * 0.8)) });
+      if (res !== 'win') return;
+      api.setFlag(`rm${tier}_${L.id}`);
+      api.healParty({ silent: true });
+      await api.say('Tus criaturas quedaron recuperadas.');
+      await api.say('Buen combate. Volvé cuando hayas recorrido más camino.', { name: L.name });
       return;
     }
     await api.say(L.intro, { name: L.name });
     const res = await api.battle(L);
     if (res !== 'win') return;
     api.setFlag(L.badge);
+    api.healParty({ silent: true });
+    await api.say('Tus criaturas quedaron recuperadas.');
     api.sfx('levelup');
     await api.say(`¡{player} recibió la ${L.badgeName}!`);
     await api.give(L.reward, L.rewardQty);

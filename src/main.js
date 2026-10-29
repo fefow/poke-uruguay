@@ -10,6 +10,8 @@ import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './ga
 import { state, setState, newState, settings, badgeCount } from './game/state.js';
 import { loadMap, updateWorld, worldState, runScript } from './game/world.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
+import * as menus from './game/menus.js';
+import * as battle from './game/battle-scene.js';
 import { openOptions, openMap } from './game/menus.js';
 import { createCreature } from './game/creature.js';
 import { mountHud, updateHud, flashSaved } from './game/hud.js';
@@ -20,7 +22,7 @@ import { SAVE_CONFIG } from './save/config.js';
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();

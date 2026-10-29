@@ -422,7 +422,7 @@ async function chooseAction() {
   return { type: 'run' };
 }
 
-async function chooseMove(c) {
+async function chooseMove(c, { forgetting = false } = {}) {
   closeDialog();
   const info = h('div', { class: 'move-info' });
   uiRoot().append(info);
@@ -434,7 +434,7 @@ async function chooseMove(c) {
       h('span', { class: 'mv-sub' },
         h('i', { class: 'mv-dot', style: { '--type': TYPES[d.type].color } }),
         h('span', { text: `PP ${m.pp}/${d.pp}` })));
-    return { label: d.name, content, disabled: m.pp <= 0 && c.moves.some((x) => x.pp > 0) };
+    return { label: d.name, content, disabled: !forgetting && m.pp <= 0 && c.moves.some((x) => x.pp > 0) };
   });
   const show = (i) => {
     const d = MOVES[c.moves[i].id];
@@ -515,6 +515,14 @@ async function play(events, leveled) {
         await awardExp(e.foe, leveled);
         break;
       case 'foeNext': {
+        // Like the original games: offer a free switch before the next creature comes out.
+        if (engine.party.filter((c) => c.hp > 0).length > 1 && engine.p.c.hp > 0) {
+          const next = displayName(engine.foes[e.index]);
+          if (await ask(`${fmt(engine.trainer.name)} va a enviar a ${next}. ¿Querés cambiar de criatura?`, { battle: true })) {
+            const idx = await openParty({ mode: 'battle', active: engine.pIndex });
+            if (idx != null && idx >= 0 && idx !== engine.pIndex) await play(engine.freeSwitch(idx), leveled);
+          }
+        }
         await say(`¡${fmt(engine.trainer.name)} va a enviar a ${displayName(engine.foes[e.index])}!`, { battle: true, auto: 900 });
         const sub = engine.sendFoe(e.index);
         await sendOutFoe(engine.f.c);
@@ -639,24 +647,49 @@ async function shakeAnim(n, caught) {
   }
 }
 
+/** Move the visible EXP bar to `exp` within `lvl` (the HUD shows creature `c` at that level). */
+function expBar(c, lvl, exp, instant = false) {
+  const el = hud.ply;
+  el.querySelector('.bhud-lv').textContent = `Nv${lvl}`;
+  const fill = el.querySelector('.expbar-fill');
+  fill.classList.toggle('no-anim', instant);
+  const lo = expForLevel(lvl), hi = expForLevel(lvl + 1);
+  fill.style.setProperty('--exp', lvl >= 100 ? 1 : clamp((exp - lo) / (hi - lo), 0, 1));
+}
+
 async function awardExp(foe, leveled) {
   for (const [c, amt] of engine.expShares(foe)) {
     if (c.level >= 100) continue;
+    const shown = c === engine.p.c;
+    let lvl = c.level;
+    if (shown) expBar(c, lvl, c.exp, true);
     await say(`¡${displayName(c)} ganó ${amt} puntos de EXP!`, { battle: true, auto: 1000 });
     const before = calcStats(c);
     const events = gainExp(c, amt);
-    if (c === engine.p.c) setHud('ply', c);
     for (const ev of events) {
       if (ev.type === 'level') {
         leveled.add(c.uid);
+        if (shown) {
+          expBar(c, lvl, expForLevel(lvl + 1));
+          await wait(950);
+        }
         sfx('levelup');
-        if (c === engine.p.c) setHud('ply', c, { instant: true });
+        lvl = ev.level;
+        if (shown) {
+          setHud('ply', c, { instant: true });
+          expBar(c, lvl, expForLevel(lvl), true);
+        }
         await say(`¡${displayName(c)} subió al nivel ${ev.level}!`, { battle: true });
         await showStatGains(c, before);
         Object.assign(before, calcStats(c));
       } else if (ev.type === 'learn') {
         await learnFlow(c, ev.move, { battle: true });
       }
+    }
+    if (shown) {
+      expBar(c, lvl, c.exp);
+      await wait(950);
+      setHud('ply', c, { instant: true });
     }
   }
 }
@@ -685,9 +718,8 @@ export async function learnFlow(c, moveId, opts = {}) {
   while (true) {
     const yes = await ask(`¿Querés que olvide un movimiento para aprender ${mv.name}?`, opts);
     if (yes) {
-      await say('¿Cuál movimiento debería olvidar?', { ...opts, keep: true });
-      const idx = await choose(c.moves.map((m) => ({ label: MOVES[m.id].name, hint: `${TYPES[MOVES[m.id].type].name}` })), { cls: 'menu-moves' });
-      closeDialog();
+      await say('¿Cuál movimiento debería olvidar?', opts);
+      const idx = await chooseMove(c, { forgetting: true });
       if (idx >= 0) {
         const old = MOVES[c.moves[idx].id].name;
         learnMove(c, moveId, idx);

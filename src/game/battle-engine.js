@@ -314,6 +314,13 @@ export class BattleEngine {
     return ev;
   }
 
+  /** Optional switch offered between a trainer's creatures (no turn is used). */
+  freeSwitch(index) {
+    const ev = [];
+    this.#doSwitch(0, index, ev, false);
+    return ev;
+  }
+
   #doSwitch(side, index, ev, forced = false) {
     if (side !== 0) return;
     if (!forced) ev.push({ t: 'text', msg: `¡${displayName(this.p.c)}, volvé!` }, { t: 'recall', side: 0 });

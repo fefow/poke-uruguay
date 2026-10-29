@@ -79,7 +79,7 @@ test('items heal and revive correctly', () => {
   const c = mon('carpinchito', 10);
   const max = calcStats(c).hp;
   c.hp = 1;
-  assert.match(applyItem('te_marcela', c), /recuperó 20 PS/);
+  assert.match(applyItem('te_marcela', c), /recuperó 15 PS/);
   c.hp = 0;
   assert.equal(applyItem('mate', c), null, 'cannot heal fainted');
   applyItem('alfajor', c);

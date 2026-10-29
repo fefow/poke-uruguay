@@ -3,7 +3,8 @@ import { deepFreeze } from '../core/util.js';
 // cat: 'fis' (physical) | 'esp' (special) | 'est' (status)
 // fx: { status, chance, self:{stat:delta}, foe:{stat:delta}, heal, drain, recoil, crit, prio, never }
 // stats: atk def spa spd spe acc eva
-const M = (name, type, cat, power, acc, pp, desc, fx = {}) => ({ name, type, cat, power, acc, pp, desc, fx });
+// PP are halved from the raw table (rounded up) so strong moves cannot be spammed.
+const M = (name, type, cat, power, acc, pp, desc, fx = {}) => ({ name, type, cat, power, acc, pp: Math.max(2, Math.ceil(pp / 2)), desc, fx });
 
 export const MOVES = deepFreeze({
   // Normal

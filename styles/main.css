@@ -455,21 +455,24 @@ button { font: inherit; color: inherit; }
 .bag-desc { margin: 0; min-height: 9cqi; padding: 1.4cqi 2cqi; border-radius: 1cqi; background: var(--night-2); color: var(--paper); font-size: 3.4cqi; text-wrap: pretty; }
 .controls-help { font-size: 2.8cqi; color: var(--ink-soft); & p { margin: 0.4cqi 0; } }
 
-.dex-grid {
-  list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1cqi; overflow: auto; flex: 1; scrollbar-width: thin;
-  & li { position: relative; display: grid; justify-items: center; padding: 0.6cqi; border-radius: 1cqi; background: oklch(0.95 0.01 270); cursor: pointer; border: 2px solid transparent; }
-  & li.is-active { border-color: var(--celeste-deep); }
-  & li.is-caught { background: oklch(0.93 0.04 235); }
-  & li.is-caught::after { content: ''; position: absolute; top: 1cqi; right: 1cqi; width: 2.2cqi; height: 2.2cqi; border-radius: 50%; background: linear-gradient(var(--celeste) 50%, #fff 50%); border: 1px solid var(--ink); }
-  & img { width: 14cqi; height: 14cqi; image-rendering: pixelated; }
-  & .num { font-family: var(--font-pixel); font-size: 1.8cqi; color: var(--ink-soft); }
-  & .name { font-size: 2.8cqi; }
+.dex-layout { display: grid; grid-template-columns: 1fr 34cqi; gap: 2.4cqi; flex: 1; min-height: 0; }
+.dex-info {
+  display: flex; flex-direction: column; align-items: center; gap: 0.8cqi; padding: 1.2cqi 2cqi; min-height: 0; overflow: auto; scrollbar-width: thin;
+  border-radius: 1.2cqi; background: oklch(0.95 0.01 270);
+  & .dex-art { width: 24cqi; height: 24cqi; flex: none; image-rendering: pixelated; background: radial-gradient(circle, oklch(0.92 0.05 235) 50%, transparent 70%); }
+  & .dex-title { font-size: 4.2cqi; font-weight: 600; }
+  & .chips { justify-content: center; }
+  & .dex-desc { margin: 0; font-size: 3cqi; text-align: center; text-wrap: pretty; }
+  & .small { margin: 0; font-size: 2.8cqi; color: var(--ink-soft); }
+  & .base-stats { inline-size: 100%; grid-template-columns: 1fr 1fr; gap: 0.3cqi 2.6cqi; font-size: 2.3cqi; & .row { grid-template-columns: 9cqi 1fr 4cqi; } }
 }
-.dex-detail {
-  position: absolute; inset: 0; background: var(--paper); padding: 2.4cqi 3cqi; display: flex; flex-direction: column; gap: 1.6cqi; border-radius: 1.4cqi;
-  & .dex-body { display: grid; grid-template-columns: 30cqi 1fr; gap: 3cqi; font-size: 3.4cqi; & p { margin: 1cqi 0; text-wrap: pretty; } }
-  & img { width: 30cqi; height: 30cqi; image-rendering: pixelated; background: radial-gradient(circle, oklch(0.92 0.05 235) 50%, transparent 70%); }
-  & .chips { justify-content: start; }
+.dex-list {
+  list-style: none; margin: 0; padding: 0; overflow: auto; min-height: 0; scrollbar-width: thin;
+  & li { display: grid; grid-template-columns: 8cqi 1fr 3cqi; align-items: center; gap: 1cqi; padding: 0.7cqi 1.4cqi; border-radius: 0.8cqi; cursor: pointer; font-size: 3.2cqi; }
+  & li.is-active { background: oklch(0.9 0.05 235); }
+  & .num { font-family: var(--font-pixel); font-size: 2cqi; color: var(--ink-soft); }
+  & .ball { width: 2.4cqi; height: 2.4cqi; border-radius: 50%; border: 1px solid var(--ink); background: linear-gradient(var(--celeste) 50%, #fff 50%); visibility: hidden; }
+  & li.is-caught .ball { visibility: visible; }
 }
 .base-stats { display: grid; gap: 0.4cqi; font-size: 2.8cqi;
   & .row { display: grid; grid-template-columns: 16cqi 1fr 6cqi; }
@@ -710,23 +713,22 @@ button { font: inherit; color: inherit; }
 }
 .hud-speed {
   position: absolute;
-  top: 1.8cqi;
+  top: 1.2cqi;
   left: 50%;
   translate: -50% -140%;
   opacity: 0;
   display: flex;
   align-items: baseline;
-  gap: 1.2cqi;
-  padding: 0.8cqi 2.6cqi;
+  gap: 0.6cqi;
+  padding: 0.3cqi 1.2cqi;
   border-radius: 99px;
   font-family: var(--font-pixel);
-  font-size: 3cqi;
-  color: var(--ink);
-  background: linear-gradient(90deg, var(--sun), oklch(0.78 0.15 60));
-  box-shadow: 0 0 0 0.4cqi var(--ink), 0 1cqi 3cqi oklch(0 0 0 / 0.4);
-  transition: translate 0.18s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.14s;
-  & b { letter-spacing: -0.3cqi; }
-  &.is-on { translate: -50% 0; opacity: 1; }
+  font-size: 1.8cqi;
+  color: var(--paper);
+  background: oklch(0 0 0 / 0.45);
+  transition: translate 0.18s ease-out, opacity 0.14s;
+  & b { letter-spacing: -0.2cqi; }
+  &.is-on { translate: -50% 0; opacity: 0.8; }
 }
 .hud-party {
   position: absolute;

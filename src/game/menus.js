@@ -349,48 +349,37 @@ export function openDex() {
     const seen = new Set(S.dex.seen);
     const caught = new Set(S.dex.caught);
     const head = h('header', { class: 'panel-title' }, h('span', { text: 'PokeDex' }), h('span', { text: `Vistos ${seen.size} · Atrapados ${caught.size}` }));
-    const grid = h('ul', { class: 'dex-grid' });
     const rows = DEX_ORDER.map((k) => {
       const sp = SPECIES[k];
-      const known = seen.has(k);
-      return h('li', { class: `${caught.has(k) ? 'is-caught' : ''}` },
-        h('img', { src: known ? creatureIcon(k) : silhouette(k), alt: '', width: 80, height: 80 }),
+      return h('li', { class: caught.has(k) ? 'is-caught' : '' },
         h('span', { class: 'num', text: pad(sp.id) }),
-        h('span', { class: 'name', text: known ? sp.name : '???' }));
+        h('span', { class: 'name', text: seen.has(k) ? sp.name : '???' }),
+        h('i', { class: 'ball', 'aria-hidden': 'true' }));
     });
-    grid.append(...rows);
-    el.append(head, grid, h('footer', { class: 'panel-foot', text: `${keyName('a')} ver detalle · ${keyName('b')} volver` }));
-    let detail = null;
-    const nav = listNav(rows, {
-      cols: 4,
-      onCancel: () => close(),
-      onPick: (i) => {
-        const k = DEX_ORDER[i];
-        if (!seen.has(k)) return sfx('bump');
-        sfx('confirm');
-        const sp = SPECIES[k];
-        const isCaught = caught.has(k);
-        detail = h('div', { class: 'dex-detail' },
-          h('header', { class: 'panel-title', text: `#${pad(sp.id)} ${sp.name}` }),
-          h('div', { class: 'dex-body' },
-            h('img', { src: creatureIcon(k), alt: sp.name, width: 80, height: 80 }),
-            h('div', {},
-              h('div', { class: 'chips' }, sp.types.map(typeChip)),
-              h('p', { text: isCaught ? sp.desc : 'Atrapalo para saber más sobre esta criatura.' }),
-              isCaught ? h('div', { class: 'base-stats' }, STAT_KEYS.map((s, j) => h('div', { class: 'row' }, h('span', { text: STAT_NAMES[s] }), h('i', { style: { '--v': sp.base[j] / 160 } }), h('b', { text: String(sp.base[j]) })))) : null,
-              sp.evo && isCaught ? h('p', { class: 'small', text: sp.evo.stone ? `Evoluciona con ${ITEMS[sp.evo.stone].name}.` : `Evoluciona en el nivel ${sp.evo.lvl}.` }) : null,
-            )),
-          h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }));
-        el.append(detail);
-      },
-    });
-    return (a) => {
-      if (detail) {
-        if (a === 'a' || a === 'b' || a === 'start') { detail.remove(); detail = null; sfx('cancel'); }
+    const list = h('ul', { class: 'dex-list' }, rows);
+    // Left column: follows the highlighted row. Nothing is revealed for creatures not yet seen.
+    const left = h('section', { class: 'dex-info' });
+    const show = (i) => {
+      const k = DEX_ORDER[i];
+      const sp = SPECIES[k];
+      if (!seen.has(k)) {
+        left.replaceChildren(
+          h('img', { class: 'dex-art', src: silhouette(k), alt: '' }),
+          h('div', { class: 'dex-title', text: `#${pad(sp.id)} ???` }),
+          h('p', { class: 'dex-desc', text: 'Sin datos. Todavía no viste a esta criatura.' }));
         return;
       }
-      nav(a);
+      const isCaught = caught.has(k);
+      left.replaceChildren(
+        h('img', { class: 'dex-art', src: creatureIcon(k), alt: sp.name }),
+        h('div', { class: 'dex-title', text: `#${pad(sp.id)} ${sp.name}` }),
+        h('div', { class: 'chips' }, sp.types.map(typeChip)),
+        h('p', { class: 'dex-desc', text: isCaught ? sp.desc : 'Atrapala para saber más sobre esta criatura.' }),
+        isCaught ? h('div', { class: 'base-stats' }, STAT_KEYS.map((st, j) => h('div', { class: 'row' }, h('span', { text: STAT_NAMES[st] }), h('i', { style: { '--v': sp.base[j] / 160 } }), h('b', { text: String(sp.base[j]) })))) : null,
+        sp.evo && isCaught ? h('p', { class: 'small', text: sp.evo.stone ? `Evoluciona con ${ITEMS[sp.evo.stone].name}.` : `Evoluciona en el nivel ${sp.evo.lvl}.` }) : null);
     };
+    el.append(head, h('div', { class: 'dex-layout' }, left, list), h('footer', { class: 'panel-foot', text: `↑↓ recorrer · ${keyName('b')} volver` }));
+    return listNav(rows, { onCancel: () => close(), onPick: () => {}, onMove: show });
   });
 }
 
@@ -478,11 +467,14 @@ export function openMap() {
   const pts = Object.fromEntries(PLACES.map((p) => [p.id, project(p.lon, p.lat)]));
   const reg = mapRegions();
   const biomeOf = Object.fromEntries(DEPARTMENTS.map((d) => [d.id, BIOMES[d.biome]]));
-  const deptPaths = DEPARTMENTS.map((d) => `<path d="${reg.paths[d.id] ?? ''}" fill="${biomeOf[d.id].color}"/>`).join('');
+  // A department only shows its zone colour once one of its places has been visited.
+  const deptSeen = (id) => PLACES.some((p) => PLACE_DEPT[p.id] === id && visited(p.id));
+  const deptPaths = DEPARTMENTS.map((d) => `<path d="${reg.paths[d.id] ?? ''}" fill="${deptSeen(d.id) ? biomeOf[d.id].color : '#7c8290'}"/>`).join('');
   const roads = LINKS.map(([a, b]) => `M${pts[a][0]} ${pts[a][1]}L${pts[b][0]} ${pts[b][1]}`).join('');
   const dots = PLACES.map((p) => {
     const [x, y] = pts[p.id];
     const seen = visited(p.id) ? 'is-seen' : '';
+    if (!seen) return `<g class="node k-loc"><circle cx="${x}" cy="${y}" r="5.5"/></g>`;
     if (p.kind === 'city') return `<g class="node k-city ${seen}"><rect x="${x - 6}" y="${y - 6}" width="12" height="12"/><rect x="${x - 2.5}" y="${y - 2.5}" width="5" height="5" fill="${p.color ?? '#fff'}" class="pip"/></g>`;
     if (p.kind === 'place') return `<g class="node k-place ${seen}"><path d="M${x} ${y - 7}L${x + 6.5} ${y}L${x} ${y + 7}L${x - 6.5} ${y}Z"/></g>`;
     return `<g class="node k-loc ${seen}"><circle cx="${x}" cy="${y}" r="5.5"/></g>`;
@@ -550,14 +542,14 @@ export function openMap() {
       sel.setAttribute('d', reg.paths[dept.id] ?? '');
       const seen = visited(cur);
       q('.mi-name').textContent = seen ? p.name : '???';
-      q('.mi-kind').textContent = p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial';
+      q('.mi-kind').textContent = !seen ? '???' : p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial';
       q('.mi-dept').textContent = seen ? dept.name : '???';
-      q('.mi-sw').style.background = biome.color;
-      q('.mi-zname').textContent = biome.name;
-      q('.mi-ztypes').replaceChildren(...biome.types.map(chip));
+      q('.mi-sw').style.background = seen ? biome.color : '#7c8290';
+      q('.mi-zname').textContent = seen ? biome.name : '???';
+      q('.mi-ztypes').replaceChildren(...(seen ? biome.types.map(chip) : [h('span', { class: 'mi-none', text: '???' })]));
       const wt = wildTypes(cur);
       q('.mi-wild').replaceChildren(...(!seen ? [h('span', { class: 'mi-none', text: '???' })] : wt.length ? wt.map(chip) : [h('span', { class: 'mi-none', text: 'Ninguna' })]));
-      q('.mi-note').textContent = seen ? `${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Todavía no fuiste a este lugar.';
+      q('.mi-note').textContent = seen ? `${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Sin visitar';
     };
     show();
     return (a) => {

@@ -176,13 +176,24 @@ const DRAW = {
     g.fillStyle = '#2f7a3a'; g.beginPath(); g.arc(8, 7, 7, 0, 7); g.fill();
     for (let i = 0; i < 9; i++) px(g, r.int(2, 13), r.int(1, 11), '#e0263a', 2, 1);
   },
+  // Palm on grass (the sand background looked wrong on inland routes).
   p: (g, r) => {
-    speckle(g, r, '#f0dca0', ['#e4cc8a'], 6);
-    px(g, 7, 6, '#8a6a3a', 2, 10);
-    for (let i = 0; i < 6; i++) px(g, 7, 8 + i * 1.3, '#6a4a2a', 2, 1);
-    const fronds = [[0, 3], [1, 2], [2, 2], [3, 1], [4, 2], [5, 3]];
-    for (const [dx, dy] of fronds) { px(g, 2 + dx, 2 + dy, '#3a8a34', 2, 1); px(g, 9 + (5 - dx), 2 + dy, '#3a8a34', 2, 1); }
-    px(g, 6, 1, '#4aa03c', 4, 4); px(g, 7, 5, '#ff9a2a', 2, 1);
+    grass(g, r);
+    g.fillStyle = 'rgba(0,0,0,0.18)'; g.beginPath(); g.ellipse(8, 14, 5, 1.6, 0, 0, 7); g.fill();
+    // slightly curved trunk with rings
+    const trunk = [[7, 15], [7, 13], [7, 11], [8, 9], [8, 7], [8, 5]];
+    for (const [tx, ty] of trunk) px(g, tx, ty, '#8a6a3a', 2, 2);
+    for (const [tx, ty] of trunk) px(g, tx + 1, ty, '#6a4a2a', 1, 2);
+    for (let y = 6; y < 15; y += 2) px(g, y > 10 ? 7 : 8, y, '#5a3e22', 2, 1);
+    // fronds
+    const leaf = (x, y, w, h, c) => px(g, x, y, c, w, h);
+    leaf(3, 3, 5, 2, '#2f7a34'); leaf(9, 3, 5, 2, '#2f7a34');
+    leaf(1, 4, 4, 2, '#3a8a34'); leaf(11, 4, 4, 2, '#3a8a34');
+    leaf(2, 6, 3, 1, '#2f7a34'); leaf(11, 6, 3, 1, '#2f7a34');
+    leaf(6, 1, 4, 3, '#4aa03c'); leaf(5, 2, 6, 2, '#4aa03c');
+    leaf(4, 2, 2, 1, '#6cc04c'); leaf(10, 2, 2, 1, '#6cc04c');
+    // coconuts
+    px(g, 7, 5, '#5a3a1a', 2, 2); px(g, 9, 5, '#6a4a2a', 1, 1);
   },
   R: (g, r) => {
     grass(g, r);
