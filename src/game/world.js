@@ -8,7 +8,8 @@ import { ITEMS } from '../data/items.js';
 import { T, TILE_INFO, tileCanvas } from '../gfx/tiles.js';
 import { charSprite } from '../gfx/characters.js';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.js';
-import { W, H, setRenderer, dayTint, text as ctext } from '../gfx/screen.js';
+import { W, H, setRenderer, text as ctext } from '../gfx/screen.js';
+import { vignette, shadow, backdrop, mapGlow, motes, grade } from '../gfx/fx.js';
 import { input } from '../core/input.js';
 import { sfx, playMusic } from '../core/audio.js';
 import { worldRng } from '../core/rng.js';
@@ -566,22 +567,28 @@ function drawWorld(g, t) {
   if (!m) return;
   const p = W_.player;
   const ppos = entityPos(p);
-  // camera
-  let cx = ppos.x + T / 2 - W / 2;
-  let cy = ppos.y + T / 2 - H / 2;
   const mw = m.w * T;
   const mh = m.h * T;
-  cx = mw <= W ? (mw - W) / 2 : Math.max(0, Math.min(mw - W, cx));
-  cy = mh <= H ? (mh - H) / 2 : Math.max(0, Math.min(mh - H, cy));
+  // Small interiors are drawn at 2x so they fill the screen instead of floating in black.
+  const Z = m.indoor && mw * 2 <= W && mh * 2 <= H * 1.15 ? 2 : 1;
+  const VW = W / Z;
+  const VH = H / Z;
+  // camera
+  let cx = ppos.x + T / 2 - VW / 2;
+  let cy = ppos.y + T / 2 - VH / 2;
+  cx = mw <= VW ? (mw - VW) / 2 : Math.max(0, Math.min(mw - VW, cx));
+  cy = mh <= VH ? (mh - VH) / 2 : Math.max(0, Math.min(mh - VH, cy));
   cx = Math.round(cx);
   cy = Math.round(cy);
-  g.fillStyle = '#141018';
-  g.fillRect(0, 0, W, H);
+  backdrop(g);
+  g.save();
+  g.scale(Z, Z);
+  if (mw < VW || mh < VH) mapGlow(g, Math.max(0, -cx), Math.max(0, -cy), Math.min(mw, VW), Math.min(mh, VH));
   const frame = Math.floor(t / 400);
   const x0 = Math.max(0, Math.floor(cx / T));
   const y0 = Math.max(0, Math.floor(cy / T));
-  const x1 = Math.min(m.w - 1, Math.ceil((cx + W) / T));
-  const y1 = Math.min(m.h - 1, Math.ceil((cy + H) / T));
+  const x1 = Math.min(m.w - 1, Math.ceil((cx + VW) / T));
+  const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = m.tiles[y];
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame), x * T - cx, y * T - cy);
@@ -606,6 +613,7 @@ function drawWorld(g, t) {
     const look = player ? state().player.look : n.def.look;
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
     const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : 0) : n.moving ? frameIdx : 0;
+    shadow(g, sx + 8, sy + 13, 5.5, 2.2);
     g.drawImage(charSprite(look, n.dir, f), sx, sy - 4);
     // tall grass covers your feet
     const tx = player ? p.x : n.x;
@@ -619,11 +627,13 @@ function drawWorld(g, t) {
     g.fillStyle = '#fff'; g.fillRect(ex, ey, 9, 11);
     g.fillStyle = '#1a1a24'; g.fillRect(ex + 3, ey + 2, 3, 5); g.fillRect(ex + 3, ey + 8, 3, 2);
   }
+  g.restore();
   if (!m.indoor) {
-    const tint = dayTint();
-    if (tint) { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
+    const night = grade(g);
+    motes(g, t, { night });
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
   }
+  vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
 }
 

@@ -36,12 +36,12 @@ export const OUTDOOR = {
       'COLONIA DEL SACRAMENTO\nBarrio Histórico, Patrimonio de la Humanidad. Calles de piedra desde 1680.',
       'FARO DE COLONIA\nConstruido sobre las ruinas del convento de San Francisco. ¡Cuidado con el Río de la Plata!',
     ],
-    exits: { e: { to: 'ruta1', req: 'has_starter', deny: ['¡Esperá, {player}!', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Andá primero al laboratorio de la Profesora Arazá.'] } },
+    exits: { e: { to: 'ruta1', req: 'has_starter', deny: ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.'] } },
     npcs: [
-      { x: 20, y: 13, look: 'girl', wander: true, text: ['Los turistas vienen desde Buenos Aires en barco.', 'Dicen que en las noches de niebla el faro se ve borroso…'] },
-      { x: 8, y: 11, look: 'oldman', text: ['Cuando yo era gurí, había Ceibitos en todas las orillas.', 'Ahora sólo la Profesora Arazá los cuida.'] },
-      { x: 14, y: 12, look: 'boy', cond: (f) => !f.has_starter, text: ['¿Vos también vas al laboratorio? ¡Hoy reparten criaturas!'] },
-      { x: 14, y: 12, look: 'boy', cond: (f) => f.has_starter, text: ['¡Qué lindo tu compañero! Cuidalo mucho.', 'Si se cansa, pasá por casa: tu vieja siempre tiene un té de marcela.'] },
+      { x: 20, y: 13, look: 'girl', wander: true, text: ['Los turistas vienen desde Buenos Aires en barco.', 'Dicen que en las noches de niebla el faro se ve borroso.'] },
+      { x: 8, y: 11, look: 'oldman', text: ['Cuando yo era joven, había Ceibos en todas las orillas.', 'Ahora casi solo los cuida el Maestro Tabárez.'] },
+      { x: 14, y: 12, look: 'boy', cond: (f) => !f.has_starter, text: ['¿Vas al laboratorio? Hoy entregan criaturas.'] },
+      { x: 14, y: 12, look: 'boy', cond: (f) => f.has_starter, text: ['Buen compañero te tocó. Cuidalo.', 'Si se debilita, pasá por tu casa: tu madre siempre tiene té de marcela.'] },
     ],
   },
 
@@ -73,9 +73,9 @@ export const OUTDOOR = {
     exits: { w: { to: 'colonia' }, e: { to: 'montevideo' } },
     enc: { rate: 0.12, list: [['teruterito', 2, 4, 30], ['hornerito', 2, 4, 25], ['nandulin', 3, 5, 18], ['zorrigris', 3, 4, 15], ['venadito', 3, 5, 8], ['luciernito', 4, 5, 4]] },
     npcs: [
-      { x: 9, y: 5, look: 'boy', dir: 'down', sight: 4, trainer: TR('r1_a', 'Mateo', 'Gurí', [['teruterito', 4], ['hornerito', 4]], 80, '¡Ey! ¡Vos tenés una criatura! ¡A ver qué tal!', '¡Bah! Me ganaste…', 'Voy a entrenar más en el pastizal.') },
-      { x: 18, y: 9, look: 'girl', dir: 'left', sight: 4, trainer: TR('r1_b', 'Agustina', 'Estudiante', [['nandulin', 5]], 100, '¡Mi Ñandulín corre más rápido que el ómnibus!', '¡Uy, qué fuerte!', 'Montevideo está cerca. ¡Hay un gimnasio de tipo Agua!', 'girl') },
-      { x: 22, y: 13, look: 'gaucho', dir: 'up', text: ['Buen día, botija.', 'Si tus criaturas están cansadas, en Montevideo está la Policlínica. Te las curan gratis.'] },
+      { x: 9, y: 5, look: 'boy', dir: 'down', sight: 4, trainer: TR('r1_a', 'Mateo', 'Aprendiz', [['teruterito', 4], ['hornerito', 4]], 80, 'Tenés una criatura. Veamos qué tal te va.', 'Me ganaste.', 'Voy a entrenar más en el pastizal.') },
+      { x: 18, y: 9, look: 'girl', dir: 'left', sight: 4, trainer: TR('r1_b', 'Agustina', 'Estudiante', [['nandulin', 5]], 100, 'Mi Ñandú corre más rápido que el ómnibus.', 'Fuerte. Muy fuerte.', 'Montevideo está cerca. Allí hay un gimnasio de tipo Agua.', 'girl') },
+      { x: 22, y: 13, look: 'gaucho', dir: 'up', text: ['Buen día.', 'Si tus criaturas están debilitadas, en Montevideo está la Policlínica. Las atienden gratis.'] },
       { x: 13, y: 15, look: 'oldman', script: 'gift_te_marcela' },
     ],
   },
@@ -105,7 +105,7 @@ export const OUTDOOR = {
       '##############################',
     ],
     doors: [
-      { to: 'estadio', req: (f) => f.badge3 && f.quebrada_clear, deny: ['El Estadio Centenario está cerrado.', 'Sólo entran quienes tengan 3 medallas y hayan salvado al Pampero.'] },
+      { to: 'estadio', req: (f) => f.badge3 && f.quebrada_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan 3 medallas y hayan protegido al Pampero.'] },
       'gym_mvd', 'palacio', 'poli_mvd', 'shop_mvd', 'casa_mvd',
     ],
     signs: [
@@ -115,15 +115,15 @@ export const OUTDOOR = {
     exits: {
       w: { to: 'ruta1' },
       e: { to: 'interbalnearia', req: 'badge1', deny: ['POLICÍA: La Interbalnearia está cortada por la niebla.', 'Sólo dejamos pasar a entrenadores con la Medalla Rambla.'] },
-      n: { to: 'ruta8', req: (f) => f.badge2 && f.cabo_clear, deny: ['POLICÍA: La Ruta 8 está bloqueada por el Equipo Niebla.', 'Dicen que primero hay que resolver lo que pasa en Cabo Polonio…'] },
+      n: { to: 'ruta8', req: (f) => f.badge2 && f.cabo_clear, deny: ['POLICÍA: La Ruta 8 está bloqueada por el Equipo Niebla.', 'Primero hay que resolver lo que ocurre en Cabo Polonio.'] },
     },
     npcs: [
-      { x: 28, y: 7, look: 'cop', dir: 'left', cond: (f) => !f.badge1, text: ['La niebla en la Interbalnearia es muy rara…', 'Volvé cuando tengas la Medalla Rambla del gimnasio.'] },
-      { x: 11, y: 1, look: 'cop', dir: 'down', cond: (f) => !(f.badge2 && f.cabo_clear), text: ['El Equipo Niebla anda por el norte. No es seguro.'] },
-      { x: 6, y: 13, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', '¡Es marrón como el dulce de leche!'] },
-      { x: 18, y: 6, look: 'boy', text: ['La líder del gimnasio, Lucía, entrena en el mar todos los días.', 'Sus criaturas de tipo Agua son durísimas. Planta y Eléctrico le hacen daño.'] },
-      { x: 24, y: 13, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro vive gente que sabe mucho de criaturas.'] },
-      { x: 4, y: 6, look: 'grunt', cond: (f) => f.badge1 && !f.cabo_clear, text: ['¿Qué mirás? El Equipo Niebla va a cubrir todo el país.', 'Sin faros, nadie va a ver nada… ¡je je!'] },
+      { x: 28, y: 7, look: 'cop', dir: 'left', cond: (f) => !f.badge1, text: ['La niebla en la Interbalnearia es anormal.', 'Volvé cuando tengas la Medalla Rambla del gimnasio.'] },
+      { x: 11, y: 1, look: 'cop', dir: 'down', cond: (f) => !(f.badge2 && f.cabo_clear), text: ['El Equipo Niebla opera en el norte. No es seguro.'] },
+      { x: 6, y: 13, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
+      { x: 18, y: 6, look: 'boy', text: ['La líder del gimnasio, Lucía, entrena en el mar todos los días.', 'Sus criaturas son de tipo Agua. Planta y Eléctrico le hacen daño.'] },
+      { x: 24, y: 13, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
+      { x: 4, y: 6, look: 'grunt', cond: (f) => f.badge1 && !f.cabo_clear, text: ['¿Qué mirás? El Equipo Niebla va a cubrir todo el país.', 'Sin faros, nadie va a ver lo que hacemos.'] },
       { x: 2, y: 7, look: 'rival', dir: 'right', id: 'rival_mvd', cond: (f) => !f.rival2, script: 'rival_mvd' },
     ],
     triggers: [{ x: 0, y: 6, w: 3, h: 4, cond: (f) => !f.rival2, script: 'rival_mvd' }],
@@ -157,10 +157,10 @@ export const OUTDOOR = {
     exits: { w: { to: 'montevideo' }, e: { to: 'punta' } },
     enc: { rate: 0.12, list: [['butia', 10, 13, 22], ['mulitin', 10, 13, 18], ['teruterito', 11, 13, 15], ['benteve', 11, 13, 15], ['yararita', 10, 12, 14], ['venadito', 11, 13, 10], ['mbigua', 12, 13, 6]] },
     npcs: [
-      { x: 8, y: 4, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('ib_a', 'Santi', 'Surfista', [['mbigua', 13], ['lobito', 13]], 260, '¡Las olas en La Paloma están bárbaras! Pero primero, ¡una batalla!', '¡Me revolcó la ola!', 'Andá a Punta del Este, ahí está el segundo gimnasio.', 'swimmer') },
-      { x: 16, y: 7, look: 'girl', dir: 'left', sight: 4, trainer: TR('ib_b', 'Valentina', 'Campista', [['butia', 12], ['benteve', 13]], 220, '¡Acampé en Atlántida toda la semana!', '¡Ay, perdí!', 'Comprá Repelente si querés evitar los pastizales.', 'girl') },
-      { x: 24, y: 11, look: 'gaucho', dir: 'up', sight: 4, trainer: TR('ib_c', 'Don Rufino', 'Gaucho', [['mulitin', 13], ['nandulin', 13], ['zorrigris', 14]], 300, '¡Ahijuna! Nadie pasa sin probar mi tropilla.', '¡Pucha digo!', 'Para la mulita, nada mejor que el agua.', 'gaucho') },
-      { x: 5, y: 13, look: 'boy', text: ['¿Viste la niebla? Unos tipos de gris la tiran con máquinas.', 'Se hacen llamar Equipo Niebla.'] },
+      { x: 8, y: 4, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('ib_a', 'Santi', 'Surfista', [['mbigua', 13], ['lobito', 13]], 260, 'Las olas en La Paloma están muy buenas, pero primero un combate.', 'Me revolcaron.', 'Andá a Punta del Este: ahí está el segundo gimnasio.', 'swimmer') },
+      { x: 16, y: 7, look: 'girl', dir: 'left', sight: 4, trainer: TR('ib_b', 'Valentina', 'Campista', [['butia', 12], ['benteve', 13]], 220, 'Acampé en Atlántida toda la semana.', 'Perdí.', 'Comprá Repelente si querés evitar a las criaturas de los pastizales.', 'girl') },
+      { x: 24, y: 11, look: 'gaucho', dir: 'up', sight: 4, trainer: TR('ib_c', 'Don Rufino', 'Gaucho', [['mulitin', 13], ['nandulin', 13], ['zorrigris', 14]], 300, 'Nadie pasa sin enfrentarme primero.', 'Buen combate.', 'Contra la Mulita, nada mejor que el agua.', 'gaucho') },
+      { x: 5, y: 13, look: 'boy', text: ['Esa niebla no es natural. Unos hombres de gris la generan con máquinas.', 'Se hacen llamar Equipo Niebla.'] },
     ],
     items: [{ x: 26, y: 1, item: 'mate', id: 'ib_item1' }, { x: 1, y: 12, item: 'superesfera', id: 'ib_item2' }],
   },
@@ -193,14 +193,14 @@ export const OUTDOOR = {
     exits: { w: { to: 'interbalnearia' }, e: { to: 'cabo' } },
     enc: { rate: 0.1, list: [['mbigua', 14, 16, 30], ['benteve', 14, 16, 25], ['lobito', 14, 16, 15], ['cotorrayo', 15, 16, 15], ['teruterazo', 16, 17, 5]] },
     npcs: [
-      { x: 6, y: 12, look: 'girl', text: ['¡La Mano! Una escultura de dedos que salen de la arena.', 'Dicen que es un aviso para los bañistas: cuidado con la Brava.'] },
-      { x: 23, y: 12, look: 'sailor', dir: 'down', text: ['Desde el puerto se ve la Isla de Lobos.', 'A veces, en invierno, aparece una ballena que canta…'] },
-      { x: 14, y: 10, look: 'swimmer', wander: true, text: ['¡Qué calor! ¿Un chivito en la playa?'] },
-      { x: 18, y: 9, look: 'grunt', dir: 'left', sight: 3, cond: (f) => f.badge1, trainer: TR('pde_g1', 'Recluta Niebla', 'Equipo Niebla', [['yararita', 16], ['zorrigris', 16]], 320, '¡Ey! ¡Nadie tiene que saber lo del faro!', '¡Bah! Igual ya es tarde…', 'La jefa Bruma está en Cabo Polonio. ¡Ups, hablé de más!', 'grunt') },
-      { x: 25, y: 10, look: 'boy', text: ['La líder Sofía usa tipo Eléctrico. ¡Mi Mbiguá quedó frito!', 'Algo de tipo Tierra le vendría bien a tu equipo.'] },
+      { x: 6, y: 12, look: 'girl', text: ['La Mano es una escultura de dedos que emergen de la arena.', 'Es un recordatorio para los bañistas: la playa Brava es peligrosa.'] },
+      { x: 23, y: 12, look: 'sailor', dir: 'down', text: ['Desde el puerto se ve la Isla de Lobos.', 'A veces, en invierno, aparece una ballena cuyo canto se oye desde la costa.'] },
+      { x: 14, y: 10, look: 'swimmer', wander: true, text: ['Con este calor, lo que más apetece es un chivito en la playa.'] },
+      { x: 18, y: 9, look: 'grunt', dir: 'left', sight: 3, cond: (f) => f.badge1, trainer: TR('pde_g1', 'Recluta Niebla', 'Equipo Niebla', [['yararita', 16], ['zorrigris', 16]], 320, 'Nadie tiene que saber lo del faro.', 'Igual ya es tarde.', 'La jefa Bruma está en Cabo Polonio. Hablé de más.', 'grunt') },
+      { x: 25, y: 10, look: 'boy', text: ['La líder Sofía usa tipo Eléctrico. Mi Mbiguá no pudo con ella.', 'Algo de tipo Tierra le vendría bien a tu equipo.'] },
     ],
     items: [{ x: 1, y: 13, item: 'alfajor', id: 'pde_item1' }],
-    legend: { x: 24, y: 12, species: 'ballenaplata', level: 55, flag: 'caught_ballenaplata', cond: (f) => f.champion, text: '¡Un canto profundo sale del agua!' },
+    legend: { x: 24, y: 12, species: 'ballenaplata', level: 55, flag: 'caught_ballenaplata', cond: (f) => f.champion, text: 'Un canto profundo sale del agua.' },
   },
 
   cabo: {
@@ -229,11 +229,11 @@ export const OUTDOOR = {
     warps: [{ x: 9, y: 4, to: 'faro_cabo', tx: 4, ty: 6 }],
     enc: { rate: 0.12, list: [['lobito', 17, 20, 30], ['tortugal', 18, 20, 12], ['mbigua', 17, 19, 20], ['cotorrayo', 17, 19, 18], ['butia', 17, 19, 20]] },
     npcs: [
-      { x: 2, y: 7, look: 'keeper', cond: (f) => !f.cabo_clear, text: ['¡Ayuda! ¡El Equipo Niebla se robó la lámpara del faro!', 'Sin luz, los barcos van a chocar contra las rocas.'] },
-      { x: 12, y: 7, look: 'grunt', dir: 'left', sight: 4, cond: (f) => !f.cabo_clear, trainer: TR('cp_g1', 'Recluta Niebla', 'Equipo Niebla', [['zorrigris', 19], ['yararita', 19]], 380, '¡Alto ahí! El faro es nuestro.', '¡No puede ser!', 'La jefa Bruma te va a hacer pedazos.', 'grunt') },
-      { x: 18, y: 9, look: 'grunt', dir: 'up', sight: 3, cond: (f) => !f.cabo_clear, trainer: TR('cp_g2', 'Recluta Niebla', 'Equipo Niebla', [['cuervon', 20], ['mulitin', 19]], 380, '¡Más niebla, menos luz!', 'Me nublé…', '…', 'grunt') },
+      { x: 2, y: 7, look: 'keeper', cond: (f) => !f.cabo_clear, text: ['El Equipo Niebla se llevó la lámpara del faro.', 'Sin luz, los barcos pueden chocar contra las rocas.'] },
+      { x: 12, y: 7, look: 'grunt', dir: 'left', sight: 4, cond: (f) => !f.cabo_clear, trainer: TR('cp_g1', 'Recluta Niebla', 'Equipo Niebla', [['zorrigris', 19], ['yararita', 19]], 380, 'Alto. El faro es nuestro.', 'No es posible.', 'La jefa Bruma no será tan fácil.', 'grunt') },
+      { x: 18, y: 9, look: 'grunt', dir: 'up', sight: 3, cond: (f) => !f.cabo_clear, trainer: TR('cp_g2', 'Recluta Niebla', 'Equipo Niebla', [['cuervon', 20], ['mulitin', 19]], 380, 'Más niebla, menos luz.', 'Me superaste.', 'No tengo más que decir.', 'grunt') },
       { x: 10, y: 4, look: 'boss', dir: 'left', id: 'bruma', cond: (f) => !f.cabo_clear, script: 'bruma' },
-      { x: 20, y: 6, look: 'boy', text: ['Acá no hay luz eléctrica, ¡ni calles!', 'Los lobos marinos se tiran al sol en las rocas.'] },
+      { x: 20, y: 6, look: 'boy', text: ['Acá no hay red eléctrica ni calles asfaltadas.', 'Los lobos marinos descansan al sol sobre las rocas.'] },
       { x: 3, y: 11, look: 'girl', wander: true, text: ['Las dunas se mueven con el viento. El pueblo entero cambia cada año.'] },
     ],
     items: [{ x: 21, y: 1, item: 'ultraesfera', id: 'cp_item1' }, { x: 5, y: 12, item: 'torta_frita', id: 'cp_item2' }],
@@ -269,10 +269,10 @@ export const OUTDOOR = {
     exits: { s: { to: 'montevideo' }, n: { to: 'quebrada' } },
     enc: { rate: 0.13, list: [['gatomontes', 22, 25, 15], ['venadito', 22, 24, 18], ['cotorrayo', 22, 24, 15], ['luciernito', 22, 24, 15], ['yararita', 23, 25, 15], ['yacarito', 22, 24, 12], ['zorrigris', 23, 25, 8], ['aguaraflama', 24, 24, 2]] },
     npcs: [
-      { x: 15, y: 15, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('r8_a', 'Don Ceferino', 'Gaucho', [['nanduro', 25], ['venadito', 24]], 500, '¡Por la ruta 8 sólo pasan los guapos!', '¡Ta bien, ta bien!', 'Que Dios te acompañe, gurí.', 'gaucho') },
-      { x: 18, y: 7, look: 'girl', dir: 'down', sight: 3, trainer: TR('r8_b', 'Lucía B.', 'Naturalista', [['luciernito', 24], ['picaflorin', 25]], 480, '¡Estoy estudiando a los bichitos de luz!', '¡Qué energía!', 'En la Quebrada viven Cuervones. Son de tipo Siniestro y Volador.', 'girl') },
-      { x: 7, y: 3, look: 'grunt', dir: 'right', sight: 5, trainer: TR('r8_g', 'Recluta Niebla', 'Equipo Niebla', [['yarara', 27], ['cuervon', 26]], 540, '¡El jefe Brumario está por atrapar al Pampero!', '¡Ay, no!', '¡Ya es tarde! Con el Pampero encerrado, la niebla nunca se va a ir.', 'grunt') },
-      { x: 4, y: 14, look: 'oldman', text: ['Cuando sopla el pampero, el cielo queda limpito.', 'Dicen que lo trae una criatura enorme con alas de tormenta.'] },
+      { x: 15, y: 15, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('r8_a', 'Don Ceferino', 'Gaucho', [['nanduro', 25], ['venadito', 24]], 500, 'Por la Ruta 8 solo pasan los que tienen coraje.', 'Está bien, pasaste.', 'Que te vaya bien en el camino.', 'gaucho') },
+      { x: 18, y: 7, look: 'girl', dir: 'down', sight: 3, trainer: TR('r8_b', 'Lucía B.', 'Naturalista', [['luciernito', 24], ['picaflorin', 25]], 480, 'Estudio a las criaturas luminosas de la zona.', 'Tenés mucha energía.', 'En la Quebrada viven Cuervos. Son de tipo Siniestro y Volador.', 'girl') },
+      { x: 7, y: 3, look: 'grunt', dir: 'right', sight: 5, trainer: TR('r8_g', 'Recluta Niebla', 'Equipo Niebla', [['yarara', 27], ['cuervon', 26]], 540, 'El jefe Brumario está por capturar al Pampero.', 'No.', 'Ya es tarde. Con el Pampero capturado, la niebla no se va a ir.', 'grunt') },
+      { x: 4, y: 14, look: 'oldman', text: ['Cuando sopla el pampero, el cielo queda despejado.', 'Dicen que lo trae una criatura enorme con alas de tormenta.'] },
       { x: 11, y: 17, look: 'rival', dir: 'up', id: 'rival_r8', cond: (f) => !f.rival3, script: 'rival_r8' },
     ],
     items: [{ x: 24, y: 1, item: 'mate_dulce', id: 'r8_item1' }, { x: 1, y: 18, item: 'garrapinada', id: 'r8_item2' }],
@@ -310,15 +310,15 @@ export const OUTDOOR = {
     enc: { rate: 0.13, list: [['cuervon', 26, 29, 25], ['mulitin', 26, 28, 15], ['picaflorin', 27, 29, 12], ['zorrigris', 27, 29, 15], ['yacarito', 26, 28, 13], ['gatomontes', 27, 29, 12], ['mulitron', 29, 30, 8]] },
     npcs: [
       { x: 12, y: 2, look: 'boss', dir: 'down', id: 'brumario', cond: (f) => f.badge3 && !f.quebrada_clear, script: 'brumario' },
-      { x: 12, y: 2, look: 'grunt', dir: 'down', cond: (f) => !f.badge3, text: ['El jefe está ocupado. Volvé cuando seas alguien. ¡Ja!'] },
-      { x: 10, y: 3, look: 'grunt', dir: 'right', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta Niebla', 'Equipo Niebla', [['zorromonte', 30], ['yararita', 29]], 600, '¡El Pampero va a ser nuestro!', '¡Noo!', 'El jefe Brumario es imparable…', 'grunt') },
-      { x: 15, y: 3, look: 'grunt', dir: 'left', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g2', 'Recluta Niebla', 'Equipo Niebla', [['cuervon', 30], ['mulitron', 30]], 600, '¡Más niebla para todos!', '¡Uf!', '…', 'grunt') },
-      { x: 7, y: 9, look: 'gaucho', dir: 'right', sight: 4, trainer: TR('qb_a', 'Doña Ofelia', 'Paisana', [['gatomontes', 28], ['venadalto', 29]], 560, '¡En la Quebrada se pelea con respeto!', '¡Bien jugado, m\'hijo!', 'Don Aparicio es duro como la piedra de la quebrada.', 'gaucho') },
+      { x: 12, y: 2, look: 'grunt', dir: 'down', cond: (f) => !f.badge3, text: ['El jefe está ocupado. Volvé cuando seas un rival de verdad.'] },
+      { x: 10, y: 3, look: 'grunt', dir: 'right', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta Niebla', 'Equipo Niebla', [['zorromonte', 30], ['yararita', 29]], 600, 'El Pampero va a ser nuestro.', 'No.', 'El jefe Brumario es imparable.', 'grunt') },
+      { x: 15, y: 3, look: 'grunt', dir: 'left', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g2', 'Recluta Niebla', 'Equipo Niebla', [['cuervon', 30], ['mulitron', 30]], 600, 'Más niebla para todos.', 'Me superaste.', 'No tengo más que decir.', 'grunt') },
+      { x: 7, y: 9, look: 'gaucho', dir: 'right', sight: 4, trainer: TR('qb_a', 'Doña Ofelia', 'Paisana', [['gatomontes', 28], ['venadalto', 29]], 560, 'En la Quebrada se combate con respeto.', 'Bien jugado.', 'Don Aparicio es duro como la piedra de la quebrada.', 'gaucho') },
       { x: 22, y: 9, look: 'boy', text: ['En el fondo de la quebrada hay un arroyo.', 'Los cuervos de cabeza roja vuelan en círculos por arriba.'] },
-      { x: 4, y: 18, look: 'girl', wander: true, text: ['Treinta y Tres se llama así por los 33 Orientales.', '¡Acá se respira historia!'] },
+      { x: 4, y: 18, look: 'girl', wander: true, text: ['Treinta y Tres se llama así por los 33 Orientales.', 'Acá la historia está en cada rincón.'] },
     ],
     items: [{ x: 3, y: 2, item: 'ultraesfera', id: 'qb_item1' }, { x: 24, y: 2, item: 'dulce_de_leche', id: 'qb_item2' }],
-    legend: { x: 13, y: 1, species: 'pamperon', level: 50, flag: 'caught_pamperon', cond: (f) => f.champion, text: '¡Un viento helado baja desde el cielo!' },
+    legend: { x: 13, y: 1, species: 'pamperon', level: 50, flag: 'caught_pamperon', cond: (f) => f.champion, text: 'Un viento helado baja desde el cielo.' },
   },
 };
 
@@ -374,7 +374,7 @@ const GYM = [
 
 const nurse = { x: 5, y: 1, look: 'nurse', dir: 'down', script: 'nurse' };
 const pc = { x: 9, y: 1, look: null, script: 'pc' };
-const poli = (name) => room(POLI, { name, heal: true, npcs: [nurse, pc, { x: 2, y: 5, look: 'oldman', wander: true, text: ['La Policlínica atiende gratis. ¡Viva la salud pública!'] }] });
+const poli = (name) => room(POLI, { name, heal: true, npcs: [nurse, pc, { x: 2, y: 5, look: 'oldman', wander: true, text: ['La Policlínica atiende gratis. Es un servicio público.'] }] });
 const shop = (name, stock) => room(SHOP, { name, npcs: [{ x: 1, y: 2, look: 'clerk', dir: 'down', script: 'shop', stock }] });
 
 export const INTERIOR = {
@@ -387,7 +387,7 @@ export const INTERIOR = {
     name: 'Casa de {rival}',
     npcs: [
       { x: 6, y: 4, look: 'girl', dir: 'left', script: 'rival_sister' },
-      { x: 1, y: 2, look: 'rival', dir: 'down', cond: (f) => f.champion, text: ['¡Ey, Campeón! Volví a casa a entrenar.', 'La próxima en el Centenario te gano yo.'] },
+      { x: 1, y: 2, look: 'rival', dir: 'down', cond: (f) => f.champion, text: ['Campeón. Volví a casa a entrenar.', 'La próxima vez en el Centenario te gano yo.'] },
     ],
   }),
   lab: room([
@@ -401,20 +401,20 @@ export const INTERIOR = {
     'NiiiiiiiiiiN',
     'iiiiimmiiiii',
   ], {
-    name: 'Laboratorio Arazá',
+    name: 'Laboratorio Tabárez',
     npcs: [
       { x: 5, y: 2, look: 'prof', dir: 'down', id: 'prof', script: 'prof' },
       { x: 4, y: 3, look: 'ball', species: 'ceibito', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 5, y: 3, look: 'ball', species: 'tejuchispa', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 6, y: 3, look: 'ball', species: 'carpinchito', cond: (f) => !f.has_starter, script: 'starter' },
-      { x: 9, y: 6, look: 'clerk', dir: 'left', text: ['Soy ayudante de la Profesora.', 'Estudiamos cómo las criaturas cambian con el clima del Río de la Plata.'] },
+      { x: 9, y: 6, look: 'clerk', dir: 'left', text: ['Soy ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
       { x: 7, y: 1, look: 'rival', dir: 'down', id: 'rival_lab', cond: (f) => !f.rival1 },
     ],
   }),
   casa_mvd: room(HOUSE, {
     name: 'Casa en Montevideo',
     npcs: [
-      { x: 6, y: 3, look: 'oldman', dir: 'left', text: ['El candombe nació en los barrios Sur y Palermo.', 'Cuando suenan los tambores, ¡hasta las criaturas bailan!', 'Hay un movimiento llamado Danza Candombe que sube Ataque y Velocidad.'] },
+      { x: 6, y: 3, look: 'oldman', dir: 'left', text: ['El candombe nació en los barrios Sur y Palermo.', 'Cuando suenan los tambores, hasta las criaturas siguen el ritmo.', 'Existe un movimiento llamado Danza Candombe que sube Ataque y Velocidad.'] },
       { x: 2, y: 5, look: 'girl', script: 'gift_garrapinada' },
     ],
   }),
@@ -434,8 +434,8 @@ export const INTERIOR = {
   ], {
     name: 'Palacio Salvo',
     npcs: [
-      { x: 2, y: 2, look: 'prof', dir: 'down', text: ['En este palacio guardamos registros de todas las criaturas del país.', 'Algunas evolucionan al subir de nivel. ¡Entrenalas con paciencia!'] },
-      { x: 9, y: 2, look: 'boy', dir: 'down', text: ['¿Sabías? Si una criatura está dormida o paralizada, es más fácil atraparla.'] },
+      { x: 2, y: 2, look: 'prof', dir: 'down', text: ['En este palacio guardamos registros de todas las criaturas del país.', 'Algunas evolucionan al subir de nivel. Entrenalas con paciencia.'] },
+      { x: 9, y: 2, look: 'boy', dir: 'down', text: ['Dato útil: si una criatura está dormida o paralizada, es más fácil capturarla.'] },
       { x: 6, y: 4, look: 'girl', dir: 'down', text: ['El tipo Lucha es fuerte contra Normal, Roca y Siniestro.', 'Pero sufre contra Volador y Psíquico.'] },
     ],
   }),
@@ -462,27 +462,27 @@ export const INTERIOR = {
     name: 'Gimnasio de Montevideo',
     npcs: [
       { x: 5, y: 2, look: 'leader_water', dir: 'down', script: 'leader', leader: 'lucia' },
-      { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Nadador', [['lobito', 10], ['carpinchito', 10]], 200, '¡Entreno en la Rambla con Lucía!', '¡Glub!', 'Lucía usa tipo Agua. ¿Tenés algo de tipo Planta o Eléctrico?', 'swimmer') },
-      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Nadadora', [['mbigua', 11]], 220, '¡Plaf! ¡Al agua!', '¡Me hundí!', 'Lucía es muy buena. ¡Suerte!', 'girl') },
-      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['¡Bienvenido al Gimnasio de Montevideo!', 'La líder Lucía usa criaturas de tipo Agua.', 'Las de tipo Planta y Eléctrico tienen ventaja.'] },
+      { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Nadador', [['lobito', 10], ['carpinchito', 10]], 200, 'Entreno en la Rambla con Lucía.', 'Perdí.', 'Lucía usa tipo Agua. ¿Tenés algo de tipo Planta o Eléctrico?', 'swimmer') },
+      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Nadadora', [['mbigua', 11]], 220, 'Al agua.', 'Me hundí.', 'Lucía es muy buena. Suerte.', 'girl') },
+      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Bienvenido al Gimnasio de Montevideo.', 'La líder Lucía usa criaturas de tipo Agua.', 'Las de tipo Planta y Eléctrico tienen ventaja.'] },
     ],
   }),
   gym_pde: room(GYM, {
     name: 'Gimnasio de Punta del Este',
     npcs: [
       { x: 5, y: 2, look: 'leader_elec', dir: 'down', script: 'leader', leader: 'sofia' },
-      { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Electricista', [['luciernito', 17], ['luciernito', 17]], 340, '¡Bzzzt! ¡Cuidado con los cables!', '¡Cortocircuito!', 'Sofía es rapidísima.', 'boy') },
-      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Modelo', [['cotorrayo', 18]], 360, '¡Punta es glamour y voltaje!', '¡Ay, mi pelo!', 'Lo de tipo Tierra no recibe daño eléctrico.', 'girl') },
-      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['¡Gimnasio de Punta del Este!', 'Sofía usa tipo Eléctrico. Tipo Tierra es inmune a la electricidad.'] },
+      { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Electricista', [['luciernito', 17], ['luciernito', 17]], 340, 'Cuidado con los cables.', 'Cortocircuito.', 'Sofía es rapidísima.', 'boy') },
+      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Modelo', [['cotorrayo', 18]], 360, 'Punta es glamour y voltaje.', 'Perdí.', 'Las criaturas de tipo Tierra no reciben daño eléctrico.', 'girl') },
+      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Gimnasio de Punta del Este.', 'Sofía usa tipo Eléctrico. El tipo Tierra es inmune a la electricidad.'] },
     ],
   }),
   gym_tyt: room(GYM, {
     name: 'Gimnasio de Treinta y Tres',
     npcs: [
       { x: 5, y: 2, look: 'gaucho', dir: 'down', script: 'leader', leader: 'aparicio' },
-      { x: 8, y: 6, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('g3_a', 'Peón Ramiro', 'Peón', [['mulitin', 27], ['hornerazo', 27]], 540, '¡La piedra no se quiebra!', '¡Se quebró!', 'Agua y Planta le hacen bien a la roca… digo, mal.', 'gaucho') },
-      { x: 3, y: 9, look: 'boy', dir: 'right', sight: 4, trainer: TR('g3_b', 'Tropero Lalo', 'Tropero', [['nanduro', 28]], 560, '¡Ninguna tropa me para!', '¡Pa!', 'Don Aparicio pelea desde antes que vos nacieras.', 'boy') },
-      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['¡Gimnasio de Treinta y Tres!', 'Don Aparicio usa tipo Roca y Tierra. Agua y Planta son tus mejores aliados.'] },
+      { x: 8, y: 6, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('g3_a', 'Peón Ramiro', 'Peón', [['mulitin', 27], ['hornerazo', 27]], 540, 'La piedra no se quiebra.', 'Se quebró.', 'El agua y la planta le hacen daño a la roca.', 'gaucho') },
+      { x: 3, y: 9, look: 'boy', dir: 'right', sight: 4, trainer: TR('g3_b', 'Tropero Lalo', 'Tropero', [['nanduro', 28]], 560, 'Ninguna tropa me detiene.', 'Perdí.', 'Don Aparicio combate desde antes de que vos nacieras.', 'boy') },
+      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Gimnasio de Treinta y Tres.', 'Don Aparicio usa tipo Roca y Tierra. Agua y Planta son tus mejores aliados.'] },
     ],
   }),
   estadio: room([

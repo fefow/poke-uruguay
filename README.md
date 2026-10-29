@@ -13,7 +13,7 @@ npm run dev        # serves the folder at http://localhost:8080
 
 Open `http://localhost:8080`. No build step is needed in development: the game is plain ES modules.
 
-**Controls:** arrows / WASD move · hold Space to walk 1.5x faster · Z or Enter = A · X or Shift = B (hold to run) · Esc or M = menu. Gamepads work, and phones get on-screen touch controls.
+**Controls:** arrows / WASD move · hold Space to walk 1.5x faster · Z = A · X or Shift = B · Enter, Esc or M = menu · N toggles music · O opens settings · P toggles the team panel. Gamepads work, and phones get on-screen touch controls.
 
 **Bug log:** the 🐞 button (or F2) opens a panel that records errors automatically, plus map changes and battles as context. You can add your own notes, then copy the report, download it as a .txt, or open a prefilled GitHub issue. If you paste a fine-grained GitHub token (Contents: write on this repo only) into the panel, it is kept only in that browser and the log is uploaded automatically to `reports/<device>.json` on the `bug-reports` branch.
 
@@ -36,7 +36,7 @@ Copy `dist/` to any static host (nginx, Caddy…). Serve it over HTTPS so the of
 | Overworld engine (movement, warps, encounters, trainer sight) | `src/game/world.js` |
 | Battle rules (pure, seeded, replayable) | `src/game/battle-engine.js` |
 | Battle presentation | `src/game/battle-scene.js` |
-| Menus: team, bag, UruDex, card, options, save, shop, PC | `src/game/menus.js` |
+| Menus: team, bag, PokeDex, card, options, save, shop, PC | `src/game/menus.js` |
 | Title, intro, hall of fame, credits | `src/game/scenes.js` |
 | Pixel art generators | `src/gfx/` |
 | Save system | `src/save/` (provider interface, signing, validation) |
@@ -48,7 +48,7 @@ Copy `dist/` to any static host (nginx, Caddy…). Serve it over HTTPS so the of
 - 8 regions: Colonia, Ruta 1, Montevideo (Rambla, Palacio Salvo, Estadio Centenario), Ruta Interbalnearia, Punta del Este (La Mano), Cabo Polonio, Ruta 8, Treinta y Tres / Quebrada de los Cuervos. 17 interiors.
 - 42 creatures across 13 types, 3 starters (Ceibito, Tejuchispa, Carpinchito), evolutions, 60+ moves (Danza Candombe, Mate Amargo, Garra Charrúa, Rayo Pampero…).
 - Items with local flavor: Té de Marcela, Mate, Dulce de Leche, Chivito, Alfajor, Torta Frita, Garrapiñada.
-- Story: rival Facu, Profesora Arazá, three gym leaders, Equipo Niebla (Bruma, Brumario), Champion Obdulio, hall of fame, credits, post-game legendaries (Pamperón, Ballenaplata, Soldemayo).
+- Story: rival Facu, Maestro Tabárez, three gym leaders, Equipo Niebla (Bruma, Brumario), Champion Obdulio, hall of fame, credits, post-game legendaries (Pamperón, Ballenaplata, Soldemayo).
 
 ### Modern web features used
 

@@ -58,7 +58,7 @@ export const LOOKS = {
   player_m: { h: '#e8e8f0', H: '#5aa8e8', s: '#f2c8a0', S: '#d8a880', c: '#5aa8e8', C: '#3a78b8', p: '#2a3a5a', b: '#3a2a20' },
   player_f: { h: '#8a4a2a', H: '#f2f2f2', s: '#f2c8a0', S: '#d8a880', c: '#f2f2f2', C: '#5aa8e8', p: '#3a78b8', b: '#3a2a20', long: true },
   rival: { h: '#2a2a3a', H: '#2a2a3a', s: '#e8b890', S: '#c89870', c: '#e0263a', C: '#a01a2a', p: '#2a2a2a', b: '#1a1a1a' },
-  prof: { h: '#d8d8d8', H: '#d8d8d8', s: '#f2c8a0', S: '#d8a880', c: '#f8f8f8', C: '#c8c8d0', p: '#5a4a3a', b: '#2a1a10', long: true },
+  prof: { h: '#d8d8d8', H: '#d8d8d8', s: '#f2c8a0', S: '#d8a880', c: '#f8f8f8', C: '#c8c8d0', p: '#5a4a3a', b: '#2a1a10' },
   mom: { h: '#5a2a1a', H: '#5a2a1a', s: '#f2c8a0', S: '#d8a880', c: '#e86a8a', C: '#b84a6a', p: '#5a5a8a', b: '#2a2a2a', long: true },
   nurse: { h: '#f2a0b8', H: '#ffffff', s: '#f2c8a0', S: '#d8a880', c: '#ffffff', C: '#f2a0b8', p: '#f2a0b8', b: '#ffffff', long: true },
   clerk: { h: '#3a2a1a', H: '#4a9a4a', s: '#e8b890', S: '#c89870', c: '#4a9a4a', C: '#2a6a2a', p: '#3a3a3a', b: '#1a1a1a' },

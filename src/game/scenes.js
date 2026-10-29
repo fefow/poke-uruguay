@@ -104,24 +104,24 @@ export async function newGameIntro() {
   });
   playMusic('town');
   await fadeIn(400);
-  await say(['¡Hola! ¡Bienvenido al mundo de Poke Uruguay!', 'Me llamo Arazá, pero todos me dicen la Profesora.'], { name: 'Prof. Arazá' });
+  await say(['Bienvenido al mundo de Poke Uruguay.', 'Soy el Maestro Tabárez. Dirigí a la selección durante años y hoy me dedico a estudiar a las criaturas de este país.'], { name: 'Maestro Tabárez' });
   mon = 'carpinchito';
   sfx('confirm');
-  await say(['En este país viven criaturas maravillosas.', 'Algunas nadan en el Río de la Plata, otras corren por las praderas o vuelan sobre las sierras.',
-    'La gente vive con ellas, entrena con ellas… y a veces, combate con ellas.'], { name: 'Prof. Arazá' });
+  await say(['En este país conviven personas y criaturas.', 'Algunas nadan en el Río de la Plata, otras recorren las praderas o vuelan sobre las sierras.',
+    'La gente trabaja con ellas, las entrena y, a veces, combate con ellas.'], { name: 'Maestro Tabárez' });
   mon = null;
-  await say('Pero contame de vos. ¿Cómo sos?', { name: 'Prof. Arazá', keep: true });
-  const look = await choose(['Chico', 'Chica'], { cancel: false });
+  await say('Ahora hablemos de vos. ¿Cómo te presentás?', { name: 'Maestro Tabárez', keep: true });
+  const look = await choose(['Hombre', 'Mujer'], { cancel: false });
   closeDialog();
   const S = state();
   S.player.look = look === 0 ? 'player_m' : 'player_f';
   const raw = await textInput('¿Cómo te llamás? (máx. 10 letras)', look === 0 ? 'Bruno' : 'Martina');
   S.player.name = sanitizeName(raw, look === 0 ? 'Bruno' : 'Martina');
-  await say(`¡Así que te llamás {player}! Qué lindo nombre.`, { name: 'Prof. Arazá' });
-  await say('Y este es mi nieto. Se la pasa compitiendo con vos desde que eran chiquitos. ¿Cómo se llamaba?', { name: 'Prof. Arazá', keep: true });
+  await say(`Así que te llamás {player}. Un gusto.`, { name: 'Maestro Tabárez' });
+  await say('Este es mi nieto. Compite con vos desde que eran niños. ¿Cómo se llamaba?', { name: 'Maestro Tabárez', keep: true });
   const rawR = await textInput('Nombre de tu rival', 'Facu');
   S.rivalName = sanitizeName(rawR, 'Facu');
-  await say(['¡Claro! {rival}. ¿Cómo me pude olvidar?', '{player}, tu propia leyenda está por empezar.', '¡Un mundo de sueños y aventuras te espera en el Uruguay! ¡Vamos!'], { name: 'Prof. Arazá' });
+  await say(['Claro, {rival}. Cómo me pude olvidar.', '{player}, tu propia historia está por empezar.', 'Un camino largo te espera por todo el Uruguay. Vamos.'], { name: 'Maestro Tabárez' });
   await fadeOut(500);
 }
 
@@ -226,7 +226,7 @@ export function slotCard(s) {
   return h('div', { class: 'slot-card' },
     h('b', { text: s.summary.name }),
     h('span', { text: `${s.summary.location}` }),
-    h('span', { text: `Medallas ${s.summary.badges} · UruDex ${s.summary.dex} · ${formatTime(s.summary.playtime)}` }),
+    h('span', { text: `Medallas ${s.summary.badges} · PokeDex ${s.summary.dex} · ${formatTime(s.summary.playtime)}` }),
     s.summary.champion ? h('span', { class: 'champ', text: '★ Campeón' }) : null);
 }
 

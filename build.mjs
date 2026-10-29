@@ -14,6 +14,7 @@ const result = await build({
   target: ['chrome120', 'firefox121', 'safari17'],
   write: false,
   legalComments: 'none',
+  define: { __QA__: process.env.QA ? 'true' : 'false' }, // QA=1 node build.mjs exposes window.__qa for test scripts
 });
 const js = result.outputFiles[0].text;
 const css = await readFile('styles/main.css', 'utf8');

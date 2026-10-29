@@ -8,7 +8,7 @@ const KEYMAP = {
   ArrowDown: 'down', KeyS: 'down',
   ArrowLeft: 'left', KeyA: 'left',
   ArrowRight: 'right', KeyD: 'right',
-  KeyZ: 'a', KeyJ: 'a', Enter: 'a',
+  KeyZ: 'a', KeyJ: 'a', Enter: 'enter',
   Space: 'run', // held: walk 1.5x faster
   KeyX: 'b', Backspace: 'b', KeyK: 'b', ShiftLeft: 'b', ShiftRight: 'b',
   Escape: 'start', KeyM: 'start', Tab: 'start',
@@ -65,15 +65,18 @@ export const input = {
 addEventListener('keydown', (e) => {
   // Name entry field and bug-panel notes
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-  const action = KEYMAP[e.code];
+  let action = KEYMAP[e.code];
   if (!action) return;
   e.preventDefault();
+  // Enter opens the menu in the overworld and confirms inside UI layers.
+  if (action === 'enter') action = handlers.length ? 'a' : 'start';
   held.add(action);
   press(action);
 });
 addEventListener('keyup', (e) => {
   const action = KEYMAP[e.code];
-  if (action) held.delete(action);
+  if (action === 'enter') { held.delete('a'); held.delete('start'); }
+  else if (action) held.delete(action);
 });
 addEventListener('blur', () => held.clear());
 

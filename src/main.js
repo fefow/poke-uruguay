@@ -8,15 +8,18 @@ import { initAudio, setVolumes, sfx } from './core/audio.js';
 import { h, nextFrame, viewTransition, wait } from './core/util.js';
 import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './game/ui.js';
 import { state, setState, newState, settings, badgeCount } from './game/state.js';
-import { loadMap, updateWorld, worldState } from './game/world.js';
+import { loadMap, updateWorld, worldState, runScript } from './game/world.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
 import { openOptions } from './game/menus.js';
+import { mountHud, updateHud } from './game/hud.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
 import { SAVE_CONFIG } from './save/config.js';
 
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
+/* global __QA__ */
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();
@@ -44,6 +47,7 @@ function frame(now) {
     const S = state();
     if (S) S.stats.playtime += dt / 1000;
   }
+  updateHud(now);
   render(now);
   requestAnimationFrame(frame);
 }
@@ -53,6 +57,7 @@ async function boot() {
   mountScreen($('#view'));
   mountUI($('#ui'));
   mountTouchControls($('#touch'));
+  mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   setVolumes(settings);
   requestAnimationFrame(frame);
@@ -72,7 +77,7 @@ async function boot() {
       ]).catch(() => {});
     }],
     ['Empedrando Colonia…', async (sub) => buildTileset(sub)],
-    ['Vistiendo a los gurises…', async (sub) => {
+    ['Preparando a los personajes…', async (sub) => {
       const looks = Object.keys(LOOKS);
       looks.forEach((l, i) => { for (const d of ['down', 'up', 'left', 'right']) for (const f of [0, 1, 2]) charSprite(l, d, f); sub((i + 1) / looks.length); });
     }],
@@ -166,7 +171,7 @@ async function startNewGame() {
   mode = 'game';
   await fadeIn(500);
   worldState.scriptRunning = true;
-  await say(['¡Hoy es el día! Vas a recibir tu primera criatura.', 'Hablá con mamá antes de salir. (Z / A para hablar · Esc / Menú para el menú)']);
+  await say(['¡Hoy es el día! Vas a recibir tu primera criatura.', 'Hablá con tu madre antes de salir. (Z para hablar · Enter para abrir el menú)']);
   worldState.scriptRunning = false;
 }
 

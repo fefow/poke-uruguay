@@ -140,9 +140,9 @@ export function validateSave(d) {
   // Dex
   const seen = (d.dex?.seen ?? []).filter((k) => SPECIES[k]);
   const caught = (d.dex?.caught ?? []).filter((k) => SPECIES[k]);
-  if (seen.length !== (d.dex?.seen ?? []).length || caught.length !== (d.dex?.caught ?? []).length) e('UruDex con especies desconocidas');
-  if (!caught.every((k) => seen.includes(k))) e('UruDex inconsistente');
-  for (const c of all) if (!caught.includes(c.species)) e(`${SPECIES[c.species].name} no figura como atrapado en la UruDex`);
+  if (seen.length !== (d.dex?.seen ?? []).length || caught.length !== (d.dex?.caught ?? []).length) e('PokeDex con especies desconocidas');
+  if (!caught.every((k) => seen.includes(k))) e('PokeDex inconsistente');
+  for (const c of all) if (!caught.includes(c.species)) e(`${SPECIES[c.species].name} no figura como atrapado en la PokeDex`);
 
   if (errors.length) return { ok: false, errors };
   return {

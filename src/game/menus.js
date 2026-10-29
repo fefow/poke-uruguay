@@ -1,4 +1,4 @@
-// Panels: pause menu, party, summary, bag, UruDex, trainer card, options,
+// Panels: pause menu, party, summary, bag, PokeDex, trainer card, options,
 // save, shop and PC storage.
 import { h, clamp, formatTime, pad } from '../core/util.js';
 import { sfx, setVolumes } from '../core/audio.js';
@@ -57,7 +57,7 @@ export async function openPauseMenu() {
   sfx('confirm');
   while (true) {
     const entries = [];
-    if (S.flags.dex) entries.push(['UruDex', openDex]);
+    if (S.flags.dex) entries.push(['PokeDex', openDex]);
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
     entries.push([S.player.name, openCard]);
@@ -297,7 +297,7 @@ export function openDex() {
   return panel('panel-dex', (el, close) => {
     const seen = new Set(S.dex.seen);
     const caught = new Set(S.dex.caught);
-    const head = h('header', { class: 'panel-title' }, h('span', { text: 'UruDex' }), h('span', { text: `Vistos ${seen.size} · Atrapados ${caught.size}` }));
+    const head = h('header', { class: 'panel-title' }, h('span', { text: 'PokeDex' }), h('span', { text: `Vistos ${seen.size} · Atrapados ${caught.size}` }));
     const grid = h('ul', { class: 'dex-grid' });
     const rows = DEX_ORDER.map((k) => {
       const sp = SPECIES[k];
@@ -354,7 +354,7 @@ export function openCard() {
         h('dl', {},
           h('dt', { text: 'Nombre' }), h('dd', { text: S.player.name }),
           h('dt', { text: 'Dinero' }), h('dd', { text: `$${S.player.money.toLocaleString('es-UY')}` }),
-          h('dt', { text: 'UruDex' }), h('dd', { text: `${S.dex.caught.length} / ${DEX_ORDER.length}` }),
+          h('dt', { text: 'PokeDex' }), h('dd', { text: `${S.dex.caught.length} / ${DEX_ORDER.length}` }),
           h('dt', { text: 'Tiempo' }), h('dd', { text: formatTime(S.stats.playtime) }),
           h('dt', { text: 'Victorias' }), h('dd', { text: String(S.stats.battlesWon) }),
           h('dt', { text: 'Inicio' }), h('dd', { text: new Date(S.created).toLocaleDateString('es-UY') }),
@@ -383,7 +383,7 @@ export function openOptions() {
     refresh();
     el.append(h('header', { class: 'panel-title', text: 'Opciones' }), h('ul', { class: 'options-list' }, items),
       h('div', { class: 'controls-help' },
-        h('p', { text: 'Controles: Flechas/WASD mover · Espacio (mantener) = caminar 1,5x más rápido · Z/Enter = A · X/Shift = B (mantener para correr) · Esc/M = Menú' }),
+        h('p', { text: 'Controles: Flechas/WASD mover · Espacio (mantener) = caminar 1,5x más rápido · Z = A · X/Shift = B · Enter/Esc/M = Menú · N música · O ajustes · P equipo' }),
         h('p', { text: 'También funciona con gamepad y con los botones táctiles.' })),
       h('footer', { class: 'panel-foot', text: '←→ cambiar · B volver' }));
     const nav = listNav(items, {

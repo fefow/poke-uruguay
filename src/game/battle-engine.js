@@ -364,7 +364,7 @@ export class BattleEngine {
       ev.push({ t: 'text', msg: `¡Atrapaste a ${displayName(c)}!` }, { t: 'end', result: 'caught' });
       return true;
     }
-    ev.push({ t: 'text', msg: ['¡Oh, no! ¡Se escapó!', '¡Casi! ¡Faltó poquito!', '¡Uy! ¡Parecía atrapado!', '¡Noo! ¡Por un pelo!'][shakes] });
+    ev.push({ t: 'text', msg: ['¡Se escapó de la Esfera!', '¡Casi! Faltó muy poco.', '¡Parecía capturado!', '¡Por un pelo!'][shakes] });
     return false;
   }
 

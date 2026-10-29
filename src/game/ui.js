@@ -23,7 +23,7 @@ export const uiRoot = () => root;
 export function fmt(text) {
   const s = state();
   return String(text)
-    .replaceAll('{player}', s?.player.name ?? 'Gurí')
+    .replaceAll('{player}', s?.player.name ?? 'Jugador')
     .replaceAll('{rival}', s?.rivalName ?? 'Facu');
 }
 

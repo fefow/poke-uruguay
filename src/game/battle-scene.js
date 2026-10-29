@@ -7,6 +7,7 @@ import { ITEMS } from '../data/items.js';
 import { creatureSprite, SPRITE } from '../gfx/creatures.js';
 import { charSprite } from '../gfx/characters.js';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.js';
+import { vignette } from '../gfx/fx.js';
 import { h, wait, clamp } from '../core/util.js';
 import { sfx, playMusic, currentTrack } from '../core/audio.js';
 import { input } from '../core/input.js';
@@ -55,12 +56,22 @@ function drawBattle(g, t) {
   g.save();
   g.translate(sx, 0);
   // platforms
-  g.fillStyle = 'rgba(0,0,0,0.18)';
-  g.beginPath(); g.ellipse(236 + A.foeX * 0, 104, 52, 12, 0, 0, 7); g.fill();
-  g.beginPath(); g.ellipse(84, 178, 64, 13, 0, 0, 7); g.fill();
-  g.fillStyle = 'rgba(255,255,255,0.18)';
-  g.beginPath(); g.ellipse(236, 102, 48, 9, 0, 0, 7); g.fill();
-  g.beginPath(); g.ellipse(84, 176, 60, 9, 0, 0, 7); g.fill();
+  for (const [px, py, rx, ry] of [[236, 104, 52, 12], [84, 178, 64, 13]]) {
+    g.save();
+    g.translate(px, py);
+    g.scale(1, ry / rx);
+    const sh = g.createRadialGradient(0, 0, rx * 0.25, 0, 0, rx);
+    sh.addColorStop(0, 'rgba(0,0,0,0.38)');
+    sh.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = sh;
+    g.beginPath(); g.arc(0, 0, rx, 0, 7); g.fill();
+    g.restore();
+    g.fillStyle = 'rgba(255,255,255,0.16)';
+    g.beginPath(); g.ellipse(px, py - 2, rx * 0.86, ry * 0.7, 0, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,0.22)';
+    g.lineWidth = 1;
+    g.beginPath(); g.ellipse(px, py - 2, rx * 0.86, ry * 0.7, 0, 0, 7); g.stroke();
+  }
   // foe trainer
   if (A.foeTrainer) {
     const spr = charSprite(A.foeTrainer, 'down', 0);
@@ -94,6 +105,7 @@ function drawBattle(g, t) {
   g.restore();
   const tint = dayTint();
   if (tint && A.bg !== 'indoor') { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
+  vignette(g, 0.9);
   if (A.tint) { g.fillStyle = A.tint; g.fillRect(0, 0, W, H); }
 }
 
@@ -585,7 +597,7 @@ export async function learnFlow(c, moveId, opts = {}) {
       if (idx >= 0) {
         const old = MOVES[c.moves[idx].id].name;
         learnMove(c, moveId, idx);
-        await say(['1, 2 y… ¡Puf!', `${n} olvidó ${old}…`, `…¡y aprendió ${mv.name}!`], opts);
+        await say([`${n} olvidó ${old}…`, `…y aprendió ${mv.name}.`], opts);
         return;
       }
     }
@@ -602,7 +614,7 @@ async function handleCatch(foe) {
   foe.status = foe.status ?? null;
   markCaught(foe.species);
   S.stats.caught++;
-  await say(`¡Los datos de ${SPECIES[foe.species].name} se agregaron a la UruDex!`, { battle: true });
+  await say(`¡Los datos de ${SPECIES[foe.species].name} se agregaron a la PokeDex!`, { battle: true });
   if (await ask(`¿Querés ponerle un apodo a ${SPECIES[foe.species].name}?`, { battle: true })) {
     const raw = await textInput('Apodo (máx. 10 letras)', '');
     const nick = sanitizeName(raw, '');
