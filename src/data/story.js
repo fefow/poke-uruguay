@@ -42,7 +42,7 @@ export const LEADERS = {
     after: ['La Medalla Maldonado es tuya.', 'El Equipo PP robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
   },
   aparicio: {
-    id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'gaucho', ai: 'smart', items: ['mate_dulce'],
+    id: 'leader_aparicio', name: 'Don Aparicio', cls: 'Líder', look: 'leader_gaucho', ai: 'smart', items: ['mate_dulce'],
     team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
     intro: ['Buenas. Soy Aparicio.', 'Cuido estas sierras desde hace sesenta años.', 'La piedra de la quebrada lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía años que nadie me ganaba.',
@@ -199,7 +199,7 @@ export const SCRIPTS = {
   async garua(api) {
     if (api.flag('pp_clear')) return api.say('Mi plan fracasó. Esta vez de verdad.', { name: 'Garúa' });
     await api.say(['Así que lograste llegar hasta acá.', 'Soy Garúa, comandante del Equipo PP.', 'Brumario cayó, pero las máquinas siguen en pie. Con ellas, la niebla vuelve en cuestión de semanas.', 'Desde esta fábrica se va a gobernar el clima del país.'], { name: 'Garúa' });
-    const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'boss', ai: 'smart', team: [['yarara', 38], ['cuervon', 39], ['lobomarino', 39], ['pombero', 40], ['caudillo', 41]], prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
+    const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: [['yarara', 38], ['cuervon', 39], ['lobomarino', 39], ['pombero', 40], ['caudillo', 41]], prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('pp_clear');
     await api.say(['Está bien. Me rindo.', 'Llevate esto. Lo usábamos para vigilar el país desde el aire.', 'Silbá y un hornero te lleva a cualquier ciudad que ya conozcas.'], { name: 'Garúa' });
@@ -282,7 +282,7 @@ export const SCRIPTS = {
 
   async bruma(api) {
     await api.say(['Un entrometido más.', 'Soy Bruma, del Equipo PP.', 'Sin la lámpara del faro, la niebla cubre la costa y nadie ve lo que hacemos.', 'No vas a arruinar nuestros planes.'], { name: 'Bruma' });
-    const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. PP', look: 'boss', ai: 'smart', team: [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]], prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
+    const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]], prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
     if (res !== 'win') return;
     await api.say(['Llevate tu lámpara.', 'Igual es tarde: el jefe Brumario ya va camino a la Quebrada de los Cuervos.', 'Con el Pampero en nuestro poder, la niebla será permanente.'], { name: 'Bruma' });
     await api.give('lampara', 1);
@@ -321,7 +321,7 @@ export const SCRIPTS = {
 
   async brumario(api) {
     await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP.', 'El Pampero limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
-    const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'boss', ai: 'smart', team: [['yarara', 33], ['zorromonte', 33], ['cuervon', 34], ['lobomarino', 35]], prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
+    const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: [['yarara', 33], ['zorromonte', 33], ['cuervon', 34], ['lobomarino', 35]], prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('quebrada_clear');
     await api.flash();
