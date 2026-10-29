@@ -15,7 +15,7 @@ Open `http://localhost:8080`. No build step is needed in development: the game i
 
 **Controls:** arrows / WASD move · hold Space to walk 1.5x faster · Z or Enter = A · X or Shift = B (hold to run) · Esc or M = menu. Gamepads work, and phones get on-screen touch controls.
 
-**Bug log:** the 🐞 button (or F2) opens a panel that records errors automatically, plus map changes and battles as context. You can add your own notes, then copy the report, download it as a .txt, or open a prefilled GitHub issue.
+**Bug log:** the 🐞 button (or F2) opens a panel that records errors automatically, plus map changes and battles as context. You can add your own notes, then copy the report, download it as a .txt, or open a prefilled GitHub issue. If you paste a fine-grained GitHub token (Contents: write on this repo only) into the panel, it is kept only in that browser and the log is uploaded automatically to `reports/<device>.json` on the `bug-reports` branch.
 
 ## Build and deploy to a VPS
 

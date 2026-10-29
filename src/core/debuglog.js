@@ -65,7 +65,44 @@ export function log(level, msg, detail) {
 }
 
 // ---- automatic online upload (only when REPORT_CONFIG.enabled)
+const REPO = 'fefow/poke-uruguay';
+const BRANCH = 'bug-reports';
+const token = () => { try { return store.getItem('pokeuy:ghtoken') || ''; } catch { return ''; } };
+let repoTimer = 0;
+let repoBusy = false;
+let repoDirty = false;
+let repoStatus = '';
+
+/** Write the whole local log to reports/<client>.json on the bug-reports branch. */
+async function syncRepo() {
+  if (repoBusy) { repoDirty = true; return; }
+  repoBusy = true;
+  const url = `https://api.github.com/repos/${REPO}/contents/reports/${clientId}.json`;
+  const headers = { Authorization: `Bearer ${token()}`, Accept: 'application/vnd.github+json' };
+  try {
+    do {
+      repoDirty = false;
+      const cur = await fetch(`${url}?ref=${BRANCH}`, { headers });
+      if (!cur.ok && cur.status !== 404) throw new Error(`GitHub ${cur.status}`);
+      const sha = cur.ok ? (await cur.json()).sha : undefined;
+      const text = buildJson({ build: getBuildFn() });
+      const body = { message: 'bug report', branch: BRANCH, content: btoa(unescape(encodeURIComponent(text))), sha };
+      const put = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+      if (!put.ok) throw new Error(`GitHub ${put.status}`);
+      repoStatus = `Subido ${new Date().toLocaleTimeString('es-UY')}`;
+    } while (repoDirty);
+  } catch (err) {
+    repoStatus = `No se pudo subir (${err.message})`;
+  }
+  repoBusy = false;
+  onChange();
+}
+
 function enqueue(e) {
+  if (token()) {
+    clearTimeout(repoTimer);
+    repoTimer = setTimeout(syncRepo, e.level === 'note' ? 300 : 3000);
+  }
   if (!REPORT_CONFIG.enabled || sent >= 40) return;
   queue.push(e);
   clearTimeout(timer);
@@ -191,6 +228,7 @@ export function mountDebugPanel({ blockInput, getBuild }) {
     const status = h('p', { class: 'bug-status', role: 'status' });
     const say = (t) => { status.textContent = t; };
     const render = () => {
+      if (repoStatus) say(repoStatus);
       const items = entries.slice().reverse().slice(0, 120).map((e) =>
         h('li', { class: `lvl-${e.level}` },
           h('span', { class: 'bug-time', text: e.t.slice(11, 19) }),
@@ -203,6 +241,16 @@ export function mountDebugPanel({ blockInput, getBuild }) {
     render();
 
     const report = () => buildReport({ build: getBuild?.() });
+    const tok = h('input', { class: 'bug-token', type: 'password', autocomplete: 'off', placeholder: 'Token de GitHub (solo se guarda en este navegador)' });
+    const sync = h('div', { class: 'bug-sync' },
+      tok,
+      h('button', { type: 'button', onclick: () => {
+        const v = tok.value.trim();
+        try { if (v) store.setItem('pokeuy:ghtoken', v); else store.removeItem('pokeuy:ghtoken'); } catch { /* ignore */ }
+        tok.value = '';
+        say(v ? 'Token guardado. Subiendo…' : 'Token borrado: ya no se sube solo.');
+        if (v) syncRepo();
+      } }, 'Conectar'));
     const actions = h('div', { class: 'bug-actions' },
       h('button', { type: 'button', class: 'bug-primary', onclick: () => {
         const v = note.value.trim();
@@ -251,7 +299,7 @@ export function mountDebugPanel({ blockInput, getBuild }) {
     panelEl = h('section', { class: 'bug-panel', role: 'dialog', 'aria-label': 'Panel de errores' },
       h('header', {}, h('strong', { text: '🐞 Registro de errores' }), h('button', { type: 'button', class: 'bug-close', 'aria-label': 'Cerrar', onclick: close }, '✕')),
       h('p', { class: 'bug-help', text: REPORT_CONFIG.enabled ? 'Los errores y tus notas se envían solos online. También podés copiar o descargar el reporte.' : 'Los errores se guardan solos en este navegador. Podés sumar notas y después copiar, descargar o mandar todo a GitHub.' }),
-      list, note, actions, status);
+      list, note, actions, sync, status);
     document.body.append(panelEl);
   };
 
