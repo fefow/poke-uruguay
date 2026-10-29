@@ -20,6 +20,7 @@ import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSee
 import { createCreature, heal as healCreature, displayName } from './creature.js';
 import { runBattle } from './battle-scene.js';
 import { openPauseMenu, openShop, openPC } from './menus.js';
+import { drawItem } from '../gfx/items.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -650,7 +651,10 @@ function drawWorld(g, t) {
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme), x * T - cx, y * T - cy);
   }
   // ground items
-  for (const it of W_.items) drawBallIcon(g, it.x * T - cx + 8, it.y * T - cy + 9);
+  for (const it of W_.items) {
+    shadow(g, it.x * T - cx + 8, it.y * T - cy + 13, 5, 2);
+    drawItem(g, it.item, it.x * T - cx, it.y * T - cy - 1);
+  }
   // legend
   if (W_.legend) {
     const spr = creatureSprite(W_.legend.species);

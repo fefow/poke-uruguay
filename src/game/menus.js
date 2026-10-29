@@ -16,6 +16,7 @@ import { saveGame, listSaves } from '../save/index.js';
 import { MAPS } from '../data/maps.js';
 import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, TREES, HILLS, project } from '../data/atlas.js';
 import { charSprite } from '../gfx/characters.js';
+import { itemIcon } from '../gfx/items.js';
 import { SAVE_CONFIG } from '../save/config.js';
 
 // ---------------------------------------------------------------- helpers
@@ -231,7 +232,7 @@ export function openBag({ mode = 'field', wild = false } = {}) {
     const render = (start = 0) => {
       tabs.replaceChildren(...POCKETS.map(([, n], i) => h('span', { class: i === pocket ? 'is-active' : '', text: n })));
       keys = Object.keys(S.bag).filter((k) => ITEMS[k]?.pocket === POCKETS[pocket][0]);
-      const rows = keys.map((k) => h('li', {}, h('span', { text: ITEMS[k].name }), h('b', { text: ITEMS[k].pocket === 'key' ? '' : `×${S.bag[k]}` })));
+      const rows = keys.map((k) => h('li', {}, h('span', { class: 'item-name' }, h('img', { class: 'item-icon', src: itemIcon(k), alt: '' }), ITEMS[k].name), h('b', { text: ITEMS[k].pocket === 'key' ? '' : `×${S.bag[k]}` })));
       if (!rows.length) desc.textContent = 'No hay nada en este bolsillo.';
       list.replaceChildren(...rows);
       nav = listNav(rows, {
@@ -521,7 +522,7 @@ export function openCard() {
         h('div', { class: 'card-flag', 'aria-hidden': 'true' }),
       ),
       h('ul', { class: 'badges' }, badges.map(([f, n, col]) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col } }, h('i'), h('span', { text: n })))),
-      S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : null,
+      S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : '',
       h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
     );
     return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };
@@ -652,7 +653,7 @@ function qtyPicker(title, unit, max) {
 async function buyFlow(stock) {
   const S = state();
   while (true) {
-    const opts = stock.map((k) => ({ label: ITEMS[k].name, hint: `$${ITEMS[k].price}` }));
+    const opts = stock.map((k) => ({ label: ITEMS[k].name, icon: itemIcon(k), hint: `$${ITEMS[k].price}` }));
     const i = await choose(opts, { cls: 'menu-shop', title: `Tenés $${S.player.money}`, onMove: (j) => descToast(stock[j]) });
     clearDescToast();
     if (i < 0) return;
@@ -679,7 +680,7 @@ async function sellFlow() {
   while (true) {
     const keys = Object.keys(S.bag).filter((k) => ITEMS[k].price > 0 && ITEMS[k].pocket !== 'key');
     if (!keys.length) return say('No tenés nada para vender.', { name: 'Almacenero' });
-    const i = await choose(keys.map((k) => ({ label: `${ITEMS[k].name} ×${S.bag[k]}`, hint: `$${ITEMS[k].price / 2}` })), { cls: 'menu-shop', title: 'Vender' });
+    const i = await choose(keys.map((k) => ({ label: `${ITEMS[k].name} ×${S.bag[k]}`, icon: itemIcon(k), hint: `$${ITEMS[k].price / 2}` })), { cls: 'menu-shop', title: 'Vender' });
     if (i < 0) return;
     const k = keys[i];
     const unit = ITEMS[k].price / 2;

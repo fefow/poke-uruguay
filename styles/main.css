@@ -879,3 +879,7 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) { .map-svg .cursor ellipse, .map-svg .face { animation: none; } }
 
 .bhud-types { display: flex; gap: 1cqi; margin-block: 0.4cqi 0.6cqi; & .type-chip { font-size: 1.7cqi; padding: 0.1cqi 1.2cqi; } }
+
+.item-icon { inline-size: 5.4cqi; block-size: 5.4cqi; image-rendering: pixelated; flex: none; }
+.item-name { display: inline-flex; align-items: center; gap: 1.6cqi; }
+.menu-list li:has(.item-icon) { display: flex; align-items: center; gap: 1.6cqi; }

@@ -90,6 +90,7 @@ export function choose(options, { cancel = true, cls = '', title = null, start =
     let idx = Math.min(start, opts.length - 1);
     const items = opts.map((o, i) =>
       h('li', { class: o.disabled ? 'is-disabled' : '', role: 'option', onclick: () => { idx = i; render(); pick(); } },
+        o.icon ? h('img', { class: 'item-icon', src: o.icon, alt: '' }) : null,
         h('span', { class: 'label', text: fmt(o.label) }),
         o.hint ? h('span', { class: 'hint', text: o.hint }) : null),
     );
