@@ -424,6 +424,7 @@ button { font: inherit; color: inherit; }
   &.is-current { box-shadow: inset 0.8cqi 0 0 var(--sun); }
   &.is-fainted { background: oklch(0.9 0.04 25); }
   &.is-swapping { outline: 2px dashed var(--sun); }
+  .is-forced &.is-fainted { opacity: 0.45; cursor: not-allowed; }
 }
 .party-icon { width: 10cqi; height: 10cqi; image-rendering: pixelated; }
 .party-main { min-width: 0; font-size: 2.9cqi; }

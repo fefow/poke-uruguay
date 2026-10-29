@@ -105,6 +105,7 @@ export function openParty({ mode = 'field', active = -1, title } = {}) {
   const S = state();
   return panel('panel-party', (el, close) => {
     const head = h('header', { class: 'panel-title', text: title ?? (mode === 'forced' ? 'Elegí la próxima criatura' : mode === 'item' || mode === 'select' ? 'Elegí una criatura' : 'Equipo') });
+    if (mode === 'forced') el.classList.add('is-forced');
     const list = h('ol', { class: 'party-list' });
     let swapFrom = null;
     const rows = [];
@@ -138,6 +139,7 @@ export function openParty({ mode = 'field', active = -1, title } = {}) {
     };
     const pick = async (i) => {
       const c = S.party[i];
+      if (mode === 'forced' && c.hp <= 0) return sfx('bump');
       if (swapFrom != null) {
         [S.party[swapFrom], S.party[i]] = [S.party[i], S.party[swapFrom]];
         swapFrom = null;

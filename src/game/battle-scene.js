@@ -522,7 +522,8 @@ async function play(events, leveled) {
         break;
       }
       case 'needSwitch': {
-        const idx = await openParty({ mode: 'forced', active: engine.pIndex });
+        const alive = engine.party.map((c, i) => (c.hp > 0 ? i : -1)).filter((i) => i >= 0);
+        const idx = alive.length === 1 ? alive[0] : await openParty({ mode: 'forced', active: engine.pIndex });
         const sub = engine.forceSwitch(idx);
         await play(sub, leveled);
         break;
