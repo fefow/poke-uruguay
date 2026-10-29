@@ -35,6 +35,11 @@ export const TILE_INFO = {
   M: { name: 'La Mano', solid: true },
   Z: { name: 'tribuna', solid: true },
   // gym facades, one family per city: water, electric, rock
+  C: { name: 'techo policlínica', solid: true },
+  Q: { name: 'cruz policlínica', solid: true },
+  I: { name: 'fachada policlínica', solid: true },
+  U: { name: 'toldo tienda', solid: true },
+  t: { name: 'fachada tienda', solid: true },
   G: { name: 'techo gimnasio agua', solid: true },
   h: { name: 'fachada gimnasio agua', solid: true },
   a: { name: 'emblema agua', solid: true },
@@ -226,6 +231,33 @@ const DRAW = {
   z: (g) => {
     px(g, 0, 0, '#e8e4dc', T, T);
     px(g, 5, 0, '#c8c4bc', 6, T); px(g, 6, 2, '#5a5a6a', 4, 3);
+  },
+  // ---- policlínicas y tiendas (iguales en todas las ciudades) ----
+  C: (g) => {
+    px(g, 0, 0, '#3aa89a', T, T); px(g, 0, 0, '#d9f2ee', T, 2); px(g, 0, 15, '#1f6e64', T, 1);
+    for (let y = 4; y < 15; y += 4) px(g, 0, y, '#2a8a7e', T, 1);
+  },
+  Q: (g) => {
+    DRAW.C(g);
+    g.fillStyle = '#16615a'; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(8, 8, 6.4, 0, 7); g.fill();
+    px(g, 6, 3, '#e0263a', 4, 10); px(g, 3, 6, '#e0263a', 10, 4);
+  },
+  I: (g) => {
+    px(g, 0, 0, '#f4f8f7', T, T); px(g, 0, 0, '#3aa89a', T, 2); px(g, 0, 13, '#cfe4e0', T, 3); px(g, 0, 12, '#3aa89a', T, 1);
+    px(g, 3, 4, '#2a8a7e', 10, 7); px(g, 4, 5, '#9ad8f0', 8, 5); px(g, 4, 5, '#d8f4ff', 8, 1); px(g, 7, 5, '#2a8a7e', 2, 5);
+  },
+  U: (g) => {
+    for (let x = 0; x < T; x += 4) { px(g, x, 0, '#d83a3a', 2, T); px(g, x + 2, 0, '#fbf2e2', 2, T); }
+    px(g, 0, 0, '#8a1a1a', T, 1); px(g, 0, 13, '#a82a2a', T, 3);
+    for (let x = 0; x < T; x += 4) { px(g, x + 1, 15, '#fbf2e2', 2, 1); }
+  },
+  t: (g) => {
+    px(g, 0, 0, '#f2e2bc', T, T); px(g, 0, 12, '#a87a4a', T, 4); px(g, 0, 11, '#8a5a2a', T, 1);
+    px(g, 2, 2, '#5a3a1a', 12, 9); px(g, 3, 3, '#a8dcf0', 10, 7); px(g, 3, 3, '#e0f6ff', 10, 1);
+    px(g, 3, 7, '#8a5a2a', 10, 1);
+    for (const [x, col] of [[4, '#e0263a'], [6, '#f2c02a'], [8, '#4a9a3c'], [10, '#3f86e0']]) px(g, x, 5, col, 2, 2);
+    px(g, 4, 8, '#e8c070', 3, 2); px(g, 9, 8, '#c8a060', 3, 2);
   },
   // ---- gym facades (outdoor) ----
   G: (g) => {

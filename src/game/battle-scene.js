@@ -163,6 +163,7 @@ function buildHud() {
   const box = (side) => {
     const el = h('div', { class: `bhud bhud-${side}` },
       h('div', { class: 'bhud-row' }, h('span', { class: 'bhud-name' }), h('span', { class: 'bhud-status' }), h('span', { class: 'bhud-lv' })),
+      h('div', { class: 'bhud-types' }),
       h('div', { class: 'hpbar' }, h('span', { class: 'hpbar-label', text: 'PS' }), h('div', { class: 'hpbar-track' }, h('div', { class: 'hpbar-fill' }))),
       side === 'ply' ? h('div', { class: 'bhud-hp' }) : null,
       side === 'ply' ? h('div', { class: 'expbar' }, h('div', { class: 'expbar-fill' })) : null,
@@ -184,6 +185,7 @@ function setHud(which, c, { instant = false } = {}) {
   if (!c) return;
   el.querySelector('.bhud-name').textContent = displayName(c);
   el.querySelector('.bhud-lv').textContent = `Nv${c.level}`;
+  el.querySelector('.bhud-types').replaceChildren(...SPECIES[c.species].types.map((t) => h('span', { class: 'type-chip', style: { '--type': TYPES[t].color }, text: TYPES[t].name })));
   const st = el.querySelector('.bhud-status');
   st.textContent = c.status ? STATUS_SHORT[c.status] : '';
   st.dataset.status = c.status ?? '';

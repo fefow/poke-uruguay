@@ -19,7 +19,7 @@ export const PLACES = deepFreeze([
   { id: 'punta', name: 'Punta del Este', kind: 'city', lon: -54.95, lat: -34.96, color: '#e8c21c', note: 'Gimnasio Eléctrico' },
   { id: 'paloma', name: 'La Paloma', kind: 'loc', lon: -54.17, lat: -34.66, note: 'Superballs' },
   { id: 'cabo', name: 'Cabo Polonio', kind: 'place', lon: -53.77, lat: -34.4, note: 'Faro' },
-  { id: 'minas', name: 'Minas', kind: 'loc', lon: -55.24, lat: -34.37, note: 'Mate Dulce' },
+  { id: 'minas', name: 'Minas', kind: 'loc', lon: -55.24, lat: -34.37, note: 'Mate: Canarias' },
   { id: 'quebrada', name: 'Treinta y Tres', kind: 'city', lon: -54.38, lat: -33.23, color: '#a48e48', note: 'Gimnasio de Roca' },
 ]);
 

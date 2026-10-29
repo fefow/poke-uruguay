@@ -1,6 +1,6 @@
 // Static checks on world data: row widths, NPC/item placement, doors, exits.
 import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.js';
-const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVye'.split(''));
+const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVyeCQIUt'.split(''));
 let problems = 0;
 const bad = (m) => { problems++; console.log('✗', m); };
 for (const [id, m] of Object.entries(MAPS)) {

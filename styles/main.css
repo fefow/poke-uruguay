@@ -871,3 +871,5 @@ button { font: inherit; color: inherit; }
 }
 .map-key { margin: 0; font-size: 2.2cqi; opacity: 0.8; }
 @media (prefers-reduced-motion: reduce) { .map-svg .you circle:first-child { animation: none; opacity: 0.6; } }
+
+.bhud-types { display: flex; gap: 1cqi; margin-block: 0.4cqi 0.6cqi; & .type-chip { font-size: 1.7cqi; padding: 0.1cqi 1.2cqi; } }
