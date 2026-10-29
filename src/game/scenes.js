@@ -270,11 +270,11 @@ export async function newGameIntro() {
   closeDialog();
   const S = state();
   S.player.look = look === 0 ? 'player_m' : 'player_f';
-  const raw = await textInput('¿Cómo te llamás? (máx. 10 letras)', look === 0 ? 'Bruno' : 'Martina');
+  const raw = await textInput('¿Cómo te llamás? (máx. 10 letras)', '', 'Tu nombre');
   S.player.name = sanitizeName(raw, look === 0 ? 'Bruno' : 'Martina');
   await say(`Así que te llamás {player}. Un gusto.`, { name: 'Maestro Tabárez' });
   await say('Este es mi nieto. Compite con vos desde que eran niños. ¿Cómo se llamaba?', { name: 'Maestro Tabárez', keep: true });
-  const rawR = await textInput('Nombre de tu rival', 'Facu');
+  const rawR = await textInput('Nombre de tu rival', '', 'Nombre del rival');
   S.rivalName = sanitizeName(rawR, 'Facu');
   await say(['Claro, {rival}. Cómo me pude olvidar.', '{player}, tu propia historia está por empezar.', 'Un camino largo te espera por todo el Uruguay. Vamos.'], { name: 'Maestro Tabárez' });
   await fadeOut(500);

@@ -549,12 +549,12 @@ export function openMap() {
       const seen = visited(cur);
       q('.mi-name').textContent = seen ? p.name : '???';
       q('.mi-kind').textContent = p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial';
-      q('.mi-dept').textContent = dept.name;
+      q('.mi-dept').textContent = seen ? dept.name : '???';
       q('.mi-sw').style.background = biome.color;
       q('.mi-zname').textContent = biome.name;
       q('.mi-ztypes').replaceChildren(...biome.types.map(chip));
       const wt = wildTypes(cur);
-      q('.mi-wild').replaceChildren(...(wt.length ? wt.map(chip) : [h('span', { class: 'mi-none', text: 'Ninguna' })]));
+      q('.mi-wild').replaceChildren(...(!seen ? [h('span', { class: 'mi-none', text: '???' })] : wt.length ? wt.map(chip) : [h('span', { class: 'mi-none', text: 'Ninguna' })]));
       q('.mi-note').textContent = seen ? `${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Todavía no fuiste a este lugar.';
     };
     show();

@@ -158,9 +158,9 @@ export function panel(cls, build) {
 }
 
 /** Name entry using a real <input> so mobile keyboards work. */
-export function textInput(label, value = '') {
+export function textInput(label, value = '', placeholder = '') {
   return new Promise((resolve) => {
-    const field = h('input', { id: 'name-input', class: 'text-input', maxlength: '10', autocomplete: 'off', spellcheck: 'false', value });
+    const field = h('input', { id: 'name-input', class: 'text-input', maxlength: '10', autocomplete: 'off', spellcheck: 'false', value, placeholder });
     const ok = h('button', { class: 'btn', type: 'submit', text: 'Listo' });
     const form = h('form', { class: 'panel panel-name' },
       h('label', { for: 'name-input', class: 'menu-title', text: label }), field, ok);
