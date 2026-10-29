@@ -1,0 +1,10 @@
+{
+  "name": "UruMon: La Leyenda del Pampero",
+  "short_name": "UruMon",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#14183a",
+  "theme_color": "#14183a",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "urumon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "UruMon: La Leyenda del Pampero — a 2D creature-collecting RPG set in Uruguay.",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "build": "node build.mjs",
+    "test": "node --test tests/unit.test.mjs && node tests/check-maps.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  }
+}

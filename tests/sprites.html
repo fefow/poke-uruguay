@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><body style="background:#cde;margin:0">
+<canvas id="c" width="800" height="560" style="image-rendering:pixelated;width:1600px"></canvas>
+<script type="module">
+import { creatureSprite } from '../src/gfx/creatures.js';
+import { SPECIES } from '../src/data/species.js';
+import { tileCanvas, TILE_INFO } from '../src/gfx/tiles.js';
+import { charSprite, LOOKS } from '../src/gfx/characters.js';
+const g = document.getElementById('c').getContext('2d');
+Object.keys(SPECIES).forEach((k,i)=>{ g.drawImage(creatureSprite(k),(i%10)*80,Math.floor(i/10)*80); });
+Object.keys(TILE_INFO).forEach((k,i)=>{ g.drawImage(tileCanvas(k),i*17%800,400+Math.floor(i*17/800)*17); });
+Object.keys(LOOKS).forEach((k,i)=>['down','up','left','right'].forEach((d,j)=>g.drawImage(charSprite(k,d,j%3),i*20, 450+j*18)));
+document.title='done';
+</script>
