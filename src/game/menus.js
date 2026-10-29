@@ -609,18 +609,21 @@ export function openCard() {
 export function openOptions() {
   return panel('panel-options', (el, close) => {
     const rows = [
-      { label: 'Velocidad del texto', get: () => ['Lenta', 'Normal', 'Rápida'][settings.textSpeed - 1], step: (d) => (settings.textSpeed = clamp(settings.textSpeed + d, 1, 3)) },
-      { label: 'Música', get: () => `${Math.round(settings.music * 10)}`, step: (d) => (settings.music = clamp(Math.round((settings.music + d * 0.1) * 10) / 10, 0, 1)) },
-      { label: 'Efectos', get: () => `${Math.round(settings.sfx * 10)}`, step: (d) => (settings.sfx = clamp(Math.round((settings.sfx + d * 0.1) * 10) / 10, 0, 1)) },
-      { label: 'Animaciones', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
-      { label: 'Controles', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },
+      { label: 'Velocidad del texto', hint: 'Qué tan rápido aparecen los diálogos.', get: () => ['Lenta', 'Normal', 'Rápida'][settings.textSpeed - 1], step: (d) => (settings.textSpeed = clamp(settings.textSpeed + d, 1, 3)) },
+      { label: 'Música', hint: 'Volumen de la música, de 0 a 10.', get: () => `${Math.round(settings.music * 10)}`, step: (d) => (settings.music = clamp(Math.round((settings.music + d * 0.1) * 10) / 10, 0, 1)) },
+      { label: 'Vol. de efectos', hint: 'Volumen de los efectos de sonido, de 0 a 10.', get: () => `${Math.round(settings.sfx * 10)}`, step: (d) => (settings.sfx = clamp(Math.round((settings.sfx + d * 0.1) * 10) / 10, 0, 1)) },
+      { label: 'Animaciones de combate', hint: 'Sí: los ataques y golpes se animan en combate. No: el combate muestra los resultados al instante.', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
+      { label: 'Controles', hint: 'Muestra las teclas del juego.', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },
     ];
     const items = rows.map((r) => h('li', {}, h('span', { text: r.label }), h('b', { text: '' })));
     const refresh = () => rows.forEach((r, i) => (items[i].querySelector('b').textContent = r.noArrows ? `▶ ${r.get()}` : `◀ ${r.get()} ▶`));
     refresh();
-    el.append(h('header', { class: 'panel-title', text: 'Opciones' }), h('ul', { class: 'options-list' }, items),
+    const hint = h('p', { class: 'bag-desc' });
+    const showHint = (i) => (hint.textContent = rows[i].hint ?? '');
+    el.append(h('header', { class: 'panel-title', text: 'Opciones' }), h('ul', { class: 'options-list' }, items), hint,
       h('footer', { class: 'panel-foot', text: `←→ cambiar · ${keyName('b')} volver` }));
     const nav = listNav(items, {
+      onMove: showHint,
       onCancel: () => { saveSettings(); setVolumes(settings); close(); },
       onPick: (i) => { if (rows[i].noArrows) { sfx('select'); rows[i].step(); } },
       extra: (a, i) => {

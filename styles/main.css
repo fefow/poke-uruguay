@@ -17,9 +17,17 @@
   --hp-good: oklch(0.72 0.19 145);
   --hp-mid: oklch(0.82 0.16 85);
   --hp-low: oklch(0.62 0.21 28);
-  --font-ui: 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
-  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  --font-ui: 'Digits', 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+  --font-pixel: 'Digits', 'Press Start 2P', ui-monospace, monospace;
   --frame: 3px;
+}
+
+/* Pixel fonts make 3/8/0 look alike; digits come from a plain sans face instead. */
+@font-face {
+  font-family: 'Digits';
+  src: local('DejaVu Sans Bold'), local('Verdana Bold'), local('Segoe UI Bold'), local('Arial Bold'), local('Helvetica Neue Bold'), local('Liberation Sans Bold');
+  font-weight: 400 700;
+  unicode-range: U+0030-0039, U+002F;
 }
 
 * { box-sizing: border-box; }

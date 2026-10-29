@@ -45,10 +45,17 @@ export function tmCompatible(speciesKey, moveId) {
 }
 
 /** Every move a species could legitimately know at this level (incl. pre-evolutions). */
+// Starters used to learn moves faster; saves made before the slower curve stay valid.
+const LEGACY_LEARN = {
+  ceibito: [[1, 'grunido'], [5, 'absorber'], [9, 'megaagotar'], [10, 'somnifero'], [15, 'hoja_afilada'], [30, 'mate_amargo']],
+  tejuchispa: [[1, 'grunido'], [3, 'ascuas'], [8, 'ataque_rapido'], [24, 'mordisco'], [30, 'parrillada']],
+  carpinchito: [[1, 'grunido'], [3, 'pistola_agua'], [7, 'burbuja'], [13, 'mate_amargo'], [20, 'golpe_cuerpo'], [30, 'cascada']],
+};
+
 export function legalMoves(speciesKey, level) {
   const set = new Set();
   const visit = (key) => {
-    for (const [l, m] of SPECIES[key].learn) if (l <= level) set.add(m);
+    for (const [l, m] of [...SPECIES[key].learn, ...(LEGACY_LEARN[key] ?? [])]) if (l <= level) set.add(m);
     for (const m of TM_MOVES) if (tmCompatible(key, m)) set.add(m);
   };
   visit(speciesKey);

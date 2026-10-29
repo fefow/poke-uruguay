@@ -64,9 +64,15 @@ test('battles replay identically from seed + actions', () => {
 
 test('exp curve and level up', () => {
   const c = mon('ceibito', 5);
-  const ev = gainExp(c, expForLevel(9) - c.exp);
-  assert.equal(c.level, 9);
+  assert.equal(c.moves.length, 2, 'starters begin with two moves');
+  const ev = gainExp(c, expForLevel(10) - c.exp);
+  assert.equal(c.level, 10);
   assert.ok(ev.some((e) => e.type === 'learn' && e.move === 'megaagotar'));
+});
+
+test('legacy starter moves stay legal for old saves', () => {
+  assert.ok(legalMoves('ceibito', 9).has('megaagotar'));
+  assert.ok(legalMoves('tejuchispa', 5).has('grunido'));
 });
 
 test('items heal and revive correctly', () => {
