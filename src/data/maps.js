@@ -126,7 +126,7 @@ const BASE_OUTDOOR = {
       { x: 28, y: 7, look: 'cop', dir: 'left', cond: (f) => !f.badge1, text: ['La niebla en la Interbalnearia es anormal.', 'Volvé cuando tengas la Medalla Montevideo del gimnasio.'] },
       { x: 11, y: 1, look: 'cop', dir: 'down', cond: (f) => !(f.badge2 && f.cabo_clear), text: ['El Equipo PP opera en el norte. No es seguro.'] },
       { x: 6, y: 13, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
-      { x: 18, y: 6, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Silvia Ferraro, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
+      { x: 18, y: 6, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Sofía, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
       { x: 27, y: 5, look: 'sailor', dir: 'up', cond: (f) => !f.got_ticket && !f.ferry_done, text: ['Terminal del Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz.', 'Sin ticket no se sube. Dicen que el farero de Cabo Polonio consigue pasajes.'] },
       { x: 27, y: 5, look: 'sailor', dir: 'up', cond: (f) => f.got_ticket && !f.ferry_done, text: ['Ya podés subir con tu ticket.', 'Preguntá por el capitán: está en su camarote, en la cubierta de arriba.'] },
       { x: 27, y: 5, look: 'sailor', dir: 'up', cond: (f) => f.ferry_done, text: ['El "China Zorrilla" zarpó hacia Buenos Aires.', 'Dicen que volverá en la próxima temporada.'] },
@@ -207,7 +207,7 @@ const BASE_OUTDOOR = {
       { x: 23, y: 12, look: 'sailor', dir: 'down', text: ['Desde el puerto se ve la Isla de Lobos.', 'A veces, en invierno, aparece una ballena cuyo canto se oye desde la costa.'] },
       { x: 14, y: 10, look: 'swimmer', wander: true, text: ['Con este calor, lo que más apetece es un chivito en la playa.'] },
       { x: 18, y: 9, look: 'grunt', dir: 'left', sight: 3, cond: (f) => f.badge1, trainer: TR('pde_g1', 'Recluta PP', 'Equipo PP', [['yararita', 16], ['zorrigris', 16]], 320, 'Nadie tiene que saber lo del faro.', 'Igual ya es tarde.', 'La jefa Bruma está en Cabo Polonio. Hablé de más.', 'grunt') },
-      { x: 25, y: 10, look: 'boy', text: ['El gimnasio de acá es la planta potabilizadora de OSE. Su presidenta, Teresa Almada, usa tipo Agua.', 'Planta y Eléctrico le hacen daño.'] },
+      { x: 25, y: 10, look: 'boy', text: ['El gimnasio de acá es la planta potabilizadora de OSE. Su presidenta, Lucía, usa tipo Agua.', 'Planta y Eléctrico le hacen daño.'] },
     ],
     items: [{ x: 1, y: 13, item: 'alfajor', id: 'pde_item1' }],
     legend: { x: 24, y: 12, species: 'ballenaplata', level: 55, flag: 'caught_ballenaplata', cond: (f) => f.champion, text: 'Un canto profundo sale del agua.' },
@@ -632,9 +632,9 @@ const BASE_INTERIOR = {
     theme: 'gym_elec',
     npcs: [
       { x: 5, y: 2, look: 'leader_ute', dir: 'down', script: 'leader', leader: 'ute' },
-      { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Electricista', [['luciernito', 8], ['nimbo', 8]], 200, 'Trabajo en la usina de UTE.', 'Se cortó la luz.', 'La presidenta Silvia Ferraro usa tipo Eléctrico. ¿Tenés algo de tipo Tierra?', 'boy') },
-      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Técnica de UTE', [['cotorrayo', 9]], 220, 'Mido cada kilovatio de la ciudad.', 'Corto circuito.', 'Silvia es muy buena. Suerte.', 'girl') },
-      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Bienvenido al Palacio de la Luz, sede de UTE.', 'La presidenta Silvia Ferraro usa criaturas de tipo Eléctrico.', 'Las de tipo Tierra no reciben daño eléctrico.'] },
+      { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Electricista', [['luciernito', 8], ['nimbo', 8]], 200, 'Trabajo en la usina de UTE.', 'Se cortó la luz.', 'La presidenta Sofía usa tipo Eléctrico. ¿Tenés algo de tipo Tierra?', 'boy') },
+      { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Técnica de UTE', [['cotorrayo', 9]], 220, 'Mido cada kilovatio de la ciudad.', 'Corto circuito.', 'Sofía es muy buena. Suerte.', 'girl') },
+      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Bienvenido al Palacio de la Luz, sede de UTE.', 'La presidenta Sofía usa criaturas de tipo Eléctrico.', 'Las de tipo Tierra no reciben daño eléctrico.'] },
     ],
   }),
   gym_pde: room(GYM, {
@@ -642,9 +642,9 @@ const BASE_INTERIOR = {
     theme: 'gym_agua',
     npcs: [
       { x: 5, y: 2, look: 'leader_ose', dir: 'down', script: 'leader', leader: 'ose' },
-      { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Operario de OSE', [['lobito', 14], ['lobito', 14]], 340, 'Cuido que el agua llegue limpia a cada canilla.', 'Se me rompió la cañería.', 'Teresa Almada conoce cada cañería del país.', 'swimmer') },
+      { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Operario de OSE', [['lobito', 14], ['lobito', 14]], 340, 'Cuido que el agua llegue limpia a cada canilla.', 'Se me rompió la cañería.', 'Lucía conoce cada cañería del país.', 'swimmer') },
       { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Técnica de OSE', [['mbigua', 15]], 360, 'Analizo el agua todos los días.', 'Perdí.', 'Las criaturas de tipo Planta o Eléctrico le hacen daño al agua.', 'girl') },
-      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Planta de OSE de Punta del Este.', 'Teresa Almada usa tipo Agua. Planta y Eléctrico tienen ventaja.'] },
+      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Planta de OSE de Punta del Este.', 'Lucía usa tipo Agua. Planta y Eléctrico tienen ventaja.'] },
     ],
   }),
   gym_tyt: room(GYM, {

@@ -289,14 +289,14 @@ const DECO = {
     else if (dir === 'up') { d(6, 9, '#2a3a8a', 1, 4); d(7, 9, '#2a3a8a', 2, 1); d(7, 11, '#2a3a8a', 2, 1); d(8, 12, '#2a3a8a', 1, 1); }
     else d(6, 11, '#2a3a8a', 3, 1);
   },
-  // Silvia Ferraro (UTE): yellow hard hat with a bolt and a hi-vis vest.
+  // Sofía (UTE): yellow hard hat with a bolt and a hi-vis vest.
   leader_ute: (d, dir) => {
     d(2, 1, '#f2e05c', 12, 2); d(3, 0, '#f2e05c', 9, 1);
     if (dir === 'down') { d(7, 1, '#2a2a2a', 2, 1); d(4, 10, '#f8f8d8', 8, 1); d(7, 11, '#f8f8d8', 2, 1); }
     else if (dir === 'up') d(4, 10, '#f8f8d8', 8, 1);
     else d(5, 10, '#f8f8d8', 6, 1);
   },
-  // Teresa Almada (OSE): blue cap, white lab coat and a water drop.
+  // Lucía (OSE): blue cap, white lab coat and a water drop.
   leader_ose: (d, dir) => {
     d(3, 1, '#2a6ad8', 10, 2); d(4, 0, '#2a6ad8', 8, 1);
     if (dir === 'down') { d(7, 10, '#2a6ad8', 2, 2); d(8, 9, '#2a6ad8', 1, 1); d(3, 12, '#f4f4f4', 10, 1); }
@@ -309,20 +309,20 @@ const DECO = {
     else if (dir === 'up') { d(2, 9, '#f8d040', 3, 1); d(11, 9, '#f8d040', 3, 1); }
     else { d(5, 9, '#f8d040', 3, 1); d(5, 10, '#e0263a', 5, 1); d(9, 7, '#d8d8d8', 3, 1); }
   },
-  // Candelaria Ríos (ANCAP): red hard hat with a flame, grey coverall and a yellow stripe.
+  // Candelaria (ANCAP): red hard hat with a flame, grey coverall and a yellow stripe.
   leader_ancap: (d, dir) => {
     d(2, 1, '#d83a2a', 12, 2); d(3, 0, '#d83a2a', 9, 1);
     if (dir === 'down') { d(7, 1, '#f8d040', 2, 1); d(4, 10, '#f8d040', 8, 1); d(3, 12, '#f8d040', 10, 1); }
     else if (dir === 'up') { d(4, 10, '#f8d040', 8, 1); d(3, 12, '#f8d040', 10, 1); }
     else d(5, 10, '#f8d040', 6, 1);
   },
-  // Ramón Villalba (MGAP): wide straw hat, wheat pin and a green tie.
+  // Ramón (MGAP): wide straw hat, wheat pin and a green tie.
   leader_mgap: (d, dir) => {
     d(1, 1, '#e8d090', 14, 2); d(4, 0, '#e8d090', 8, 1); d(4, 2, '#8a4a1a', 8, 1);
     if (dir === 'down') { d(7, 9, '#2f7a2a', 2, 3); d(10, 10, '#f8d040', 1, 2); }
     else if (dir === 'side') d(6, 10, '#f8d040', 1, 2);
   },
-  // Mariela Cabrera (Defensa): green beret with a star, medals and a belt.
+  // Mariela (Defensa): green beret with a star, medals and a belt.
   leader_defensa: (d, dir) => {
     d(2, 1, '#2f4a2a', 12, 2); d(3, 0, '#2f4a2a', 8, 1);
     if (dir === 'down') { d(7, 1, '#f8d040', 1, 1); d(10, 10, '#f8d040', 2, 1); d(10, 11, '#e0263a', 2, 1); d(3, 12, '#14141e', 10, 1); }

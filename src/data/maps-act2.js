@@ -107,8 +107,8 @@ export const ACT2_OUTDOOR = {
     },
     enc: { rate: 0.12, list: wildList(['fuego', 'tierra', 'roca'], 31, 34, 7, 'dur', ['pavesa', 'alacran', 'alazan', 'guijarro', 'geoda', 'arenisca']) },
     npcs: [
-      npc(7, 8, 'gaucho', ['Acá la gente trabaja con el fuego desde siempre.', 'El gimnasio es la sede de ANCAP en Durazno. Su presidenta, Candelaria Ríos, domina el fuego.'], { dir: 'right' }),
-      tr({ x: 7, y: 7, dir: 'right' }, 'gaucho', 'dur_a', 'Rodrigo', 'Herrero', ['fuego', 'tierra'], [32, 32], ['El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Candelaria Ríos usa tipo Fuego. Llevá algo de Agua o de Roca.']),
+      npc(7, 8, 'gaucho', ['Acá la gente trabaja con el fuego desde siempre.', 'El gimnasio es la sede de ANCAP en Durazno. Su presidenta, Candelaria, domina el fuego.'], { dir: 'right' }),
+      tr({ x: 7, y: 7, dir: 'right' }, 'gaucho', 'dur_a', 'Rodrigo', 'Herrero', ['fuego', 'tierra'], [32, 32], ['El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Candelaria usa tipo Fuego. Llevá algo de Agua o de Roca.']),
       tr({ x: 16, y: 8, dir: 'left' }, 'girl', 'dur_b', 'Camila', 'Geóloga', ['tierra', 'roca'], [32, 33], ['Estudio por qué el suelo guarda tanto calor.', 'Buen combate.', 'Los datos no cierran: el calor aumenta desde que llegó el Equipo PP.']),
       wander(12, 9, 'oldman', ['Hace décadas no llueve como antes. La ceniza lo cubre todo.', 'Las criaturas de fuego se sienten cómodas acá.']),
       npc(20, 8, 'boy', ['Cruzando el puente de hierro se llega al norte. Pero el camino está cortado por la gente de gris.'], { cond: (f) => !f.pp_clear }),
@@ -138,7 +138,7 @@ export const ACT2_OUTDOOR = {
     doors: [...TAC.doors],
     signs: [
       'TACUAREMBÓ\nTierra de gauchos y cuna del tango. Cada marzo, la Patria Gaucha.',
-      'GIMNASIO DE TACUAREMBÓ\nLíder: Ramón Villalba, ministro de Ganadería. Tipo Planta.',
+      'GIMNASIO DE TACUAREMBÓ\nLíder: Ramón, ministro de Ganadería. Tipo Planta.',
     ],
     exits: {
       s: { to: 'ruta5' },
@@ -150,7 +150,7 @@ export const ACT2_OUTDOOR = {
     npcs: [
       wander(10, 8, 'gaucho', ['En Tacuarembó se hizo el primer asado de la Patria Gaucha.', 'Si te gusta el campo, andá a ver el desfile.']),
       npc(20, 9, 'girl', ['Dicen que Gardel nació acá. Otros dicen que en Toulouse.', 'En Tacuarembó nadie se pone de acuerdo.'], { dir: 'down' }),
-      tr({ x: 12, y: 8, dir: 'right' }, 'oldman', 'tac_a', 'Segundo', 'Baqueano', FOREST, [37, 38], ['Conozco este monte como a mi casa.', 'Me ganaste de visitante.', 'El ministro Villalba es duro pero justo.']),
+      tr({ x: 12, y: 8, dir: 'right' }, 'oldman', 'tac_a', 'Segundo', 'Baqueano', FOREST, [37, 38], ['Conozco este monte como a mi casa.', 'Me ganaste de visitante.', 'El ministro Ramón es duro pero justo.']),
       npc(19, 16, 'gaucho', ['La parrilla de la Patria Gaucha fue tomada por el Equipo PP. Hay reclutas adentro.', 'Si los sacás, el dueño te va a agradecer.'], { dir: 'up', cond: (f) => !f.parrilla_clear }),
       npc(19, 16, 'gaucho', ['La parrilla vuelve a abrir. Se huele el asado hasta acá.'], { dir: 'up', cond: (f) => f.parrilla_clear }),
       npc(24, 9, 'cop', ['Hay movimiento raro en el norte. Los camiones del Equipo PP no paran.'], { dir: 'left' }),
@@ -403,8 +403,8 @@ export const ACT2_INTERIOR = {
 
   // --- gyms
   gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_ancap', 'ancap', [
-    tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria Ríos es más dura que el hierro.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria Ríos usa tipo Fuego.'], { dir: 'right' }),
+    tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria es más dura que el hierro.'], { dir: 'left' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria usa tipo Fuego.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Durazno. La líder usa criaturas de tipo Fuego.', 'Las de Agua, Tierra y Roca le hacen frente.'], { dir: 'down' }),
   ]),
   gym_tac: gym('Ministerio de Ganadería (Tacuarembó)', 'gym_planta', 'leader_mgap', 'mgap', [
@@ -414,7 +414,7 @@ export const ACT2_INTERIOR = {
   ]),
   gym_riv: gym('Cuartel de la frontera (Rivera)', 'gym_lucha', 'leader_defensa', 'defensa', [
     tr({ x: 8, y: 6 }, 'boy', 'g6_a', 'Thiago', 'Capoeirista', ['lucha'], [40, 41], ['Ginga y golpe, esa es la clave.', 'Caí.', 'La ministra de Defensa entrena todas las mañanas.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g6_b', 'Paula', 'Karateka', ['lucha', 'normal'], [41, 42], ['Un cinturón negro no se regala.', 'Respeto.', 'La ministra Cabrera es la mejor de la frontera.'], { dir: 'right' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g6_b', 'Paula', 'Karateka', ['lucha', 'normal'], [41, 42], ['Un cinturón negro no se regala.', 'Respeto.', 'La ministra Mariela es la mejor de la frontera.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Rivera. La líder usa criaturas de tipo Lucha.', 'Las de tipo Psíquico y Volador la complican.'], { dir: 'down' }),
   ]),
   gym_sal: gym('Casa de Quiroga (Salto)', 'gym_psiquico', 'leader_quiroga', 'quiroga', [
