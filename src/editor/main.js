@@ -111,7 +111,7 @@ const header = h('header', { class: 'ed-head' },
   pending,
   h('div', { class: 'ed-actions' },
     h('button', { class: 'ed-btn', type: 'button', text: 'Cargar archivo', onclick: () => fileInput.click() }),
-    h('button', { class: 'ed-btn', type: 'button', text: 'Descargar archivo', onclick: download }),
+    h('button', { class: 'ed-btn', type: 'button', text: 'Descargar archivo', onclick: () => download() }),
     h('button', { class: 'ed-btn is-primary', type: 'button', text: 'Guardar en el juego', onclick: saveToGitHub }),
     h('button', { class: 'ed-btn', type: 'button', text: 'Salir', title: 'Cierra el modo desarrollador en este navegador', onclick: () => { lockDev(); location.reload(); } }),
   ),
@@ -616,14 +616,14 @@ addEventListener('keyup', (ev) => {
 });
 
 // ---------------------------------------------------------------- files & GitHub
-function download() {
+function download(quiet = false) {
   const blob = new Blob([overridesSource(live())], { type: 'text/javascript' });
   const a = h('a', { href: URL.createObjectURL(blob), download: 'sprite-overrides.js' });
   document.body.append(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  status('Archivo descargado. Para que el juego lo use, va en src/data/sprite-overrides.js del repo.');
+  if (!quiet) status('Archivo descargado. Para que el juego lo use, va en src/data/sprite-overrides.js del repo.');
 }
 
 async function importFile() {
@@ -660,7 +660,7 @@ async function saveToGitHub() {
   status('Guardando en GitHub…');
   try {
     const cur = await fetch(`${url}?ref=main`, { headers });
-    if (!cur.ok) throw new Error(`GitHub respondió ${cur.status}`);
+    if (!cur.ok) throw await ghError(cur);
     const meta = await cur.json();
     // Merge on top of what is on GitHub now, so edits made from another computer are kept.
     const merged = parseOverridesSource(b64decode(meta.content));
@@ -671,7 +671,7 @@ async function saveToGitHub() {
     const n = Object.keys(drafts).length;
     const body = { message: `Editor de sprites: ${n} cambio${n === 1 ? '' : 's'}`, content: b64encode(overridesSource(merged)), sha: meta.sha, branch: 'main' };
     const put = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
-    if (!put.ok) throw new Error(`GitHub respondió ${put.status}`);
+    if (!put.ok) throw await ghError(put);
     base = merged;
     drafts = {};
     persist();
@@ -680,8 +680,23 @@ async function saveToGitHub() {
     syncPending();
     status('Guardado. El juego publicado se actualiza solo en uno o dos minutos.', 'ok');
   } catch (err) {
-    status(`No se pudo guardar en GitHub (${err.message}). Revisá el token o descargá el archivo.`, 'error');
+    status(`No se pudo guardar en GitHub: ${err.message} Se descargó el archivo con tus dibujos para que no los pierdas.`, 'error');
+    download(true);
   }
+}
+
+/** Turns a failed GitHub response into a message that says what to fix. */
+async function ghError(res) {
+  let detail = '';
+  try { detail = (await res.json()).message ?? ''; } catch { /* no body */ }
+  const hint = {
+    401: 'El token venció o es incorrecto: generá uno nuevo.',
+    403: 'El token no tiene permiso de escritura (Contents: Read and write) sobre este repositorio, o GitHub limitó los pedidos.',
+    404: 'El token no ve el repositorio: al crearlo hay que elegir "Only select repositories" con fefow/poke-uruguay.',
+    409: 'Alguien guardó al mismo tiempo: probá de nuevo.',
+    422: 'GitHub rechazó el cambio: probá de nuevo.',
+  }[res.status] ?? '';
+  return new Error(`GitHub respondió ${res.status}${detail ? ` («${detail}»)` : ''}. ${hint}`);
 }
 
 // ---------------------------------------------------------------- start
