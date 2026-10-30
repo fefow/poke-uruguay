@@ -514,7 +514,7 @@ export const SCRIPTS = {
   },
 
   async safari_clerk(api) {
-    await api.say(['Bienvenido al Mi Zoo. Es un parque con criaturas de todo el país, sueltas y a la vista.', 'Se paga por tiempo de visita. Pasado ese tiempo suena una campana y los guardias te acompañan a la salida.', 'Un minuto antes te vamos a avisar. No se devuelve el dinero si salís antes.'], { name: 'Boletería' });
+    await api.say(['Bienvenido a Mi Zoo. Es un parque con criaturas de todo el país, sueltas y a la vista.', 'Se paga por tiempo de visita. Pasado ese tiempo suena una campana y los guardias te acompañan a la salida.', 'Un minuto antes te vamos a avisar. No se devuelve el dinero si salís antes.'], { name: 'Boletería' });
     const opts = [['Visita corta · 5 minutos · $500', 5, 500], ['Visita media · 10 minutos · $900', 10, 900], ['Visita larga · 15 minutos · $1300', 15, 1300]];
     const r = await api.choose([...opts.map((o) => ({ label: o[0] })), 'No, gracias'], { cancel: true });
     if (r < 0 || r >= opts.length) return api.say('Cuando quieras, acá estamos.', { name: 'Boletería' });
