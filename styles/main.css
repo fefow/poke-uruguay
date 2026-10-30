@@ -902,3 +902,21 @@ body {
   &.is-on { display: none; }
 }
 @media (max-width: 700px) { .fs-btn { display: none; } }
+
+/* Dialog per speaker: tint and face change with who talks. */
+.dialog[style*='--who'] { background: var(--who-bg); box-shadow: inset 0 0 0 2px var(--who-bg), inset 0 0 0 4px var(--who); }
+.dialog-name { background: var(--who, var(--celeste-deep)); }
+.dialog .dialog-face {
+  position: absolute;
+  inset: auto;
+  left: 2.2cqi;
+  top: 50%;
+  translate: 0 -50%;
+  inline-size: 13cqi;
+  block-size: 13.8cqi;
+  image-rendering: pixelated;
+  background: oklch(1 0 0 / 0.6);
+  border: 2px solid var(--who);
+  border-radius: 1.2cqi;
+}
+.dialog.has-face { padding-left: 17.5cqi; }

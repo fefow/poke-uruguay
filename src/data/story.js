@@ -453,12 +453,12 @@ export const SCRIPTS = {
 
   async ferry_captain(api) {
     if (api.flag('ferry_done')) return;
-    await api.say(['Uf… perdón. Soy el capitán de este barco, y estoy mareado desde que zarpamos de prueba.', 'Lo único que me calma es un Mate: Baldo, de esos bien cebados. Pero acá a bordo se acabó la yerba.'], { name: 'Capitán' });
-    if (!api.hasItem('mate')) return api.say(['Si me traés un Mate: Baldo, te lo voy a agradecer toda la vida.', 'En el almacén de Montevideo venden.'], { name: 'Capitán' });
-    if (!(await api.ask('¿Le das el Mate: Baldo al capitán?'))) return api.say('El capitán suspira. Cuando quieras, acá estoy.', { name: 'Capitán' });
+    await api.say(['Uf… perdón. Soy el capitán de este barco, y estoy mareado desde que zarpamos de prueba.', 'Lo único que me calma es un Mate, de esos bien cebados. Pero acá a bordo se acabó la yerba.'], { name: 'Capitán' });
+    if (!api.hasItem('mate')) return api.say(['Si me traés un Mate, te lo voy a agradecer toda la vida.', 'En el almacén de Montevideo venden.'], { name: 'Capitán' });
+    if (!(await api.ask('¿Le das el Mate al capitán?'))) return api.say('El capitán suspira. Cuando quieras, acá estoy.', { name: 'Capitán' });
     api.takeItem('mate');
     api.sfx('heal');
-    await api.say('{player} le dio el Mate: Baldo al capitán. Poco a poco recupera el color.');
+    await api.say('{player} le dio el Mate al capitán. Poco a poco recupera el color.');
     await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá esto: un machete de a bordo. Lo uso para cortar cabos y zarzas.', 'Con él vas a poder abrirte paso en el monte. Lo vas a necesitar para seguir tu viaje.'], { name: 'Capitán' });
     await api.give('machete', 1);
     api.setFlag('got_machete');

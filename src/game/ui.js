@@ -4,16 +4,40 @@ import { h, wait } from '../core/util.js';
 import { input } from '../core/input.js';
 import { sfx } from '../core/audio.js';
 import { settings, state } from './state.js';
+import { charSprite } from '../gfx/characters.js';
+
+// Speaker looks so each voice gets its own face and tint in the dialog box.
+const FACES = {
+  'Maestro Tabárez': 'prof', Madre: 'mom', Enfermera: 'nurse', Comerciante: 'clerk', Dueño: 'clerk', Policía: 'cop',
+  Marinero: 'sailor', Surfista: 'swimmer', Abuelo: 'oldman', Vecina: 'girl', Vecino: 'oldman', Hermana: 'girl',
+  Sofía: 'leader_ute', Lucía: 'leader_ose', 'Juan A. Lavalleja': 'leader_lavalleja', Candelaria: 'leader_ancap',
+  Ramón: 'leader_mgap', Mariela: 'leader_defensa', 'Horacio Quiroga': 'leader_quiroga', Capitán: 'ferry_captain',
+  Biólogo: 'biologo', 'Ciclista veterano': 'ciclista', Farero: 'keeper', Calima: 'calima', Bruma: 'bruma', Brumario: 'brumario',
+  Garúa: 'garua', Obdulio: 'champion', Estela: 'elite1', Teófilo: 'elite2', Dolores: 'elite3', Federico: 'elite4',
+};
+// Fixed tints for the main voices; any other speaker gets a stable hue from its name.
+const TINTS = { '{player}': 205, '{rival}': 25, 'Maestro Tabárez': 150, Madre: 340 };
+
+function speaker(name) {
+  const s = state();
+  const raw = name;
+  const look = raw === '{player}' ? s?.player.look : raw === '{rival}' ? 'rival' : FACES[raw];
+  let hue = TINTS[raw];
+  if (hue == null) { let n = 0; for (const ch of raw) n = (n * 31 + ch.charCodeAt(0)) % 360; hue = n; }
+  return { look, hue };
+}
+
 
 let root;
-let dialog, dialogText, dialogName, dialogArrow;
+let dialog, dialogText, dialogName, dialogArrow, dialogFace;
 
 export function mountUI(el) {
   root = el;
   dialogName = h('div', { class: 'dialog-name', hidden: true });
   dialogText = h('p', { class: 'dialog-text' });
   dialogArrow = h('span', { class: 'dialog-arrow', 'aria-hidden': 'true', text: '▼' });
-  dialog = h('div', { class: 'dialog', hidden: true, role: 'status', 'aria-live': 'polite' }, dialogName, dialogText, dialogArrow);
+  dialogFace = h('canvas', { class: 'dialog-face', width: 16, height: 17, hidden: true, 'aria-hidden': 'true' });
+  dialog = h('div', { class: 'dialog', hidden: true, role: 'status', 'aria-live': 'polite' }, dialogFace, dialogName, dialogText, dialogArrow);
   root.append(dialog);
 }
 
@@ -41,6 +65,16 @@ export async function say(text, opts = {}) {
     dialog.classList.toggle('is-battle', !!opts.battle);
     dialogName.hidden = !opts.name;
     dialogName.textContent = opts.name ? fmt(opts.name) : '';
+    const who = opts.name ? speaker(opts.name) : null;
+    dialog.classList.toggle('has-face', !!who?.look);
+    dialog.style.setProperty('--who', who ? `oklch(0.52 0.13 ${who.hue})` : '');
+    dialog.style.setProperty('--who-bg', who ? `oklch(0.97 0.025 ${who.hue})` : '');
+    dialogFace.hidden = !who?.look;
+    if (who?.look) {
+      const g = dialogFace.getContext('2d');
+      g.clearRect(0, 0, 16, 17);
+      g.drawImage(charSprite(who.look, 'down', 0), 0, 0);
+    }
     dialogArrow.hidden = true;
     dialogText.textContent = '';
     let done = false;

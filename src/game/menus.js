@@ -1,6 +1,6 @@
 // Panels: pause menu, party, summary, bag, PokeDex, trainer card, options,
 // save, shop and PC storage.
-import { h, clamp, formatTime, pad } from '../core/util.js';
+import { h, clamp, formatTime, pad, wait } from '../core/util.js';
 import { keyName } from '../core/input.js';
 import { sfx, setVolumes } from '../core/audio.js';
 import { SPECIES, DEX_ORDER } from '../data/species.js';
@@ -101,30 +101,55 @@ async function pickFlight() {
  * mode: 'field' | 'battle' | 'forced' | 'item' | 'select'
  * returns chosen index (battle/forced/item/select) or -1/null.
  */
-export function openParty({ mode = 'field', active = -1, title } = {}) {
+export function openParty({ mode = 'field', active = -1, title, onUse } = {}) {
   const S = state();
   return panel('panel-party', (el, close) => {
-    const head = h('header', { class: 'panel-title', text: title ?? (mode === 'forced' ? 'Elegí la próxima criatura' : mode === 'item' || mode === 'select' ? 'Elegí una criatura' : 'Equipo') });
+    const head = h('header', { class: 'panel-title', text: title ?? (mode === 'forced' ? 'Elegí la próxima criatura' : mode === 'item' || mode === 'select' || mode === 'use' ? 'Elegí una criatura' : 'Equipo') });
     if (mode === 'forced') el.classList.add('is-forced');
     const list = h('ol', { class: 'party-list' });
     let swapFrom = null;
     const rows = [];
-    const build = () => {
+    // anim = { i, from }: row i is drawn with its old HP so the bar can slide to the new value.
+    const build = (anim) => {
       rows.length = 0;
       list.replaceChildren(...S.party.map((c, i) => {
-        const li = h('li', { class: `party-row ${c.hp <= 0 ? 'is-fainted' : ''} ${i === active ? 'is-current' : ''} ${swapFrom === i ? 'is-swapping' : ''}` },
+        const shown = anim && anim.i === i ? { ...c, hp: anim.from } : c;
+        const li = h('li', { class: `party-row ${shown.hp <= 0 ? 'is-fainted' : ''} ${i === active ? 'is-current' : ''} ${swapFrom === i ? 'is-swapping' : ''}` },
           h('img', { src: creatureIcon(c.species), alt: '', class: 'party-icon', width: 80, height: 80 }),
           h('div', { class: 'party-main' },
             h('div', { class: 'party-name' }, h('span', { text: displayName(c) }), c.status ? h('span', { class: 'status-chip', 'data-status': c.status, text: STATUS_SHORT[c.status] }) : null),
             h('div', { class: 'party-lv', text: `Nv${c.level}` }),
-            hpBar(c),
-            h('div', { class: 'party-hp', text: `${c.hp}/${maxHp(c)}` }),
+            hpBar(shown),
+            h('div', { class: 'party-hp', text: `${shown.hp}/${maxHp(c)}` }),
           ));
         rows.push(li);
         return li;
       }));
     };
     build();
+    /** Shows the HP bar and counter of row i rising from `from` to its current value. */
+    const animate = async (i, from) => {
+      const c = S.party[i];
+      if (c.hp === from) { build(); makeNav(i); return; }
+      build({ i, from });
+      makeNav(i);
+      const fill = rows[i].querySelector('.hpbar-fill');
+      const num = rows[i].querySelector('.party-hp');
+      await wait(60);
+      const r = c.hp / maxHp(c);
+      fill.classList.remove('no-anim');
+      fill.style.setProperty('--hp', r);
+      fill.dataset.level = r > 0.5 ? 'good' : r > 0.2 ? 'mid' : 'low';
+      rows[i].classList.remove('is-fainted');
+      const steps = 14;
+      for (let k = 1; k <= steps; k++) {
+        num.textContent = `${Math.round(from + ((c.hp - from) * k) / steps)}/${maxHp(c)}`;
+        if (k % 3 === 0) sfx('select');
+        await wait(50);
+      }
+      num.textContent = `${c.hp}/${maxHp(c)}`;
+      await wait(250);
+    };
     const foot = h('footer', { class: 'panel-foot', text: mode === 'forced' ? '' : 'B: volver' });
     el.append(head, list, foot);
     let nav;
@@ -149,6 +174,7 @@ export function openParty({ mode = 'field', active = -1, title } = {}) {
         return;
       }
       if (mode === 'item' || mode === 'select') return close(i);
+      if (mode === 'use') { if (await onUse(i, animate)) close(i); return; }
       if (mode === 'forced' || mode === 'battle') {
         const opts = ['Cambiar', 'Datos', 'Cancelar'];
         const r = await choose(opts, { cls: 'menu-sub' });
@@ -312,6 +338,25 @@ async function useInField(key) {
     return say(`Usaste ${it.name}. Las criaturas débiles no se van a acercar.`);
   }
   if (it.xstat) return say('Solo se puede usar en combate.');
+  if (!it.tm && !it.stone && !it.rareCandy) {
+    // Stay inside the party menu: the bar fills up there, then the player keeps choosing or goes back.
+    await openParty({
+      mode: 'use',
+      title: `Usar ${it.name}`,
+      onUse: async (i, animate) => {
+        const c = S.party[i];
+        if (!itemUsable(key, c)) { await say('No tendría ningún efecto.'); return false; }
+        removeItem(key, 1);
+        const from = c.hp;
+        const msg = applyItem(key, c);
+        sfx('heal');
+        await animate(i, from);
+        await say(msg ?? 'No tuvo efecto.');
+        return !hasItem(key);
+      },
+    });
+    return;
+  }
   const t = await openParty({ mode: 'item', title: `Usar ${it.name}` });
   if (t < 0) return;
   const c = S.party[t];
