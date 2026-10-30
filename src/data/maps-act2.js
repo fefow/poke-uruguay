@@ -35,7 +35,7 @@ const R5 = route({ seed: 'ruta5', w: 30, h: 30, axis: 'v', from: 14, to: 9, gras
 const TAC = city({
   seed: 'tacuarembo', sa: 6, sb: 15,
   a: [['houseG', 2, 'casa_tac'], ['planta', 8, 'gym_tac'], ['poli', 17, 'poli_tac'], ['shop', 23, 'shop_tac']],
-  b: [['houseO', 4, 'casa_tac2'], ['houseV', 17]],
+  b: [['houseO', 4, 'casa_tac2'], ['houseV', 17, 'parrilla_tac']],
   vroads: [14], nroads: [14], sroads: [14], decor: { '#': 14, q: 6, f: 14 },
   signs: [[26, 7], [7, 16]],
   exits: { w: 6, e: 6, s: 14, n: 14 },
@@ -50,7 +50,7 @@ const R30 = route({ seed: 'ruta30', w: 30, h: 14, axis: 'h', from: 6, to: 7, gra
 const RIV = city({
   seed: 'rivera', sa: 6, sb: 15,
   a: [['houseB', 2, 'casa_riv'], ['lucha', 8, { to: 'gym_riv', req: 'torre_clear', deny: ['La puerta del gimnasio está cerrada y hay un recluta del Equipo PP custodiándola.', 'La Torre de Niebla, al norte de la plaza, mantiene la ciudad entera bajo control.'] }], ['poli', 17, 'poli_riv'], ['shop', 23, 'shop_riv']],
-  b: [['house', 4], ['houseO', 17, 'casa_riv2'], ['torre', 23, 'torre_1']],
+  b: [['house', 4, 'aduana_riv'], ['houseO', 17, 'casa_riv2'], ['torre', 23, 'torre_1']],
   vroads: [14], decor: { '#': 8, q: 4, f: 10 },
   signs: [[26, 7], [14, 18]],
   exits: { w: 6 },
@@ -62,7 +62,7 @@ const R31 = route({ seed: 'ruta31', w: 44, h: 16, axis: 'h', from: 8, to: 6, gra
 const SAL = city({
   seed: 'salto', sa: 6, sb: 15,
   a: [['houseV', 3, 'casa_sal'], ['psiquico', 9, 'gym_sal'], ['poli', 18, 'poli_sal'], ['shop', 23, 'shop_sal']],
-  b: [['houseB', 3], ['fabrica', 8, 'represa_1'], ['house', 18, 'casa_sal2']],
+  b: [['houseB', 3, 'radio_sal'], ['fabrica', 8, 'represa_1'], ['house', 18, 'casa_sal2']],
   vroads: [15], sroads: [15], decor: { p: 8, f: 12, '#': 6 },
   water: [[1, 16, 8, 3], [20, 17, 6, 2]],
   signs: [[7, 7], [14, 18]],
@@ -75,7 +75,7 @@ const R3 = route({ seed: 'ruta3', w: 18, h: 48, axis: 'v', from: 9, to: 9, grass
 const PAY = city({
   seed: 'paysandu', w: 26, h: 18, sa: 6, sb: 13, road: 'c',
   a: [['houseO', 3, 'casa_pay'], ['poli', 10, 'poli_pay'], ['shop', 18, 'shop_pay']],
-  b: [['houseG', 6, 'casa_pay2']],
+  b: [['houseG', 6, 'casa_pay2'], ['houseB', 18, 'muelle_pay']],
   vroads: [14], nroads: [12], sroads: [14], decor: { '#': 8, q: 6, f: 10 },
   signs: [[16, 7]],
   exits: { n: 12, s: 14 },
@@ -151,6 +151,8 @@ export const ACT2_OUTDOOR = {
       wander(10, 8, 'gaucho', ['En Tacuarembó se hizo el primer asado de la Patria Gaucha.', 'Si te gusta el campo, andá a ver el desfile.']),
       npc(20, 9, 'girl', ['Dicen que Gardel nació acá. Otros dicen que en Toulouse.', 'En Tacuarembó nadie se pone de acuerdo.'], { dir: 'down' }),
       tr({ x: 12, y: 8, dir: 'right' }, 'oldman', 'tac_a', 'Segundo', 'Baqueano', FOREST, [37, 38], ['Conozco este monte como a mi casa.', 'Me ganaste de visitante.', 'El ministro Villalba es duro pero justo.']),
+      npc(19, 16, 'gaucho', ['La parrilla de la Patria Gaucha fue tomada por el Equipo PP. Hay reclutas adentro.', 'Si los sacás, el dueño te va a agradecer.'], { dir: 'up', cond: (f) => !f.parrilla_clear }),
+      npc(19, 16, 'gaucho', ['La parrilla vuelve a abrir. Se huele el asado hasta acá.'], { dir: 'up', cond: (f) => f.parrilla_clear }),
       npc(24, 9, 'cop', ['Hay movimiento raro en el norte. Los camiones del Equipo PP no paran.'], { dir: 'left' }),
       npc(5, 13, 'clerk', ['La Policlínica y el almacén están sobre la calle principal. Nunca se equivocan: siempre están en el mismo lugar.']),
     ],
@@ -198,6 +200,8 @@ export const ACT2_OUTDOOR = {
     enc: { rate: 0.1, list: wildList(['lucha', 'normal', 'bicho', 'planta'], 40, 42, 8, 'riv') },
     npcs: [
       wander(10, 9, 'girl', ['En Rivera cruzás la calle y estás en otro país.', 'Mi abuelo vendía en un lado y compraba en el otro.']),
+      npc(6, 14, 'cop', ['La aduana fue tomada por gente de gris. Nadie puede cruzar a Brasil.', 'Si los desalojás, hay recompensa.'], { dir: 'up', cond: (f) => !f.aduana_clear }),
+      npc(6, 14, 'cop', ['La aduana funciona otra vez. Gracias.'], { dir: 'up', cond: (f) => f.aduana_clear }),
       npc(22, 9, 'oldman', ['La niebla de la Torre nos tiene sin sol desde hace días.', 'La policía no puede entrar. Alguien tiene que subir.'], { dir: 'left', cond: (f) => !f.torre_clear }),
       npc(22, 9, 'oldman', ['El sol volvió a Rivera. Gracias.'], { dir: 'left', cond: (f) => f.torre_clear }),
       grunt({ x: 11, y: 7, dir: 'down' }, 'riv_g1', [41, 42], 'Nadie entra al gimnasio.', 'Qué mala suerte.', 'La jefa Bruma está arriba de la Torre.', { cond: (f) => !f.torre_clear }),
@@ -238,6 +242,8 @@ export const ACT2_OUTDOOR = {
     fish: fishList(44, 46, 7),
     npcs: [
       wander(12, 9, 'swimmer', ['Las termas de Salto son buenas para el cuerpo y para la cabeza.', 'Si tenés algo de tipo Siniestro, el líder lo va a sufrir.']),
+      npc(5, 16, 'clerk', ['Hace días que la radio de Salto no da el pronóstico real: la tomó el Equipo PP.', 'Si volvés a poner al aire a la gente de siempre, te lo van a agradecer.'], { dir: 'up', cond: (f) => !f.radio_clear }),
+      npc(5, 16, 'clerk', ['La radio vuelve a dar el pronóstico de siempre.'], { dir: 'up', cond: (f) => f.radio_clear }),
       npc(22, 9, 'girl', ['El gimnasio es un observatorio con techo de vidrio.', 'Horacio Quiroga escribía cuentos oscuros en Salto. Dicen que adivina tus movimientos.'], { dir: 'left' }),
       tr({ x: 11, y: 9, dir: 'down' }, 'oldman', 'sal_a', 'Don Rufino', 'Astrónomo aficionado', ['psiquico', 'volador'], [44, 44], ['Anoche vi algo raro en el cielo.', 'Qué cielo más despejado.', 'Los de gris prenden luces fuertes en la Represa.']),
       grunt({ x: 18, y: 9, dir: 'left' }, 'sal_g1', [44, 45], 'Esta ciudad se queda a oscuras.', 'No tiene sentido.', 'Garúa está dentro de la Represa.', { cond: (f) => !f.represa_clear }),
@@ -270,6 +276,8 @@ export const ACT2_OUTDOOR = {
     exits: { n: { to: 'ruta3' }, s: { to: 'ruta24' } },
     enc: { rate: 0.1, list: wildList(['normal', 'volador', 'tierra', 'agua'], 47, 49, 8, 'pay') },
     npcs: [
+      npc(20, 14, 'sailor', ['El muelle del puerto lo tomó el Equipo PP. Por ahí entra el material de las torres de niebla.', 'Si los echás, el capataz del puerto te lo va a agradecer.'], { dir: 'up', cond: (f) => !f.muelle_clear }),
+      npc(20, 14, 'sailor', ['El muelle volvió a trabajar con normalidad.'], { dir: 'up', cond: (f) => f.muelle_clear }),
       wander(8, 9, 'girl', ['El Puente Internacional une dos países. Yo lo crucé de chica.', 'Después de la niebla, todo se ve distinto.']),
       npc(18, 9, 'gaucho', ['Más al sur está Fray Bentos. Allí se construyó el frigorífico que cambió el mundo.', 'Hoy lo usan para otra cosa.'], { dir: 'down' }),
       tr({ x: 20, y: 9, dir: 'left' }, 'sailor', 'pay_a', 'Marcelo', 'Marinero', ['agua', 'volador'], [47, 48], ['Navego el río hace treinta años.', 'Buen combate.', 'Los camiones de gris van al sur.']),
@@ -367,7 +375,32 @@ const FLOOR_TOP = [
   'iiiiimmiiiii',
 ];
 
+/**
+ * A building taken over by the Equipo PP (see EVENTS in story.js): the recruits (gate trainers) vanish when
+ * beaten, then the boss appears; afterwards the owner is back. Freeing it gives a TM.
+ */
+const eventRoom = (ev, name, prefix, levels, ownerLook) => {
+  const ids = [`${prefix}_g1`, `${prefix}_g2`, `${prefix}_g3`];
+  const done = (f) => ids.every((id) => f[`tr_${id}`]);
+  const talk = [['No se puede pasar.', 'Qué mala suerte.', 'Hay más adentro.'], ['Este lugar es nuestro.', 'Perdí.', 'El capataz está al fondo.'], ['Dejá de meterte.', 'No lo esperaba.', 'Seguí, que el capataz te espera.']];
+  const spots = [{ x: 2, y: 4, dir: 'right' }, { x: 8, y: 6, dir: 'left' }, { x: 9, y: 3, dir: 'down' }];
+  return room(FLOOR_UP, {
+    name, music: 'cave',
+    npcs: [
+      ...ids.map((id, i) => grunt(spots[i], id, levels[i], ...talk[i], { dir: spots[i].dir, sight: 4, gate: true })),
+      { x: 5, y: 2, look: 'grunt', dir: 'down', id: `boss_${ev}`, cond: (f) => done(f) && !f[`${ev}_clear`], script: 'event_boss', event: ev },
+      { x: 5, y: 3, look: ownerLook, dir: 'down', cond: (f) => f[`${ev}_clear`], script: 'event_owner', event: ev },
+    ],
+  });
+};
+
 export const ACT2_INTERIOR = {
+  // --- Side missions: buildings taken over by the Equipo PP
+  parrilla_tac: eventRoom('parrilla', 'Parrilla de la Patria Gaucha', 'pa', [[38, 39], [39, 40], [39, 40]], 'gaucho'),
+  aduana_riv: eventRoom('aduana', 'Aduana de Rivera', 'ad', [[43, 44], [43, 44], [44, 45]], 'cop'),
+  radio_sal: eventRoom('radio', 'Radio de Salto', 'ra', [[45, 46], [45, 46], [46, 47]], 'clerk'),
+  muelle_pay: eventRoom('muelle', 'Muelle de Paysandú', 'mu', [[47, 48], [48, 49], [48, 49]], 'sailor'),
+
   // --- gyms
   gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_fire', 'ancap', [
     tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria Ríos es más dura que el hierro.'], { dir: 'left' }),

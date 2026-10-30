@@ -121,6 +121,45 @@ async function keeperTicket(api) {
   api.setFlag('got_ticket');
 }
 
+/**
+ * Side missions: a building taken over by the Equipo PP. The recruits inside vanish once beaten, then the
+ * boss appears; freeing the building gives a TM. Rooms are built in maps-act2.js (eventRoom).
+ */
+export const EVENTS = {
+  parrilla: {
+    flag: 'parrilla_clear', name: 'Capataz Rondeau', mt: 'mt_parrillada', prize: 2800,
+    team: [['yarara', 40], ['cuervon', 40], ['pombero', 41], ['zorromonte', 42]],
+    intro: ['Esta parrilla es ahora cuartel del Equipo PP. Sin asado, la gente no se junta; y sin gente, nadie nos molesta.', 'No te voy a dejar arruinar el plan.'],
+    lose: 'Me quedé sin brasas.',
+    after: ['Está bien. Nos vamos. Que sigan con su asado.'],
+    thanks: ['La parrilla de la Patria Gaucha vuelve a abrir. Gracias, {player}.', 'Tomá esta MT: es la receta de mi abuelo, el fuego justo para cada corte.'],
+  },
+  aduana: {
+    flag: 'aduana_clear', name: 'Inspector Bianchi', mt: 'mt_punio_gaucho', prize: 3000,
+    team: [['yarara', 44], ['vespertino', 44], ['pombero', 45], ['caudillo', 46]],
+    intro: ['La aduana ahora es del Equipo PP. Todo lo que cruza la frontera pasa por nosotros.', 'Documentos, por favor. Y un combate.'],
+    lose: 'Sin sello no se pasa… y yo perdí el mío.',
+    after: ['Está bien, nos vamos. Que la aduana vuelva a ser pública.'],
+    thanks: ['La aduana de Rivera vuelve a funcionar. Gracias, {player}.', 'Tomá esta MT. La usan los pesadores de la frontera: puro puño y poco papel.'],
+  },
+  radio: {
+    flag: 'radio_clear', name: 'Locutora Cáceres', mt: 'mt_psiquico', prize: 3300,
+    team: [['vespertino', 46], ['pombero', 46], ['caudillo', 47], ['temblador', 48]],
+    intro: ['Esta radio ahora transmite lo que el Equipo PP quiere que se oiga. Nada de pronósticos reales.', 'Salí al aire sin permiso, y no pienso callarme.'],
+    lose: 'Se cortó la transmisión…',
+    after: ['Está bien, me voy. Que vuelva la programación de siempre.'],
+    thanks: ['La radio de Salto vuelve al aire. Gracias, {player}.', 'Tomá esta MT: con ella las ondas viajan directo a la mente de cualquiera.'],
+  },
+  muelle: {
+    flag: 'muelle_clear', name: 'Contramaestre Vidal', mt: 'mt_bomba_lodo', prize: 3600,
+    team: [['yarara', 49], ['lobomarino', 49], ['caudillo', 50], ['temblador', 50]],
+    intro: ['El muelle del puerto es nuestro. Por acá entra el material de las torres de niebla.', 'Quien quiera pasar, va a tener que hundirse primero.'],
+    lose: 'Me hundí yo solo…',
+    after: ['Está bien. Levanto el campamento. Que el muelle sea de todos otra vez.'],
+    thanks: ['El muelle de Paysandú vuelve a trabajar. Gracias, {player}.', 'Tomá esta MT: la mejor arma contra el barro del río.'],
+  },
+};
+
 export const SCRIPTS = {
   async mom(api) {
     if (!api.flag('has_starter')) {
@@ -393,14 +432,39 @@ export const SCRIPTS = {
     await api.say('¡Los datos de Ballenaplata se agregaron a la PokeDex!');
   },
 
+  async event_boss(api, npc) {
+    const E = EVENTS[npc.event];
+    if (api.flag(E.flag)) return api.say(E.thanks, { name: 'Dueño' });
+    await api.say(E.intro, { name: E.name });
+    const res = await api.battle({ id: `ev_${npc.event}`, name: E.name, cls: 'Capataz PP', look: 'grunt', ai: 'smart', team: E.team, prize: E.prize, lose: E.lose, items: ['mate_dulce'] });
+    if (res !== 'win') return;
+    api.setFlag(E.flag);
+    await api.flash();
+    await api.say(E.after, { name: E.name });
+    await api.npcLeave(`boss_${npc.event}`);
+    await api.say(E.thanks, { name: 'Dueño' });
+    await api.give(E.mt, 1);
+  },
+
+  async event_owner(api, npc) {
+    const E = EVENTS[npc.event];
+    await api.say(['Gracias otra vez, {player}. Sin vos esto seguiría tomado.', 'Pasá cuando quieras.'], { name: 'Dueño' });
+  },
+
   async ferry_captain(api) {
     if (api.flag('ferry_done')) return;
-    await api.say(['Uf… perdón. Soy el capitán de este barco, y estoy mareado desde que zarpamos de prueba.', 'Parece una broma, pero es así. Hace días que no puedo ni pararme.'], { name: 'Capitán' });
-    if (!(await api.ask('¿Querés ayudar al capitán?'))) return api.say('El capitán suspira. Cuando quieras ayudarlo, acá estoy.', { name: 'Capitán' });
-    await api.say(['{player} le acomodó la almohada y le sirvió un mate caliente.'], {});
+    const MATES = ['te_marcela', 'mate', 'mate_dulce', 'dulce_de_leche'];
+    const mate = MATES.find((k) => api.hasItem(k));
+    await api.say(['Uf… perdón. Soy el capitán de este barco, y estoy mareado desde que zarpamos de prueba.', 'Lo único que me calma es un mate bien caliente. Pero acá a bordo se acabó la yerba.'], { name: 'Capitán' });
+    if (!mate) return api.say(['Si me traés un mate, te lo voy a agradecer toda la vida.', 'En el almacén de Montevideo venden.'], { name: 'Capitán' });
+    if (!(await api.ask('¿Le das un mate al capitán?'))) return api.say('El capitán suspira. Cuando quieras, acá estoy.', { name: 'Capitán' });
+    api.takeItem(mate);
     api.sfx('heal');
+    await api.say('{player} le cebó un mate al capitán. Poco a poco recupera el color.');
     await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá esto: un machete de a bordo. Lo uso para cortar cabos y zarzas.', 'Con él vas a poder abrirte paso en el monte. Lo vas a necesitar para seguir tu viaje.'], { name: 'Capitán' });
     await api.give('machete', 1);
+    await api.say(['Y esta MT es del barco: así se pelea cuando hay temporal.'], { name: 'Capitán' });
+    await api.give('mt_triturar', 1);
     api.setFlag('got_machete');
     api.takeItem('ticket_ferry');
     api.setFlag('ferry_done');

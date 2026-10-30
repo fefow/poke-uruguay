@@ -403,7 +403,7 @@ const BASE_OUTDOOR = {
       { x: 24, y: 4, look: 'oldman', wander: true, text: ['Desde la cima del cerro se ve toda la costa.', 'El mar acá es más calmo que en Punta del Este.'] },
       { x: 6, y: 9, look: 'boy', text: ['Mi abuelo dice que en el mar de Piriápolis se ven toninas en verano.'] },
     ],
-    items: [{ x: 9, y: 2, item: 'superesfera', id: 'pir_item1' }, { x: 26, y: 4, item: 'mt_triturar', id: 'pir_mt1' }, { x: 13, y: 13, item: 'mt_psiquico', id: 'pir_mt2' }],
+    items: [{ x: 9, y: 2, item: 'superesfera', id: 'pir_item1' }],
   },
 
   paloma: {
@@ -439,7 +439,7 @@ const BASE_OUTDOOR = {
       { x: 14, y: 7, look: 'oldman', text: ['El faro de La Paloma guía a los barcos desde hace casi siglo y medio.'] },
       { x: 26, y: 8, look: 'gaucho', dir: 'left', text: ['Más al este, en Cabo Polonio, no hay luz eléctrica.', 'Se vive con velas y con lo que da el mar.'] },
     ],
-    items: [{ x: 25, y: 1, item: 'mate_dulce', id: 'pal_item1' }, { x: 20, y: 13, item: 'mt_bomba_lodo', id: 'pal_mt1' }],
+    items: [{ x: 25, y: 1, item: 'mate_dulce', id: 'pal_item1' }],
   },
 
   minas: {
