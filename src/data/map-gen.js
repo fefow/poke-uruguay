@@ -4,7 +4,7 @@ import { SPECIES } from './species.js';
 // and cities (two streets with the standard gym, Policlínica, shop and house blocks).
 // Everything is deterministic, so a map is the same on every run and in every save.
 
-function rng(seed) {
+export function rng(seed) {
   let a = [...String(seed)].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7) || 1;
   return () => {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
@@ -20,6 +20,7 @@ const rows = (g) => g.map((r) => r.join(''));
 /** Gym block, 7 wide x 3 tall: roof, roof with emblem, facade with the door. */
 export const GYM_CHARS = {
   fuego: ['1', '2', '3'], planta: ['4', '5', '6'], lucha: ['7', '8', '9'], psiquico: ['!', '@', '$'], siniestro: ['&', '*', '+'],
+  tierra: ['À', 'Á', 'Â'], normal: ['Ã', 'Ä', 'Å'], bicho: ['È', 'É', 'Ê'], volador: ['Ì', 'Í', 'Î'],
 };
 const gymBlock = (fam) => { const [r, f, e] = GYM_CHARS[fam]; return [`${r}${r}${r}${r}${r}${r}${r}`, `${r}${r}${r}${e}${r}${r}${r}`, `${f}${f}${f}D${f}${f}${f}`]; };
 const BLOCKS = {
@@ -46,7 +47,7 @@ const SOLID_DECO = new Set('#qpRFSHwrugovWCQIUtDlLMzZ'.split(''));
  * (row `sb`) with more buildings above that one, and a vertical road between them.
  * a / b: [[kind, x, doorTarget?], ...] with x the left column of the block.
  */
-export function city({ seed, w = 28, h = 20, base = '.', border = '#', road = 'c', sa = 6, sb = 15, a = [], b = [], vroads = [], nroads = [], sroads = [], decor = {}, water = [], signs = [], exits = {} }) {
+export function city({ seed, w = 28, h = 20, base = '.', border = '#', road = 'c', sa = 6, sb = 15, sc = 0, a = [], b = [], c = [], vroads = [], nroads = [], sroads = [], decor = {}, water = [], plazas = [], groves = [], bridges = [], signs = [], exits = {} }) {
   const r = rng(seed);
   const g = grid(w, h, base);
   for (let x = 0; x < w; x++) { g[0][x] = border; g[h - 1][x] = border; }
@@ -65,12 +66,26 @@ export function city({ seed, w = 28, h = 20, base = '.', border = '#', road = 'c
   // streets
   for (let x = 1; x < w - 1; x++) g[sa][x] = road;
   if (b.length) for (let x = 1; x < w - 1; x++) g[sb][x] = road;
-  for (const vx of vroads) for (let y = sa; y <= (b.length ? sb : h - 2); y++) g[y][vx] = road;
+  if (c.length) for (let x = 1; x < w - 1; x++) g[sc][x] = road;
+  const lastStreet = c.length ? sc : b.length ? sb : h - 2;
+  for (const vx of vroads) for (let y = sa; y <= lastStreet; y++) g[y][vx] = road;
   for (const nx of nroads) for (let y = 0; y <= sa; y++) g[y][nx] = road;
-  for (const sx of sroads) for (let y = b.length ? sb : sa; y < h; y++) g[y][sx] = road;
+  for (const sx of sroads) for (let y = c.length ? sc : b.length ? sb : sa; y < h; y++) g[y][sx] = road;
   place(a, sa);
   place(b, sb);
+  place(c, sc);
+  // plazas: a paved square with a two-tile fountain in the middle
+  for (const [px, py, pw, ph] of plazas) {
+    for (let y = py; y < py + ph; y++) for (let x = px; x < px + pw; x++) if (g[y]?.[x] !== undefined) g[y][x] = road;
+    const fx = px + ((pw - 2) >> 1), fy = py + ((ph - 2) >> 1);
+    for (let y = fy; y < fy + 2; y++) for (let x = fx; x < fx + 2; x++) g[y][x] = '~';
+  }
+  // groves: a rectangle of trees with a clear lane through the middle
+  for (const [gx, gy, gw, gh, ch = '#'] of groves) {
+    for (let y = gy; y < gy + gh; y++) for (let x = gx; x < gx + gw; x++) if (g[y]?.[x] === base && (x - gx) % 4 !== 2 && (y - gy) % 4 !== 2) g[y][x] = ch;
+  }
   for (const rect of water) for (let y = rect[1]; y < rect[1] + rect[3]; y++) for (let x = rect[0]; x < rect[0] + rect[2]; x++) if (g[y]?.[x] !== undefined && g[y][x] === base) g[y][x] = rect[4] ?? '~';
+  for (const [bx0, bx1, by] of bridges) for (let x = bx0; x <= bx1; x++) g[by][x] = 'b';
   // scattered decoration on free base tiles (never on roads)
   for (const [ch, n] of Object.entries(decor)) {
     for (let i = 0, tries = 0; i < n && tries < 400; tries++) {

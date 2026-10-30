@@ -1,6 +1,9 @@
 // Story scripts. Each receives the script API (see game/script-api.js) and the
 // NPC that triggered it. Text uses Rioplatense Spanish ("vos"), in a sober tone aimed at adults.
 import { SPECIES } from './species.js';
+import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from './route.js';
+import { teamOf } from './map-gen.js';
+import { bossTeam, rescaleTeam } from './levels.js';
 
 // The rival picks the creature the player's starter is strong against (like the modern games),
 // so the first fights are winnable without grinding.
@@ -11,19 +14,23 @@ const LINE = {
   carpinchito: ['carpinchito', 'carpincho', 'carpinchon'],
 };
 
+// Level range of each rival fight, by where on the route it happens (see RIVAL_AT in maps.js).
+const RIVAL_LEVELS = [null, [13, 13], [19, 23], [27, 31], [37, 41], [49, 52]];
+
 export function rivalTeamFor(playerStarter, stage) {
   const line = LINE[COUNTER[playerStarter]];
-  return [
+  const team = [
     [[line[0], 5]],
-    [['zorrigris', 11], [line[0], 13]],
+    [[line[0], 13]],
     [['teruterazo', 17], ['hornerazo', 17], ['zorrigris', 18], [line[1], 20]],
-    // Ruta 5 (before Tacuarembó)
-    [['hornerazo', 38], ['zorromonte', 39], ['yacaron', 39], ['coatimundi', 39], [line[2], 41]],
-    // Ruta 24 (before Fray Bentos)
+    // Lascano (before Rocha)
+    [['hornerazo', 35], ['zorromonte', 36], ['yacaron', 36], ['coatimundi', 37], [line[2], 38]],
+    // Sarandí Grande (before Durazno)
     [['zorromonte', 45], ['lobomarino', 45], ['venadalto', 46], ['yacaron', 46], ['coatimundi', 47], [line[2], 49]],
     // Estadio Centenario (before the Champion)
     [['carancho', 50], ['yacaron', 51], ['gliptodonte', 51], ['mantis', 52], ['venadalto', 52], [line[2], 54]],
   ][stage];
+  return RIVAL_LEVELS[stage] ? rescaleTeam(team, RIVAL_LEVELS[stage]) : team;
 }
 const rivalTeam = (api, stage) => rivalTeamFor(api.starterKey(), stage);
 
@@ -33,67 +40,114 @@ const rival = (api, stage, prize, intro, lose, after) => ({
 
 export const LEADERS = {
   // Each gym leader heads a state body or is a figure from the city's history, and their type matches it.
+  inc: {
+    order: 1, id: 'leader_inc', name: 'Elena', cls: 'Presidenta del Instituto de Colonización', look: 'leader_inc', ai: 'smart', items: ['mate'],
+    team: teamOf(['tierra'], [8, 9, 10], 'inc'), prize: 500, badge: 'badge1', badgeName: 'Medalla Trinidad', reward: 'mate', rewardQty: 1, tm: 'mt_excavar',
+    intro: ['Bienvenido a Trinidad. Soy Elena, presidenta del Instituto Nacional de Colonización.', 'Mi trabajo es repartir tierra a quienes la trabajan, y conozco cada terrón del país.', 'Veamos si tus criaturas aguantan el peso de la tierra.'],
+    lose: 'Buena siembra. Se nota que trabajaste duro.',
+    after: ['La Medalla Trinidad es tuya.', 'Seguí hacia Mercedes, sobre el río. Allá el Correo reparte noticias y desafíos.'],
+  },
+  correo: {
+    order: 2, id: 'leader_correo', name: 'Marta', cls: 'Presidenta del Correo Uruguayo', look: 'leader_correo', ai: 'smart', items: ['mate'],
+    team: teamOf(['normal'], [10, 11, 12], 'correo'), prize: 800, badge: 'badge2', badgeName: 'Medalla Mercedes', reward: 'superesfera', rewardQty: 2, tm: 'mt_derribo',
+    intro: ['Soy Marta, presidenta del Correo Uruguayo.', 'Llevamos cartas y paquetes a todos los rincones del país, con sol, lluvia o niebla.', 'Mis criaturas son simples y confiables. Eso, en un combate, vale mucho.'],
+    lose: 'Entrega completada. Buen combate.',
+    after: ['La Medalla Mercedes es tuya.', 'Seguí hacia Fray Bentos. Dicen que el viejo Anglo volvió a prender las luces.'],
+  },
+  boiso: {
+    order: 9, id: 'leader_boiso', name: 'Juan M. Boiso Lanza', cls: 'Pionero de la aviación', look: 'leader_boiso', ai: 'smart', items: ['mate_dulce'],
+    team: teamOf(['volador'], [30, 32, 34, 36, 38], 'boiso'), prize: 4400, badge: 'badge9', badgeName: 'Medalla Florida', reward: 'mate_dulce', rewardQty: 2, tm: 'mt_pico_taladro',
+    intro: ['Soy Juan Manuel Boiso Lanza. En mil novecientos once fui el primer uruguayo en cruzar el Río de la Plata en un biplano.', 'Florida tiene el mejor viento de la llanura. Acá se aprende a volar.', 'Veamos si podés seguirme el ritmo.'],
+    lose: 'Aterrizaje forzoso. Me ganaste en el aire.',
+    after: ['La Medalla Florida es tuya.', 'Con ella, el Silbato del Hornero te obedece: ya podés volar a cualquier ciudad que hayas visitado.', 'Seguí hacia Durazno. Se pone caluroso.'],
+  },
+  inavi: {
+    order: 11, id: 'leader_inavi', name: 'Tomás', cls: 'Presidente del INAVI', look: 'leader_inavi', ai: 'smart', items: ['mate_dulce'],
+    team: teamOf(['bicho'], [38, 40, 42, 44, 46], 'inavi'), prize: 6800, badge: 'badge11', badgeName: 'Medalla Canelones', reward: 'mate_dulce', rewardQty: 3, tm: 'mt_zumbido',
+    intro: ['Soy Tomás, presidente del Instituto Nacional de Vitivinicultura.', 'Canelones es tierra de viñedos, y un viñedo sin insectos no existe.', 'Que empiece la vendimia.'],
+    lose: 'Cosecha perdida… pero qué buena cosecha de combate.',
+    after: ['La Medalla Canelones es tuya.', 'Falta una sola medalla: Montevideo, el Palacio de la Luz.', 'Y después, Calima. Tené cuidado.'],
+  },
   ute: {
-    order: 1, id: 'leader_ute', name: 'Sofía', cls: 'Presidenta de UTE', look: 'leader_ute', ai: 'smart', items: ['mate'],
-    team: [['luciernito', 7], ['nimbo', 7], ['cotorrayo', 9]], prize: 1400, badge: 'badge1', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 1, tm: 'mt_descarga',
+    order: 8, id: 'leader_ute', name: 'Sofía', cls: 'Presidenta de UTE', look: 'leader_ute', ai: 'smart', items: ['mate'],
+    team: [['luciernito', 7], ['nimbo', 7], ['cotorrayo', 9]], prize: 1400, badge: 'badge8', badgeName: 'Medalla Montevideo', reward: 'mate', rewardQty: 1, tm: 'mt_descarga',
     intro: ['Soy Sofía, presidenta de UTE, la empresa estatal que lleva la luz a todo el país.', 'Este es el Palacio de la Luz: desde acá se dirige la energía de Montevideo.', 'Veamos si resistís la corriente.'],
     lose: 'Se cortó el circuito. Fue un buen combate.',
-    after: ['Te ganaste la Medalla Montevideo. Con ella la policía te deja pasar a la Interbalnearia.', 'Hay apagones raros en la costa este. Dicen que es obra del Equipo PP. Andá con cuidado.'],
+    after: ['La Medalla Montevideo es tuya. Son doce: la Liga está abierta.', 'Pero antes del Estadio Centenario, Calima te espera en el puerto. Es el fundador del Equipo PP.'],
   },
   ose: {
-    order: 2, id: 'leader_ose', name: 'Lucía', cls: 'Presidenta de OSE', look: 'leader_ose', ai: 'smart', items: ['mate'],
-    team: [['lobito', 15], ['mbigua', 16], ['carpincho', 18]], prize: 2200, badge: 'badge2', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 2, tm: 'mt_cascada',
+    order: 6, id: 'leader_ose', name: 'Lucía', cls: 'Presidenta de OSE', look: 'leader_ose', ai: 'smart', items: ['mate'],
+    team: [['lobito', 15], ['mbigua', 16], ['carpincho', 18]], prize: 2200, badge: 'badge6', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 2, tm: 'mt_cascada',
     intro: ['Bienvenido a Punta del Este. Soy Lucía, presidenta de OSE.', 'Obras Sanitarias del Estado lleva el agua potable a cada casa del país, y la cuida como un tesoro.', 'Veamos si resistís la corriente.'],
     lose: 'Me superaste. Fue una derrota limpia.',
-    after: ['La Medalla Maldonado es tuya.', 'El Equipo PP robó la lámpara del faro de Cabo Polonio, al este.', 'Si la recuperás, te van a dejar pasar por la Ruta 8.'],
+    after: ['La Medalla Maldonado es tuya.', 'Siguiendo hacia el interior, en Minas, una fábrica abandonada volvió a funcionar.', 'Garúa está detrás. Llevá el machete: hay zarzales.'],
   },
   lavalleja: {
-    order: 3, id: 'leader_lavalleja', name: 'Juan A. Lavalleja', cls: 'Héroe de los Treinta y Tres', look: 'leader_lavalleja', ai: 'smart', items: ['mate_dulce'],
-    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge3', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
+    order: 5, id: 'leader_lavalleja', name: 'Juan A. Lavalleja', cls: 'Héroe de los Treinta y Tres', look: 'leader_lavalleja', ai: 'smart', items: ['mate_dulce'],
+    team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge5', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
     intro: ['Soy Juan Antonio Lavalleja. Con treinta y dos compañeros desembarqué en la Agraciada para liberar la Provincia Oriental.', 'Esta ciudad lleva el nombre de aquel grupo: los Treinta y Tres Orientales.', 'La piedra de estas sierras lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía mucho que nadie me ganaba.',
     after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo PP subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
   },
   ancap: {
-    order: 4, id: 'leader_ancap', name: 'Candelaria', cls: 'Presidenta de ANCAP', look: 'leader_ancap', ai: 'smart', items: ['mate_dulce'],
-    team: [['corcel', 34], ['fatuo', 35], ['escorpio', 36], ['crinfuego', 37], ['luzmala', 39]], prize: 4200, badge: 'badge4', badgeName: 'Medalla Durazno', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_fogon',
+    order: 7, id: 'leader_ancap', name: 'Candelaria', cls: 'Presidenta de ANCAP', look: 'leader_ancap', ai: 'smart', items: ['mate_dulce'],
+    team: [['corcel', 34], ['fatuo', 35], ['escorpio', 36], ['crinfuego', 37], ['luzmala', 39]], prize: 4200, badge: 'badge7', badgeName: 'Medalla Durazno', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_fogon',
     intro: ['Bienvenido a Durazno. Soy Candelaria, presidenta de ANCAP.', 'Mi organismo refina los combustibles del país: el fuego es mi oficio.', 'Veamos si tus criaturas aguantan el calor.'],
     lose: 'Se apagó la llama. Buen combate.',
-    after: ['La Medalla Durazno es tuya.', 'Desde hace semanas el suelo se enfría raro: alguien está drenando el calor de las brasas con máquinas.', 'La fábrica abandonada de Minas volvió a funcionar. Me da mala espina.'],
+    after: ['La Medalla Durazno es tuya.', 'Falta poco: Canelones y, después, Montevideo.', 'Dicen que el fundador del Equipo PP espera en la capital.'],
   },
   mgap: {
-    order: 5, id: 'leader_mgap', name: 'Ramón', cls: 'Ministro de Ganadería', look: 'leader_mgap', ai: 'smart', items: ['mate_dulce'],
-    team: [['butiazal', 35], ['cortadora', 35], ['cardal', 36], ['curupi', 37], ['talamonte', 38]], prize: 4800, badge: 'badge5', badgeName: 'Medalla Tacuarembó', reward: 'pan_casero', rewardQty: 2, tm: 'mt_megaagotar',
+    order: 4, id: 'leader_mgap', name: 'Ramón', cls: 'Ministro de Ganadería', look: 'leader_mgap', ai: 'smart', items: ['mate_dulce'],
+    team: [['butiazal', 35], ['cortadora', 35], ['cardal', 36], ['curupi', 37], ['talamonte', 38]], prize: 4800, badge: 'badge4', badgeName: 'Medalla Tacuarembó', reward: 'pan_casero', rewardQty: 2, tm: 'mt_megaagotar',
     intro: ['Buenas, entrenador. Soy Ramón, ministro de Ganadería, Agricultura y Pesca.', 'Mi trabajo es cuidar el campo y el monte, que sostienen al país.', 'La naturaleza no se rinde fácil. Veamos si vos tampoco.'],
     lose: 'El monte te eligió. Es tuyo el triunfo.',
-    after: ['La Medalla Tacuarembó es tuya.', 'Al este, camino a Rivera, la niebla es cada vez más espesa. Sale de una torre que levantaron los de gris.', 'Tené cuidado: en la frontera nadie te va a ayudar.'],
+    after: ['La Medalla Tacuarembó es tuya.', 'Hacia el este el camino sigue a Melo y a la Quebrada de los Cuervos.', 'Allá arriba se juntan los jefes del Equipo PP. Tené cuidado.'],
   },
   defensa: {
-    order: 6, id: 'leader_defensa', name: 'Mariela', cls: 'Ministra de Defensa', look: 'leader_defensa', ai: 'smart', items: ['mate_dulce'],
-    team: [['capataz', 42], ['grison', 42], ['coatimundi', 43], ['toro', 44], ['capitan', 45]], prize: 5200, badge: 'badge6', badgeName: 'Medalla Rivera', reward: 'alfajor_triple', rewardQty: 3, tm: 'mt_garra_charrua',
+    order: 3, id: 'leader_defensa', name: 'Mariela', cls: 'Ministra de Defensa', look: 'leader_defensa', ai: 'smart', items: ['mate_dulce'],
+    team: [['capataz', 42], ['grison', 42], ['coatimundi', 43], ['toro', 44], ['capitan', 45]], prize: 5200, badge: 'badge3', badgeName: 'Medalla Rivera', reward: 'alfajor_triple', rewardQty: 3, tm: 'mt_garra_charrua',
     intro: ['Soy Mariela, ministra de Defensa Nacional.', 'Cuido la frontera y entreno acá, en Rivera, con disciplina de cuartel.', 'Mostrame qué sabés hacer.'],
     lose: 'Ganaste con respeto. Eso vale mucho.',
-    after: ['La Medalla Rivera es tuya.', 'Con la Torre apagada, el sol volvió a la ciudad. Gracias.', 'Al oeste, en Salto, la Represa se quedó sin luz. Eso no es casualidad.'],
+    after: ['La Medalla Rivera es tuya.', 'La niebla de la Torre sigue ahí, al norte de la plaza. Si querés apagarla, adelante.', 'Seguí hacia Tacuarembó: el ministro de Ganadería te espera.'],
   },
   quiroga: {
-    order: 7, id: 'leader_quiroga', name: 'Horacio Quiroga', cls: 'Escritor', look: 'leader_quiroga', ai: 'smart', items: ['dulce_de_leche'],
-    team: [['tonina', 44], ['venadalto', 45], ['mantis', 46], ['anta', 46], ['luzmala', 47], ['amatista', 48]], prize: 5800, badge: 'badge7', badgeName: 'Medalla Salto', reward: 'pan_casero', rewardQty: 3, tm: 'mt_premonicion',
+    order: 2, id: 'leader_quiroga', name: 'Horacio Quiroga', cls: 'Escritor', look: 'leader_quiroga', ai: 'smart', items: ['dulce_de_leche'],
+    team: [['tonina', 44], ['venadalto', 45], ['mantis', 46], ['anta', 46], ['luzmala', 47], ['amatista', 48]], prize: 5800, badge: 'badge2', badgeName: 'Medalla Salto', reward: 'pan_casero', rewardQty: 3, tm: 'mt_premonicion',
     intro: ['Te esperaba, {player}. Escribí tu llegada antes de que llegaras.', 'Soy Horacio Quiroga. Nací en Salto y le debo a esta ciudad mis cuentos más oscuros.', 'Veamos si tu camino coincide con lo que escribí.'],
     lose: 'El final no era ese. Qué honor.',
-    after: ['La Medalla Salto es tuya.', 'Al sur, en Fray Bentos, los de gris usan el viejo frigorífico como cuartel central.', 'El jefe de todo esto se llama Calima. Prepará a tus criaturas.'],
+    after: ['La Medalla Salto es tuya.', 'La Represa sigue bajo control de los de gris, bajo el puente.', 'Seguí hacia Artigas y Rivera. El camino se pone más duro.'],
   },
   anglo: {
-    order: 8, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Museo del Anglo', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
-    team: [['yarara', 44], ['zorromonte', 45], ['vespertino', 45], ['zarigueya', 45], ['buho', 46], ['yacaron', 47]], prize: 6500, badge: 'badge8', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
+    order: 1, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Museo del Anglo', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
+    team: [['yarara', 47], ['zorromonte', 48], ['vespertino', 48], ['zarigueya', 48], ['buho', 49], ['yacaron', 50]], prize: 6500, badge: 'badge1', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
     intro: ['Gracias por abrir el gimnasio, {player}. Estuve encerrada demasiado tiempo.', 'Soy Zoraida. Trabajo de noche, entre las sombras.', 'No me subestimes: la oscuridad también tiene sus reglas.'],
     lose: 'Salí de la sombra gracias a vos.',
-    after: ['La Medalla Fray Bentos es tuya. Son ocho: la Liga está abierta.', 'Volvé a Montevideo. El Estadio Centenario te espera.', 'Con el Alto Mando se juega distinto. Entrená, curá a tu equipo y entrá con todo.'],
+    after: ['La Medalla Fray Bentos es tuya. Es la tercera de doce.', 'El Equipo PP usa el viejo Anglo como depósito. Ahí hay algo que no cierra.', 'Seguí hacia Paysandú y Salto. Entrená y curá a tu equipo en cada ciudad.'],
   },
 };
 
+/** Team of a story boss, rescaled to the level curve of the city where they are met. */
+const bossAt = (stopId, team, plus = 0) => rescaleTeam(team, [gymAce(stopId) - 3 + plus, gymAce(stopId) + plus]);
+
+// Gym n is the n-th gym of the route: its team size, ace level, prize and reward all follow that position.
+const GYM_SIZE = [2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6];
+const GYM_PRIZE = [500, 800, 1200, 1800, 2400, 3000, 3600, 4400, 5200, 6000, 6800, 7500];
+const GYM_REWARD = [['mate', 1], ['superesfera', 2], ['mate', 2], ['superesfera', 2], ['mate_dulce', 1], ['superesfera', 3], ['ultraesfera', 2], ['mate_dulce', 2], ['ultraesfera', 3], ['ultraesfera', 4], ['mate_dulce', 3], ['pan_casero', 3]];
+for (const [key, L] of Object.entries(LEADERS)) {
+  const idx = GYM_STOPS.findIndex((st) => st.gym === key);
+  const stop = GYM_STOPS[idx];
+  const ace = gymAce(stop.id);
+  const types = [...new Set([L.team[0], L.team[L.team.length - 1]].flatMap(([sp]) => SPECIES[sp].types))];
+  L.order = idx + 1;
+  L.badge = badgeOf(stop.id);
+  L.team = bossTeam(L.team, GYM_SIZE[idx], ace, types, `gym_${key}`);
+  L.prize = GYM_PRIZE[idx];
+  [L.reward, L.rewardQty] = GYM_REWARD[idx];
+}
+
 export const CHAMPION = (rematch) => ({
   id: rematch ? 'champion_rematch' : 'champion', name: 'Obdulio', cls: 'Campeón', look: 'champion', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'],
-  team: [['capitan', 57], ['crinfuego', 57], ['albatros', 58], ['tucoterra', 58], ['yacaron', 58], ['aguaraflama', 60]].map(([sp, l]) => [sp, Math.min(95, l + (rematch ? 14 : 0))]),
+  team: rescaleTeam([['capitan', 57], ['crinfuego', 57], ['albatros', 58], ['tucoterra', 58], ['yacaron', 58], ['aguaraflama', 60]], [54, 58]).map(([sp, l]) => [sp, Math.min(95, l + (rematch ? 14 : 0))]),
   prize: rematch ? 24000 : 12000,
   intro: rematch
     ? ['Volviste, {player}. El Centenario siempre está abierto para una revancha.', 'Esta vez no me reservo nada.']
@@ -116,7 +170,7 @@ export const ELITES = [
 
 /** The lighthouse keeper's thanks: a ticket for the new Buquebus ferry docked in Montevideo. */
 async function keeperTicket(api) {
-  await api.say(['Mi hermano trabaja en el puerto de Montevideo. Hoy está atracado el Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz.', 'Con este ticket podés subir. Dicen que el capitán tiene algo para quien lo ayude. Y la Ruta 8 sigue cerrada por zarzas: sin ese algo no vas a pasar.'], { name: 'Farero' });
+  await api.say(['Mi hermano trabaja en el puerto de Montevideo. Hoy está atracado el Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz.', 'Con este ticket podés subir cuando llegues a la capital. Dicen que el capitán tiene algo para quien lo ayude.'], { name: 'Farero' });
   await api.give('ticket_ferry', 1);
   api.setFlag('got_ticket');
 }
@@ -201,7 +255,19 @@ export const SCRIPTS = {
       }
       return;
     }
-    if (!api.flag('dex')) return;
+    if (!api.flag('dex')) {
+      if (api.hasItem('carta_tabarez')) {
+        api.takeItem('carta_tabarez');
+        await api.say(['¡La carta! Gracias, {player}.', 'Es de un viejo colega. Dice que el Pampero se vio por el litoral.'], { name: 'Maestro Tabárez' });
+        await api.say(['Como prometí: la PokeDex. Registra cada criatura que veas o captures.', 'Y unas Pokeballs para capturar criaturas salvajes.'], { name: 'Maestro Tabárez' });
+        await api.give('uru_dex', 1);
+        await api.give('esfera', 5);
+        api.setFlag('dex');
+      } else {
+        await api.say(['Te pedí una carta del almacén de San José de Mayo, la próxima ciudad.', 'Cuando la tengas, traémela y te doy la PokeDex.'], { name: 'Maestro Tabárez' });
+      }
+      return;
+    }
     const seen = api.state.dex.seen.length;
     const caught = api.state.dex.caught.length;
     await api.say([`Veamos tu PokeDex. Viste ${seen} y capturaste ${caught} especies.`,
@@ -227,10 +293,6 @@ export const SCRIPTS = {
     await api.say(`¡{player} recibió a ${sp.name}!`);
     const rk = COUNTER[key];
     await api.say([`Entonces yo me quedo con ${SPECIES[rk].name}.`, 'Tiene desventaja contra el tuyo, pero no pienso ponértelo fácil.'], { name: '{rival}' });
-    await api.say(['Llevate también esto: la PokeDex.', 'Registra cada criatura que veas o captures.', 'Y unas Pokeballs para capturar criaturas salvajes.'], { name: 'Maestro Tabárez' });
-    await api.give('uru_dex', 1);
-    await api.give('esfera', 5);
-    api.setFlag('dex');
     await api.say(['{player}, probemos a nuestras criaturas.', 'Combatamos.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 0, 100, null, 'Elegí mal.', null), { canLose: true });
     api.setFlag('rival1');
@@ -238,10 +300,13 @@ export const SCRIPTS = {
     else await api.say(['Fue suerte.', 'Voy a entrenar hasta superarte.'], { name: '{rival}' });
     api.healParty({ silent: true });
     await api.say(['Buen combate. Ya atendí a sus criaturas.',
-      'Ahora, {player}: el país es grande. Hay ocho Gimnasios, desde Montevideo hasta Fray Bentos.',
-      'Si conseguís las ocho medallas, podés desafiar a la Liga en el Estadio Centenario.',
-      'Y tené cuidado con el Equipo PP. Últimamente aparece una niebla extraña en la costa.',
-      'Tu madre puede curar a tus criaturas en casa. Buen viaje.'], { name: 'Maestro Tabárez' });
+      'Ahora, {player}: el país es grande. Hay doce Gimnasios, y el camino empieza acá, en Colonia, y termina en Montevideo.',
+      'Si conseguís las doce medallas, podés desafiar a la Liga en el Estadio Centenario.',
+      'Y tené cuidado con el Equipo PP. Últimamente aparece una niebla extraña en el litoral.',
+      'Tu madre puede curar a tus criaturas en casa.',
+      'Antes de irte, {player}, te pido un favor. En el almacén de San José de Mayo, la próxima ciudad, me guardan una carta.',
+      'Traémela y te entrego la PokeDex y unas Pokeballs. Buen viaje.'], { name: 'Maestro Tabárez' });
+    api.setFlag('dex_quest');
   },
 
   async gift_te_marcela(api) {
@@ -259,12 +324,59 @@ export const SCRIPTS = {
     await api.say('Entre ciudad y ciudad hay localidades sin gimnasio, pero con almacenes y gente con cosas útiles.', { name: 'Guía de turismo' });
   },
 
+  async gift_ros(api) {
+    await api.say(['Pesqué en estos arroyos toda la vida.', 'Somos tres hermanos pescadores: uno vive en La Paloma, otro en Minas y el menor en Paysandú.', 'Cada uno te da una caña mejor, pero hay que ganársela con medallas.'], { name: 'Pescador retirado' });
+  },
+
+  // Three rods, each handed out later in the story: Vieja (La Paloma), Buena (Minas), Súper (Paysandú).
   async gift_cana(api) {
-    if (api.flag('got_cana')) return api.say('Parate frente al agua y apretá el botón A. Cada orilla tiene sus propias criaturas.', { name: 'Pescador' });
-    await api.say(['Hace cuarenta años que pesco en estos arroyos.', 'Ya estoy grande para andar con tanta caña. Tomá, que te va a servir.'], { name: 'Pescador' });
+    if (api.flag('got_cana')) return api.say('Parate frente al agua y apretá A. Con esta caña solo pican las criaturas más comunes. Mi hermano en Minas tiene una mejor.', { name: 'Pescador' });
+    if (api.badges() < 2) return api.say(['Soy pescador, como mis hermanos.', 'Todavía no te conozco. Volvé cuando tengas dos medallas y te presto una caña.'], { name: 'Pescador' });
+    await api.say(['Tantos años de pesca y todavía me sorprende el río.', 'Tomá esta caña vieja: con ella pican las criaturas más comunes, nada del otro mundo.'], { name: 'Pescador' });
     await api.give('cana_pescar', 1);
     api.setFlag('got_cana');
-    await api.say('Parate frente al agua y apretá el botón A. Algunas criaturas solo se encuentran así.', { name: 'Pescador' });
+    await api.say('Parate frente al agua y apretá el botón A. Con más medallas, mi hermano de Minas te dará una mejor.', { name: 'Pescador' });
+  },
+
+  async gift_cana2(api) {
+    if (api.flag('got_cana2')) return api.say('Con la Caña Buena pican criaturas más grandes. La Súper Caña la tiene mi hermano menor, en Paysandú.', { name: 'Pescador' });
+    if (!api.flag('got_cana')) return api.say('Mi hermano de La Paloma tiene una caña para empezar. Pasá primero por ahí.', { name: 'Pescador' });
+    if (api.badges() < 3) return api.say(['Veo que ya sabés pescar.', 'Todavía te falta camino: volvé con tres medallas y te doy una caña buena.'], { name: 'Pescador' });
+    await api.say(['Venís con tres medallas, y eso se nota en el trato con las criaturas.', 'Tomá: una caña buena, con mejor carnada.'], { name: 'Pescador' });
+    await api.give('cana_buena', 1);
+    api.setFlag('got_cana2');
+    await api.say('Con ella pican criaturas de más nivel. Mi hermano menor, en Paysandú, guarda la mejor.', { name: 'Pescador' });
+  },
+
+  async gift_cana3(api) {
+    if (api.flag('got_cana3')) return api.say('Con la Súper Caña puede picar cualquier cosa. Tené cuidado con lo que sacás.', { name: 'Pescador' });
+    if (!api.flag('got_cana2')) return api.say('Mi hermano de Minas tiene la caña buena. Pasá primero por ahí.', { name: 'Pescador' });
+    if (api.badges() < 7) return api.say(['La Súper Caña no es para cualquiera.', 'Volvé con siete medallas y es tuya.'], { name: 'Pescador' });
+    await api.say(['Siete medallas. Mis hermanos no se equivocaron con vos.', 'Esta es la mejor caña que armé en mi vida.'], { name: 'Pescador' });
+    await api.give('cana_super', 1);
+    api.setFlag('got_cana3');
+    await api.say('Con ella pican todas las criaturas de la zona, incluso las más raras y fuertes.', { name: 'Pescador' });
+  },
+
+  async gift_corte(api) {
+    if (api.flag('got_machete')) return api.say('Un zarzal no es nada con un buen machete. Eso sí: la guardia solo deja cortar a quien ganó la Medalla Salto.', { name: 'Carpintero' });
+    await api.say(['Trabajo la madera del puerto desde hace cuarenta años.', 'Tomá este machete. Sirve para abrirte paso entre zarzales.', 'Se usa parándote frente al zarzal y apretando A. Para cortar en los caminos del norte hace falta la Medalla Salto.'], { name: 'Carpintero' });
+    await api.give('machete', 1);
+    api.setFlag('got_machete');
+  },
+
+  async gift_surf(api) {
+    if (api.flag('got_canoa')) return api.say('El Cuareim es manso, pero hay que respetarlo. La Canoa solo resiste con la Medalla Rivera.', { name: 'Pescador' });
+    await api.say(['Vivo a orillas del río desde que nací.', 'Te regalo esta canoa. Caminá hacia el agua y subís sola.', 'Ojo: las corrientes de más al este son fuertes. Hace falta la Medalla Rivera para animarse.'], { name: 'Pescador' });
+    await api.give('canoa', 1);
+    api.setFlag('got_canoa');
+  },
+
+  async gift_fuerza(api) {
+    if (api.flag('got_guantes')) return api.say('Con esos guantes movés lo que quieras. Pero la Medalla Tacuarembó es la que te da el derecho.', { name: 'Domador' });
+    await api.say(['Domo potros hace años y no hay animal que me gane de fuerza.', 'Llevate estos guantes. Con ellos podés empujar rocas pesadas, caminando contra ellas.', 'Solo te van a servir si ganás la Medalla Tacuarembó.'], { name: 'Domador' });
+    await api.give('guantes', 1);
+    api.setFlag('got_guantes');
   },
 
   async gift_pir(api) {
@@ -282,25 +394,25 @@ export const SCRIPTS = {
       await api.give('superesfera', 1);
       api.setFlag('gift_pal');
     }
-    if (!api.flag('got_canoa')) {
-      await api.say(['Tengo una canoa de más, de cuando remaba por el arroyo.', 'Con ella podés navegar: caminá hacia el agua y subís sola.', 'Dicen que hay islitas con tesoros frente a las playas.'], { name: 'Surfista' });
-      await api.give('canoa', 1);
-      api.setFlag('got_canoa');
-      return;
-    }
     await api.say('Si te gusta el mar, no dejes de probar la pesca en La Paloma.', { name: 'Surfista' });
+  },
+
+  async gift_vuelo(api) {
+    if (api.flag('got_vuelo')) return api.say('El viento de Florida no para nunca. Con el hornero ya podés cruzar el país en un rato.', { name: 'Criador de horneros' });
+    await api.say(['Acá el viento llega de todos lados, y mis horneros aprendieron a usarlo.', 'Llevate este silbato. Si silbás, un hornero te lleva volando a cualquier ciudad que ya conozcas.', 'Se usa desde el menú, en la opción Vuelo. Eso sí: el hornero solo te obedece si ganaste la Medalla Florida.'], { name: 'Criador de horneros' });
+    await api.give('silbato', 1);
+    api.setFlag('got_vuelo');
   },
 
   async garua(api) {
     if (api.flag('pp_clear')) return api.say('Mi plan fracasó. Esta vez de verdad.', { name: 'Garúa' });
-    await api.say(['Así que lograste llegar hasta acá.', 'Soy Garúa, comandante del Equipo PP.', 'Brumario cayó, pero las máquinas siguen en pie. Con ellas, la niebla vuelve en cuestión de semanas.', 'Desde esta fábrica se va a gobernar el clima del país.'], { name: 'Garúa' });
-    const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: [['yarara', 36], ['cuervon', 37], ['lobomarino', 37], ['pombero', 37], ['caudillo', 38]], prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
+    await api.say(['Así que lograste llegar hasta acá. Otra vez.', 'Te dije que el plan de la Represa era un ensayo.', 'Brumario cayó y Bruma también, pero las máquinas siguen en pie. Con ellas, la niebla vuelve en cuestión de semanas.', 'Desde esta fábrica se va a gobernar el clima del país.'], { name: 'Garúa' });
+    const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: bossAt('minas', [['yarara', 36], ['cuervon', 37], ['lobomarino', 37], ['pombero', 37], ['caudillo', 38]]), prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('pp_clear');
-    await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es de Calima.', 'Calima levantó torres de niebla en el norte: una en Rivera, otra en la Represa de Salto. Su cuartel está en Fray Bentos.', 'Llevate esto. Lo usábamos para vigilar el país desde el aire.', 'Silbá y un hornero te lleva a cualquier ciudad que ya conozcas.'], { name: 'Garúa' });
-    await api.give('silbato', 1);
+    await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es de Calima.', 'Calima dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las ocho medallas.', 'Llevate esto.'], { name: 'Garúa' });
     await api.give('mt_vendaval', 1);
-    await api.say('Las máquinas de la fábrica se apagaron. Pero el Equipo PP sigue activo en el norte.');
+    await api.say('Las máquinas de la fábrica se apagaron. Solo falta Calima, en Montevideo.');
     await api.npcLeave('garua');
   },
 
@@ -328,13 +440,13 @@ export const SCRIPTS = {
 
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
-    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a la presidenta de UTE.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
+    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 1, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
-    if (res === 'win') await api.say(['Yo sigo hacia Punta del Este. Nos vemos allá.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Yo sigo hacia Paysandú. Nos vemos allá.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
-      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Yo sigo hacia Punta del Este. Nos vemos allá.'], { name: '{rival}' });
+      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Yo sigo hacia Paysandú. Nos vemos allá.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_mvd');
@@ -352,9 +464,35 @@ export const SCRIPTS = {
     await api.openPC();
   },
 
+  // San José de Mayo's storekeeper holds Tabárez's letter.
+  async shop_carta(api, npc) {
+    if (api.flag('has_starter') && !api.flag('dex') && !api.flag('got_carta')) {
+      await api.say(['¿Venís de parte del Maestro Tabárez? Te estaba esperando.', 'Tengo esta carta para él. Llevásela con cuidado.'], { name: 'Almacenero' });
+      await api.give('carta_tabarez', 1);
+      api.setFlag('got_carta');
+    }
+    return SCRIPTS.shop(api, npc);
+  },
+
   async shop(api, npc) {
     await api.say('Buenas. ¿Qué se lleva?', { name: 'Almacenero', keep: true });
     await api.openShop(npc.stock);
+  },
+
+  // Every city without a gym has a guard who opens the road to the next one after a friendly match.
+  async town_gate(api, npc) {
+    const i = STOP_INDEX[npc.stop];
+    const here = STOPS[i];
+    const next = STOPS[i + 1];
+    const flag = openFlag(here.id);
+    if (api.flag(flag)) return api.say([`El camino a ${next.name} está abierto.`, 'Cuidate en la ruta.'], { name: 'Guardia' });
+    const [lo, hi] = mapBand(here.id);
+    await api.say([`El camino a ${next.name} está cerrado por orden de la intendencia.`, 'Antes de dejar pasar a alguien, quiero ver cómo trata a sus criaturas.'], { name: 'Guardia' });
+    const team = teamOf(['normal', 'lucha', 'tierra'], [hi - 1, hi, hi + 1], `gate_${here.id}`);
+    const res = await api.battle({ id: `gate_${here.id}`, name: 'Guardia', cls: 'Guardia de ruta', look: 'cop', team, prize: (hi + 1) * 30, intro: null, lose: 'Todavía te falta.', after: null, ai: 'basic' }, { canLose: true });
+    if (res !== 'win') return api.say('Entrená un poco y volvé. No hay apuro.', { name: 'Guardia' });
+    api.setFlag(flag);
+    await api.say([`Bien tratadas, tus criaturas. Pasá nomás: el camino a ${next.name} queda abierto.`], { name: 'Guardia' });
   },
 
   async leader(api, npc) {
@@ -377,6 +515,8 @@ export const SCRIPTS = {
     const res = await api.battle(L);
     if (res !== 'win') return;
     api.setFlag(L.badge);
+    const home = STOPS.find((st) => st.gym === npc.leader);
+    if (home) api.setFlag(openFlag(home.id)); // winning the medal opens the road to the next city
     api.healParty({ silent: true });
     await api.say('Tus criaturas quedaron recuperadas.');
     api.sfx('levelup');
@@ -388,10 +528,10 @@ export const SCRIPTS = {
   },
 
   async bruma(api) {
-    await api.say(['Un entrometido más.', 'Soy Bruma, del Equipo PP.', 'Sin la lámpara del faro, la niebla cubre la costa y nadie ve lo que hacemos.', 'No vas a arruinar nuestros planes.'], { name: 'Bruma' });
-    const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]], prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
+    await api.say(['Otra vez vos.', 'Sin la lámpara del faro, la niebla cubre la costa y nadie ve lo que hacemos.', 'Esta vez no hay torre que te frene. Vas a tener que pasar por mí.'], { name: 'Bruma' });
+    const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('paloma', [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]]), prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
     if (res !== 'win') return;
-    await api.say(['Llevate tu lámpara.', 'Igual es tarde: el jefe Brumario ya va camino a la Quebrada de los Cuervos.', 'Con el Pampero en nuestro poder, la niebla será permanente.'], { name: 'Bruma' });
+    await api.say(['Llevate tu lámpara.', 'Igual es tarde: Garúa ya puso a funcionar la fábrica de Minas.', 'Y Calima nos espera en Montevideo.'], { name: 'Bruma' });
     await api.give('lampara', 1);
     api.setFlag('cabo_clear');
     await api.npcLeave('bruma');
@@ -403,11 +543,14 @@ export const SCRIPTS = {
       await api.say(['La lámpara. La recuperaste.', 'Esta noche el faro de Cabo Polonio vuelve a funcionar.', 'Aceptá esto, es lo menos que puedo hacer.'], { name: 'Farero' });
       api.takeItem('lampara');
       api.setFlag('lamp_returned');
+      await api.say(['Y llevate también este farol de gaucho. Alumbra hasta el túnel más oscuro.', 'Las sierras entre Piriápolis y Minas son pura oscuridad: lo vas a necesitar.', 'Se usa desde el menú, en Destello. Eso sí: solo te va a obedecer si ganaste la Medalla Maldonado.'], { name: 'Farero' });
+      await api.give('farol', 1);
+      api.setFlag('got_farol');
       await keeperTicket(api);
       return;
     }
     if (api.flag('lamp_returned')) {
-      if (!api.flag('got_ticket') && !api.flag('ferry_done') && !api.flag('quebrada_clear')) return keeperTicket(api);
+      if (!api.flag('got_ticket') && !api.flag('ferry_done')) return keeperTicket(api);
       return api.say('Gracias a vos, los barcos navegan seguros.', { name: 'Farero' });
     }
     await api.say(['Se llevaron la lámpara. Fue una mujer vestida de gris, con capa.', 'Sigue afuera, del lado de las rocas.'], { name: 'Farero' });
@@ -415,12 +558,14 @@ export const SCRIPTS = {
 
   async rival_ferry(api) {
     if (api.flag('rival3')) return;
-    await api.say(['{player}. No sabía que también tenías ticket.', 'Mi abuelo me consiguió uno para conocer el barco. Pero antes, veamos quién es más fuerte.'], { name: '{rival}' });
+    await api.say(['{player}. Te alcancé.', 'Cruzando esta frontera se acaba lo fácil. Antes, veamos quién es más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 1200, null, 'Sos un rival duro.', null), { canLose: true });
     api.setFlag('rival3');
-    if (res === 'win') await api.say(['Bien. Andá vos primero. Yo me quedo viendo el barco.', 'Pero en el Centenario te gano.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Bien. Andá vos primero. Yo sigo hacia Tacuarembó.', 'Pero en el Centenario te gano.'], { name: '{rival}' });
     else {
-      await api.say(['Todavía te falta. No pasa nada: entrená y volvé a medirte conmigo en el Centenario.', 'Andá vos primero. Yo me quedo viendo el barco.'], { name: '{rival}' });
+      api.healParty({ silent: true });
+      await api.say(['Todavía te falta. No pasa nada: entrená y volvé a medirte conmigo en el Centenario.', 'Yo sigo hacia Tacuarembó.'], { name: '{rival}' });
+      await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_ferry');
   },
@@ -461,9 +606,9 @@ export const SCRIPTS = {
     api.takeItem('mate');
     api.sfx('heal');
     await api.say('{player} le dio el Mate al capitán. Poco a poco recupera el color.');
-    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá esto: un machete de a bordo. Lo uso para cortar cabos y zarzas.', 'Con él vas a poder abrirte paso en el monte. Lo vas a necesitar para seguir tu viaje.'], { name: 'Capitán' });
-    await api.give('machete', 1);
-    api.setFlag('got_machete');
+    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá esto: provisiones de a bordo y unas Ultraballs que el barco no va a usar.'], { name: 'Capitán' });
+    await api.give('ultraesfera', 3);
+    await api.give('pan_casero', 2);
     api.takeItem('ticket_ferry');
     api.setFlag('ferry_done');
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
@@ -473,7 +618,7 @@ export const SCRIPTS = {
 
   async brumario(api) {
     await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP en el este.', 'El Pampero limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
-    const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: [['yarara', 32], ['zorromonte', 32], ['cuervon', 33], ['lobomarino', 34]], prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
+    const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: bossAt('quebrada', [['yarara', 32], ['zorromonte', 32], ['cuervon', 33], ['lobomarino', 34]], 1), prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('quebrada_clear');
     await api.flash();
@@ -481,19 +626,19 @@ export const SCRIPTS = {
     await api.say(['Un viento helado baja de las sierras.', 'Una silueta enorme, con alas de tormenta, cruza el cielo.', 'El Pampero se aleja hacia el sur. La niebla se disipa.'],);
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo a Calima. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
-    await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Quedan muchas ciudades con gimnasio al oeste y al norte: empezá por Durazno, al oeste de Minas.', 'Y con la medalla en mano, mirá la fábrica abandonada."']);
+    await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Seguí hacia la costa de Rocha: en el faro de Cabo Polonio falta una lámpara.', 'Y más adelante, en Minas, hay una fábrica abandonada que volvió a funcionar. Mirala con cuidado."']);
     await api.say(['Otro mensaje, un minuto después:', '"Proyecto Pampero… ese nombre es mío. Fue un estudio que hice con Calima para predecir el clima con ayuda de las criaturas.', 'Se fue cuando me negué a venderlo. Si es él quien está detrás, esto también es cosa mía.', 'Nuestro laboratorio era el viejo Observatorio del Cerro, en Piriápolis. Si podés, pasá a ver qué quedó ahí."']);
   },
 
   async rival_r5(api) {
     if (api.flag('rival5')) return;
-    await api.say(['{player}. Te estaba esperando en el camino.', 'Los de gris cortaron la ruta, pero no me van a frenar a mí.', 'Antes de entrar a Tacuarembó, veamos quién viene mejor.'], { name: '{rival}' });
+    await api.say(['{player}. Te estaba esperando en el camino.', 'Después de Treinta y Tres ya no queda nada fácil.', 'Antes de seguir hacia la costa, veamos quién viene mejor.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 3, 3200, null, 'Sos un rival duro. Muy duro.', null), { canLose: true });
     api.setFlag('rival5');
-    if (res === 'win') await api.say(['Bien jugado. Yo sigo hacia Rivera: algo raro hay en esa torre.', 'Nos vemos en el Centenario.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Bien jugado. Yo sigo hacia Maldonado.', 'Nos vemos en el Centenario.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
-      await api.say(['Todavía te falta un poco. Entrená y seguí.', 'Yo voy hacia Rivera: algo raro hay en esa torre.'], { name: '{rival}' });
+      await api.say(['Todavía te falta un poco. Entrená y seguí.', 'Yo voy hacia Maldonado.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_r5');
@@ -501,13 +646,13 @@ export const SCRIPTS = {
 
   async rival_r24(api) {
     if (api.flag('rival6')) return;
-    await api.say(['{player}. Ya sé lo de Calima.', 'Mi tío fue su socio. Nunca me lo dijo hasta ahora, y todavía no sé qué pensar.', 'Fray Bentos es el último paso antes de la Liga, y no pienso quedarme atrás.', 'Mostrame cuánto mejoraste.'], { name: '{rival}' });
+    await api.say(['{player}. Ya sé lo del Equipo PP.', 'Mi tío fue socio de Calima. Nunca me lo dijo hasta ahora, y todavía no sé qué pensar.', 'Falta Durazno y después la capital, y no pienso llegar segundo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 4, 5000, null, 'Me ganaste otra vez. Bien.', null), { canLose: true });
     api.setFlag('rival6');
-    if (res === 'win') await api.say(['Andá vos. Yo me quedo vigilando que no escape nadie.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Andá vos. Yo te sigo de cerca.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
-      await api.say(['Esta vez gané yo, pero el frigorífico es cosa tuya. Andá.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
+      await api.say(['Esta vez gané yo, pero la capital es cosa tuya. Andá.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_r24');
@@ -543,7 +688,7 @@ export const SCRIPTS = {
     if (api.flag('obs_clear')) return;
     await api.say(['No esperaba visitas. Soy Almada, fui alumno del Maestro Tabárez en este mismo observatorio.', 'Estudiábamos cómo el Pampero ordena el clima del Río de la Plata. Calima y Tabárez dirigían el proyecto.', 'Cuando Tabárez se negó a vender los datos, Calima se quedó con los instrumentos y yo me fui con él.', 'Pensé que íbamos a proteger el clima. Resulta que quería controlarlo.'], { name: 'Almada' });
     await api.say('Acá guardo el registro original. Si querés leerlo, ganame primero.', { name: 'Almada' });
-    const res = await api.battle({ id: 'almada', name: 'Almada', cls: 'Investigador PP', look: 'biologo', ai: 'smart', team: [['luzmala', 37], ['fatuo', 37], ['pombero', 38], ['vespertino', 38], ['caudillo', 39]], prize: 3200, lose: 'Tenías razón en venir hasta acá.', items: ['mate_dulce'] });
+    const res = await api.battle({ id: 'almada', name: 'Almada', cls: 'Investigador PP', look: 'biologo', ai: 'smart', team: bossAt('piriapolis', [['luzmala', 37], ['fatuo', 37], ['pombero', 38], ['vespertino', 38], ['caudillo', 39]]), prize: 3200, lose: 'Tenías razón en venir hasta acá.', items: ['mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('obs_clear');
     api.setFlag('obs_log');
@@ -556,53 +701,52 @@ export const SCRIPTS = {
   },
 
   async bruma2(api) {
-    await api.say(['Volvimos a vernos.', 'Después de Cabo Polonio juré que no me ganarías otra vez.', 'Esta torre emite la niebla que cubre Rivera. Mientras esté encendida, nadie ve lo que hacemos.'], { name: 'Bruma' });
-    const res = await api.battle({ id: 'bruma2', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: [['yarara', 42], ['vespertino', 43], ['viudanegra', 43], ['zarigueya', 44], ['zorromonte', 44]], prize: 5000, lose: 'No… la niebla…', items: ['dulce_de_leche'] });
+    await api.say(['Volvimos a vernos.', 'Después del Anglo juré que no me ganarías otra vez.', 'Esta torre emite la niebla que cubre Rivera. Mientras esté encendida, nadie ve lo que hacemos.'], { name: 'Bruma' });
+    const res = await api.battle({ id: 'bruma2', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('rivera', [['yarara', 42], ['vespertino', 43], ['viudanegra', 43], ['zarigueya', 44], ['zorromonte', 44]]), prize: 5000, lose: 'No… la niebla…', items: ['dulce_de_leche'] });
     if (res !== 'win') return;
     api.setFlag('torre_clear');
     await api.flash();
     api.sfx('evolve');
     await api.say(['La luz del transmisor se apaga.', 'Afuera, la niebla se disipa y el sol vuelve a la ciudad.'], {});
-    await api.say(['Perdí… otra vez.', 'Calima tiene otra torre: la Represa de Salto Grande. Ahí le roban electricidad a todo el litoral.', 'Hacé lo que quieras. Él tiene el Anglo, y el Anglo es una fortaleza.'], { name: 'Bruma' });
+    await api.say(['Perdí… otra vez.', 'Calima no se va a quedar en el norte. Dicen que prepara algo grande en Montevideo.', 'Hacé lo que quieras. Brumario espera en la Quebrada de los Cuervos.'], { name: 'Bruma' });
     await api.give('pan_casero', 1);
     await api.npcLeave('bruma2');
-    await api.say('Ya podés entrar al gimnasio de Rivera.');
   },
 
   async garua2(api) {
-    await api.say(['Otra vez vos.', 'Mi plan en Minas fue un ensayo. Esta es la verdadera operación.', 'La Represa mueve las torres: sin electricidad no hay niebla. Y yo controlo los interruptores.'], { name: 'Garúa' });
-    const res = await api.battle({ id: 'garua2', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: [['yarara', 46], ['lobomarino', 46], ['vespertino', 47], ['pombero', 47], ['caudillo', 48], ['temblador', 48]], prize: 6000, lose: 'Otra vez a oscuras…', items: ['dulce_de_leche', 'dulce_de_leche'] });
+    await api.say(['Así que vos sos el entrenador que nos molesta.', 'Soy Garúa, comandante del Equipo PP.', 'La Represa mueve las torres: sin electricidad no hay niebla. Y yo controlo los interruptores.'], { name: 'Garúa' });
+    const res = await api.battle({ id: 'garua2', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: bossAt('salto', [['yarara', 46], ['lobomarino', 46], ['vespertino', 47], ['pombero', 47], ['caudillo', 48], ['temblador', 48]]), prize: 6000, lose: 'Otra vez a oscuras…', items: ['dulce_de_leche', 'dulce_de_leche'] });
     if (res !== 'win') return;
     api.setFlag('represa_clear');
     await api.flash();
     api.sfx('levelup');
     await api.say(['Las turbinas vuelven a girar. En la ciudad, las luces se prenden una por una.'], {});
-    await api.say(['Me retiro del Equipo PP. Ya no tiene sentido.', 'Calima usa a todos. Si lo detenés, quizás recupere algo de dignidad.', 'Está en lo alto del Anglo, en Fray Bentos. Cuidado con Brumario: lo puso de guardia.'], { name: 'Garúa' });
+    await api.say(['Perdí. Pero esto es solo una pieza: Calima tiene otra torre en Rivera, y mucho más que eso.', 'Yo vuelvo a mi fábrica de Minas. Si querés alcanzarme, tendrás que llegar hasta allá.'], { name: 'Garúa' });
     await api.give('pan_casero', 1);
     await api.npcLeave('garua2');
-    await api.say('Ya podés seguir hacia el sur, a Paysandú y Fray Bentos.');
   },
 
-  async brumario2(api) {
-    await api.say(['Llegaste lejos, entrenador.', 'Calima me puso a custodiar esta escalera. Si caigo, que me perdone.', 'No te voy a facilitar nada.'], { name: 'Brumario' });
-    const res = await api.battle({ id: 'brumario2', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: [['yarara', 48], ['zorromonte', 49], ['cuervon', 49], ['lobomarino', 50], ['viudanegra', 50], ['yacaron', 51]], prize: 6500, lose: 'Se acabó.', items: ['dulce_de_leche', 'dulce_de_leche'] });
+  async bruma_anglo(api) {
+    await api.say(['Así que sos vos el que anda haciendo ruido en Fray Bentos.', 'Soy Bruma, administradora del Equipo PP.', 'Este frigorífico guarda las máquinas de niebla. Calima las necesita funcionando.'], { name: 'Bruma' });
+    const res = await api.battle({ id: 'bruma_anglo', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('fraybentos', [['yararita', 8], ['zorrigris', 9], ['lechuza', 10]], -2), prize: 700, lose: 'No… las máquinas…', items: ['mate'] });
     if (res !== 'win') return;
-    api.setFlag('anglo_brumario');
-    await api.say(['Adelante. Calima está en la dirección, arriba.', 'Yo ya no tengo nada que hacer en este equipo.'], { name: 'Brumario' });
-    await api.npcLeave('brumario2');
+    api.setFlag('anglo_pp');
+    await api.say(['Perdí. Pero el proyecto es más grande que este frigorífico.', 'Calima tiene torres y una represa, y yo no soy la única que sigue sus órdenes.'], { name: 'Bruma' });
+    await api.give('mate', 1);
+    await api.npcLeave('bruma_anglo');
   },
 
   async calima(api) {
     await api.say(['Así que sos vos.', 'Soy Calima, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Pampero natural era un estorbo. Por eso quise capturarlo.', 'Tabárez nunca se animó a ir más lejos. Yo sí, y por eso hoy estoy acá.'], { name: 'Calima' });
-    await api.say(['Lástima que hayas apagado las torres.', 'Pero no vas a apagarme a mí.'], { name: 'Calima' });
-    const res = await api.battle({ id: 'calima', name: 'Calima', cls: 'Fundador PP', look: 'calima', ai: 'smart', team: [['vespertino', 51], ['viudanegra', 52], ['tormenton', 53], ['yarara', 53], ['buho', 53], ['yacaron', 54]], prize: 9000, lose: 'No… mi proyecto…', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'] });
+    await api.say(['Llegaste con las doce medallas. Se nota que no te asustan las torres.', 'Pero no vas a apagarme a mí.'], { name: 'Calima' });
+    const res = await api.battle({ id: 'calima', name: 'Calima', cls: 'Fundador PP', look: 'calima', ai: 'smart', team: bossAt('montevideo', [['vespertino', 51], ['viudanegra', 52], ['tormenton', 53], ['yarara', 53], ['buho', 53], ['yacaron', 54]], 1), prize: 9000, lose: 'No… mi proyecto…', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'] });
     if (res !== 'win') return;
     api.setFlag('anglo_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.say(['Las últimas máquinas de niebla se apagan. Desde la ventana se ve el río Uruguay, limpio, hasta el otro lado.'], {});
+    await api.say(['Las últimas máquinas de niebla se apagan. Desde el puerto se ve el Río de la Plata, limpio, hasta el horizonte.'], {});
     await api.say(['Gané perdiendo… Ya no tengo equipo, ni dinero, ni torres.', 'Hacé lo que quieras. Pero el cielo nunca fue de nadie.'], { name: 'Calima' });
-    await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'El gimnasio de Fray Bentos ya reabrió. Con la octava medalla, la Liga te espera en el Estadio Centenario.', 'Calima fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude."']);
+    await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'Con las doce medallas y el Equipo PP disuelto, la Liga te espera en el Estadio Centenario.', 'Calima fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude."']);
     await api.npcLeave('calima');
   },
 
@@ -694,3 +838,9 @@ export const SCRIPTS = {
     await api.say(['Algunas semanas después, en Colonia.', 'Se habla de criaturas legendarias avistadas en el país:', 'un viento helado en la Quebrada, un canto en la costa de Punta del Este.', 'Tu aventura continúa.']);
   },
 };
+
+// The late-game content was written for a longer climb: bring it down to the route's level curve.
+// Elite Four and Champion follow the eighth gym (ace 47); side missions follow the city they take place in.
+[[49, 52], [51, 54], [52, 55], [53, 56]].forEach((range, i) => { ELITES[i].team = rescaleTeam(ELITES[i].team, range); });
+const EVENT_STOP = { parrilla: 'tacuarembo', aduana: 'rivera', radio: 'salto', muelle: 'paysandu' };
+for (const [ev, stop] of Object.entries(EVENT_STOP)) EVENTS[ev].team = bossAt(stop, EVENTS[ev].team);

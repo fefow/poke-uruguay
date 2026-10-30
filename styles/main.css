@@ -491,7 +491,7 @@ button { font: inherit; color: inherit; }
     linear-gradient(#fff 0 0) 0 0 / 44% 55% no-repeat,
     repeating-linear-gradient(#fff 0 11.1%, var(--celeste) 11.1% 22.2%);
 }
-.badges { list-style: none; margin: 0; padding: 0; display: flex; gap: 2.4cqi; justify-content: center;
+.badges { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1.6cqi 2cqi; justify-content: center;
   & li { display: grid; justify-items: center; align-content: start; gap: 0.4cqi; font-size: 1.9cqi; max-inline-size: 10cqi; text-align: center; line-height: 1.1; color: var(--ink-soft); opacity: 0.5; }
   & li.is-earned { opacity: 1; color: var(--ink); }
   & .badge-slot { inline-size: 5.4cqi; block-size: 5.4cqi; border-radius: 50%; background: oklch(0.8 0.01 270); border: 2px dashed var(--ink-soft); }
@@ -940,4 +940,16 @@ body {
   & b[data-level='good'] { color: var(--hp-good); }
   & b[data-level='mid'] { color: var(--hp-mid); }
   & b[data-level='low'] { color: var(--hp-low); }
+}
+
+.desktop-only {
+  position: fixed; inset: 0; z-index: 9999; display: grid; place-content: center; gap: 12px;
+  padding: 24px; text-align: center; background: #101a3a; color: #fff;
+  & h1 { font-size: 28px; color: #f8d040; }
+  & p { font-size: 16px; line-height: 1.5; }
+}
+
+.title-version {
+  position: absolute; right: 12px; bottom: 10px; z-index: 5; font-size: 12px; letter-spacing: 1px;
+  color: #fff; opacity: .7; text-shadow: 0 1px 2px #000; pointer-events: none;
 }

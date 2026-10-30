@@ -293,6 +293,8 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
       if (action.type === 'ball' && wild) removeItem(action.item, 1);
       if (action.type === 'item') removeItem(action.item, 1);
       const ev = engine.turn(action);
+      // Compact trace of the turn, so a report from the bug panel shows what the engine decided.
+      logInfo(`Turno ${engine.turnNo}: ${action.type}${action.index != null ? ` #${action.index}` : ''} | ${ev.map((x) => (x.t === 'text' ? `"${x.msg}"` : x.t === 'damage' ? `dmg${x.side}:${x.amount}` : x.t)).join(' ')}`);
       await play(ev, leveled);
     }
 

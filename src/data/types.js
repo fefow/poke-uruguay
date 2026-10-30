@@ -22,7 +22,7 @@ const CHART = deepFreeze({
   fuego: { planta: 2, bicho: 2, fuego: 0.5, agua: 0.5, roca: 0.5 },
   agua: { fuego: 2, tierra: 2, roca: 2, agua: 0.5, planta: 0.5 },
   planta: { agua: 2, tierra: 2, roca: 2, fuego: 0.5, planta: 0.5, volador: 0.5, bicho: 0.5, veneno: 0.5 },
-  electrico: { agua: 2, volador: 2, planta: 0.5, electrico: 0.5, tierra: 0 },
+  electrico: { agua: 2, volador: 2, planta: 0.5, electrico: 0.5, roca: 0.5, tierra: 0 },
   tierra: { fuego: 2, electrico: 2, roca: 2, veneno: 2, planta: 0.5, bicho: 0.5, volador: 0 },
   roca: { fuego: 2, volador: 2, bicho: 2, lucha: 0.5, tierra: 0.5 },
   volador: { planta: 2, bicho: 2, lucha: 2, electrico: 0.5, roca: 0.5 },

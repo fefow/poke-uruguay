@@ -35,21 +35,26 @@ const BASE_ITEMS = {
   refuerzo_velocidad: { name: 'Refuerzo de Velocidad', pocket: 'items', price: 550, xstat: 'spe', desc: 'Solo en combate. Sube la Velocidad de la criatura activa.' },
   repelente: { name: 'Repelente', pocket: 'items', price: 350, repel: 100, desc: 'Evita criaturas salvajes débiles por 100 pasos.' },
 
+  carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de San José de Mayo guardaba para el Maestro Tabárez.' },
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
   lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
   mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
-  cana_pescar: { name: 'Caña de Pescar', pocket: 'key', price: 0, desc: 'Parada frente al agua, tirá la caña con el botón A para pescar criaturas acuáticas.' },
-  machete: { name: 'Machete', pocket: 'key', price: 0, desc: 'Parate frente a un zarzal y apretá A para abrirte paso.' },
-  canoa: { name: 'Canoa', pocket: 'key', price: 0, desc: 'Permite navegar por el agua. Caminá hacia la orilla para subirte.' },
+  cana_pescar: { name: 'Caña Vieja', pocket: 'key', price: 0, rod: 1, desc: 'Una caña simple. Parada frente al agua, apretá A: solo pican las criaturas más comunes y chicas.' },
+  cana_buena: { name: 'Caña Buena', pocket: 'key', price: 0, rod: 2, desc: 'Más firme y con mejor carnada. Atrae criaturas acuáticas de mayor nivel.' },
+  cana_super: { name: 'Súper Caña', pocket: 'key', price: 0, rod: 3, desc: 'La mejor caña. Pican todas las criaturas de la zona, incluso las más raras y fuertes.' },
+  machete: { name: 'Machete', pocket: 'key', price: 0, desc: 'Corte: parate frente a un zarzal y apretá A para abrirte paso. Hace falta la Medalla Salto.' },
+  canoa: { name: 'Canoa', pocket: 'key', price: 0, desc: 'Surf: permite navegar por el agua. Caminá hacia la orilla para subirte. Hace falta la Medalla Rivera.' },
+  guantes: { name: 'Guantes de Domador', pocket: 'key', price: 0, desc: 'Fuerza: empujá rocas pesadas caminando contra ellas. Hace falta la Medalla Tacuarembó.' },
+  farol: { name: 'Farol de Gaucho', pocket: 'key', price: 0, desc: 'Destello: ilumina las cuevas oscuras. Se usa desde el menú. Hace falta la Medalla Maldonado.' },
   bici: { name: 'Bicicleta', pocket: 'key', price: 0, bike: true, desc: 'Cuatro veces más rápida que caminar, pero solo para moverse: no cambia nada en los combates. Se usa desde el menú. No se puede usar bajo techo.' },
   ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Montevideo.' },
-  silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Se usa desde el menú.' },
+  silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
 };
 
 // Máquinas de movimientos (MT): se consumen al usarse. Una criatura puede aprender
 // el movimiento si comparte tipo con él o si es de tipo Normal (ver tmCompatible).
-export const TM_MOVES = ['terremoto', 'psiquico', 'triturar', 'descarga', 'parrillada', 'cascada', 'bomba_lodo', 'tormenta_ceibo', 'avalancha', 'zumbido', 'punio_gaucho', 'vendaval', 'fogon', 'megaagotar', 'garra_charrua', 'premonicion', 'sombra_nocturna'];
+export const TM_MOVES = ['terremoto', 'psiquico', 'triturar', 'descarga', 'parrillada', 'cascada', 'bomba_lodo', 'tormenta_ceibo', 'avalancha', 'zumbido', 'punio_gaucho', 'vendaval', 'fogon', 'megaagotar', 'garra_charrua', 'premonicion', 'sombra_nocturna', 'excavar', 'derribo', 'pico_taladro'];
 for (const m of TM_MOVES) {
   BASE_ITEMS[`mt_${m}`] = { name: `MT ${MOVES[m].name}`, pocket: 'items', price: 3000, tm: m, desc: `Enseña ${MOVES[m].name} (${MOVES[m].power} de poder) a una criatura compatible. Se gasta al usarla.` };
 }

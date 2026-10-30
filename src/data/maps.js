@@ -87,30 +87,44 @@ const BASE_OUTDOOR = {
     name: 'Montevideo',
     music: 'town',
     bg: 'city',
+    theme: 'ciudad',
     tiles: [
-      '#########=====################',
-      '#ZZZZZz..c..cJJJJJJJWWWW.uuuu#',
-      '#ZZZZZz..c..cJJJdJJJ.WWWWuuuu#',
-      '#ZZDZZz..c..cjjjjjjj.WWWWHwDH#',
-      '#..c.....c..cjjjDjjj.WDWW....#',
-      '#..cccccccccccccc.c...c......#',
-      '#........c.....ccccccccccccccc',
-      'c........c...S.c.............c',
-      'cccccccccccccccc...CCCCCUUUUUc',
-      'c..f...........c...CCQCCUUUUUc',
-      '#..rrrrr...q...c...IIDIIttDtt#',
-      '#..rrrrr.......c.....c....c..#',
-      '#..HwDwH.......cccccccccccc..#',
-      '#....c.........c.............#',
-      '#....ccccccccccc....f..q...f.#',
-      '#sssssssssssssssssssssssssssS#',
-      '#~~~~~~~~~~~~~~~~~~~~~~~~~~~~#',
-      '##############################',
+      '____________________0:0_____________________',
+      '__ZZZZZz__{{{{{{{{{_0:0___________WWWW_{{{{_',
+      '__ZZZZZz__]]]]]]]]]_0:0__JJJJJJJ__WWWW_]]]]_',
+      '__ZZZZZz__]]]]]]]]]_0:0__JJJdJJJ__WWWW_]]]]_',
+      '__ZZDZZz__]]]]]]]]]_0:0__jjjjjjj__WDWW_]]]]_',
+      '__________]]]]]]]]]_0:0__jjjDjjj_______]]]]_',
+      '____________________///_____________________',
+      '_"_______"__"____S_|0:0|_________"______"___',
+      '000000000000000000/00000/0000000000000000000',
+      '------------------/-000-/-------------------',
+      '000000000000000000/00000/0000000000000000000',
+      '_"____________"____|0:0|________"______"____',
+      '___CCCCC_______{{{{_///__rrrrr_{{{{{{{{{{{{_',
+      '___CCQCC_UUUUU_]]]]_0:0__rrrrr_]]]]]]]]]]]]_',
+      '___IIDII_ttDtt_]]]]_0:0__HwDwH_]]]]]]]]]]]]_',
+      '_______________]]]]_0:0________]]]]]]]]]]]]_',
+      '___{{{{{{{{{{__]]]]_0:0________)))))))))))__',
+      '___]]]]]]]]]]__]]]]_0:0________))))<>)))))__',
+      '___]]]]]]]]]]_______0:0_"___"__(((((((((((__',
+      '___]]]]]]]]]]_______0:0________(((((((((((__',
+      '__"______"___"_____|0:0|_______(((((((((((__',
+      '--------------------000-------0(((((((((((__',
+      '0000000000000000000000000000000(((((D(((((__',
+      '????????|???????|?????????|?????????????????',
+      '????????????S???????????????????????????????',
+      '[[[[[[[[}}[[[[[[[[[[[[[[[[[[[[[[[[[[[[}}[[[[',
+      '~~~~~~~~}}~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~',
+      '~~~~~~~~}}~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
     ],
+    // Row-major order of the door tiles: Estadio, Palacio Salvo, Palacio de la Luz (gimnasio), Policlínica, tienda, casa, terminal del Buquebus.
     doors: [
-      { to: 'liga_1', req: (f) => f.badge8 && f.anglo_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 8 medallas y hayan detenido al Equipo PP.'] },
+      { to: 'liga_1', req: (f) => f.badge12 && f.anglo_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido a Calima, el fundador del Equipo PP.'] },
+      'palacio', 'gym_mvd', 'poli_mvd', 'shop_mvd', 'casa_mvd',
       { to: 'ferry_1', req: (f) => f.got_ticket && !f.ferry_done, deny: ['Terminal del Buquebus "China Zorrilla".', 'Para subir hace falta el ticket. Y cuando el barco zarpa, no vuelve.'] },
-      'gym_mvd', 'palacio', 'poli_mvd', 'shop_mvd', 'casa_mvd',
     ],
     fish: [['pejerrey', 8, 10, 55], ['aguaviva', 8, 10, 30], ['anguila', 9, 11, 15]],
     signs: [
@@ -119,22 +133,15 @@ const BASE_OUTDOOR = {
     ],
     exits: {
       w: { to: 'rosario' },
-      e: { to: 'interbalnearia', req: 'badge1', deny: ['POLICÍA: La Interbalnearia está cortada por la niebla.', 'Sólo dejamos pasar a entrenadores con la Medalla Montevideo.'] },
-      n: { to: 'ruta8', req: (f) => f.badge2 && f.cabo_clear && (f.ferry_done || f.quebrada_clear), deny: ['POLICÍA: La Ruta 8 está cerrada por zarzales y por el Equipo PP.', 'Primero hay que resolver lo de Cabo Polonio y subir al Buquebus "China Zorrilla": el capitán tiene con qué abrir paso.'] },
     },
     npcs: [
-      { x: 28, y: 7, look: 'cop', dir: 'left', cond: (f) => !f.badge1, text: ['La niebla en la Interbalnearia es anormal.', 'Volvé cuando tengas la Medalla Montevideo del gimnasio.'] },
-      { x: 11, y: 1, look: 'cop', dir: 'down', cond: (f) => !(f.badge2 && f.cabo_clear), text: ['El Equipo PP opera en el norte. No es seguro.'] },
-      { x: 6, y: 13, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
-      { x: 18, y: 6, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Sofía, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
-      { x: 27, y: 5, look: 'sailor', dir: 'up', cond: (f) => !f.got_ticket && !f.ferry_done, text: ['Terminal del Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz.', 'Sin ticket no se sube. Dicen que el farero de Cabo Polonio consigue pasajes.'] },
-      { x: 27, y: 5, look: 'sailor', dir: 'up', cond: (f) => f.got_ticket && !f.ferry_done, text: ['Ya podés subir con tu ticket.', 'Preguntá por el capitán: está en su camarote, en la cubierta de arriba.'] },
-      { x: 27, y: 5, look: 'sailor', dir: 'up', cond: (f) => f.ferry_done, text: ['El "China Zorrilla" zarpó hacia Buenos Aires.', 'Dicen que volverá en la próxima temporada.'] },
-      { x: 24, y: 13, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
-      { x: 4, y: 6, look: 'grunt', cond: (f) => f.badge1 && !f.cabo_clear, text: ['¿Qué mirás? El Equipo PP va a cubrir todo el país.', 'Sin faros, nadie va a ver lo que hacemos.'] },
-      { x: 2, y: 7, look: 'rival', dir: 'right', id: 'rival_mvd', cond: (f) => f.badge1 && !f.rival2, script: 'rival_mvd' },
+      { x: 16, y: 24, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
+      { x: 26, y: 6, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Sofía, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
+      { x: 37, y: 23, look: 'sailor', dir: 'up', cond: (f) => !f.got_ticket && !f.ferry_done, text: ['Terminal del Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz.', 'Sin ticket no se sube. Dicen que el farero de Cabo Polonio consigue pasajes.'] },
+      { x: 37, y: 23, look: 'sailor', dir: 'up', cond: (f) => f.got_ticket && !f.ferry_done, text: ['Ya podés subir con tu ticket.', 'Preguntá por el capitán: está en su camarote, en la cubierta de arriba.'] },
+      { x: 37, y: 23, look: 'sailor', dir: 'up', cond: (f) => f.ferry_done, text: ['El "China Zorrilla" zarpó hacia Buenos Aires.', 'Dicen que volverá en la próxima temporada.'] },
+      { x: 33, y: 5, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
     ],
-    triggers: [{ x: 0, y: 6, w: 3, h: 4, cond: (f) => f.badge1 && !f.rival2, script: 'rival_mvd' }],
   },
 
   interbalnearia: {
@@ -206,7 +213,7 @@ const BASE_OUTDOOR = {
       { x: 6, y: 12, look: 'girl', text: ['La Mano es una escultura de dedos que emergen de la arena.', 'Es un recordatorio para los bañistas: la playa Brava es peligrosa.'] },
       { x: 23, y: 12, look: 'sailor', dir: 'down', text: ['Desde el puerto se ve la Isla de Lobos.', 'A veces, en invierno, aparece una ballena cuyo canto se oye desde la costa.'] },
       { x: 14, y: 10, look: 'swimmer', wander: true, text: ['Con este calor, lo que más apetece es un chivito en la playa.'] },
-      { x: 18, y: 9, look: 'grunt', dir: 'left', sight: 3, cond: (f) => f.badge1, trainer: TR('pde_g1', 'Recluta PP', 'Equipo PP', [['yararita', 16], ['zorrigris', 16]], 320, 'Nadie tiene que saber lo del faro.', 'Igual ya es tarde.', 'La jefa Bruma está en Cabo Polonio. Hablé de más.', 'grunt') },
+      { x: 18, y: 9, look: 'grunt', dir: 'left', sight: 3, trainer: TR('pde_g1', 'Recluta PP', 'Equipo PP', [['yararita', 16], ['zorrigris', 16]], 320, 'Nadie tiene que saber lo del faro.', 'Igual ya es tarde.', 'La jefa Bruma está en Cabo Polonio. Hablé de más.', 'grunt') },
       { x: 25, y: 10, look: 'boy', text: ['El gimnasio de acá es la planta potabilizadora de OSE. Su presidenta, Lucía, usa tipo Agua.', 'Planta y Eléctrico le hacen daño.'] },
     ],
     items: [{ x: 1, y: 13, item: 'alfajor', id: 'pde_item1' }],
@@ -321,8 +328,8 @@ const BASE_OUTDOOR = {
     enc: { rate: 0.13, list: [['cuervon', 26, 29, 25], ['mulitin', 26, 28, 15], ['picaflorin', 27, 29, 12], ['oruga', 27, 29, 15], ['butia', 26, 28, 13], ['gatomontes', 27, 29, 12], ['mulitron', 29, 30, 8], ['curupi', 27, 29, 6], ['sapo', 27, 29, 6], ['ciempies', 27, 29, 6]] },
     fish: [['camalote', 26, 29, 50], ['anguila', 26, 29, 40], ['pejerrey', 26, 28, 10]],
     npcs: [
-      { x: 12, y: 2, look: 'brumario', dir: 'down', id: 'brumario', cond: (f) => f.badge3 && !f.quebrada_clear, script: 'brumario' },
-      { x: 12, y: 2, look: 'grunt', dir: 'down', cond: (f) => !f.badge3, text: ['El jefe está ocupado. Volvé cuando seas un rival de verdad.'] },
+      { x: 12, y: 2, look: 'brumario', dir: 'down', id: 'brumario', cond: (f) => f[badgeOf('quebrada')] && !f.quebrada_clear, script: 'brumario' },
+      { x: 12, y: 2, look: 'grunt', dir: 'down', cond: (f) => !f[badgeOf('quebrada')], text: ['El jefe está ocupado. Volvé cuando seas un rival de verdad.'] },
       { x: 10, y: 3, look: 'grunt', dir: 'right', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta PP', 'Equipo PP', [['zorromonte', 30], ['yararita', 29]], 600, 'El Pampero va a ser nuestro.', 'No.', 'El jefe Brumario es imparable.', 'grunt') },
       { x: 15, y: 3, look: 'grunt', dir: 'left', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g2', 'Recluta PP', 'Equipo PP', [['cuervon', 30], ['mulitron', 30]], 600, 'Más niebla para todos.', 'Me superaste.', 'No tengo más que decir.', 'grunt') },
       { x: 7, y: 9, look: 'gaucho', dir: 'right', sight: 4, trainer: TR('qb_a', 'Doña Ofelia', 'Paisana', [['gatomontes', 28], ['venadalto', 29]], 560, 'En la Quebrada se combate con respeto.', 'Bien jugado.', 'Don Aparicio es duro como la piedra de la quebrada.', 'gaucho') },
@@ -467,7 +474,7 @@ const BASE_OUTDOOR = {
       '#..f.....=..........q....#',
       '######.......#############',
     ],
-    doors: ['shop_min', 'casa_min', { to: 'pp_1', req: (f) => f.quebrada_clear && f.badge4, deny: 'La puerta de la fábrica está sellada con candados. Hay mucha niebla en las sierras, y alguien adentro. Antes conviene visitar Durazno, al oeste.' }],
+    doors: ['shop_min', 'casa_min', { to: 'pp_1', req: (f) => f.quebrada_clear && f[badgeOf('punta')], deny: 'La puerta de la fábrica está sellada con candados. Hay mucha niebla en las sierras, y alguien adentro. Antes conviene visitar Durazno, al oeste.' }],
     signs: ['MINAS\nCapital del departamento de Lavalleja. Entre sierras, cerros y el agua más pura del país.'],
     exits: { s: { to: 'ruta8' }, n: { to: 'quebrada' }, w: { to: 'durazno', req: 'badge3', deny: 'Un camino de ceniza baja hacia el oeste. El aire quema: todavía no estás listo para ese calor.' } },
     enc: { rate: 0.1, list: [['tatadios', 24, 26, 14], ['pararrayo', 25, 27, 10], ['cuchilla', 25, 27, 10], ['cerro', 25, 27, 10], ['pombero', 25, 27, 8], ['lobomarino', 26, 27, 6], ['gatomontes', 24, 26, 14], ['cotorrayo', 24, 26, 14], ['criollo', 25, 27, 6], ['candil', 25, 27, 6], ['tapir', 25, 27, 6], ['fosil', 25, 27, 6]] },
@@ -602,7 +609,7 @@ const BASE_INTERIOR = {
   shop_min: shop('Almacén de Minas', ['superesfera', 'ultraesfera', 'mate_dulce', 'dulce_de_leche', 'alfajor', 'torta_frita', 'chivito', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'piedra_agata', 'piedra_amatista', 'piedra_basalto', 'mt_parrillada', 'mt_tormenta_ceibo', 'mt_punio_gaucho']),
   casa_ros: room(HOUSE, {
     name: 'Casa en Rosario',
-    npcs: [{ x: 6, y: 3, look: 'oldman', dir: 'left', script: 'gift_cana' }],
+    npcs: [{ x: 6, y: 3, look: 'oldman', dir: 'left', script: 'gift_ros' }],
   }),
   casa_pir: room(HOUSE, {
     name: 'Casa en Piriápolis',
@@ -610,7 +617,7 @@ const BASE_INTERIOR = {
   }),
   casa_pal: room(HOUSE, {
     name: 'Guardería de La Paloma',
-    npcs: [{ x: 6, y: 3, look: 'swimmer', dir: 'left', script: 'gift_pal' }, { x: 2, y: 2, look: 'oldman', dir: 'down', script: 'guarderia' }],
+    npcs: [{ x: 6, y: 3, look: 'swimmer', dir: 'left', script: 'gift_pal' }, { x: 2, y: 2, look: 'oldman', dir: 'down', script: 'guarderia' }, { x: 7, y: 5, look: 'oldman', dir: 'left', script: 'gift_cana' }],
   }),
   shop_dur: shop('Almacén de Durazno', ['superesfera', 'ultraesfera', 'mate_dulce', 'dulce_de_leche', 'alfajor', 'aloe', 'refuerzo_ataque', 'refuerzo_especial', 'piedra_agata', 'mt_parrillada']),
   casa_dur: room(HOUSE, {
@@ -619,7 +626,7 @@ const BASE_INTERIOR = {
   }),
   casa_min: room(HOUSE, {
     name: 'Casa en Minas',
-    npcs: [{ x: 6, y: 3, look: 'gaucho', dir: 'left', script: 'gift_min' }],
+    npcs: [{ x: 6, y: 3, look: 'gaucho', dir: 'left', script: 'gift_min' }, { x: 3, y: 5, look: 'oldman', dir: 'right', script: 'gift_cana2' }],
   }),
   poli_mvd: poli('Policlínica de Montevideo'),
   poli_pde: poli('Policlínica de Punta del Este'),
@@ -689,9 +696,15 @@ const BASE_INTERIOR = {
 import { ACT2_OUTDOOR, ACT2_INTERIOR } from './maps-act2.js';
 import { SPECIES } from './species.js';
 import { MAP_BIOME, BIOMES } from './atlas.js';
+import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.js';
+import { CHAIN, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from './route.js';
+import { fitDown, fitSpecies } from './levels.js';
+import { fitToMap, wildList, teamOf } from './map-gen.js';
+import { TILE_INFO } from '../gfx/tiles.js';
 
-export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR };
-export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR };
+export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR, ...ROUTE_OUTDOOR };
+export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR, ...ROUTE_INTERIOR };
+rewire(OUTDOOR);
 export const MAPS = { ...OUTDOOR, ...INTERIOR };
 
 /**
@@ -724,4 +737,189 @@ const CAP = 6;
     covered.add(e[0]);
   }
   for (const m of maps) m.enc.list = kept.get(m);
+})();
+
+/**
+ * Level curve along the story. Each outdoor zone gets the band the player should have by the time
+ * they get there (about the ace of the previous gym, never above the next one), so wild creatures
+ * and route trainers only ever step up from one zone to the next. Levels written in the maps are
+ * rescaled into these bands.
+ */
+export const ZONE_LEVELS = Object.fromEntries(CHAIN.map((id) => [id, mapBand(id)]));
+(function retuneLevels() {
+  const scale = (lv, [a, b], [lo, hi]) => (b === a ? lo : Math.round(lo + ((lv - a) * (hi - lo)) / (b - a)));
+  for (const [id, band] of Object.entries(ZONE_LEVELS)) {
+    const m = OUTDOOR[id];
+    if (!m || m.fullWild) continue;
+    const lists = [m.enc?.list, m.fish].filter(Boolean);
+    const all = lists.flatMap((l) => l.flatMap((e) => [e[1], e[2]]));
+    if (!all.length) continue;
+    const old = [Math.min(...all), Math.max(...all)];
+    for (const l of lists) for (const e of l) { e[1] = scale(e[1], old, band); e[2] = Math.max(e[1], scale(e[2], old, band)); e[0] = fitDown(e[0], e[1]); }
+    for (const n of m.npcs ?? []) {
+      if (!n.trainer) continue;
+      n.trainer.team = n.trainer.team.map(([sp, lv]) => { const n2 = Math.min(band[1] + 2, Math.max(band[0], scale(lv, old, band))); return [fitSpecies(sp, n2), n2]; });
+    }
+  }
+})();
+
+/**
+ * Buildings and dungeons were written for the old order of the story. Each belongs to a stop of the route and
+ * its trainers are rescaled to that stop's curve: gym trainers sit just under the leader's ace, the rest of the
+ * dungeons between the wild band and the ace.
+ */
+const PLACES = {
+  fraybentos: ['gym_frb', 'anglo_1', 'anglo_2', 'anglo_3'],
+  paysandu: ['muelle_pay'],
+  salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
+  rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],
+  tacuarembo: ['gym_tac', 'parrilla_tac', 'ciclovia'],
+  quebrada: ['gym_tyt'],
+  paloma: ['cabo'],
+  punta: ['gym_pde'],
+  piriapolis: ['obs_1', 'obs_2', 'obs_3'],
+  minas: ['pp_1', 'pp_2'],
+  durazno: ['gym_dur'],
+  montevideo: ['gym_mvd', 'ferry_1', 'ferry_2'],
+  trinidad: ['gym_trinidad'],
+  mercedes: ['gym_mercedes'],
+  florida: ['gym_florida'],
+  canelones: ['gym_canelones'],
+};
+(function retuneBuildings() {
+  for (const [stop, ids] of Object.entries(PLACES)) {
+    const [lo, hi] = stopBand(STOP_INDEX[stop]);
+    const ace = gymAce(stop);
+    for (const id of ids) {
+      const m = INTERIOR[id] ?? OUTDOOR[id];
+      const gym = id.startsWith('gym_');
+      const target = gym ? [Math.max(lo, ace - 4), ace - 1] : [hi, Math.max(hi + 1, ace - 1)];
+      const lists = [m.enc?.list, m.fish].filter(Boolean);
+      const wild = lists.flatMap((l) => l.flatMap((e) => [e[1], e[2]]));
+      if (wild.length) {
+        const wa = Math.min(...wild), wb = Math.max(...wild);
+        const sc = (v) => (wb === wa ? lo : Math.round(lo + ((v - wa) * (hi - lo)) / (wb - wa)));
+        for (const l of lists) for (const e of l) { e[1] = sc(e[1]); e[2] = Math.max(e[1], sc(e[2])); e[0] = fitDown(e[0], e[1]); }
+      }
+      const teams = (m.npcs ?? []).filter((n) => n.trainer).map((n) => n.trainer.team);
+      const all = teams.flat().map((t) => t[1]);
+      if (!all.length) continue;
+      const a = Math.min(...all), b = Math.max(...all);
+      for (const team of teams) {
+        for (const t of team) {
+          t[1] = b === a ? target[1] : Math.round(target[0] + ((t[1] - a) * (target[1] - target[0])) / (b - a));
+          t[0] = fitSpecies(t[0], t[1]);
+        }
+      }
+    }
+  }
+})();
+
+/**
+ * Rival encounters, placed on the route maps where the story needs them (stage = index in rivalTeamFor).
+ * The rival stands on the road, so the player cannot walk past without meeting them.
+ */
+const RIVAL_AT = [
+  ['ruta24', 'rival_mvd', 'rival2'],
+  ['ruta30', 'rival_ferry', 'rival3'],
+  ['r_lascano_rocha', 'rival_r5', 'rival5'],
+  ['r_sarandi_durazno', 'rival_r24', 'rival6'],
+];
+for (const [mapId, script, flag] of RIVAL_AT) {
+  const m = OUTDOOR[mapId];
+  const rows = m.tiles;
+  const mid = Math.floor(rows[0].length / 2);
+  let spot = null;
+  for (let d = 0; d < mid && !spot; d++) for (const x of [mid + d, mid - d]) { const y = rows.findIndex((r) => r[x] === '='); if (y >= 0) { spot = { x, y }; break; } }
+  const npc = { ...(spot ?? { x: mid, y: 8 }), look: 'rival', dir: 'up', id: script, cond: (f) => !f[flag], script };
+  fitToMap(rows, [npc]);
+  (m.npcs ??= []).push(npc);
+}
+
+// The founder of the Equipo PP waits by the Estadio Centenario once the player has the eighth medal and the factory in Minas is shut down.
+(function placeCalima() {
+  const m = OUTDOOR.montevideo;
+  let door = null;
+  m.tiles.forEach((row, y) => { const x = row.indexOf('D'); if (!door && x >= 0) door = { x, y }; });
+  const npc = { x: door.x, y: door.y + 2, look: 'calima', dir: 'up', id: 'calima', cond: (f) => f.badge12 && f.pp_clear && !f.anglo_clear, script: 'calima' };
+  fitToMap(m.tiles, [npc]);
+  m.npcs.push(npc);
+})();
+
+// The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.
+Object.assign(INTERIOR.casa_florida.npcs[0], { script: 'gift_vuelo', text: undefined });
+
+// Gift NPCs for the field moves (the Machete, the Canoa and the Guantes de Domador).
+for (const [house, script] of [['casa_pay', 'gift_corte'], ['casa_artigas', 'gift_surf'], ['casa_tac', 'gift_fuerza']]) {
+  Object.assign(INTERIOR[house].npcs[0], { script, text: undefined });
+}
+
+/**
+ * Field-move obstacles on the main road. Each one sits on the route right after the city where the player
+ * receives the move and wins the medal that lets them use it:
+ *   Corte (Machete, Medalla Salto): a thicket across the road after Belén.
+ *   Surf (Canoa, Medalla Rivera): a river across Tranqueras.
+ *   Fuerza (Guantes, Medalla Tacuarembó): a boulder in a gap in a wall of trees after Tupambaé.
+ *   Destello (Farol, Medalla Maldonado): the dark mountain road between Piriápolis and Minas.
+ */
+/** Turns the generated road between Piriápolis and Minas into a dark cave of Roca and Bicho creatures. */
+function makeCave(m) {
+  m.dark = true;
+  m.theme = 'cueva';
+  m.music = 'cave';
+  m.name = 'Cueva de las Sierras';
+  m.signs = ['CUEVA DE LAS SIERRAS\nPiriápolis ←  ·  → Minas\nSin luz no se ve el camino. El Farol de Gaucho ayuda.'];
+  const levels = m.enc.list.flatMap((e) => [e[1], e[2]]);
+  const lo = Math.min(...levels), hi = Math.max(...levels);
+  // The old road's creatures stay as rare visitors, so none of them becomes impossible to find.
+  const fresh = wildList(['roca', 'bicho'], lo, hi, 8, 'cueva');
+  m.enc.list = [...fresh, ...m.enc.list.filter((e) => !fresh.some((f) => f[0] === e[0])).map((e) => [e[0], e[1], e[2], 2])];
+  const folk = [
+    ['Minero Evaristo', 'Minero', ['roca'], ['El ruido de la roca se aprende con los años.', 'Se me derrumbó el túnel.', 'Seguí por el camino más claro.']],
+    ['Espeleóloga Bianca', 'Espeleóloga', ['bicho', 'roca'], ['Estudio lo que vive donde no llega el sol.', 'No esperaba perder.', 'Los cristales marcan el camino.']],
+    ['Entomólogo Ramiro', 'Entomólogo', ['bicho'], ['¿Sabías que acá hay escarabajos sin ojos?', 'Hoy me tocó a mí.', 'No pises los hongos.']],
+  ];
+  (m.npcs ?? []).filter((n) => n.trainer).forEach((n, k) => {
+    const [name, cls, types, [intro, lose, after]] = folk[k % folk.length];
+    n.trainer.name = name;
+    n.trainer.cls = cls;
+    n.trainer.intro = intro; n.trainer.lose = lose; n.trainer.after = after;
+    n.trainer.team = teamOf(types, n.trainer.team.map((t) => t[1]), `cueva${k}`);
+  });
+}
+
+const MO_BLOCKS = [
+  ['r_belen_artigas', 'corte'],
+  ['ruta30', 'surf'],
+  ['r_tupambae_melo', 'fuerza'],
+  ['r_piriapolis_minas', 'destello'],
+];
+(function placeFieldMoveBlocks() {
+  const solid = (c) => !!TILE_INFO[c]?.solid;
+  for (const [id, kind] of MO_BLOCKS) {
+    const m = OUTDOOR[id];
+    if (kind === 'destello') { makeCave(m); continue; }
+    const npcCols = new Set((m.npcs ?? []).flatMap((n) => [n.x - 1, n.x, n.x + 1]));
+    const rows = m.tiles;
+    const mid = Math.floor(rows[0].length / 2) + (kind === 'surf' ? 0 : 3);
+    // First column near the middle with no NPC around it and a road tile to anchor on.
+    let x = mid;
+    for (let d = 0; d < 10; d++) {
+      const c = [mid + d, mid - d].find((cx) => !npcCols.has(cx) && !npcCols.has(cx + 1) && !npcCols.has(cx + 2) && rows.some((r) => r[cx] === '='));
+      if (c !== undefined) { x = c; break; }
+    }
+    const set = (cx, y, ch) => { rows[y] = rows[y].slice(0, cx) + ch + rows[y].slice(cx + 1); };
+    const gap = rows.findIndex((r) => r[x] === '=');
+    for (let y = 0; y < rows.length; y++) {
+      const ch = rows[y][x];
+      if (solid(ch) && ch !== '%') continue;
+      if (kind === 'corte') set(x, y, '%');
+      else if (kind === 'surf') { set(x, y, '~'); set(x + 1, y, solid(rows[y][x + 1]) ? rows[y][x + 1] : '~'); }
+      else if (y === gap) set(x, y, '\\');
+      else set(x, y, 'q');
+    }
+    const blocked = [...(m.items ?? []), ...(m.npcs ?? [])].filter((o) => solid(rows[o.y][o.x]) || rows[o.y][o.x] === '~' || rows[o.y][o.x] === '%');
+    if (blocked.length) fitToMap(rows, blocked, new Set([...(m.items ?? []), ...(m.npcs ?? [])].filter((o) => !blocked.includes(o)).map((o) => `${o.x},${o.y}`)));
+    if (kind === 'fuerza') for (const cx of [x + 1, x + 2, x - 1, x - 2]) if (solid(rows[gap][cx])) set(cx, gap, '.');
+  }
 })();

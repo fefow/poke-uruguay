@@ -1,4 +1,4 @@
-// Unified input: keyboard, touch pad and Gamepad API.
+// Unified input: keyboard and Gamepad API.
 // Actions: up, down, left, right, a, b, start.
 // UI layers push a handler; the top handler receives presses. When no
 // handler is active, presses queue for the overworld.

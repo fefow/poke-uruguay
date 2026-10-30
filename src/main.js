@@ -1,8 +1,10 @@
 // Boot: loader -> title -> game loop.
 import { mountScreen, render } from './gfx/screen.js';
-import { buildTileset } from './gfx/tiles.js';
+import { buildTileset, tileCanvas } from './gfx/tiles.js';
+import { validateSave } from './save/validate.js';
 import { buildAllSprites, creatureSprite } from './gfx/creatures.js';
 import { DEX_ORDER } from './data/species.js';
+import { pamperoFrame } from './gfx/pampero.js';
 import { charSprite, LOOKS } from './gfx/characters.js';
 import { pollGamepads, input, keyName } from './core/input.js';
 import { initAudio, setVolumes, sfx } from './core/audio.js';
@@ -11,12 +13,13 @@ import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './ga
 import { state, setState, newState, settings, badgeCount } from './game/state.js';
 import { loadMap, updateWorld, worldState, runScript, poisonTick, api as scriptApi } from './game/world.js';
 import { SCRIPTS } from './data/story.js';
-import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
+import { startTitle, newGameIntro, credits, slotCard, titleRenderer } from './game/scenes.js';
 import * as menus from './game/menus.js';
 import * as battle from './game/battle-scene.js';
 import { openOptions, openMap } from './game/menus.js';
 import { createCreature } from './game/creature.js';
 import { mountHud, updateHud, flashSaved } from './game/hud.js';
+import { VERSION } from './version.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
 import { SAVE_CONFIG } from './save/config.js';
@@ -26,7 +29,7 @@ import { mountPerf, perfTick } from './core/perf.js';
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { keys: DEX_ORDER, creatureSprite, updateWorld, poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { validateSave, tileCanvas, titleRenderer, keys: DEX_ORDER, pamperoFrame, creatureSprite, updateWorld, poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();
@@ -68,6 +71,13 @@ async function boot() {
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   mountFullscreen();
+  // The game needs a keyboard: touch-only devices get a notice instead of a game they cannot play.
+  if (matchMedia('(hover: none) and (pointer: coarse)').matches) {
+    document.body.append(h('div', { class: 'desktop-only' },
+      h('h1', { text: 'Poke Uruguay' }),
+      h('p', { text: 'Este juego se juega con teclado en una computadora.' }),
+      h('p', { text: 'Abrilo desde una PC o notebook.' })));
+  }
   mountPerf();
   setVolumes(settings);
   requestAnimationFrame(frame);
@@ -145,10 +155,12 @@ async function titleScreen() {
   mode = 'title';
   startTitle();
   const press = h('div', { class: 'title-press', text: 'Presioná Enter para empezar' });
-  uiRoot().append(press);
+  const ver = h('div', { class: 'title-version', text: `Versión ${VERSION}` });
+  uiRoot().append(press, ver);
   press.addEventListener('click', () => input.press('a'));
   await input.waitFor(['a', 'start']);
   press.remove();
+  ver.remove();
   sfx('confirm');
   while (true) {
     const saves = await listSaves().catch(() => []);

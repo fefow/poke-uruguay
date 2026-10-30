@@ -438,9 +438,8 @@ const PLANS = {
 };
 
 // ---------------------------------------------------------------------------
-// Finishing pipeline: stage-aware decoration, cel shading, type texture and a
-// variable-weight outline, applied identically to every species so the whole
-// roster shares one look.
+// Finishing pipeline: stage-aware decoration (crests, fins, flames that grow with
+// each evolution) and a flat outline, applied identically to every species.
 
 /** Evolution stage of each species: { i: position in its line, n: line length }. */
 let stages = null;
@@ -467,7 +466,6 @@ function hash(x, y, seed) {
 }
 const seedOf = (key) => [...key].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) | 0, 7);
 
-const hexRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
 
 function bounds(d, W, H) {
   let x0 = W, y0 = H, x1 = -1, y1 = -1;
@@ -550,105 +548,20 @@ function decorate(g, sp, st, bb, seed) {
   }
 }
 
-/** Per-type surface texture: small details that sit inside the silhouette. */
-function texture(img, W, H, mask, sp, st, seed) {
-  const d = img.data;
-  const type = sp.types[0];
-  const set = (x, y, rgb) => { const i = (y * W + x) * 4; d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; };
-  const get = (x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
-  const mix = (c, t, amt) => c.map((v, i) => Math.round(v + (t[i] - v) * amt));
-  const inside = (x, y) => mask(x, y) && mask(x - 1, y) && mask(x + 1, y) && mask(x, y - 1) && mask(x, y + 1);
-  const dens = { fuego: 9, agua: 7, planta: 7, electrico: 5, roca: 12, tierra: 11, volador: 10, bicho: 6, veneno: 8, siniestro: 6, psiquico: 5, lucha: 6, normal: 9 }[type] ?? 8;
-  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
-    if (!inside(x, y)) continue;
-    const r = hash(x, y, seed);
-    if (r >= dens) continue;
-    const c = get(x, y);
-    if (c[0] > 245 && c[1] > 245 && c[2] > 245) continue;
-    if (c[0] < 50 && c[1] < 50 && c[2] < 60) continue;
-    switch (type) {
-      case 'agua': set(x, y, mix(c, [200, 235, 255], 0.55)); if (inside(x + 1, y)) set(x + 1, y, mix(c, [200, 235, 255], 0.55)); break;
-      case 'planta': set(x, y, mix(c, [20, 60, 20], 0.3)); if (inside(x, y + 1)) set(x, y + 1, mix(c, [20, 60, 20], 0.3)); break;
-      case 'fuego': set(x, y, mix(c, [255, 220, 90], 0.6)); break;
-      case 'electrico': set(x, y, mix(c, [255, 250, 170], 0.7)); break;
-      case 'roca': case 'tierra': set(x, y, mix(c, [30, 24, 20], 0.3)); if (inside(x + 1, y + 1)) set(x + 1, y + 1, mix(c, [30, 24, 20], 0.3)); break;
-      case 'bicho': set(x, y, mix(c, [20, 20, 30], 0.4)); break;
-      case 'veneno': set(x, y, mix(c, [190, 90, 200], 0.5)); break;
-      case 'psiquico': set(x, y, mix(c, [255, 220, 240], 0.55)); break;
-      case 'siniestro': set(x, y, mix(c, [90, 60, 140], 0.35)); break;
-      default: set(x, y, mix(c, [20, 14, 24], 0.2)); if (inside(x, y + 1)) set(x, y + 1, mix(c, [20, 14, 24], 0.2));
-    }
-  }
-  // Elemental sparks floating around the final forms.
-  const spark = { fuego: [255, 190, 60], electrico: [255, 240, 90], psiquico: [255, 150, 200], agua: [170, 220, 255], veneno: [200, 110, 220], planta: [150, 230, 110], siniestro: [140, 90, 200] }[type];
-  if (spark && st.i >= 1) {
-    const want = st.i === st.n - 1 ? 5 : 2;
-    let placed = 0;
-    for (let t = 0; t < 400 && placed < want; t++) {
-      const x = 4 + (hash(t, 3, seed) % (W - 8)), y = 4 + (hash(t, 9, seed) % (H - 8));
-      let near = false;
-      for (let dy = -4; dy <= 4 && !near; dy++) for (let dx = -4; dx <= 4; dx++) if (mask(x + dx, y + dy)) { near = true; break; }
-      if (!near || mask(x, y) || mask(x - 1, y) || mask(x + 1, y) || mask(x, y - 1) || mask(x, y + 1)) continue;
-      set(x, y, spark); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) set(x + dx, y + dy, mix(spark, [255, 255, 255], 0.0));
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0, 0]]) d[((y + dy) * W + x + dx) * 4 + 3] = 255;
-      placed++;
-    }
-  }
-}
-
-/** Threshold alpha, then cel-shade, highlight, texture and outline with variable weight. */
-function finish(c, sp, st, seed) {
+/** Threshold alpha and add a uniform 1px dark outline: flat colours, no shading or relief. */
+export function flatOutline(c) {
   const g = c.getContext('2d');
   const W = c.width, H = c.height;
   const img = g.getImageData(0, 0, W, H);
   const d = img.data;
   for (let i = 0; i < d.length; i += 4) d[i + 3] = d[i + 3] >= 110 ? 255 : 0;
-  const mask = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] === 255;
-  const bb = bounds(d, W, H);
-  if (bb.x1 < 0) return;
-  const shadowCut = bb.y0 + bb.h * 0.84;
-  const base = new Uint8ClampedArray(d);
-  const baseMask = (x, y) => x >= 0 && y >= 0 && x < W && y < H && base[(y * W + x) * 4 + 3] === 255;
-  // cel shading: light from upper-left
+  const solid = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] === 255;
+  const marks = [];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    if (!baseMask(x, y)) continue;
-    const i = (y * W + x) * 4;
-    const r = base[i], gg = base[i + 1], b = base[i + 2];
-    if ((r > 250 && gg > 250 && b > 250) || (r < 48 && gg < 48 && b < 60)) continue; // eyes
-    let k = 0;
-    if (!baseMask(x + 3, y + 3) || !baseMask(x + 4, y + 1) || y > shadowCut) k = -1;
-    else if (!baseMask(x - 2, y - 2) && y < bb.y0 + bb.h * 0.6) k = 1;
-    if (k < 0) { d[i] = r * 0.64; d[i + 1] = gg * 0.68; d[i + 2] = Math.min(255, b * 0.84 + 6); }
-    else if (k > 0) { d[i] = r + (255 - r) * 0.3; d[i + 1] = gg + (255 - gg) * 0.3; d[i + 2] = b + (255 - b) * 0.3; }
+    if (solid(x, y)) continue;
+    if (solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1)) marks.push((y * W + x) * 4);
   }
-  // specular spot on the lit side
-  const sx = Math.round(bb.x0 + bb.w * 0.36), sy = Math.round(bb.y0 + bb.h * 0.3);
-  search: for (let r = 0; r < 14; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
-    const x = sx + dx, y = sy + dy;
-    if (!baseMask(x, y) || !baseMask(x + 3, y + 3) || !baseMask(x - 3, y - 3) || !baseMask(x + 2, y) || !baseMask(x, y + 1)) continue;
-    const i = (y * W + x) * 4;
-    if (base[i] > 245 || base[i] < 50) continue;
-    for (const [ox, oy] of [[0, 0], [1, 0], [0, 1]]) {
-      const j = ((y + oy) * W + x + ox) * 4;
-      d[j] = Math.min(255, base[j] + 95); d[j + 1] = Math.min(255, base[j + 1] + 95); d[j + 2] = Math.min(255, base[j + 2] + 95);
-    }
-    break search;
-  }
-  texture(img, W, H, baseMask, sp, st, seed);
-  // outline: 1px tinted ring all round, a 2nd neutral px on the lower/right sides
-  const ring = [];
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    if (baseMask(x, y)) continue;
-    let src = null;
-    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) if (baseMask(x + dx, y + dy)) { src = (y + dy) * W + x + dx; break; }
-    if (src !== null) {
-      const j = src * 4;
-      ring.push([(y * W + x) * 4, base[j] * 0.22 + 14, base[j + 1] * 0.22 + 12, base[j + 2] * 0.26 + 22]);
-    } else if (baseMask(x - 2, y) || baseMask(x, y - 2) || baseMask(x - 1, y - 1)) {
-      ring.push([(y * W + x) * 4, 22, 20, 30]);
-    }
-  }
-  for (const [i, r, gg, b] of ring) { d[i] = r; d[i + 1] = gg; d[i + 2] = b; d[i + 3] = 255; }
+  for (const i of marks) { d[i] = 22; d[i + 1] = 20; d[i + 2] = 30; d[i + 3] = 255; }
   g.putImageData(img, 0, 0);
 }
 
@@ -678,7 +591,7 @@ export function creatureSprite(key, { back = false } = {}) {
   g.globalCompositeOperation = 'destination-over'; // crests sit behind the body
   decorate(g, sp, st, bb, seed);
   g.restore();
-  finish(c, sp, st, seed);
+  flatOutline(c);
   let out = c;
   if (back) {
     out = document.createElement('canvas');

@@ -49,7 +49,7 @@ const R30 = route({ seed: 'ruta30', w: 30, h: 14, axis: 'h', from: 6, to: 7, gra
 // ---------------------------------------------------------------- RIVERA (gym 6, fighting)
 const RIV = city({
   seed: 'rivera', sa: 6, sb: 15,
-  a: [['houseB', 2, 'casa_riv'], ['lucha', 8, { to: 'gym_riv', req: 'torre_clear', deny: ['La puerta del gimnasio está cerrada y hay un recluta del Equipo PP custodiándola.', 'La Torre de Niebla, al norte de la plaza, mantiene la ciudad entera bajo control.'] }], ['poli', 17, 'poli_riv'], ['shop', 23, 'shop_riv']],
+  a: [['houseB', 2, 'casa_riv'], ['lucha', 8, 'gym_riv'], ['poli', 17, 'poli_riv'], ['shop', 23, 'shop_riv']],
   b: [['house', 4, 'aduana_riv'], ['houseG', 9, 'safari_gate'], ['houseO', 17, 'casa_riv2'], ['torre', 23, 'torre_1']],
   vroads: [14], decor: { '#': 8, q: 4, f: 10 },
   signs: [[26, 7], [14, 18]],
@@ -86,7 +86,7 @@ const R24 = route({ seed: 'ruta24', w: 20, h: 26, axis: 'v', from: 10, to: 10, g
 // ---------------------------------------------------------------- FRAY BENTOS (gym 8, dark)
 const FRB = city({
   seed: 'fraybentos', sa: 6, sb: 15, road: 'c',
-  a: [['house', 2, 'casa_frb'], ['siniestro', 8, { to: 'gym_frb', req: 'anglo_clear', deny: ['La puerta del gimnasio está cerrada con candado.', 'Un cartel dice: "Cerrado por orden del director del frigorífico".'] }], ['poli', 17, 'poli_frb'], ['shop', 23, 'shop_frb']],
+  a: [['house', 2, 'casa_frb'], ['siniestro', 8, 'gym_frb'], ['poli', 17, 'poli_frb'], ['shop', 23, 'shop_frb']],
   b: [['houseB', 1], ['fabrica', 7, 'anglo_1'], ['houseG', 17, 'casa_frb2']],
   vroads: [14], decor: { '#': 8, f: 8 },
   water: [[1, 17, 26, 1]],
@@ -247,8 +247,6 @@ export const ACT2_OUTDOOR = {
       npc(6, 14, 'cop', ['La aduana funciona otra vez. Gracias.'], { dir: 'up', cond: (f) => f.aduana_clear }),
       npc(22, 9, 'oldman', ['La niebla de la Torre nos tiene sin sol desde hace días.', 'La policía no puede entrar. Alguien tiene que subir.'], { dir: 'left', cond: (f) => !f.torre_clear }),
       npc(22, 9, 'oldman', ['El sol volvió a Rivera. Gracias.'], { dir: 'left', cond: (f) => f.torre_clear }),
-      grunt({ x: 11, y: 7, dir: 'down' }, 'riv_g1', [41, 42], 'Nadie entra al gimnasio.', 'Qué mala suerte.', 'La jefa Bruma está arriba de la Torre.', { cond: (f) => !f.torre_clear }),
-      { x: 11, y: 7, look: 'cop', dir: 'down', text: ['Gracias por lo de la Torre. El gimnasio ya está abierto.'], cond: (f) => f.torre_clear },
     ],
     items: [{ x: 24, y: 9, item: 'refuerzo_defensa', id: 'riv_item1' }],
   },
@@ -340,7 +338,6 @@ export const ACT2_OUTDOOR = {
       tr(R24.spots[2], 'boy', 'r24_b', 'Santiago', 'Obrero', ['tierra', 'roca'], [48, 50], ['Salí del turno y me topé con vos.', 'Qué cansancio.', 'En el frigorífico hay movimientos raros.']),
       tr(R24.gateSpots[0], 'boy', 'r24_gate', 'Capataz Rivas', 'Obrero', ['roca', 'tierra'], [49, 50], ['La cantera está cerrada. A menos que me ganes.', 'Pasá, pero con cuidado.', 'Fray Bentos queda al sur.'], { gate: true, sight: 3 }),
       grunt(R24.spots[3], 'r24_g2', [50, 51], 'Última advertencia.', 'No lo puedo creer.', 'Calima es más fuerte que todos nosotros.'),
-      { ...npc(R24.walk[18].x, R24.walk[18].y, 'rival', [], { id: 'rival_r24', cond: (f) => !f.rival6, script: 'rival_r24', dir: 'up' }) },
     ],
     items: [{ ...R24.itemSpots[0], item: 'alfajor_triple', id: 'r24_item1' }],
   },
@@ -357,10 +354,9 @@ export const ACT2_OUTDOOR = {
     fish: fishList(49, 51, 8),
     npcs: [
       wander(10, 9, 'oldman', ['El Anglo tuvo su época de oro. Después quedó vacío.', 'Hace unas semanas volvieron a prender las luces.']),
-      npc(21, 9, 'girl', ['El gimnasio de acá es de tipo Siniestro. Zoraida trabaja de noche.', 'Pero el gimnasio está cerrado: el director del frigorífico ordenó clausurarlo.'], { dir: 'down', cond: (f) => !f.anglo_clear }),
-      npc(21, 9, 'girl', ['El gimnasio ya abrió. Zoraida te espera.'], { dir: 'down', cond: (f) => f.anglo_clear }),
-      grunt({ x: 13, y: 11, dir: 'right' }, 'frb_g1', [50, 51], 'Acá nadie entra a la planta.', 'Increíble.', 'La entrada es la puerta grande del frigorífico.', { cond: (f) => !f.anglo_clear }),
-      { x: 5, y: 3, look: 'grunt', dir: 'down', text: ['El frigorífico es propiedad privada.'], cond: (f) => !f.anglo_clear },
+      npc(21, 9, 'girl', ['El gimnasio de acá es de tipo Siniestro. Zoraida trabaja de noche.', 'Dicen que en el frigorífico se mueve gente de gris. Con cuidado.'], { dir: 'down' }),
+      grunt({ x: 13, y: 11, dir: 'right' }, 'frb_g1', [50, 51], 'Acá nadie entra a la planta.', 'Increíble.', 'La entrada es la puerta grande del frigorífico.', { cond: (f) => !f.anglo_pp }),
+      { x: 5, y: 3, look: 'grunt', dir: 'down', text: ['El frigorífico es propiedad privada.'], cond: (f) => !f.anglo_pp },
     ],
     items: [{ x: 24, y: 10, item: 'alfajor_triple', id: 'frb_item1' }],
   },
@@ -490,7 +486,7 @@ export const ACT2_INTERIOR = {
   casa_sal: house('Casa en Salto', casaNpc('girl', ['Las naranjas de Salto son las mejores. Probá un gajo.', 'Los termas relajan hasta al más nervioso.'])),
   casa_sal2: house('Casa en Salto', { x: 6, y: 3, look: 'cop', dir: 'left', script: 'gift_sal' }),
   casa_pay: house('Casa en Paysandú', casaNpc('oldman', ['Paysandú resistió un sitio de varios meses.', 'Por eso le dicen la Heroica.'])),
-  casa_pay2: house('Casa en Paysandú', { x: 6, y: 3, look: 'sailor', dir: 'left', script: 'gift_pay' }),
+  casa_pay2: house('Casa en Paysandú', { x: 6, y: 3, look: 'sailor', dir: 'left', script: 'gift_pay' }, { x: 3, y: 5, look: 'oldman', dir: 'right', script: 'gift_cana3' }),
   casa_frb: house('Casa en Fray Bentos', casaNpc('clerk', ['Mi abuelo trabajó en el Anglo. Decía que el olor del frigorífico se sentía a kilómetros.'])),
   casa_frb2: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_frb' }),
 
@@ -509,11 +505,9 @@ export const ACT2_INTERIOR = {
     name: 'Buquebus China Zorrilla: comedor', music: 'town',
     exitTo: { map: 'ferry_1', x: 11, y: 2 },
     warps: [{ x: 0, y: 1, to: 'ferry_3', tx: 5, ty: 6 }, { x: 11, y: 1, to: 'ferry_3', tx: 5, ty: 6 }],
-    triggers: [{ x: 0, y: 5, w: 12, h: 1, cond: (f) => !f.rival3, script: 'rival_ferry' }],
     npcs: [
       tr({ x: 3, y: 5 }, 'clerk', 'fe_c', 'Maitre Ibarra', 'Maitre', ['normal'], [21, 22], ['Para subir hay que reservar. Y para pasar, ganarme.', 'Retiro lo dicho.', 'El capitán no se siente bien: hace días que no sale.'], { dir: 'right', sight: 4 }),
       tr({ x: 8, y: 3 }, 'boy', 'fe_d', 'Rodrigo', 'Tripulante', ['agua', 'normal'], [22, 23], ['Limpio las cubiertas, pero hoy hago una excepción.', 'Perdí el turno.', 'En el camarote de arriba está el capitán.'], { dir: 'down', sight: 3 }),
-      { x: 5, y: 2, look: 'rival', dir: 'down', id: 'rival_ferry', cond: (f) => !f.rival3, script: 'rival_ferry' },
       npc(9, 5, 'girl', ['El comedor tiene chivitos, milanesas y mate para todos.', 'Pero el chivito del barco no es como el de la rambla.'], { dir: 'left' }),
     ],
   }),
@@ -604,7 +598,7 @@ export const ACT2_INTERIOR = {
     npcs: [
       grunt({ x: 2, y: 4 }, 'an_g1', [48, 48], 'Este galpón es del Equipo PP.', 'No pasa nada.', 'Subí. Calima te espera.', { dir: 'right', sight: 4 }),
       grunt({ x: 8, y: 6 }, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'La escalera está al fondo.', { dir: 'left', sight: 4 }),
-      grunt({ x: 6, y: 2 }, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'Calima está arriba.', { dir: 'down', sight: 3 }),
+      grunt({ x: 6, y: 2 }, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'La administradora está arriba.', { dir: 'down', sight: 3 }),
     ],
     items: [{ x: 1, y: 7, item: 'pan_casero', id: 'an_item1' }],
   }),
@@ -615,14 +609,13 @@ export const ACT2_INTERIOR = {
     npcs: [
       grunt({ x: 3, y: 5 }, 'an_g4', [49, 50], 'Las oficinas son privadas.', 'Me ganaste.', 'El jefe de verdad está arriba.', { dir: 'right', sight: 4 }),
       grunt({ x: 8, y: 3 }, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.', { dir: 'down', sight: 3 }),
-      { x: 5, y: 4, look: 'brumario', dir: 'down', id: 'brumario2', cond: (f) => !f.anglo_brumario, script: 'brumario2' },
     ],
     items: [{ x: 9, y: 6, item: 'alfajor_triple', id: 'an_item2' }],
   }),
   anglo_3: room(FLOOR_TOP, {
     name: 'Frigorífico Anglo: dirección', music: 'cave',
     exitTo: { map: 'anglo_2', x: 11, y: 2 },
-    npcs: [{ x: 5, y: 2, look: 'calima', dir: 'down', id: 'calima', cond: (f) => !f.anglo_clear, script: 'calima' }],
+    npcs: [{ x: 5, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' }],
   }),
 
   // --- Liga: Alto Mando en cuatro salas, luego el Campeón

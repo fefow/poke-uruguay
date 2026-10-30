@@ -11,7 +11,7 @@ const FACES = {
   'Maestro Tabárez': 'prof', Madre: 'mom', Enfermera: 'nurse', Comerciante: 'clerk', Dueño: 'clerk', Policía: 'cop',
   Marinero: 'sailor', Surfista: 'swimmer', Abuelo: 'oldman', Vecina: 'girl', Vecino: 'oldman', Hermana: 'girl',
   Sofía: 'leader_ute', Lucía: 'leader_ose', 'Juan A. Lavalleja': 'leader_lavalleja', Candelaria: 'leader_ancap',
-  Ramón: 'leader_mgap', Mariela: 'leader_defensa', 'Horacio Quiroga': 'leader_quiroga', Capitán: 'ferry_captain',
+  Elena: 'leader_inc', Marta: 'leader_correo', 'Juan M. Boiso Lanza': 'leader_boiso', Tomás: 'leader_inavi', Ramón: 'leader_mgap', Mariela: 'leader_defensa', 'Horacio Quiroga': 'leader_quiroga', Capitán: 'ferry_captain',
   Biólogo: 'biologo', 'Ciclista veterano': 'ciclista', Farero: 'keeper', Calima: 'calima', Bruma: 'bruma', Brumario: 'brumario',
   Garúa: 'garua', Obdulio: 'champion', Estela: 'elite1', Teófilo: 'elite2', Dolores: 'elite3', Federico: 'elite4',
 };

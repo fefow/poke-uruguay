@@ -166,7 +166,7 @@ export class BattleEngine {
     if (!move.fx.never && (move.acc < 100 || user.stages.acc !== 0 || target.stages.eva !== 0)) {
       const p = (move.acc / 100) * accMult(user.stages.acc - target.stages.eva);
       if (!this.#rng.chance(p)) {
-        ev.push({ t: 'text', msg: '¡Pero falló!' });
+        ev.push({ t: 'text', msg: move.cat !== 'est' || target.stages.eva > 0 ? `¡${this.name(1 - side)} esquivó el ataque!` : '¡Pero falló!' });
         return;
       }
     }
@@ -178,7 +178,7 @@ export class BattleEngine {
     }
     const r = computeDamage(user, target, move, this.#rng);
     if (r.eff === 0) {
-      ev.push({ t: 'text', msg: `No afecta a ${tName}…` });
+      ev.push({ t: 'text', msg: `No afecta a ${tName}… ¡El ataque no tuvo ningún efecto!` });
       return;
     }
     ev.push({ t: 'anim', side, move: move.type, kind: move.cat });

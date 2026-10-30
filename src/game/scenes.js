@@ -1,6 +1,7 @@
 // Title screen, new-game intro, hall of fame and credits.
 import { W, H, setRenderer, text } from '../gfx/screen.js';
 import { creatureSprite, SPRITE } from '../gfx/creatures.js';
+import { pamperoAt, PAMPERO_W, PAMPERO_H } from '../gfx/pampero.js';
 import { charSprite } from '../gfx/characters.js';
 import { DEX_ORDER, SPECIES } from '../data/species.js';
 import { playMusic, sfx } from '../core/audio.js';
@@ -65,28 +66,45 @@ function drawSky(g, t) {
   }
 }
 
-/** Draws a sprite with its wings beating: columns away from the body swing up and down with the flap phase. */
-function drawFlapping(g, img, x, y, w, h, t, { speed = 160, amp = 0.22 } = {}) {
-  const sw = img.width, sh = img.height, cols = 48;
-  const half = cols / 2, cw = w / cols;
-  const flap = Math.sin(t / speed);
-  for (let i = 0; i < cols; i++) {
-    const d = (i + 0.5 - half) / half;
-    const lift = -(Math.abs(d) ** 1.6) * flap * amp * h;
-    const body = Math.sin(t / speed * 0.5) * 0.02 * h;
-    g.drawImage(img, (i * sw) / cols, 0, sw / cols, sh, x + i * cw, y + lift + body, cw + 0.6, h * (1 + Math.abs(d) * flap * 0.05));
+/**
+ * A trail of glitter left behind a moving point: `at(time)` gives where the tail was at that time (or null).
+ * Older sparkles are smaller, fainter and drift down a little, and each one twinkles on its own beat.
+ */
+function glitter(g, t, at, count = 36, gap = 36) {
+  const COLS = ['#fff8c0', '#ffe45c', '#bfe8ff', '#ffffff'];
+  for (let i = 1; i <= count; i++) {
+    const pt = at(t - i * gap);
+    if (!pt) continue;
+    const fade = 1 - i / (count + 1);
+    const n1 = Math.sin(i * 12.9898) * 43758.5453, n2 = Math.sin(i * 78.233) * 12345.6789;
+    const jx = (n1 - Math.floor(n1) - 0.5) * 10, jy = (n2 - Math.floor(n2) - 0.5) * 12 + i * 0.35;
+    const tw = 0.55 + 0.45 * Math.sin(t / 90 + i * 1.7);
+    g.globalAlpha = Math.max(0, Math.min(1, fade * 1.2 * tw));
+    g.fillStyle = COLS[i % COLS.length];
+    const x = Math.round(pt.x + jx), y = Math.round(pt.y + jy);
+    if (i % 2 === 0 && fade > 0.25) { g.fillRect(x - 2, y, 5, 1); g.fillRect(x, y - 2, 1, 5); g.fillRect(x - 1, y - 1, 3, 3); } // little star
+    else g.fillRect(x, y, fade > 0.5 ? 3 : 2, fade > 0.5 ? 3 : 2);
   }
+  g.globalAlpha = 1;
 }
 
+/** Draws a sprite with its wings beating: columns away from the body swing up and down with the flap phase. */
 export function titleRenderer(g, t) {
   drawSky(g, t);
-  // flying Pamperón silhouette
-  const px = ((t / 18) % (W + 200)) - 100;
-  g.globalAlpha = 0.85;
-  drawFlapping(g, creatureSprite('pamperon'), px, 30 + Math.sin(t / 500) * 6, 48, 48, t);
-  g.globalAlpha = 1;
   text(g, 'Poke Uruguay', W / 2, 38, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
   text(g, 'Aventuras en tierras charruas', W / 2, 72, { size: 8, align: 'center', color: '#f8d040', shadow: '#2a1830' });
+  // The Pampero crosses in front of the title from left to right, facing where it is going, leaving glitter behind.
+  const pos = (tt) => ({ x: ((tt / 18) % (W + 200)) - 100, y: 22 + Math.sin(tt / 500) * 6 });
+  const here = pos(t);
+  const tw = PAMPERO_W * 0.6, th = PAMPERO_H * 0.6;
+  glitter(g, t, (tt) => { const q = pos(tt); return q.x <= here.x ? { x: q.x + 8, y: q.y + th * 0.52 } : null; });
+  g.globalAlpha = 0.9;
+  g.save();
+  g.translate(here.x + tw, here.y);
+  g.scale(-1, 1); // the sprite faces left; flip it to face right
+  g.drawImage(pamperoAt(t, 620), 0, 0, tw, th);
+  g.restore();
+  g.globalAlpha = 1;
   // starters parade on the shore
   const keys = ['ceibito', 'tejuchispa', 'carpinchito'];
   keys.forEach((k, i) => {
@@ -191,7 +209,12 @@ const CINEMATIC = [
       hills(g, t, 190, 6, '#1a2030', 0.01, 140);
       const k = Math.min(1, p * 1.5);
       g.globalAlpha = 0.35 + 0.65 * k;
-      drawFlapping(g, creatureSprite('pamperon'), 120 + (1 - k) * 160, 50 - k * 10 + Math.sin(t / 300) * 4, 130 * (0.5 + k * 0.5), 130 * (0.5 + k * 0.5), t, { speed: 210, amp: 0.2 });
+      {
+        const at = (tt) => { const kk = Math.min(1, (p - (t - tt) / 7000) * 1.5); if (kk <= 0) return null; const sc = 0.9 + kk * 1.1; return { x: 120 + (1 - kk) * 160 - 10 + PAMPERO_W * sc * 0.85, y: 40 - kk * 10 + Math.sin(tt / 300) * 4 + PAMPERO_H * sc * 0.5 }; };
+        glitter(g, t, at, 30, 55);
+        const sc = 0.9 + k * 1.1;
+        g.drawImage(pamperoAt(t, 760), 120 + (1 - k) * 160 - 10, 40 - k * 10 + Math.sin(t / 300) * 4, PAMPERO_W * sc, PAMPERO_H * sc);
+      }
       g.globalAlpha = 1;
     },
   },

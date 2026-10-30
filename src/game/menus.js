@@ -18,6 +18,8 @@ import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, BIOMES, DEPARTMENTS, PLACE_DEPT, 
 import { charSprite } from '../gfx/characters.js';
 import { itemIcon } from '../gfx/items.js';
 import { badgeIcon } from '../gfx/badges.js';
+import { badgeOf } from '../data/route.js';
+import { isDev } from '../core/devauth.js';
 import { SAVE_CONFIG } from '../save/config.js';
 
 // ---------------------------------------------------------------- helpers
@@ -72,7 +74,9 @@ export async function openPauseMenu() {
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
     if (hasItem('mapa_uruguay')) entries.push(['Mapa', openMap]);
+    if (hasItem('farol')) entries.push(['Destello', async () => { const { useFlash } = await import('./world.js'); await say(useFlash()); }]);
     if (hasItem('silbato')) entries.push(['Vuelo', async () => { flight = await pickFlight(); }]);
+    if (isDev()) entries.push(['Desarrollo', async () => { const { openDevMenu } = await import('./devtools.js'); flight = await openDevMenu(); }]);
     entries.push([S.player.name, openCard]);
     entries.push(['Guardar', openSave]);
     entries.push(['Opciones', openOptions]);
@@ -90,6 +94,7 @@ export async function openPauseMenu() {
 /** Silbato del Hornero: pick a visited city to fly to. Returns the destination or null. */
 async function pickFlight() {
   const { flyPoints, worldState } = await import('./world.js');
+  if (!state().flags[badgeOf('florida')]) { await say('El hornero no te obedece todavía. Hace falta la Medalla Florida.'); return null; }
   if (worldState.map?.indoor) { await say('Acá adentro no se puede usar.'); return null; }
   const pts = flyPoints();
   if (!pts.length) { await say('Todavía no conocés ninguna ciudad adonde volar.'); return null; }
@@ -151,7 +156,7 @@ export function openParty({ mode = 'field', active = -1, title, onUse } = {}) {
       num.textContent = `${c.hp}/${maxHp(c)}`;
       await wait(250);
     };
-    const foot = h('footer', { class: 'panel-foot', text: mode === 'forced' ? '' : 'B: volver' });
+    const foot = h('footer', { class: 'panel-foot', text: mode === 'forced' ? '' : `${keyName('b')}: volver` });
     el.append(head, list, foot);
     let nav;
     const makeNav = (start) => {
@@ -627,7 +632,8 @@ export function openMap() {
 export function openCard() {
   const S = state();
   return panel('panel-card', (el, close) => {
-    const badges = [['badge1', 'Montevideo', '#3f86e0'], ['badge2', 'Maldonado', '#e8c21c'], ['badge3', 'Treinta y Tres', '#a48e48'], ['badge4', 'Durazno', '#e8702a'], ['badge5', 'Tacuarembó', '#4aa03c'], ['badge6', 'Rivera', '#c8402a'], ['badge7', 'Salto', '#8a5ad0'], ['badge8', 'Fray Bentos', '#c8506a']];
+    // In route order; the last number picks the medal drawing (each medal keeps its type's art).
+    const badges = [['badge1', 'Trinidad', '#b8864a', 9], ['badge2', 'Mercedes', '#c8c0b0', 10], ['badge3', 'Fray Bentos', '#c8506a', 8], ['badge4', 'Salto', '#8a5ad0', 7], ['badge5', 'Rivera', '#c8402a', 6], ['badge6', 'Tacuarembó', '#4aa03c', 5], ['badge7', 'Treinta y Tres', '#a48e48', 3], ['badge8', 'Maldonado', '#e8c21c', 2], ['badge9', 'Florida', '#8ac8f0', 11], ['badge10', 'Durazno', '#e8702a', 4], ['badge11', 'Canelones', '#9ac83a', 12], ['badge12', 'Montevideo', '#3f86e0', 1]];
     el.append(
       h('header', { class: 'panel-title' }, h('span', { text: 'Carnet de Entrenador' }), h('span', { text: `ID ${S.player.id}` })),
       h('div', { class: 'card-body' },
@@ -641,7 +647,7 @@ export function openCard() {
         ),
         h('div', { class: 'card-flag', 'aria-hidden': 'true' }),
       ),
-      h('ul', { class: 'badges' }, badges.map(([f, n, col], i) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col }, title: n }, S.flags[f] ? h('img', { class: 'badge-img', src: badgeIcon(i + 1), alt: `Medalla ${n}` }) : h('i', { class: 'badge-slot' }), h('span', { text: n })))),
+      h('ul', { class: 'badges' }, badges.map(([f, n, col, art]) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col }, title: n }, S.flags[f] ? h('img', { class: 'badge-img', src: badgeIcon(art), alt: `Medalla ${n}` }) : h('i', { class: 'badge-slot' }), h('span', { text: n })))),
       S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : '',
       h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
     );
@@ -689,8 +695,8 @@ export function openOptions() {
 
 const CONTROLS = [
   ['Flechas / W A S D', 'Mover al personaje'],
-  ['Z / J', 'Aceptar, hablar, interactuar (botón A)'],
-  ['X / K / Shift / Retroceso', 'Cancelar, volver (botón B)'],
+  ['Z / J', 'Aceptar, hablar, interactuar'],
+  ['X / K / Shift / Retroceso', 'Cancelar, volver'],
   ['Espacio (mantener)', 'Doble velocidad: caminar y combates'],
   ['Enter / Esc / M / Tab', 'Abrir el menú (en el menú, Enter acepta)'],
   ['N', 'Silenciar o activar la música'],
@@ -698,7 +704,7 @@ const CONTROLS = [
   ['P', 'Mostrar u ocultar el equipo'],
   ['T', 'Abrir el Mapa de Uruguay (cuando lo tengas)'],
   ['F2', 'Panel de errores y notas'],
-  ['Gamepad / pantalla táctil', 'Cruz = mover · A y B = botones del mismo nombre'],
+  ['Gamepad', 'Cruz = mover · botón inferior = aceptar · botón derecho = volver'],
 ];
 
 export function openControls() {

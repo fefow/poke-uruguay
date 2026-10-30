@@ -87,9 +87,9 @@ export const LINES = [
     ['anguila', 'Anguila', null, 'snake', '#4a6a5a', '#8ad0c0', '#f2e05c', 'pattern', 0.95, 'Vive en los fondos barrosos y aturde a sus presas con descargas.'],
     ['temblador', 'Temblador', 'agua', 'snake', '#2a5a6a', '#9af0e8', '#ffe44a', 'pattern fangs', 1.15, 'Puede paralizar a un animal grande con una sola descarga.'],
   ] },
-  { t: 'electrico', role: 'f', bst: PAIR, evo: ['piedra_agata'], mons: [
-    ['murcielago', 'Murciélago', 'volador', 'moth', '#5a4a6a', '#8a7a9a', '#ffe44a', 'bat', 0.95, 'Se orienta con chasquidos eléctricos. Pasa el día colgado en galpones abandonados.'],
-    ['vespertino', 'Vespertino', 'siniestro', 'moth', '#3a2a4a', '#6a5a7a', '#ffe44a', 'bat', 1.2, 'Sale al anochecer en grandes bandadas. Su chillido produce chispas.'],
+  { t: 'veneno', role: 'f', bst: PAIR, evo: ['piedra_agata'], mons: [
+    ['murcielago', 'Murciélago', 'volador', 'moth', '#5a4a6a', '#8a7a9a', '#ffe44a', 'bat', 0.95, 'Se orienta con chasquidos agudos y su mordida es venenosa. Pasa el día colgado en galpones abandonados.'],
+    ['vespertino', 'Vespertino', 'volador', 'moth', '#3a2a4a', '#6a5a7a', '#ffe44a', 'bat', 1.2, 'Sale al anochecer en grandes bandadas. Su mordida deja un veneno que adormece.'],
   ] },
   { t: 'electrico', role: 's', bst: [450], evo: [], mons: [
     ['fanal', 'Fanal', 'psiquico', 'wisp', '#f2e05c', '#c8a02a', '#fffbd0', 'lantern', 1.0, 'Una luz que guía a los barcos en la niebla. Se la ve de lejos aunque no haya faro.'],
@@ -160,9 +160,9 @@ export const LINES = [
     ['cururu', 'Cururú', 'agua', 'frog', '#5a7a3a', '#3a5a22', '#e8e0a0', 'spots sac', 1.1, 'Hincha el cuerpo para parecer más grande. Su veneno paraliza a depredadores pequeños.'],
     ['escuerzo', 'Escuerzo', 'tierra', 'frog', '#8a9a3a', '#5a3a1a', '#e8d870', 'spots horns sac', 1.3, 'El sapo cornudo de la pampa. Se entierra y espera con la boca abierta.'],
   ] },
-  { t: 'veneno', role: 's', bst: PAIR, evo: [24], mons: [
-    ['aguaviva', 'Aguaviva', 'agua', 'jelly', '#b8d8f8', '#8ab8e8', '#e8b0f8', '', 0.95, 'Arrastrada por la corriente hasta las playas, deja ronchas dolorosas.'],
-    ['carabela', 'Carabela', 'agua', 'jelly', '#4a8ae8', '#2a5ac0', '#c870e8', 'float', 1.2, 'Sus tentáculos miden metros. Un solo roce saca a un nadador del agua.'],
+  { t: 'electrico', role: 's', bst: PAIR, evo: [24], mons: [
+    ['aguaviva', 'Aguaviva', 'agua', 'jelly', '#b8d8f8', '#8ab8e8', '#e8b0f8', '', 0.95, 'Arrastrada por la corriente hasta las playas, deja ronchas dolorosas con descargas eléctricas.'],
+    ['carabela', 'Carabela', 'agua', 'jelly', '#4a8ae8', '#2a5ac0', '#c870e8', 'float', 1.2, 'Sus tentáculos miden metros. Un solo roce con su descarga saca a un nadador del agua.'],
   ] },
   { t: 'veneno', role: 'a', bst: PAIR, evo: [23], mons: [
     ['viuda', 'Viuda', null, 'spider', '#1a1a22', '#2a2a32', '#e0263a', 'hourglass', 0.95, 'Teje redes irregulares en rincones oscuros. Su picadura debe tomarse en serio.'],

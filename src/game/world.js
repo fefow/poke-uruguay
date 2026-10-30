@@ -3,6 +3,7 @@
 import { MAPS, OUTDOOR, INTERIOR } from '../data/maps.js';
 import { SCRIPTS } from '../data/story.js';
 import { SPECIES } from '../data/species.js';
+import { badgeOf } from '../data/route.js';
 import { TYPES } from '../data/types.js';
 import { ITEMS } from '../data/items.js';
 import { T, TILE_INFO, tileCanvas } from '../gfx/tiles.js';
@@ -94,7 +95,7 @@ function solidAt(x, y, { ignorePlayer = false, self = null, player = false } = {
   const ch = tileAt(x, y);
   if (ch == null) return true;
   // With the canoe, the player can sail on water.
-  if (TILE_INFO[ch]?.solid && !(player && ch === '~' && hasItem('canoa'))) return true;
+  if (TILE_INFO[ch]?.solid && !(player && ch === '~' && hasItem('canoa') && flag(badgeOf('rivera')))) return true;
   if (W_.npcs.some((n) => n !== self && n.visible && n.x === x && n.y === y)) return true;
   if (W_.items.some((it) => it.x === x && it.y === y)) return true;
   if (W_.legend && W_.legend.x === x && W_.legend.y === y) return true;
@@ -141,7 +142,7 @@ export function loadMap(id, x, y, dir = 'down') {
       if (row[x] === '%' && S.flags[`cl_${id}_${x}_${y}`]) W_.tiles[y] = W_.tiles[y].slice(0, x) + '.' + W_.tiles[y].slice(x + 1);
     }
   });
-  if (changed) W_.npcs = [];
+  if (changed) { W_.npcs = []; W_.lit = false; }
   // The bicycle is never used indoors, and bike-only zones put you on it.
   if (m.indoor) W_.bike = false;
   else if (m.bikeOnly && hasItem('bici')) W_.bike = true;
@@ -252,7 +253,11 @@ function tryMove(d) {
     if (!req(door.req)) return void runScript(async () => { await say(door.deny ?? 'Está cerrado.'); });
     return void runScript(() => enterInterior(door.to));
   }
-  if (solidAt(nx, ny, { player: true })) return bump();
+  if (tileAt(nx, ny) === '\\') return void pushBoulder(dx, dy, nx, ny);
+  if (solidAt(nx, ny, { player: true })) {
+    if (tileAt(nx, ny) === '~' && hasItem('canoa') && !flag(badgeOf('rivera'))) hint('La Canoa no aguanta esta corriente todavía: hace falta la Medalla Rivera.');
+    return bump();
+  }
   p.from = { x: p.x, y: p.y };
   p.x = nx;
   p.y = ny;
@@ -260,6 +265,42 @@ function tryMove(d) {
   p.t = 0;
   p.dur = W_.bike ? BIKE_MS : input.held('b') ? RUN_MS : input.held('run') ? SPACE_MS : WALK_MS;
   p.step++;
+}
+
+let hintAt = 0;
+function hint(msg) {
+  const now = performance.now();
+  if (now - hintAt < 2500 || W_.scriptRunning) return;
+  hintAt = now;
+  void runScript(() => say(msg));
+}
+
+let pushAt = 0;
+/** Fuerza: walking against a boulder pushes it one tile, if the one behind it is free. */
+function pushBoulder(dx, dy, bx, by) {
+  const now = performance.now();
+  if (now - pushAt < 350) return;
+  pushAt = now;
+  if (!hasItem('guantes')) return hint('Una roca enorme. Hace falta fuerza para moverla.');
+  if (!flag(badgeOf('tacuarembo'))) return hint('La roca no se mueve. Con los Guantes de Domador hace falta la Medalla Tacuarembó.');
+  const tx = bx + dx, ty = by + dy;
+  const ch = tileAt(tx, ty);
+  if (ch == null || TILE_INFO[ch]?.solid || ch === '~' || solidAt(tx, ty)) return bump();
+  sfx('confirm');
+  const put = (x, y, c) => { W_.tiles[y] = W_.tiles[y].slice(0, x) + c + W_.tiles[y].slice(x + 1); };
+  put(bx, by, '.');
+  put(tx, ty, '\\');
+}
+
+/** Destello: lights up a dark map until the player leaves it. Returns what to tell the player. */
+export function useFlash() {
+  if (!hasItem('farol')) return 'No tenés con qué iluminar.';
+  if (!flag(badgeOf('punta'))) return 'El farol no alcanza todavía: hace falta la Medalla Maldonado.';
+  if (!W_.map?.dark) return 'Acá no hace falta.';
+  if (W_.lit) return 'Ya está iluminado.';
+  W_.lit = true;
+  sfx('levelup');
+  return '¡El farol ilumina todo el lugar!';
 }
 
 let bumpAt = 0;
@@ -540,6 +581,7 @@ async function legendEncounter(L) {
 
 async function cutBush(x, y) {
   if (!hasItem('machete')) return say('Un zarzal espeso y espinoso. Con algo filoso se podría abrir paso.');
+  if (!flag(badgeOf('salto'))) return say('Un zarzal espeso. El Machete no alcanza todavía: hace falta la Medalla Salto.');
   await say('Un zarzal espeso. Con el Machete se puede abrir paso.');
   if (!(await ask('¿Cortar el zarzal?'))) return;
   sfx('select');
@@ -580,11 +622,25 @@ export async function flyTo(pt) {
   await doWarp(pt.id, pt.x, pt.y, 'down');
 }
 
-/** Fishing: needs the rod and a `fish` table on the map. */
+/**
+ * What a rod can pull out of a map's fishing table: the Caña Vieja only gets the most common creature
+ * at the low end of its level range, the Caña Buena the two most common up to the middle, and the
+ * Súper Caña everything over the full range.
+ */
+export function fishFor(table, rod) {
+  const byWeight = [...table].sort((a, b) => b[3] - a[3]);
+  if (rod >= 3) return byWeight;
+  const n = rod === 1 ? 1 : Math.min(2, byWeight.length);
+  return byWeight.slice(0, n).map(([sp, lo, hi, w]) => [sp, lo, rod === 1 ? Math.min(hi, lo + 1) : Math.max(lo, Math.round((lo + hi) / 2)), w]);
+}
+
+/** Fishing: needs a rod and a `fish` table on the map. */
 async function fish() {
-  if (!hasItem('cana_pescar')) return say('El agua está turbia. Mejor no meterse.');
-  const list = W_.map.fish;
-  if (!list) return say('Acá no parece haber nada que pescar.');
+  const rod = hasItem('cana_super') ? 3 : hasItem('cana_buena') ? 2 : hasItem('cana_pescar') ? 1 : 0;
+  if (!rod) return say('El agua está turbia. Sin una caña, mejor no meterse.');
+  const table = W_.map.fish;
+  if (!table) return say('Acá no parece haber nada que pescar.');
+  const list = fishFor(table, rod);
   if (!state().party.some((c) => c.hp > 0)) return say('Tus criaturas están debilitadas. Mejor no arriesgarse.');
   const pl = W_.player;
   const [dx, dy] = DIRS[pl.dir];
@@ -657,6 +713,7 @@ export const api = {
   flag,
   setFlag,
   hasItem,
+  badges: () => badgeCount(),
   takeItem: (k, q = 1) => removeItem(k, q),
   sfx,
   wait,
@@ -878,6 +935,14 @@ function drawWorld(g, t) {
     const night = grade(g);
     motes(g, t, { night });
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
+  }
+  if (m.dark && !W_.lit) {
+    const px0 = ppos.x - cx + T / 2, py0 = ppos.y - cy + T / 2;
+    const gr = g.createRadialGradient(px0, py0, T * 1.3, px0, py0, T * 3.8);
+    gr.addColorStop(0, 'rgba(6,6,16,0)');
+    gr.addColorStop(1, 'rgba(6,6,16,0.97)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, W, H);
   }
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }

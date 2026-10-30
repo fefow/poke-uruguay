@@ -27,7 +27,7 @@ function summaryOf(s) {
   return {
     name: s.player.name,
     look: s.player.look,
-    badges: ['badge1', 'badge2', 'badge3'].filter((b) => s.flags[b]).length,
+    badges: Array.from({ length: 12 }, (_, i) => `badge${i + 1}`).filter((b) => s.flags[b]).length,
     dex: s.dex.caught.length,
     playtime: Math.floor(s.stats.playtime),
     location: MAPS[s.pos.map]?.name ?? '',

@@ -1,6 +1,7 @@
 // Rule-based save validation. Rejects values the game could never produce,
 // whatever the signature says. The same rules are mirrored server-side in
 // supabase/ so the server can be the final authority later.
+import { badgeOf } from '../data/route.js';
 import { SPECIES, MIN_LEVEL, STARTERS } from '../data/species.js';
 import { MOVES } from '../data/moves.js';
 import { ITEMS, MAX_STACK } from '../data/items.js';
@@ -17,14 +18,14 @@ const LINES = {
   carpinchito: ['carpinchito', 'carpincho', 'carpinchon'],
 };
 const STORY_FLAGS = new Set([
-  'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'rival1', 'rival2', 'rival3', 'rival4',
-  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
+  'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'dex_quest', 'got_carta', 'rival1', 'rival2', 'rival3', 'rival4',
+  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
-  'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
-  'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_brumario', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
+  'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
+  'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
   'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
-const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-9])_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 
@@ -94,16 +95,23 @@ export function validateSave(d) {
     flags[k] = true;
   }
   // Story order: every medal needs the previous one, and each PP hideout needs its medal.
-  for (let i = 2; i <= 8; i++) if (flags[`badge${i}`] && !flags[`badge${i - 1}`]) e('medallas fuera de orden');
-  if (flags.pp_clear && !(flags.badge4 && flags.quebrada_clear)) e('la fábrica de Minas no pudo haberse completado');
-  if (flags.torre_clear && !(flags.badge5 && flags.pp_clear)) e('la Torre de Niebla no pudo haberse completado');
-  if (flags.badge6 && !flags.torre_clear) e('medalla de Rivera sin haber apagado la Torre');
-  if (flags.represa_clear && !(flags.badge6 && flags.torre_clear)) e('la Represa no pudo haberse completado');
-  if (flags.anglo_clear && !(flags.badge7 && flags.represa_clear)) e('el Frigorífico no pudo haberse completado');
-  if (flags.badge8 && !flags.anglo_clear) e('medalla de Fray Bentos sin haber vencido a Calima');
+  for (let i = 2; i <= 12; i++) if (flags[`badge${i}`] && !flags[`badge${i - 1}`]) e('medallas fuera de orden');
+  const needs = [
+    ['anglo_pp', badgeOf('fraybentos'), 'el Frigorífico Anglo'],
+    ['represa_clear', badgeOf('salto'), 'la Represa'],
+    ['torre_clear', badgeOf('rivera'), 'la Torre de Niebla'],
+    ['quebrada_clear', badgeOf('quebrada'), 'la Quebrada de los Cuervos'],
+    ['cabo_clear', badgeOf('quebrada'), 'el faro de Cabo Polonio'],
+    ['obs_clear', 'quebrada_clear', 'el Observatorio'],
+    ['pp_clear', badgeOf('punta'), 'la fábrica de Minas'],
+    ['anglo_clear', 'badge12', 'Calima'],
+  ];
+  for (const [flag, req, what] of needs) if (flags[flag] && !flags[req]) e(`${what} no pudo haberse completado`);
+  if (flags.pp_clear && !flags.quebrada_clear) e('la fábrica de Minas no pudo haberse completado');
+  if (flags.anglo_clear && !flags.pp_clear) e('Calima no pudo haberse vencido antes que Garúa');
   for (let i = 2; i <= 4; i++) if (flags[`elite${i}`] && !flags[`elite${i - 1}`]) e('Alto Mando fuera de orden');
-  if (flags.elite1 && !(flags.badge8 && flags.anglo_clear)) e('Alto Mando sin las ocho medallas');
-  if (flags.champion && !(flags.badge8 && flags.anglo_clear && flags.elite4 && flags.rival4)) e('campeón sin completar la Liga');
+  if (flags.elite1 && !(flags.badge12 && flags.anglo_clear)) e('Alto Mando sin las doce medallas');
+  if (flags.champion && !(flags.badge12 && flags.anglo_clear && flags.elite4 && flags.rival4)) e('campeón sin completar la Liga');
 
   // Position
   const pos = d.pos ?? {};
@@ -148,14 +156,19 @@ export function validateSave(d) {
   if (bag.lampara && !(flags.cabo_clear && !flags.lamp_returned)) e('Lámpara del Faro imposible');
   if (bag.esfera_celeste) e('Pokeball Celeste no se puede obtener');
   if (bag.mapa_uruguay && !flags.got_mapa) e('Mapa de Uruguay sin haberlo recibido');
-  if (bag.cana_pescar && !flags.got_cana) e('Caña de Pescar sin haberla recibido');
+  if (bag.cana_pescar && !flags.got_cana) e('Caña Vieja sin haberla recibido');
+  if (bag.cana_buena && !flags.got_cana2) e('Caña Buena sin haberla recibido');
+  if (bag.cana_super && !flags.got_cana3) e('Súper Caña sin haberla recibido');
+  if (bag.carta_tabarez && !(flags.got_carta && !flags.dex)) e('Carta de Tabárez imposible');
   if (bag.machete && !flags.got_machete) e('Machete sin haberlo recibido');
   if (bag.ticket_ferry && !(flags.got_ticket && !flags.ferry_done)) e('Ticket del Buquebus imposible');
-  if (flags.ferry_done && !(flags.got_ticket && flags.got_machete)) e('el Buquebus no pudo haber zarpado');
+  if (flags.ferry_done && !flags.got_ticket) e('el Buquebus no pudo haber zarpado');
   if (bag.bici && !flags.got_bici) e('Bicicleta sin haberla recibido');
+  if (bag.guantes && !flags.got_guantes) e('Guantes sin haberlos recibido');
+  if (bag.farol && !flags.got_farol) e('Farol sin haberlo recibido');
   if (bag.canoa && !flags.got_canoa) e('Canoa sin haberla recibido');
   if (!(d.safari && Number.isFinite(d.safari.until))) { delete bag.safari_ball; delete bag.cebo; }
-  if (bag.silbato && !flags.pp_clear) e('Silbato del Hornero sin haber vencido al Equipo PP');
+  if (bag.silbato && !flags.got_vuelo) e('Silbato del Hornero sin haberlo recibido');
 
   // Dex
   const seen = (d.dex?.seen ?? []).filter((k) => SPECIES[k]);

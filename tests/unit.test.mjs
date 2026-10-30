@@ -244,3 +244,56 @@ test('sprite codec round-trips pixels, alpha and big palettes', async () => {
   assert.deepEqual(parseOverridesSource(overridesSource(map)), map);
   assert.deepEqual(parseOverridesSource(overridesSource({})), {});
 });
+
+test('ruta: de Colonia se llega a Montevideo siguiendo las salidas, y cada ciudad bloquea el camino hacia adelante', async () => {
+  const { OUTDOOR } = await import('../src/data/maps.js');
+  const { CHAIN, STOPS, STOP_INDEX, openFlag } = await import('../src/data/route.js');
+  for (let i = 0; i < CHAIN.length - 1; i++) {
+    const a = OUTDOOR[CHAIN[i]];
+    const fwd = Object.values(a.exits).find((e) => e.to === CHAIN[i + 1]);
+    const back = Object.values(OUTDOOR[CHAIN[i + 1]].exits).find((e) => e.to === CHAIN[i]);
+    assert.ok(fwd && back, `${CHAIN[i]} y ${CHAIN[i + 1]} no están conectados en los dos sentidos`);
+    const stop = STOPS[STOP_INDEX[CHAIN[i]]];
+    if (stop?.kind === 'city' && CHAIN[i] !== 'montevideo') assert.ok(fwd.req, `${CHAIN[i]} no bloquea el camino a ${CHAIN[i + 1]}`);
+    if (stop?.kind === 'loc') assert.equal(fwd.req, undefined, `${CHAIN[i]} no debería bloquear`);
+  }
+  assert.equal(openFlag('fraybentos'), 'open_fraybentos');
+});
+
+test('medallas: el N-ésimo gimnasio de la ruta da la medalla N y los equipos suben con el camino', async () => {
+  const { LEADERS, rivalTeamFor } = await import('../src/data/story.js');
+  const { GYM_STOPS, gymAce } = await import('../src/data/route.js');
+  const { fitSpecies, minLevelOf } = await import('../src/data/levels.js');
+  GYM_STOPS.forEach((st, i) => {
+    const L = LEADERS[st.gym];
+    assert.equal(L.order, i + 1, `${st.gym} debería ser el gimnasio ${i + 1}`);
+    assert.equal(L.badge, `badge${i + 1}`);
+    assert.equal(Math.max(...L.team.map((t) => t[1])), gymAce(st.id), `el as de ${st.gym} no sigue la curva`);
+    for (const [sp, lv] of L.team) assert.ok(minLevelOf(sp) <= lv, `${sp} no puede estar en nivel ${lv}`);
+  });
+  for (let s = 1; s <= 5; s++) {
+    const prev = Math.max(...rivalTeamFor('ceibito', s - 1).map((t) => t[1]));
+    assert.ok(Math.max(...rivalTeamFor('ceibito', s).map((t) => t[1])) > prev, `el rival ${s} no es más fuerte que el anterior`);
+  }
+  assert.equal(rivalTeamFor('ceibito', 1).length, 1);
+  assert.equal(fitSpecies('carpinchon', 10), 'carpinchito');
+});
+
+test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstáculo', async () => {
+  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.js');
+  const { CHAIN } = await import('../src/data/route.js');
+  const { SCRIPTS } = await import('../src/data/story.js');
+  const has = (id, ch) => OUTDOOR[id].tiles.some((r) => r.includes(ch));
+  const at = (id) => CHAIN.indexOf(id);
+  assert.ok(has('r_belen_artigas', '%'), 'falta el zarzal de Corte');
+  assert.ok(has('ruta30', '~'), 'falta el río de Surf');
+  assert.ok(has('r_tupambae_melo', '\\'), 'falta la roca de Fuerza');
+  assert.ok(OUTDOOR.r_piriapolis_minas.dark, 'falta el túnel oscuro de Destello');
+  // the move is handed out in a city before the obstacle, and that script exists
+  for (const [house, city, block, script] of [['casa_pay', 'paysandu', 'r_belen_artigas', 'gift_corte'], ['casa_artigas', 'artigas', 'ruta30', 'gift_surf'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'gift_fuerza']]) {
+    assert.equal(INTERIOR[house].npcs[0].script, script);
+    assert.ok(SCRIPTS[script]);
+    assert.ok(at(city) < at(block), `${script} debe darse antes de su obstáculo`);
+  }
+  assert.ok(at('paloma') < at('r_piriapolis_minas'), 'el farol se da antes del túnel');
+});

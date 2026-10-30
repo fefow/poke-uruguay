@@ -52,9 +52,27 @@ export const TILE_INFO = {
   e: { name: 'emblema roca', solid: true },
   z: { name: 'torre', solid: true },
   '%': { name: 'zarzal', solid: true },
+  '\\': { name: 'roca de fuerza', solid: true },
   '`': { name: 'ceniza' },
   ';': { name: 'brasas', enc: true },
   '^': { name: 'magma', solid: true, anim: true },
+  // big city (Montevideo): asphalt, sidewalks, promenade, high-rises and the Buquebus terminal
+  '0': { name: 'asfalto' },
+  '-': { name: 'asfalto con línea' },
+  ':': { name: 'asfalto con línea vertical' },
+  '/': { name: 'cebra' },
+  '_': { name: 'vereda' },
+  '?': { name: 'rambla' },
+  '[': { name: 'baranda', solid: true },
+  ']': { name: 'edificio alto', solid: true },
+  '{': { name: 'azotea', solid: true },
+  '}': { name: 'muelle' },
+  '(': { name: 'vidrio terminal', solid: true },
+  ')': { name: 'techo terminal', solid: true },
+  '<': { name: 'cartel Buquebus (1)', solid: true },
+  '>': { name: 'cartel Buquebus (2)', solid: true },
+  '|': { name: 'farola', solid: true },
+  '"': { name: 'árbol de vereda', solid: true },
   // interiors
   i: { name: 'piso' },
   Y: { name: 'piso gimnasio' },
@@ -201,6 +219,13 @@ const DRAW = {
     g.fillStyle = '#6a6a72'; g.beginPath(); g.ellipse(8, 10, 7, 5, 0, 0, 7); g.fill();
     g.fillStyle = '#9a9aa2'; g.beginPath(); g.ellipse(7, 9, 5, 3, 0, 0, 7); g.fill();
     px(g, 5, 7, '#c0c0c8', 3, 1);
+  },
+  '\\': (g, r) => {
+    grass(g, r);
+    g.fillStyle = '#16141e'; g.beginPath(); g.ellipse(8, 9.5, 8, 6.5, 0, 0, 7); g.fill();
+    g.fillStyle = '#7a6a62'; g.beginPath(); g.ellipse(8, 9, 7, 5.5, 0, 0, 7); g.fill();
+    g.fillStyle = '#a89a90'; g.beginPath(); g.ellipse(6.5, 7.5, 4.5, 3, 0, 0, 7); g.fill();
+    px(g, 4, 6, '#d0c4ba', 3, 1); px(g, 9, 10, '#4e423c', 4, 1); px(g, 7, 12, '#4e423c', 2, 1); px(g, 11, 8, '#4e423c', 1, 3);
   },
   K: (g, r) => {
     px(g, 0, 0, '#8a6a4a', T, T);
@@ -535,6 +560,10 @@ const EMBLEMS = {
   lucha: (g) => { px(g, 4, 5, '#f2e0c0', 8, 6); px(g, 4, 5, '#d8b890', 8, 1); for (let i = 0; i < 4; i++) px(g, 4 + i * 2, 3, '#f2e0c0', 2, 2); px(g, 4, 11, '#d8b890', 8, 1); px(g, 5, 12, '#e0263a', 6, 1); },
   psiquico: (g) => { disc(g, 8, 8, 4.2, '#f4f0ff'); disc(g, 8, 8, 2.4, '#8a4ad8'); disc(g, 8, 8, 1, '#1a1a2a'); px(g, 3, 8, '#f4f0ff', 1, 1); px(g, 12, 8, '#f4f0ff', 1, 1); },
   siniestro: (g) => { disc(g, 8, 8, 4.8, '#e8e0f0'); disc(g, 10, 7, 4.3, '#2a2a3a'); },
+  tierra: (g) => { g.fillStyle = '#e8d098'; g.beginPath(); g.moveTo(2.5, 12); g.lineTo(8, 3.5); g.lineTo(13.5, 12); g.fill(); g.fillStyle = '#8a5a30'; g.beginPath(); g.moveTo(5.5, 12); g.lineTo(8, 8); g.lineTo(10.5, 12); g.fill(); px(g, 3, 12, '#7ac04a', 10, 1); },
+  normal: (g) => { g.fillStyle = '#ffffff'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5; const r = i % 2 ? 2.2 : 5; g.lineTo(8 + Math.cos(a) * r, 8.5 + Math.sin(a) * r); } g.closePath(); g.fill(); },
+  bicho: (g) => { disc(g, 8, 9, 4.2, '#d83a2a'); disc(g, 8, 4.8, 2.1, '#1a2a0a'); px(g, 7.5, 5, '#1a2a0a', 1, 8); disc(g, 6, 8, 0.9, '#1a2a0a'); disc(g, 10, 10, 0.9, '#1a2a0a'); disc(g, 6, 11, 0.8, '#1a2a0a'); },
+  volador: (g) => { g.fillStyle = '#f4faff'; g.beginPath(); g.moveTo(3, 11.5); g.bezierCurveTo(4, 6, 9, 3.5, 13.5, 4); g.bezierCurveTo(12, 6, 11.5, 7, 12.5, 8); g.bezierCurveTo(10, 8.5, 9, 9.5, 9.5, 11); g.bezierCurveTo(7.5, 10.5, 5.5, 11.5, 3, 11.5); g.fill(); px(g, 5, 10, '#8ac8f0', 5, 1); },
 };
 function gymFamily(ids, k) {
   const [R, F, E] = ids;
@@ -577,9 +606,119 @@ gymFamily(['1', '2', '3'], { type: 'fuego', roof: '#a83a1a', roofLight: '#e8702a
 gymFamily(['4', '5', '6'], { type: 'planta', roof: '#2f7a34', roofLight: '#6cc04c', roofDark: '#1a4a1e', rim: '#b8f090', wall: '#e8e0b8', wallDark: '#b8a878', wallLight: '#fff8d8', trim: '#1a4a1e', door: '#4aa03c', doorLight: '#b8f090', wallIn: '#2a5a2a', wallInLight: '#4a8a3a', floorA: '#9ac870', floorB: '#78a858', accent: '#4aa03c' });
 gymFamily(['7', '8', '9'], { type: 'lucha', roof: '#a82a2a', roofLight: '#e86a5a', roofDark: '#5a1414', rim: '#f8e0c0', wall: '#f4ecdc', wallDark: '#c8b898', wallLight: '#ffffff', trim: '#5a1414', door: '#c8402a', doorLight: '#f8e0c0', wallIn: '#7a2a2a', wallInLight: '#b04a3a', floorA: '#d8c898', floorB: '#b8a468', accent: '#c8402a' });
 gymFamily(['!', '@', '$'], { type: 'psiquico', roof: '#6a3a9a', roofLight: '#a878e0', roofDark: '#2e1a4e', rim: '#e8d8ff', wall: '#d8ccee', wallDark: '#a898c8', wallLight: '#f4eeff', trim: '#2e1a4e', door: '#8a5ad0', doorLight: '#e8d8ff', wallIn: '#3a2a6a', wallInLight: '#6a4aa8', floorA: '#2a2a4a', floorB: '#5a4a8a', accent: '#8a5ad0' });
+gymFamily(['À', 'Á', 'Â'], { type: 'tierra', roof: '#8a5a30', roofLight: '#c89058', roofDark: '#4a2a14', rim: '#f0d8a0', wall: '#d8c098', wallDark: '#a8885a', wallLight: '#f0e0c0', trim: '#4a2a14', door: '#a8703a', doorLight: '#f0d8a0', wallIn: '#6a4a2a', wallInLight: '#a8784a', floorA: '#b89860', floorB: '#8a6a3a', accent: '#c89058' });
+gymFamily(['Ã', 'Ä', 'Å'], { type: 'normal', roof: '#9a8a78', roofLight: '#c8bcaa', roofDark: '#4a4238', rim: '#f4ecd8', wall: '#e8e0cc', wallDark: '#b8ae98', wallLight: '#fffaec', trim: '#4a4238', door: '#8a7a68', doorLight: '#f4ecd8', wallIn: '#6a6254', wallInLight: '#a89c88', floorA: '#d8d0bc', floorB: '#b8ae98', accent: '#c8bcaa' });
+gymFamily(['È', 'É', 'Ê'], { type: 'bicho', roof: '#5a8a1a', roofLight: '#9ac83a', roofDark: '#2a4a0a', rim: '#e8f090', wall: '#d8e0a8', wallDark: '#a8b878', wallLight: '#f2f8d0', trim: '#2a4a0a', door: '#6a9a2a', doorLight: '#e8f090', wallIn: '#3a5a1a', wallInLight: '#6a9a2a', floorA: '#a8c868', floorB: '#7aa03a', accent: '#9ac83a' });
+gymFamily(['Ì', 'Í', 'Î'], { type: 'volador', roof: '#4a88c8', roofLight: '#8ac8f0', roofDark: '#1a3a6a', rim: '#f4faff', wall: '#e0eef8', wallDark: '#a8c0d8', wallLight: '#ffffff', trim: '#1a3a6a', door: '#5a98d8', doorLight: '#f4faff', wallIn: '#2a5a9a', wallInLight: '#5a98d8', floorA: '#b8d8f0', floorB: '#88b0d8', accent: '#8ac8f0' });
 gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a5a78', roofDark: '#12121c', rim: '#c8506a', wall: '#585870', wallDark: '#3a3a4e', wallLight: '#7a7a94', trim: '#12121c', door: '#2a2a3a', doorLight: '#c8506a', wallIn: '#1e1e2c', wallInLight: '#3a3a52', floorA: '#2a2a34', floorB: '#3e3e4c', accent: '#c8506a' });
 
 const cache = new Map();
+
+// ---- big city tiles ----
+const sidewalk = (g) => {
+  px(g, 0, 0, '#c9c5be', T, T);
+  px(g, 0, 7, '#aeaaa3', T, 1); px(g, 7, 0, '#aeaaa3', 1, T);
+  px(g, 0, 15, '#aeaaa3', T, 1); px(g, 15, 0, '#aeaaa3', 1, T);
+  px(g, 1, 1, '#dad7d0', 5, 1); px(g, 9, 9, '#dad7d0', 5, 1);
+};
+const asphalt = (g, r) => speckle(g, r, '#4c4c56', ['#44444e', '#54545e', '#3e3e48'], 16);
+const GLYPH = {
+  B: ['110', '101', '110', '101', '110'], U: ['101', '101', '101', '101', '111'], Q: ['111', '101', '101', '111', '001'],
+  E: ['111', '100', '110', '100', '111'], S: ['011', '100', '010', '001', '110'],
+};
+const signBand = (g, text) => {
+  px(g, 0, 0, '#2a3a7a', T, T);
+  px(g, 0, 0, '#e8eef8', T, 1); px(g, 0, 15, '#e8eef8', T, 1);
+  [...text].forEach((ch, i) => GLYPH[ch].forEach((row, y) => [...row].forEach((b, x) => b === '1' && px(g, i * 4 + x, 5 + y, '#f2f6ff'))));
+};
+Object.assign(DRAW, {
+  '0': (g, r) => asphalt(g, r),
+  '-': (g, r) => { asphalt(g, r); px(g, 1, 7, '#f2d23c', 5, 2); px(g, 10, 7, '#f2d23c', 5, 2); },
+  ':': (g, r) => { asphalt(g, r); px(g, 7, 1, '#f2d23c', 2, 5); px(g, 7, 10, '#f2d23c', 2, 5); },
+  '/': (g, r) => { asphalt(g, r); for (let x = 1; x < T; x += 4) px(g, x, 1, '#eeeeee', 2, 14); },
+  '_': (g) => sidewalk(g),
+  '?': (g) => {
+    px(g, 0, 0, '#d9cfba', T, T);
+    for (let y = 0; y < T; y += 4) for (let x = (y / 4) % 2 ? 2 : 0; x < T; x += 4) px(g, x, y, '#c4b89e', 2, 2);
+    px(g, 0, 15, '#b8ac92', T, 1);
+  },
+  '[': (g) => {
+    px(g, 0, 0, '#d9cfba', T, T);
+    px(g, 0, 5, '#3a3e4a', T, 2); px(g, 0, 9, '#3a3e4a', T, 1);
+    for (let x = 1; x < T; x += 5) px(g, x, 4, '#3a3e4a', 2, 8);
+    px(g, 0, 5, '#7a8090', T, 1);
+  },
+  ']': (g) => {
+    px(g, 0, 0, '#bfae94', T, T);
+    px(g, 0, 15, '#8a7a64', T, 1); px(g, 0, 0, '#d4c6ae', T, 1);
+    for (const [x, y] of [[2, 2], [9, 2], [2, 9], [9, 9]]) {
+      px(g, x, y, '#2e4468', 5, 4); px(g, x + 1, y + 1, '#7ab0e0', 3, 2); px(g, x + 1, y + 1, '#c8e4f8', 1, 1);
+      px(g, x - 1, y + 4, '#9a8a74', 7, 1);
+    }
+  },
+  '{': (g, r) => {
+    px(g, 0, 0, '#6c6c78', T, T);
+    px(g, 0, 0, '#8e8e9a', T, 2); px(g, 0, 14, '#4a4a56', T, 2);
+    px(g, 2, 5, '#b8bcc8', 5, 4); px(g, 2, 5, '#d8dce8', 5, 1); px(g, 10, 6, '#8a6a4a', 4, 6); px(g, 10, 6, '#aa8a6a', 4, 1);
+    for (let i = 0; i < 4; i++) px(g, r.int(0, 15), r.int(2, 13), '#5c5c68');
+  },
+  '}': (g) => {
+    px(g, 0, 0, '#a87a4a', T, T);
+    for (let y = 0; y < T; y += 4) px(g, 0, y + 3, '#6a4a2a', T, 1);
+    for (let y = 0; y < T; y += 8) px(g, 5, y, '#6a4a2a', 1, 3);
+    px(g, 0, 0, '#c8966a', T, 1);
+  },
+  '(': (g) => {
+    px(g, 0, 0, '#4a9ac8', T, T);
+    px(g, 0, 0, '#d8e8f0', T, 1); px(g, 0, 15, '#d8e8f0', T, 1);
+    px(g, 7, 0, '#d8e8f0', 2, T);
+    px(g, 2, 3, '#8ad0f0', 3, 1); px(g, 3, 4, '#8ad0f0', 2, 1); px(g, 10, 7, '#8ad0f0', 3, 1); px(g, 11, 8, '#8ad0f0', 2, 1);
+  },
+  ')': (g) => {
+    px(g, 0, 0, '#e4ecf0', T, T);
+    px(g, 0, 0, '#2a5ab8', T, 3); px(g, 0, 3, '#8ab0d8', T, 1);
+    px(g, 0, 14, '#9aa8b4', T, 2);
+  },
+  '<': (g) => signBand(g, 'BUQU'),
+  '>': (g) => signBand(g, 'EBUS'),
+  '|': (g) => {
+    sidewalk(g);
+    px(g, 7, 4, '#2e3240', 2, 11); px(g, 5, 14, '#2e3240', 6, 2);
+    px(g, 4, 2, '#2e3240', 8, 2); px(g, 5, 4, '#fff2a0', 6, 2); px(g, 6, 5, '#ffe060', 4, 1);
+  },
+  '"': (g, r) => {
+    sidewalk(g);
+    px(g, 7, 9, '#6a4a2a', 2, 5); px(g, 4, 13, '#8a8a92', 8, 3);
+    for (let i = 0; i < 26; i++) { const x = 2 + r.int(0, 11), y = 1 + r.int(0, 9); if ((x - 8) ** 2 + (y - 5) ** 2 < 30) px(g, x, y, r.pick(['#3a8a34', '#4a9a3c', '#2e7a2c']), 2, 2); }
+  },
+});
+
+// Montevideo redraws the street sign on a sidewalk instead of grass.
+THEMES.ciudad = {
+  S: (g) => {
+    sidewalk(g);
+    px(g, 7, 7, '#5a3a1a', 2, 8); px(g, 2, 2, '#5a3a1a', 12, 7); px(g, 3, 3, '#c8905a', 10, 5);
+    px(g, 4, 4, '#7a4a2a', 8, 1); px(g, 4, 6, '#7a4a2a', 6, 1);
+  },
+};
+
+// The cave between Piriápolis and Minas: stone floor, rubble where creatures hide, rock walls and crystals.
+const caveFloor = (g, r) => speckle(g, r, '#5a5560', ['#524d58', '#625d68', '#4a4650'], 14);
+const caveWall = (g, r) => {
+  px(g, 0, 0, '#2e2a36', T, T);
+  for (let i = 0; i < 6; i++) { const x = r.int(0, 11), y = r.int(0, 11); px(g, x, y, '#44404e', r.int(3, 5), r.int(3, 4)); px(g, x, y, '#5a5566', 2, 1); }
+  px(g, 0, 15, '#1c1a22', T, 1);
+};
+THEMES.cueva = {
+  '.': caveFloor,
+  ',': (g, r) => { caveFloor(g, r); for (let i = 0; i < 7; i++) { const x = r.int(1, 12), y = r.int(1, 12); px(g, x, y, '#3e3a46', 3, 2); px(g, x, y, '#6e6a78', 2, 1); } },
+  '=': (g, r) => speckle(g, r, '#8a8294', ['#7e768a', '#968ea0', '#74707e'], 12),
+  '#': caveWall,
+  q: caveWall,
+  F: caveWall,
+  f: (g, r) => { caveFloor(g, r); g.fillStyle = '#7ad8f0'; g.beginPath(); g.moveTo(8, 3); g.lineTo(11, 12); g.lineTo(5, 12); g.fill(); g.fillStyle = '#c8f4ff'; g.beginPath(); g.moveTo(8, 3); g.lineTo(9, 8); g.lineTo(7, 8); g.fill(); px(g, 3, 12, '#2a8aa8', 10, 1); },
+  S: (g) => { caveFloor(g, new Rng(5)); px(g, 7, 7, '#5a3a1a', 2, 8); px(g, 2, 2, '#5a3a1a', 12, 7); px(g, 3, 3, '#c8905a', 10, 5); px(g, 4, 4, '#7a4a2a', 8, 1); px(g, 4, 6, '#7a4a2a', 6, 1); },
+};
 
 export function tileCanvas(ch, frame = 0, theme = null) {
   const info = TILE_INFO[ch];

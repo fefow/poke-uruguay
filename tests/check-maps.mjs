@@ -1,6 +1,7 @@
+import { TILE_INFO } from '../src/gfx/tiles.js';
 // Static checks on world data: row widths, NPC/item placement, doors, exits.
 import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.js';
-const SOLID = new Set('~#qpRKkFSHwrugovWLlMZzxXnBTPENOGhaJjdVyeCQIUt%^123456789!@$&*+'.split(''));
+const SOLID = new Set(Object.entries(TILE_INFO).filter(([, v]) => v.solid).map(([k]) => k));
 let problems = 0;
 const bad = (m) => { problems++; console.log('✗', m); };
 for (const [id, m] of Object.entries(MAPS)) {
@@ -36,7 +37,7 @@ for (const [id, m] of Object.entries(MAPS)) for (const w of m.warps ?? []) { con
 const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(MAPS).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
 for (const id of Object.keys(INTERIOR)) if (!linked.has(id)) bad(`interior ${id} is not linked from any door`);
 // connectivity: from the first walkable edge tile of an outdoor map, every exit, door front and NPC/item is reachable
-const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~'); }; // thickets (machete) and water (canoe) count as passable
+const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\'); }; // thickets (machete) and water (canoe) count as passable
 for (const [id, m] of Object.entries(OUTDOOR)) {
   const h = m.tiles.length; const w = m.tiles[0].length;
   const starts = [];

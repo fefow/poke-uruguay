@@ -1,5 +1,5 @@
 // Procedural 16x16 gym medals (pixel by pixel, so they stay crisp when scaled).
-// badgeIcon(n) returns a data URL for medal n (1-8) in the trainer card.
+// badgeIcon(n) returns a data URL for medal n (1-12) in the trainer card.
 import { override } from './overrides.js';
 
 const INK = '#1a1a24';
@@ -119,6 +119,62 @@ const MEDALS = {
     '...wwwww........',
     '....wwwwwwww....',
     '.....wwwwww.....',
+  ] },
+  // 9 Trinidad, Tierra: loma con pasto
+  9: { plate: ['#b8864a', '#7a5430'], pal: { t: '#e8d098', m: '#8a5a30', g: '#7ac04a' }, rows: [
+    '',
+    '',
+    '.......tt.......',
+    '......tttt......',
+    '.....tttttt.....',
+    '....ttmmmmtt....',
+    '...ttmmmmmmtt...',
+    '...tmmmmmmmmt...',
+    '...gggggggggg...',
+    '....gggggggg....',
+    '',
+  ] },
+  // 10 Mercedes, Normal: estrella
+  10: { plate: ['#d8d0c0', '#9a9484'], pal: { w: '#ffffff', k: '#6a6458' }, rows: [
+    '',
+    '',
+    '.......kk.......',
+    '.......ww.......',
+    '......wwww......',
+    '...wwwwwwwwww...',
+    '....wwwwwwww....',
+    '.....wwwwww.....',
+    '.....wwwwww.....',
+    '....www..www....',
+    '...ww......ww...',
+  ] },
+  // 11 Florida, Volador: ala
+  11: { plate: ['#8ac8f0', '#4a88c8'], pal: { w: '#ffffff', c: '#d0ecff' }, rows: [
+    '',
+    '',
+    '',
+    '..........wwww..',
+    '........wwwwww..',
+    '......wwwwwwcc..',
+    '....wwwwwwwcc...',
+    '...wwwwwwwcc....',
+    '...wwwwwcc......',
+    '....wwcc........',
+    '.....c..........',
+  ] },
+  // 12 Canelones, Bicho: mariquita
+  12: { plate: ['#9ac83a', '#5a8a1a'], pal: { k: '#1a2a0a', r: '#d83a2a' }, rows: [
+    '',
+    '',
+    '.......kk.......',
+    '......kkkk......',
+    '.....rrkkrr.....',
+    '....rrrkkrrr....',
+    '....rkrkkrkr....',
+    '....rrrkkrrr....',
+    '....rkrkkrkr....',
+    '.....rrkkrr.....',
+    '......kkkk......',
   ] },
 };
 

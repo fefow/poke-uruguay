@@ -1,5 +1,6 @@
 // Mapa de Uruguay: contorno simplificado y posición de cada lugar (longitud, latitud).
 import { deepFreeze } from '../core/util.js';
+import { STOPS } from './route.js';
 
 // [lon, lat], en sentido horario desde Bella Unión.
 export const OUTLINE = [
@@ -11,42 +12,40 @@ export const OUTLINE = [
 
 // kind: 'city' (con gimnasio) | 'loc' (localidad: almacén y gente con objetos) | 'place' (lugar de la historia)
 // maps: ids de mapa que cuentan como "estar en" ese lugar (además de sus interiores).
+const POS = {
+  colonia: [-57.84, -34.47, '#f2f2f2', 'Laboratorio del Maestro Tabárez'], rosario: [-57.35, -34.31, null, 'Pescador retirado'],
+  sanjose: [-56.71, -34.34, '#d8c8a0', 'Intendencia'], ecilda: [-56.8, -33.95], trinidad: [-56.9, -33.52, '#c8b890', 'Centro de tropas'],
+  palmitas: [-57.3, -33.45], mercedes: [-57.6, -33.3, '#a8c8d8', 'Club de remo'], villasoriano: [-57.85, -33.2],
+  fraybentos: [-58.0, -33.1, '#c8506a', 'Gimnasio Siniestro · Frigorífico Anglo'], young: [-57.97, -32.7],
+  paysandu: [-57.9, -32.3, '#e0c898', 'Pan Casero y Alfajor Triple'], guichon: [-57.75, -32.0],
+  salto: [-57.75, -31.38, '#8a5ad0', 'Gimnasio Psíquico · Represa'], belen: [-57.8, -30.95],
+  artigas: [-56.95, -30.4, '#c8a0d8', 'Cooperativa de mineros'], baltasar: [-56.3, -30.6],
+  rivera: [-55.7, -30.95, '#c8402a', 'Gimnasio de Lucha · Torre de Niebla'], tranqueras: [-55.85, -31.35],
+  tacuarembo: [-56.0, -31.72, '#4aa03c', 'Gimnasio de Planta'], tupambae: [-55.4, -32.2],
+  melo: [-54.2, -32.4, '#d8b078', 'Peña criolla'], cerrochato: [-54.2, -32.8],
+  quebrada: [-54.38, -33.23, '#a48e48', 'Gimnasio de Roca'], lascano: [-54.15, -33.7],
+  rocha: [-54.3, -34.3, '#e0d0a0', 'Centro de guardaparques'], paloma: [-54.17, -34.66, null, 'Superballs · Guardería'],
+  punta: [-54.95, -34.96, '#3f86e0', 'Gimnasio de Agua'], piriapolis: [-55.27, -34.86, null, 'Almacén y Alfajores'],
+  minas: [-55.24, -34.37, '#9cc4d8', 'Mate con Carqueja · Observatorio'], casupa: [-55.65, -34.2],
+  florida: [-56.2, -34.1, '#e8e0c8', 'Piedra Alta'], sarandi: [-56.35, -33.6],
+  durazno: [-56.5, -33.0, '#e8702a', 'Gimnasio de Fuego'], sanramon: [-56.4, -34.35],
+  canelones: [-56.28, -34.52, '#b08ac8', 'Bodega'], laspiedras: [-56.22, -34.7],
+  montevideo: [-56.19, -34.9, '#e8c21c', 'Gimnasio Eléctrico · Liga'],
+};
+// kind: 'city' (ciudad de la ruta) | 'loc' (localidad entre dos ciudades) | 'place' (lugar de la historia)
 export const PLACES = deepFreeze([
-  { id: 'colonia', name: 'Colonia del Sacramento', kind: 'city', lon: -57.84, lat: -34.47, color: '#f2f2f2', note: 'Laboratorio del Maestro Tabárez' },
-  { id: 'rosario', name: 'Rosario', kind: 'loc', lon: -57.35, lat: -34.31, note: 'Caña de Pescar' },
-  { id: 'montevideo', name: 'Montevideo', kind: 'city', lon: -56.19, lat: -34.9, color: '#3f86e0', note: 'Gimnasio de Agua · Mapa' },
-  { id: 'piriapolis', name: 'Piriápolis', kind: 'loc', lon: -55.27, lat: -34.86, note: 'Almacén y Alfajores' },
-  { id: 'punta', name: 'Punta del Este', kind: 'city', lon: -54.95, lat: -34.96, color: '#e8c21c', note: 'Gimnasio Eléctrico' },
-  { id: 'paloma', name: 'La Paloma', kind: 'loc', lon: -54.17, lat: -34.66, note: 'Superballs' },
+  ...STOPS.map((st) => {
+    const [lon, lat, color, note] = POS[st.id];
+    return { id: st.id, name: st.name, kind: st.kind, lon, lat, ...(color ? { color } : {}), ...(note ? { note } : {}) };
+  }),
   { id: 'cabo', name: 'Cabo Polonio', kind: 'place', lon: -53.77, lat: -34.4, note: 'Faro' },
-  { id: 'minas', name: 'Minas', kind: 'loc', lon: -55.24, lat: -34.37, note: 'Mate con Carqueja' },
-  { id: 'quebrada', name: 'Treinta y Tres', kind: 'city', lon: -54.38, lat: -33.23, color: '#a48e48', note: 'Gimnasio de Roca' },
-  { id: 'durazno', name: 'Durazno', kind: 'city', lon: -56.5, lat: -33.0, color: '#e8702a', note: 'Gimnasio de Fuego' },
-  { id: 'tacuarembo', name: 'Tacuarembó', kind: 'city', lon: -56.0, lat: -31.72, color: '#4aa03c', note: 'Gimnasio de Planta' },
-  { id: 'rivera', name: 'Rivera', kind: 'city', lon: -55.7, lat: -30.95, color: '#c8402a', note: 'Gimnasio de Lucha · Torre de Niebla' },
-  { id: 'salto', name: 'Salto', kind: 'city', lon: -57.75, lat: -31.38, color: '#8a5ad0', note: 'Gimnasio Psíquico · Represa' },
-  { id: 'paysandu', name: 'Paysandú', kind: 'loc', lon: -57.9, lat: -32.3, note: 'Pan Casero y Alfajor Triple' },
-  { id: 'fraybentos', name: 'Fray Bentos', kind: 'city', lon: -58.0, lat: -33.1, color: '#c8506a', note: 'Gimnasio Siniestro · Frigorífico Anglo' },
 ]);
 
 // Mapas de ruta: se muestran entre los dos lugares que unen.
-export const ROUTES = deepFreeze({
-  ruta1: ['colonia', 'rosario'],
-  interbalnearia: ['montevideo', 'piriapolis'],
-  ruta8: ['montevideo', 'minas'],
-  ruta5: ['durazno', 'tacuarembo'],
-  ruta30: ['tacuarembo', 'rivera'],
-  ruta31: ['tacuarembo', 'salto'],
-  ruta3: ['salto', 'paysandu'],
-  ruta24: ['paysandu', 'fraybentos'],
-});
+export const ROUTES = deepFreeze(Object.fromEntries(STOPS.flatMap((st, i) => st.via.map((r) => [r, [st.id, STOPS[i + 1].id]]))));
 
-// Líneas que unen los lugares en orden de recorrido.
-export const LINKS = deepFreeze([
-  ['colonia', 'rosario'], ['rosario', 'montevideo'], ['montevideo', 'piriapolis'], ['piriapolis', 'punta'],
-  ['punta', 'paloma'], ['paloma', 'cabo'], ['montevideo', 'minas'], ['minas', 'quebrada'], ['minas', 'durazno'],
-  ['durazno', 'tacuarembo'], ['tacuarembo', 'rivera'], ['tacuarembo', 'salto'], ['salto', 'paysandu'], ['paysandu', 'fraybentos'],
-]);
+// Líneas que unen los lugares en orden de recorrido (la ruta completa, más el ramal a Cabo Polonio).
+export const LINKS = deepFreeze([...STOPS.slice(0, -1).map((st, i) => [st.id, STOPS[i + 1].id]), ['paloma', 'cabo']]);
 
 export const VIEW = { w: 340, h: 250, lon0: -59.76, lon1: -52.04, lat0: -29.9, lat1: -35.2 };
 export const project = (lon, lat) => [
@@ -89,18 +88,20 @@ export const DEPARTMENTS = deepFreeze([
 ]);
 
 // Departamento de cada lugar del mapa.
-export const PLACE_DEPT = deepFreeze({
-  colonia: 'colonia', rosario: 'colonia', montevideo: 'montevideo', piriapolis: 'maldonado', punta: 'maldonado',
-  paloma: 'rocha', cabo: 'rocha', minas: 'lavalleja', quebrada: 'treintaytres', durazno: 'durazno',
-  tacuarembo: 'tacuarembo', rivera: 'rivera', salto: 'salto', paysandu: 'paysandu', fraybentos: 'rionegro',
-});
+export const PLACE_DEPT = deepFreeze({ ...Object.fromEntries(STOPS.map((st) => [st.id, st.dept])), cabo: 'rocha' });
 
 // Zona (bioma) de cada mapa con criaturas salvajes.
-export const MAP_BIOME = deepFreeze({
+const DEPT_BIOME = Object.fromEntries(DEPARTMENTS.map((d) => [d.id, d.biome]));
+const BASE_MAP_BIOME = {
   ruta1: ['campo'], rosario: ['playa'], interbalnearia: ['ciudad', 'playa'], piriapolis: ['playa'], punta: ['playa'], paloma: ['playa'], cabo: ['playa'],
   ruta8: ['campo', 'ciudad'], minas: ['hielo', 'campo'], quebrada: ['campo', 'bosque'], durazno: ['magma'],
   ruta5: ['campo', 'bosque'], tacuarembo: ['bosque'], ruta30: ['bosque'], rivera: ['bosque', 'ciudad'], ruta31: ['campo', 'bosque'], salto: ['campo', 'ciudad'],
   ruta3: ['campo'], paysandu: ['campo'], ruta24: ['campo'], fraybentos: ['ciudad', 'campo'],
+};
+export const MAP_BIOME = deepFreeze({
+  ...BASE_MAP_BIOME,
+  ...Object.fromEntries(STOPS.filter((st) => !BASE_MAP_BIOME[st.id]).map((st) => [st.id, [DEPT_BIOME[st.dept]]])),
+  ...Object.fromEntries(STOPS.flatMap((st, i) => st.via.filter((r) => !BASE_MAP_BIOME[r]).map((r) => [r, [...new Set([DEPT_BIOME[st.dept], DEPT_BIOME[STOPS[i + 1].dept]])]]))),
 });
 
 // Adornos del mapa (pinos y cerros), en [lon, lat].
