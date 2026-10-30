@@ -152,7 +152,7 @@ export const EVENTS = {
   },
   muelle: {
     flag: 'muelle_clear', name: 'Contramaestre Vidal', mt: 'mt_bomba_lodo', prize: 3600,
-    team: [['yarara', 49], ['lobomarino', 49], ['caudillo', 50], ['temblador', 50]],
+    team: [['yarara', 49], ['patriarca', 49], ['caudillo', 50], ['temblador', 50]],
     intro: ['El muelle del puerto es nuestro. Por acá entra el material de las torres de niebla.', 'Quien quiera pasar, va a tener que hundirse primero.'],
     lose: 'Me hundí yo solo…',
     after: ['Está bien. Levanto el campamento. Que el muelle sea de todos otra vez.'],

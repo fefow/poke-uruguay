@@ -208,9 +208,8 @@ export const LINES = [
     ['peon', 'Peón', null, 'biped', '#8a6a3a', '#d8a070', '#c83a2a', 'hat', 0.95, 'Trabaja de sol a sol en la estancia. Sus manos son más duras que la piedra.'],
     ['capataz', 'Capataz', 'normal', 'biped', '#6a4a22', '#c89060', '#c83a2a', 'hat beard', 1.2, 'Dirige la tropa con autoridad. Nadie lo ve cansado.'],
   ] },
-  { t: 'lucha', role: 'a', bst: PAIR, evo: [24], mons: [
-    ['carpintero', 'Carpintero', 'volador', 'bird', '#2a2a2a', '#d8a040', '#e0263a', 'crest long_beak', 0.95, 'Golpea los troncos con cadencia constante. Su pico no se desgasta.'],
-    ['picamadero', 'Picamadero', 'volador', 'bird', '#3a3a30', '#e8d070', '#e0263a', 'crest long_beak red_head', 1.2, 'Perfora madera dura sin esfuerzo. Sus golpes se oyen a un kilómetro.'],
+  { t: 'lucha', role: 'a', bst: [450], evo: [], mons: [
+    ['carpintero', 'Carpintero', 'volador', 'bird', '#2a2a2a', '#d8a040', '#e0263a', 'crest long_beak red_head', 1.1, 'Golpea los troncos con cadencia constante. Su pico no se desgasta y perfora la madera más dura.'],
   ] },
   { t: 'lucha', role: 'b', bst: PAIR, evo: [25], mons: [
     ['coati', 'Coatí', null, 'cat', '#9a6a3a', '#4a3018', '#f2e8d0', '', 0.9, 'Explora en grupo y no se asusta con facilidad. Su cola anillada es inconfundible.'],

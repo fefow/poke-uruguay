@@ -2,6 +2,7 @@
 // features). Shapes are drawn with canvas paths, then hard-thresholded and
 // outlined so they read as pixel art. Facing left (toward the player).
 import { SPECIES } from '../data/species.js';
+import { TYPES } from '../data/types.js';
 import { override, overrideMirrored } from './overrides.js';
 
 export const SPRITE = 80;
@@ -14,16 +15,29 @@ function shade(hex, amt) {
   return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }
 
-function P(g) {
+function P(g, st = { i: 0, n: 1 }) {
+  const baby = st.n > 1 && st.i === 0;
+  const fierce = st.n > 1 && st.i === st.n - 1;
   return {
     ell(x, y, rx, ry, col, rot = 0) { g.fillStyle = col; g.beginPath(); g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); g.fill(); },
     rect(x, y, w, h, col) { g.fillStyle = col; g.fillRect(x, y, w, h); },
     poly(pts, col) { g.fillStyle = col; g.beginPath(); g.moveTo(...pts[0]); for (const p of pts.slice(1)) g.lineTo(...p); g.closePath(); g.fill(); },
     line(pts, col, w = 2) { g.strokeStyle = col; g.lineWidth = w; g.lineCap = 'round'; g.beginPath(); g.moveTo(...pts[0]); for (const p of pts.slice(1)) g.lineTo(...p); g.stroke(); },
     eye(x, y, r = 2.6) {
+      if (baby) r *= 1.3;
       g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-      g.fillStyle = '#141420'; g.fillRect(Math.round(x - 1.5), Math.round(y - 1), 2, 3);
-      g.fillStyle = '#ffffff'; g.fillRect(Math.round(x - 1.5), Math.round(y - 1), 1, 1);
+      g.fillStyle = '#141420';
+      if (baby) {
+        g.fillRect(Math.round(x - 2), Math.round(y - 1.5), 3, 4);
+        g.fillStyle = '#ffffff'; g.fillRect(Math.round(x - 2), Math.round(y - 1.5), 1, 2); g.fillRect(Math.round(x), Math.round(y + 1), 1, 1);
+      } else {
+        g.fillRect(Math.round(x - 1.5), Math.round(y - 1), 2, 3);
+        g.fillStyle = '#ffffff'; g.fillRect(Math.round(x - 1.5), Math.round(y - 1), 1, 1);
+      }
+      if (fierce) { // heavy brow slanting toward the snout
+        g.strokeStyle = '#16141e'; g.lineWidth = 1.7; g.lineCap = 'round';
+        g.beginPath(); g.moveTo(x + r + 0.5, y - r - 1.2); g.lineTo(x - r - 0.5, y - r + 0.9); g.stroke();
+      }
     },
   };
 }
@@ -126,18 +140,32 @@ const PLANS = {
     p.eye(17, 18, 2.2);
   },
   seal(p, a, f) {
-    p.ell(38, 46, 18, 11, a.c1);
-    p.ell(36, 50, 13, 6, a.c2);
-    p.poly([[52, 50], [62, 44], [62, 56]], shade(a.c1, -0.1));
-    p.ell(24, 54, 6, 3, shade(a.c1, -0.12), 0.4);
-    p.line([[30, 40], [22, 30]], a.c1, 12);
-    if (f.has('mane')) p.ell(24, 34, 11, 9, shade(a.c1, -0.15));
-    p.ell(18, 24, 9, 8, a.c1);
-    p.ell(12, 27, 5, 3.5, a.c2);
-    p.ell(9, 26, 1.8, 1.4, a.c3);
-    for (const y of [26, 28]) p.line([[11, y], [5, y + 1]], '#e8e0d0', 1);
-    p.eye(17, 21, 2.6);
+    const dark = shade(a.c1, -0.14);
+    // hind flippers, fanned out behind
+    p.poly([[54, 52], [67, 45], [71, 48], [66, 52], [71, 56], [66, 58], [54, 58]], dark);
+    // torso: heavy chest, tapering to the rear
+    p.ell(40, 47, 21, 11, a.c1, -0.12);
+    p.ell(38, 53, 15, 5.5, a.c2);
+    // fore flipper planted on the ground
+    p.poly([[28, 48], [34, 49], [38, 58], [30, 61], [22, 60], [26, 54]], dark);
+    // neck and chest raised
+    p.line([[31, 43], [26, 32]], a.c1, 14);
+    if (f.has('mane')) {
+      p.ell(28, 36, 12, 11, dark);
+      for (const [x, y] of [[19, 41], [22, 46], [36, 30]]) p.poly([[x, y], [x + 4, y - 4], [x + 6, y + 1]], dark);
+    }
+    // head with the sea-lion's blunt, dog-like snout
+    p.ell(22, 27, 9, 8, a.c1);
+    p.ell(13, 30, 7, 4.5, a.c1);
+    p.ell(12, 32.5, 5, 2.6, a.c2);
+    p.ell(7, 30, 1.9, 1.5, a.c3);
+    p.poly([[25, 22], [30, 18], [29, 25]], dark);
+    if (f.has('crest')) p.ell(21, 19.5, f.has('mane') ? 7 : 4.5, f.has('mane') ? 5 : 3.5, shade(a.c1, 0.05));
+    for (const y of [29, 31.5]) { p.line([[10, y], [2, y - 1]], '#f0eadc', 1); p.line([[10, y + 0.5], [3, y + 3]], '#f0eadc', 1); }
+    p.eye(17, 25, 2.5);
+    if (f.has('scars')) { p.line([[20, 21], [26, 28]], '#d8c0a8', 1); p.line([[34, 38], [40, 44]], '#d8c0a8', 1); }
   },
+
   turtle(p, a) {
     for (const x of [22, 46]) p.ell(x, 52, 6, 3, a.c3);
     p.ell(14, 44, 7, 6, a.c3);
@@ -409,49 +437,248 @@ const PLANS = {
   },
 };
 
-function pixelate(c, outline = '#16141e') {
-  const g = c.getContext('2d');
-  const img = g.getImageData(0, 0, c.width, c.height);
-  const d = img.data;
-  const W = c.width, H = c.height;
-  for (let i = 0; i < d.length; i += 4) d[i + 3] = d[i + 3] >= 110 ? 255 : 0;
-  const solid = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] === 255;
-  const out = parseInt(outline.slice(1), 16);
-  const marks = [];
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    if (solid(x, y)) continue;
-    if (solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1)) marks.push((y * W + x) * 4);
+// ---------------------------------------------------------------------------
+// Finishing pipeline: stage-aware decoration, cel shading, type texture and a
+// variable-weight outline, applied identically to every species so the whole
+// roster shares one look.
+
+/** Evolution stage of each species: { i: position in its line, n: line length }. */
+let stages = null;
+function stageOf(key) {
+  if (!stages) {
+    stages = {};
+    const pre = {};
+    for (const s of Object.values(SPECIES)) if (s.evo) pre[s.evo.to] = s.key;
+    for (const k of Object.keys(SPECIES)) {
+      let i = 0;
+      for (let c = k; pre[c]; c = pre[c]) i++;
+      let n = i + 1;
+      for (let c = k; SPECIES[c].evo; c = SPECIES[c].evo.to) n++;
+      stages[k] = { i, n };
+    }
   }
-  for (const i of marks) { d[i] = out >> 16; d[i + 1] = (out >> 8) & 255; d[i + 2] = out & 255; d[i + 3] = 255; }
+  return stages[key];
+}
+
+function hash(x, y, seed) {
+  let h = (x * 374761393 + y * 668265263 + seed * 2246822519) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) % 1000;
+}
+const seedOf = (key) => [...key].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) | 0, 7);
+
+const hexRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+
+function bounds(d, W, H) {
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (d[(y * W + x) * 4 + 3] < 110) continue;
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }
+  const top = [];
+  for (let x = x0; x <= x1; x++) for (let y = 0; y < H; y++) if (d[(y * W + x) * 4 + 3] >= 110) { top[x] = y; break; }
+  return { x0, y0, x1, y1, w: x1 - x0 + 1, h: y1 - y0 + 1, top };
+}
+
+/** Crests, fins, shards and flames that grow with the stage, drawn behind/over the silhouette's top. */
+function decorate(g, sp, st, bb, seed) {
+  if (st.n < 2 || st.i < 1 || bb.x1 < 0) return;
+  const p = P(g, st);
+  const big = st.i === st.n - 1 ? 1 : 0;           // final form
+  const type = sp.types[0];
+  const col = TYPES[type].color;
+  const a = sp.art;
+  const cnt = big ? 4 : 2;
+  const span = bb.w * 0.42;
+  const sx = bb.x0 + bb.w * 0.42;
+  const k = (big ? 1.25 : 0.85);
+  for (let n = 0; n < cnt; n++) {
+    const x = Math.round(sx + (span * n) / Math.max(1, cnt - 1));
+    if (bb.top[x] === undefined) continue;
+    const hgt = (6 + (hash(n, 1, seed) % 5)) * k;
+    const w = 3.2 * k;
+    const y = bb.top[x] + 1 + (n === 0 || n === cnt - 1 ? 1 : 0);
+    switch (type) {
+      case 'fuego':
+        p.poly([[x - w, y + 2], [x - 1, y - hgt * 0.5], [x + 1, y - hgt], [x + w * 0.6, y - hgt * 0.4], [x + w, y + 2]], '#ff7a1c');
+        p.poly([[x - w * 0.5, y + 2], [x + 0.5, y - hgt * 0.6], [x + w * 0.5, y + 2]], '#ffd23c');
+        break;
+      case 'agua':
+        p.poly([[x - w, y + 3], [x - 1, y - hgt * 0.9], [x + w, y + 3]], shade(col, 0.05));
+        p.poly([[x - 1, y + 3], [x, y - hgt * 0.6], [x + w * 0.7, y + 3]], '#a8d8ff');
+        break;
+      case 'planta':
+        p.ell(x, y - hgt * 0.4, 2.2 * k, hgt * 0.6, n % 2 ? '#4ca83c' : '#78c850', (n - 1.5) * 0.35);
+        break;
+      case 'electrico':
+        p.poly([[x - 2, y + 2], [x + 1, y - hgt * 0.4], [x - 1, y - hgt * 0.4], [x + 2, y - hgt]], '#ffe83c');
+        p.line([[x - 2, y + 2], [x + 1, y - hgt * 0.4], [x - 1, y - hgt * 0.4], [x + 2, y - hgt]], '#fff6a0', 1);
+        break;
+      case 'roca': case 'tierra':
+        p.poly([[x - w, y + 3], [x - 1, y - hgt * 0.8], [x + 1, y - hgt], [x + w, y + 3]], shade(type === 'roca' ? '#8a8270' : '#a8804a', -0.04));
+        p.poly([[x - 1, y + 3], [x + 0.5, y - hgt * 0.9], [x + w, y + 3]], shade(type === 'roca' ? '#8a8270' : '#a8804a', -0.18));
+        break;
+      case 'volador':
+        p.ell(x + 2, y - hgt * 0.3, 2 * k, hgt * 0.7, '#f4f0ea', 0.5 + n * 0.1);
+        p.ell(x + 2.5, y - hgt * 0.2, 1 * k, hgt * 0.5, col, 0.5 + n * 0.1);
+        break;
+      case 'veneno':
+        p.poly([[x - w * 0.8, y + 2], [x, y - hgt], [x + w * 0.8, y + 2]], '#8a2a8a');
+        p.ell(x + 3, y - hgt * 0.9, 1.4, 1.4, '#d880e0');
+        break;
+      case 'siniestro':
+        p.poly([[x - w * 0.8, y + 2], [x - 1, y - hgt], [x + w * 0.8, y + 2]], '#2a2030');
+        p.poly([[x - 0.5, y - hgt * 0.5], [x - 1, y - hgt], [x + 1, y - hgt * 0.6]], '#d8384a');
+        break;
+      case 'psiquico':
+        p.poly([[x - 2, y - hgt * 0.4], [x, y - hgt], [x + 2, y - hgt * 0.4], [x, y + 1]], '#ff78b0');
+        p.poly([[x - 0.5, y - hgt * 0.5], [x, y - hgt * 0.9], [x + 0.8, y - hgt * 0.5]], '#ffd8ec');
+        break;
+      case 'lucha':
+        if (n === 0 || n === cnt - 1) {
+          p.poly([[x - 3 * k, y + 3], [x - 2 * k, y - hgt * 0.5], [x + 3 * k, y - hgt * 0.3], [x + 3 * k, y + 3]], '#8c8c9c');
+          p.line([[x - 2 * k, y - hgt * 0.5], [x + 3 * k, y - hgt * 0.3]], '#d8d8e4', 1);
+        }
+        break;
+      case 'bicho':
+        p.line([[x, y + 2], [x + 1, y - hgt * 0.5], [x + 3, y - hgt]], shade(a.c2, -0.1), 1.4);
+        p.ell(x + 3, y - hgt, 1.4, 1.4, a.c3);
+        break;
+      default:
+        if (big) p.ell(x, y - 1, 3.2, 2.2, shade(a.c2, 0.1), (n - 1.5) * 0.4);
+    }
+  }
+}
+
+/** Per-type surface texture: small details that sit inside the silhouette. */
+function texture(img, W, H, mask, sp, st, seed) {
+  const d = img.data;
+  const type = sp.types[0];
+  const set = (x, y, rgb) => { const i = (y * W + x) * 4; d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; };
+  const get = (x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const mix = (c, t, amt) => c.map((v, i) => Math.round(v + (t[i] - v) * amt));
+  const inside = (x, y) => mask(x, y) && mask(x - 1, y) && mask(x + 1, y) && mask(x, y - 1) && mask(x, y + 1);
+  const dens = { fuego: 9, agua: 7, planta: 7, electrico: 5, roca: 12, tierra: 11, volador: 10, bicho: 6, veneno: 8, siniestro: 6, psiquico: 5, lucha: 6, normal: 9 }[type] ?? 8;
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    if (!inside(x, y)) continue;
+    const r = hash(x, y, seed);
+    if (r >= dens) continue;
+    const c = get(x, y);
+    if (c[0] > 245 && c[1] > 245 && c[2] > 245) continue;
+    if (c[0] < 50 && c[1] < 50 && c[2] < 60) continue;
+    switch (type) {
+      case 'agua': set(x, y, mix(c, [200, 235, 255], 0.55)); if (inside(x + 1, y)) set(x + 1, y, mix(c, [200, 235, 255], 0.55)); break;
+      case 'planta': set(x, y, mix(c, [20, 60, 20], 0.3)); if (inside(x, y + 1)) set(x, y + 1, mix(c, [20, 60, 20], 0.3)); break;
+      case 'fuego': set(x, y, mix(c, [255, 220, 90], 0.6)); break;
+      case 'electrico': set(x, y, mix(c, [255, 250, 170], 0.7)); break;
+      case 'roca': case 'tierra': set(x, y, mix(c, [30, 24, 20], 0.3)); if (inside(x + 1, y + 1)) set(x + 1, y + 1, mix(c, [30, 24, 20], 0.3)); break;
+      case 'bicho': set(x, y, mix(c, [20, 20, 30], 0.4)); break;
+      case 'veneno': set(x, y, mix(c, [190, 90, 200], 0.5)); break;
+      case 'psiquico': set(x, y, mix(c, [255, 220, 240], 0.55)); break;
+      case 'siniestro': set(x, y, mix(c, [90, 60, 140], 0.35)); break;
+      default: set(x, y, mix(c, [20, 14, 24], 0.2)); if (inside(x, y + 1)) set(x, y + 1, mix(c, [20, 14, 24], 0.2));
+    }
+  }
+  // Elemental sparks floating around the final forms.
+  const spark = { fuego: [255, 190, 60], electrico: [255, 240, 90], psiquico: [255, 150, 200], agua: [170, 220, 255], veneno: [200, 110, 220], planta: [150, 230, 110], siniestro: [140, 90, 200] }[type];
+  if (spark && st.i >= 1) {
+    const want = st.i === st.n - 1 ? 5 : 2;
+    let placed = 0;
+    for (let t = 0; t < 400 && placed < want; t++) {
+      const x = 4 + (hash(t, 3, seed) % (W - 8)), y = 4 + (hash(t, 9, seed) % (H - 8));
+      let near = false;
+      for (let dy = -4; dy <= 4 && !near; dy++) for (let dx = -4; dx <= 4; dx++) if (mask(x + dx, y + dy)) { near = true; break; }
+      if (!near || mask(x, y) || mask(x - 1, y) || mask(x + 1, y) || mask(x, y - 1) || mask(x, y + 1)) continue;
+      set(x, y, spark); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) set(x + dx, y + dy, mix(spark, [255, 255, 255], 0.0));
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0, 0]]) d[((y + dy) * W + x + dx) * 4 + 3] = 255;
+      placed++;
+    }
+  }
+}
+
+/** Threshold alpha, then cel-shade, highlight, texture and outline with variable weight. */
+function finish(c, sp, st, seed) {
+  const g = c.getContext('2d');
+  const W = c.width, H = c.height;
+  const img = g.getImageData(0, 0, W, H);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) d[i + 3] = d[i + 3] >= 110 ? 255 : 0;
+  const mask = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] === 255;
+  const bb = bounds(d, W, H);
+  if (bb.x1 < 0) return;
+  const shadowCut = bb.y0 + bb.h * 0.84;
+  const base = new Uint8ClampedArray(d);
+  const baseMask = (x, y) => x >= 0 && y >= 0 && x < W && y < H && base[(y * W + x) * 4 + 3] === 255;
+  // cel shading: light from upper-left
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (!baseMask(x, y)) continue;
+    const i = (y * W + x) * 4;
+    const r = base[i], gg = base[i + 1], b = base[i + 2];
+    if ((r > 250 && gg > 250 && b > 250) || (r < 48 && gg < 48 && b < 60)) continue; // eyes
+    let k = 0;
+    if (!baseMask(x + 3, y + 3) || !baseMask(x + 4, y + 1) || y > shadowCut) k = -1;
+    else if (!baseMask(x - 2, y - 2) && y < bb.y0 + bb.h * 0.6) k = 1;
+    if (k < 0) { d[i] = r * 0.64; d[i + 1] = gg * 0.68; d[i + 2] = Math.min(255, b * 0.84 + 6); }
+    else if (k > 0) { d[i] = r + (255 - r) * 0.3; d[i + 1] = gg + (255 - gg) * 0.3; d[i + 2] = b + (255 - b) * 0.3; }
+  }
+  // specular spot on the lit side
+  const sx = Math.round(bb.x0 + bb.w * 0.36), sy = Math.round(bb.y0 + bb.h * 0.3);
+  search: for (let r = 0; r < 14; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+    const x = sx + dx, y = sy + dy;
+    if (!baseMask(x, y) || !baseMask(x + 3, y + 3) || !baseMask(x - 3, y - 3) || !baseMask(x + 2, y) || !baseMask(x, y + 1)) continue;
+    const i = (y * W + x) * 4;
+    if (base[i] > 245 || base[i] < 50) continue;
+    for (const [ox, oy] of [[0, 0], [1, 0], [0, 1]]) {
+      const j = ((y + oy) * W + x + ox) * 4;
+      d[j] = Math.min(255, base[j] + 95); d[j + 1] = Math.min(255, base[j + 1] + 95); d[j + 2] = Math.min(255, base[j + 2] + 95);
+    }
+    break search;
+  }
+  texture(img, W, H, baseMask, sp, st, seed);
+  // outline: 1px tinted ring all round, a 2nd neutral px on the lower/right sides
+  const ring = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (baseMask(x, y)) continue;
+    let src = null;
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) if (baseMask(x + dx, y + dy)) { src = (y + dy) * W + x + dx; break; }
+    if (src !== null) {
+      const j = src * 4;
+      ring.push([(y * W + x) * 4, base[j] * 0.22 + 14, base[j + 1] * 0.22 + 12, base[j + 2] * 0.26 + 22]);
+    } else if (baseMask(x - 2, y) || baseMask(x, y - 2) || baseMask(x - 1, y - 1)) {
+      ring.push([(y * W + x) * 4, 22, 20, 30]);
+    }
+  }
+  for (const [i, r, gg, b] of ring) { d[i] = r; d[i + 1] = gg; d[i + 2] = b; d[i + 3] = 255; }
   g.putImageData(img, 0, 0);
 }
 
-/** Front sprite (faces left). back=true returns a mirrored, darker-rim version for the player side. */
+/** Front sprite (faces left). back=true returns a mirrored version for the player side. */
 export function creatureSprite(key, { back = false } = {}) {
   const drawn = back ? overrideMirrored(`creature:${key}`, SPRITE, SPRITE) : override(`creature:${key}`, SPRITE, SPRITE);
   if (drawn) return drawn;
   const ck = `${key}|${back}`;
   if (cache.has(ck)) return cache.get(ck);
   const sp = SPECIES[key];
+  const st = stageOf(key);
+  const seed = seedOf(key);
   const c = document.createElement('canvas');
   c.width = c.height = SPRITE;
   const g = c.getContext('2d');
   const a = sp.art;
-  const size = (a.size ?? 1) * 0.92;
+  const baby = st.n > 1 && st.i === 0;
+  const size = (a.size ?? 1) * 0.92 * (baby ? 0.86 : 1);
   g.save();
   g.translate(SPRITE / 2, SPRITE - 4);
   g.scale(size, size);
   g.translate(-34, -60);
-  PLANS[a.plan](P(g), a, new Set(a.feats));
+  PLANS[a.plan](P(g, st), a, new Set(a.feats));
   g.restore();
-  // Belly-light / back-shadow pass, clipped to the silhouette.
-  g.globalCompositeOperation = 'source-atop';
-  g.fillStyle = 'rgba(255,255,255,0.10)';
-  g.fillRect(0, 0, SPRITE, SPRITE * 0.45);
-  g.fillStyle = 'rgba(0,0,0,0.12)';
-  g.fillRect(0, SPRITE * 0.78, SPRITE, SPRITE);
-  g.globalCompositeOperation = 'source-over';
-  pixelate(c);
+  const bb = bounds(g.getImageData(0, 0, SPRITE, SPRITE).data, SPRITE, SPRITE);
+  g.save();
+  g.globalCompositeOperation = 'destination-over'; // crests sit behind the body
+  decorate(g, sp, st, bb, seed);
+  g.restore();
+  finish(c, sp, st, seed);
   let out = c;
   if (back) {
     out = document.createElement('canvas');

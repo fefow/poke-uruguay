@@ -1,7 +1,8 @@
 // Boot: loader -> title -> game loop.
 import { mountScreen, render } from './gfx/screen.js';
 import { buildTileset } from './gfx/tiles.js';
-import { buildAllSprites } from './gfx/creatures.js';
+import { buildAllSprites, creatureSprite } from './gfx/creatures.js';
+import { DEX_ORDER } from './data/species.js';
 import { charSprite, LOOKS } from './gfx/characters.js';
 import { pollGamepads, input, keyName } from './core/input.js';
 import { initAudio, setVolumes, sfx } from './core/audio.js';
@@ -25,7 +26,7 @@ import { mountPerf, perfTick } from './core/perf.js';
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { updateWorld, poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { keys: DEX_ORDER, creatureSprite, updateWorld, poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();
