@@ -513,6 +513,10 @@ export const SCRIPTS = {
     await api.npcLeave('rival_r24');
   },
 
+  async guarderia(api) {
+    await api.daycare();
+  },
+
   async almada(api) {
     if (api.flag('obs_clear')) return;
     await api.say(['No esperaba visitas. Soy Almada, fui alumno del Maestro Tabárez en este mismo observatorio.', 'Estudiábamos cómo el Pampero ordena el clima del Río de la Plata. Calima y Tabárez dirigían el proyecto.', 'Cuando Tabárez se negó a vender los datos, Calima se quedó con los instrumentos y yo me fui con él.', 'Pensé que íbamos a proteger el clima. Resulta que quería controlarlo.'], { name: 'Almada' });

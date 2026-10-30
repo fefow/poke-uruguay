@@ -22,6 +22,7 @@ export function newState({ name, look }) {
     stats: { playtime: 0, steps: 0, battlesWon: 0, moneyEarned: 0, moneySpent: 0, caught: 0 },
     lastHeal: { map: 'casa_jugador', x: 6, y: 5 },
     repel: 0,
+    daycare: null,
     created: Date.now(),
     saveCount: 0,
   };

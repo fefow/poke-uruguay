@@ -609,8 +609,8 @@ const BASE_INTERIOR = {
     npcs: [{ x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_pir' }],
   }),
   casa_pal: room(HOUSE, {
-    name: 'Casa en La Paloma',
-    npcs: [{ x: 6, y: 3, look: 'swimmer', dir: 'left', script: 'gift_pal' }],
+    name: 'Guardería de La Paloma',
+    npcs: [{ x: 6, y: 3, look: 'swimmer', dir: 'left', script: 'gift_pal' }, { x: 2, y: 2, look: 'oldman', dir: 'down', script: 'guarderia' }],
   }),
   shop_dur: shop('Almacén de Durazno', ['superesfera', 'ultraesfera', 'mate_dulce', 'dulce_de_leche', 'alfajor', 'aloe', 'refuerzo_ataque', 'refuerzo_especial', 'piedra_agata', 'mt_parrillada']),
   casa_dur: room(HOUSE, {

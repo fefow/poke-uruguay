@@ -180,6 +180,7 @@ export function validateSave(d) {
       stats: { playtime: st.playtime, steps: st.steps, battlesWon: st.battlesWon, moneyEarned: st.moneyEarned, moneySpent: st.moneySpent, caught: st.caught },
       lastHeal: { map: lh.map, x: lh.x | 0, y: lh.y | 0 },
       repel: isInt(d.repel, 0, 100) ? d.repel : 0,
+      daycare: d.daycare && box.some((c) => c.uid === d.daycare.uid) && isInt(d.daycare.steps, 0, st.steps) ? { uid: d.daycare.uid, steps: d.daycare.steps } : null,
       created: Number.isFinite(d.created) ? d.created : Date.now(),
       saveCount: isInt(d.saveCount, 0, 1e7) ? d.saveCount : 0,
       battleLog: Array.isArray(d.battleLog) ? d.battleLog.slice(-20) : [],

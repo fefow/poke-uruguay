@@ -17,9 +17,9 @@ import { h, wait, clamp } from '../core/util.js';
 import { info as logInfo } from '../core/debuglog.js';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.js';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX, badgeCount } from './state.js';
-import { createCreature, heal as healCreature, displayName, maxHp } from './creature.js';
+import { createCreature, heal as healCreature, displayName, maxHp, gainExp } from './creature.js';
 import { runBattle } from './battle-scene.js';
-import { openPauseMenu, openShop, openPC } from './menus.js';
+import { openPauseMenu, openShop, openPC, openParty } from './menus.js';
 import { drawItem } from '../gfx/items.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -641,6 +641,47 @@ export const api = {
     if (S.party.length < PARTY_MAX) S.party.push(c);
     else S.box.push(c);
     return c;
+  },
+  /** Guardería: a creature left here gains experience for every step the player takes (stored in the box, S.daycare marks it). */
+  async daycare() {
+    const S = state();
+    const dc = S.daycare;
+    const kept = dc && S.box.find((c) => c.uid === dc.uid);
+    if (dc && !kept) S.daycare = null;
+    if (!S.daycare) {
+      await say(['Bienvenido a la guardería. Cuido a tus criaturas mientras caminás: ganan experiencia con cada paso que das.', 'Dejala y volvé cuando quieras. Retirarla cuesta un poco más cuanto más haya crecido.']);
+      if (!(await ask('¿Querés dejar una criatura?'))) return;
+      if (S.party.filter((c) => c.hp > 0).length < 2) return say('Necesitás otra criatura en condiciones para seguir viaje.');
+      const i = await openParty({ mode: 'select', title: '¿A quién dejás?' });
+      if (i < 0) return;
+      const c = S.party[i];
+      if (S.party.filter((x, k) => k !== i && x.hp > 0).length < 1) return say('Necesitás otra criatura en condiciones para seguir viaje.');
+      S.party.splice(i, 1);
+      S.box.push(c);
+      S.daycare = { uid: c.uid, steps: S.stats.steps };
+      sfx('confirm');
+      return say(`${displayName(c)} queda en buenas manos. Volvé cuando quieras.`);
+    }
+    const gained = Math.max(0, (S.stats.steps - dc.steps) * 2);
+    const sim = { ...kept, moves: kept.moves.map((m) => ({ ...m })) };
+    const before = sim.level;
+    gainExp(sim, gained);
+    const levels = sim.level - before;
+    const price = 100 + levels * 80;
+    await say(`${displayName(kept)} está bien. Subió ${levels} ${levels === 1 ? 'nivel' : 'niveles'} desde que lo dejaste.`);
+    if (S.party.length >= PARTY_MAX) return say('Tu equipo está completo. Dejá lugar y volvé a buscarla.');
+    if (!(await ask(`¿Retirar a ${displayName(kept)} por $${price}?`))) return;
+    if (S.player.money < price) return say('No te alcanza el dinero.');
+    loseMoney(price);
+    S.box.splice(S.box.indexOf(kept), 1);
+    S.daycare = null;
+    S.party.push(kept);
+    const { learnFlow } = await import('./battle-scene.js');
+    sfx('levelup');
+    for (const ev of gainExp(kept, gained)) {
+      if (ev.type === 'learn') await learnFlow(kept, ev.move);
+    }
+    await say(`¡${displayName(kept)} está en el nivel ${kept.level}!`);
   },
   /** Gym rematches unlock every two gyms (badges, Liga, PP base) after the one being challenged. */
   gymRematchTier(order) {
