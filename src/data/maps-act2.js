@@ -107,8 +107,8 @@ export const ACT2_OUTDOOR = {
     },
     enc: { rate: 0.12, list: wildList(['fuego', 'tierra', 'roca'], 31, 34, 7, 'dur', ['pavesa', 'alacran', 'alazan', 'guijarro', 'geoda', 'arenisca']) },
     npcs: [
-      npc(7, 8, 'gaucho', ['Acá la gente trabaja con el fuego desde siempre.', 'La líder del gimnasio, Candelaria, forja sus propias herramientas.'], { dir: 'right' }),
-      tr({ x: 7, y: 7, dir: 'right' }, 'gaucho', 'dur_a', 'Rodrigo', 'Herrero', ['fuego', 'tierra'], [32, 32], ['El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Candelaria usa tipo Fuego. Llevá algo de Agua o de Roca.']),
+      npc(7, 8, 'gaucho', ['Acá la gente trabaja con el fuego desde siempre.', 'El gimnasio es la sede de ANCAP en Durazno. Su presidenta, Candelaria Ríos, domina el fuego.'], { dir: 'right' }),
+      tr({ x: 7, y: 7, dir: 'right' }, 'gaucho', 'dur_a', 'Rodrigo', 'Herrero', ['fuego', 'tierra'], [32, 32], ['El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Candelaria Ríos usa tipo Fuego. Llevá algo de Agua o de Roca.']),
       tr({ x: 16, y: 8, dir: 'left' }, 'girl', 'dur_b', 'Camila', 'Geóloga', ['tierra', 'roca'], [32, 33], ['Estudio por qué el suelo guarda tanto calor.', 'Buen combate.', 'Los datos no cierran: el calor aumenta desde que llegó el Equipo PP.']),
       wander(12, 9, 'oldman', ['Hace décadas no llueve como antes. La ceniza lo cubre todo.', 'Las criaturas de fuego se sienten cómodas acá.']),
       npc(20, 8, 'boy', ['Cruzando el puente de hierro se llega al norte. Pero el camino está cortado por la gente de gris.'], { cond: (f) => !f.pp_clear }),
@@ -138,7 +138,7 @@ export const ACT2_OUTDOOR = {
     doors: [...TAC.doors],
     signs: [
       'TACUAREMBÓ\nTierra de gauchos y cuna del tango. Cada marzo, la Patria Gaucha.',
-      'GIMNASIO DE TACUAREMBÓ\nLíder: Ramón, guardabosques. Tipo Planta.',
+      'GIMNASIO DE TACUAREMBÓ\nLíder: Ramón Villalba, ministro de Ganadería. Tipo Planta.',
     ],
     exits: {
       s: { to: 'ruta5' },
@@ -150,7 +150,7 @@ export const ACT2_OUTDOOR = {
     npcs: [
       wander(10, 8, 'gaucho', ['En Tacuarembó se hizo el primer asado de la Patria Gaucha.', 'Si te gusta el campo, andá a ver el desfile.']),
       npc(20, 9, 'girl', ['Dicen que Gardel nació acá. Otros dicen que en Toulouse.', 'En Tacuarembó nadie se pone de acuerdo.'], { dir: 'down' }),
-      tr({ x: 12, y: 8, dir: 'right' }, 'oldman', 'tac_a', 'Segundo', 'Baqueano', FOREST, [37, 38], ['Conozco este monte como a mi casa.', 'Me ganaste de visitante.', 'Ramón es duro pero justo.']),
+      tr({ x: 12, y: 8, dir: 'right' }, 'oldman', 'tac_a', 'Segundo', 'Baqueano', FOREST, [37, 38], ['Conozco este monte como a mi casa.', 'Me ganaste de visitante.', 'El ministro Villalba es duro pero justo.']),
       npc(24, 9, 'cop', ['Hay movimiento raro en el norte. Los camiones del Equipo PP no paran.'], { dir: 'left' }),
       npc(5, 13, 'clerk', ['La Policlínica y el almacén están sobre la calle principal. Nunca se equivocan: siempre están en el mismo lugar.']),
     ],
@@ -238,7 +238,7 @@ export const ACT2_OUTDOOR = {
     fish: fishList(44, 46, 7),
     npcs: [
       wander(12, 9, 'swimmer', ['Las termas de Salto son buenas para el cuerpo y para la cabeza.', 'Si tenés algo de tipo Siniestro, el líder lo va a sufrir.']),
-      npc(22, 9, 'girl', ['El gimnasio es un observatorio con techo de vidrio.', 'Octavio mira las estrellas y adivina tus movimientos.'], { dir: 'left' }),
+      npc(22, 9, 'girl', ['El gimnasio es un observatorio con techo de vidrio.', 'Horacio Quiroga escribía cuentos oscuros en Salto. Dicen que adivina tus movimientos.'], { dir: 'left' }),
       tr({ x: 11, y: 9, dir: 'down' }, 'oldman', 'sal_a', 'Don Rufino', 'Astrónomo aficionado', ['psiquico', 'volador'], [44, 44], ['Anoche vi algo raro en el cielo.', 'Qué cielo más despejado.', 'Los de gris prenden luces fuertes en la Represa.']),
       grunt({ x: 18, y: 9, dir: 'left' }, 'sal_g1', [44, 45], 'Esta ciudad se queda a oscuras.', 'No tiene sentido.', 'Garúa está dentro de la Represa.', { cond: (f) => !f.represa_clear }),
       npc(15, 11, 'cop', ['La Represa está tomada. Si querés ayudar, la entrada está debajo del puente.'], { dir: 'down', cond: (f) => !f.represa_clear }),
@@ -369,27 +369,27 @@ const FLOOR_TOP = [
 
 export const ACT2_INTERIOR = {
   // --- gyms
-  gym_dur: gym('Gimnasio de Durazno', 'gym_fuego', 'leader_fire', 'candelaria', [
-    tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria es más dura que el hierro.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria usa tipo Fuego.'], { dir: 'right' }),
+  gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_fire', 'ancap', [
+    tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria Ríos es más dura que el hierro.'], { dir: 'left' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria Ríos usa tipo Fuego.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Durazno. La líder usa criaturas de tipo Fuego.', 'Las de Agua, Tierra y Roca le hacen frente.'], { dir: 'down' }),
   ]),
-  gym_tac: gym('Gimnasio de Tacuarembó', 'gym_planta', 'leader_forest', 'ramon', [
-    tr({ x: 8, y: 6 }, 'boy', 'g5_a', 'Mateo', 'Guardabosque', ['planta', 'bicho'], [37, 38], ['El monte me enseñó a combatir.', 'Perdí en mi bosque.', 'Ramón conoce cada árbol.'], { dir: 'left' }),
+  gym_tac: gym('Ministerio de Ganadería (Tacuarembó)', 'gym_planta', 'leader_forest', 'mgap', [
+    tr({ x: 8, y: 6 }, 'boy', 'g5_a', 'Mateo', 'Guardabosque', ['planta', 'bicho'], [37, 38], ['El monte me enseñó a combatir.', 'Perdí en mi bosque.', 'El ministro conoce cada árbol.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g5_b', 'Inés', 'Botánica', ['planta', 'veneno'], [38, 39], ['Estudio las plantas, y también sus defensas.', 'Interesante.', 'Cuidado con el veneno de Ramón.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Tacuarembó. El líder usa criaturas de tipo Planta.', 'Fuego, Volador y Bicho tienen ventaja.'], { dir: 'down' }),
   ]),
-  gym_riv: gym('Gimnasio de Rivera', 'gym_lucha', 'leader_dojo', 'mariela', [
-    tr({ x: 8, y: 6 }, 'boy', 'g6_a', 'Thiago', 'Capoeirista', ['lucha'], [40, 41], ['Ginga y golpe, esa es la clave.', 'Caí.', 'Mariela entrena todas las mañanas.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g6_b', 'Paula', 'Karateka', ['lucha', 'normal'], [41, 42], ['Un cinturón negro no se regala.', 'Respeto.', 'Mariela es la mejor de la frontera.'], { dir: 'right' }),
+  gym_riv: gym('Cuartel de la frontera (Rivera)', 'gym_lucha', 'leader_dojo', 'defensa', [
+    tr({ x: 8, y: 6 }, 'boy', 'g6_a', 'Thiago', 'Capoeirista', ['lucha'], [40, 41], ['Ginga y golpe, esa es la clave.', 'Caí.', 'La ministra de Defensa entrena todas las mañanas.'], { dir: 'left' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g6_b', 'Paula', 'Karateka', ['lucha', 'normal'], [41, 42], ['Un cinturón negro no se regala.', 'Respeto.', 'La ministra Cabrera es la mejor de la frontera.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Rivera. La líder usa criaturas de tipo Lucha.', 'Las de tipo Psíquico y Volador la complican.'], { dir: 'down' }),
   ]),
-  gym_sal: gym('Gimnasio de Salto', 'gym_psiquico', 'leader_psy', 'octavio', [
-    tr({ x: 8, y: 6 }, 'oldman', 'g7_a', 'Gabriel', 'Astrólogo', ['psiquico'], [43, 44], ['Las estrellas dicen que vas a perder.', 'No lo vi venir.', 'Octavio ve el futuro.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g7_b', 'Noelia', 'Vidente', ['psiquico', 'volador'], [44, 44], ['Sé qué vas a elegir antes que vos.', 'Me equivoqué.', 'Octavio usa tipo Psíquico.'], { dir: 'right' }),
+  gym_sal: gym('Casa de Quiroga (Salto)', 'gym_psiquico', 'leader_psy', 'quiroga', [
+    tr({ x: 8, y: 6 }, 'oldman', 'g7_a', 'Gabriel', 'Astrólogo', ['psiquico'], [43, 44], ['Las estrellas dicen que vas a perder.', 'No lo vi venir.', 'Quiroga ve el futuro.'], { dir: 'left' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g7_b', 'Noelia', 'Vidente', ['psiquico', 'volador'], [44, 44], ['Sé qué vas a elegir antes que vos.', 'Me equivoqué.', 'Quiroga usa tipo Psíquico.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Salto. El líder usa criaturas de tipo Psíquico.', 'Las de tipo Siniestro y Bicho tienen ventaja.'], { dir: 'down' }),
   ]),
-  gym_frb: gym('Gimnasio de Fray Bentos', 'gym_siniestro', 'leader_dark', 'zoraida', [
+  gym_frb: gym('Museo del Anglo (Fray Bentos)', 'gym_siniestro', 'leader_dark', 'anglo', [
     tr({ x: 8, y: 6 }, 'boy', 'g8_a', 'Dante', 'Sereno', ['siniestro'], [46, 46], ['La noche es mi territorio.', 'Salí de la sombra.', 'Zoraida cierra el camino a la Liga.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g8_b', 'Alma', 'Sombra', ['siniestro', 'veneno'], [46, 47], ['No me vas a ver venir.', 'Me ganaste.', 'La Liga está en Montevideo, en el Centenario.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Fray Bentos. La líder usa criaturas de tipo Siniestro.', 'Las de Lucha, Bicho y Hada... digo, las de Lucha y Bicho le hacen frente.'], { dir: 'down' }),
@@ -417,6 +417,35 @@ export const ACT2_INTERIOR = {
   casa_pay2: house('Casa en Paysandú', { x: 6, y: 3, look: 'sailor', dir: 'left', script: 'gift_pay' }),
   casa_frb: house('Casa en Fray Bentos', casaNpc('clerk', ['Mi abuelo trabajó en el Anglo. Decía que el olor del frigorífico se sentía a kilómetros.'])),
   casa_frb2: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_frb' }),
+
+  // --- Buquebus "China Zorrilla" (Montevideo): the ferry the player boards once, three decks, the captain at the top
+  ferry_1: room(FLOOR_UP, {
+    name: 'Buquebus China Zorrilla: salón', music: 'town',
+    warps: [{ x: 11, y: 1, to: 'ferry_2', tx: 5, ty: 7 }],
+    npcs: [
+      tr({ x: 2, y: 4 }, 'sailor', 'fe_a', 'Marinero Gómez', 'Marinero', ['agua', 'volador'], [20, 21], ['Primer viaje del barco y ya tengo que defenderlo.', 'Zozobré.', 'El capitán está arriba, en su camarote.'], { dir: 'right', sight: 4 }),
+      tr({ x: 8, y: 6 }, 'girl', 'fe_b', 'Gimena', 'Turista', ['normal', 'volador'], [20, 22], ['Viajo a Buenos Aires por el día. Pero un combate no le hace mal a nadie.', 'Qué mala suerte.', 'Subí por la escalera del fondo.'], { dir: 'left', sight: 4 }),
+      { x: 9, y: 4, look: 'clerk', dir: 'left', script: 'ferry_bio' },
+      npc(6, 2, 'oldman', ['El barco se llama como la actriz China Zorrilla, una de las grandes de nuestro teatro.', 'Dicen que le hubiera gustado verlo navegar.'], { dir: 'down' }),
+    ],
+  }),
+  ferry_2: room(FLOOR_MID, {
+    name: 'Buquebus China Zorrilla: comedor', music: 'town',
+    exitTo: { map: 'ferry_1', x: 11, y: 2 },
+    warps: [{ x: 0, y: 1, to: 'ferry_3', tx: 5, ty: 6 }, { x: 11, y: 1, to: 'ferry_3', tx: 5, ty: 6 }],
+    triggers: [{ x: 0, y: 5, w: 12, h: 1, cond: (f) => !f.rival3, script: 'rival_ferry' }],
+    npcs: [
+      tr({ x: 3, y: 5 }, 'clerk', 'fe_c', 'Maitre Ibarra', 'Maitre', ['normal'], [21, 22], ['Para subir hay que reservar. Y para pasar, ganarme.', 'Retiro lo dicho.', 'El capitán no se siente bien: hace días que no sale.'], { dir: 'right', sight: 4 }),
+      tr({ x: 8, y: 3 }, 'boy', 'fe_d', 'Rodrigo', 'Tripulante', ['agua', 'normal'], [22, 23], ['Limpio las cubiertas, pero hoy hago una excepción.', 'Perdí el turno.', 'En el camarote de arriba está el capitán.'], { dir: 'down', sight: 3 }),
+      { x: 5, y: 2, look: 'rival', dir: 'down', id: 'rival_ferry', cond: (f) => !f.rival3, script: 'rival_ferry' },
+      npc(9, 5, 'girl', ['El comedor tiene chivitos, milanesas y mate para todos.', 'Pero el chivito del barco no es como el de la rambla.'], { dir: 'left' }),
+    ],
+  }),
+  ferry_3: room(FLOOR_TOP, {
+    name: 'Buquebus China Zorrilla: camarote del capitán', music: 'town',
+    exitTo: { map: 'ferry_2', x: 11, y: 2 },
+    npcs: [{ x: 5, y: 2, look: 'oldman', dir: 'down', script: 'ferry_captain' }],
+  }),
 
   // --- Torre de Niebla (Rivera): three floors, Bruma at the top
   torre_1: room(FLOOR_UP, {

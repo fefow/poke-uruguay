@@ -660,6 +660,9 @@ export const api = {
     n.visible = false;
     await fadeIn(150);
   },
+  /** Moves the player to another map with a fade (used when the ferry sails). */
+  warp: (map, x, y, dir = 'down') => doWarp(map, x, y, dir),
+  markSeen: (sp) => markSeen(sp),
   openShop: (stock) => openShop(stock),
   openPC: () => openPC(),
   async flash() {

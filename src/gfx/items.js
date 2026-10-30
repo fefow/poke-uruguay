@@ -100,6 +100,7 @@ const ART = {
     g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.moveTo(4, 11); g.lineTo(7, 5); g.lineTo(12, 11); g.moveTo(7, 5); g.lineTo(10, 5); g.moveTo(6, 4); g.lineTo(5, 4); g.stroke();
     g.strokeStyle = '#d83a3a'; g.lineWidth = 1; g.beginPath(); g.moveTo(4, 11); g.lineTo(7, 5); g.lineTo(12, 11); g.moveTo(7, 5); g.lineTo(10, 5); g.stroke();
   },
+  ticket_ferry: (g) => { r(g, 1, 3, 14, 10, INK); r(g, 2, 4, 12, 8, '#f2e8c0'); r(g, 2, 4, 12, 2, '#2a6ab0'); r(g, 4, 8, 5, 1, '#16141c'); r(g, 4, 10, 8, 1, '#16141c'); r(g, 11, 7, 2, 2, '#d83a3a'); },
   silbato: (g) => { r(g, 2, 6, 10, 6, INK); r(g, 3, 7, 8, 4, '#d8dce8'); r(g, 10, 4, 4, 3, INK); r(g, 11, 5, 2, 1, '#d8dce8'); r(g, 4, 8, 3, 1, '#f2c02a'); r(g, 3, 12, 1, 2, INK); r(g, 3, 14, 5, 1, INK); },
   boleto: (g) => { r(g, 1, 3, 14, 10, INK); r(g, 2, 4, 12, 8, '#7ac8f0'); r(g, 5, 4, 1, 8, '#fff'); r(g, 3, 6, 1, 4, '#fff'); r(g, 7, 6, 6, 1, '#16141e'); r(g, 7, 8, 5, 1, '#16141e'); r(g, 7, 10, 3, 1, '#16141e'); },
 };

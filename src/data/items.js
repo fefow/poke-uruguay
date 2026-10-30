@@ -40,6 +40,7 @@ const BASE_ITEMS = {
   machete: { name: 'Machete', pocket: 'key', price: 0, desc: 'Parate frente a un zarzal y apretá A para abrirte paso.' },
   canoa: { name: 'Canoa', pocket: 'key', price: 0, desc: 'Permite navegar por el agua. Caminá hacia la orilla para subirte.' },
   bici: { name: 'Bicicleta', pocket: 'key', price: 0, bike: true, desc: 'Cuatro veces más rápida que caminar, pero solo para moverse: no cambia nada en los combates. Se usa desde el menú. No se puede usar bajo techo.' },
+  ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Montevideo.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
 };
