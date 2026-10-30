@@ -1,5 +1,7 @@
 // Procedural 16x16 gym medals (pixel by pixel, so they stay crisp when scaled).
 // badgeIcon(n) returns a data URL for medal n (1-8) in the trainer card.
+import { override } from './overrides.js';
+
 const INK = '#1a1a24';
 const cache = new Map();
 
@@ -146,7 +148,14 @@ function draw(n) {
   return c;
 }
 
+/** 16x16 canvas for medal n (the editor's drawing if there is one). */
+export function badgeCanvas(n) {
+  return override(`badge:${n}`, 16, 16) ?? draw(n);
+}
+
 export function badgeIcon(n) {
+  const drawn = override(`badge:${n}`, 16, 16);
+  if (drawn) return drawn.toDataURL();
   if (!cache.has(n)) cache.set(n, draw(n).toDataURL());
   return cache.get(n);
 }

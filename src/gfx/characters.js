@@ -1,4 +1,5 @@
 // Pixel-template character sprites (player + NPCs), 16x16, 4 directions, 3 frames.
+import { override } from './overrides.js';
 
 const DOWN = [
   '.....oooooo.....',
@@ -379,6 +380,8 @@ function draw(g, rows, pal, ox, oy, flip) {
 /** dir: 'down'|'up'|'left'|'right'; frame: 0 stand, 1/2 steps */
 export function charSprite(look, dir, frame = 0) {
   const key = `${look}|${dir}|${frame}`;
+  const drawn = override(`char:${key}`, 16, 17);
+  if (drawn) return drawn;
   let c = cache.get(key);
   if (c) return c;
   const pal = LOOKS[look] ?? LOOKS.boy;

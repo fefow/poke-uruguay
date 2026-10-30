@@ -1,5 +1,6 @@
 // Procedural 16x16 pixel tileset (no external images).
 import { Rng } from '../core/rng.js';
+import { override } from './overrides.js';
 
 export const T = 16;
 
@@ -523,7 +524,7 @@ const GYM_ROCA = {
   T: (g) => { stoneFloor(g); px(g, 1, 3, '#7a5a38', 14, 9); px(g, 1, 3, '#a98f66', 14, 3); },
 };
 
-const THEMES = { poli: POLI_T, gym_agua: GYM_AGUA, gym_elec: GYM_ELEC, gym_roca: GYM_ROCA };
+export const THEMES = { poli: POLI_T, gym_agua: GYM_AGUA, gym_elec: GYM_ELEC, gym_roca: GYM_ROCA };
 
 
 // ---- gym families for the later cities: roof, facade and emblem tiles plus an interior theme ----
@@ -585,6 +586,8 @@ export function tileCanvas(ch, frame = 0, theme = null) {
   const f = info?.anim ? frame % 4 : 0;
   const draw = (theme && THEMES[theme]?.[ch]) || null;
   const key = (draw ? `${theme}|` : '') + ch + f;
+  const drawn = override(`tile:${key}`, T, T);
+  if (drawn) return drawn;
   let c = cache.get(key);
   if (!c) {
     c = mk();

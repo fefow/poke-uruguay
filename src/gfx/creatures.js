@@ -2,6 +2,7 @@
 // features). Shapes are drawn with canvas paths, then hard-thresholded and
 // outlined so they read as pixel art. Facing left (toward the player).
 import { SPECIES } from '../data/species.js';
+import { override, overrideMirrored } from './overrides.js';
 
 export const SPRITE = 80;
 const cache = new Map();
@@ -427,6 +428,8 @@ function pixelate(c, outline = '#16141e') {
 
 /** Front sprite (faces left). back=true returns a mirrored, darker-rim version for the player side. */
 export function creatureSprite(key, { back = false } = {}) {
+  const drawn = back ? overrideMirrored(`creature:${key}`, SPRITE, SPRITE) : override(`creature:${key}`, SPRITE, SPRITE);
+  if (drawn) return drawn;
   const ck = `${key}|${back}`;
   if (cache.has(ck)) return cache.get(ck);
   const sp = SPECIES[key];

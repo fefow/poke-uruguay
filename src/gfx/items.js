@@ -3,6 +3,7 @@
 import { ITEMS } from '../data/items.js';
 import { MOVES } from '../data/moves.js';
 import { TYPES } from '../data/types.js';
+import { override } from './overrides.js';
 
 const INK = '#1a1a24';
 const cache = new Map();
@@ -114,6 +115,8 @@ function draw(g, key) {
 }
 
 function canvasFor(key) {
+  const drawn = override(`item:${key}`, 16, 16);
+  if (drawn) return drawn;
   let c = canvases.get(key);
   if (!c) {
     c = document.createElement('canvas');
@@ -126,9 +129,13 @@ function canvasFor(key) {
   return c;
 }
 
+/** 16x16 canvas for an item icon (the editor's drawing if there is one). */
+export { canvasFor as itemCanvas };
+
 export function itemIcon(key) {
-  let u = cache.get(key);
-  if (!u) { u = canvasFor(key).toDataURL(); cache.set(key, u); }
+  const c = canvasFor(key);
+  let u = cache.get(c);
+  if (!u) { u = c.toDataURL(); cache.set(c, u); }
   return u;
 }
 

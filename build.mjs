@@ -27,6 +27,35 @@ const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.js'", "'./game
 await writeFile('dist/sw.js', sw);
 await writeFile('dist/index.html', html.replace('src="src/main.js"', 'src="game.js"'));
 
+// Visual sprite editor (editor.html): its own bundle; it writes src/data/sprite-overrides.js.
+const editor = await build({
+  entryPoints: ['src/editor/main.js'],
+  bundle: true,
+  minify: true,
+  format: 'esm',
+  target: ['chrome120', 'firefox121', 'safari17'],
+  write: false,
+  legalComments: 'none',
+});
+const editorJs = editor.outputFiles[0].text;
+await writeFile('dist/editor.js', editorJs);
+await copyFile('styles/editor.css', 'dist/styles/editor.css');
+const editorHtml = await readFile('editor.html', 'utf8');
+await writeFile('dist/editor.html', editorHtml.replace('src="src/editor/main.js"', 'src="editor.js"'));
+// Single-file editor (for an Artifact preview): CSS and JS inlined.
+const editorBody = editorHtml.split('<!--APP-->')[1].split('<!--/APP-->')[0];
+const editorCss = await readFile('styles/editor.css', 'utf8');
+await writeFile('dist/editor-single.html', `<title>Editor de sprites</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+${editorCss}
+</style>
+${editorBody}
+<script type="module">
+${editorJs.replace(/<\/script/gi, '<\\/script')}
+</script>
+`);
+
 // Single file: CSS + JS inlined, no external files except Google Fonts.
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];
 const single = `<title>Poke Uruguay</title>

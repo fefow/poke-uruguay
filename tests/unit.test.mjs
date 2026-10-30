@@ -225,3 +225,22 @@ test('los eventos de daño y curación llevan los PS en ese momento', () => {
   const ev = e.turn({ type: 'move', index: party[0].moves.findIndex((m) => m.id === 'absorber') });
   for (const x of ev) if (x.t === 'damage' || x.t === 'heal') assert.ok(Number.isInteger(x.hp), `${x.t} sin hp`);
 });
+
+test('sprite codec round-trips pixels, alpha and big palettes', async () => {
+  const { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } = await import('../src/gfx/sprite-codec.js');
+  const w = 12, h = 9;
+  const px = new Uint8ClampedArray(w * h * 4);
+  for (let i = 0; i < w * h; i++) {
+    if (i % 7 === 0) continue; // transparent
+    px.set([i * 3 % 256, i * 5 % 256, i * 11 % 256, i % 5 === 0 ? 56 : 255], i * 4);
+  }
+  const enc = encodeSprite(px, w, h);
+  assert.equal(enc.c, 2); // more than 62 colours: two characters per pixel
+  assert.deepEqual([...decodeSprite(enc)], [...px]);
+  const small = encodeSprite(new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 0, 0]), 2, 1);
+  assert.deepEqual(small, { w: 2, h: 1, c: 1, p: ['#ff0000'], d: ['0.'] });
+  assert.equal(decodeSprite({ ...small, d: ['0'] }), null); // wrong row length is rejected
+  const map = { 'badge:1': small, 'item:mate': enc };
+  assert.deepEqual(parseOverridesSource(overridesSource(map)), map);
+  assert.deepEqual(parseOverridesSource(overridesSource({})), {});
+});
