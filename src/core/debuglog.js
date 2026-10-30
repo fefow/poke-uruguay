@@ -3,6 +3,7 @@
 // Read-only with respect to game state: it never changes a save.
 import { h, safeStorage } from './util.js';
 import { REPORT_CONFIG } from '../save/config.js';
+import { isDev, unlockDev } from './devauth.js';
 
 const KEY = 'pokeuy:debuglog';
 const MAX = 400;
@@ -206,7 +207,9 @@ function flashBadge() {
  */
 export function mountDebugPanel({ blockInput, getBuild }) {
   getBuildFn = getBuild ?? getBuildFn;
-  badge = h('button', { class: 'bug-btn', type: 'button', title: 'Panel de errores (F2)', 'aria-label': 'Abrir panel de errores' }, '🐞');
+  // Only the developer sees the panel: errors are still recorded for everyone, but the button and F2
+  // appear after unlocking with a GitHub token that can push to the repo (here with Ctrl+Shift+F2, or in editor.html).
+  badge = h('button', { class: 'bug-btn', type: 'button', title: 'Panel de errores (F2)', 'aria-label': 'Abrir panel de errores', hidden: !isDev() }, '🐞');
   document.body.append(badge);
   flashBadge();
   if (!entries.some((e) => e.level === 'error')) badge.classList.remove('has-error');
@@ -306,7 +309,18 @@ export function mountDebugPanel({ blockInput, getBuild }) {
   const open_ = (url) => { const a = h('a', { href: url, target: '_blank', rel: 'noopener' }); document.body.append(a); a.click(); a.remove(); };
 
   badge.addEventListener('click', open);
-  addEventListener('keydown', (e) => {
+  addEventListener('keydown', async (e) => {
+    if (e.code === 'F2' && e.ctrlKey && e.shiftKey && !isDev()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const t = prompt('Modo desarrollador: token de GitHub con permiso de escritura sobre el repo');
+      if (!t) return;
+      const r = await unlockDev(t);
+      if (r === 'ok') badge.hidden = false;
+      else alert(r === 'offline' ? 'No se pudo verificar el token (sin conexión con GitHub).' : 'Ese token no tiene permiso sobre el repo.');
+      return;
+    }
+    if (!isDev()) return;
     if (e.code === 'F2' || (e.code === 'Escape' && panelEl)) {
       e.preventDefault();
       e.stopImmediatePropagation();

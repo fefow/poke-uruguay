@@ -136,3 +136,13 @@ kbd { font: 600 10px/1 ui-monospace, monospace; padding: 2px 4px; border-radius:
   .ed-right { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
   .ed-actions .ed-input { width: 160px; }
 }
+
+/* access gate */
+.ed-lock { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 16px;
+  background: radial-gradient(70% 60% at 50% 40%, var(--panel-2), var(--bg)); }
+.ed-lock-card { display: grid; gap: 12px; width: min(420px, 100%); padding: 28px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 60px oklch(0 0 0 / 0.5);
+  & b { font: 11px var(--font-pixel); color: var(--sun); }
+  & h1 { margin: 0; font: 18px/1.3 var(--font-pixel); }
+  & p { margin: 0; color: var(--muted); }
+}
+.ed-lock-msg { min-height: 1.3em; }

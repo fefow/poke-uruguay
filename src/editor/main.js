@@ -12,12 +12,12 @@ import { tileCanvas, TILE_INFO, THEMES, T } from '../gfx/tiles.js';
 import { generated, setOverrides } from '../gfx/overrides.js';
 import { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } from '../gfx/sprite-codec.js';
 import { h, clamp, safeStorage } from '../core/util.js';
+import { devToken, isDev, unlockDev, checkToken, lockDev } from '../core/devauth.js';
 
 const REPO = 'fefow/poke-uruguay';
 const FILE = 'src/data/sprite-overrides.js';
 const store = safeStorage();
 const DRAFTS_KEY = 'pokeuy:sprite-drafts';
-const TOKEN_KEY = 'pokeuy:ghtoken'; // shared with the bug panel of the game
 const MAX_UNDO = 60;
 
 // ---------------------------------------------------------------- catalogue
@@ -104,9 +104,6 @@ const S = {
 const root = document.getElementById('editor');
 const statusEl = h('p', { class: 'ed-status', role: 'status' });
 const pending = h('span', { class: 'ed-pending' });
-const tokenInput = h('input', { type: 'password', class: 'ed-input', placeholder: 'Token de GitHub (permiso Contents)', autocomplete: 'off', spellcheck: 'false' });
-try { tokenInput.value = store.getItem(TOKEN_KEY) || ''; } catch { /* storage blocked */ }
-tokenInput.addEventListener('change', () => { try { store.setItem(TOKEN_KEY, tokenInput.value.trim()); } catch { /* storage blocked */ } });
 const fileInput = h('input', { type: 'file', accept: '.js,.json,text/javascript,application/json', hidden: true, onchange: importFile });
 
 const header = h('header', { class: 'ed-head' },
@@ -115,8 +112,8 @@ const header = h('header', { class: 'ed-head' },
   h('div', { class: 'ed-actions' },
     h('button', { class: 'ed-btn', type: 'button', text: 'Cargar archivo', onclick: () => fileInput.click() }),
     h('button', { class: 'ed-btn', type: 'button', text: 'Descargar archivo', onclick: download }),
-    tokenInput,
     h('button', { class: 'ed-btn is-primary', type: 'button', text: 'Guardar en el juego', onclick: saveToGitHub }),
+    h('button', { class: 'ed-btn', type: 'button', text: 'Salir', title: 'Cierra el modo desarrollador en este navegador', onclick: () => { lockDev(); location.reload(); } }),
   ),
   fileInput,
 );
@@ -656,10 +653,8 @@ const b64encode = (text) => btoa(unescape(encodeURIComponent(text)));
 const b64decode = (b64) => decodeURIComponent(escape(atob(b64.replace(/\s/g, ''))));
 
 async function saveToGitHub() {
-  const token = tokenInput.value.trim();
+  const token = devToken();
   if (!Object.keys(drafts).length) return status('No hay cambios para guardar.');
-  if (!token) return status('Pegá un token de GitHub con permiso "Contents: Read and write" sobre el repo para guardar. También podés descargar el archivo.', 'error');
-  try { store.setItem(TOKEN_KEY, token); } catch { /* storage blocked */ }
   const url = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
   const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
   status('Guardando en GitHub…');
@@ -690,5 +685,36 @@ async function saveToGitHub() {
 }
 
 // ---------------------------------------------------------------- start
-syncTools();
-selectCat(CATS[0]);
+// Locked until a GitHub token with write access to the repo is verified (checked again on every visit).
+function start() {
+  lock.remove();
+  syncTools();
+  selectCat(CATS[0]);
+}
+const lockInput = h('input', { type: 'password', class: 'ed-input', placeholder: 'Token de GitHub', autocomplete: 'off', spellcheck: 'false' });
+const lockMsg = h('p', { class: 'ed-lock-msg', role: 'status' });
+const lockForm = h('form', { class: 'ed-lock-card' },
+  h('b', { text: 'Poke Uruguay' }),
+  h('h1', { text: 'Editor de sprites' }),
+  h('p', { text: 'Acceso solo para el desarrollador. Ingresá un token de GitHub con permiso de escritura sobre el repo del juego.' }),
+  lockInput,
+  h('button', { class: 'ed-btn is-primary', type: 'submit', text: 'Entrar' }),
+  lockMsg);
+const lock = h('div', { class: 'ed-lock' }, lockForm);
+document.body.append(lock);
+const denied = { denied: 'Ese token no tiene permiso de escritura sobre el repo.', offline: 'No se pudo conectar con GitHub. Probá de nuevo.' };
+lockForm.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  lockMsg.textContent = 'Verificando…';
+  const r = await unlockDev(lockInput.value);
+  if (r === 'ok') start();
+  else lockMsg.textContent = denied[r];
+});
+if (isDev()) {
+  lockMsg.textContent = 'Verificando acceso…';
+  checkToken(devToken()).then((r) => {
+    if (r === 'ok') return start();
+    if (r === 'denied') lockDev();
+    lockMsg.textContent = denied[r];
+  });
+}
