@@ -297,7 +297,7 @@ export function openBag({ mode = 'field', wild = false } = {}) {
         if (it.repel) return say('¡No es momento de usar eso!');
         if (it.tm || it.stone) return say('Mejor usala fuera de combate.');
         if (it.rareCandy) return say('Mejor usala fuera de combate.');
-        if (it.xstat) {
+        if (it.xstat || it.bait) {
           const act = S.party.findIndex((c) => c.hp > 0);
           return close({ item: key, target: act });
         }
@@ -338,7 +338,7 @@ async function useInField(key) {
     sfx('confirm');
     return say(`Usaste ${it.name}. Las criaturas débiles no se van a acercar.`);
   }
-  if (it.xstat) return say('Solo se puede usar en combate.');
+  if (it.xstat || it.bait) return say('Solo se puede usar en combate.');
   if (!it.tm && !it.stone && !it.rareCandy) {
     // Stay inside the party menu: the bar fills up there, then the player keeps choosing or goes back.
     await openParty({

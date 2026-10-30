@@ -97,6 +97,49 @@ const FRB = city({
 const sign = (texts) => (r) => texts.slice(0, r.signs.length);
 
 export const ACT2_OUTDOOR = {
+  // Safari Pan de Azúcar (Piriápolis, Maldonado): paid time inside a big park full of wild creatures.
+  safari: {
+    name: 'Safari Pan de Azúcar', music: 'route', bg: 'field', safari: true, fullWild: true,
+    tiles: [
+    '##########################',
+    '#,,,,,,,,,,,==,,,,,,,,,,,#',
+    '#,,,,,,,,,ff==ff,,,,,,,,,#',
+    '#,,,,~~~~,,,==,,,~~~~,,,,#',
+    '#,,,,~~~~,,,==,,,~~~~,,,,#',
+    '#,,,,~~~~,,,==,,,~~~~,,,,#',
+    '#,,,,,,,,,,,==,,,~~~~,,,,#',
+    '#,,#,,,,,,,,==,,,,,,,,#,,#',
+    '#,,#,,#,,,,,==,,,,,#,,#,,#',
+    '#,,,,,,,,,,,==,,,,,,,,,,,#',
+    '#========================#',
+    '#........................#',
+    '#,,,,,,,,,,,==,,,,,,,,,,,#',
+    '#,,,,,,,,#,,==,#,,,,,,,,,#',
+    '#,,,~~~~~#,,==,#,,~~~~,,,#',
+    '#,,,~~~~~,,,==,,,,~~~~,,,#',
+    '#,,,~~~~~,,,==,,,,~~~~,,,#',
+    '#,,,,,,,,,,....,,,~~~~,,,#',
+    '#,,,,,,,,,,.==.,,,,,,,,,,#',
+    '##########################',
+    ],
+    signs: [],
+    enc: {
+      rate: 0.22,
+      list: [
+        ...wildList(['normal', 'volador'], 22, 27, 4, 'sf1'),
+        ...wildList(['planta', 'bicho'], 22, 27, 4, 'sf2'),
+        ...wildList(['agua', 'tierra'], 22, 27, 4, 'sf3'),
+        ...wildList(['electrico', 'roca'], 22, 27, 3, 'sf4'),
+        ...wildList(['veneno', 'psiquico'], 22, 27, 3, 'sf5'),
+        ...wildList(['fuego', 'lucha', 'siniestro'], 22, 27, 3, 'sf6'),
+      ].map(([k, a, b]) => [k, a, b, 6]),
+    },
+    fish: fishList(22, 26, 'sf'),
+    npcs: [
+      { x: 12, y: 18, look: 'cop', dir: 'up', script: 'safari_exit' },
+      { ...npc(14, 17, 'oldman', ['Esto es un parque, no un campo de batalla: acá se viene a ver y a atrapar criaturas.', 'Fijate el tiempo que contrataste. Cuando suena la campana, los guardias te acompañan a la salida.'], { dir: 'left' }) },
+    ],
+  },
   durazno: {
     name: 'Durazno', music: 'town', bg: 'canyon', tiles: DUR.tiles,
     doors: [...DUR.doors],
@@ -479,6 +522,8 @@ export const ACT2_INTERIOR = {
     exitTo: { map: 'ferry_2', x: 11, y: 2 },
     npcs: [{ x: 5, y: 2, look: 'ferry_captain', dir: 'down', script: 'ferry_captain' }],
   }),
+
+  safari_gate: house('Safari Pan de Azúcar: boletería', { x: 6, y: 3, look: 'clerk', dir: 'left', script: 'safari_clerk' }, npc(3, 2, 'cop', ['El parque tiene seguridad propia. Quien se pasa del tiempo contratado es acompañado a la salida.'], { dir: 'down' })),
 
   // --- Observatorio del Cerro (Piriápolis): old Proyecto Pampero lab, three floors; Almada guards the logbook
   obs_1: room(FLOOR_UP, {

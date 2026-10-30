@@ -358,12 +358,20 @@ export class BattleEngine {
       return false;
     }
     const c = this.f.c;
-    const a = catchValue({ catchRate: SPECIES[c.species].catchRate, level: c.level, hp: c.hp, maxHp: maxHp(c), ball, status: c.status });
     let shakes = 0;
+    if (ball === 'safari') {
+      // Safari: wild, strong creatures. About 50/50 with one bait, better with more, worse with none.
+      const base = [0.3, 0.5, 0.65, 0.75][Math.min(3, this.f.bait ?? 0)];
+      const p = Math.min(0.95, base + (1 - c.hp / maxHp(c)) * 0.15);
+      const per = p ** 0.25;
+      while (shakes < 4 && this.#rng.next() < per) shakes++;
+    } else {
+    const a = catchValue({ catchRate: SPECIES[c.species].catchRate, level: c.level, hp: c.hp, maxHp: maxHp(c), ball, status: c.status });
     if (a >= 255) shakes = 4;
     else {
       const b = 65536 * shakeChance(a);
       while (shakes < 4 && this.#rng.int(0, 65535) < b) shakes++;
+    }
     }
     const caught = shakes === 4;
     ev.push({ t: 'shakes', n: Math.min(shakes, 3), caught });
@@ -380,6 +388,11 @@ export class BattleEngine {
     const it = ITEMS[itemKey];
     const c = this.party[targetIndex];
     ev.push({ t: 'text', msg: `Usaste ${it.name}.` });
+    if (it.bait) {
+      this.f.bait = Math.min(3, (this.f.bait ?? 0) + 1);
+      ev.push({ t: 'text', msg: this.f.bait >= 3 ? `¡${displayName(this.f.c)} está encantado con vos!` : `¡${displayName(this.f.c)} se encariña con la galleta!` });
+      return;
+    }
     if (it.xstat) {
       this.#changeStage(0, it.xstat, 1, ev);
       return;

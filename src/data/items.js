@@ -7,6 +7,8 @@ const BASE_ITEMS = {
   esfera: { name: 'Pokeball', pocket: 'balls', price: 200, ball: 1, desc: 'Una bola de cuero para atrapar criaturas salvajes. Efectividad ×1.' },
   superesfera: { name: 'Superball', pocket: 'balls', price: 600, ball: 1.5, desc: 'Mejor que la Pokeball. Cosida a mano en Tacuarembó. Efectividad ×1,5.' },
   ultraesfera: { name: 'Ultraball', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Efectividad ×2. Ideal para criaturas raras o de nivel alto.' },
+  safari_ball: { name: 'Safari Ball', pocket: 'balls', price: 0, ball: 'safari', desc: 'Solo del Safari. Atrapa criaturas salvajes; con Galleta de Campaña, más seguido. Se devuelve al salir.' },
+  cebo: { name: 'Galleta de Campaña', pocket: 'items', price: 0, bait: true, desc: 'Solo en el Safari. Comida para ganarse a la criatura: se encariña y es más fácil de atrapar (hasta 3 por criatura).' },
   esfera_celeste: { name: 'Pokeball Celeste', pocket: 'balls', price: 0, ball: 255, desc: 'Celeste como la camiseta. Atrapa sin fallar.' },
 
   te_marcela: { mate: true, name: 'Mate Lavado', pocket: 'items', price: 300, heal: 15, desc: 'El mate más suave, casi lavado. Recupera 15 PS.' },

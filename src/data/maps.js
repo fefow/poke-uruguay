@@ -377,9 +377,9 @@ const BASE_OUTDOOR = {
     locality: true,
     tiles: [
       '############################',
-      '#uuuuu..,,,,,.....uuuuu....#',
-      '#uuuuu..,,,,,.....uuuuu.f..#',
-      '#HwDwH...,,,,.....HwDwH...%#',
+      '#uuuuu..ooooo.....uuuuu....#',
+      '#uuuuu..ooooo.....uuuuu.f..#',
+      '#HwDwH..HwDwH.....HwDwH...%#',
       '#........f..........c....%.#',
       '#..UUUUU............c..S..%#',
       '#..UUUUU............c......#',
@@ -392,7 +392,7 @@ const BASE_OUTDOOR = {
       '#~~~~~~~~~~~sss~~~~~~~~~~~~#',
       '############################',
     ],
-    doors: [{ to: 'obs_1', req: 'quebrada_clear', deny: ['El viejo Observatorio del Cerro tiene la puerta clausurada con candados.', 'Un cartel dice: "Cerrado por seguridad. Proyecto Pampero".'] }, 'casa_pir', 'shop_pir'],
+    doors: [{ to: 'obs_1', req: 'quebrada_clear', deny: ['El viejo Observatorio del Cerro tiene la puerta clausurada con candados.', 'Un cartel dice: "Cerrado por seguridad. Proyecto Pampero".'] }, 'safari_gate', 'casa_pir', 'shop_pir'],
     signs: ['PIRIÁPOLIS\nBalneario fundado a principios del siglo XX. Al fondo se ve el Cerro San Antonio.'],
     exits: { w: { to: 'interbalnearia' }, e: { to: 'punta' } },
     enc: { rate: 0.1, list: [['pejerrey', 12, 14, 14], ['gaviota', 12, 14, 12], ['avispa', 12, 14, 14], ['chimango', 13, 15, 10], ['murcielago', 12, 14, 12], ['tatu', 12, 14, 12], ['carpintero', 13, 15, 12], ['tuco', 13, 15, 10]] },
@@ -403,7 +403,7 @@ const BASE_OUTDOOR = {
       { x: 24, y: 4, look: 'oldman', wander: true, text: ['Desde la cima del cerro se ve toda la costa.', 'El mar acá es más calmo que en Punta del Este.'] },
       { x: 6, y: 9, look: 'boy', text: ['Mi abuelo dice que en el mar de Piriápolis se ven toninas en verano.'] },
     ],
-    items: [{ x: 9, y: 2, item: 'superesfera', id: 'pir_item1' }],
+    items: [{ x: 15, y: 2, item: 'superesfera', id: 'pir_item1' }],
   },
 
   paloma: {
@@ -703,7 +703,7 @@ export const MAPS = { ...OUTDOOR, ...INTERIOR };
 const MAX_WILD = 4;
 const CAP = 6;
 (function trimWild() {
-  const maps = Object.values(OUTDOOR).filter((m) => m.enc?.list);
+  const maps = Object.values(OUTDOOR).filter((m) => m.enc?.list && !m.fullWild);
   const kept = new Map(maps.map((m) => [m, [...m.enc.list].sort((x, y) => y[3] - x[3]).slice(0, MAX_WILD)]));
   const covered = new Set([...maps.flatMap((m) => kept.get(m).map((e) => e[0])), ...Object.values(OUTDOOR).flatMap((m) => (m.fish ?? []).map((e) => e[0]))]);
   const mid = (list) => list.reduce((a, e) => a + (e[1] + e[2]) / 2, 0) / list.length;

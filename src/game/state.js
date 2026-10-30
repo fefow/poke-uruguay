@@ -23,6 +23,7 @@ export function newState({ name, look }) {
     lastHeal: { map: 'casa_jugador', x: 6, y: 5 },
     repel: 0,
     daycare: null,
+    safari: null,
     created: Date.now(),
     saveCount: 0,
   };

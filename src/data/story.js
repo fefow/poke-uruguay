@@ -513,6 +513,28 @@ export const SCRIPTS = {
     await api.npcLeave('rival_r24');
   },
 
+  async safari_clerk(api) {
+    await api.say(['Bienvenido al Safari Pan de Azúcar. Es un parque con criaturas de todo el país, sueltas y a la vista.', 'Se paga por tiempo de visita. Pasado ese tiempo suena una campana y los guardias te acompañan a la salida.', 'Un minuto antes te vamos a avisar. No se devuelve el dinero si salís antes.'], { name: 'Boletería' });
+    const opts = [['Visita corta · 5 minutos · $500', 5, 500], ['Visita media · 10 minutos · $900', 10, 900], ['Visita larga · 15 minutos · $1300', 15, 1300]];
+    const r = await api.choose([...opts.map((o) => ({ label: o[0] })), 'No, gracias'], { cancel: true });
+    if (r < 0 || r >= opts.length) return api.say('Cuando quieras, acá estamos.', { name: 'Boletería' });
+    const [, min, price] = opts[r];
+    if (!api.pay(price)) return api.say('No te alcanza el dinero para esa entrada.', { name: 'Boletería' });
+    api.safariStart(min);
+    api.sfx('confirm');
+    await api.say([`Pagaste $${price}. Tenés ${min} minutos desde que cruces la puerta.`, 'Te damos 30 Safari Balls y 15 Galletas de Campaña. Con la galleta, la criatura se encariña y es más fácil de atrapar. Todo se devuelve al salir.', 'Que disfrutes la visita.'], { name: 'Boletería' });
+    await api.warp('safari', 12, 17, 'up');
+  },
+
+  async safari_exit(api) {
+    const left = api.safariLeft();
+    const mins = Math.ceil(left / 60000);
+    if (!(await api.ask(`Te quedan unos ${mins} minuto${mins === 1 ? '' : 's'} de visita. ¿Querés salir ahora?`, { name: 'Guardia' }))) return;
+    api.safariLeave();
+    await api.say('Gracias por la visita. Te acompaño a la salida.', { name: 'Guardia' });
+    await api.warp(api.safariGate.map, api.safariGate.x, api.safariGate.y, 'down');
+  },
+
   async guarderia(api) {
     await api.daycare();
   },

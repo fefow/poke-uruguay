@@ -16,7 +16,7 @@ import { worldRng } from '../core/rng.js';
 import { h, wait, clamp } from '../core/util.js';
 import { info as logInfo } from '../core/debuglog.js';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.js';
-import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX, badgeCount } from './state.js';
+import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount } from './state.js';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp } from './creature.js';
 import { runBattle } from './battle-scene.js';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.js';
@@ -113,10 +113,23 @@ function refreshEntities() {
   W_.legend = m.legend && cond(m.legend.cond) && !flag(m.legend.flag) ? m.legend : null;
 }
 
+// Safari: the ticket is a deadline (S.safari.until). Nobody stays inside, or loads a save inside, without paid time.
+export const SAFARI_GATE = { map: 'piriapolis', x: 10, y: 4 };
+const safariLeft = () => (state().safari?.until ?? 0) - Date.now();
+// Park equipment goes back to the park when you leave.
+const safariStrip = () => { const S = state(); S.bag.safari_ball && delete S.bag.safari_ball; S.bag.cebo && delete S.bag.cebo; };
+
 export function loadMap(id, x, y, dir = 'down') {
   linkWorld();
-  const m = MAPS[id];
   const S = state();
+  if (MAPS[id]?.safari && safariLeft() <= 0) {
+    S.safari = null;
+    safariStrip();
+    ({ map: id, x, y } = SAFARI_GATE);
+    dir = 'down';
+  }
+  const m = MAPS[id];
+  if (W_.map?.safari && !m.safari) safariStrip();
   const changed = W_.map?.id !== id;
   if (changed) logInfo(`Entró a ${id}`);
   if (!m.indoor) S.flags[`v_${id}`] = true;
@@ -150,8 +163,28 @@ function showBanner(name) {
 }
 
 // ---------------------------------------------------------------- update
+function safariClock() {
+  const S = state();
+  const left = safariLeft();
+  if (left <= 0) {
+    if (W_.scriptRunning || W_.safariEnding) return;
+    W_.safariEnding = true;
+    runScript(async () => {
+      S.safari = null;
+      for (let i = 0; i < 3; i++) { sfx('levelup'); await wait(450); }
+      await say(['¡Ding, dong! Se terminó el tiempo contratado.', 'Los guardias del Safari te acompañan hasta la salida.']);
+      await doWarp(SAFARI_GATE.map, SAFARI_GATE.x, SAFARI_GATE.y, 'down');
+    }).finally(() => { W_.safariEnding = false; });
+  } else if (left <= 60000 && W_.safariWarned !== S.safari.until) {
+    W_.safariWarned = S.safari.until;
+    sfx('levelup');
+    toast('Aviso del Safari: queda 1 minuto de visita.', 5000);
+  }
+}
+
 export function updateWorld(dt, now) {
   W_.anim += dt;
+  if (W_.map.safari) safariClock();
   const p = W_.player;
   // NPCs keep animating during scripts: trainers walking up to you or leaving the scene depend on it.
   for (const n of W_.npcs) updateNpc(n, now, dt);
@@ -731,6 +764,16 @@ export const api = {
   },
   /** Moves the player to another map with a fade (used when the ferry sails). */
   warp: (map, x, y, dir = 'down') => doWarp(map, x, y, dir),
+  pay: (n) => spend(n),
+  /** Buy safari time: the clock only runs inside the Safari map. */
+  safariStart(minutes) {
+    state().safari = { until: Date.now() + minutes * 60000 };
+    addItem('safari_ball', 30);
+    addItem('cebo', 15);
+  },
+  safariLeft: () => Math.max(0, safariLeft()),
+  safariLeave() { state().safari = null; safariStrip(); },
+  safariGate: SAFARI_GATE,
   markSeen: (sp) => markSeen(sp),
   openShop: (stock) => openShop(stock),
   openPC: () => openPC(),
