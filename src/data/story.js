@@ -482,7 +482,7 @@ export const SCRIPTS = {
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo a Calima. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
     await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Quedan muchas ciudades con gimnasio al oeste y al norte: empezá por Durazno, al oeste de Minas.', 'Y con la medalla en mano, mirá la fábrica abandonada."']);
-    await api.say(['Otro mensaje, un minuto después:', '"Proyecto Pampero… ese nombre es mío. Fue un estudio que hice con Calima para predecir el clima con ayuda de las criaturas.', 'Se fue cuando me negué a venderlo. Si es él quien está detrás, esto también es cosa mía."']);
+    await api.say(['Otro mensaje, un minuto después:', '"Proyecto Pampero… ese nombre es mío. Fue un estudio que hice con Calima para predecir el clima con ayuda de las criaturas.', 'Se fue cuando me negué a venderlo. Si es él quien está detrás, esto también es cosa mía.', 'Nuestro laboratorio era el viejo Observatorio del Cerro, en Piriápolis. Si podés, pasá a ver qué quedó ahí."']);
   },
 
   async rival_r5(api) {
@@ -511,6 +511,22 @@ export const SCRIPTS = {
       await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_r24');
+  },
+
+  async almada(api) {
+    if (api.flag('obs_clear')) return;
+    await api.say(['No esperaba visitas. Soy Almada, fui alumno del Maestro Tabárez en este mismo observatorio.', 'Estudiábamos cómo el Pampero ordena el clima del Río de la Plata. Calima y Tabárez dirigían el proyecto.', 'Cuando Tabárez se negó a vender los datos, Calima se quedó con los instrumentos y yo me fui con él.', 'Pensé que íbamos a proteger el clima. Resulta que quería controlarlo.'], { name: 'Almada' });
+    await api.say('Acá guardo el registro original. Si querés leerlo, ganame primero.', { name: 'Almada' });
+    const res = await api.battle({ id: 'almada', name: 'Almada', cls: 'Investigador PP', look: 'biologo', ai: 'smart', team: [['luzmala', 37], ['fatuo', 37], ['pombero', 38], ['vespertino', 38], ['caudillo', 39]], prize: 3200, lose: 'Tenías razón en venir hasta acá.', items: ['mate_dulce'] });
+    if (res !== 'win') return;
+    api.setFlag('obs_clear');
+    api.setFlag('obs_log');
+    await api.flash();
+    await api.say(['Tomá el registro. Está firmado por los dos: Tabárez y Calima.', 'La última página la escribió Calima: "El Pampero tiene un ciclo. Si lo interrumpo, la niebla es mía para siempre".', 'Por eso quiere capturarlo. No lo odia: lo necesita.'], { name: 'Almada' });
+    await api.say(['Dejo el Equipo PP. Voy a llevarle esto a Tabárez en persona.', 'Y esta MT era del observatorio: se usaba para medir los temblores del cerro.'], { name: 'Almada' });
+    await api.give('mt_terremoto', 1);
+    await api.npcLeave('almada');
+    await api.say(['Tu celular vibra. Es Facu:', '"Mi tío me contó que Almada fue su mejor alumno. Si lo convenciste de volver, ya hiciste más que yo.', 'No pienso quedarme atrás. Nos vemos en el camino."']);
   },
 
   async bruma2(api) {

@@ -480,6 +480,33 @@ export const ACT2_INTERIOR = {
     npcs: [{ x: 5, y: 2, look: 'ferry_captain', dir: 'down', script: 'ferry_captain' }],
   }),
 
+  // --- Observatorio del Cerro (Piriápolis): old Proyecto Pampero lab, three floors; Almada guards the logbook
+  obs_1: room(FLOOR_UP, {
+    name: 'Observatorio del Cerro: planta baja', music: 'cave',
+    warps: [{ x: 11, y: 1, to: 'obs_2', tx: 5, ty: 7 }],
+    npcs: [
+      tr({ x: 2, y: 4 }, 'grunt', 'ob_a', 'Recluta Neblina', 'Equipo PP', ['siniestro', 'veneno'], [33, 34], ['Este lugar lleva años cerrado. Nadie debería estar acá.', 'No se vio nada.', 'Los pasillos se vuelven fríos más arriba.'], { dir: 'right', sight: 4 }),
+      tr({ x: 8, y: 6 }, 'oldman', 'ob_b', 'Sereno Facundo', 'Sereno', ['psiquico', 'siniestro'], [34, 35], ['Dicen que las luces del cerro se prenden solas de noche.', 'No me asusta perder, me asustan las luces.', 'Arriba están los instrumentos viejos.'], { dir: 'left', sight: 4 }),
+      npc(6, 2, 'girl', ['Escuché pasos en el piso de arriba, pero hace años que el edificio está vacío.', 'Será el viento… o será otra cosa.'], { dir: 'down' }),
+    ],
+    items: [{ x: 1, y: 7, item: 'mate_dulce', id: 'ob_item1' }],
+  }),
+  obs_2: room(FLOOR_MID, {
+    name: 'Observatorio del Cerro: sala de instrumentos', music: 'cave',
+    exitTo: { map: 'obs_1', x: 11, y: 2 },
+    warps: [{ x: 0, y: 1, to: 'obs_3', tx: 5, ty: 6 }, { x: 11, y: 1, to: 'obs_3', tx: 5, ty: 6 }],
+    npcs: [
+      tr({ x: 3, y: 5 }, 'clerk', 'ob_c', 'Técnica Moreira', 'Técnica PP', ['psiquico', 'veneno'], [35, 36], ['Estos instrumentos midieron el viento del Río de la Plata durante décadas.', 'Se desajustó todo.', 'Los registros originales están arriba.'], { dir: 'right', sight: 4 }),
+      tr({ x: 8, y: 3 }, 'grunt', 'ob_d', 'Recluta Bruma Baja', 'Equipo PP', ['siniestro', 'psiquico'], [35, 36], ['Esto fue un laboratorio serio, antes de que lo usáramos nosotros.', 'Ahora sí me asusté.', 'El que manda acá arriba es Almada.'], { dir: 'down', sight: 3 }),
+      npc(9, 5, 'biologo', ['Una placa dice: "Proyecto Pampero, estudio del clima rioplatense. Dir. Tabárez y Calima".', 'Había dos nombres. Alguien raspó uno de los dos.'], { dir: 'left' }),
+    ],
+  }),
+  obs_3: room(FLOOR_TOP, {
+    name: 'Observatorio del Cerro: cúpula', music: 'cave',
+    exitTo: { map: 'obs_2', x: 11, y: 2 },
+    npcs: [{ x: 5, y: 2, look: 'biologo', dir: 'down', id: 'almada', cond: (f) => !f.obs_clear, script: 'almada' }],
+  }),
+
   // --- Torre de Niebla (Rivera): three floors, Bruma at the top
   torre_1: room(FLOOR_UP, {
     name: 'Torre de Niebla: planta baja', music: 'cave',

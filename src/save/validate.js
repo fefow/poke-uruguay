@@ -22,7 +22,7 @@ const STORY_FLAGS = new Set([
   'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
   'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_brumario', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
-  'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
+  'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
 const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-9])_[a-z0-9_]{1,40}$/;
 
