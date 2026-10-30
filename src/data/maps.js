@@ -631,7 +631,7 @@ const BASE_INTERIOR = {
     name: 'Palacio de la Luz (UTE)',
     theme: 'gym_elec',
     npcs: [
-      { x: 5, y: 2, look: 'leader_elec', dir: 'down', script: 'leader', leader: 'ute' },
+      { x: 5, y: 2, look: 'leader_ute', dir: 'down', script: 'leader', leader: 'ute' },
       { x: 8, y: 6, look: 'boy', dir: 'left', sight: 4, trainer: TR('g1_a', 'Nico', 'Electricista', [['luciernito', 8], ['nimbo', 8]], 200, 'Trabajo en la usina de UTE.', 'Se cortó la luz.', 'La presidenta Silvia Ferraro usa tipo Eléctrico. ¿Tenés algo de tipo Tierra?', 'boy') },
       { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g1_b', 'Flor', 'Técnica de UTE', [['cotorrayo', 9]], 220, 'Mido cada kilovatio de la ciudad.', 'Corto circuito.', 'Silvia es muy buena. Suerte.', 'girl') },
       { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Bienvenido al Palacio de la Luz, sede de UTE.', 'La presidenta Silvia Ferraro usa criaturas de tipo Eléctrico.', 'Las de tipo Tierra no reciben daño eléctrico.'] },
@@ -641,7 +641,7 @@ const BASE_INTERIOR = {
     name: 'Planta de OSE (Punta del Este)',
     theme: 'gym_agua',
     npcs: [
-      { x: 5, y: 2, look: 'leader_water', dir: 'down', script: 'leader', leader: 'ose' },
+      { x: 5, y: 2, look: 'leader_ose', dir: 'down', script: 'leader', leader: 'ose' },
       { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Operario de OSE', [['lobito', 14], ['lobito', 14]], 340, 'Cuido que el agua llegue limpia a cada canilla.', 'Se me rompió la cañería.', 'Teresa Almada conoce cada cañería del país.', 'swimmer') },
       { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Técnica de OSE', [['mbigua', 15]], 360, 'Analizo el agua todos los días.', 'Perdí.', 'Las criaturas de tipo Planta o Eléctrico le hacen daño al agua.', 'girl') },
       { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Planta de OSE de Punta del Este.', 'Teresa Almada usa tipo Agua. Planta y Eléctrico tienen ventaja.'] },
@@ -651,7 +651,7 @@ const BASE_INTERIOR = {
     name: 'Gimnasio de Treinta y Tres',
     theme: 'gym_roca',
     npcs: [
-      { x: 5, y: 2, look: 'leader_gaucho', dir: 'down', script: 'leader', leader: 'lavalleja' },
+      { x: 5, y: 2, look: 'leader_lavalleja', dir: 'down', script: 'leader', leader: 'lavalleja' },
       { x: 8, y: 6, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('g3_a', 'Peón Ramiro', 'Peón', [['mulitin', 24], ['hornerazo', 24]], 540, 'La piedra no se quiebra.', 'Se quebró.', 'El agua y la planta le hacen daño a la roca.', 'gaucho') },
       { x: 3, y: 9, look: 'boy', dir: 'right', sight: 4, trainer: TR('g3_b', 'Tropero Lalo', 'Tropero', [['nanduro', 25]], 560, 'Ninguna tropa me detiene.', 'Perdí.', 'El general Lavalleja combate desde antes de que vos nacieras.', 'boy') },
       { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Gimnasio de Treinta y Tres.', 'El general Lavalleja usa tipo Roca y Tierra. Agua y Planta son tus mejores aliados.'] },

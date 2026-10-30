@@ -150,6 +150,18 @@ export const LOOKS = {
   cop: { h: '#1a2a5a', H: '#1a2a5a', s: '#e8b890', S: '#c89870', c: '#3a5a9a', C: '#1a2a5a', p: '#1a2a3a', b: '#1a1a1a' },
   leader_water: { h: '#2a6ad8', H: '#2a6ad8', s: '#f2c8a0', S: '#d8a880', c: '#7ac8f0', C: '#2a6ad8', p: '#f2f2f2', b: '#2a6ad8', long: true },
   leader_elec: { h: '#f2e05c', H: '#f2e05c', s: '#f2c8a0', S: '#d8a880', c: '#2a2a2a', C: '#f2e05c', p: '#2a2a2a', b: '#f2e05c', long: true },
+  // Gym leaders by state body / historic figure, the ferry captain and the PP foremen each get their own look.
+  leader_ute: { h: '#2a1a1a', H: '#f2e05c', s: '#f2c8a0', S: '#d8a880', c: '#f28a1a', C: '#c86a0a', p: '#2a3a5a', b: '#14141e', long: true },
+  leader_ose: { h: '#9a9aa8', H: '#2a6ad8', s: '#f2c8a0', S: '#d8a880', c: '#f4f4f4', C: '#c8d8f0', p: '#2a4a7a', b: '#14141e', long: true },
+  leader_lavalleja: { h: '#d8d8d8', H: '#1a2a5a', s: '#c8946a', S: '#a8744a', c: '#1a2a6a', C: '#0a1a4a', p: '#d8d8d8', b: '#14141e' },
+  leader_ancap: { h: '#5a2a1a', H: '#d83a2a', s: '#d8a070', S: '#b88050', c: '#8a8a98', C: '#5a5a6a', p: '#3a3a4a', b: '#14141e', long: true },
+  leader_mgap: { h: '#4a3a2a', H: '#e8d090', s: '#e8b890', S: '#c89870', c: '#7a5a3a', C: '#4a3a1a', p: '#3a3a2a', b: '#2a1a10' },
+  leader_defensa: { h: '#2a1a1a', H: '#2f4a2a', s: '#f2c8a0', S: '#d8a880', c: '#4a6a3a', C: '#2f4a2a', p: '#3a4a2a', b: '#1a1a10', long: true },
+  leader_quiroga: { h: '#1a1a1a', H: '#1a1a1a', s: '#e8c8a8', S: '#c8a888', c: '#f4f4f4', C: '#c8c8d0', p: '#3a3a3a', b: '#14141e' },
+  ferry_captain: { h: '#d8d8d8', H: '#f4f4f4', s: '#e8b890', S: '#c89870', c: '#1a2a5a', C: '#0a1a3a', p: '#1a2a5a', b: '#14141e' },
+  biologo: { h: '#6a4a2a', H: '#6a4a2a', s: '#e8b890', S: '#c89870', c: '#f4f4f4', C: '#c8c8d0', p: '#3a5a8a', b: '#2a1a10' },
+  pp_capataz: { h: '#1a1a1a', H: '#1a1a1a', s: '#e8b890', S: '#c89870', c: '#4a1a2a', C: '#2a0a1a', p: '#1a1a24', b: '#0a0a12' },
+  ciclista: { h: '#2a1a1a', H: '#e0263a', s: '#e8b890', S: '#c89870', c: '#f8d040', C: '#c8a010', p: '#14141e', b: '#e0263a' },
   champion: { h: '#2a2a2a', H: '#5aa8e8', s: '#a87a5a', S: '#8a5a3a', c: '#5aa8e8', C: '#ffffff', p: '#1a1a1a', b: '#1a1a1a' },
   keeper: { h: '#5a5a5a', H: '#1a2a5a', s: '#e8b890', S: '#c89870', c: '#1a2a5a', C: '#f2f2f2', p: '#3a3a3a', b: '#1a1a1a' },
 };
@@ -276,6 +288,77 @@ const DECO = {
     if (dir === 'down') { d(7, 10, '#2a3a8a', 2, 1); d(10, 10, '#f8d040', 2, 2); d(1, 10, '#e0263a', 2, 1); }
     else if (dir === 'up') { d(6, 9, '#2a3a8a', 1, 4); d(7, 9, '#2a3a8a', 2, 1); d(7, 11, '#2a3a8a', 2, 1); d(8, 12, '#2a3a8a', 1, 1); }
     else d(6, 11, '#2a3a8a', 3, 1);
+  },
+  // Silvia Ferraro (UTE): yellow hard hat with a bolt and a hi-vis vest.
+  leader_ute: (d, dir) => {
+    d(2, 1, '#f2e05c', 12, 2); d(3, 0, '#f2e05c', 9, 1);
+    if (dir === 'down') { d(7, 1, '#2a2a2a', 2, 1); d(4, 10, '#f8f8d8', 8, 1); d(7, 11, '#f8f8d8', 2, 1); }
+    else if (dir === 'up') d(4, 10, '#f8f8d8', 8, 1);
+    else d(5, 10, '#f8f8d8', 6, 1);
+  },
+  // Teresa Almada (OSE): blue cap, white lab coat and a water drop.
+  leader_ose: (d, dir) => {
+    d(3, 1, '#2a6ad8', 10, 2); d(4, 0, '#2a6ad8', 8, 1);
+    if (dir === 'down') { d(7, 10, '#2a6ad8', 2, 2); d(8, 9, '#2a6ad8', 1, 1); d(3, 12, '#f4f4f4', 10, 1); }
+    else if (dir === 'up') d(3, 12, '#f4f4f4', 10, 1);
+  },
+  // General Lavalleja: bicorne with red plume, gold epaulettes and a red sash.
+  leader_lavalleja: (d, dir) => {
+    d(1, 1, '#1a2a5a', 14, 2); d(4, 0, '#1a2a5a', 8, 1); d(7, -1, '#e0263a', 2, 1);
+    if (dir === 'down') { d(2, 9, '#f8d040', 3, 1); d(11, 9, '#f8d040', 3, 1); d(4, 10, '#e0263a', 2, 1); d(6, 11, '#e0263a', 2, 1); d(8, 12, '#e0263a', 2, 1); d(6, 7, '#d8d8d8', 4, 1); }
+    else if (dir === 'up') { d(2, 9, '#f8d040', 3, 1); d(11, 9, '#f8d040', 3, 1); }
+    else { d(5, 9, '#f8d040', 3, 1); d(5, 10, '#e0263a', 5, 1); d(9, 7, '#d8d8d8', 3, 1); }
+  },
+  // Candelaria Ríos (ANCAP): red hard hat with a flame, grey coverall and a yellow stripe.
+  leader_ancap: (d, dir) => {
+    d(2, 1, '#d83a2a', 12, 2); d(3, 0, '#d83a2a', 9, 1);
+    if (dir === 'down') { d(7, 1, '#f8d040', 2, 1); d(4, 10, '#f8d040', 8, 1); d(3, 12, '#f8d040', 10, 1); }
+    else if (dir === 'up') { d(4, 10, '#f8d040', 8, 1); d(3, 12, '#f8d040', 10, 1); }
+    else d(5, 10, '#f8d040', 6, 1);
+  },
+  // Ramón Villalba (MGAP): wide straw hat, wheat pin and a green tie.
+  leader_mgap: (d, dir) => {
+    d(1, 1, '#e8d090', 14, 2); d(4, 0, '#e8d090', 8, 1); d(4, 2, '#8a4a1a', 8, 1);
+    if (dir === 'down') { d(7, 9, '#2f7a2a', 2, 3); d(10, 10, '#f8d040', 1, 2); }
+    else if (dir === 'side') d(6, 10, '#f8d040', 1, 2);
+  },
+  // Mariela Cabrera (Defensa): green beret with a star, medals and a belt.
+  leader_defensa: (d, dir) => {
+    d(2, 1, '#2f4a2a', 12, 2); d(3, 0, '#2f4a2a', 8, 1);
+    if (dir === 'down') { d(7, 1, '#f8d040', 1, 1); d(10, 10, '#f8d040', 2, 1); d(10, 11, '#e0263a', 2, 1); d(3, 12, '#14141e', 10, 1); }
+    else if (dir === 'up') d(3, 12, '#14141e', 10, 1);
+    else { d(6, 10, '#f8d040', 1, 1); d(4, 12, '#14141e', 8, 1); }
+  },
+  // Horacio Quiroga: black wide-brim hat, moustache, dark vest and bow tie.
+  leader_quiroga: (d, dir) => {
+    d(1, 1, '#1a1a1a', 14, 2); d(4, 0, '#1a1a1a', 8, 1);
+    if (dir === 'down') { d(6, 7, '#1a1a1a', 4, 1); d(4, 9, '#3a2a1a', 3, 4); d(9, 9, '#3a2a1a', 3, 4); d(7, 9, '#8a2a2a', 2, 1); }
+    else if (dir === 'up') d(4, 9, '#3a2a1a', 8, 4);
+    else { d(9, 7, '#1a1a1a', 3, 1); d(5, 9, '#3a2a1a', 5, 4); }
+  },
+  // Ferry captain: white cap with a gold badge, grey beard, navy jacket with gold buttons.
+  ferry_captain: (d, dir) => {
+    d(2, 1, '#f4f4f4', 12, 2); d(3, 0, '#f4f4f4', 9, 1);
+    if (dir === 'down') { d(7, 1, '#f8d040', 2, 1); d(5, 7, '#d8d8d8', 6, 2); d(7, 10, '#f8d040', 1, 1); d(7, 12, '#f8d040', 1, 1); d(3, 11, '#f8d040', 2, 1); d(11, 11, '#f8d040', 2, 1); }
+    else if (dir === 'up') d(3, 11, '#f8d040', 10, 1);
+    else { d(9, 7, '#d8d8d8', 3, 2); d(6, 10, '#f8d040', 1, 1); }
+  },
+  // Marine biologist: round glasses, white coat and a camera strap.
+  biologo: (d, dir) => {
+    if (dir === 'down') { d(4, 5, '#14141e', 3, 2); d(9, 5, '#14141e', 3, 2); d(5, 6, '#8ac8f0', 1, 1); d(10, 6, '#8ac8f0', 1, 1); d(5, 9, '#14141e', 1, 4); d(8, 11, '#14141e', 3, 2); }
+    else if (dir === 'side') { d(8, 5, '#14141e', 3, 2); d(6, 9, '#14141e', 3, 2); }
+  },
+  // PP foreman: black mask, crimson coat with gold shoulders and the PP badge.
+  pp_capataz: (d, dir) => {
+    if (dir === 'down') { d(4, 6, '#14141e', 8, 1); d(3, 9, '#f8d040', 3, 1); d(10, 9, '#f8d040', 3, 1); PP(d, 5, 10, '#f8d040'); d(3, 12, '#2a0a1a', 10, 2); }
+    else if (dir === 'up') { d(3, 9, '#f8d040', 3, 1); d(10, 9, '#f8d040', 3, 1); d(3, 12, '#2a0a1a', 10, 2); }
+    else { d(7, 6, '#14141e', 5, 1); d(5, 9, '#f8d040', 3, 1); d(6, 10, '#f8d040', 1, 2); d(4, 12, '#2a0a1a', 8, 2); }
+  },
+  // Cyclist: red helmet with vents, yellow jersey with a stripe.
+  ciclista: (d, dir) => {
+    d(2, 1, '#e0263a', 12, 3); d(3, 0, '#e0263a', 9, 1); d(4, 2, '#f8f8f8', 1, 1); d(7, 2, '#f8f8f8', 1, 1); d(10, 2, '#f8f8f8', 1, 1);
+    if (dir === 'down') { d(3, 10, '#14141e', 10, 1); d(7, 11, '#14141e', 2, 2); }
+    else d(4, 10, '#14141e', 8, 1);
   },
   mom: (d, dir) => { if (dir === 'down') d(5, 10, '#f8f8f8', 6, 4); else if (dir !== 'up') d(5, 10, '#f8f8f8', 5, 3); },
 };

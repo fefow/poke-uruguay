@@ -164,9 +164,9 @@ export const ACT2_OUTDOOR = {
     exits: { s: { to: 'tacuarembo' } },
     enc: { rate: 0.08, list: wildList(['volador', 'electrico'], 44, 47, 5, 'cic') },
     npcs: [
-      tr(CIC.gateSpots[0], 'boy', 'cic_a', 'Nicolás', 'Ciclista', ['volador', 'electrico'], [44, 45], ['¡Carrera! Si me ganás, seguís.', 'Me pasaste por encima.', 'Más adelante hay más ciclistas.'], { gate: true, sight: 4, dir: 'down' }),
-      tr(CIC.gateSpots[1], 'girl', 'cic_b', 'Camila', 'Ciclista', ['electrico', 'normal'], [45, 46], ['Esta ciclovía es mía. Pagá peaje con un combate.', 'Buen ritmo.', 'Al final hay alguien esperando.'], { gate: true, sight: 4, dir: 'down' }),
-      tr(CIC.gateSpots[2], 'gaucho', 'cic_c', 'Tomás', 'Ciclista', ['volador', 'normal'], [46, 47], ['El último tramo es el más duro.', 'Estaba difícil.', 'Ya casi llegás.'], { gate: true, sight: 4, dir: 'down' }),
+      tr(CIC.gateSpots[0], 'ciclista', 'cic_a', 'Nicolás', 'Ciclista', ['volador', 'electrico'], [44, 45], ['¡Carrera! Si me ganás, seguís.', 'Me pasaste por encima.', 'Más adelante hay más ciclistas.'], { gate: true, sight: 4, dir: 'down' }),
+      tr(CIC.gateSpots[1], 'ciclista', 'cic_b', 'Camila', 'Ciclista', ['electrico', 'normal'], [45, 46], ['Esta ciclovía es mía. Pagá peaje con un combate.', 'Buen ritmo.', 'Al final hay alguien esperando.'], { gate: true, sight: 4, dir: 'down' }),
+      tr(CIC.gateSpots[2], 'ciclista', 'cic_c', 'Tomás', 'Ciclista', ['volador', 'normal'], [46, 47], ['El último tramo es el más duro.', 'Estaba difícil.', 'Ya casi llegás.'], { gate: true, sight: 4, dir: 'down' }),
       { x: CIC.walk[3].x, y: CIC.walk[3].y + 1, look: 'oldman', dir: 'down', script: 'gift_ciclovia' },
     ],
     items: [{ ...CIC.itemSpots[0], item: 'dulce_de_leche', id: 'cic_item1' }],
@@ -388,7 +388,7 @@ const eventRoom = (ev, name, prefix, levels, ownerLook) => {
     name, music: 'cave',
     npcs: [
       ...ids.map((id, i) => grunt(spots[i], id, levels[i], ...talk[i], { dir: spots[i].dir, sight: 4, gate: true })),
-      { x: 5, y: 2, look: 'grunt', dir: 'down', id: `boss_${ev}`, cond: (f) => done(f) && !f[`${ev}_clear`], script: 'event_boss', event: ev },
+      { x: 5, y: 2, look: 'pp_capataz', dir: 'down', id: `boss_${ev}`, cond: (f) => done(f) && !f[`${ev}_clear`], script: 'event_boss', event: ev },
       { x: 5, y: 3, look: ownerLook, dir: 'down', cond: (f) => f[`${ev}_clear`], script: 'event_owner', event: ev },
     ],
   });
@@ -402,22 +402,22 @@ export const ACT2_INTERIOR = {
   muelle_pay: eventRoom('muelle', 'Muelle de Paysandú', 'mu', [[47, 48], [48, 49], [48, 49]], 'sailor'),
 
   // --- gyms
-  gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_fire', 'ancap', [
+  gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_ancap', 'ancap', [
     tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria Ríos es más dura que el hierro.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria Ríos usa tipo Fuego.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Durazno. La líder usa criaturas de tipo Fuego.', 'Las de Agua, Tierra y Roca le hacen frente.'], { dir: 'down' }),
   ]),
-  gym_tac: gym('Ministerio de Ganadería (Tacuarembó)', 'gym_planta', 'leader_forest', 'mgap', [
+  gym_tac: gym('Ministerio de Ganadería (Tacuarembó)', 'gym_planta', 'leader_mgap', 'mgap', [
     tr({ x: 8, y: 6 }, 'boy', 'g5_a', 'Mateo', 'Guardabosque', ['planta', 'bicho'], [37, 38], ['El monte me enseñó a combatir.', 'Perdí en mi bosque.', 'El ministro conoce cada árbol.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g5_b', 'Inés', 'Botánica', ['planta', 'veneno'], [38, 39], ['Estudio las plantas, y también sus defensas.', 'Interesante.', 'Cuidado con el veneno de Ramón.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Tacuarembó. El líder usa criaturas de tipo Planta.', 'Fuego, Volador y Bicho tienen ventaja.'], { dir: 'down' }),
   ]),
-  gym_riv: gym('Cuartel de la frontera (Rivera)', 'gym_lucha', 'leader_dojo', 'defensa', [
+  gym_riv: gym('Cuartel de la frontera (Rivera)', 'gym_lucha', 'leader_defensa', 'defensa', [
     tr({ x: 8, y: 6 }, 'boy', 'g6_a', 'Thiago', 'Capoeirista', ['lucha'], [40, 41], ['Ginga y golpe, esa es la clave.', 'Caí.', 'La ministra de Defensa entrena todas las mañanas.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g6_b', 'Paula', 'Karateka', ['lucha', 'normal'], [41, 42], ['Un cinturón negro no se regala.', 'Respeto.', 'La ministra Cabrera es la mejor de la frontera.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Rivera. La líder usa criaturas de tipo Lucha.', 'Las de tipo Psíquico y Volador la complican.'], { dir: 'down' }),
   ]),
-  gym_sal: gym('Casa de Quiroga (Salto)', 'gym_psiquico', 'leader_psy', 'quiroga', [
+  gym_sal: gym('Casa de Quiroga (Salto)', 'gym_psiquico', 'leader_quiroga', 'quiroga', [
     tr({ x: 8, y: 6 }, 'oldman', 'g7_a', 'Gabriel', 'Astrólogo', ['psiquico'], [43, 44], ['Las estrellas dicen que vas a perder.', 'No lo vi venir.', 'Quiroga ve el futuro.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g7_b', 'Noelia', 'Vidente', ['psiquico', 'volador'], [44, 44], ['Sé qué vas a elegir antes que vos.', 'Me equivoqué.', 'Quiroga usa tipo Psíquico.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Salto. El líder usa criaturas de tipo Psíquico.', 'Las de tipo Siniestro y Bicho tienen ventaja.'], { dir: 'down' }),
@@ -458,7 +458,7 @@ export const ACT2_INTERIOR = {
     npcs: [
       tr({ x: 2, y: 4 }, 'sailor', 'fe_a', 'Marinero Gómez', 'Marinero', ['agua', 'volador'], [20, 21], ['Primer viaje del barco y ya tengo que defenderlo.', 'Zozobré.', 'El capitán está arriba, en su camarote.'], { dir: 'right', sight: 4 }),
       tr({ x: 8, y: 6 }, 'girl', 'fe_b', 'Gimena', 'Turista', ['normal', 'volador'], [20, 22], ['Viajo a Buenos Aires por el día. Pero un combate no le hace mal a nadie.', 'Qué mala suerte.', 'Subí por la escalera del fondo.'], { dir: 'left', sight: 4 }),
-      { x: 9, y: 4, look: 'clerk', dir: 'left', script: 'ferry_bio' },
+      { x: 9, y: 4, look: 'biologo', dir: 'left', script: 'ferry_bio' },
       npc(6, 2, 'oldman', ['El barco se llama como la actriz China Zorrilla, una de las grandes de nuestro teatro.', 'Dicen que le hubiera gustado verlo navegar.'], { dir: 'down' }),
     ],
   }),
@@ -477,7 +477,7 @@ export const ACT2_INTERIOR = {
   ferry_3: room(FLOOR_TOP, {
     name: 'Buquebus China Zorrilla: camarote del capitán', music: 'town',
     exitTo: { map: 'ferry_2', x: 11, y: 2 },
-    npcs: [{ x: 5, y: 2, look: 'oldman', dir: 'down', script: 'ferry_captain' }],
+    npcs: [{ x: 5, y: 2, look: 'ferry_captain', dir: 'down', script: 'ferry_captain' }],
   }),
 
   // --- Torre de Niebla (Rivera): three floors, Bruma at the top
