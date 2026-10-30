@@ -191,6 +191,8 @@ export const SCRIPTS = {
           'Viven en los montes, las playas, las sierras y hasta en la Rambla.',
           'Hoy vas a elegir a tu primer compañero.',
           'En la mesa hay tres Pokeballs. Elegí con calma: esa criatura te va a acompañar mucho tiempo.',
+          '{rival} es mi sobrino. Creció entre apuntes y Pokeballs, así que no te la va a hacer fácil.',
+          'Hace años estudié el clima del Río de la Plata junto a un colega, Calima. Hoy no sé dónde anda, pero el Pampero sigue siendo un misterio.',
         ], { name: 'Maestro Tabárez' });
         await api.say('¿Y yo? Llegué primero.', { name: '{rival}' });
         await api.say('Paciencia, {rival}. Vos elegís después.', { name: 'Maestro Tabárez' });
@@ -480,6 +482,7 @@ export const SCRIPTS = {
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo a Calima. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
     await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Quedan muchas ciudades con gimnasio al oeste y al norte: empezá por Durazno, al oeste de Minas.', 'Y con la medalla en mano, mirá la fábrica abandonada."']);
+    await api.say(['Otro mensaje, un minuto después:', '"Proyecto Pampero… ese nombre es mío. Fue un estudio que hice con Calima para predecir el clima con ayuda de las criaturas.', 'Se fue cuando me negué a venderlo. Si es él quien está detrás, esto también es cosa mía."']);
   },
 
   async rival_r5(api) {
@@ -498,7 +501,7 @@ export const SCRIPTS = {
 
   async rival_r24(api) {
     if (api.flag('rival6')) return;
-    await api.say(['{player}. Ya sé lo de Calima.', 'Fray Bentos es el último paso antes de la Liga, y no pienso quedarme atrás.', 'Mostrame cuánto mejoraste.'], { name: '{rival}' });
+    await api.say(['{player}. Ya sé lo de Calima.', 'Mi tío fue su socio. Nunca me lo dijo hasta ahora, y todavía no sé qué pensar.', 'Fray Bentos es el último paso antes de la Liga, y no pienso quedarme atrás.', 'Mostrame cuánto mejoraste.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 4, 5000, null, 'Me ganaste otra vez. Bien.', null), { canLose: true });
     api.setFlag('rival6');
     if (res === 'win') await api.say(['Andá vos. Yo me quedo vigilando que no escape nadie.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
@@ -548,7 +551,7 @@ export const SCRIPTS = {
   },
 
   async calima(api) {
-    await api.say(['Así que sos vos.', 'Soy Calima, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Pampero natural era un estorbo. Por eso quise capturarlo.'], { name: 'Calima' });
+    await api.say(['Así que sos vos.', 'Soy Calima, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Pampero natural era un estorbo. Por eso quise capturarlo.', 'Tabárez nunca se animó a ir más lejos. Yo sí, y por eso hoy estoy acá.'], { name: 'Calima' });
     await api.say(['Lástima que hayas apagado las torres.', 'Pero no vas a apagarme a mí.'], { name: 'Calima' });
     const res = await api.battle({ id: 'calima', name: 'Calima', cls: 'Fundador PP', look: 'calima', ai: 'smart', team: [['vespertino', 51], ['viudanegra', 52], ['tormenton', 53], ['yarara', 53], ['buho', 53], ['yacaron', 54]], prize: 9000, lose: 'No… mi proyecto…', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'] });
     if (res !== 'win') return;
@@ -557,7 +560,7 @@ export const SCRIPTS = {
     api.sfx('evolve');
     await api.say(['Las últimas máquinas de niebla se apagan. Desde la ventana se ve el río Uruguay, limpio, hasta el otro lado.'], {});
     await api.say(['Gané perdiendo… Ya no tengo equipo, ni dinero, ni torres.', 'Hacé lo que quieras. Pero el cielo nunca fue de nadie.'], { name: 'Calima' });
-    await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'El gimnasio de Fray Bentos ya reabrió. Con la octava medalla, la Liga te espera en el Estadio Centenario."']);
+    await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'El gimnasio de Fray Bentos ya reabrió. Con la octava medalla, la Liga te espera en el Estadio Centenario.', 'Calima fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude."']);
     await api.npcLeave('calima');
   },
 
