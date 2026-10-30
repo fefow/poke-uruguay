@@ -873,4 +873,5 @@ button { font: inherit; color: inherit; }
 
 /* Dialogs and their choice lists must show above full-screen panels (bag, party), e.g. when a Garrapiñada teaches a move. */
 .dialog { z-index: 65; }
-.menu-yesno, .menu-moves, .move-info { z-index: 66; }
+/* Every choice list (battle menu, yes/no, moves, intro choices) must stay above the dialog box that asks the question. */
+.menu, .move-info { z-index: 66; }
