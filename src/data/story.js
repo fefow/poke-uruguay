@@ -461,8 +461,6 @@ export const SCRIPTS = {
     await api.say('{player} le dio el Mate: Baldo al capitán. Poco a poco recupera el color.');
     await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá esto: un machete de a bordo. Lo uso para cortar cabos y zarzas.', 'Con él vas a poder abrirte paso en el monte. Lo vas a necesitar para seguir tu viaje.'], { name: 'Capitán' });
     await api.give('machete', 1);
-    await api.say(['Y esta MT es del barco: así se pelea cuando hay temporal.'], { name: 'Capitán' });
-    await api.give('mt_triturar', 1);
     api.setFlag('got_machete');
     api.takeItem('ticket_ferry');
     api.setFlag('ferry_done');
