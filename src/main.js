@@ -20,6 +20,7 @@ import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/i
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
 import { SAVE_CONFIG } from './save/config.js';
 import { mountFullscreen } from './core/fullscreen.js';
+import { mountPerf, perfTick } from './core/perf.js';
 
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
@@ -44,8 +45,10 @@ setContext(() => {
 // ---------------------------------------------------------------- loop
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min(50, now - last);
+  const raw = now - last;
+  const dt = Math.min(50, raw);
   last = now;
+  perfTick(now, raw);
   pollGamepads();
   if (mode === 'game') {
     updateWorld(dt, now);
@@ -64,6 +67,7 @@ async function boot() {
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   mountFullscreen();
+  mountPerf();
   setVolumes(settings);
   requestAnimationFrame(frame);
 

@@ -82,7 +82,7 @@ export function badgeCount() {
 // ---- Settings (per device, not part of the save) ------------------------------
 const store = safeStorage();
 const SETTINGS_KEY = 'urumon:settings';
-const DEFAULT_SETTINGS = { textSpeed: 2, music: 0.5, sfx: 0.7, anims: true, hudParty: true };
+const DEFAULT_SETTINGS = { textSpeed: 2, music: 0.5, sfx: 0.7, anims: true, hudParty: true, perf: false };
 export const settings = (() => {
   try {
     return { ...DEFAULT_SETTINGS, ...JSON.parse(store.getItem(SETTINGS_KEY) || '{}') };

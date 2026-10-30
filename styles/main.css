@@ -920,3 +920,23 @@ body {
   border-radius: 1.2cqi;
 }
 .dialog.has-face { padding-left: 17.5cqi; }
+
+/* Performance overlay (F3) */
+.perf {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: oklch(0.14 0.04 268 / 0.78);
+  border: 1px solid oklch(1 0 0 / 0.18);
+  color: oklch(0.92 0.02 250);
+  font: 600 12px/1.45 ui-monospace, 'DejaVu Sans Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  & b { font-size: 14px; }
+  & b[data-level='good'] { color: var(--hp-good); }
+  & b[data-level='mid'] { color: var(--hp-mid); }
+  & b[data-level='low'] { color: var(--hp-low); }
+}
