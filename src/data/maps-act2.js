@@ -75,7 +75,7 @@ const R3 = route({ seed: 'ruta3', w: 18, h: 48, axis: 'v', from: 9, to: 9, grass
 const PAY = city({
   seed: 'paysandu', w: 26, h: 18, sa: 6, sb: 13, road: 'c',
   a: [['houseO', 3, 'casa_pay'], ['poli', 10, 'poli_pay'], ['shop', 18, 'shop_pay']],
-  b: [['houseG', 6, 'casa_pay2'], ['houseB', 18, 'muelle_pay']],
+  b: [['houseO', 1, 'safari_gate'], ['houseG', 6, 'casa_pay2'], ['houseB', 18, 'muelle_pay']],
   vroads: [14], nroads: [12], sroads: [14], decor: { '#': 8, q: 6, f: 10 },
   signs: [[16, 7]],
   exits: { n: 12, s: 14 },
@@ -97,9 +97,9 @@ const FRB = city({
 const sign = (texts) => (r) => texts.slice(0, r.signs.length);
 
 export const ACT2_OUTDOOR = {
-  // Safari Pan de Azúcar (Piriápolis, Maldonado): paid time inside a big park full of wild creatures.
+  // Safari Costa del Uruguay (Paysandú): paid time inside a big park full of wild creatures.
   safari: {
-    name: 'Safari Pan de Azúcar', music: 'route', bg: 'field', safari: true, fullWild: true,
+    name: 'Safari Costa del Uruguay', music: 'route', bg: 'field', safari: true, fullWild: true,
     tiles: [
     '##########################',
     '#,,,,,,,,,,,==,,,,,,,,,,,#',
@@ -126,15 +126,15 @@ export const ACT2_OUTDOOR = {
     enc: {
       rate: 0.22,
       list: [
-        ...wildList(['normal', 'volador'], 22, 27, 4, 'sf1'),
-        ...wildList(['planta', 'bicho'], 22, 27, 4, 'sf2'),
-        ...wildList(['agua', 'tierra'], 22, 27, 4, 'sf3'),
-        ...wildList(['electrico', 'roca'], 22, 27, 3, 'sf4'),
-        ...wildList(['veneno', 'psiquico'], 22, 27, 3, 'sf5'),
-        ...wildList(['fuego', 'lucha', 'siniestro'], 22, 27, 3, 'sf6'),
+        ...wildList(['normal', 'volador'], 42, 47, 4, 'sf1'),
+        ...wildList(['planta', 'bicho'], 42, 47, 4, 'sf2'),
+        ...wildList(['agua', 'tierra'], 42, 47, 4, 'sf3'),
+        ...wildList(['electrico', 'roca'], 42, 47, 3, 'sf4'),
+        ...wildList(['veneno', 'psiquico'], 42, 47, 3, 'sf5'),
+        ...wildList(['fuego', 'lucha', 'siniestro'], 42, 47, 3, 'sf6'),
       ].map(([k, a, b]) => [k, a, b, 6]),
     },
-    fish: fishList(22, 26, 'sf'),
+    fish: fishList(42, 46, 'sf'),
     npcs: [
       { x: 12, y: 18, look: 'cop', dir: 'up', script: 'safari_exit' },
       { ...npc(14, 17, 'oldman', ['Esto es un parque, no un campo de batalla: acá se viene a ver y a atrapar criaturas.', 'Fijate el tiempo que contrataste. Cuando suena la campana, los guardias te acompañan a la salida.'], { dir: 'left' }) },
@@ -325,7 +325,7 @@ export const ACT2_OUTDOOR = {
       npc(18, 9, 'gaucho', ['Más al sur está Fray Bentos. Allí se construyó el frigorífico que cambió el mundo.', 'Hoy lo usan para otra cosa.'], { dir: 'down' }),
       tr({ x: 20, y: 9, dir: 'left' }, 'sailor', 'pay_a', 'Marcelo', 'Marinero', ['agua', 'volador'], [47, 48], ['Navego el río hace treinta años.', 'Buen combate.', 'Los camiones de gris van al sur.']),
     ],
-    items: [{ x: 3, y: 12, item: 'pan_casero', id: 'pay_item1' }],
+    items: [{ x: 3, y: 15, item: 'pan_casero', id: 'pay_item1' }],
   },
 
   ruta24: {
@@ -523,7 +523,7 @@ export const ACT2_INTERIOR = {
     npcs: [{ x: 5, y: 2, look: 'ferry_captain', dir: 'down', script: 'ferry_captain' }],
   }),
 
-  safari_gate: house('Safari Pan de Azúcar: boletería', { x: 6, y: 3, look: 'clerk', dir: 'left', script: 'safari_clerk' }, npc(3, 2, 'cop', ['El parque tiene seguridad propia. Quien se pasa del tiempo contratado es acompañado a la salida.'], { dir: 'down' })),
+  safari_gate: house('Safari Costa del Uruguay: boletería', { x: 6, y: 3, look: 'clerk', dir: 'left', script: 'safari_clerk' }, npc(3, 2, 'cop', ['El parque tiene seguridad propia. Quien se pasa del tiempo contratado es acompañado a la salida.'], { dir: 'down' })),
 
   // --- Observatorio del Cerro (Piriápolis): old Proyecto Pampero lab, three floors; Almada guards the logbook
   obs_1: room(FLOOR_UP, {

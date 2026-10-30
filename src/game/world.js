@@ -114,7 +114,7 @@ function refreshEntities() {
 }
 
 // Safari: the ticket is a deadline (S.safari.until). Nobody stays inside, or loads a save inside, without paid time.
-export const SAFARI_GATE = { map: 'piriapolis', x: 10, y: 4 };
+export const SAFARI_GATE = { map: 'paysandu', x: 3, y: 13 };
 const safariLeft = () => (state().safari?.until ?? 0) - Date.now();
 // Park equipment goes back to the park when you leave.
 const safariStrip = () => { const S = state(); S.bag.safari_ball && delete S.bag.safari_ball; S.bag.cebo && delete S.bag.cebo; };
