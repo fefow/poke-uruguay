@@ -26,6 +26,7 @@ const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
 const RUN_MS = 115;
 const SPACE_MS = Math.round(WALK_MS / 2); // Space: 2x speed
+const BIKE_MS = Math.round(WALK_MS / 4); // bicycle: 4x walking, overworld only
 
 // ---------------------------------------------------------------- linking
 let linked = false;
@@ -107,7 +108,7 @@ function refreshEntities() {
     const prev = W_.npcs.find((n) => n.def === def);
     return prev ?? { def, i, x: def.x, y: def.y, ox: def.x, oy: def.y, dir: def.dir ?? 'down', visible: true, moving: false, t: 0, from: null, wanderAt: performance.now() + 1000 + worldRng.next() * 3000 };
   });
-  for (const n of W_.npcs) n.visible = cond(n.def.cond) && !n.gone;
+  for (const n of W_.npcs) n.visible = cond(n.def.cond) && !n.gone && !(n.def.gate && n.def.trainer && flag(`tr_${n.def.trainer.id}`));
   W_.items = (m.items ?? []).filter((it) => !flag(`it_${it.id}`));
   W_.legend = m.legend && cond(m.legend.cond) && !flag(m.legend.flag) ? m.legend : null;
 }
@@ -128,6 +129,9 @@ export function loadMap(id, x, y, dir = 'down') {
     }
   });
   if (changed) W_.npcs = [];
+  // The bicycle is never used indoors, and bike-only zones put you on it.
+  if (m.indoor) W_.bike = false;
+  else if (m.bikeOnly && hasItem('bici')) W_.bike = true;
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
   S.pos = { map: id, x, y, dir };
   refreshEntities();
@@ -221,7 +225,7 @@ function tryMove(d) {
   p.y = ny;
   p.moving = true;
   p.t = 0;
-  p.dur = input.held('b') ? RUN_MS : input.held('run') ? SPACE_MS : WALK_MS;
+  p.dur = W_.bike ? BIKE_MS : input.held('b') ? RUN_MS : input.held('run') ? SPACE_MS : WALK_MS;
   p.step++;
 }
 
@@ -450,6 +454,7 @@ async function trainerTalk(n) {
   if (res === 'win') {
     setFlag(`tr_${t.id}`);
     if (t.after) await say(t.after, { name: t.name });
+    if (n.def.gate) refreshEntities();
   }
 }
 
@@ -483,6 +488,19 @@ async function cutBush(x, y) {
 }
 
 /** Cities the Silbato del Hornero can reach: visited maps with a Policlínica facade. */
+/** Gets on or off the bicycle (menu item). Returns the message to show. */
+export function toggleBike() {
+  const m = W_.map;
+  if (m.indoor) return 'No se puede usar la bicicleta bajo techo.';
+  if (W_.bike) {
+    if (m.bikeOnly) return 'En la Ciclovía hay que ir en bicicleta.';
+    W_.bike = false;
+    return 'Te bajaste de la bicicleta.';
+  }
+  W_.bike = true;
+  return 'Te subiste a la bicicleta.';
+}
+
 export function flyPoints() {
   linkWorld();
   const out = [];
@@ -541,7 +559,8 @@ async function wildBattle(sp, lvl) {
 
 async function blackout() {
   const S = state();
-  const lost = loseMoney(Math.floor(S.player.money / 2));
+  // Small penalty, comparable to a trainer prize: 10% of the money, capped by progress.
+  const lost = loseMoney(Math.min(Math.floor(S.player.money / 10), 100 + 50 * badgeCount()));
   await say([`Perdiste $${lost} en la confusión…`, '…', '¡Corriste a un lugar seguro para curar a tus criaturas!']);
   for (const c of S.party) healCreature(c);
   const lh = S.lastHeal;
@@ -724,7 +743,8 @@ function drawWorld(g, t) {
       g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
       g.fillStyle = '#a87a4a'; g.beginPath(); g.ellipse(sx + 8, sy + 11, 8, 3, 0, 0, 7); g.fill();
     }
-    g.drawImage(charSprite(look, n.dir, f), sx, sy - 4);
+    if (player && W_.bike) drawBike(g, sx, sy, n.dir);
+    g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0));
     // tall grass covers your feet
     const tx = player ? p.x : n.x;
     const ty = player ? p.y : n.y;
@@ -746,6 +766,20 @@ function drawWorld(g, t) {
   }
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
+}
+
+/** Wheels and frame under the rider. */
+function drawBike(g, sx, sy, dir) {
+  const side = dir === 'left' || dir === 'right';
+  g.fillStyle = '#1a1a24';
+  if (side) {
+    for (const cx of [sx + 2, sx + 14]) { g.beginPath(); g.arc(cx, sy + 12, 3.6, 0, 7); g.fill(); g.fillStyle = '#9aa0b8'; g.beginPath(); g.arc(cx, sy + 12, 1.6, 0, 7); g.fill(); g.fillStyle = '#1a1a24'; }
+    g.fillStyle = '#d83a3a'; g.fillRect(sx + 3, sy + 7, 10, 2);
+  } else {
+    g.fillRect(sx + 6, sy + 8, 4, 9);
+    g.fillStyle = '#9aa0b8'; g.fillRect(sx + 7, sy + 10, 2, 5);
+    g.fillStyle = '#d83a3a'; g.fillRect(sx + 3, sy + 6, 10, 1);
+  }
 }
 
 /** Rod, line and bobber while fishing: cast arc, idle bobbing with ripples, a bite splash, or reeling in empty. */

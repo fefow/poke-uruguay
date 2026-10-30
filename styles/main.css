@@ -870,3 +870,7 @@ button { font: inherit; color: inherit; }
 .item-name { display: inline-flex; align-items: center; gap: 1.6cqi; }
 .menu-list li:has(.item-icon) { display: flex; align-items: center; gap: 1.6cqi; }
 .text-input::placeholder { color: oklch(0.65 0.02 270); }
+
+/* Dialogs and their choice lists must show above full-screen panels (bag, party), e.g. when a Garrapiñada teaches a move. */
+.dialog { z-index: 65; }
+.menu-yesno, .menu-moves, .move-info { z-index: 66; }

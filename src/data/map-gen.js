@@ -94,7 +94,7 @@ export function city({ seed, w = 28, h = 20, base = '.', border = '#', road = 'c
  * (axis 'h' = west to east, 'v' = north to south). Returns tiles plus candidate spots
  * for trainers (grass tiles next to the path, spaced out) and items.
  */
-export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', border = '#', path = '=', grass = [], ponds = [], trees = 0, treeChar = 'q', rocks = 6, flowers = 8, signs = 1 }) {
+export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', border = '#', path = '=', grass = [], ponds = [], trees = 0, treeChar = 'q', rocks = 6, flowers = 8, signs = 1, bridge = null, gates = [], fence = 'F' }) {
   const r = rng(seed);
   const g = grid(w, h, base);
   for (let x = 0; x < w; x++) { g[0][x] = border; g[h - 1][x] = border; }
@@ -112,6 +112,14 @@ export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', 
     if (t === along - 1) c = to;
     pts.push(c);
   }
+  if (bridge) for (let t = bridge[0]; t <= bridge[1]; t++) pts[t] = pts[bridge[0]];
+  // gates sit on straight stretches so a single guard fills the whole gap
+  const gateAt = gates.map((want) => {
+    for (let d = 0; d < along; d++) for (const t of [want + d, want - d]) {
+      if (t > 7 && t < along - 8 && (bridge ? true : (t - 6) % 4 !== 0) && pts[t - 1] === pts[t] && pts[t] === pts[t + 1]) return t;
+    }
+    return want;
+  });
   const set = (t, k, ch) => { const x = axis === 'h' ? t : k; const y = axis === 'h' ? k : t; if (g[y]?.[x] !== undefined) g[y][x] = ch; };
   for (let t = 0; t < along; t++) {
     set(t, pts[t], path);
@@ -144,6 +152,17 @@ export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', 
   // inner trees: clusters at the borders so the route feels enclosed
   for (let x = 1; x < w - 1; x++) for (const y of [1, h - 2]) if (g[y][x] === base && r() < 0.55 && !nearPath(x, y, 1)) g[y][x] = border;
   for (let y = 1; y < h - 1; y++) for (const x of [1, w - 2]) if (g[y][x] === base && r() < 0.55 && !nearPath(x, y, 1)) g[y][x] = border;
+  // river crossing: water on both sides of a straight bridge
+  if (bridge) {
+    for (let t = bridge[0]; t <= bridge[1]; t++) for (let k = 1; k < across - 1; k++) set(t, k, k === pts[t] ? 'b' : '~');
+  }
+  // gate: a fence line across the route with a single opening where a guard stands (skipped over water)
+  const gateSpots = [];
+  for (const t of gateAt) {
+    const over = bridge && t >= bridge[0] && t <= bridge[1];
+    if (!over) for (let k = 1; k < across - 1; k++) if (k !== pts[t]) set(t, k, fence);
+    gateSpots.push(axis === 'h' ? { x: t, y: pts[t], dir: 'left' } : { x: pts[t], y: t, dir: 'up' });
+  }
   // exits
   if (axis === 'h') { g[from][0] = path; g[to][w - 1] = path; } else { g[0][from] = path; g[h - 1][to] = path; }
   // sign next to the entrance
@@ -173,7 +192,7 @@ export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', 
     i++;
   }
   const walk = pts.map((k, t) => (axis === 'h' ? { x: t, y: k } : { x: k, y: t }));
-  return { tiles: rows(g), spots, itemSpots, signs: signSpots, walk };
+  return { tiles: rows(g), spots, itemSpots, signs: signSpots, walk, gateSpots };
 }
 
 // ---------------------------------------------------------------- species helpers

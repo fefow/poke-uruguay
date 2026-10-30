@@ -95,6 +95,11 @@ const ART = {
   cana_pescar: (g) => { for (let i = 0; i < 12; i++) r(g, 2 + i, 13 - i, 2, 2, INK); for (let i = 0; i < 12; i++) r(g, 3 + i, 13 - i, 1, 1, '#a8702a'); r(g, 13, 2, 1, 7, '#c8ccd8'); disc(g, 13.5, 11, 1.6, '#e0263a'); },
   machete: (g) => { for (let i = 0; i < 9; i++) { r(g, 4 + i, 11 - i, 3, 3, INK); } for (let i = 0; i < 9; i++) r(g, 5 + i, 11 - i, 1, 2, '#d8dce8'); r(g, 2, 12, 4, 3, '#6a3a1a'); r(g, 2, 12, 4, 1, '#8a5a3a'); },
   canoa: (g) => { g.fillStyle = INK; g.beginPath(); g.moveTo(0, 7); g.lineTo(16, 7); g.quadraticCurveTo(13, 14, 8, 14); g.quadraticCurveTo(3, 14, 0, 7); g.fill(); g.fillStyle = '#b8803c'; g.beginPath(); g.moveTo(1.8, 8); g.lineTo(14.2, 8); g.quadraticCurveTo(12, 12.4, 8, 12.4); g.quadraticCurveTo(4, 12.4, 1.8, 8); g.fill(); r(g, 3, 8, 10, 1, '#d8a050'); r(g, 3, 10, 10, 1, '#8a5a26'); r(g, 11, 0, 1, 8, '#6a4a2a'); r(g, 10, 0, 3, 2, '#d8a050'); },
+  bici: (g) => {
+    for (const cx of [4, 12]) { g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.arc(cx, 11, 3.6, 0, 7); g.stroke(); g.strokeStyle = '#9aa0b8'; g.lineWidth = 0.8; g.beginPath(); g.arc(cx, 11, 3.6, 0, 7); g.stroke(); }
+    g.strokeStyle = INK; g.lineWidth = 2; g.beginPath(); g.moveTo(4, 11); g.lineTo(7, 5); g.lineTo(12, 11); g.moveTo(7, 5); g.lineTo(10, 5); g.moveTo(6, 4); g.lineTo(5, 4); g.stroke();
+    g.strokeStyle = '#d83a3a'; g.lineWidth = 1; g.beginPath(); g.moveTo(4, 11); g.lineTo(7, 5); g.lineTo(12, 11); g.moveTo(7, 5); g.lineTo(10, 5); g.stroke();
+  },
   silbato: (g) => { r(g, 2, 6, 10, 6, INK); r(g, 3, 7, 8, 4, '#d8dce8'); r(g, 10, 4, 4, 3, INK); r(g, 11, 5, 2, 1, '#d8dce8'); r(g, 4, 8, 3, 1, '#f2c02a'); r(g, 3, 12, 1, 2, INK); r(g, 3, 14, 5, 1, INK); },
   boleto: (g) => { r(g, 1, 3, 14, 10, INK); r(g, 2, 4, 12, 8, '#7ac8f0'); r(g, 5, 4, 1, 8, '#fff'); r(g, 3, 6, 1, 4, '#fff'); r(g, 7, 6, 6, 1, '#16141e'); r(g, 7, 8, 5, 1, '#16141e'); r(g, 7, 10, 3, 1, '#16141e'); },
 };

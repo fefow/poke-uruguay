@@ -167,7 +167,7 @@ const BASE_OUTDOOR = {
       { x: 24, y: 11, look: 'gaucho', dir: 'up', sight: 4, trainer: TR('ib_c', 'Don Rufino', 'Gaucho', [['mulitin', 13], ['nandulin', 13], ['zorrigris', 14]], 300, 'Nadie pasa sin enfrentarme primero.', 'Buen combate.', 'Contra la Mulita, nada mejor que el agua.', 'gaucho') },
       { x: 5, y: 13, look: 'boy', text: ['Esa niebla no es natural. Unos hombres de gris la generan con máquinas.', 'Se hacen llamar Equipo PP.'] },
     ],
-    items: [{ x: 26, y: 1, item: 'mate', id: 'ib_item1' }, { x: 1, y: 12, item: 'superesfera', id: 'ib_item2' }],
+    items: [{ x: 26, y: 1, item: 'mate', id: 'ib_item1' }],
   },
 
   punta: {
@@ -243,7 +243,7 @@ const BASE_OUTDOOR = {
       { x: 20, y: 6, look: 'boy', text: ['Acá no hay red eléctrica ni calles asfaltadas.', 'Los lobos marinos descansan al sol sobre las rocas.'] },
       { x: 3, y: 11, look: 'girl', wander: true, text: ['Las dunas se mueven con el viento. El pueblo entero cambia cada año.'] },
     ],
-    items: [{ x: 21, y: 1, item: 'ultraesfera', id: 'cp_item1' }, { x: 5, y: 12, item: 'torta_frita', id: 'cp_item2' }],
+    items: [{ x: 21, y: 1, item: 'ultraesfera', id: 'cp_item1' }],
   },
 
   ruta8: {
@@ -283,7 +283,7 @@ const BASE_OUTDOOR = {
       { x: 4, y: 14, look: 'oldman', text: ['Cuando sopla el pampero, el cielo queda despejado.', 'Dicen que lo trae una criatura enorme con alas de tormenta.'] },
       { x: 11, y: 17, look: 'rival', dir: 'up', id: 'rival_r8', cond: (f) => !f.rival3, script: 'rival_r8' },
     ],
-    items: [{ x: 24, y: 1, item: 'mate_dulce', id: 'r8_item1' }, { x: 1, y: 18, item: 'garrapinada', id: 'r8_item2' }],
+    items: [{ x: 24, y: 1, item: 'mate_dulce', id: 'r8_item1' }],
   },
 
   quebrada: {
@@ -326,7 +326,7 @@ const BASE_OUTDOOR = {
       { x: 22, y: 9, look: 'boy', text: ['En el fondo de la quebrada hay un arroyo.', 'Los cuervos de cabeza roja vuelan en círculos por arriba.'] },
       { x: 4, y: 18, look: 'girl', wander: true, text: ['Treinta y Tres se llama así por los 33 Orientales.', 'Acá la historia está en cada rincón.'] },
     ],
-    items: [{ x: 3, y: 2, item: 'ultraesfera', id: 'qb_item1' }, { x: 24, y: 2, item: 'dulce_de_leche', id: 'qb_item2' }],
+    items: [{ x: 3, y: 2, item: 'ultraesfera', id: 'qb_item1' }],
     legend: { x: 13, y: 1, species: 'pamperon', level: 50, flag: 'caught_pamperon', cond: (f) => f.champion, text: 'Un viento helado baja desde el cielo.' },
   },
   // ------------------------------------------------------------ localidades (sin gimnasio)
@@ -684,7 +684,41 @@ const BASE_INTERIOR = {
 };
 
 import { ACT2_OUTDOOR, ACT2_INTERIOR } from './maps-act2.js';
+import { SPECIES } from './species.js';
+import { MAP_BIOME, BIOMES } from './atlas.js';
 
 export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR };
 export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR };
 export const MAPS = { ...OUTDOOR, ...INTERIOR };
+
+/**
+ * Fewer species per zone so the 151 creatures spread over every map. Each wild table keeps its
+ * most common species; species left without any table (grass or fishing) are moved to a nearby
+ * table with room, preferring one whose biome matches the creature's type, with levels shifted
+ * to that table's range.
+ */
+const MAX_WILD = 4;
+const CAP = 6;
+(function trimWild() {
+  const maps = Object.values(OUTDOOR).filter((m) => m.enc?.list);
+  const kept = new Map(maps.map((m) => [m, [...m.enc.list].sort((x, y) => y[3] - x[3]).slice(0, MAX_WILD)]));
+  const covered = new Set([...maps.flatMap((m) => kept.get(m).map((e) => e[0])), ...Object.values(OUTDOOR).flatMap((m) => (m.fish ?? []).map((e) => e[0]))]);
+  const mid = (list) => list.reduce((a, e) => a + (e[1] + e[2]) / 2, 0) / list.length;
+  const range = (m) => [Math.min(...m.enc.list.map((e) => e[1])), Math.max(...m.enc.list.map((e) => e[2]))];
+  const biomeTypes = (m) => new Set((MAP_BIOME[m.id] ?? []).flatMap((b) => BIOMES[b]?.types ?? []));
+  const lost = maps.flatMap((m) => m.enc.list.filter((e) => !covered.has(e[0])).map((e) => [m, e]));
+  lost.sort((x, y) => x[1][1] - y[1][1]);
+  for (const [from, e] of lost) {
+    if (covered.has(e[0])) continue;
+    const lvl = (e[1] + e[2]) / 2;
+    const types = SPECIES[e[0]].types;
+    const score = (m) => Math.abs(mid(m.enc.list) - lvl) + kept.get(m).length * 3 + (types.some((t) => biomeTypes(m).has(t)) ? 0 : 12) + (kept.get(m).length >= CAP ? 100 : 0);
+    const target = maps.reduce((best, m) => (score(m) < score(best) ? m : best), from);
+    const [lo, hi] = range(target);
+    const span = e[2] - e[1];
+    const nlo = Math.max(lo, Math.min(hi - span, Math.round(mid(target.enc.list) - span / 2)));
+    kept.get(target).push([e[0], nlo, nlo + span, Math.min(e[3], 10)]);
+    covered.add(e[0]);
+  }
+  for (const m of maps) m.enc.list = kept.get(m);
+})();

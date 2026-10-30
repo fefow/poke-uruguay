@@ -299,6 +299,10 @@ async function useInField(key) {
   const it = ITEMS[key];
   if (key === 'uru_dex') return openDex();
   if (key === 'mapa_uruguay') return openMap();
+  if (key === 'bici') {
+    const { toggleBike } = await import('./world.js');
+    return say(toggleBike());
+  }
   if (it.pocket === 'key') return say(it.desc);
   if (it.ball) return say('¡Las Pokeballs se usan en combate!');
   if (it.repel) {

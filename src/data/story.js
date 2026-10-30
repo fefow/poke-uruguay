@@ -127,7 +127,7 @@ export const SCRIPTS = {
   async rival_sister(api) {
     if (!api.flag('got_map_gift')) {
       await api.say(['Hola, {player}. {rival} ya salió para el laboratorio.', 'Siempre quiere ser el primero en todo.', 'Tomá, llevate esto para el viaje.'], { name: 'Hermana' });
-      await api.give('te_marcela', 3);
+      await api.give('te_marcela', 1);
       api.setFlag('got_map_gift');
     } else {
       await api.say(['Mucha suerte en el viaje. Si ves a {rival}, decile que llame a casa.'], { name: 'Hermana' });
@@ -198,7 +198,7 @@ export const SCRIPTS = {
   async gift_te_marcela(api) {
     if (api.flag('gift_r1')) return api.say('Que tengas buen viaje. Y tomá mate, que ayuda.', { name: 'Abuelo' });
     await api.say(['Un entrenador joven. Tomá, para el camino.'], { name: 'Abuelo' });
-    await api.give('esfera', 3);
+    await api.give('esfera', 1);
     api.setFlag('gift_r1');
   },
 
@@ -221,7 +221,7 @@ export const SCRIPTS = {
   async gift_pir(api) {
     if (!api.flag('gift_pir')) {
       await api.say('Alquilo esta casa todos los veranos. Llevate unos alfajores, que me sobraron.', { name: 'Veraneante' });
-      await api.give('alfajor', 2);
+      await api.give('alfajor', 1);
       api.setFlag('gift_pir');
     }
     if (!api.flag('got_machete')) {
@@ -236,7 +236,7 @@ export const SCRIPTS = {
   async gift_pal(api) {
     if (!api.flag('gift_pal')) {
       await api.say('Me mudé acá por las olas. Tomá, unas Superballs que ya no uso.', { name: 'Surfista' });
-      await api.give('superesfera', 3);
+      await api.give('superesfera', 1);
       api.setFlag('gift_pal');
     }
     if (!api.flag('got_canoa')) {
@@ -265,14 +265,14 @@ export const SCRIPTS = {
     if (api.flag('gift_dur')) return api.say('El calor se aguanta mejor con un buen mate.', { name: 'Vecino' });
     await api.say(['No es fácil vivir con este calor.', 'Pero la gente de acá se las arregla. Llevate esto, que no lo uso.'], { name: 'Vecino' });
     await api.give('piedra_agata', 1);
-    await api.give('aloe', 5);
+
     api.setFlag('gift_dur');
   },
 
   async gift_min(api) {
     if (api.flag('gift_min')) return api.say('Un buen mate se toma despacio y con buena compañía.', { name: 'Paisano' });
     await api.say('Los de acá tomamos mate con el agua de las sierras. Probalo, que es de lo mejor.', { name: 'Paisano' });
-    await api.give('mate_dulce', 2);
+    await api.give('mate_dulce', 1);
     api.setFlag('gift_min');
   },
 
@@ -359,8 +359,8 @@ export const SCRIPTS = {
     if (api.hasItem('lampara')) {
       await api.say(['La lámpara. La recuperaste.', 'Esta noche el faro de Cabo Polonio vuelve a funcionar.', 'Aceptá esto, es lo menos que puedo hacer.'], { name: 'Farero' });
       api.takeItem('lampara');
-      await api.give('superesfera', 5);
-      await api.give('alfajor', 2);
+      await api.give('superesfera', 1);
+      await api.give('alfajor', 1);
       api.setFlag('lamp_returned');
       await api.say(['La policía ya abrió la Ruta 8, al norte de Montevideo.', 'Dicen que el Equipo PP fue hacia la Quebrada de los Cuervos.'], { name: 'Farero' });
       return;
@@ -433,7 +433,7 @@ export const SCRIPTS = {
     api.sfx('evolve');
     await api.say(['La luz del transmisor se apaga.', 'Afuera, la niebla se disipa y el sol vuelve a la ciudad.'], {});
     await api.say(['Perdí… otra vez.', 'Calima tiene otra torre: la Represa de Salto Grande. Ahí le roban electricidad a todo el litoral.', 'Hacé lo que quieras. Él tiene el Anglo, y el Anglo es una fortaleza.'], { name: 'Bruma' });
-    await api.give('pan_casero', 2);
+    await api.give('pan_casero', 1);
     await api.npcLeave('bruma2');
     await api.say('Ya podés entrar al gimnasio de Rivera.');
   },
@@ -447,7 +447,7 @@ export const SCRIPTS = {
     api.sfx('levelup');
     await api.say(['Las turbinas vuelven a girar. En la ciudad, las luces se prenden una por una.'], {});
     await api.say(['Me retiro del Equipo PP. Ya no tiene sentido.', 'Calima usa a todos. Si lo detenés, quizás recupere algo de dignidad.', 'Está en lo alto del Anglo, en Fray Bentos. Cuidado con Brumario: lo puso de guardia.'], { name: 'Garúa' });
-    await api.give('pan_casero', 3);
+    await api.give('pan_casero', 1);
     await api.npcLeave('garua2');
     await api.say('Ya podés seguir hacia el sur, a Paysandú y Fray Bentos.');
   },
@@ -485,37 +485,46 @@ export const SCRIPTS = {
   },
 
   async gift_tac(api) {
-    if (api.flag('gift_tac')) return api.say('Cuidá el monte. Es de todos.', { name: 'Vecina' });
-    await api.say(['Vengo todos los días a regar estas plantas. Son del monte.', 'Llevate esto, que a vos te va a servir más que a mí.'], { name: 'Vecina' });
-    await api.give('alfajor_triple', 2);
+    if (api.flag('got_bici')) return api.say('Al norte de la ciudad empieza la Ciclovía. Solo se entra en bicicleta. Usala desde el menú.', { name: 'Vecina' });
+    await api.say(['Vengo todos los días a regar estas plantas. Son del monte.', 'Esta bicicleta era de mi hijo y ya no la usa. Llevatela: va cuatro veces más rápido que caminando.', 'Se usa desde el menú. Bajo techo no se puede, y en combate no cambia nada.'], { name: 'Vecina' });
+    await api.give('bici', 1);
+    api.setFlag('got_bici');
     api.setFlag('gift_tac');
+    await api.say('Al norte de la ciudad hay una Ciclovía. Solo se entra en bicicleta.', { name: 'Vecina' });
+  },
+
+  async gift_ciclovia(api) {
+    if (api.flag('ciclo_done')) return api.say('Cada vez que bajo por la ciclovía me siento joven.', { name: 'Ciclista veterano' });
+    await api.say(['Llegaste hasta el final. Pocos lo hacen.', 'Eso se premia. Tomá, un mate bien fuerte para el camino.'], { name: 'Ciclista veterano' });
+    await api.give('dulce_de_leche', 1);
+    api.setFlag('ciclo_done');
   },
 
   async gift_riv(api) {
     if (api.flag('gift_riv')) return api.say('Del otro lado de la plaza se compra más barato. Pero acá, el café es mejor.', { name: 'Comerciante' });
     await api.say(['Compro de un lado y vendo del otro.', 'Tomá, un regalo para el viaje. Que no se te acaben las Ultraballs.'], { name: 'Comerciante' });
-    await api.give('ultraesfera', 5);
+    await api.give('ultraesfera', 1);
     api.setFlag('gift_riv');
   },
 
   async gift_sal(api) {
     if (api.flag('gift_sal')) return api.say('La represa es el orgullo de Salto. Y ahora, un problema.', { name: 'Policía' });
     await api.say(['Estoy de guardia, pero algo puedo hacer.', 'Tomá, que te sirve más que a mí.'], { name: 'Policía' });
-    await api.give('pan_casero', 2);
+    await api.give('pan_casero', 1);
     api.setFlag('gift_sal');
   },
 
   async gift_pay(api) {
     if (api.flag('gift_pay')) return api.say('El río siempre vuelve a su cauce.', { name: 'Marinero' });
     await api.say(['Hace años que navego esta costa.', 'Llevate esto: no tiene mucho valor, pero sirve.'], { name: 'Marinero' });
-    await api.give('ultraesfera', 5);
+    await api.give('ultraesfera', 1);
     api.setFlag('gift_pay');
   },
 
   async gift_frb(api) {
     if (api.flag('gift_frb')) return api.say('El gimnasio de acá fue el más temido del litoral.', { name: 'Vecina' });
     await api.say(['Mi abuelo me dijo que el frigorífico era cosa seria.', 'Tomá esto, para lo que venga.'], { name: 'Vecina' });
-    await api.give('alfajor_triple', 3);
+    await api.give('alfajor_triple', 1);
     api.setFlag('gift_frb');
   },
 

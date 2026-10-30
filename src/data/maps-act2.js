@@ -5,7 +5,7 @@ import { city, route, wildList, fishList, teamOf, fitToMap } from './map-gen.js'
 
 // ---------------------------------------------------------------- helpers
 const tr = (spot, look, id, name, cls, types, levels, [intro, lose, after], opts = {}) => ({
-  x: spot.x, y: spot.y, look, dir: opts.dir ?? spot.dir ?? 'down', sight: opts.sight ?? 4, ...(opts.cond ? { cond: opts.cond } : {}),
+  x: spot.x, y: spot.y, look, dir: opts.dir ?? spot.dir ?? 'down', sight: opts.sight ?? 4, ...(opts.cond ? { cond: opts.cond } : {}), ...(opts.gate ? { gate: true } : {}),
   trainer: TR(id, name, cls, opts.team ?? teamOf(types, levels, id), Math.round(levels[levels.length - 1] * 20), intro, lose, after, look),
 });
 const grunt = (spot, id, levels, intro, lose, after, opts = {}) => tr(spot, 'grunt', id, 'Recluta PP', 'Equipo PP', ['veneno', 'siniestro'], levels, [intro, lose, after], opts);
@@ -29,18 +29,23 @@ const DUR = city({
 });
 
 // ---------------------------------------------------------------- RUTA 5: Durazno -> Tacuarembó
-const R5 = route({ seed: 'ruta5', w: 24, h: 34, axis: 'v', from: 14, to: 9, grass: [[5, 3, 5]], ponds: [[1, 4, 3]], trees: 8 });
+// Open prairie: wide, almost no trees, big grass fields and a blocked road.
+const R5 = route({ seed: 'ruta5', w: 30, h: 30, axis: 'v', from: 14, to: 9, grass: [[9, 3, 6]], ponds: [], trees: 0, rocks: 3, flowers: 22, gates: [20] });
 // ---------------------------------------------------------------- TACUAREMBÓ (gym 5, grass)
 const TAC = city({
   seed: 'tacuarembo', sa: 6, sb: 15,
   a: [['houseG', 2, 'casa_tac'], ['planta', 8, 'gym_tac'], ['poli', 17, 'poli_tac'], ['shop', 23, 'shop_tac']],
   b: [['houseO', 4, 'casa_tac2'], ['houseV', 17]],
-  vroads: [14], sroads: [14], decor: { '#': 14, q: 6, f: 14 },
+  vroads: [14], nroads: [14], sroads: [14], decor: { '#': 14, q: 6, f: 14 },
   signs: [[26, 7], [7, 16]],
-  exits: { w: 6, e: 6, s: 14 },
+  exits: { w: 6, e: 6, s: 14, n: 14 },
 });
+// ---------------------------------------------------------------- CICLOVÍA (bicycle only)
+// A long paved cycle path north of Tacuarembó: you are on the bike the whole way, trainers block it and the end has a reward.
+const CIC = route({ seed: 'ciclovia', w: 16, h: 62, axis: 'v', from: 8, to: 8, path: 'c', grass: [[2, 3, 3]], ponds: [], trees: 8, rocks: 4, flowers: 30, gates: [16, 28, 40], signs: 0 });
 // ---------------------------------------------------------------- RUTA 30: Tacuarembó -> Rivera
-const R30 = route({ seed: 'ruta30', w: 34, h: 18, axis: 'h', from: 6, to: 9, grass: [[5, 3, 5]], ponds: [[1, 4, 3]], trees: 12, treeChar: '#' });
+// Short and tidy: a customs post (fence line with one opening) before the border city.
+const R30 = route({ seed: 'ruta30', w: 30, h: 14, axis: 'h', from: 6, to: 7, grass: [[3, 3, 4]], ponds: [], trees: 6, treeChar: '#', flowers: 4, gates: [12] });
 // ---------------------------------------------------------------- RIVERA (gym 6, fighting)
 const RIV = city({
   seed: 'rivera', sa: 6, sb: 15,
@@ -51,7 +56,8 @@ const RIV = city({
   exits: { w: 6 },
 });
 // ---------------------------------------------------------------- RUTA 31: Salto <- Tacuarembó
-const R31 = route({ seed: 'ruta31', w: 34, h: 18, axis: 'h', from: 8, to: 6, grass: [[5, 3, 5]], ponds: [[2, 4, 3]], trees: 8 });
+// Long and dense: cane fields and woods, with a guarded road block halfway.
+const R31 = route({ seed: 'ruta31', w: 44, h: 16, axis: 'h', from: 8, to: 6, grass: [[7, 3, 4]], ponds: [[1, 3, 3]], trees: 45, treeChar: '#', rocks: 3, gates: [24] });
 // ---------------------------------------------------------------- SALTO (gym 7, psychic)
 const SAL = city({
   seed: 'salto', sa: 6, sb: 15,
@@ -63,7 +69,8 @@ const SAL = city({
   exits: { e: 6, s: 15 },
 });
 // ---------------------------------------------------------------- RUTA 3: Salto -> Paysandú
-const R3 = route({ seed: 'ruta3', w: 24, h: 34, axis: 'v', from: 15, to: 12, grass: [[5, 3, 5]], ponds: [[2, 4, 3]], trees: 8 });
+// River crossing: a long bridge over the Uruguay with guards that cannot be avoided.
+const R3 = route({ seed: 'ruta3', w: 18, h: 48, axis: 'v', from: 9, to: 9, grass: [[2, 3, 4]], ponds: [], trees: 6, bridge: [14, 34], gates: [19, 29] });
 // ---------------------------------------------------------------- PAYSANDÚ (locality)
 const PAY = city({
   seed: 'paysandu', w: 26, h: 18, sa: 6, sb: 13, road: 'c',
@@ -74,7 +81,8 @@ const PAY = city({
   exits: { n: 12, s: 14 },
 });
 // ---------------------------------------------------------------- RUTA 24: Paysandú -> Fray Bentos
-const R24 = route({ seed: 'ruta24', w: 24, h: 34, axis: 'v', from: 14, to: 14, grass: [[5, 3, 5]], ponds: [[2, 4, 3]], trees: 6 });
+// Rocky ridge: narrow and short, packed with boulders.
+const R24 = route({ seed: 'ruta24', w: 20, h: 26, axis: 'v', from: 10, to: 10, grass: [[4, 3, 4]], ponds: [[1, 3, 3]], trees: 3, rocks: 28, gates: [12] });
 // ---------------------------------------------------------------- FRAY BENTOS (gym 8, dark)
 const FRB = city({
   seed: 'fraybentos', sa: 6, sb: 15, road: 'c',
@@ -105,7 +113,7 @@ export const ACT2_OUTDOOR = {
       wander(12, 9, 'oldman', ['Hace décadas no llueve como antes. La ceniza lo cubre todo.', 'Las criaturas de fuego se sienten cómodas acá.']),
       npc(20, 8, 'boy', ['Cruzando el puente de hierro se llega al norte. Pero el camino está cortado por la gente de gris.'], { cond: (f) => !f.pp_clear }),
     ],
-    items: [{ x: 23, y: 11, item: 'piedra_agata', id: 'dur_item1' }, { x: 2, y: 9, item: 'dulce_de_leche', id: 'dur_item2' }],
+    items: [{ x: 23, y: 11, item: 'piedra_agata', id: 'dur_item1' }],
   },
 
   ruta5: {
@@ -119,9 +127,10 @@ export const ACT2_OUTDOOR = {
       tr(R5.spots[1], 'girl', 'r5_b', 'Mirta', 'Estudiante', ['planta', 'bicho'], [35, 37], ['Voy a Tacuarembó a rendir un examen.', 'Qué mala suerte.', 'Dicen que en Tacuarembó el líder entrena entre los árboles.']),
       grunt(R5.spots[2], 'r5_g1', [36, 37], 'Los de gris cortamos este camino.', 'Pasá, nomás.', 'La Torre de Niebla de Rivera ya está encendida. No van a llegar a tiempo.'),
       tr(R5.spots[4], 'boy', 'r5_c', 'Joaquín', 'Montañista', ['roca', 'volador'], [36, 37], ['¿Un combate? Dale.', 'Buen combate.', 'Descansá en la Policlínica de Tacuarembó antes de seguir.']),
+      tr(R5.gateSpots[0], 'oldman', 'r5_gate', 'Hernán', 'Camionero', ['normal', 'tierra'], [37, 38], ['Mi camión se rompió justo acá. Y no te dejo pasar sin un combate.', 'Fue justo.', 'Cuando lo arreglen, seguí hacia Tacuarembó.'], { gate: true, sight: 3, dir: 'down' }),
       { ...npc(R5.walk[14].x, R5.walk[14].y, 'rival', [], { id: 'rival_r5', cond: (f) => !f.rival5, script: 'rival_r5', dir: 'up' }) },
     ],
-    items: [{ ...R5.itemSpots[0], item: 'mate_dulce', id: 'r5_item1' }, { ...R5.itemSpots[1], item: 'ultraesfera', id: 'r5_item2' }, { ...R5.itemSpots[2], item: 'refuerzo_ataque', id: 'r5_item3' }],
+    items: [{ ...R5.itemSpots[0], item: 'mate_dulce', id: 'r5_item1' }],
   },
 
   tacuarembo: {
@@ -133,6 +142,7 @@ export const ACT2_OUTDOOR = {
     ],
     exits: {
       s: { to: 'ruta5' },
+      n: { to: 'ciclovia', req: 'got_bici', deny: ['Al norte empieza la Ciclovía, un camino pavimentado larguísimo.', 'Un cartel dice: "Solo bicicletas".'] },
       e: { to: 'ruta30', req: 'badge5', deny: ['El camino al este lleva a Rivera.', 'Un guardia te frena: "Sólo pasan entrenadores con la Medalla Tacuarembó".'] },
       w: { to: 'ruta31', req: 'badge6', deny: ['El camino al oeste baja hacia Salto.', 'Un guardia te frena: "La Ruta 31 está cerrada. Primero resolvé lo de Rivera".'] },
     },
@@ -144,7 +154,20 @@ export const ACT2_OUTDOOR = {
       npc(24, 9, 'cop', ['Hay movimiento raro en el norte. Los camiones del Equipo PP no paran.'], { dir: 'left' }),
       npc(5, 13, 'clerk', ['La Policlínica y el almacén están sobre la calle principal. Nunca se equivocan: siempre están en el mismo lugar.']),
     ],
-    items: [{ x: 22, y: 12, item: 'torta_frita', id: 'tac_item1' }, { x: 2, y: 9, item: 'alfajor_triple', id: 'tac_item2' }],
+    items: [{ x: 22, y: 12, item: 'torta_frita', id: 'tac_item1' }],
+  },
+
+  ciclovia: {
+    name: 'Ciclovía', music: 'route', bg: 'field', bikeOnly: true, tiles: CIC.tiles,
+    exits: { s: { to: 'tacuarembo' } },
+    enc: { rate: 0.08, list: wildList(['volador', 'electrico'], 44, 47, 5, 'cic') },
+    npcs: [
+      tr(CIC.gateSpots[0], 'boy', 'cic_a', 'Nicolás', 'Ciclista', ['volador', 'electrico'], [44, 45], ['¡Carrera! Si me ganás, seguís.', 'Me pasaste por encima.', 'Más adelante hay más ciclistas.'], { gate: true, sight: 4, dir: 'down' }),
+      tr(CIC.gateSpots[1], 'girl', 'cic_b', 'Camila', 'Ciclista', ['electrico', 'normal'], [45, 46], ['Esta ciclovía es mía. Pagá peaje con un combate.', 'Buen ritmo.', 'Al final hay alguien esperando.'], { gate: true, sight: 4, dir: 'down' }),
+      tr(CIC.gateSpots[2], 'gaucho', 'cic_c', 'Tomás', 'Ciclista', ['volador', 'normal'], [46, 47], ['El último tramo es el más duro.', 'Estaba difícil.', 'Ya casi llegás.'], { gate: true, sight: 4, dir: 'down' }),
+      { x: CIC.walk[3].x, y: CIC.walk[3].y + 1, look: 'oldman', dir: 'down', script: 'gift_ciclovia' },
+    ],
+    items: [{ ...CIC.itemSpots[0], item: 'dulce_de_leche', id: 'cic_item1' }],
   },
 
   ruta30: {
@@ -158,9 +181,10 @@ export const ACT2_OUTDOOR = {
       tr(R30.spots[1], 'girl', 'r30_b', 'Mariana', 'Apicultora', ['bicho'], [39, 41], ['No te acerques a las colmenas.', 'Zumbó fuerte.', 'La miel de esta zona es de las mejores del país.']),
       grunt(R30.spots[2], 'r30_g1', [40, 41], 'Esta ruta es nuestra desde ahora.', 'Qué mala suerte.', 'Rivera ya es de la jefa Bruma.'),
       tr(R30.spots[3], 'gaucho', 'r30_c', 'Atilio', 'Peón', ['normal', 'lucha'], [40, 41], ['Para pasar tenés que ganarle al peón.', 'Buen combate, amigo.', 'En la frontera se habla mezclado: portuñol.']),
+      tr(R30.gateSpots[0], 'cop', 'r30_aduana', 'Inspector Duarte', 'Aduana', ['normal', 'lucha'], [41, 42], ['Aduana de Rivera. Documentos, por favor. Y un combate de rutina.', 'Todo en orden. Pasá.', 'Del otro lado de la plaza ya es Brasil.'], { gate: true, sight: 3 }),
       grunt(R30.spots[4], 'r30_g2', [41, 42], 'Dije que nadie pasa.', 'Está bien.', 'Pregunten en la plaza por la Torre.'),
     ],
-    items: [{ ...R30.itemSpots[0], item: 'ultraesfera', id: 'r30_item1' }, { ...R30.itemSpots[1], item: 'mate_dulce', id: 'r30_item2' }],
+    items: [{ ...R30.itemSpots[0], item: 'ultraesfera', id: 'r30_item1' }],
   },
 
   rivera: {
@@ -193,9 +217,10 @@ export const ACT2_OUTDOOR = {
       tr(R31.spots[1], 'girl', 'r31_b', 'Ana', 'Cañera', ['planta', 'tierra'], [42, 44], ['El cañaveral es mi oficina.', 'Buen combate.', 'Cuidado en Salto: los apagones son culpa de gente de gris.']),
       grunt(R31.spots[2], 'r31_g1', [43, 44], 'Cortamos la luz a propósito.', 'No debía pasar esto.', 'La Represa es nuestra desde la mañana.'),
       tr(R31.spots[3], 'oldman', 'r31_c', 'Ceferino', 'Veterano', ['normal', 'lucha'], [43, 44], ['Pasé mil batallas. Una más no hace diferencia.', 'Me jubilo.', 'Los jóvenes de ahora combaten mejor que nosotros.']),
+      tr(R31.gateSpots[0], 'gaucho', 'r31_gate', 'Capataz Olivera', 'Capataz', ['tierra', 'planta'], [43, 44], ['Este camino es de la estancia. Para pasar, tenés que ganarme.', 'Pasá, nomás.', 'Más adelante empieza Salto.'], { gate: true, sight: 3, dir: 'right' }),
       grunt(R31.spots[4], 'r31_g2', [44, 44], 'Quedate quieto.', 'Pasá.', 'Qué mala suerte.'),
     ],
-    items: [{ ...R31.itemSpots[0], item: 'alfajor_triple', id: 'r31_item1' }, { ...R31.itemSpots[1], item: 'ultraesfera', id: 'r31_item2' }],
+    items: [{ ...R31.itemSpots[0], item: 'alfajor_triple', id: 'r31_item1' }],
   },
 
   salto: {
@@ -218,7 +243,7 @@ export const ACT2_OUTDOOR = {
       grunt({ x: 18, y: 9, dir: 'left' }, 'sal_g1', [44, 45], 'Esta ciudad se queda a oscuras.', 'No tiene sentido.', 'Garúa está dentro de la Represa.', { cond: (f) => !f.represa_clear }),
       npc(15, 11, 'cop', ['La Represa está tomada. Si querés ayudar, la entrada está debajo del puente.'], { dir: 'down', cond: (f) => !f.represa_clear }),
     ],
-    items: [{ x: 5, y: 11, item: 'alfajor_triple', id: 'sal_item1' }, { x: 24, y: 11, item: 'pan_casero', id: 'sal_item2' }],
+    items: [{ x: 5, y: 11, item: 'alfajor_triple', id: 'sal_item1' }],
   },
 
   ruta3: {
@@ -232,9 +257,10 @@ export const ACT2_OUTDOOR = {
       grunt(R3.spots[1], 'r3_g1', [47, 48], 'Sin la Represa, la niebla manda.', 'Imposible.', 'Calima nos va a premiar igual.'),
       tr(R3.spots[2], 'girl', 'r3_b', 'Lorena', 'Navegante', ['agua', 'volador'], [47, 48], ['El río es más grande que el mar para mí.', 'Buen viento.', 'Paysandú es la heroica.']),
       grunt(R3.spots[3], 'r3_g2', [48, 48], 'Mejor volvé.', 'No era tan difícil.', 'Nos vemos en el frigorífico.'),
-      tr(R3.spots[4], 'oldman', 'r3_c', 'Aníbal', 'Veterano', ['tierra', 'roca'], [48, 48], ['Mi criatura es de piedra. La tuya, no sé.', 'Me rindo.', 'Fray Bentos está al sur de Paysandú.']),
+      tr(R3.gateSpots[0], 'oldman', 'r3_c', 'Aníbal', 'Veterano', ['tierra', 'roca'], [47, 48], ['El puente es angosto y yo ocupo todo el ancho.', 'Me rindo. Pasá.', 'Fray Bentos está al sur de Paysandú.'], { gate: true, sight: 4 }),
+      grunt(R3.gateSpots[1], 'r3_g3', [48, 49], 'Nadie cruza el río sin pasar por mí.', 'Se acabó.', 'Del otro lado está Paysandú.', { gate: true, sight: 4, dir: 'up' }),
     ],
-    items: [{ ...R3.itemSpots[0], item: 'pan_casero', id: 'r3_item1' }, { ...R3.itemSpots[1], item: 'ultraesfera', id: 'r3_item2' }],
+    items: [{ ...R3.itemSpots[0], item: 'pan_casero', id: 'r3_item1' }],
   },
 
   paysandu: {
@@ -261,10 +287,11 @@ export const ACT2_OUTDOOR = {
       tr(R24.spots[0], 'girl', 'r24_a', 'Valeria', 'Ingeniera', ['electrico', 'psiquico'], [48, 49], ['Estudio cómo funciona la niebla artificial.', 'Muy interesante.', 'Es una red de torres. Todas conectadas.']),
       grunt(R24.spots[1], 'r24_g1', [49, 50], 'El jefe no recibe visitas.', 'No.', 'Calima está arriba del frigorífico.'),
       tr(R24.spots[2], 'boy', 'r24_b', 'Santiago', 'Obrero', ['tierra', 'roca'], [48, 50], ['Salí del turno y me topé con vos.', 'Qué cansancio.', 'En el frigorífico hay movimientos raros.']),
+      tr(R24.gateSpots[0], 'boy', 'r24_gate', 'Capataz Rivas', 'Obrero', ['roca', 'tierra'], [49, 50], ['La cantera está cerrada. A menos que me ganes.', 'Pasá, pero con cuidado.', 'Fray Bentos queda al sur.'], { gate: true, sight: 3 }),
       grunt(R24.spots[3], 'r24_g2', [50, 51], 'Última advertencia.', 'No lo puedo creer.', 'Calima es más fuerte que todos nosotros.'),
       { ...npc(R24.walk[18].x, R24.walk[18].y, 'rival', [], { id: 'rival_r24', cond: (f) => !f.rival6, script: 'rival_r24', dir: 'up' }) },
     ],
-    items: [{ ...R24.itemSpots[0], item: 'alfajor_triple', id: 'r24_item1' }, { ...R24.itemSpots[1], item: 'pan_casero', id: 'r24_item2' }],
+    items: [{ ...R24.itemSpots[0], item: 'alfajor_triple', id: 'r24_item1' }],
   },
 
   fraybentos: {
