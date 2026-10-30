@@ -53,8 +53,7 @@ button { font: inherit; color: inherit; }
   display: grid;
   place-items: center;
   grid-template-rows: 1fr;
-  padding-block: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-bottom));
-  padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+  padding: 0;
 }
 
 /* ---------------------------------------------------------------- screen */
@@ -62,12 +61,12 @@ button { font: inherit; color: inherit; }
   position: relative;
   container-type: inline-size;
   aspect-ratio: 4 / 3;
-  width: min(100%, calc((100dvh - 24px) * 4 / 3), 1920px);
+  width: min(100vw, calc(100dvh * 4 / 3));
   max-height: 100%;
-  border-radius: 10px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 0 0 4px oklch(0.16 0.04 270), 0 0 0 7px var(--celeste-deep), 0 20px 60px oklch(0 0 0 / 0.55);
+  /* Soft glow instead of a thick frame: the game fills the window edge to edge. */
+  box-shadow: 0 0 80px oklch(0.5 0.12 250 / 0.35);
   view-transition-name: screen;
 
   & canvas {
@@ -875,3 +874,31 @@ button { font: inherit; color: inherit; }
 .dialog { z-index: 65; }
 /* Every choice list (battle menu, yes/no, moves, intro choices) must stay above the dialog box that asks the question. */
 .menu, .move-info { z-index: 66; }
+
+/* ---------------------------------------------------------------- modern shell */
+body {
+  background:
+    radial-gradient(90% 70% at 50% 45%, oklch(0.3 0.09 255), transparent 75%),
+    radial-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1.5px) 0 0 / 22px 22px,
+    oklch(0.14 0.04 268);
+}
+.fs-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 10px;
+  border: 1px solid oklch(1 0 0 / 0.22);
+  background: oklch(0.16 0.04 268 / 0.55);
+  backdrop-filter: blur(8px);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+  &:hover, &:focus-visible { opacity: 1; transform: scale(1.06); }
+  &.is-on { display: none; }
+}
+@media (max-width: 700px) { .fs-btn { display: none; } }

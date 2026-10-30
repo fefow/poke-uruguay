@@ -19,6 +19,7 @@ import { mountHud, updateHud, flashSaved } from './game/hud.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
 import { SAVE_CONFIG } from './save/config.js';
+import { mountFullscreen } from './core/fullscreen.js';
 
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
@@ -62,6 +63,7 @@ async function boot() {
   mountUI($('#ui'));
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
+  mountFullscreen();
   setVolumes(settings);
   requestAnimationFrame(frame);
 
