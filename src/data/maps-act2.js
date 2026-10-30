@@ -97,9 +97,9 @@ const FRB = city({
 const sign = (texts) => (r) => texts.slice(0, r.signs.length);
 
 export const ACT2_OUTDOOR = {
-  // Safari Frontera Viva (Rivera): paid time inside a big park full of wild creatures.
+  // Mi Zoo (Rivera): paid time inside a big park full of wild creatures.
   safari: {
-    name: 'Safari Frontera Viva', music: 'route', bg: 'field', safari: true, fullWild: true,
+    name: 'Mi Zoo', music: 'route', bg: 'field', safari: true, fullWild: true,
     tiles: [
     '##########################',
     '#,,,,,,,,,,,==,,,,,,,,,,,#',
@@ -523,7 +523,7 @@ export const ACT2_INTERIOR = {
     npcs: [{ x: 5, y: 2, look: 'ferry_captain', dir: 'down', script: 'ferry_captain' }],
   }),
 
-  safari_gate: house('Safari Frontera Viva: boletería', { x: 6, y: 3, look: 'clerk', dir: 'left', script: 'safari_clerk' }, npc(3, 2, 'cop', ['El parque tiene seguridad propia. Quien se pasa del tiempo contratado es acompañado a la salida.'], { dir: 'down' })),
+  safari_gate: house('Mi Zoo: boletería', { x: 6, y: 3, look: 'clerk', dir: 'left', script: 'safari_clerk' }, npc(3, 2, 'cop', ['El parque tiene seguridad propia. Quien se pasa del tiempo contratado es acompañado a la salida.'], { dir: 'down' })),
 
   // --- Observatorio del Cerro (Piriápolis): old Proyecto Pampero lab, three floors; Almada guards the logbook
   obs_1: room(FLOOR_UP, {
