@@ -17,6 +17,7 @@ import { MAPS } from '../data/maps.js';
 import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, BIOMES, DEPARTMENTS, PLACE_DEPT, project } from '../data/atlas.js';
 import { charSprite } from '../gfx/characters.js';
 import { itemIcon } from '../gfx/items.js';
+import { badgeIcon } from '../gfx/badges.js';
 import { SAVE_CONFIG } from '../save/config.js';
 
 // ---------------------------------------------------------------- helpers
@@ -640,7 +641,7 @@ export function openCard() {
         ),
         h('div', { class: 'card-flag', 'aria-hidden': 'true' }),
       ),
-      h('ul', { class: 'badges' }, badges.map(([f, n, col]) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col } }, h('i'), h('span', { text: n })))),
+      h('ul', { class: 'badges' }, badges.map(([f, n, col], i) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col }, title: n }, S.flags[f] ? h('img', { class: 'badge-img', src: badgeIcon(i + 1), alt: `Medalla ${n}` }) : h('i', { class: 'badge-slot' }), h('span', { text: n })))),
       S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : '',
       h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
     );

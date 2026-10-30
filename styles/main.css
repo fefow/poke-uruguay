@@ -491,10 +491,11 @@ button { font: inherit; color: inherit; }
     linear-gradient(#fff 0 0) 0 0 / 44% 55% no-repeat,
     repeating-linear-gradient(#fff 0 11.1%, var(--celeste) 11.1% 22.2%);
 }
-.badges { list-style: none; margin: 0; padding: 0; display: flex; gap: 3cqi; justify-content: center;
-  & li { display: grid; justify-items: center; gap: 0.6cqi; font-size: 2.8cqi; color: var(--ink-soft); opacity: 0.35; }
+.badges { list-style: none; margin: 0; padding: 0; display: flex; gap: 2.4cqi; justify-content: center;
+  & li { display: grid; justify-items: center; align-content: start; gap: 0.4cqi; font-size: 1.9cqi; max-inline-size: 10cqi; text-align: center; line-height: 1.1; color: var(--ink-soft); opacity: 0.5; }
   & li.is-earned { opacity: 1; color: var(--ink); }
-  & i { width: 8cqi; height: 8cqi; rotate: 45deg; border-radius: 1.4cqi; background: var(--badge); border: 2px solid var(--ink); box-shadow: inset 0 0 0 1cqi oklch(1 0 0 / 0.35); }
+  & .badge-slot { inline-size: 5.4cqi; block-size: 5.4cqi; border-radius: 50%; background: oklch(0.8 0.01 270); border: 2px dashed var(--ink-soft); }
+  & .badge-img { inline-size: 6cqi; block-size: 6cqi; image-rendering: pixelated; }
 }
 .champion-line { margin: 0; text-align: center; font-family: var(--font-pixel); font-size: 2.4cqi; color: oklch(0.6 0.15 80); }
 
