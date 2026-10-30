@@ -75,18 +75,18 @@ async function boot() {
     if (msg) label.textContent = msg;
   };
   const steps = [
-    ['Cebando el mate…', async () => {
+    ['Calentando el agua…', async () => {
       await Promise.race([
         Promise.all([document.fonts?.load('16px "Press Start 2P"'), document.fonts?.load('16px "Pixelify Sans"')]),
         wait(2500),
       ]).catch(() => {});
     }],
-    ['Empedrando Colonia…', async (sub) => buildTileset(sub)],
-    ['Preparando a los personajes…', async (sub) => {
+    ['Armando la montañita…', async (sub) => buildTileset(sub)],
+    ['Dejando hinchar la yerba…', async (sub) => {
       const looks = Object.keys(LOOKS);
       looks.forEach((l, i) => { for (const d of ['down', 'up', 'left', 'right']) for (const f of [0, 1, 2]) charSprite(l, d, f); sub((i + 1) / looks.length); });
     }],
-    ['Despertando a las criaturas…', async (sub) => {
+    ['Cebando el primer mate…', async (sub) => {
       // chunked so the bar keeps moving
       let done = 0;
       await new Promise((res) => {
@@ -95,7 +95,7 @@ async function boot() {
       });
       return done;
     }],
-    ['Preparando las partidas…', async () => { await initSaves(); }],
+    ['Pasando el termo…', async () => { await initSaves(); }],
   ];
   for (let i = 0; i < steps.length; i++) {
     const [msg, fn] = steps[i];
@@ -112,7 +112,7 @@ async function boot() {
     setP((i + 1) / steps.length);
     await nextFrame();
   }
-  setP(1, '¡Listo!');
+  setP(1, '¡Listo para tomar!');
   await wait(500);
   const start = $('#loader-start');
   start.hidden = false;
