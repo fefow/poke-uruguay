@@ -8,7 +8,7 @@ import { initAudio, setVolumes, sfx } from './core/audio.js';
 import { h, nextFrame, viewTransition, wait } from './core/util.js';
 import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './game/ui.js';
 import { state, setState, newState, settings, badgeCount } from './game/state.js';
-import { loadMap, updateWorld, worldState, runScript, api as scriptApi } from './game/world.js';
+import { loadMap, updateWorld, worldState, runScript, poisonTick, api as scriptApi } from './game/world.js';
 import { SCRIPTS } from './data/story.js';
 import { startTitle, newGameIntro, credits, slotCard } from './game/scenes.js';
 import * as menus from './game/menus.js';
@@ -23,7 +23,7 @@ import { SAVE_CONFIG } from './save/config.js';
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();

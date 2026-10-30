@@ -17,7 +17,7 @@ import { h, wait, clamp } from '../core/util.js';
 import { info as logInfo } from '../core/debuglog.js';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.js';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, PARTY_MAX, badgeCount } from './state.js';
-import { createCreature, heal as healCreature, displayName } from './creature.js';
+import { createCreature, heal as healCreature, displayName, maxHp } from './creature.js';
 import { runBattle } from './battle-scene.js';
 import { openPauseMenu, openShop, openPC } from './menus.js';
 import { drawItem } from '../gfx/items.js';
@@ -280,6 +280,33 @@ async function doWarp(map, x, y, dir) {
   await fadeIn(200);
 }
 
+/**
+ * Poison keeps hurting outside battle: every 4 steps each poisoned creature loses a little HP until it is
+ * cured (Ruda) or healed (home, Policlínica). A creature that drops to 0 faints and the poison ends.
+ * Returns true when a script (faint messages) took over.
+ */
+export function poisonTick() {
+  const S = state();
+  const sick = S.party.filter((c) => c.hp > 0 && c.status === 'psn');
+  if (!sick.length) { W_.psnSteps = 0; return false; }
+  W_.psnSteps = (W_.psnSteps ?? 0) + 1;
+  if (W_.psnSteps % 4) return false;
+  sfx('hit');
+  W_.flash = 1;
+  setTimeout(() => { W_.flash = 0; }, 90);
+  const fallen = [];
+  for (const c of sick) {
+    c.hp = Math.max(0, c.hp - Math.max(1, Math.floor(maxHp(c) / 40)));
+    if (c.hp === 0) { c.status = null; fallen.push(c); }
+  }
+  if (!fallen.length) return false;
+  runScript(async () => {
+    for (const c of fallen) await say(`¡${displayName(c)} cayó por el veneno!`);
+    if (!S.party.some((c) => c.hp > 0)) await blackout();
+  });
+  return true;
+}
+
 function onStep() {
   const S = state();
   const p = W_.player;
@@ -293,6 +320,7 @@ function onStep() {
     S.repel--;
     if (S.repel === 0) runScript(() => say('El efecto del Repelente se terminó.'));
   }
+  if (poisonTick()) return;
   // Scripted triggers
   for (const tr of W_.map.triggers ?? []) {
     if (p.x >= tr.x && p.x < tr.x + tr.w && p.y >= tr.y && p.y < tr.y + tr.h && cond(tr.cond)) {
