@@ -10,7 +10,7 @@ import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.js';
 import { vignette } from '../gfx/fx.js';
 import { h, wait as baseWait, clamp } from '../core/util.js';
 import { sfx, playMusic, currentTrack } from '../core/audio.js';
-import { input } from '../core/input.js';
+import { input, rumble } from '../core/input.js';
 import { say, choose, ask, closeDialog, uiRoot, textInput, fmt } from './ui.js';
 import { state, settings, earn, markSeen, markCaught, removeItem, PARTY_MAX } from './state.js';
 import { createCreature, displayName, maxHp, expForLevel, gainExp, learnMove, canEvolve, evolve, calcStats, STAT_KEYS, STAT_NAMES } from './creature.js';
@@ -88,6 +88,7 @@ function drawBattle(g, t) {
   if (A.proj) drawProjectile(g, A.proj);
   if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake);
   if (A.fx) drawFx(g, A.fx, t);
+  drawBursts(g);
   g.restore();
   const tint = dayTint();
   if (tint && A.bg !== 'indoor') { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
@@ -464,12 +465,15 @@ async function play(events, leveled) {
         await say(e.msg, { battle: true, auto: 1100 });
         break;
       case 'anim':
+        A.lastType = e.move;
         await attackAnim(e.side, e.move, e.kind);
         break;
       case 'damage': {
         const side = e.side === 0 ? 'ply' : 'foe';
         sfx(e.eff > 1 ? 'super' : e.eff < 1 ? 'weak' : 'hit');
         A[e.side === 0 ? 'plyFlash' : 'foeFlash'] = 1;
+        if (settings.anims && e.amount > 0) burst(e.side, e.eff, e.crit, e.amount);
+        rumble(e.eff > 1 ? 260 : 140, e.eff > 1 ? 0.9 : 0.4, e.side === 0 ? 0.6 : 0.2);
         hitReaction(side, e.side === 0 ? -1 : 1, e.eff);
         setHud(side, e.side === 0 ? engine.p.c : engine.f.c, { hp: e.hp });
         await wait(520);
@@ -500,6 +504,7 @@ async function play(events, leveled) {
       }
       case 'faint': {
         sfx('faint');
+        rumble(420, 0.7, 0.9);
         const sd = e.side === 0 ? 'ply' : 'foe';
         await tween(520, (p) => {
           A[`${sd}Y`] = 26 * p;
@@ -565,6 +570,48 @@ async function play(events, leveled) {
 }
 
 /** Defender recoils away from the attacker, squashes, then settles; the screen shakes on strong hits. */
+/** Hit sparks in the colour of the move and a floating damage number; a critical hit adds a ring of stars. */
+function burst(side, eff, crit, amount) {
+  const [x, y] = side === 0 ? [84, 140] : [236, 72];
+  const color = TYPES[A.lastType]?.color ?? '#fff';
+  const n = eff > 1 ? 16 : eff < 1 ? 6 : 10;
+  const now = performance.now();
+  A.parts ??= [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * 0.5, v = 40 + Math.random() * 60;
+    A.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 20, c: i % 3 ? color : '#fff', t0: now, life: 420 + Math.random() * 200, s: crit ? 2 : 1 });
+  }
+  if (crit) for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    A.parts.push({ x, y, vx: Math.cos(a) * 110, vy: Math.sin(a) * 110, c: '#ffe05a', t0: now, life: 380, s: 3 });
+  }
+  A.pops = (A.pops ?? []).concat({ x, y: y - 14, text: `-${amount}`, c: crit ? '#ffe05a' : eff > 1 ? '#ff8a6a' : '#fff', t0: now });
+}
+function drawBursts(g) {
+  const now = performance.now();
+  if (A.parts?.length) {
+    A.parts = A.parts.filter((p) => now - p.t0 < p.life);
+    for (const p of A.parts) {
+      const k = (now - p.t0) / 1000;
+      g.globalAlpha = 1 - (now - p.t0) / p.life;
+      g.fillStyle = p.c;
+      g.fillRect(Math.round(p.x + p.vx * k), Math.round(p.y + p.vy * k + 60 * k * k), p.s, p.s);
+    }
+    g.globalAlpha = 1;
+  }
+  if (A.pops?.length) {
+    A.pops = A.pops.filter((p) => now - p.t0 < 800);
+    g.font = 'bold 10px monospace'; g.textAlign = 'center';
+    for (const p of A.pops) {
+      const k = (now - p.t0) / 800;
+      g.globalAlpha = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
+      g.fillStyle = '#16141e'; g.fillText(p.text, Math.round(p.x) + 1, Math.round(p.y - 18 * k) + 1);
+      g.fillStyle = p.c; g.fillText(p.text, Math.round(p.x), Math.round(p.y - 18 * k));
+    }
+    g.globalAlpha = 1; g.textAlign = 'left';
+  }
+}
+
 function hitReaction(sd, dir, eff) {
   if (!settings.anims) return;
   const push = eff > 1 ? 15 : eff < 1 ? 5 : 9;

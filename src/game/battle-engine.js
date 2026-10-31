@@ -184,7 +184,7 @@ export class BattleEngine {
     ev.push({ t: 'anim', side, move: move.type, kind: move.cat });
     const dealt = Math.min(target.c.hp, r.dmg);
     target.c.hp -= dealt;
-    ev.push({ t: 'damage', side: 1 - side, amount: dealt, eff: r.eff, hp: target.c.hp });
+    ev.push({ t: 'damage', side: 1 - side, amount: dealt, eff: r.eff, crit: r.crit, hp: target.c.hp });
     if (r.crit) ev.push({ t: 'text', msg: '¡Golpe crítico!' });
     if (r.eff > 1) ev.push({ t: 'text', msg: '¡Es súper eficaz!' });
     else if (r.eff < 1) ev.push({ t: 'text', msg: 'No es muy eficaz…' });

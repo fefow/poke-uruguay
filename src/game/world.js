@@ -10,7 +10,7 @@ import { T, TILE_INFO, tileCanvas } from '../gfx/tiles.js';
 import { charSprite } from '../gfx/characters.js';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.js';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.js';
-import { vignette, shadow, backdrop, mapGlow, motes, grade } from '../gfx/fx.js';
+import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain } from '../gfx/fx.js';
 import { input } from '../core/input.js';
 import { sfx, playMusic } from '../core/audio.js';
 import { worldRng } from '../core/rng.js';
@@ -1006,6 +1006,7 @@ function drawWorld(g, t) {
   if (!m.indoor) {
     const night = grade(g);
     motes(g, t, { night });
+    if (!m.dark && m.theme !== 'cueva' && weatherAt(m.id) === 'rain') rain(g, t);
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
   }
   if (m.dark && !W_.lit) {

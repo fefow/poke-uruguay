@@ -111,3 +111,10 @@ export function pollGamepads() {
     }
   }
 }
+
+/** Gamepad vibration for hits and faints; does nothing without a pad that supports it. */
+export function rumble(ms = 120, strong = 0.5, weak = 0.5) {
+  for (const gp of navigator.getGamepads?.() ?? []) {
+    gp?.vibrationActuator?.playEffect?.('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch?.(() => {});
+  }
+}

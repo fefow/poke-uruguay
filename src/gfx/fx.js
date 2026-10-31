@@ -77,6 +77,40 @@ export function motes(g, t, { night = false } = {}) {
   g.restore();
 }
 
+/** Weather changes every ten minutes of real time and is the same for everyone on a given map; about one slot in five is rain. */
+export function weatherAt(mapId, now = Date.now()) {
+  const slot = Math.floor(now / 600000);
+  let h = 2166136261;
+  for (const c of `${mapId}|${slot}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return ((h >>> 0) % 100) < 20 ? 'rain' : null;
+}
+
+const DROPS = Array.from({ length: 130 }, (_, i) => ({ x: (i * 53) % W, y: (i * 89) % H, s: 0.8 + ((i * 7) % 5) / 8, l: 5 + (i % 4) }));
+/** Rain: slanted streaks falling at different speeds, a cool tint and a few splashes. */
+export function rain(g, t) {
+  g.save();
+  g.fillStyle = 'rgba(40,60,110,0.2)';
+  g.fillRect(0, 0, W, H);
+  g.strokeStyle = 'rgba(210,228,255,0.75)';
+  g.lineWidth = 1;
+  g.beginPath();
+  for (const d of DROPS) {
+    const y = (d.y + t * 0.32 * d.s) % (H + 8) - 4;
+    const x = (((d.x - t * 0.08 * d.s) % W) + W) % W;
+    g.moveTo(Math.round(x), Math.round(y));
+    g.lineTo(Math.round(x) - 1, Math.round(y) + d.l);
+  }
+  g.stroke();
+  g.fillStyle = 'rgba(220,235,255,0.5)';
+  for (let i = 0; i < 6; i++) {
+    const ph = (t / 260 + i * 1.3) % 3;
+    if (ph > 1) continue;
+    const x = (i * 131 + Math.floor(t / 780) * 37) % W, y = (i * 71 + Math.floor(t / 780) * 53) % H;
+    g.fillRect(x - Math.round(ph * 2), y, 1, 1); g.fillRect(x + Math.round(ph * 2), y, 1, 1);
+  }
+  g.restore();
+}
+
 /** Time-of-day grading with multiply (richer than a flat alpha wash) plus a warm/cool lift. */
 export function grade(g, date = new Date()) {
   const hr = date.getHours() + date.getMinutes() / 60;

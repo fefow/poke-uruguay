@@ -394,3 +394,11 @@ test('objetos de batalla nuevos: precisión, resistencia, concentración y repel
   assert.ok(ITEMS.concentracion.focus);
   assert.ok(ITEMS.repelente_max.repel > ITEMS.repelente_super.repel && ITEMS.repelente_super.repel > ITEMS.repelente.repel);
 });
+
+test('clima: la lluvia es determinista por mapa y franja y ocupa cerca de una de cada cinco', async () => {
+  const { weatherAt } = await import('../src/gfx/fx.js');
+  assert.equal(weatherAt('carmelo', 1e12), weatherAt('carmelo', 1e12 + 1000));
+  let rainy = 0;
+  for (let i = 0; i < 500; i++) if (weatherAt('colonia', 1e12 + i * 600000) === 'rain') rainy++;
+  assert.ok(rainy > 60 && rainy < 140, `lluvia ${rainy}/500`);
+});
