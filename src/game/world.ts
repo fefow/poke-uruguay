@@ -928,7 +928,8 @@ function drawWorld(g, t) {
   const mw = m.w * T;
   const mh = m.h * T;
   // Interiors are zoomed so the room always covers the whole canvas (the camera scrolls the rest).
-  const Z = m.indoor ? Math.min(2.5, Math.max(1, Math.ceil(Math.max(W / mw, H / mh) * 4) / 4)) : 1;
+  // whole-number zoom only: a fractional one makes some art pixels 2 px wide and others 3 (eyes shrink, lines break)
+  const Z = m.indoor ? Math.min(3, Math.max(1, Math.round(Math.max(W / mw, H / mh)))) : 1;
   const VW = W / Z;
   const VH = H / Z;
   // camera
