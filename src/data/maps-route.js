@@ -10,6 +10,58 @@ import { BIOMES, DEPARTMENTS, PLACES } from './atlas.js';
 import { TILE_INFO } from '../gfx/tiles.js';
 
 // Real road numbers of the legs (the map ids stay the same so saves keep working).
+// Localities: two local trainers and someone who has seen the PP pass by, so every stop of the trip has a fight and a clue.
+// [look, name, class, intro, lose, after] x2, then the clue.
+const LOC_FOLK = {
+  palmitas: [['gaucho', 'Ruben', 'Tambero', 'Ordeñé temprano; ahora tengo tiempo.', 'Me dejaste sin leche.', 'La cueva de acá cerca está llena de gente rara.'],
+    ['girl', 'Sofía', 'Maestra rural', 'En la escuela enseño las criaturas del pago. Veamos qué sabés.', 'Aprobaste.', 'Mis alumnos dibujan la niebla gris. Antes no había.'],
+    ['Anoche entraron camiones grises a la cueva, con máquinas tapadas.', 'El que manejaba tenía una P bordada en la campera.']],
+  villasoriano: [['sailor', 'Néstor', 'Pescador', 'El río Negro da buena pesca y buenos rivales.', 'Se me cortó la línea.', 'Acá llegaron los primeros españoles. Es el pueblo más viejo del país.'],
+    ['boy', 'Matías', 'Remero', 'Remo todos los días contra la corriente.', 'Me diste vuelta el bote.', 'En Fray Bentos hay movimiento raro en el Anglo.'],
+    ['Un barco sin bandera subió por el río hacia Fray Bentos.', 'Llevaba unos tanques que largaban humo blanco.']],
+  young: [['gaucho', 'Don Aurelio', 'Productor', 'Soja, trigo y combates. De todo un poco.', 'Mala cosecha.', 'Por la Ruta 24 andan buscando entrenadores fuertes.'],
+    ['girl', 'Camila', 'Veterinaria', 'Curo vacas todo el día. Las criaturas me salen fácil.', 'Necesito una curita.', 'Se me perdieron dos vacas en la niebla de la semana pasada.'],
+    ['La niebla de la semana pasada no era normal: tapó el campo de golpe y se fue igual.', 'Al otro día había huellas de camión en la banquina.']],
+  guichon: [['oldman', 'Don Ciro', 'Bañista', 'Vengo por las termas de Almirón. Y por un combate.', 'Necesito otro baño.', 'Las aguas termales curan todo menos las derrotas.'],
+    ['boy', 'Tobías', 'Ciclista', 'Pedaleo de Paysandú a Salto ida y vuelta.', 'Pinché.', 'En Salto hay una represa enorme. Dicen que la vigilan de noche.'],
+    ['Un hombre de capa gris preguntó cuánta agua pasa por la represa de Salto.', 'Anotaba todo en una libreta con un dibujo de pájaro azul.']],
+  belen: [['gaucho', 'Isidro', 'Citricultor', 'Las naranjas de Belén son las más dulces.', 'Exprimido.', 'Cuidá las criaturas del norte: son duras.'],
+    ['sailor', 'Elba', 'Pescadora', 'En el Uruguay pescás dorados si tenés paciencia.', 'Se me escapó.', 'Del otro lado está Brasil. Del lado de acá, la niebla.'],
+    ['Le robaron la caña a mi vecino. Fue uno de gris que decía que el río era de ellos.', 'Se fue hacia Artigas.']],
+  baltasar: [['gaucho', 'Carmelo', 'Arriero', 'Llevo ganado por estos campos desde chico.', 'Se me dispersó la tropa.', 'Las piedras de Artigas tienen colores que no ves en otro lado.'],
+    ['girl', 'Florencia', 'Caminante', 'Recorro el norte a pie. Y peleo en el camino.', 'Me cansé.', 'Por la Ruta 30 hay lugares donde el campo se ve gris.'],
+    ['Pasaron unos de gris con bolsas pesadas. Iban hacia Rivera.', 'Se les cayó una piedra violeta: una amatista.']],
+  tranqueras: [['gaucho', 'Rolando', 'Forestal', 'Planto pinos, corto pinos. Y peleo entre pinos.', 'Me tiraste como a un tronco.', 'En Tacuarembó la Parrilla de la Patria Gaucha está cerrada. Raro.'],
+    ['girl', 'Jimena', 'Sandiera', 'Tranqueras es tierra de sandías. Probá una y después peleamos.', 'Te comiste todo.', 'Llevé sandías a Rivera y me hicieron pasar por un control del PP.'],
+    ['En la frontera el PP pone controles como si fuera la aduana.', 'A los que no pagan les dicen que la niebla los va a perder.']],
+  tupambae: [['gaucho', 'Bruno', 'Esquilador', 'Esquilo cien ovejas por día. Una pelea más no me cansa.', 'Me trasquilaste.', 'En Melo hay una torre con luces que nadie entiende.'],
+    ['oldman', 'Don Faustino', 'Pulpero', 'En mi pulpería se discute de todo. Ahora, combate.', 'Fiado no te lo doy.', 'Las Luces Malas aparecieron justo cuando llegaron los de gris.'],
+    ['Las Luces Malas se ven cada noche más cerca de Melo.', 'Un de gris dijo en la pulpería que en la torre guardan una pieza de la máquina.']],
+  cerrochato: [['girl', 'Leticia', 'Docente', 'Este pueblo tiene tres departamentos: Treinta y Tres, Lavalleja y Durazno se juntan acá.', 'Tres veces perdí.', 'En la Quebrada de los Cuervos anida un pájaro que no es de este mundo.'],
+    ['gaucho', 'Hilario', 'Domador', 'Domé potros más bravos que tus criaturas.', 'Me corcoveaste.', 'Hay gente de gris acampando en la Quebrada.'],
+    ['En 1915 acá se votó por primera vez en Sudamérica con mujeres. Mi abuela votó.', 'Ahora los de gris dicen que van a decidir ellos sobre el clima.']],
+  lascano: [['gaucho', 'Ramón', 'Arrocero', 'El arroz de Lascano se exporta. Mis criaturas también ganan afuera.', 'Se me pasó el arroz.', 'Los bañados de Rocha están cubiertos de una niebla espesa.'],
+    ['girl', 'Graciela', 'Bióloga', 'Estudio las aves de los bañados. Las criaturas también.', 'Anotado.', 'Los cisnes de cuello negro se fueron de la laguna. Algo los espantó.'],
+    ['Los arrozales amanecieron con una capa de niebla que no se levanta ni con sol.', 'Vi una antena nueva sobre un galpón, del lado de Rocha.']],
+  casupa: [['gaucho', 'Felipe', 'Tambero', 'La leche de Florida llega a todo el país.', 'Se cortó.', 'El cielo de Florida está lleno de aviones de práctica.'],
+    ['boy', 'Ignacio', 'Estudiante', 'Vuelvo de Minas a estudiar a Florida. En el ómnibus, combates.', 'Me bajé en la parada equivocada.', 'Dicen que los de gris dejaron la fábrica de Minas y se fueron al centro del país.'],
+    ['Después de lo de Minas, los camiones grises pasaron hacia Durazno.', 'Llevaban tanques con un olor fuerte, como a nafta.']],
+  sarandi: [['gaucho', 'Abel', 'Ganadero', 'Acá el campo es plano y las peleas son derechas.', 'Me ganaste parejo.', 'En Durazno la refinería trabaja día y noche. Más que nunca.'],
+    ['girl', 'Rocío', 'Ferroviaria', 'Por acá pasaba el tren. Ahora pasa la niebla.', 'Descarrilé.', 'Los que trabajan en la refinería no quieren hablar de lo que cargan.'],
+    ['Cada noche sale un convoy de la refinería de Durazno hacia el sur.', 'No lleva el logo de la empresa: lleva una P.']],
+  sanramon: [['oldman', 'Don Julio', 'Almacenero', 'Mi almacén tiene cien años. Mis criaturas, un poco menos.', 'Te debo una.', 'En Canelones hacen el mejor vino. El de Tomás, el líder, es famoso.'],
+    ['boy', 'Lucas', 'Futbolista', 'Juego de lateral. Marco a cualquiera.', 'Me pasaste por arriba.', 'El Centenario está cerrado. Dicen que adentro hay alguien esperando.'],
+    ['El convoy de la refinería pasó por acá rumbo a Montevideo.', 'Uno de gris dijo: «La niebla final va a tapar el Estadio».']],
+  laspiedras: [['boy', 'Diego', 'Hincha de fútbol', 'Mi cuadro juega el domingo. Hoy juego yo.', 'Goleado.', 'Montevideo está cerca. El último tramo es el más difícil.'],
+    ['girl', 'Natalia', 'Viñatera', 'En Las Piedras se pisaba uva y se ganaban batallas.', 'Me pisaste.', 'Acá Artigas ganó la batalla de Las Piedras. Vos podés ganar la tuya.'],
+    ['Montevideo amaneció con una niebla que no deja ver el Cerro.', 'Dicen que es el último plan del Dr. Díaz.']],
+};
+function locFolk(id, types, lo, hi) {
+  const [a, b, clue] = LOC_FOLK[id];
+  const t = (k, [look, nm, cls, intro, lose, after], lv) => ({ x: 0, y: 0, look, dir: k ? 'left' : 'down', sight: 4, trainer: TR(`loc_${id}_${k}`, nm, cls, teamOf(types, lv, `loc${id}${k}`), Math.round(lv[1] * 22), intro, lose, after) });
+  return [t(0, a, [lo, hi - 1]), t(1, b, [lo + 1, hi]), npc(0, 0, 'oldman', clue, { dir: 'down' })];
+}
+
 // Who keeps each city's road closed (the reason is in GATE_STORY, story.js).
 const GATE_LOOK = { colonia: 'girl', sanjose: 'clerk', artigas: 'gaucho', melo: 'oldman', rocha: 'gaucho' };
 const REAL_ROAD = {
@@ -210,6 +262,7 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
         { x: 0, y: 0, look: 'girl', dir: 'right', sight: 4, trainer: TR('ec_b', 'Brenda', 'Almacenera', teamOf(types, [lo, lo + 2], 'ecb'), 150, 'No vendo nada sin antes verte pelear.', 'Está bien, te lo cobro igual.', 'Las Pokeballs se acaban rápido. Comprá antes de seguir.') },
         npc(0, 0, 'gaucho', ['Los camiones de gris pasan de noche con unas máquinas tapadas con lona.', 'Dicen que van a Palmitas. Si vas para allá, andá con cuidado.'], { dir: 'down' }),
       ] : []),
+      ...(LOC_FOLK[id] ? locFolk(id, types, lo, hi) : []),
       ...(id === 'melo' ? [npc(0, 0, 'oldman', ['La torre vieja del Cabildo tiene luces de noche. Dicen que es el Sereno, que sigue de guardia.', 'Nadie se anima a subir.'], { dir: 'down' })] : []),
       ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: GATE_LOOK[id] ?? 'cop', dir: 'right', script: 'town_gate', stop: id, id: `gate_${id}`, cond: (f) => !f[openFlag(id)] }] : []),
     ],

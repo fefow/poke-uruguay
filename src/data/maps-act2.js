@@ -437,6 +437,7 @@ export const ACT2_INTERIOR = {
   parrilla_tac: eventRoom('parrilla', 'Parrilla de la Patria Gaucha', 'pa', [[38, 39], [39, 40], [39, 40]], 'gaucho'),
   aduana_riv: eventRoom('aduana', 'Aduana de Rivera', 'ad', [[43, 44], [43, 44], [44, 45]], 'cop'),
   radio_sal: eventRoom('radio', 'Radio de Salto', 'ra', [[45, 46], [45, 46], [46, 47]], 'clerk'),
+  refineria_dur: eventRoom('refineria', 'Depósito de la refinería', 're', [[47, 48], [48, 49], [48, 49]], 'clerk'),
   muelle_pay: eventRoom('muelle', 'Muelle de Paysandú', 'mu', [[47, 48], [48, 49], [48, 49]], 'sailor'),
 
   // --- gyms

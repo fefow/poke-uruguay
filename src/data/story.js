@@ -97,7 +97,7 @@ export const LEADERS = {
   },
   ancap: {
     order: 7, id: 'leader_ancap', name: 'Candelaria', cls: 'Presidenta de ANCAP', look: 'leader_ancap', ai: 'smart', items: ['mate_dulce'],
-    team: [['corcel', 34], ['fatuo', 35], ['escorpio', 36], ['crinfuego', 37], ['luzmala', 39]], prize: 4200, badge: 'badge7', badgeName: 'Medalla Durazno', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_fogon',
+    team: [['corcel', 34], ['fatuo', 35], ['escorpio', 36], ['crinfuego', 37], ['luzmala', 39]], prize: 4200, badge: 'badge7', badgeName: 'Medalla Durazno', reward: 'ultraesfera', rewardQty: 5, need: ['refineria_clear', ['Ahora no puedo combatir. El Equipo PP tomó el depósito de la refinería, acá en Durazno.', 'Si ese combustible sale para Montevideo, la niebla va a tapar la capital. Sacalos y te espero.']], tm: 'mt_fogon',
     intro: ['Bienvenido a Durazno. Soy Candelaria, presidenta de ANCAP.', 'Mi organismo refina los combustibles del país: el fuego es mi oficio.', 'Veamos si tus criaturas aguantan el calor.'],
     lose: 'Se apagó la llama. Buen combate.',
     after: ['La Medalla Durazno es tuya.', 'Falta poco: Canelones y, después, Montevideo.', 'Dicen que el fundador del Equipo PP espera en la capital.'],
@@ -238,6 +238,14 @@ const GATE_STORY = {
 };
 
 export const EVENTS = {
+  refineria: {
+    flag: 'refineria_clear', name: 'Capataz Ferreira', mt: 'mt_descarga', prize: 3800,
+    team: [['yarara', 49], ['pavesa', 49], ['caudillo', 50], ['temblador', 51]],
+    intro: ['De este depósito sale el combustible de la niebla. Cada tanque que cargamos tapa un departamento entero.', 'El Dr. Díaz necesita una última carga para Montevideo. No vas a ser vos quien la frene.'],
+    lose: 'Se me fue la presión.',
+    after: ['Está bien. Cierro las válvulas. Sin este combustible, la niebla de Montevideo no va a durar.', 'Pero el Dr. Díaz ya está en el Centenario.'],
+    thanks: ['El depósito vuelve a ser de ANCAP. Gracias, {player}.', 'Candelaria te espera en el gimnasio. Y llevate esta MT, la usamos para las chispas de los motores.'],
+  },
   parrilla: {
     flag: 'parrilla_clear', name: 'Capataz Rondeau', mt: 'mt_parrillada', prize: 2800,
     team: [['yarara', 40], ['cuervon', 40], ['pombero', 41], ['zorromonte', 42]],
@@ -667,6 +675,7 @@ export const SCRIPTS = {
 
   async leader(api, npc) {
     const L = LEADERS[npc.leader];
+    if (L.need && !api.flag(L.need[0])) return api.say(L.need[1], { name: L.name });
     if (api.flag(L.badge)) {
       // A rematch opens every two gyms, so the leader has had time to train.
       const tier = api.gymRematchTier(L.order);
@@ -1044,5 +1053,5 @@ export const SCRIPTS = {
 // Elite Four and Champion follow the eighth gym (ace 47); side missions follow the city they take place in.
 const LEAGUE_ACE = gymAce('montevideo');
 [[1, 3], [2, 4], [3, 5], [4, 6]].forEach(([a, b], i) => { ELITES[i].team = rescaleTeam(ELITES[i].team, [LEAGUE_ACE + a, LEAGUE_ACE + b]); });
-const EVENT_STOP = { parrilla: 'tacuarembo', aduana: 'rivera', radio: 'salto', muelle: 'paysandu' };
+const EVENT_STOP = { refineria: 'durazno', parrilla: 'tacuarembo', aduana: 'rivera', radio: 'salto', muelle: 'paysandu' };
 for (const [ev, stop] of Object.entries(EVENT_STOP)) EVENTS[ev].team = bossAt(stop, EVENTS[ev].team);

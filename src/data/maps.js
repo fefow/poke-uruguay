@@ -788,7 +788,7 @@ const PLACES = {
   piriapolis: ['obs_1', 'obs_2', 'obs_3'],
   minas: ['pp_1', 'pp_2'],
   melo: ['anima_1', 'anima_2', 'anima_3'],
-  durazno: ['gym_dur'],
+  durazno: ['gym_dur', 'refineria_dur'],
   montevideo: ['gym_mvd'],
   trinidad: ['gym_trinidad'],
   mercedes: ['gym_mercedes'],

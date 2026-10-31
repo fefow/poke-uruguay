@@ -272,7 +272,7 @@ export const CITY_SPECS = {
       scatter: [[';', 30, 'away'], ['R', 14, 'away'], ['Ω', 3, 'road']],
       animals: [],
     },
-    bld: [['fuego', 'gym_dur', [26, 10]], ['poli', 'poli_dur'], ['shop', 'shop_dur'], ['house', 'casa_dur']],
+    bld: [['fuego', 'gym_dur', [26, 10]], ['poli', 'poli_dur'], ['shop', 'shop_dur'], ['house', 'casa_dur'], ['houseB', 'refineria_dur']],
     fill: 7,
   },
   // Canelones: vineyards in long rows around a plaza, windmills and the bodega.
