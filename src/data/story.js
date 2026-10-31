@@ -461,6 +461,20 @@ export const SCRIPTS = {
     api.setFlag('gift_garr');
   },
 
+  // Bosque Grande, before San José: a short rematch with the starter alone, so the rival is present before the first gym.
+  async rival_bosque(api) {
+    if (api.flag('rival_bosque')) return;
+    await api.say(['¡{player}! Sabía que ibas a pasar por acá.', 'Ya tengo la PokeDex llena de apuntes. Vos recién arrancás.', 'Mi tío dice que en el litoral hay niebla rara. Yo voy a Trinidad por la medalla. Pero antes, una revancha.'], { name: '{rival}' });
+    const [, hi] = mapBand('r_rosario_sanjose');
+    const line = LINE[COUNTER[api.starterKey()]];
+    const team = rescaleTeam([[line[0], hi + 1]], [hi + 1, hi + 1]);
+    const res = await api.battle({ id: 'rival_bosque', name: '{rival}', cls: 'Rival', look: 'rival', team, prize: 160, intro: null, lose: 'Otra vez vos. No puede ser.', after: null, ai: 'basic' }, { canLose: true });
+    api.setFlag('rival_bosque');
+    if (res !== 'win') { api.healParty({ silent: true }); await api.say(['Te gané. Así es como se entrena.', 'Ya curé a tus criaturas: no quiero ganarte con ventaja.'], { name: '{rival}' }); }
+    await api.say(['Nos vemos en Trinidad. Si llegás primero, no le ganes a Elena antes que yo.'], { name: '{rival}' });
+    await api.npcLeave('rival_bosque');
+  },
+
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
     await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });

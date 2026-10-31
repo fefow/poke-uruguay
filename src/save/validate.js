@@ -22,7 +22,7 @@ const STORY_FLAGS = new Set([
   'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'anima_clear', 'fog1', 'fog2', 'fog3', 'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
-  'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
+  'rival5', 'rival6', 'rival_bosque', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
   'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
 const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|rm[1-9]|open)_[a-z0-9_]{1,40}$/;

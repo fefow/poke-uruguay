@@ -829,6 +829,7 @@ const PLACES = {
  * The rival stands on the road, so the player cannot walk past without meeting them.
  */
 const RIVAL_AT = [
+  ['r_rosario_sanjose', 'rival_bosque', 'rival_bosque'],
   ['ruta24', 'rival_mvd', 'rival2'],
   ['ruta30', 'rival_ferry', 'rival3'],
   ['r_lascano_rocha', 'rival_r5', 'rival5'],
