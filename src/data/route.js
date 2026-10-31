@@ -59,7 +59,9 @@ export const CHAIN = deepFreeze(STOPS.flatMap((s) => [s.id, ...s.via]));
 
 /** Centre of the wild-level band at a stop: gentle at first, steeper after the first gym, and a little more after every gym passed. */
 const gymsBefore = (i) => STOPS.slice(0, i).filter((s) => s.gym).length;
-export const stopCentre = (i) => (i <= 8 ? 2 + 0.9 * i : 9.2 + (i - 8) * 1.3) + 0.9 * gymsBefore(i);
+// The early curve is steep on purpose: by the first medal a player who fights every trainer is around level 13 to 20,
+// so the wild creatures after it must be about 12 to 15. It then flattens so that Montevideo stays where it was (about 58).
+export const stopCentre = (i) => (i <= 8 ? 2.5 + 1.7 * i : 16.1 + (i - 8) * 1.06) + 0.9 * gymsBefore(i);
 /** Wild level band [lo, hi] of stop i. */
 export const stopBand = (i) => { const c = stopCentre(i); return [Math.max(2, Math.round(c - 2)), Math.max(3, Math.round(c + 1.2))]; };
 /** Level of a gym leader's ace: just above the wild creatures of their city. */

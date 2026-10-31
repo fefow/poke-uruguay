@@ -98,6 +98,7 @@ const S = {
   cat: CATS[0], entries: [], filter: '', entry: null, group: null,
   px: null, undo: [], redo: [], tool: 'pencil', mirror: false, grid: true, showOriginal: false,
   color: [22, 20, 30, 255], zoom: 8, hover: null, painting: false,
+  sel: null, selAnchor: null, clip: null, pasteBlank: false, bulk: null, // selection, clipboard, last paste into several variants (undoable)
 };
 
 // ---------------------------------------------------------------- DOM
@@ -137,7 +138,7 @@ const center = h('main', { class: 'ed-center' },
   statusEl,
 );
 
-const TOOLS = [['pencil', 'Lápiz', 'B'], ['eraser', 'Borrador', 'E'], ['fill', 'Balde', 'G'], ['picker', 'Gotero', 'I']];
+const TOOLS = [['pencil', 'Lápiz', 'B'], ['eraser', 'Borrador', 'E'], ['fill', 'Balde', 'G'], ['picker', 'Gotero', 'I'], ['select', 'Seleccionar', 'S']];
 const toolBtns = TOOLS.map(([id, label, key]) => h('button', { type: 'button', class: 'ed-tool', 'data-tool': id, title: `${label} (${key})`, onclick: () => setTool(id) }, h('span', { text: label }), h('kbd', { text: key })));
 const mirrorBtn = h('button', { type: 'button', class: 'ed-toggle', title: 'Dibujo simétrico (M)', onclick: () => { S.mirror = !S.mirror; syncTools(); } }, 'Simetría', h('kbd', { text: 'M' }));
 const gridBtn = h('button', { type: 'button', class: 'ed-toggle', title: 'Cuadrícula (H)', onclick: () => { S.grid = !S.grid; syncTools(); drawBoard(); } }, 'Cuadrícula', h('kbd', { text: 'H' }));
@@ -145,6 +146,7 @@ const origBtn = h('button', { type: 'button', class: 'ed-toggle', title: 'Ver el
 origBtn.addEventListener('pointerdown', () => { S.showOriginal = true; drawBoard(); });
 for (const ev of ['pointerup', 'pointerleave']) origBtn.addEventListener(ev, () => { S.showOriginal = false; drawBoard(); });
 
+const pasteBlankBtn = h('button', { type: 'button', class: 'ed-toggle', title: 'Al pegar, lo transparente también borra lo que había debajo', onclick: () => { S.pasteBlank = !S.pasteBlank; syncTools(); } }, 'Pegar con transparencia');
 const colorInput = h('input', { type: 'color', class: 'ed-color', oninput: () => { const [r, g, b] = hexToRgb(colorInput.value); S.color = [r, g, b, S.color[3] || 255]; syncColor(); } });
 const alphaInput = h('input', { type: 'range', min: '0', max: '255', class: 'ed-alpha', oninput: () => { S.color[3] = +alphaInput.value; syncColor(); } });
 const alphaLabel = h('span', { class: 'ed-alpha-val' });
@@ -161,6 +163,11 @@ const right = h('aside', { class: 'ed-right' },
   h('section', {}, h('h2', { text: 'Acciones' }), h('div', { class: 'ed-tools' },
     h('button', { type: 'button', class: 'ed-tool', title: 'Deshacer (Ctrl+Z)', onclick: undo }, h('span', { text: 'Deshacer' }), h('kbd', { text: 'Ctrl Z' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Rehacer (Ctrl+Y)', onclick: redo }, h('span', { text: 'Rehacer' }), h('kbd', { text: 'Ctrl Y' })),
+    h('button', { type: 'button', class: 'ed-tool', title: 'Copia la zona seleccionada (o todo el dibujo si no hay selección)', onclick: () => copySel() }, h('span', { text: 'Copiar' }), h('kbd', { text: 'Ctrl C' })),
+    h('button', { type: 'button', class: 'ed-tool', title: 'Pega en la zona seleccionada, o en el mismo lugar de donde se copió', onclick: () => pasteHere() }, h('span', { text: 'Pegar' }), h('kbd', { text: 'Ctrl V' })),
+    h('button', { type: 'button', class: 'ed-tool', title: 'Copia la zona y la pega en el mismo lugar de los otros pasos de este lado (las otras variantes)', onclick: () => pasteOthers('step') }, h('span', { text: 'Pegar en otros pasos' })),
+    h('button', { type: 'button', class: 'ed-tool', title: 'Copia la zona y la pega en el mismo lugar de todas las demás imágenes de este personaje', onclick: () => pasteOthers('all') }, h('span', { text: 'Pegar en todas' })),
+    pasteBlankBtn,
     h('button', { type: 'button', class: 'ed-tool', title: 'Espejar horizontalmente', onclick: () => transform('flip') }, h('span', { text: 'Espejar' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('left') }, h('span', { text: 'Mover ←' }), h('kbd', { text: '←' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('right') }, h('span', { text: 'Mover →' }), h('kbd', { text: '→' })),
@@ -251,12 +258,15 @@ function refreshThumbs() {
 // ---------------------------------------------------------------- selection
 function select(e, frame = null) {
   if (!e) return;
+  if (S.group !== e) S.bulk = null;
   S.group = e;
   S.entry = frame ?? (e.frames ? e.frames[0] : e);
   for (const li of list.children) li.classList.toggle('is-active', li._entry === e);
   S.px = pixelsOf(S.entry);
   S.undo = [];
   S.redo = [];
+  // The selection follows you between variants (same place, same size); it is dropped if it does not fit.
+  if (S.sel && (S.sel.x + S.sel.w > S.entry.w || S.sel.y + S.sel.h > S.entry.h)) S.sel = null;
   const stage = board.parentElement.getBoundingClientRect();
   const aw = Math.max(320, stage.width - 48);
   const ah = Math.max(320, Math.min(stage.height, innerHeight - 220) - 48);
@@ -307,7 +317,18 @@ function drawBoard() {
       g.beginPath(); g.moveTo((w * z) / 2 + 0.5, 0); g.lineTo((w * z) / 2 + 0.5, hh * z); g.stroke();
     }
   }
-  if (S.hover && !S.showOriginal) {
+  if (S.sel && !S.showOriginal) {
+    g.save();
+    g.lineWidth = 2;
+    g.setLineDash([6, 4]);
+    g.strokeStyle = '#ffffff';
+    g.strokeRect(S.sel.x * z + 1, S.sel.y * z + 1, S.sel.w * z - 2, S.sel.h * z - 2);
+    g.lineDashOffset = 5;
+    g.strokeStyle = '#16141e';
+    g.strokeRect(S.sel.x * z + 1, S.sel.y * z + 1, S.sel.w * z - 2, S.sel.h * z - 2);
+    g.restore();
+  }
+  if (S.hover && !S.showOriginal && S.tool !== 'select') {
     g.strokeStyle = 'rgba(242,192,42,0.95)';
     g.lineWidth = 2;
     g.strokeRect(S.hover.x * z + 1, S.hover.y * z + 1, z - 2, z - 2);
@@ -429,6 +450,7 @@ function floodFill(x0, y0, col) {
 }
 
 function snapshot() {
+  S.bulk = null;
   S.undo.push(S.px.slice());
   if (S.undo.length > MAX_UNDO) S.undo.shift();
   S.redo = [];
@@ -441,6 +463,12 @@ board.addEventListener('pointerdown', (ev) => {
   if (!cell) return;
   board.setPointerCapture(ev.pointerId);
   const tool = ev.button === 2 ? 'eraser' : S.tool;
+  if (tool === 'select') {
+    S.selAnchor = cell;
+    S.sel = { x: cell.x, y: cell.y, w: 1, h: 1 };
+    drawBoard();
+    return;
+  }
   if (tool === 'picker') {
     pickColor(getPixel(cell.x, cell.y));
     setTool('pencil');
@@ -462,6 +490,10 @@ board.addEventListener('pointermove', (ev) => {
   const cell = cellAt(ev);
   S.hover = cell;
   coords.textContent = cell ? `x ${cell.x} · y ${cell.y}` : '';
+  if (S.selAnchor && cell) {
+    const a = S.selAnchor;
+    S.sel = { x: Math.min(a.x, cell.x), y: Math.min(a.y, cell.y), w: Math.abs(cell.x - a.x) + 1, h: Math.abs(cell.y - a.y) + 1 };
+  }
   if (S.painting && cell) {
     // Fill the gap between pointer events so fast strokes stay continuous.
     const col = S.painting === 'eraser' ? [0, 0, 0, 0] : S.color;
@@ -474,6 +506,14 @@ board.addEventListener('pointermove', (ev) => {
   drawBoard();
 });
 const endStroke = () => {
+  if (S.selAnchor) {
+    // A click without dragging clears the selection; a drag keeps the rectangle.
+    if (S.sel && S.sel.w === 1 && S.sel.h === 1) S.sel = null;
+    S.selAnchor = null;
+    drawBoard();
+    status(S.sel ? `Zona seleccionada: ${S.sel.w}×${S.sel.h} px. Ctrl+C la copia; Ctrl+V la pega en otra imagen.` : 'Sin selección: copiar toma todo el dibujo.');
+    return;
+  }
   if (!S.painting) return;
   S.painting = false;
   lastCell = null;
@@ -484,17 +524,20 @@ board.addEventListener('pointercancel', endStroke);
 board.addEventListener('pointerleave', () => { S.hover = null; coords.textContent = ''; drawBoard(); });
 
 /** Store the current pixels as a draft (or drop the draft when they match what the game already has). */
-function commit() {
-  const e = S.entry;
+function storeDraft(e, px) {
   const orig = originalOf(e);
-  if (sameBytes(S.px, orig)) {
+  if (sameBytes(px, orig)) {
     if (base[e.key]) drafts[e.key] = null;
     else delete drafts[e.key];
   } else {
-    const enc = encodeSprite(S.px, e.w, e.h);
+    const enc = encodeSprite(px, e.w, e.h);
     if (JSON.stringify(enc) === JSON.stringify(base[e.key])) delete drafts[e.key];
     else drafts[e.key] = enc;
   }
+}
+function commit() {
+  const e = S.entry;
+  storeDraft(e, S.px);
   persist();
   refreshLive();
   drawAll();
@@ -518,6 +561,16 @@ function markListDots() {
 }
 
 function undo() {
+  if (S.bulk) {
+    // Last thing done was "Pegar en otros pasos / en todas": put every touched image back.
+    for (const { e, prev } of S.bulk) storeDraft(e, prev);
+    S.bulk = null;
+    persist(); refreshLive();
+    S.px = pixelsOf(S.entry);
+    drawAll(); refreshThumbs(); renderFrames(); markListDots();
+    status('Se deshizo el pegado en las otras variantes.', 'ok');
+    return;
+  }
   if (!S.undo.length) return;
   S.redo.push(S.px.slice());
   S.px = S.undo.pop();
@@ -528,6 +581,63 @@ function redo() {
   S.undo.push(S.px.slice());
   S.px = S.redo.pop();
   commit();
+}
+
+// ---------------------------------------------------------------- copy and paste
+/** Rectangle to copy: the selection, or the whole sprite. */
+const selRect = () => S.sel ?? { x: 0, y: 0, w: S.entry.w, h: S.entry.h };
+
+function cut(px, W, r) {
+  const out = new Uint8ClampedArray(r.w * r.h * 4);
+  for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) out.set(px.subarray(((r.y + y) * W + r.x + x) * 4, ((r.y + y) * W + r.x + x) * 4 + 4), (y * r.w + x) * 4);
+  return out;
+}
+/** Draws the clip onto px (W×H) with its corner at (ox, oy). Transparent clip pixels leave what is underneath, unless blank. */
+function stamp(px, W, H, clip, ox, oy, blank) {
+  let n = 0;
+  for (let y = 0; y < clip.h; y++) for (let x = 0; x < clip.w; x++) {
+    const tx = ox + x, ty = oy + y;
+    if (tx < 0 || ty < 0 || tx >= W || ty >= H) continue;
+    const i = (y * clip.w + x) * 4;
+    if (clip.px[i + 3] === 0 && !blank) continue;
+    px.set(clip.px.subarray(i, i + 4), (ty * W + tx) * 4);
+    n++;
+  }
+  return n;
+}
+
+function copySel() {
+  const r = selRect();
+  S.clip = { w: r.w, h: r.h, px: cut(S.px, S.entry.w, r), x: r.x, y: r.y };
+  status(`Copiado: ${S.sel ? `zona de ${r.w}×${r.h} px` : 'todo el dibujo'}. Andá a otra imagen y tocá Pegar (Ctrl+V).`, 'ok');
+}
+function pasteHere() {
+  if (!S.clip) return status('Primero copiá algo (Ctrl+C).', 'error');
+  const o = S.sel ? { x: S.sel.x, y: S.sel.y } : { x: S.clip.x, y: S.clip.y };
+  snapshot();
+  stamp(S.px, S.entry.w, S.entry.h, S.clip, o.x, o.y, S.pasteBlank);
+  commit();
+}
+/** Copies the zone of this image to the same place of the other variants of this character. */
+function pasteOthers(scope) {
+  const g = S.group;
+  const targets = (g.frames ?? []).filter((f) => f !== S.entry && (scope === 'all' || f.dir === S.entry.dir));
+  if (!targets.length) return status('Este sprite no tiene otras variantes. Usá Copiar y Pegar entre imágenes.', 'error');
+  const r = selRect();
+  const clip = { w: r.w, h: r.h, px: cut(S.px, S.entry.w, r), x: r.x, y: r.y };
+  S.clip = clip;
+  const bulk = [];
+  for (const f of targets) {
+    const prev = pixelsOf(f);
+    const next = prev.slice();
+    stamp(next, f.w, f.h, clip, r.x, r.y, S.pasteBlank);
+    bulk.push({ e: f, prev });
+    storeDraft(f, next);
+  }
+  persist(); refreshLive();
+  S.bulk = bulk;
+  drawAll(); refreshThumbs(); renderFrames(); markListDots();
+  status(`Pegado en ${targets.length} variante${targets.length === 1 ? '' : 's'}. Ctrl+Z lo deshace.`, 'ok');
 }
 
 function transform(kind) {
@@ -579,6 +689,7 @@ function syncTools() {
   for (const b of toolBtns) b.classList.toggle('is-active', b.dataset.tool === S.tool);
   mirrorBtn.classList.toggle('is-active', S.mirror);
   gridBtn.classList.toggle('is-active', S.grid);
+  pasteBlankBtn.classList.toggle('is-active', S.pasteBlank);
   board.dataset.tool = S.tool;
   if (S.entry) drawBoard();
 }
@@ -604,9 +715,12 @@ addEventListener('keydown', (ev) => {
   const k = ev.key.toLowerCase();
   if ((ev.ctrlKey || ev.metaKey) && k === 'z') { ev.preventDefault(); ev.shiftKey ? redo() : undo(); return; }
   if ((ev.ctrlKey || ev.metaKey) && k === 'y') { ev.preventDefault(); redo(); return; }
+  if ((ev.ctrlKey || ev.metaKey) && k === 'c' && S.entry) { ev.preventDefault(); copySel(); return; }
+  if ((ev.ctrlKey || ev.metaKey) && k === 'v' && S.entry) { ev.preventDefault(); pasteHere(); return; }
   if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
-  const tool = { b: 'pencil', e: 'eraser', g: 'fill', i: 'picker' }[k];
+  const tool = { b: 'pencil', e: 'eraser', g: 'fill', i: 'picker', s: 'select' }[k];
   if (tool) setTool(tool);
+  else if (k === 'escape' && S.sel) { S.sel = null; drawBoard(); }
   else if (k === 'm') { S.mirror = !S.mirror; syncTools(); }
   else if (k === 'h') { S.grid = !S.grid; syncTools(); }
   else if (k === 'o' && !S.showOriginal) { S.showOriginal = true; drawBoard(); }

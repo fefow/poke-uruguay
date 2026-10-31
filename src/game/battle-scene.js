@@ -377,7 +377,7 @@ async function sendOutFoe(c) {
   setHud('foe', c, { instant: true });
 }
 
-async function sendOutPlayer(c) {
+async function sendOutPlayer(c, at = null) {
   A.ply = c.species;
   A.plyVis = false;
   A.ball = { x: 30, y: 110, shake: 0 };
@@ -386,7 +386,8 @@ async function sendOutPlayer(c) {
   A.ball = null;
   A.plyVis = true;
   await popIn('ply');
-  setHud('ply', c, { instant: true });
+  // `at` is the HP and status when the creature came out: attacks later in the same turn show up on their own.
+  setHud('ply', at ? { ...c, status: at.status } : c, { instant: true, hp: at ? at.hp : c.hp });
 }
 
 function recordBattle(trainer) {
@@ -549,7 +550,7 @@ async function play(events, leveled) {
         A.plyVis = false;
         break;
       case 'send':
-        await sendOutPlayer(engine.party[e.index]);
+        await sendOutPlayer(engine.party[e.index], e);
         break;
       case 'throw':
         await throwAnim();

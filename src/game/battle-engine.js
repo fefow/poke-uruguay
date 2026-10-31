@@ -327,7 +327,9 @@ export class BattleEngine {
     this.pIndex = index;
     this.p = makeBattler(this.party[index]);
     this.participants.add(this.p.c.uid);
-    ev.push({ t: 'send', side: 0, index }, { t: 'text', msg: `¡Adelante, ${displayName(this.p.c)}!` });
+    // hp and status as they are NOW: the whole turn is computed before it is played, so the scene must not
+    // read the creature's HP later (it would already include the attack that comes after the switch).
+    ev.push({ t: 'send', side: 0, index, hp: this.p.c.hp, status: this.p.c.status ?? null }, { t: 'text', msg: `¡Adelante, ${displayName(this.p.c)}!` });
   }
 
   #tryRun(ev) {

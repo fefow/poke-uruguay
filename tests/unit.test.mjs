@@ -227,6 +227,18 @@ test('los eventos de daño y curación llevan los PS en ese momento', () => {
   for (const x of ev) if (x.t === 'damage' || x.t === 'heal') assert.ok(Number.isInteger(x.hp), `${x.t} sin hp`);
 });
 
+test('al cambiar de criatura, la que sale muestra sus PS de antes del ataque', () => {
+  const party = [mon('ceibito', 12), mon('tejuchispa', 12)];
+  const full = party[1].hp;
+  const e = new BattleEngine({ party, foes: [mon('zorrigris', 30, 4)], wild: true, seed: 5 });
+  const ev = e.turn({ type: 'switch', index: 1 });
+  const send = ev.find((x) => x.t === 'send');
+  const dmg = ev.find((x) => x.t === 'damage' && x.side === 0);
+  assert.equal(send.hp, full, 'sale con todos sus PS');
+  assert.ok(dmg && dmg.hp < full, 'el golpe llega después y baja la vida');
+  assert.ok(ev.indexOf(send) < ev.indexOf(dmg));
+});
+
 test('sprite codec round-trips pixels, alpha and big palettes', async () => {
   const { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } = await import('../src/gfx/sprite-codec.js');
   const w = 12, h = 9;
