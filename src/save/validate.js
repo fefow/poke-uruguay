@@ -25,7 +25,7 @@ const STORY_FLAGS = new Set([
   'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
   'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
-const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 

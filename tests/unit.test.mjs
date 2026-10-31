@@ -365,3 +365,11 @@ test('rutas guiadas: desniveles de un solo sentido y paredes de árboles', async
   const trees = (r.match(/[#q]/g) ?? []).length;
   assert.ok(trees / r.length > 0.4, 'el Bosque Grande es denso');
 });
+
+test('historias de ruta: las marcas rq_/rf_ son válidas en una partida guardada', async () => {
+  const { validateSave } = await import('../src/save/validate.js');
+  const { OUTDOOR } = await import('../src/data/maps.js');
+  const flags = Object.values(OUTDOOR).flatMap((m) => (m.npcs ?? []).map((n) => n.doneFlag).filter(Boolean));
+  assert.ok(flags.length > 10, 'hay misiones de ruta');
+  assert.ok(flags.every((f) => /^(rq|rf)_[a-z0-9_]{1,40}$/.test(f)), 'formato de marca');
+});
