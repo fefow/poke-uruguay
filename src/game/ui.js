@@ -195,16 +195,21 @@ export function panel(cls, build) {
 export function textInput(label, value = '', placeholder = '') {
   return new Promise((resolve) => {
     const field = h('input', { id: 'name-input', class: 'text-input', maxlength: '10', autocomplete: 'off', spellcheck: 'false', value, placeholder });
-    const ok = h('button', { class: 'btn', type: 'submit', text: 'Listo' });
-    const form = h('form', { class: 'panel panel-name' },
+    const ok = h('button', { class: 'btn', type: 'button', text: 'Listo' });
+    // A <div>, not a <form>: sandboxed iframes block form submission entirely.
+    const form = h('div', { class: 'panel panel-name' },
       h('label', { for: 'name-input', class: 'menu-title', text: label }), field, ok);
     const pop = input.push(() => {});
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
       pop();
       form.remove();
       resolve(field.value);
-    });
+    };
+    ok.addEventListener('click', finish);
+    field.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); finish(); } });
     root.append(form);
     setTimeout(() => field.focus(), 50);
   });
