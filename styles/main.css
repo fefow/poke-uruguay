@@ -962,7 +962,7 @@ body {
 .screen.has-gl > #view { visibility: hidden; }
 
 /* ------------------------------------------------ 1920x1080 stage */
-.stage { --k: 1; width: 1920px; height: 1080px; transform: scale(var(--k)); transform-origin: center; position: relative; flex: none; }
+.stage { --k: 1; width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; margin: -540px 0 0 -960px; transform: scale(var(--k)); transform-origin: center; }
 .stage > .screen { width: 1920px; height: 1080px; aspect-ratio: auto; max-height: none; }
 /* the old in-canvas buttons and team strip are replaced by the top bar */
 .stage .hud-tools, .stage .hud-party { display: none !important; }
