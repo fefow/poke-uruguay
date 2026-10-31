@@ -1,5 +1,6 @@
 // Boot: loader -> title -> game loop.
-import { mountScreen, render } from './gfx/screen.js';
+import { mountScreen, render, setAfterRender } from './gfx/screen.js';
+import { mountPixi, renderPixi } from './gfx/pixi-layer.js';
 import { buildTileset, tileCanvas } from './gfx/tiles.js';
 import { validateSave } from './save/validate.js';
 import { buildAllSprites, creatureSprite } from './gfx/creatures.js';
@@ -69,6 +70,7 @@ function frame(now) {
 // ---------------------------------------------------------------- loader
 async function boot() {
   mountScreen($('#view'));
+  if (await mountPixi($('#view'), $('#screen'))) setAfterRender(renderPixi);
   mountUI($('#ui'));
   mountSidebar($('#stage'));
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });

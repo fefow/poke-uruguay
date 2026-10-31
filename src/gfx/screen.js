@@ -18,10 +18,14 @@ export const getCtx = () => ctx;
 export const setRenderer = (fn) => (renderer = fn);
 export const getRenderer = () => renderer;
 
+let after = null;
+export const setAfterRender = (fn) => (after = fn);
+
 export function render(t) {
   if (!ctx) return;
   ctx.imageSmoothingEnabled = false;
   if (renderer) renderer(ctx, t);
+  if (after) after();
 }
 
 /** Pixel-snapped text helper for canvas overlays (title screen, credits). */

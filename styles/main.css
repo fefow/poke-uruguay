@@ -957,6 +957,9 @@ body {
 }
 
 
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.screen.has-gl > #view { visibility: hidden; }
+
 /* ------------------------------------------------ 1920x1080 stage */
 .stage { --k: 1; width: 1920px; height: 1080px; transform: scale(var(--k)); transform-origin: center; position: relative; flex: none; }
 .stage > .screen { width: 1920px; height: 1080px; aspect-ratio: auto; max-height: none; }
