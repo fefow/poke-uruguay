@@ -5,6 +5,7 @@ import { state, badgeCount } from './state.js';
 import { MAPS } from '../data/maps.js';
 import { creatureIcon } from '../gfx/creatures.js';
 import { displayName, maxHp } from './creature.js';
+import { fmt } from './ui.js';
 import { VERSION } from '../version.js';
 
 let stage, left, right, sig = '', nextPoll = 0;
@@ -32,8 +33,8 @@ export function updateSidebar(now, inGame) {
   nextPoll = now + 250;
   const S = inGame ? state() : null;
   if (!S) { if (sig !== 'off') { sig = 'off'; left.replaceChildren(); right.replaceChildren(); } return; }
-  const place = MAPS[S.pos.map]?.name ?? '';
-  const next = [place, S.player.money, badgeCount(), S.party.map((c) => `${c.species}${c.level}${c.hp}${c.status ?? ''}`).join(',')].join('|');
+  const place = fmt(MAPS[S.pos.map]?.name ?? '');
+  const next = [place, S.rivalName, S.player.money, badgeCount(), S.party.map((c) => `${c.species}${c.level}${c.hp}${c.status ?? ''}`).join(',')].join('|');
   if (next === sig) return;
   sig = next;
   left.replaceChildren(

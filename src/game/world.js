@@ -170,7 +170,7 @@ export function loadMap(id, x, y, dir = 'down') {
   refreshEntities();
   playMusic(musicFor(id, m));
   setRenderer(drawWorld);
-  if (changed && !m.indoor) showBanner(m.name);
+  if (changed && !m.indoor) showBanner(fmt(m.name));
 }
 
 function showBanner(name) {
