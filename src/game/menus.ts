@@ -647,13 +647,20 @@ export function openMap() {
 }
 
 // ---------------------------------------------------------------- CARD
+function cardFace(look) {
+  const c = document.createElement('canvas');
+  c.width = 16; c.height = 17;
+  c.getContext('2d').drawImage(charSprite(look, 'down', 0), 0, 0);
+  return h('img', { src: c.toDataURL(), alt: '', class: 'card-sprite' });
+}
+
 export function openCard() {
   const S = state();
   return panel('panel-card', (el, close) => {
     // In route order; the last number picks the medal drawing (each medal keeps its type's art).
     const badges = [['badge1', 'Trinidad', '#b8864a', 9], ['badge2', 'Mercedes', '#c8c0b0', 10], ['badge3', 'Fray Bentos', '#c8506a', 8], ['badge4', 'Salto', '#8a5ad0', 7], ['badge5', 'Rivera', '#c8402a', 6], ['badge6', 'Tacuarembó', '#4aa03c', 5], ['badge7', 'Treinta y Tres', '#a48e48', 3], ['badge8', 'Maldonado', '#e8c21c', 2], ['badge9', 'Florida', '#8ac8f0', 11], ['badge10', 'Durazno', '#e8702a', 4], ['badge11', 'Canelones', '#9ac83a', 12], ['badge12', 'Montevideo', '#3f86e0', 1]];
     el.append(
-      h('header', { class: 'panel-title' }, h('span', { text: 'Carnet de Entrenador' }), h('span', { text: `ID ${S.player.id}` })),
+      h('header', { class: 'panel-title' }, h('span', { class: 'card-tab', text: 'Ficha de Entrenador' }), h('span', { text: `N.º ID ${S.player.id}` })),
       h('div', { class: 'card-body' },
         h('dl', {},
           h('dt', { text: 'Nombre' }), h('dd', { text: S.player.name }),
@@ -663,8 +670,9 @@ export function openCard() {
           h('dt', { text: 'Victorias' }), h('dd', { text: String(S.stats.battlesWon) }),
           h('dt', { text: 'Inicio' }), h('dd', { text: new Date(S.created).toLocaleDateString('es-UY') }),
         ),
-        h('div', { class: 'card-flag', 'aria-hidden': 'true' }),
+        h('div', { class: 'card-portrait', 'aria-hidden': 'true' }, cardFace(S.player.look)),
       ),
+      h('div', { class: 'card-medals-title', text: 'Medallas' }),
       h('ul', { class: 'badges' }, badges.map(([f, n, col, art]) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col }, title: n }, S.flags[f] ? h('img', { class: 'badge-img', src: badgeIcon(art), alt: `Medalla ${n}` }) : h('i', { class: 'badge-slot' }), h('span', { text: n })))),
       S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : '',
       h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
