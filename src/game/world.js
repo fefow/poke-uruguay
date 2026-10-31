@@ -939,6 +939,7 @@ function drawWorld(g, t) {
     const sy = Math.round(pos.y - cy);
     if (!player && n.def.look === null) continue;
     if (!player && n.def.look === 'ball') { drawBallIcon(g, sx + 8, sy + 6); continue; }
+    if (!player && n.def.look === 'machine') { drawFogMachine(g, sx, sy, t); continue; }
     const look = player ? state().player.look : n.def.look;
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
     const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : 0) : n.moving ? frameIdx : 0;
@@ -1086,6 +1087,18 @@ function entityPos(e) {
     return { x: (e.from.x + (e.x - e.from.x) * k) * T, y: (e.from.y + (e.y - e.from.y) * k) * T };
   }
   return { x: e.x * T, y: e.y * T };
+}
+
+/** PP fog machine: a grey box with a vent that puffs smoke. */
+function drawFogMachine(g, sx, sy, t) {
+  shadow(g, sx + 8, sy + 14, 7, 2.4);
+  g.fillStyle = '#4a4a5a'; g.fillRect(sx + 1, sy + 4, 14, 10);
+  g.fillStyle = '#7a7a8a'; g.fillRect(sx + 1, sy + 4, 14, 3);
+  g.fillStyle = '#2a2a3a'; g.fillRect(sx + 3, sy + 9, 6, 4);
+  g.fillStyle = '#c83a3a'; g.fillRect(sx + 11, sy + 9, 2, 2);
+  const k = (t / 400) % 1;
+  g.fillStyle = `rgba(210,215,225,${0.7 - k * 0.6})`;
+  g.beginPath(); g.arc(sx + 8 + Math.sin(t / 300) * 2, sy + 2 - k * 7, 2.5 + k * 2.5, 0, 7); g.fill();
 }
 
 function drawBallIcon(g, x, y) {

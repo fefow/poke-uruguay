@@ -510,6 +510,26 @@ export const SCRIPTS = {
     api.setFlag('marta_help');
   },
 
+  // Route story beats (route-stories.js): a person who lost an object that lies in a grass clearing, and a PP fog machine.
+  async route_quest(api, npc) {
+    if (api.flag(npc.doneFlag)) return api.say('Gracias de nuevo. Ojalá todos fueran como vos.', { name: npc.name });
+    if (!api.flag(npc.holeFlag)) return api.say(npc.ask, { name: npc.name });
+    await api.say(npc.thanks, { name: npc.name });
+    api.setFlag(npc.doneFlag);
+    await api.give(npc.reward);
+  },
+
+  async route_fog(api, npc) {
+    await api.say(npc.clue, { name: 'Máquina de niebla' });
+    if (api.flag(npc.doneFlag)) return;
+    const r = await api.choose(['Apagarla', 'Dejarla'], { cancel: true });
+    if (r !== 0) return;
+    api.setFlag(npc.doneFlag);
+    api.sfx('confirm');
+    await api.say('Apagaste la máquina. La niebla de la zona empieza a levantarse. Dentro hay una bolsa con provisiones.', { name: 'Máquina de niebla' });
+    await api.give('mate_dulce');
+  },
+
   // Casino Peninsula (Maldonado): fichas for money, tragamonedas, prizes for fichas (never back into money).
   async casino_cashier(api) {
     await api.say(['Bienvenido al Casino Peninsula. Las fichas no se cambian por dinero, solo por premios.', 'Diez fichas salen $500.'], { name: 'Cajero' });
