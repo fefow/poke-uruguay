@@ -8,11 +8,10 @@ import { creatureIcon } from '../gfx/creatures.ts';
 import { displayName, maxHp } from './creature.ts';
 import { fmt } from './ui.ts';
 import { charSprite } from '../gfx/characters.ts';
-import { TILE_INFO } from '../gfx/tiles.ts';
-import { worldState } from './world.ts';
 
-let portrait, nameEl, leadEl, card, mini, mapBox, mapSig = '', lastFace = '';
-const MW = 288, MH = 192;
+let portrait, nameEl, leadEl, card, mapBox, teamBox, teamBtn, lastFace = '';
+let teamOpen = true;
+try { teamOpen = localStorage.getItem('hudTeam') !== '0'; } catch {}
 let stage, bar, placeEl, medalEl, moneyEl, teamEl, btns: Record<string, any> = {}, handlers: Record<string, any> = {}, sig = '', nextPoll = 0;
 
 const ICON = {
@@ -69,14 +68,21 @@ export function mountSidebar(stageEl, hs = {}) {
         h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, icon('coin'), moneyEl)),
       leadEl));
   // minimap + place + tools (top right)
-  mini = h('canvas', { class: 'hud-mini', width: MW, height: MH });
   mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
     h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, icon('pin'), placeEl),
-    mini,
     h('nav', { class: 'tb-tools' }, ...Object.values(btns)));
   // hotbar (bottom centre)
-  teamEl = h('ol', { class: 'hud-hotbar tb-team', 'aria-label': 'Equipo' });
-  bar = h('div', { class: 'hud' }, card, mapBox, teamEl);
+  teamEl = h('ol', { class: 'hud-team-list', 'aria-label': 'Equipo' });
+  teamBtn = h('button', { type: 'button', class: 'hud-team-toggle', 'aria-expanded': String(teamOpen), 'data-tip': 'Mostrar u ocultar el equipo' },
+    h('span', { text: 'Tu equipo' }), h('span', { class: 'hud-caret', text: '▾' }));
+  teamBtn.addEventListener('click', () => {
+    teamOpen = !teamOpen;
+    teamBox.classList.toggle('is-closed', !teamOpen);
+    teamBtn.setAttribute('aria-expanded', String(teamOpen));
+    try { localStorage.setItem('hudTeam', teamOpen ? '1' : '0'); } catch {}
+  });
+  teamBox = h('section', { class: `hud-team${teamOpen ? '' : ' is-closed'}` }, teamBtn, teamEl);
+  bar = h('div', { class: 'hud' }, card, mapBox, teamBox);
   stage.append(bar);
   fit();
   addEventListener('resize', fit);
@@ -90,40 +96,6 @@ function fit() {
   const w = document.documentElement.clientWidth || innerWidth, h = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
   const k = Math.min(w / 1920, h / 1080) * 0.96;
   stage.style.setProperty('--k', k.toFixed(4));
-}
-
-const MINI_COL: Record<string, string> = {
-  '.': '#5aa23c', f: '#7ac04a', ',': '#2f7a2a', '=': '#c9a566', c: '#a8a8b4', s: '#e3cf8f', b: '#8a5a30', '~': '#3a78c8',
-  '#': '#1f5a2a', q: '#1f5a2a', p: '#2a7a3a', R: '#6a6a74', K: '#6a5a4a', D: '#f0d060', '_': '#4a4a52', '0': '#4a4a52',
-};
-const miniColor = (ch) => MINI_COL[ch] ?? (TILE_INFO[ch]?.solid ? '#7a5a4a' : '#7a9a5a');
-
-/** Minimap: the area around the player, one block per tile, the player as a blinking dot. */
-function drawMini(now) {
-  const W = worldState, tiles = W.tiles;
-  if (!tiles?.length) return;
-  const g = mini.getContext('2d');
-  const px = Math.round(W.player.x), py = Math.round(W.player.y);
-  const cols = 48, rows = 32, bs = MW / cols;
-  const x0 = Math.max(0, Math.min(tiles[0].length - cols, px - (cols >> 1)));
-  const y0 = Math.max(0, Math.min(tiles.length - rows, py - (rows >> 1)));
-  g.fillStyle = '#0c1020'; g.fillRect(0, 0, MW, MH);
-  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-    const ch = tiles[y0 + y]?.[x0 + x];
-    if (ch === undefined) continue;
-    g.fillStyle = miniColor(ch);
-    g.fillRect(Math.floor(x * bs), Math.floor(y * bs), Math.ceil(bs), Math.ceil(bs));
-  }
-  for (const o of [...(W.npcs ?? []), ...(W.items ?? [])]) {
-    const x = o.x - x0, y = o.y - y0;
-    if (x < 0 || y < 0 || x >= cols || y >= rows || o.gone) continue;
-    g.fillStyle = o.item ? '#f0d060' : o.trainer ? '#e05050' : '#f0f0f0';
-    g.fillRect(Math.floor(x * bs) + 1, Math.floor(y * bs) + 1, 4, 4);
-  }
-  const blink = Math.floor(now / 350) % 2 === 0;
-  g.fillStyle = blink ? '#ffffff' : '#e03030';
-  g.beginPath(); g.arc((px - x0 + 0.5) * bs, (py - y0 + 0.5) * bs, 6, 0, 7); g.fill();
-  g.strokeStyle = '#101828'; g.lineWidth = 2; g.stroke();
 }
 
 function drawFace(look) {
@@ -147,8 +119,7 @@ export function updateSidebar(now, inGame) {
   btns.dex.hidden = !S.flags.dex;
   btns.party.hidden = !S.party.length;
   btns.map.hidden = !S.bag.mapa_uruguay;
-  mapBox.classList.toggle('is-hidden', !S.flags.has_starter && !S.party.length);
-  drawMini(now);
+  teamBox.hidden = !S.party.length;
   drawFace(S.player.look);
   const place = fmt(MAPS[S.pos.map]?.name ?? '');
   const team = S.party.map((c) => `${c.species}${c.level}${c.hp}${c.status ?? ''}`).join(',');
@@ -161,13 +132,14 @@ export function updateSidebar(now, inGame) {
   moneyEl.textContent = `$${S.player.money}`;
   const lead = S.party.find((c) => c.hp > 0) ?? S.party[0];
   leadEl.replaceChildren(...(lead ? [hpRow(lead)] : []));
-  teamEl.replaceChildren(...S.party.map((c, i) => {
+  teamEl.replaceChildren(...S.party.map((c) => {
     const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
-    return h('li', { class: c.hp <= 0 ? 'is-down' : '', 'data-tip': `${displayName(c)} · Nv ${c.level} · ${c.hp}/${max} PS${c.status ? ' · ' + c.status : ''}` },
-      h('kbd', { text: String(i + 1) }),
-      h('img', { src: creatureIcon(c.species), alt: displayName(c), width: 64, height: 64 }),
-      h('span', { class: 'hud-lv', text: `Nv${c.level}` }),
-      h('span', { class: `tb-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) } }));
+    return h('li', { class: c.hp <= 0 ? 'is-down' : '', 'data-tip': `${displayName(c)} · ${c.hp}/${max} PS${c.status ? ' · ' + c.status : ''}` },
+      h('img', { src: creatureIcon(c.species), alt: '', width: 56, height: 56 }),
+      h('div', { class: 'hud-team-info' },
+        h('div', { class: 'hud-team-name' }, h('span', { text: displayName(c) }), h('span', { class: 'hud-lv', text: `Nv${c.level}` })),
+        h('span', { class: `tb-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) } }),
+        h('span', { class: 'hud-hp-num', text: `${c.hp}/${max}` })));
   }));
 }
 
