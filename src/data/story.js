@@ -271,7 +271,7 @@ export const EVENTS = {
     thanks: ['La radio de Salto vuelve al aire. Gracias, {player}.', 'Tomá esta MT: con ella las ondas viajan directo a la mente de cualquiera.'],
   },
   muelle: {
-    flag: 'muelle_clear', name: 'Contramaestre Vidal', mt: 'mt_bomba_lodo', prize: 3600,
+    flag: 'muelle_clear', opens: 'open_paysandu', name: 'Contramaestre Vidal', mt: 'mt_bomba_lodo', prize: 3600,
     team: [['yarara', 49], ['patriarca', 49], ['caudillo', 50], ['temblador', 50]],
     intro: ['El muelle del puerto es nuestro. Por acá entra el material de las torres de niebla.', 'Quien quiera pasar, va a tener que hundirse primero.'],
     lose: 'Me hundí yo solo…',
@@ -482,6 +482,7 @@ export const SCRIPTS = {
     const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: bossAt('minas', [['yarara', 36], ['cuervon', 37], ['lobomarino', 37], ['pombero', 37], ['caudillo', 38]]), prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('pp_clear');
+    api.setFlag('open_minas'); // Minas has no gym: beating Garúa is what opens the road west
     await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es del Dr. Díaz.', 'Dr. Díaz dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las doce medallas.', 'Llevate esto.'], { name: 'Garúa' });
     await api.give('mt_vendaval', 1);
     await fogChoice(api, 'fog3', 'Vecino', ['Un vecino de Minas llega corriendo.', 'Gracias a esa fábrica, los viñedos de Canelones no se arruinan con el granizo. Muchos van a quedar sin protección.']);
@@ -761,6 +762,7 @@ export const SCRIPTS = {
     const res = await api.battle({ id: `ev_${npc.event}`, name: E.name, cls: 'Capataz PP', look: 'pp_capataz', ai: 'smart', team: E.team, prize: E.prize, lose: E.lose, items: ['mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag(E.flag);
+    if (E.opens) api.setFlag(E.opens); // clearing the dock opens the road out of Paysandú (the city has no gate guard)
     await api.flash();
     await api.say(E.after, { name: E.name });
     await api.npcLeave(`boss_${npc.event}`);

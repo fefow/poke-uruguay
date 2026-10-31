@@ -438,3 +438,28 @@ test('map editor patches apply and survive a parse round trip', async () => {
   assert.deepEqual(m.items.map((i) => i.id), ['ed_a_1']);
   assert.deepEqual(parseMapEditsSource(mapEditsSource({})), {});
 });
+
+test('todo camino cerrado entre ciudades tiene algo en la historia que lo abre', async () => {
+  const { MAPS } = await import('../src/data/maps.js');
+  const { STOPS, CHAIN } = await import('../src/data/route.js');
+  const { EVENTS } = await import('../src/data/story.js');
+  const fs = await import('node:fs');
+  const story = fs.readFileSync(new URL('../src/data/story.js', import.meta.url), 'utf8');
+  const canOpen = (flag) => {
+    const id = flag.replace(/^open_/, '');
+    const st = STOPS.find((x) => x.id === id);
+    if (!st) return false;
+    if (st.gym) return true; // winning the medal sets it (leader in story.js)
+    if ((MAPS[id].npcs ?? []).some((n) => n.script === 'town_gate')) return true;
+    if (Object.values(EVENTS).some((e) => e.opens === flag)) return true;
+    return story.includes(`setFlag('${flag}')`);
+  };
+  const stuck = [];
+  for (let i = 0; i < CHAIN.length - 1; i++) {
+    for (const ex of Object.values(MAPS[CHAIN[i]].exits ?? {})) {
+      if (ex.to !== CHAIN[i + 1] || typeof ex.req !== 'string' || !ex.req.startsWith('open_')) continue;
+      if (!canOpen(ex.req)) stuck.push(`${CHAIN[i]} necesita ${ex.req}`);
+    }
+  }
+  assert.deepEqual(stuck, []);
+});
