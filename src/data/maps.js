@@ -704,6 +704,7 @@ import { CHAIN, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from
 import { fitDown, fitSpecies } from './levels.js';
 import { fitToMap, wildList, teamOf, rng } from './map-gen.js';
 import { guideMap } from './guide.js';
+import { addRouteStory } from './route-stories.js';
 import { layoutGym } from './gym-layouts.js';
 import { TILE_INFO } from '../gfx/tiles.js';
 
@@ -1035,6 +1036,7 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
 for (const [id, m] of Object.entries(OUTDOOR)) {
   if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
   guideMap(m, id, { width: id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3 });
+  addRouteStory(m, id);
 }
 
 const MO_BLOCKS = [
