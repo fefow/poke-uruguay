@@ -215,7 +215,7 @@ export const ACT2_OUTDOOR = {
   },
 
   ruta30: {
-    name: 'Ruta 30', music: 'route', bg: 'field', tiles: R30.tiles,
+    name: 'Ruta 5', music: 'route', bg: 'field', tiles: R30.tiles,
     signs: sign(['RUTA 30\nTacuarembó ←  ·  Rivera →\nFrontera con Brasil a pocos kilómetros.'])(R30),
     exits: { w: { to: 'tacuarembo' }, e: { to: 'rivera' } },
     enc: { rate: 0.12, list: wildList(['planta', 'bicho', 'veneno', 'lucha'], 39, 42, 9, 'r30') },

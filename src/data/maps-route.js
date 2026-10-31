@@ -9,6 +9,12 @@ import { STOPS, STOP_INDEX, CHAIN, mapBand, openFlag } from './route.js';
 import { BIOMES, DEPARTMENTS, PLACES } from './atlas.js';
 import { TILE_INFO } from '../gfx/tiles.js';
 
+// Real road numbers of the legs (the map ids stay the same so saves keep working).
+const REAL_ROAD = {
+  r_colonia_rosario: 'Ruta 1', r_villasoriano_fraybentos: 'Ruta 2', r_belen_artigas: 'Ruta 30', r_baltasar_rivera: 'Ruta 30',
+  r_tupambae_melo: 'Ruta 26', r_cerrochato_quebrada: 'Ruta 8', r_lascano_rocha: 'Ruta 15', r_rocha_paloma: 'Ruta 15', r_sarandi_durazno: 'Ruta 5',
+};
+
 const DEPT = Object.fromEntries(DEPARTMENTS.map((d) => [d.id, d]));
 const typesOf = (stopId) => BIOMES[DEPT[STOPS[STOP_INDEX[stopId]].dept].biome].types;
 
@@ -16,7 +22,7 @@ const typesOf = (stopId) => BIOMES[DEPT[STOPS[STOP_INDEX[stopId]].dept].biome].t
 const NEW = {
   colonia: ['city', ['Colonia del Sacramento es Patrimonio de la Humanidad: calles empedradas, un faro y el río ancho como mar.', 'Desde el puerto salen los Buquebus hacia Buenos Aires.'], 'Puerto'],
   sanjose: ['city', ['San José de Mayo, capital de un departamento de tambos y chacras.', 'Acá se hace la Fiesta de la Torta Frita, y nadie se queda con las ganas.'], 'Intendencia'],
-  ecilda: ['loc', ['Ecilda Paullier vive del campo y de los viajeros que pasan por la ruta 1.', 'Un mate en el almacén y seguís camino.']],
+  ecilda: ['loc', ['Ecilda Paullier vive del campo y de los viajeros que pasan por la ruta.', 'Un mate en el almacén y seguís camino.']],
   trinidad: ['city', ['Trinidad queda en el centro del país. Dicen que desde acá todo queda cerca.', 'La Plaza Independencia tiene la fuente más fotografiada de Flores.'], 'Centro de tropas'],
   palmitas: ['loc', ['Palmitas es chica, pero cruzan camiones de granos todo el día.', 'Los silos se ven desde varios kilómetros.']],
   mercedes: ['city', ['Mercedes mira al río Negro. Es la ciudad de los pescadores y de los remeros.', 'En primavera la costanera se llena de gente tomando mate.'], 'Club de remo'],
@@ -282,7 +288,7 @@ for (const s of STOPS) for (const via of s.via) {
     return { x: R.spots[k].x, y: R.spots[k].y, look: LOOKS[(rn + k) % 5], dir: R.spots[k].dir, sight: 4, trainer: TR(`${via}_${k}`, nm, cls, teamOf(tt, lv, `${via}${k}`), Math.round(lv[1] * 20), intro, lose, after) };
   });
   ROUTE_OUTDOOR[via] = {
-    name: `Camino a ${b.name}`, music: 'route', bg: 'field', tiles: R.tiles,
+    name: REAL_ROAD[via] ?? `Camino a ${b.name}`, music: 'route', bg: 'field', tiles: R.tiles,
     signs: [`${a.name.toUpperCase()} ${ARROW[OPP[dir]]}  ·  ${b.name.toUpperCase()} ${ARROW[dir]}\n${sty.sign}`].slice(0, R.signs.length),
     exits: {},
     enc: { rate: 0.12, list: wildList(types, lo, hi, 8, via) },
@@ -337,7 +343,7 @@ const FWD_DENY = (a, b) => (a.id === 'fraybentos'
   : a.id === 'carmelo'
     ? ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.']
     : a.kind === 'city'
-        ? [`El camino a ${b} está cerrado.`, `Habla con la gente de ${a.name}: alguien necesita una mano para abrir el paso.`]
+        ? [`El camino a ${b} está cerrado.`, `Hablá con la gente de ${a.name}: alguien necesita una mano para abrir el paso.`]
         : []);
 
 /** Connect the whole chain: each consecutive pair of maps gets an exit on opposite sides. */
@@ -373,7 +379,7 @@ export function rewire(OUTDOOR) {
       const cb = edgeOpen(b, OPP[s]) || carve(b, OPP[s]);
       if (!ca || !cb) continue;
       const stopA = STOPS[STOP_INDEX[A]];
-      const fwd = stopA && STOP_INDEX[B] !== undefined ? STOPS[STOP_INDEX[B]].name : OUTDOOR[B].name.replace(/^Camino a /, '');
+      const fwd = STOPS[STOP_INDEX[CHAIN.slice(CHAIN.indexOf(B)).find((id) => STOP_INDEX[id] !== undefined)]]?.name ?? OUTDOOR[B].name;
       const exit = { to: B };
       if (stopA && (stopA.kind === 'city')) {
         const flag = A === 'carmelo' ? 'has_starter' : openFlag(A);

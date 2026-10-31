@@ -292,7 +292,7 @@ export const SCRIPTS = {
         await api.give('esfera', 5);
         api.setFlag('dex');
       } else {
-        await api.say(['Te pedí una carta del almacén de Colonia del Sacramento, siguiendo la Ruta 1.', 'Cuando la tengas, traémela y te doy la PokeDex.'], { name: 'Maestro Tabárez' });
+        await api.say(['Te pedí una carta del almacén de Colonia del Sacramento, siguiendo la Ruta 21.', 'Cuando la tengas, traémela y te doy la PokeDex.'], { name: 'Maestro Tabárez' });
       }
       return;
     }
@@ -333,7 +333,7 @@ export const SCRIPTS = {
       'Y tené cuidado con el Equipo PP. Últimamente aparece una niebla extraña en el litoral.',
       'Tu madre puede curar a tus criaturas en casa.',
       'Antes de irte, {player}, te pido un favor. En el almacén de Colonia del Sacramento me guardan una carta.',
-      'Seguí por la Ruta 1, entrenando en los pastizales y contra quien te desafíe. No vuelvas hasta tenerla.',
+      'Seguí por la Ruta 21, entrenando en los pastizales y contra quien te desafíe. No vuelvas hasta tenerla.',
       'Traémela y te entrego la PokeDex y unas Pokeballs. Buen viaje.'], { name: 'Maestro Tabárez' });
     api.setFlag('dex_quest');
   },

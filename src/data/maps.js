@@ -48,7 +48,7 @@ const BASE_OUTDOOR = {
   },
 
   ruta1: {
-    name: 'Ruta 1',
+    name: 'Ruta 21',
     music: 'route',
     bg: 'field',
     tiles: [
@@ -471,7 +471,7 @@ const BASE_OUTDOOR = {
       '#..f.....=..........q....#',
       '######.......#############',
     ],
-    doors: ['shop_min', 'casa_min', { to: 'pp_1', req: (f) => f.quebrada_clear && f[badgeOf('punta')], deny: 'La puerta de la fábrica está sellada con candados. Hay mucha niebla en las sierras, y alguien adentro. Antes conviene visitar Durazno, al oeste.' }],
+    doors: ['shop_min', 'casa_min', { to: 'pp_1', req: (f) => f.quebrada_clear && f[badgeOf('punta')], deny: 'La puerta de la fábrica está sellada con candados. Hay mucha niebla en las sierras, y alguien adentro. Primero hay que despejar la niebla del este.' }],
     signs: ['MINAS\nCapital del departamento de Lavalleja. Entre sierras, cerros y el agua más pura del país.'],
     exits: { s: { to: 'ruta8' }, n: { to: 'quebrada' }, w: { to: 'durazno', req: 'badge3', deny: 'Un camino de ceniza baja hacia el oeste. El aire quema: todavía no estás listo para ese calor.' } },
     enc: { rate: 0.1, list: [['tatadios', 24, 26, 14], ['pararrayo', 25, 27, 10], ['cuchilla', 25, 27, 10], ['cerro', 25, 27, 10], ['pombero', 25, 27, 8], ['lobomarino', 26, 27, 6], ['gatomontes', 24, 26, 14], ['cotorrayo', 24, 26, 14], ['criollo', 25, 27, 6], ['candil', 25, 27, 6], ['tapir', 25, 27, 6], ['fosil', 25, 27, 6]] },
