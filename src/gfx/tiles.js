@@ -103,6 +103,17 @@ export const TILE_INFO = {
   'μ': { name: 'cerro', solid: true, over: true },
   'ρ': { name: 'tapia de piedra', solid: true, over: true },
   'τ': { name: 'leña', solid: true, over: true },
+  'Д': { name: 'tronco caído', solid: true, over: true },
+  'Ф': { name: 'hongos', over: true },
+  'Ц': { name: 'piedritas', over: true },
+  'Ш': { name: 'barril', solid: true, over: true },
+  'Э': { name: 'cajón', solid: true, over: true },
+  'Ю': { name: 'totoras', over: true },
+  'Я': { name: 'girasoles', over: true },
+  'И': { name: 'tuna', solid: true, over: true },
+  'Л': { name: 'mojón', solid: true, over: true },
+  'П': { name: 'fogón', solid: true, over: true },
+  'Ч': { name: 'paja brava', over: true },
   'β': { name: 'bote', solid: true, over: true },
   'γ': { name: 'contenedor', solid: true, over: true },
   'ψ': { name: 'tendedero', solid: true, over: true },
@@ -731,6 +742,81 @@ const OVER = {
     g.fillStyle = '#a88028'; g.beginPath(); g.arc(8, 9, 2, 0, 7); g.fill();
     px(g, 5, 5, '#f0d878', 2, 1);
   },
+  'Д': (g) => {
+    shade(g, 8, 13, 7, 1.5);
+    px(g, 1, 7, '#6a4426', 14, 6); px(g, 2, 6, '#7e5430', 12, 1); px(g, 2, 13, '#4a2e18', 12, 1);
+    px(g, 1, 8, '#5a3a20', 14, 1); px(g, 4, 9, '#5a3a20', 8, 1); px(g, 3, 11, '#5a3a20', 9, 1);
+    px(g, 0, 7, '#c89a62', 2, 6); px(g, 1, 9, '#a87a44', 1, 2); px(g, 14, 7, '#c89a62', 2, 6); px(g, 14, 9, '#a87a44', 1, 2);
+    px(g, 6, 5, '#4a9a3a', 3, 1); px(g, 7, 4, '#6ac04a', 1, 1);
+  },
+  'Ф': (g) => {
+    shade(g, 8, 13, 5, 1);
+    for (const [x, y, c] of [[4, 9, '#d84a3a'], [9, 7, '#d84a3a'], [11, 10, '#e8a048']]) {
+      px(g, x, y + 2, '#f0e6cc', 2, 3); px(g, x - 1, y, c, 4, 2); px(g, x, y - 1, c, 2, 1);
+      px(g, x, y, '#fff', 1, 1);
+    }
+  },
+  'Ц': (g) => {
+    for (const [x, y, w, h] of [[3, 9, 4, 3], [8, 7, 5, 4], [10, 12, 3, 2], [2, 13, 3, 2]]) {
+      px(g, x, y + h, 'rgba(0,0,0,0.18)', w, 1); px(g, x, y, '#8a8a92', w, h); px(g, x, y, '#b4b4bc', w - 1, 1); px(g, x + w - 1, y + 1, '#6a6a72', 1, h - 1);
+    }
+  },
+  'Ш': (g) => {
+    shade(g, 8, 14, 6, 1.4);
+    px(g, 3, 4, '#7a4a22', 10, 10); px(g, 2, 6, '#7a4a22', 12, 6); px(g, 4, 3, '#94602e', 8, 1);
+    px(g, 3, 5, '#4a4a54', 10, 1); px(g, 2, 11, '#4a4a54', 12, 1); px(g, 3, 13, '#4a4a54', 10, 1);
+    px(g, 5, 7, '#94602e', 1, 4); px(g, 8, 7, '#94602e', 1, 4); px(g, 11, 7, '#5a3418', 1, 4);
+    px(g, 4, 4, '#2a2018', 8, 1);
+  },
+  'Э': (g) => {
+    shade(g, 8, 14, 7, 1.4);
+    px(g, 2, 4, '#b88a4e', 12, 10); px(g, 2, 4, '#d8a864', 12, 1); px(g, 2, 13, '#7a5a30', 12, 1);
+    px(g, 2, 4, '#7a5a30', 1, 10); px(g, 13, 4, '#7a5a30', 1, 10);
+    for (let i = 0; i < 10; i++) { px(g, 3 + i, 5 + i * 0.8 | 0, '#8a6a38', 1, 1); }
+    px(g, 3, 8, '#9a7240', 10, 1); px(g, 7, 4, '#7a5a30', 2, 10);
+  },
+  'Ю': (g, r) => {
+    for (const [x, h] of [[3, 9], [6, 12], [9, 10], [12, 11]]) {
+      px(g, x, 15 - h, '#5a8a3a', 1, h); px(g, x, 13 - h + 3, '#4a7a2e', 1, 2);
+      px(g, x - 1, 15 - h - 3, '#6a3a1e', 3, 4); px(g, x, 15 - h - 3, '#8a5a30', 1, 2);
+    }
+    px(g, 1, 14, '#4a7a2e', 14, 1);
+  },
+  'Я': (g) => {
+    shade(g, 8, 14, 6, 1);
+    for (const [x, y] of [[4, 5], [9, 3], [12, 7]]) {
+      px(g, x, y + 3, '#3a8a30', 1, 11 - y); px(g, x - 1, y + 8, '#4aa040', 1, 1);
+      px(g, x - 2, y, '#f4c020', 5, 3); px(g, x - 1, y - 1, '#f4c020', 3, 5); px(g, x - 1, y, '#6a4018', 3, 3);
+    }
+  },
+  'И': (g) => {
+    shade(g, 8, 14, 6, 1.4);
+    for (const [x, y, w, h] of [[5, 8, 6, 6], [2, 5, 5, 5], [9, 2, 5, 6]]) {
+      g.fillStyle = '#4a9a4a'; g.beginPath(); g.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, 7); g.fill();
+      px(g, x + 1, y + 1, '#6ac06a', 2, 1);
+      px(g, x + 1, y + 3, '#f0f0c0', 1, 1); px(g, x + 3, y + 2, '#f0f0c0', 1, 1);
+    }
+    px(g, 11, 2, '#e8486a', 2, 2);
+  },
+  'Л': (g) => {
+    shade(g, 8, 15, 5, 1.2);
+    px(g, 4, 7, '#c8c8d0', 8, 8); px(g, 5, 5, '#c8c8d0', 6, 2); px(g, 6, 4, '#c8c8d0', 4, 1);
+    px(g, 4, 7, '#e8e8ee', 1, 8); px(g, 11, 7, '#9a9aa6', 1, 8); px(g, 5, 14, '#9a9aa6', 6, 1);
+    px(g, 6, 8, '#3a3a44', 4, 1); px(g, 6, 10, '#3a3a44', 4, 1); px(g, 7, 12, '#3a3a44', 2, 1);
+  },
+  'П': (g, r, f) => {
+    shade(g, 8, 14, 6, 1.3);
+    px(g, 3, 12, '#6a4426', 10, 2); px(g, 4, 11, '#8a5a30', 8, 1);
+    g.fillStyle = '#f08020'; g.beginPath(); g.moveTo(8, 2); g.lineTo(12, 11); g.lineTo(4, 11); g.fill();
+    g.fillStyle = '#ffd040'; g.beginPath(); g.moveTo(8, 5); g.lineTo(10.5, 11); g.lineTo(5.5, 11); g.fill();
+    px(g, 7, 8, '#fff6b0', 2, 3);
+  },
+  'Ч': (g) => {
+    for (const [x, h, c] of [[3, 11, '#9ab04a'], [6, 13, '#b8c860'], [9, 12, '#9ab04a'], [12, 10, '#b8c860']]) {
+      for (let i = 0; i < h; i++) px(g, x + (i > h - 4 ? (x < 8 ? -1 : 1) * ((i - (h - 4)) >> 1) : 0), 15 - i, i % 3 ? c : '#7a9a3a', 1, 1);
+      px(g, x - 1, 15 - h, '#e8e0a8', 3, 2); px(g, x, 14 - h, '#e8e0a8', 1, 1);
+    }
+  },
   'Π': (g) => {
     shade(g, 8, 15, 3, 1);
     px(g, 7, 8, '#6a4020', 2, 7); px(g, 4, 3, '#c83a3a', 8, 5); px(g, 5, 4, '#e86a6a', 6, 1); px(g, 10, 5, '#f2e05c', 1, 3);
@@ -964,15 +1050,41 @@ export function sitsInWater(tiles, x, y) {
   return n >= 3 || (n >= 2 && (TILE_INFO[ch]?.over || ch === 'R'));
 }
 
-export function tileCanvas(ch, frame = 0, theme = null, onWater = false) {
+/** Ground tiles an object may stand on, besides grass, and what they are called when counting neighbours. */
+const BASES = { s: 's', '=': '=', c: 'c', '_': '_', '?': '?', '0': '0', '-': '0', ':': '0', '/': '0', '`': '`' };
+/**
+ * What an object tile stands on: '~' (water), a ground char ('s' sand, '=' path, 'c' cobbles, '_' pavement,
+ * '0' asphalt, '`' ash) or false for the usual grass. Objects are drawn transparent over that ground, so the same
+ * sprite works on grass, sand, a path, the shore of a lake...
+ */
+export function groundUnder(tiles, x, y) {
+  if (sitsInWater(tiles, x, y)) return '~';
+  const ch = tiles[y][x];
+  if (!TILE_INFO[ch]?.over) return false;
+  const count = {};
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    if (!dx && !dy) continue;
+    const n = tiles[y + dy]?.[x + dx];
+    const b = n === undefined ? null : BASES[n];
+    if (b) count[b] = (count[b] ?? 0) + 1;
+  }
+  let best = false, top = 3; // at least 3 of the 8 neighbours, otherwise grass
+  for (const [b, c] of Object.entries(count)) if (c >= top) { best = b; top = c; }
+  return best;
+}
+
+/** under: false (grass / theme floor), true or '~' (water) or a ground char from BASES (see groundUnder). */
+export function tileCanvas(ch, frame = 0, theme = null, under = false) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;
   const set = theme ? THEMES[theme] : null;
   const f0 = info?.anim ? frame % 4 : 0;
-  const ground = onWater ? (g, r) => DRAW['~'](g, r, f0) : (set?.['.'] ?? null);
+  const onWater = under === true || under === '~';
+  const base = !set && typeof under === 'string' && under !== '~' && DRAW[under] ? under : null;
+  const ground = onWater ? (g, r) => DRAW['~'](g, r, f0) : base ? (g, r) => DRAW[base](g, r, 0) : (set?.['.'] ?? null);
   const draw = set?.[ch] || null;
   const themed = draw || (ground && (DRAW[ch] || OVER[ch])) || onWater;
-  const key = (themed ? `${theme}|` : '') + (onWater ? 'w|' : '') + ch + f;
+  const key = (themed ? `${theme}|` : '') + (onWater ? 'w|' : base ? `${base}|` : '') + ch + f;
   const drawn = override(`tile:${key}`, T, T);
   if (drawn) return drawn;
   let c = cache.get(key);

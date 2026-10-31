@@ -6,7 +6,7 @@ import { OUTDOOR, INTERIOR, MAPS, MAP_ORIGINALS } from '../data/maps.js';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsTiles, mapEditsSource, parseMapEditsSource } from '../data/map-edits.js';
 import { ITEMS } from '../data/items.js';
-import { tileCanvas, sitsInWater, TILE_INFO, T } from '../gfx/tiles.js';
+import { tileCanvas, groundUnder, TILE_INFO, T } from '../gfx/tiles.js';
 import { charSprite, LOOKS } from '../gfx/characters.js';
 import { drawItem } from '../gfx/items.js';
 import { h, safeStorage } from '../core/util.js';
@@ -232,7 +232,7 @@ function draw() {
   g.imageSmoothingEnabled = false;
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
-  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, sitsInWater(rows, x, y)), x * T, y * T);
+  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundUnder(rows, x, y)), x * T, y * T);
   for (const it of W.items) {
     if (it.removed) continue;
     drawItem(g, it.item, it.x * T, it.y * T - 1);

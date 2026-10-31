@@ -709,6 +709,7 @@ import { layoutGym } from './gym-layouts.js';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.js';
 import { MAP_OVERRIDES } from './map-overrides.js';
 import { applyMapEdits, npcKeys } from './map-edits.js';
+import { scatterDecor } from './decor.js';
 
 export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR, ...ROUTE_OUTDOOR };
 export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR, ...ROUTE_INTERIOR };
@@ -1178,6 +1179,10 @@ const MO_BLOCKS = [
 })();
 
 // What the map editor sees as "the original" (before its own changes), then the editor's changes on top.
+// Scenery over open grass on routes and in localities (before the editor baseline below, so it is not an "edit").
+const LOCALITIES = new Set(STOPS.filter((st) => st.kind === 'loc').map((st) => st.id));
+scatterDecor(MAPS, (id) => id.startsWith('r_') || id.startsWith('ruta') || LOCALITIES.has(id));
+
 export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m]) => {
   const keys = npcKeys(m.npcs);
   return [id, {

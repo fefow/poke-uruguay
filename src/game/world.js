@@ -6,7 +6,7 @@ import { SPECIES } from '../data/species.js';
 import { badgeOf } from '../data/route.js';
 import { TYPES } from '../data/types.js';
 import { ITEMS } from '../data/items.js';
-import { T, TILE_INFO, tileCanvas, sitsInWater } from '../gfx/tiles.js';
+import { T, TILE_INFO, tileCanvas, groundUnder } from '../gfx/tiles.js';
 import { charSprite } from '../gfx/characters.js';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.js';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.js';
@@ -940,7 +940,7 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, sitsInWater(W_.tiles, x, y)), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y)), x * T - cx, y * T - cy);
   }
   // ground items
   for (const it of W_.items) {
