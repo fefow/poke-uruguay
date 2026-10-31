@@ -8,6 +8,7 @@ const PLAIN = new Set(['.', ',', '=', 's', 'f']);
 const KINDS = [
   ['Ф', 3, 'any'], ['Ц', 3, 'any'], ['Я', 2, 'any'], ['Ч', 3, 'any'], ['Д', 1.2, 'any'],
   ['Ю', 5, 'water'], ['Ш', 1.5, 'path'], ['Э', 1.5, 'path'], ['И', 2, 'sand'],
+  ['Б', 1.5, 'sand'], ['Г', 1.5, 'sand'], ['Ж', 1.5, 'sand'], ['З', 0.8, 'any'], ['Й', 1, 'path'], ['Н', 1.2, 'path'], ['Р', 1.5, 'path'], ['Ъ', 1, 'path'], ['С', 0.8, 'path'], ['Ь', 1, 'any'],
 ];
 
 const hash = (s) => [...s].reduce((a, c) => (Math.imul(a, 31) + c.charCodeAt(0)) >>> 0, 7);

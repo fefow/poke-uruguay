@@ -62,11 +62,15 @@ export function mountSidebar(stageEl, hs = {}) {
   stage.append(bar);
   fit();
   addEventListener('resize', fit);
+  window.visualViewport?.addEventListener('resize', fit);
+  new ResizeObserver(fit).observe(document.documentElement);
 }
 
 /** Scale the fixed 1920x1080 stage to the window (letterboxed). */
 function fit() {
-  const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+  // 4% margin: the window never shows the game edge to edge, so browser bars and scrollbars cannot cut it
+  const w = document.documentElement.clientWidth || innerWidth, h = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
+  const k = Math.min(w / 1920, h / 1080) * 0.96;
   stage.style.setProperty('--k', k.toFixed(4));
 }
 

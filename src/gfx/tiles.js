@@ -114,6 +114,16 @@ export const TILE_INFO = {
   'Л': { name: 'mojón', solid: true, over: true },
   'П': { name: 'fogón', solid: true, over: true },
   'Ч': { name: 'paja brava', over: true },
+  'Б': { name: 'ancla', solid: true, over: true },
+  'Г': { name: 'redes de pesca', solid: true, over: true },
+  'Ж': { name: 'sombrilla', solid: true, over: true },
+  'З': { name: 'mesa con sillas', solid: true, over: true },
+  'Й': { name: 'bicicleta apoyada', solid: true, over: true },
+  'Н': { name: 'tanque australiano', solid: true, over: true },
+  'Р': { name: 'poste con nido de hornero', solid: true, over: true },
+  'С': { name: 'cesto de basura', solid: true, over: true },
+  'Ь': { name: 'maceta grande', solid: true, over: true },
+  'Ъ': { name: 'bebedero de campo', solid: true, over: true },
   'β': { name: 'bote', solid: true, over: true },
   'γ': { name: 'contenedor', solid: true, over: true },
   'ψ': { name: 'tendedero', solid: true, over: true },
@@ -816,6 +826,67 @@ const OVER = {
       for (let i = 0; i < h; i++) px(g, x + (i > h - 4 ? (x < 8 ? -1 : 1) * ((i - (h - 4)) >> 1) : 0), 15 - i, i % 3 ? c : '#7a9a3a', 1, 1);
       px(g, x - 1, 15 - h, '#e8e0a8', 3, 2); px(g, x, 14 - h, '#e8e0a8', 1, 1);
     }
+  },
+  'Б': (g) => {
+    shade(g, 8, 14, 5, 1.2);
+    px(g, 7, 2, '#3a3a46', 2, 11); px(g, 5, 4, '#3a3a46', 6, 1); px(g, 6, 1, '#3a3a46', 4, 2); px(g, 7, 0, '#5a5a68', 2, 1);
+    px(g, 3, 10, '#3a3a46', 2, 2); px(g, 11, 10, '#3a3a46', 2, 2); px(g, 4, 12, '#3a3a46', 8, 2); px(g, 3, 9, '#3a3a46', 1, 1); px(g, 12, 9, '#3a3a46', 1, 1);
+    px(g, 7, 3, '#6a6a78', 1, 8); px(g, 6, 12, '#6a6a78', 3, 1);
+  },
+  'Г': (g) => {
+    px(g, 1, 3, '#6a4426', 1, 12); px(g, 14, 3, '#6a4426', 1, 12); px(g, 1, 3, '#6a4426', 14, 1);
+    for (let y = 4; y < 14; y += 2) for (let x = 2; x < 14; x += 2) { px(g, x, y, '#c8a860', 2, 1); px(g, x + 1, y + 1, '#a88840', 1, 1); }
+    px(g, 3, 12, '#4a8ab0', 2, 2); px(g, 9, 11, '#4a8ab0', 2, 3);
+  },
+  'Ж': (g) => {
+    shade(g, 8, 15, 5, 1);
+    px(g, 7, 6, '#8a6a3a', 2, 9);
+    g.fillStyle = '#e8486a'; g.beginPath(); g.moveTo(1, 7); g.quadraticCurveTo(8, -3, 15, 7); g.lineTo(1, 7); g.fill();
+    px(g, 4, 5, '#f4f4f4', 2, 2); px(g, 8, 3, '#f4f4f4', 3, 3); px(g, 12, 5, '#f4f4f4', 2, 2);
+    px(g, 1, 7, '#b8284a', 14, 1);
+  },
+  'З': (g) => {
+    shade(g, 8, 14, 7, 1.4);
+    px(g, 4, 6, '#d8c8a0', 8, 2); px(g, 5, 8, '#a8885a', 1, 5); px(g, 10, 8, '#a8885a', 1, 5); px(g, 4, 6, '#f0e0b8', 8, 1);
+    px(g, 0, 8, '#6a4a2a', 3, 1); px(g, 0, 9, '#6a4a2a', 1, 5); px(g, 2, 9, '#6a4a2a', 1, 5); px(g, 13, 8, '#6a4a2a', 3, 1); px(g, 13, 9, '#6a4a2a', 1, 5); px(g, 15, 9, '#6a4a2a', 1, 5);
+    px(g, 7, 4, '#e8e8e8', 2, 2); px(g, 7, 3, '#c83a3a', 2, 1);
+  },
+  'Й': (g) => {
+    shade(g, 8, 14, 6, 1);
+    for (const cx of [4, 12]) { g.strokeStyle = '#2a2a34'; g.lineWidth = 1; g.beginPath(); g.arc(cx, 11, 3, 0, 7); g.stroke(); px(g, cx, 11, '#8a8a98', 1, 1); }
+    g.fillStyle = '#e0263a'; g.fillRect(4, 8, 5, 1); g.fillRect(8, 6, 1, 3); g.fillRect(8, 8, 4, 1); g.fillRect(4, 8, 1, 3); g.fillRect(11, 8, 1, 3);
+    px(g, 7, 5, '#2a2a34', 3, 1); px(g, 11, 6, '#2a2a34', 3, 1); px(g, 12, 7, '#2a2a34', 1, 1);
+  },
+  'Н': (g) => {
+    shade(g, 8, 14, 6, 1.4);
+    px(g, 2, 4, '#8a9aa8', 12, 10); px(g, 3, 3, '#a8b8c4', 10, 1); px(g, 2, 4, '#c0ccd6', 2, 10); px(g, 12, 4, '#6a7a88', 2, 10);
+    for (const y of [6, 9, 12]) px(g, 2, y, '#5a6a78', 12, 1);
+    px(g, 6, 10, '#3a4a58', 4, 4); px(g, 7, 11, '#8a9aa8', 2, 1);
+  },
+  'Р': (g) => {
+    shade(g, 8, 15, 3, 1);
+    px(g, 7, 6, '#7a5230', 2, 9); px(g, 7, 6, '#9a6a3a', 1, 9);
+    g.fillStyle = '#b88a58'; g.beginPath(); g.ellipse(8, 4, 5, 3.5, 0, 0, 7); g.fill();
+    g.fillStyle = '#d8aa78'; g.beginPath(); g.ellipse(7, 3, 3, 1.6, 0, 0, 7); g.fill();
+    px(g, 11, 4, '#1a1008', 2, 2); px(g, 4, 6, '#8a6238', 8, 1);
+  },
+  'С': (g) => {
+    shade(g, 8, 14, 4, 1.1);
+    px(g, 4, 4, '#4a8a5a', 8, 10); px(g, 3, 3, '#5aa06a', 10, 2); px(g, 4, 4, '#6ab87a', 1, 10);
+    for (const x of [6, 8, 10]) px(g, x, 6, '#2a5a3a', 1, 6);
+    px(g, 5, 13, '#2a5a3a', 6, 1);
+  },
+  'Ь': (g) => {
+    shade(g, 8, 14, 6, 1.2);
+    g.fillStyle = '#2f9a4a'; g.beginPath(); g.arc(8, 5, 5, 0, 7); g.fill(); g.fillStyle = '#4ab860'; g.beginPath(); g.arc(7, 4, 3, 0, 7); g.fill();
+    px(g, 4, 3, '#e84a6a', 2, 2); px(g, 10, 5, '#f4c030', 2, 2); px(g, 7, 7, '#f4f4f4', 2, 1);
+    px(g, 4, 9, '#c8643a', 8, 5); px(g, 3, 9, '#d8744a', 10, 2); px(g, 4, 9, '#e89060', 8, 1); px(g, 5, 13, '#a8482a', 6, 1);
+  },
+  'Ъ': (g) => {
+    shade(g, 8, 14, 7, 1.3);
+    px(g, 1, 8, '#8a8a94', 14, 5); px(g, 1, 7, '#b8b8c2', 14, 1); px(g, 1, 13, '#5a5a64', 14, 1);
+    px(g, 2, 8, '#4a8ab0', 12, 3); px(g, 3, 8, '#7ab8e0', 4, 1);
+    px(g, 1, 8, '#5a5a64', 1, 5); px(g, 14, 8, '#5a5a64', 1, 5);
   },
   'Π': (g) => {
     shade(g, 8, 15, 3, 1);
