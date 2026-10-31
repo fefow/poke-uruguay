@@ -20,6 +20,8 @@ export function guideMap(m, seed, opts = {}) {
   const at = (x, y) => rows[y]?.[x];
   const objs = [...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])];
 
+  const guardObj = (x, y) => objs.some((o) => Math.abs(o.x - x) <= 1 && Math.abs(o.y - y) <= 1) || rows[y][x] === 'S';
+
   // distance from the trail ('=' tiles, and the edge cells where the map exits)
   const dist = Array.from({ length: h }, () => Array(w).fill(99));
   const q = [];
@@ -74,6 +76,30 @@ export function guideMap(m, seed, opts = {}) {
       const gx = x + dx, gy = y + dy;
       if ((rows[gy]?.[gx] === '.' || rows[gy]?.[gx] === 'f') && dist[gy][gx] >= 1 && dist[gy][gx] <= 4) rows[gy][gx] = ',';
     }
+  }
+
+  // Emerald-style grass belts: a band of tall grass that spans the whole trail, so the way forward means a few wild encounters
+  const belts = w > h ? 2 : 1;
+  for (let k = 0; k < belts; k++) {
+    const pos = Math.floor((0.25 + 0.5 * ((k + rand()) / belts)) * (w > h ? w : h));
+    for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+      if (Math.abs(along(x, y) - pos) <= 1 && (rows[y][x] === '.' || rows[y][x] === 'f') && !guardObj(x, y)) rows[y][x] = ',';
+    }
+  }
+
+  // a grass patch with one bare tile in the middle hides an item, as Emerald does with its hidden potions
+  const holes = 1 + Math.floor(rand() * 2);
+  for (let k = 0, placed = 0; k < 60 && placed < holes; k++) {
+    const x = 4 + Math.floor(rand() * (w - 8)), y = 4 + Math.floor(rand() * (h - 8));
+    if (dist[y][x] < 1 || dist[y][x] > 5 || guardObj(x, y)) continue;
+    const ring = D4.concat([[1, 1], [-1, -1], [1, -1], [-1, 1]]).map(([dx, dy]) => [x + dx, y + dy]);
+    if (rows[y][x] !== '.' && rows[y][x] !== ',') continue;
+    if (!ring.every(([rx, ry]) => rows[ry]?.[rx] === '.' || rows[ry]?.[rx] === ',' || rows[ry]?.[rx] === 'f')) continue;
+    ring.forEach(([rx, ry]) => { rows[ry][rx] = ','; });
+    rows[y][x] = '.';
+    (m.items ??= []).push({ x, y, item: rand() < 0.5 ? 'mate' : 'esfera', id: `${seed}_hole${placed}` });
+    objs.push({ x, y });
+    placed++;
   }
 
   // ledges: short one-way lines across grass, never cutting off anything that was reachable
