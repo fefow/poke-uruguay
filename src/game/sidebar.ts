@@ -9,7 +9,7 @@ import { displayName, maxHp } from './creature.ts';
 import { fmt } from './ui.ts';
 import { charSprite } from '../gfx/characters.ts';
 
-let portrait, nameEl, leadEl, card, mapBox, teamBox, teamBtn, lastFace = '';
+let portrait, nameEl, card, mapBox, teamBox, teamBtn, lastFace = '';
 let teamOpen = true;
 try { teamOpen = localStorage.getItem('hudTeam') !== '0'; } catch {}
 let stage, bar, placeEl, medalEl, moneyEl, teamEl, btns: Record<string, any> = {}, handlers: Record<string, any> = {}, sig = '', nextPoll = 0;
@@ -59,14 +59,13 @@ export function mountSidebar(stageEl, hs = {}) {
   // player card (top left)
   portrait = h('canvas', { class: 'hud-face', width: 16, height: 16 });
   nameEl = h('b', { class: 'hud-name' });
-  leadEl = h('div', { class: 'hud-lead' });
   card = h('section', { class: 'hud-card', 'aria-label': 'Entrenador' },
     h('div', { class: 'hud-face-wrap' }, portrait),
     h('div', { class: 'hud-card-main' },
-      h('div', { class: 'hud-card-top' }, nameEl,
+      nameEl,
+      h('div', { class: 'hud-card-top' },
         h('span', { class: 'tb-chip', 'data-tip': 'Medallas' }, icon('medal'), medalEl),
-        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, icon('coin'), moneyEl)),
-      leadEl));
+        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, icon('coin'), moneyEl))));
   // minimap + place + tools (top right)
   mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
     h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, icon('pin'), placeEl),
@@ -130,8 +129,6 @@ export function updateSidebar(now, inGame) {
   nameEl.textContent = S.player.name ?? '';
   medalEl.textContent = String(badgeCount());
   moneyEl.textContent = `$${S.player.money}`;
-  const lead = S.party.find((c) => c.hp > 0) ?? S.party[0];
-  leadEl.replaceChildren(...(lead ? [hpRow(lead)] : []));
   teamEl.replaceChildren(...S.party.map((c) => {
     const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
     return h('li', { class: c.hp <= 0 ? 'is-down' : '', 'data-tip': `${displayName(c)} · ${c.hp}/${max} PS${c.status ? ' · ' + c.status : ''}` },
@@ -141,12 +138,4 @@ export function updateSidebar(now, inGame) {
         h('span', { class: `tb-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) } }),
         h('span', { class: 'hud-hp-num', text: `${c.hp}/${max}` })));
   }));
-}
-
-function hpRow(c) {
-  const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
-  return h('div', { class: 'hud-hp' },
-    h('span', { class: 'hud-hp-name', text: `${displayName(c)} Nv${c.level}` }),
-    h('span', { class: `tb-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) } }),
-    h('span', { class: 'hud-hp-num', text: `${c.hp}/${max}` }));
 }
