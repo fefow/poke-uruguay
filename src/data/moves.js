@@ -4,7 +4,10 @@ import { deepFreeze } from '../core/util.js';
 // fx: { status, chance, self:{stat:delta}, foe:{stat:delta}, heal, drain, recoil, crit, prio, never }
 // stats: atk def spa spd spe acc eva
 // PP are halved from the raw table (rounded up) so strong moves cannot be spammed.
-const M = (name, type, cat, power, acc, pp, desc, fx = {}) => ({ name, type, cat, power, acc, pp: Math.max(2, Math.ceil(pp / 2)), desc, fx });
+// Weak attacks (the ones used in the first hours) are not sure hits: a 40 power move lands 9 times out of 10 and a 60 power move 19 of 20,
+// so both the player and the early trainers miss now and then. Strong and status moves keep the accuracy written below.
+const sure = (cat, power, acc) => (cat === 'est' || acc < 100 ? acc : power <= 45 ? 90 : power <= 65 ? 95 : acc);
+const M = (name, type, cat, power, acc, pp, desc, fx = {}) => ({ name, type, cat, power, acc: sure(cat, power, acc), pp: Math.max(2, Math.ceil(pp / 2)), desc, fx });
 
 export const MOVES = deepFreeze({
   // Normal
