@@ -10,6 +10,8 @@ import { BIOMES, DEPARTMENTS, PLACES } from './atlas.js';
 import { TILE_INFO } from '../gfx/tiles.js';
 
 // Real road numbers of the legs (the map ids stay the same so saves keep working).
+// Who keeps each city's road closed (the reason is in GATE_STORY, story.js).
+const GATE_LOOK = { colonia: 'girl', sanjose: 'clerk', artigas: 'gaucho', melo: 'oldman', rocha: 'gaucho' };
 const REAL_ROAD = {
   r_colonia_rosario: 'Ruta 1', r_villasoriano_fraybentos: 'Ruta 2', r_belen_artigas: 'Ruta 30', r_baltasar_rivera: 'Ruta 30',
   r_tupambae_melo: 'Ruta 26', r_cerrochato_quebrada: 'Ruta 8', r_lascano_rocha: 'Ruta 15', r_rocha_paloma: 'Ruta 15', r_sarandi_durazno: 'Ruta 5',
@@ -209,7 +211,7 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
         npc(0, 0, 'gaucho', ['Los camiones de gris pasan de noche con unas máquinas tapadas con lona.', 'Dicen que van a Palmitas. Si vas para allá, andá con cuidado.'], { dir: 'down' }),
       ] : []),
       ...(id === 'melo' ? [npc(0, 0, 'oldman', ['La torre vieja del Cabildo tiene luces de noche. Dicen que es el Sereno, que sigue de guardia.', 'Nadie se anima a subir.'], { dir: 'down' })] : []),
-      ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: 'cop', dir: 'right', script: 'town_gate', stop: id }] : []),
+      ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: GATE_LOOK[id] ?? 'cop', dir: 'right', script: 'town_gate', stop: id, id: `gate_${id}`, cond: (f) => !f[openFlag(id)] }] : []),
     ],
   };
   addFolk(m, id, isCity ? 7 : 4);

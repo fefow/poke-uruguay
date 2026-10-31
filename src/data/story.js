@@ -195,6 +195,48 @@ export const ELITES = [
  * Side missions: a building taken over by the Equipo PP. The recruits inside vanish once beaten, then the
  * boss appears; freeing the building gives a TM. Rooms are built in maps-act2.js (eventRoom).
  */
+/**
+ * Why the road out of each city without a gym is closed, and what opens it. need: a flag the story must set first.
+ * foe: a PP recruit to beat on the spot. The person who blocks the road leaves once it opens (see maps-route.js).
+ */
+const GATE_STORY = {
+  colonia: {
+    name: 'Vecina', need: 'dex',
+    waiting: ['El Maestro Tabárez me pidió que no te dejara seguir sin la PokeDex.', 'Llevale la carta del almacén y volvé.'],
+    intro: ['¡Ya tenés la PokeDex! El Maestro va a estar orgulloso.'],
+    thanks: ['El camino a Rosario es tuyo. Por la Ruta 1 hay mucho entrenador con ganas de pelear.'],
+    open: ['Buen viaje. Saludos al Maestro cuando vuelvas.'],
+  },
+  sanjose: {
+    name: 'Empleado de la intendencia',
+    intro: ['Uno del Equipo PP se está llevando el alambre de la intendencia. Dice que es para unas torres en el litoral.', 'Yo solo no puedo. ¿Me das una mano?'],
+    foe: { types: ['veneno', 'siniestro'], intro: ['¿Y vos quién sos? Este alambre ya está pago. Correte.'], lose: 'Pará, pará. Me rindo.', after: ['Bueno, me voy. Igual las torres se van a levantar, con o sin alambre de San José.'] },
+    thanks: ['Gracias. Se fue hacia el norte, por la ruta a Trinidad. Ojo con esa gente.', 'El camino a Ecilda Paullier queda abierto.'],
+    open: ['Desde que se fue ese tipo, no falta más alambre.'],
+  },
+  artigas: {
+    name: 'Minero de la cooperativa',
+    intro: ['Un tipo de capa gris se metió en la cantera y se lleva las geodas en bolsas.', 'Dice que las piedras sirven para cargar las máquinas de niebla. Está acá nomás, en la salida.'],
+    foe: { types: ['roca', 'siniestro'], intro: ['Estas geodas son del Proyecto Pampero ahora. Andá a buscar las tuyas.'], lose: 'Las piedras pesan demasiado.', after: ['Me llevo lo que pude. El jefe va a estar furioso.'] },
+    thanks: ['¡Se fue sin las bolsas! La cooperativa te debe una.', 'El camino a Baltasar Brum queda abierto. Si ves más de esos, avisá.'],
+    open: ['Las geodas vuelven a la cooperativa. Gracias otra vez.'],
+  },
+  melo: {
+    name: 'Vecino', need: 'anima_clear',
+    waiting: ['Desde que se apagaron las luces de la Torre de las Ánimas, nadie se anima a salir hacia Treinta y Tres.', 'Dicen que en la torre hay una máquina rara, y que las Luces Malas no dejan pasar a nadie.', 'Si alguien la apagara…'],
+    intro: ['¡Volvieron las luces de la torre! Vi desde acá cómo se apagaban las Luces Malas.'],
+    thanks: ['Ya se puede salir hacia Cerro Chato. Gracias, {player}.'],
+    open: ['Esta noche la torre está tranquila.'],
+  },
+  rocha: {
+    name: 'Guardaparque',
+    intro: ['La Laguna de Rocha amaneció tapada de niebla. No es de acá: huele a máquina.', 'Hay uno del Equipo PP vigilando el camino a la costa. Si lo sacás, puedo abrir el paso.'],
+    foe: { types: ['agua', 'siniestro'], intro: ['La laguna es nuestra hasta que termine la prueba. Nadie pasa.'], lose: 'La niebla no me salvó.', after: ['Ya está. Apago el aparato. Pero esto no termina acá: la jefa está en la costa.'] },
+    thanks: ['La niebla se levanta sobre la laguna. Ya se ven los flamencos.', 'El camino a La Paloma queda abierto.'],
+    open: ['La laguna está despejada. Se ven los cisnes de cuello negro.'],
+  },
+};
+
 export const EVENTS = {
   parrilla: {
     flag: 'parrilla_clear', name: 'Capataz Rondeau', mt: 'mt_parrillada', prize: 2800,
@@ -591,20 +633,36 @@ export const SCRIPTS = {
     }
   },
 
-  // Every city without a gym has a guard who opens the road to the next one after a friendly match.
+  // Every city without a gym has someone who keeps the road closed for a reason of the story (GATE_STORY).
+  // Without an entry, a guard asks for a friendly match.
   async town_gate(api, npc) {
     const i = STOP_INDEX[npc.stop];
     const here = STOPS[i];
     const next = STOPS[i + 1];
     const flag = openFlag(here.id);
-    if (api.flag(flag)) return api.say([`El camino a ${next.name} está abierto.`, 'Cuidate en la ruta.'], { name: 'Guardia' });
-    const [lo, hi] = mapBand(here.id);
-    await api.say([`El camino a ${next.name} está cerrado por orden de la intendencia.`, 'Antes de dejar pasar a alguien, quiero ver cómo trata a sus criaturas.'], { name: 'Guardia' });
-    const team = teamOf(['normal', 'lucha', 'tierra'], [hi - 1, hi, hi + 1], `gate_${here.id}`);
-    const res = await api.battle({ id: `gate_${here.id}`, name: 'Guardia', cls: 'Guardia de ruta', look: 'cop', team, prize: (hi + 1) * 30, intro: null, lose: 'Todavía te falta.', after: null, ai: 'basic' }, { canLose: true });
-    if (res !== 'win') return api.say('Entrená un poco y volvé. No hay apuro.', { name: 'Guardia' });
+    const G = GATE_STORY[here.id];
+    const who = G?.name ?? 'Guardia';
+    if (api.flag(flag)) return api.say(G?.open ?? [`El camino a ${next.name} está abierto.`, 'Cuidate en la ruta.'], { name: who });
+    if (G?.need && !api.flag(G.need)) return api.say(G.waiting, { name: who });
+    const [, hi] = mapBand(here.id);
+    if (G?.foe) {
+      await api.say(G.intro, { name: who });
+      await api.say(G.foe.intro, { name: 'Recluta PP' });
+      const team = teamOf(G.foe.types, [hi, hi + 1], `gatepp_${here.id}`);
+      const res = await api.battle({ id: `gate_${here.id}`, name: 'Recluta PP', cls: 'Equipo PP', look: 'grunt', team, prize: (hi + 1) * 40, intro: null, lose: G.foe.lose, after: null, ai: 'basic' }, { canLose: true });
+      if (res !== 'win') return api.say('Volvé cuando tus criaturas estén listas. No los dejes salirse con la suya.', { name: who });
+      await api.say(G.foe.after, { name: 'Recluta PP' });
+    } else if (G) {
+      await api.say(G.intro, { name: who });
+    } else {
+      await api.say([`El camino a ${next.name} está cerrado por orden de la intendencia.`, 'Antes de dejar pasar a alguien, quiero ver cómo trata a sus criaturas.'], { name: who });
+      const team = teamOf(['normal', 'lucha', 'tierra'], [hi - 1, hi, hi + 1], `gate_${here.id}`);
+      const res = await api.battle({ id: `gate_${here.id}`, name: 'Guardia', cls: 'Guardia de ruta', look: 'cop', team, prize: (hi + 1) * 30, intro: null, lose: 'Todavía te falta.', after: null, ai: 'basic' }, { canLose: true });
+      if (res !== 'win') return api.say('Entrená un poco y volvé. No hay apuro.', { name: who });
+    }
     api.setFlag(flag);
-    await api.say([`Bien tratadas, tus criaturas. Pasá nomás: el camino a ${next.name} queda abierto.`], { name: 'Guardia' });
+    await api.say(G?.thanks ?? [`Bien tratadas, tus criaturas. Pasá nomás: el camino a ${next.name} queda abierto.`], { name: who });
+    await api.npcLeave(`gate_${here.id}`);
   },
 
   async leader(api, npc) {
