@@ -35,7 +35,7 @@ export function computeDamage(att, def, move, rng, { forceCrit = null, forceRoll
   const eff = effectiveness(move.type, dsp.types);
   if (eff === 0) return { dmg: 0, eff, crit: false };
   const phys = move.cat === 'fis';
-  const critChance = move.fx.crit ? 1 / 8 : 1 / 16;
+  const critChance = (move.fx.crit ? 1 / 8 : 1 / 16) * (att.focus ? 4 : 1);
   const crit = forceCrit ?? rng.chance(critChance);
   let A = effStat(att, phys ? 'atk' : 'spa');
   let D = effStat(def, phys ? 'def' : 'spd');
@@ -395,6 +395,11 @@ export class BattleEngine {
     }
     if (it.xstat) {
       this.#changeStage(0, it.xstat, 1, ev);
+      return;
+    }
+    if (it.focus) {
+      this.p.focus = true;
+      ev.push({ t: 'text', msg: `¡${displayName(this.p.c)} se concentra! Sus golpes críticos serán mucho más frecuentes.` });
       return;
     }
     const res = applyItem(itemKey, c);

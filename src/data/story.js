@@ -93,7 +93,7 @@ export const LEADERS = {
     team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge5', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
     intro: ['Soy Juan Antonio Lavalleja. Con treinta y dos compañeros desembarqué en la Agraciada para liberar la Provincia Oriental.', 'Esta ciudad lleva el nombre de aquel grupo: los Treinta y Tres Orientales.', 'La piedra de estas sierras lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía mucho que nadie me ganaba.',
-    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo PP subió a lo alto de la quebrada. Quiere capturar al Pampero.', 'Tenés que detenerlo.'],
+    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo PP subió a lo alto de la quebrada. Quiere capturar al Cardenal Azul.', 'Tenés que detenerlo.'],
   },
   ancap: {
     order: 7, id: 'leader_ancap', name: 'Candelaria', cls: 'Presidenta de ANCAP', look: 'leader_ancap', ai: 'smart', items: ['mate_dulce'],
@@ -274,7 +274,7 @@ export const SCRIPTS = {
           'Hoy vas a elegir a tu primer compañero.',
           'En la mesa hay tres Pokeballs. Elegí con calma: esa criatura te va a acompañar mucho tiempo.',
           '{rival} es mi sobrino. Creció entre apuntes y Pokeballs, así que no te la va a hacer fácil.',
-          'Hace años estudié el clima del Río de la Plata junto a un colega, Dr. Díaz. Hoy no sé dónde anda, pero el Pampero sigue siendo un misterio.',
+          'Hace años estudié el clima del Río de la Plata junto a un colega, Dr. Díaz. Hoy no sé dónde anda, pero el Cardenal Azul sigue siendo un misterio.',
         ], { name: 'Maestro Tabárez' });
         await api.say('¿Y yo? Llegué primero.', { name: '{rival}' });
         await api.say('Paciencia, {rival}. Vos elegís después.', { name: 'Maestro Tabárez' });
@@ -286,7 +286,7 @@ export const SCRIPTS = {
     if (!api.flag('dex')) {
       if (api.hasItem('carta_tabarez')) {
         api.takeItem('carta_tabarez');
-        await api.say(['¡La carta! Gracias, {player}.', 'Es de un viejo colega. Dice que el Pampero se vio por el litoral.'], { name: 'Maestro Tabárez' });
+        await api.say(['¡La carta! Gracias, {player}.', 'Es de un viejo colega. Dice que el Cardenal Azul se vio por el litoral.'], { name: 'Maestro Tabárez' });
         await api.say(['Como prometí: la PokeDex. Registra cada criatura que veas o captures.', 'Y unas Pokeballs para capturar criaturas salvajes.'], { name: 'Maestro Tabárez' });
         await api.give('uru_dex', 1);
         await api.give('esfera', 5);
@@ -347,7 +347,7 @@ export const SCRIPTS = {
 
   async gift_mapa(api) {
     if (api.flag('got_mapa')) return api.say(['El Mapa de Uruguay te muestra dónde estás y qué lugares ya visitaste.', 'Abrilo desde el menú o con la tecla T.'], { name: 'Guía de turismo' });
-    await api.say(['Bienvenido a Montevideo. Trabajo en la oficina de turismo del Palacio.', 'Tomá, un mapa del país. Te marca las ciudades y las localidades.'], { name: 'Guía de turismo' });
+    await api.say(['Bienvenido a Colonia del Sacramento. Trabajo en la oficina de turismo del puerto.', 'Tomá, un mapa del país. Te marca las ciudades y las localidades.'], { name: 'Guía de turismo' });
     await api.give('mapa_uruguay', 1);
     api.setFlag('got_mapa');
     await api.say('Entre ciudad y ciudad hay localidades sin gimnasio, pero con almacenes y gente con cosas útiles.', { name: 'Guía de turismo' });
@@ -527,7 +527,7 @@ export const SCRIPTS = {
     api.setFlag(npc.doneFlag);
     api.sfx('confirm');
     await api.say('Apagaste la máquina. La niebla de la zona empieza a levantarse. Dentro hay una bolsa con provisiones.', { name: 'Máquina de niebla' });
-    await api.give('mate_dulce');
+    await api.give(npc.reward ?? 'mate');
   },
 
   // Casino Peninsula (Maldonado): fichas for money, tragamonedas, prizes for fichas (never back into money).
@@ -739,13 +739,13 @@ export const SCRIPTS = {
   },
 
   async brumario(api) {
-    await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP en el este.', 'El Pampero limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
+    await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP en el este.', 'El Cardenal Azul limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
     const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: bossAt('quebrada', [['yarara', 32], ['zorromonte', 32], ['cuervon', 33], ['lobomarino', 34]], 1), prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
     api.setFlag('quebrada_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.say(['Un viento helado baja de las sierras.', 'Una silueta enorme, con alas de tormenta, cruza el cielo.', 'El Pampero se aleja hacia el sur. La niebla se disipa.'],);
+    await api.say(['Un viento helado baja de las sierras.', 'Una silueta enorme, con alas de tormenta, cruza el cielo.', 'El Cardenal Azul se aleja hacia el sur. La niebla se disipa.'],);
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo al Dr. Díaz. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
     await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Seguí hacia la costa de Rocha: en el faro de Cabo Polonio falta una lámpara.', 'Y más adelante, en Minas, hay una fábrica abandonada que volvió a funcionar. Mirala con cuidado."']);
@@ -815,7 +815,7 @@ export const SCRIPTS = {
     api.setFlag('obs_clear');
     api.setFlag('obs_log');
     await api.flash();
-    await api.say(['Tomá el registro. Está firmado por los dos: Tabárez y Dr. Díaz.', 'La última página la escribió Dr. Díaz: "El Pampero tiene un ciclo. Si lo interrumpo, la niebla es mía para siempre".', 'Por eso quiere capturarlo. No lo odia: lo necesita.'], { name: 'Almada' });
+    await api.say(['Tomá el registro. Está firmado por los dos: Tabárez y Dr. Díaz.', 'La última página la escribió Dr. Díaz: "El Cardenal Azul tiene un ciclo. Si lo interrumpo, la niebla es mía para siempre".', 'Por eso quiere capturarlo. No lo odia: lo necesita.'], { name: 'Almada' });
     await api.say(['Dejo el Equipo PP. Voy a llevarle esto a Tabárez en persona.', 'Y esta MT era del observatorio: se usaba para medir los temblores del cerro.'], { name: 'Almada' });
     await api.give('mt_terremoto', 1);
     await api.npcLeave('almada');
@@ -850,7 +850,7 @@ export const SCRIPTS = {
   },
 
   async bruma_anglo(api) {
-    await api.say(['Así que sos vos el que anda haciendo ruido en Fray Bentos.', 'Soy Bruma, administradora del Equipo PP.', 'Este frigorífico guarda las máquinas de niebla. Dr. Díaz las necesita funcionando.', 'Y vos tenés algo que él lleva años buscando: esa criatura que te acompaña guarda el eco del Pampero. Entregámela y nadie se lastima.'], { name: 'Bruma' });
+    await api.say(['Así que sos vos el que anda haciendo ruido en Fray Bentos.', 'Soy Bruma, administradora del Equipo PP.', 'Este frigorífico guarda las máquinas de niebla. Dr. Díaz las necesita funcionando.', 'Y vos tenés algo que él lleva años buscando: esa criatura que te acompaña guarda el eco del Cardenal Azul. Entregámela y nadie se lastima.'], { name: 'Bruma' });
     const res = await api.battle({ id: 'bruma_anglo', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('fraybentos', [['yararita', 8], ['zorrigris', 9], ['lechuza', 10]], -2), prize: 700, lose: 'No… las máquinas…', items: ['mate'] });
     if (res !== 'win') return;
     api.setFlag('anglo_pp');

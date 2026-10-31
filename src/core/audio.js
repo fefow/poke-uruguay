@@ -135,6 +135,61 @@ const TRACKS = {
     bass: 'C3 4 C3 4 G2 4 G2 4 F2 4 G2 4 C3 8',
     drums: 'k---s---k-k-s---',
   },
+  // Zone themes: caves are slow and low, gyms drive, the beach sways, the forest is light, the sierra is stern.
+  cave: {
+    bpm: 76,
+    lead: 'A4 4 - 2 C5 2 E5 4 D5 2 C5 2 B4 4 - 4 A4 4 - 2 E5 2 G5 4 F5 2 E5 2 D5 4 - 4',
+    bass: 'A2 8 F2 8 D2 8 E2 8',
+    drums: 'k-----------h---',
+  },
+  gym: {
+    bpm: 150,
+    lead: 'E5 1 E5 1 G5 2 E5 2 D5 2 E5 1 E5 1 A5 2 G5 2 E5 2 C5 1 C5 1 E5 2 D5 2 C5 2 B4 2 D5 2 E5 4 - 2',
+    bass: 'E2 2 E2 2 E2 2 E2 2 A2 2 A2 2 A2 2 A2 2 C3 2 C3 2 D3 2 D3 2 E2 2 E2 2 B2 2 B2 2',
+    drums: 'k-s-k-s-k-sskhs-',
+  },
+  beach: {
+    bpm: 100,
+    lead: 'G5 2 E5 2 C5 2 E5 2 G5 4 A5 2 G5 2 E5 4 - 4 F5 2 D5 2 A4 2 D5 2 F5 4 G5 2 F5 2 E5 4 - 4',
+    bass: 'C3 4 G2 4 C3 4 G2 4 F2 4 C3 4 G2 4 G2 4',
+    drums: 'k---h-h-k---h-h-',
+  },
+  forest: {
+    bpm: 104,
+    lead: 'E5 2 G5 2 B5 4 A5 2 G5 2 E5 4 D5 2 F5 2 A5 4 G5 2 F5 2 D5 4 E5 2 G5 2 B5 2 E6 2 D6 4 B5 4',
+    bass: 'E3 4 B2 4 D3 4 A2 4 E3 4 B2 4 G2 4 B2 4',
+    drums: 'k-------s-------',
+  },
+  sierra: {
+    bpm: 118,
+    lead: 'D5 2 F5 2 A5 2 D6 2 C6 2 A5 2 F5 4 C5 2 E5 2 G5 2 C6 2 B5 2 G5 2 E5 4',
+    bass: 'D3 4 D3 4 C3 4 C3 4 A#2 4 A#2 4 A2 4 A2 4',
+    drums: 'k-hsk-hsk-hsk-ss',
+  },
+  pp: {
+    bpm: 124,
+    lead: 'A4 2 A4 2 C5 2 A4 2 E5 2 A4 2 D#5 2 E5 2 G4 2 G4 2 B4 2 G4 2 D5 2 G4 2 C#5 2 D5 2',
+    bass: 'A2 2 A2 2 A2 2 A2 2 A2 2 A2 2 A2 2 A2 2 G2 2 G2 2 G2 2 G2 2 G2 2 G2 2 G2 2 G2 2',
+    drums: 'k-s-k-s-kks-k-s-',
+  },
+  casino: {
+    bpm: 150,
+    lead: 'C5 1 E5 1 G5 1 E5 1 C5 1 E5 1 G5 1 C6 1 A5 1 F5 1 A5 1 C6 1 B5 1 G5 1 D5 1 G5 1',
+    bass: 'C3 2 G2 2 C3 2 G2 2 F2 2 C3 2 G2 2 G2 2',
+    drums: 'k-h-s-h-k-h-s-h-',
+  },
+  ferry: {
+    bpm: 108,
+    lead: 'E5 4 G5 2 E5 2 D5 4 C5 4 D5 4 F5 2 D5 2 C5 4 B4 4',
+    bass: 'C3 4 G2 4 A2 4 E2 4',
+    drums: 'k---s---k---s---',
+  },
+  league: {
+    bpm: 132,
+    lead: 'C5 2 E5 2 G5 4 C6 4 B5 2 G5 2 E5 4 F5 2 A5 2 C6 4 B5 2 G5 2 D5 4',
+    bass: 'C3 4 C3 4 E3 4 G2 4 F2 4 F2 4 G2 4 G2 4',
+    drums: 'k-sk-hs-k-ss-hs-',
+  },
   credits: {
     bpm: 88,
     lead: 'G4 4 C5 4 E5 4 D5 2 C5 2 A4 4 C5 4 G4 8 F4 4 A4 4 C5 4 B4 2 A4 2 G4 4 B4 4 C5 8',

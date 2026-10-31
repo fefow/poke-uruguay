@@ -34,7 +34,7 @@ export const LINES = [
     ['pavesa', 'Pavesa', null, 'wisp', '#ff8a2a', '#d8441a', '#ffe05c', '', 0.85, 'Una chispa viva que flota sobre las brasas. Se apaga si nadie la alimenta.'],
     ['fogata', 'Fogata', 'psiquico', 'wisp', '#ff6a1a', '#b0301a', '#fff08a', 'halo', 1.1, 'Reúne otras chispas a su alrededor. En invierno da calor a quienes se acercan.'],
   ] },
-  { t: 'fuego', role: 'a', bst: PAIR, evo: [26], mons: [
+  { t: 'bicho', role: 'a', bst: PAIR, evo: [26], mons: [
     ['alacran', 'Alacrán', null, 'spider', '#c8441a', '#5a2410', '#ffb02a', 'tail_sting claws', 0.95, 'Vive bajo las piedras calientes. Su aguijón guarda un calor intenso.'],
     ['escorpio', 'Escorpio', 'veneno', 'spider', '#a8301a', '#2a1008', '#ffd040', 'tail_sting claws', 1.2, 'Su aguijón quema y envenena a la vez. Prefiere cazar al atardecer.'],
   ] },
@@ -146,9 +146,9 @@ export const LINES = [
     ['avispa', 'Avispa', null, 'bug', '#f2c02a', '#2a2a2a', '#f2e05c', 'wings4 antennae glow', 0.9, 'Defiende su nido con picaduras repetidas. Es agresiva si la molestan.'],
     ['camoati', 'Camoatí', 'veneno', 'bug', '#d8a020', '#2a2a2a', '#f2e05c', 'wings4 antennae glow', 1.15, 'Construye grandes nidos de papel en las ramas. Su colonia actúa como un solo ser.'],
   ] },
-  { t: 'bicho', role: 'a', bst: PAIR, evo: [19], mons: [
-    ['hormiga', 'Hormiga', null, 'spider', '#3a2018', '#5a3a28', '#c83a2a', 'claws', 0.85, 'Trabaja en hileras sin fin. Transporta hojas mucho más grandes que ella.'],
-    ['cortadora', 'Cortadora', 'planta', 'spider', '#6a2a18', '#8a4a30', '#4aa83c', 'claws', 1.2, 'Sus mandíbulas cortan hojas como tijeras. Una colonia puede dejar un campo pelado.'],
+  { t: 'fuego', role: 'a', bst: PAIR, evo: [19], mons: [
+    ['hormiga', 'Hormiga', null, 'spider', '#3a2018', '#5a3a28', '#c83a2a', 'claws', 0.85, 'Hormiga colorada de picadura ardiente. Marcha en hileras sin fin y quema lo que muerde.'],
+    ['cortadora', 'Cortadora', 'bicho', 'spider', '#6a2a18', '#8a4a30', '#4aa83c', 'claws', 1.2, 'Sus mandíbulas cortan hojas como tijeras y su picadura arde. Una colonia puede dejar un campo pelado.'],
   ] },
   { t: 'bicho', role: 'a', bst: [440], evo: [], mons: [
     ['tarantula', 'Tarántula', 'veneno', 'spider', '#4a3a2a', '#2a2018', '#c8a860', 'claws', 1.15, 'Cazadora nocturna de gran tamaño. Espera inmóvil en su cueva a que pase una presa.'],
@@ -192,21 +192,21 @@ export const LINES = [
     ['anta', 'Anta', 'tierra', 'quad', '#5a5a62', '#2a2a32', '#d0d0d8', 'snout_long ears_round tail_short', 1.25, 'Atraviesa la espesura sin que nadie lo vea. Su mirada distrae la mente.'],
   ] },
   { t: 'psiquico', role: 's', bst: [455], evo: [], mons: [
-    ['curupi', 'Curupí', 'planta', 'biped', '#4a6a3a', '#d8b890', '#a8402a', 'beard', 1.05, 'Un ser del monte guaraní, de pies al revés. Confunde a los cazadores con huellas falsas.'],
+    ['curupi', 'Ñacurutú', 'volador', 'owl', '#8a6a4a', '#3a2a1a', '#f0c040', 'crest', 1.05, 'Un búho grande de penachos, dueño del monte. Su mirada fija desorienta a quien lo cruza de noche.'],
   ] },
   { t: 'psiquico', role: 'f', bst: [460], evo: [], mons: [
-    ['pombero', 'Pombero', 'siniestro', 'biped', '#3a3a2e', '#c8a070', '#8a6a2a', 'hat', 1.05, 'Dicen que ronda los campos de noche y silba para esconderse. Hay que dejarle tabaco y miel.'],
+    ['pombero', 'Urutaú', 'siniestro', 'bird', '#6a5a4a', '#3a3028', '#b8a888', 'small', 1.05, 'Ave nocturna que de día se queda inmóvil y se confunde con una rama seca. Su canto triste se oye al anochecer.'],
   ] },
 
   // ---------------------------------------------------------------- LUCHA
   { t: 'lucha', role: 'a', bst: TRIO, evo: [16, 34], mons: [
-    ['pibe', 'Gurí', null, 'biped', '#6cb4ee', '#e8b890', '#ffffff', 'gloves', 0.9, 'Un joven luchador de barrio que entrena en la cancha. Nunca deja de correr.'],
-    ['volante', 'Volante', null, 'biped', '#4a8ad8', '#d8a070', '#ffffff', '', 1.05, 'Domina la mitad de la cancha. Recupera y reparte sin perder la calma.'],
-    ['capitan', 'Capitán', 'normal', 'biped', '#2a6ab8', '#c89060', '#f2c02a', 'gloves', 1.28, 'Lidera con garra y con el ejemplo. Su espíritu de equipo inspira a los demás.'],
+    ['pibe', 'Gato Pajero', null, 'cat', '#b89a68', '#6a4a28', '#f2e8d0', '', 0.9, 'Un gato silvestre de pajonales que caza con rapidez. Pelea con zarpazos veloces.'],
+    ['volante', 'Gato Tigre', null, 'cat', '#d8a850', '#4a3018', '#f8f0d8', '', 1.05, 'Un felino manchado y ágil que trepa y salta entre los montes. Casi nunca se lo ve.'],
+    ['capitan', 'Puma', 'normal', 'cat', '#c89a5a', '#6a4a28', '#f2e8d0', '', 1.28, 'El gran felino de las sierras. Silencioso y potente, domina a quien se le cruza.'],
   ] },
   { t: 'lucha', role: 'a', bst: PAIR, evo: [26], mons: [
-    ['peon', 'Peón', null, 'biped', '#8a6a3a', '#d8a070', '#c83a2a', 'hat', 0.95, 'Trabaja de sol a sol en la estancia. Sus manos son más duras que la piedra.'],
-    ['capataz', 'Capataz', 'normal', 'biped', '#6a4a22', '#c89060', '#c83a2a', 'hat beard', 1.2, 'Dirige la tropa con autoridad. Nadie lo ve cansado.'],
+    ['peon', 'Chancho Cimarrón', null, 'quad', '#6a5a4a', '#2a2218', '#d8d0c0', 'snout tail_short', 0.95, 'Un chancho asilvestrado que hoza el monte. Embiste con colmillos duros.'],
+    ['capataz', 'Jabalí', 'normal', 'quad', '#4a3a2e', '#1e1610', '#d8d0c0', 'snout tail_short horns', 1.2, 'Un jabalí corpulento de cerdas duras. Nadie se anima a cruzarlo en el monte.'],
   ] },
   { t: 'lucha', role: 'a', bst: [450], evo: [], mons: [
     ['carpintero', 'Carpintero', 'volador', 'bird', '#2a2a2a', '#d8a040', '#e0263a', 'crest long_beak red_head', 1.1, 'Golpea los troncos con cadencia constante. Su pico no se desgasta y perfora la madera más dura.'],
@@ -216,13 +216,13 @@ export const LINES = [
     ['coatimundi', 'Coatí Mayor', 'normal', 'cat', '#8a5a2a', '#3a2410', '#f2e8d0', '', 1.2, 'El macho solitario es más fuerte y hábil de lo que aparenta.'],
   ] },
   { t: 'lucha', role: 'b', bst: [440], evo: [], mons: [
-    ['tamborilero', 'Tamborilero', 'normal', 'biped', '#c83a3a', '#8a5a30', '#f2c02a', 'drum', 1.0, 'Marca el ritmo en las calles del barrio Sur. Su compás hace bailar a quien lo escucha.'],
+    ['tamborilero', 'Chajá', 'normal', 'bird', '#8a8e94', '#4a4e54', '#e8e4d8', 'crest', 1.0, 'Ave de bañados que grita avisando del peligro. Las espuelas de sus alas golpean fuerte.'],
   ] },
   { t: 'lucha', role: 'a', bst: [445], evo: [], mons: [
-    ['boleador', 'Boleador', 'tierra', 'biped', '#7a2a1a', '#c89060', '#2a2a2a', 'hat gloves', 1.05, 'Lanza tres piedras atadas con la precisión que ya practicaban los antiguos charrúas.'],
+    ['boleador', 'Peludo', 'tierra', 'armadillo', '#8a7a62', '#5a4a3a', '#d8c8a8', '', 1.05, 'Un armadillo robusto de caparazón peludo. Cava profundo y resiste los golpes.'],
   ] },
   { t: 'lucha', role: 'a', bst: [480], evo: [], mons: [
-    ['caudillo', 'Caudillo', 'siniestro', 'biped', '#a8362a', '#d8a070', '#f2f2f2', 'hat beard', 1.2, 'Un jinete que reúne tropas a su alrededor. Su palabra pesa más que cualquier arma.'],
+    ['caudillo', 'Lobo de Crin', 'siniestro', 'quad', '#c8782a', '#2a1e14', '#f2e0c0', 'snout_long ears_round', 1.2, 'Zancudo de pelaje rojizo y crin negra, el mayor cánido de la región. Recorre solo los pastizales.'],
   ] },
 
   // ---------------------------------------------------------------- ROCA

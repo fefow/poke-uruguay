@@ -9,7 +9,7 @@ const solid = (c) => c === undefined || !!TILE_INFO[c]?.solid;
 const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 /**
- * m: an outdoor route map ({tiles, npcs, items, ...}); opts.width: base half-width of the trail (smaller = denser).
+ * m: an outdoor route map (or, with opts.town, a locality whose streets are the trail) ({tiles, npcs, items, ...}); opts.width: base half-width of the trail (smaller = denser).
  * Everything the player can reach before stays reachable, with the ledges counted as walls.
  */
 export function guideMap(m, seed, opts = {}) {
@@ -20,12 +20,13 @@ export function guideMap(m, seed, opts = {}) {
   const at = (x, y) => rows[y]?.[x];
   const objs = [...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])];
 
+  const TRAIL = opts.town ? '=bc' : '=b'; // in a locality the streets (cobbles) are the trail
   const guardObj = (x, y) => objs.some((o) => Math.abs(o.x - x) <= 1 && Math.abs(o.y - y) <= 1) || rows[y][x] === 'S';
 
   // distance from the trail ('=' tiles, and the edge cells where the map exits)
   const dist = Array.from({ length: h }, () => Array(w).fill(99));
   const q = [];
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (rows[y][x] === '=' || rows[y][x] === 'b') { dist[y][x] = 0; q.push([x, y]); }
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (TRAIL.includes(rows[y][x])) { dist[y][x] = 0; q.push([x, y]); }
   if (!q.length) return;
   for (let i = 0; i < q.length; i++) {
     const [x, y] = q[i];
@@ -62,10 +63,46 @@ export function guideMap(m, seed, opts = {}) {
   };
   for (const [x, y] of spurs) carve(x, y);
 
+  const placed = new Set();
   // tree walls: everything outside the trail corridor and the pockets
   for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
     if (!GROUND.has(rows[y][x]) || dist[y][x] <= widthAt(x, y) || open.has(`${x},${y}`)) continue;
     rows[y][x] = rand() < 0.22 ? 'q' : '#';
+    placed.add(`${x},${y}`);
+  }
+
+  // repair: any person, item or sign the trees have cut off gets a path cleared back to the trail
+  const flood = () => {
+    const seen = new Set();
+    const st = [];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (dist[y][x] === 0) { seen.add(`${x},${y}`); st.push([x, y]); }
+    while (st.length) {
+      const [x, y] = st.pop();
+      for (const [dx, dy] of D4) { const nx = x + dx, ny = y + dy, k = `${nx},${ny}`; if (!seen.has(k) && !solid(at(nx, ny))) { seen.add(k); st.push([nx, ny]); } }
+    }
+    return seen;
+  };
+  const okSeen = flood();
+  for (const o of objs) {
+    const near = D4.some(([dx, dy]) => okSeen.has(`${o.x + dx},${o.y + dy}`)) || okSeen.has(`${o.x},${o.y}`);
+    if (near) continue;
+    const prev = new Map([[`${o.x},${o.y}`, null]]);
+    const bq = [[o.x, o.y]];
+    let hit = null;
+    for (let i = 0; i < bq.length && !hit; i++) {
+      const [x, y] = bq[i];
+      for (const [dx, dy] of D4) {
+        const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
+        if (prev.has(k) || at(nx, ny) === undefined) continue;
+        if (solid(at(nx, ny)) && !placed.has(k)) continue;
+        prev.set(k, `${x},${y}`);
+        if (okSeen.has(k)) { hit = k; break; }
+        bq.push([nx, ny]);
+      }
+    }
+    for (let k = hit; k; k = prev.get(k)) {
+      if (placed.has(k)) { const [x, y] = k.split(',').map(Number); rows[y][x] = '.'; }
+    }
   }
 
   // tall grass beside the trail, in clusters of 3-4 wide
@@ -79,7 +116,7 @@ export function guideMap(m, seed, opts = {}) {
   }
 
   // Emerald-style grass belts: a band of tall grass that spans the whole trail, so the way forward means a few wild encounters
-  const belts = w > h ? 2 : 1;
+  const belts = opts.town ? 0 : w > h ? 2 : 1;
   for (let k = 0; k < belts; k++) {
     const pos = Math.floor((0.25 + 0.5 * ((k + rand()) / belts)) * (w > h ? w : h));
     for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
@@ -88,7 +125,7 @@ export function guideMap(m, seed, opts = {}) {
   }
 
   // a grass patch with one bare tile in the middle hides an item, as Emerald does with its hidden potions
-  const holes = 1 + Math.floor(rand() * 2);
+  const holes = opts.town ? 0 : 1 + Math.floor(rand() * 2);
   for (let k = 0, placed = 0; k < 60 && placed < holes; k++) {
     const x = 4 + Math.floor(rand() * (w - 8)), y = 4 + Math.floor(rand() * (h - 8));
     if (dist[y][x] < 1 || dist[y][x] > 5 || guardObj(x, y)) continue;

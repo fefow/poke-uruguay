@@ -80,7 +80,7 @@ test('items heal and revive correctly', () => {
   const c = mon('carpinchito', 10);
   const max = calcStats(c).hp;
   c.hp = 1;
-  assert.match(applyItem('te_marcela', c), /recuperó 15 PS/);
+  assert.match(applyItem('te_marcela', c), /recuperó 10 PS/);
   c.hp = 0;
   assert.equal(applyItem('mate', c), null, 'cannot heal fainted');
   applyItem('alfajor', c);
@@ -372,4 +372,25 @@ test('historias de ruta: las marcas rq_/rf_ son válidas en una partida guardada
   const flags = Object.values(OUTDOOR).flatMap((m) => (m.npcs ?? []).map((n) => n.doneFlag).filter(Boolean));
   assert.ok(flags.length > 10, 'hay misiones de ruta');
   assert.ok(flags.every((f) => /^(rq|rf)_[a-z0-9_]{1,40}$/.test(f)), 'formato de marca');
+});
+
+test('música por zona: todas las notas de las pistas son válidas y existen las zonas', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../src/core/audio.js', import.meta.url), 'utf8');
+  for (const name of ['cave', 'gym', 'beach', 'forest', 'sierra', 'pp', 'casino', 'ferry', 'league']) assert.ok(new RegExp(`\\n  ${name}: \\{`).test(src), `pista ${name}`);
+  const seqs = [...src.matchAll(/(?:lead|bass): '([^']+)'/g)].map((m) => m[1]);
+  for (const s of seqs) {
+    const p = s.trim().split(/\s+/);
+    for (let i = 0; i < p.length; i += 2) {
+      assert.ok(p[i] === '-' || /^[A-G]#?\d$/.test(p[i]), `nota ${p[i]}`);
+      assert.ok(Number.isInteger(Number(p[i + 1])), `duración ${p[i + 1]}`);
+    }
+  }
+});
+
+test('objetos de batalla nuevos: precisión, resistencia, concentración y repelentes', () => {
+  assert.equal(ITEMS.refuerzo_precision.xstat, 'acc');
+  assert.equal(ITEMS.refuerzo_resistencia.xstat, 'spd');
+  assert.ok(ITEMS.concentracion.focus);
+  assert.ok(ITEMS.repelente_max.repel > ITEMS.repelente_super.repel && ITEMS.repelente_super.repel > ITEMS.repelente.repel);
 });

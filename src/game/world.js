@@ -120,6 +120,25 @@ const safariLeft = () => (state().safari?.until ?? 0) - Date.now();
 // Park equipment goes back to the park when you leave.
 const safariStrip = () => { const S = state(); S.bag.safari_ball && delete S.bag.safari_ball; S.bag.cebo && delete S.bag.cebo; };
 
+/** Background track of a map: the zone it belongs to, unless the map names its own non-generic track. */
+function musicFor(id, m) {
+  const own = m.music;
+  if (own && own !== 'town' && own !== 'route') return own;
+  if (m.indoor) {
+    if (id.startsWith('gym_')) return 'gym';
+    if (id.startsWith('casino_')) return 'casino';
+    if (id.startsWith('ferry_')) return 'ferry';
+    if (/^(anglo|represa|torre|pp|fabrica|radio|aduana|parrilla|muelle|obs)_/.test(id)) return 'pp';
+    return own ?? 'town';
+  }
+  if (own === 'town') return m.theme === 'arena' ? 'beach' : 'town';
+  if (m.theme === 'cueva') return 'cave';
+  if (m.theme === 'arena' || m.bg === 'beach') return 'beach';
+  if (m.theme === 'sierra' || m.bg === 'canyon') return 'sierra';
+  if (/Bosque|Monte|Eucalipt|Pinar/.test(m.name ?? '')) return 'forest';
+  return 'route';
+}
+
 export function loadMap(id, x, y, dir = 'down') {
   linkWorld();
   const S = state();
@@ -149,7 +168,7 @@ export function loadMap(id, x, y, dir = 'down') {
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
   S.pos = { map: id, x, y, dir };
   refreshEntities();
-  playMusic(m.music ?? 'route');
+  playMusic(musicFor(id, m));
   setRenderer(drawWorld);
   if (changed && !m.indoor) showBanner(m.name);
 }
@@ -888,6 +907,16 @@ export const api = {
 };
 
 // ---------------------------------------------------------------- render
+/** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
+const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);
+function sitsInWater(tiles, x, y) {
+  const ch = tiles[y][x];
+  if (LAND_BASE.has(ch)) return false;
+  let n = 0;
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (tiles[y + dy]?.[x + dx] === '~') n++;
+  return n >= 3 || (n >= 2 && (TILE_INFO[ch]?.over || ch === 'R'));
+}
+
 function drawWorld(g, t) {
   const m = W_.map;
   if (!m) return;
@@ -917,7 +946,7 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, sitsInWater(W_.tiles, x, y)), x * T - cx, y * T - cy);
   }
   // ground items
   for (const it of W_.items) {

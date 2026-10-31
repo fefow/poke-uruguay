@@ -38,7 +38,7 @@ const BASE_OUTDOOR = {
       'RAMBLA DE CARMELO\nDesde la costa se ve la orilla argentina, al otro lado del río.',
     ],
     fish: [['pejerrey', 3, 6, 60], ['camalote', 3, 5, 30], ['aguaviva', 4, 6, 10]],
-    exits: { e: { to: 'ruta1', req: 'has_starter', deny: ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.'] } },
+    exits: { e: { to: 'ruta1', req: 'has_starter', deny: ['¡Esperá, {player}!', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'No podés irte sin hablar con el Maestro Tabárez. Pasá primero por su laboratorio.'] } },
     npcs: [
       { x: 20, y: 13, look: 'girl', wander: true, text: ['Los turistas vienen desde Buenos Aires en lancha, a ver los astilleros.', 'Dicen que en las noches de niebla el río se ve más ancho que el mar.'] },
       { x: 8, y: 11, look: 'oldman', text: ['Cuando yo era joven, había Ceibos en todas las orillas.', 'Ahora casi solo los cuida el Maestro Tabárez.'] },
@@ -287,7 +287,7 @@ const BASE_OUTDOOR = {
     npcs: [
       { x: 15, y: 15, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('r8_a', 'Don Ceferino', 'Gaucho', [['nanduro', 25], ['venadito', 24]], 500, 'Por la Ruta 8 solo pasan los que tienen coraje.', 'Está bien, pasaste.', 'Que te vaya bien en el camino.', 'gaucho') },
       { x: 18, y: 7, look: 'girl', dir: 'down', sight: 3, trainer: TR('r8_b', 'Lucía B.', 'Naturalista', [['luciernito', 24], ['picaflorin', 25]], 480, 'Estudio a las criaturas luminosas de la zona.', 'Tenés mucha energía.', 'En la Quebrada viven Cuervos. Son de tipo Siniestro y Volador.', 'girl') },
-      { x: 7, y: 3, look: 'grunt', dir: 'right', sight: 5, trainer: TR('r8_g', 'Recluta PP', 'Equipo PP', [['yarara', 27], ['cuervon', 26]], 540, 'El jefe Brumario está por capturar al Pampero.', 'No.', 'Ya es tarde. Con el Pampero capturado, la niebla no se va a ir.', 'grunt') },
+      { x: 7, y: 3, look: 'grunt', dir: 'right', sight: 5, trainer: TR('r8_g', 'Recluta PP', 'Equipo PP', [['yarara', 27], ['cuervon', 26]], 540, 'El jefe Brumario está por capturar al Cardenal Azul.', 'No.', 'Ya es tarde. Con el Cardenal Azul capturado, la niebla no se va a ir.', 'grunt') },
       { x: 4, y: 14, look: 'oldman', text: ['Cuando sopla el pampero, el cielo queda despejado.', 'Dicen que lo trae una criatura enorme con alas de tormenta.'] },
     ],
     items: [{ x: 24, y: 1, item: 'mate_dulce', id: 'r8_item1' }],
@@ -327,7 +327,7 @@ const BASE_OUTDOOR = {
     npcs: [
       { x: 12, y: 2, look: 'brumario', dir: 'down', id: 'brumario', cond: (f) => f[badgeOf('quebrada')] && !f.quebrada_clear, script: 'brumario' },
       { x: 12, y: 2, look: 'grunt', dir: 'down', cond: (f) => !f[badgeOf('quebrada')], text: ['El jefe está ocupado. Volvé cuando seas un rival de verdad.'] },
-      { x: 10, y: 3, look: 'grunt', dir: 'right', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta PP', 'Equipo PP', [['zorromonte', 30], ['yararita', 29]], 600, 'El Pampero va a ser nuestro.', 'No.', 'El jefe Brumario es imparable.', 'grunt') },
+      { x: 10, y: 3, look: 'grunt', dir: 'right', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta PP', 'Equipo PP', [['zorromonte', 30], ['yararita', 29]], 600, 'El Cardenal Azul va a ser nuestro.', 'No.', 'El jefe Brumario es imparable.', 'grunt') },
       { x: 15, y: 3, look: 'grunt', dir: 'left', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g2', 'Recluta PP', 'Equipo PP', [['cuervon', 30], ['mulitron', 30]], 600, 'Más niebla para todos.', 'Me superaste.', 'No tengo más que decir.', 'grunt') },
       { x: 7, y: 9, look: 'gaucho', dir: 'right', sight: 4, trainer: TR('qb_a', 'Doña Ofelia', 'Paisana', [['gatomontes', 28], ['venadalto', 29]], 560, 'En la Quebrada se combate con respeto.', 'Bien jugado.', 'Don Aparicio es duro como la piedra de la quebrada.', 'gaucho') },
       { x: 22, y: 9, look: 'boy', text: ['En el fondo de la quebrada hay un arroyo.', 'Los cuervos de cabeza roja vuelan en círculos por arriba.'] },
@@ -366,7 +366,7 @@ const BASE_OUTDOOR = {
     fish: [['pejerrey', 6, 9, 60], ['camalote', 6, 8, 30], ['aguaviva', 7, 9, 10]],
     npcs: [
       { x: 8, y: 8, look: 'boy', dir: 'right', sight: 4, trainer: TR('ros_a', 'Beto', 'Pescador', [['pejerrey', 7], ['sapo', 7]], 160, 'Hoy no pican. Mejor combatamos.', 'Me ganaste.', 'Con una caña de pescar vas a poder sacar criaturas del agua.', 'boy') },
-      { x: 22, y: 6, look: 'girl', dir: 'down', sight: 3, trainer: TR('ros_b', 'Clara', 'Veterinaria', [['oveja', 8], ['ternero', 8]], 170, 'Cuido a los animales de la zona. Veamos cómo cuidás a los tuyos.', 'Se nota que los tratás bien.', 'En Montevideo, en el Palacio Salvo, regalan un mapa de todo el país.', 'girl') },
+      { x: 22, y: 6, look: 'girl', dir: 'down', sight: 3, trainer: TR('ros_b', 'Clara', 'Veterinaria', [['oveja', 8], ['ternero', 8]], 170, 'Cuido a los animales de la zona. Veamos cómo cuidás a los tuyos.', 'Se nota que los tratás bien.', 'En una casa del puerto de Colonia regalan un mapa de todo el país.', 'girl') },
       { x: 12, y: 8, look: 'oldman', text: ['Rosario es un pueblo de paso, pero bien tranquilo.', 'Si te cansás, comprá mate en el almacén.'] },
       { x: 4, y: 6, look: 'gaucho', wander: true, text: ['Acá se cría ganado de todos los tipos. Cada criatura tiene su lugar en el campo.'] },
     ],
@@ -545,7 +545,7 @@ const BASE_INTERIOR = {
   ], {
     name: 'Palacio Salvo',
     npcs: [
-      { x: 6, y: 2, look: 'clerk', dir: 'down', script: 'gift_mapa' },
+      { x: 6, y: 2, look: 'clerk', dir: 'down', text: ['Bienvenido al Palacio Salvo.', 'Si tenés el Mapa de Uruguay, mirá cuántos lugares ya visitaste.'] },
       { x: 2, y: 2, look: 'prof', dir: 'down', text: ['En este palacio guardamos registros de todas las criaturas del país.', 'Algunas evolucionan al subir de nivel. Entrenalas con paciencia.'] },
       { x: 9, y: 2, look: 'boy', dir: 'down', text: ['Dato útil: si una criatura está dormida o paralizada, es más fácil capturarla.'] },
       { x: 6, y: 4, look: 'girl', dir: 'down', text: ['El tipo Lucha es fuerte contra Normal, Roca y Siniestro.', 'Pero sufre contra Volador y Psíquico.'] },
@@ -700,13 +700,13 @@ import { ACT2_OUTDOOR, ACT2_INTERIOR } from './maps-act2.js';
 import { SPECIES } from './species.js';
 import { MAP_BIOME, BIOMES } from './atlas.js';
 import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.js';
-import { CHAIN, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from './route.js';
+import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from './route.js';
 import { fitDown, fitSpecies } from './levels.js';
 import { fitToMap, wildList, teamOf, rng } from './map-gen.js';
 import { guideMap } from './guide.js';
 import { addRouteStory } from './route-stories.js';
 import { layoutGym } from './gym-layouts.js';
-import { TILE_INFO } from '../gfx/tiles.js';
+import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.js';
 
 export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR, ...ROUTE_OUTDOOR };
 export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR, ...ROUTE_INTERIOR };
@@ -985,25 +985,37 @@ GYM_STOPS.forEach((stop, i) => {
   if (door && INTERIOR[door]) layoutGym(INTERIOR[door], i);
 });
 
-/** A cave mouth: rocks close in on the trail near the edge and the last tile becomes a dark opening. */
+/** A cave mouth: a wall of rock runs along the edge of the map beside the trail, and the trail ends in a dark opening in it. */
+const MOUTH = { w: 'ϗ', e: 'ϙ', n: 'ϛ', s: 'ϝ' };
+const WALL = { w: 'k', e: 'ϰ', n: 'ϱ', s: 'ϲ' };
 function caveMouth(m, side) {
   const rows = m.tiles.map((r) => [...r]);
   const h = rows.length, w = rows[0].length;
   const cell = (d, k) => (side === 'e' ? [w - 1 - d, k] : side === 'w' ? [d, k] : side === 'n' ? [k, d] : [k, h - 1 - d]);
   const span = side === 'e' || side === 'w' ? h : w;
   const busy = new Set([...(m.npcs ?? []), ...(m.items ?? [])].map((o) => `${o.x},${o.y}`));
-  const pathAt = (d, k) => { const [x, y] = cell(d, k); return rows[y]?.[x] === '=' || rows[y]?.[x] === 'c' || rows[y]?.[x] === 'b' || rows[y]?.[x] === '.' && false; };
+  const pathAt = (d, k) => { const [x, y] = cell(d, k); return rows[y]?.[x] === '=' || rows[y]?.[x] === 'c' || rows[y]?.[x] === 'b'; };
   const trail = [];
   for (let k = 0; k < span; k++) if (pathAt(0, k)) trail.push(k);
   if (!trail.length) return;
-  for (let d = 0; d <= 2; d++) for (let k = 0; k < span; k++) {
-    const [x, y] = cell(d, k);
+  const mid = trail[Math.floor(trail.length / 2)];
+  for (let k = 1; k < span - 1; k++) {
+    const [x, y] = cell(0, k);
     if (busy.has(`${x},${y}`)) continue;
-    const near = trail.some((t) => Math.abs(t - k) <= 1);
-    if (near) { if (d === 0 && pathAt(0, k)) rows[y][x] = 'ϗ'; continue; }
-    if (TILE_INFO[rows[y][x]]?.solid) continue;
-    rows[y][x] = 'k';
+    if (trail.includes(k)) { rows[y][x] = k === mid ? MOUTH[side] : WALL[side]; continue; }
+    if (k < trail[0] - 5 || k > trail[trail.length - 1] + 5) continue;
+    rows[y][x] = WALL[side];
   }
+  // the two ends of the wall are rounded off
+  const placed = [];
+  for (let k = 0; k < span; k++) { const [x, y] = cell(0, k); if ([WALL[side], MOUTH[side]].includes(rows[y][x])) placed.push(k); }
+  if (placed.length > 1) {
+    const [a, b] = placed.filter((k) => { const [x, y] = cell(0, k); return rows[y][x] === WALL[side]; }).length ? [placed[0], placed[placed.length - 1]] : [null, null];
+    for (const [k, c] of [[a, WALL_CAPS[side][0]], [b, WALL_CAPS[side][1]]]) { const [x, y] = cell(0, k); if (rows[y][x] === WALL[side]) rows[y][x] = c; }
+  }
+  // keep one clear way to the mouth: the tiles in front of it stay walkable
+  const [fx, fy] = cell(1, mid);
+  if (TILE_INFO[rows[fy][fx]]?.solid) rows[fy][fx] = '=';
   m.tiles = rows.map((r) => r.join(''));
 }
 for (const caveId of ['r_palmitas_mercedes', 'r_piriapolis_minas']) {
@@ -1021,13 +1033,18 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
     if (!ex.req || !Array.isArray(ex.deny)) continue;
     const w = m.tiles[0].length, h = m.tiles.length;
     const cells = side === 'e' ? m.tiles.map((_, y) => [w - 1, y]) : side === 'w' ? m.tiles.map((_, y) => [0, y]) : side === 'n' ? [...m.tiles[0]].map((_, x) => [x, 0]) : [...m.tiles[h - 1]].map((_, x) => [x, h - 1]);
-    const open = cells.filter(([x, y]) => !TILE_INFO[m.tiles[y][x]]?.solid);
+    let open = cells.filter(([x, y]) => !TILE_INFO[m.tiles[y][x]]?.solid);
     if (!open.length || open.length > 5) continue;
+    if (mapId === 'carmelo') { // at home a neighbour stops you, not a row of officers: one gap in the fence, one person in it
+      const keep = open[Math.floor(open.length / 2)];
+      for (const [x, y] of open) if (y !== keep[1]) m.tiles[y] = m.tiles[y].slice(0, x) + '#' + m.tiles[y].slice(x + 1);
+      open = [keep];
+    }
     const pp = STOP_INDEX[mapId] >= STOP_INDEX.fraybentos;
     const done = (f) => (typeof ex.req === 'string' ? f[ex.req] : ex.req(f));
     for (const [x, y] of open) {
       if ((m.npcs ?? []).some((n) => n.x === x && n.y === y)) continue;
-      (m.npcs ??= []).push({ x, y, look: pp ? 'grunt' : 'cop', dir: side === 'e' ? 'left' : side === 'w' ? 'right' : side === 'n' ? 'down' : 'up', blocker: true, name: pp ? 'Equipo PP' : 'Guardia', text: ex.deny, cond: (f) => !done(f) });
+      (m.npcs ??= []).push({ x, y, look: mapId === 'carmelo' ? 'oldman' : pp ? 'grunt' : 'cop', dir: side === 'e' ? 'left' : side === 'w' ? 'right' : side === 'n' ? 'down' : 'up', blocker: true, name: mapId === 'carmelo' ? 'Vecino' : pp ? 'Equipo PP' : 'Guardia', text: ex.deny, cond: (f) => !done(f) });
     }
   }
 }
@@ -1037,6 +1054,53 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
   guideMap(m, id, { width: id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3 });
   addRouteStory(m, id);
+}
+
+// Localities get the same treatment, more gently: the open fields around the streets close into tree walls.
+for (const stop of STOPS) {
+  if (stop.kind !== 'loc' || !OUTDOOR[stop.id]) continue;
+  guideMap(OUTDOOR[stop.id], stop.id, { width: 4, town: true });
+}
+
+// What the player finds and can buy follows the story: mates and shops scale with how far along the route the place is.
+const MATES = ['te_marcela', 'mate', 'mate_dulce', 'dulce_de_leche'];
+const mateAt = (id) => {
+  const hi = mapBand(id)?.[1];
+  return hi === undefined ? null : MATES[hi <= 12 ? 0 : hi <= 30 ? 1 : hi <= 48 ? 2 : 3];
+};
+const capMate = (item, id) => {
+  const k = MATES.indexOf(item), cap = mateAt(id);
+  return k < 0 || cap === null ? item : MATES[Math.min(k, MATES.indexOf(cap))];
+};
+for (const [id, m] of Object.entries(OUTDOOR)) {
+  for (const it of m.items ?? []) it.item = capMate(it.item, id);
+  for (const n of m.npcs ?? []) {
+    if (n.script === 'route_quest') n.reward = capMate(n.reward, id);
+    if (n.script === 'route_fog') n.reward = mateAt(id) ?? 'mate';
+  }
+}
+
+const SHOP_TIERS = [
+  [4, ['esfera', 'te_marcela', 'ruda', 'repelente']],
+  [9, ['esfera', 'te_marcela', 'ruda', 'aloe', 'repelente', 'alfajor']],
+  [16, ['esfera', 'superesfera', 'te_marcela', 'mate', 'ruda', 'aloe', 'linimento', 'despertador', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa']],
+  [24, ['superesfera', 'mate', 'ruda', 'aloe', 'linimento', 'despertador', 'alfajor', 'repelente', 'repelente_super', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad']],
+  [30, ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'aloe', 'despertador', 'alfajor', 'torta_frita', 'repelente_super', 'refuerzo_precision', 'refuerzo_resistencia']],
+  [99, ['ultraesfera', 'mate_dulce', 'dulce_de_leche', 'aloe', 'despertador', 'torta_frita', 'chivito', 'repelente_max', 'concentracion', 'refuerzo_precision']],
+];
+for (const stop of STOPS) {
+  if (stop.kind !== 'city') continue;
+  const i = STOP_INDEX[stop.id];
+  const tier = SHOP_TIERS.find(([lim]) => i < lim)[1];
+  for (const d of OUTDOOR[stop.id]?.doors ?? []) {
+    const to = typeof d === 'string' ? d : d.to;
+    if (!/^shop_/.test(to) || !INTERIOR[to]) continue;
+    for (const n of INTERIOR[to].npcs) {
+      if (n.script !== 'shop' && n.script !== 'shop_carta') continue;
+      const keep = (n.stock ?? []).filter((x) => /^(piedra_|mt_)/.test(x) && i >= 12);
+      n.stock = [...tier, ...keep];
+    }
+  }
 }
 
 const MO_BLOCKS = [

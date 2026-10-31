@@ -5,6 +5,9 @@ import { override } from './overrides.js';
 export const T = 16;
 
 // Tile legend. solid = blocks movement; enc = wild encounters; anim = animated.
+/** Rounded ends of a rock wall: [start, end] for the wall of each side. */
+export const WALL_CAPS = { w: ['а', 'б'], e: ['в', 'г'], n: ['д', 'е'], s: ['ж', 'з'] };
+
 export const TILE_INFO = {
   '.': { name: 'pasto' },
   ',': { name: 'pastizal', enc: true },
@@ -21,8 +24,15 @@ export const TILE_INFO = {
   K: { name: 'acantilado', solid: true },
   ι: { name: 'pilar', solid: true },
   ϗ: { name: 'boca de cueva' },
+  ϙ: { name: 'boca de cueva' },
+  ϛ: { name: 'boca de cueva' },
+  ϝ: { name: 'boca de cueva' },
+  ϰ: { name: 'pared de roca', solid: true },
+  ϱ: { name: 'pared de roca', solid: true },
+  ϲ: { name: 'pared de roca', solid: true },
+  ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
-  k: { name: 'risco', solid: true },
+  k: { name: 'pared de roca', solid: true },
   F: { name: 'cerco', solid: true },
   S: { name: 'cartel', solid: true },
   H: { name: 'pared', solid: true },
@@ -136,6 +146,42 @@ let GROUND = null; // the map theme's ground while a themed tile is drawn, so tr
 function grass(g, rng) {
   if (GROUND) GROUND(g, rng);
   else speckle(g, rng, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14);
+}
+
+/**
+ * A wall of rock one tile wide that runs along the edge of the map, with the lit side towards the player:
+ * a lumpy outline, darker veins, a mossy strip on the ground next to it and, when `mouth`, a black cave opening.
+ * It is drawn with the rock on the left and then turned to face `side` ('w' keeps it, 'e' mirrors, 'n' and 's' turn it).
+ */
+function rockWall(g, r, side, mouth, cap = 0) {
+  grass(g, r);
+  g.save();
+  if (side === 'e') g.transform(-1, 0, 0, 1, T, 0);
+  else if (side === 'n') g.transform(0, 1, 1, 0, 0, 0);
+  else if (side === 's') g.transform(0, -1, 1, 0, 0, T);
+  const edge = [];
+  for (let y = 0; y < T; y++) edge.push(13 + Math.round(Math.sin(y * 0.55 + 1) * 1.2));
+  if (cap) for (let y = 0; y < T; y++) { // the end of the wall rounds off
+    const e = cap < 0 ? y : T - 1 - y;
+    if (e < 6) edge[y] = Math.max(3, edge[y] - Math.round(((6 - e) * (6 - e)) / 5));
+  }
+  for (let y = 0; y < T; y++) px(g, edge[y] + 1, y, 'rgba(200,176,72,0.4)', 2, 1); // mossy strip beside the rock
+  for (let y = 0; y < T; y++) {
+    px(g, 0, y, '#85756a', edge[y], 1);
+    px(g, edge[y] - 1, y, '#6a5a50', 2, 1); // shaded lip
+    px(g, edge[y] + 1, y, '#4a3e38', 1, 1); // outline
+  }
+  if (cap) { const ey = cap < 0 ? 0 : T - 1; px(g, 0, ey, '#4a3e38', edge[ey] + 2, 1); px(g, 0, cap < 0 ? 1 : T - 2, '#a89a8c', edge[ey] + 1, 1); }
+  for (let i = 0; i < 9; i++) px(g, r.int(0, 10), r.int(0, 15), r.pick(['#948476', '#6a5a50', '#756558']), r.int(2, 5), 1);
+  for (let i = 0; i < 3; i++) { const x = r.int(0, 8), y = r.int(1, 13); px(g, x, y, '#4e423a', 3, 1); px(g, x + 3, y + 1, '#4e423a', 2, 1); }
+  px(g, r.int(0, 8), r.int(0, 15), '#b0785a'); // a mineral fleck
+  if (mouth) {
+    g.fillStyle = '#4a3e38'; g.beginPath(); g.ellipse(15.5, 8, 8, 8, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#b0a294'; g.beginPath(); g.ellipse(15.5, 8, 7.2, 7.3, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#050408'; g.beginPath(); g.ellipse(16, 8, 6, 6.6, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#16111c'; g.beginPath(); g.ellipse(16.5, 8, 3.2, 4.4, 0, 0, Math.PI * 2); g.fill();
+  }
+  g.restore();
 }
 
 function roof(g, base, dark, light) {
@@ -256,14 +302,10 @@ const DRAW = {
     g.fillStyle = '#a89a90'; g.beginPath(); g.ellipse(6.5, 7.5, 4.5, 3, 0, 0, 7); g.fill();
     px(g, 4, 6, '#d0c4ba', 3, 1); px(g, 9, 10, '#4e423c', 4, 1); px(g, 7, 12, '#4e423c', 2, 1); px(g, 11, 8, '#4e423c', 1, 3);
   },
-  ϗ: (g, r) => {
-    px(g, 0, 0, '#5a4a3e', T, T);
-    px(g, 0, 0, '#7a6a5c', T, 3);
-    px(g, 1, 3, '#16121a', 14, 13);
-    px(g, 2, 3, '#241c28', 12, 2);
-    for (let i = 0; i < 6; i++) px(g, r.int(0, 14), r.int(5, 14), '#33283a', 2, 1);
-    px(g, 0, 0, '#a89686', 3, 2); px(g, 13, 0, '#a89686', 3, 2);
-  },
+  ϗ: (g, r) => rockWall(g, r, 'w', true),
+  ϙ: (g, r) => rockWall(g, r, 'e', true),
+  ϛ: (g, r) => rockWall(g, r, 'n', true),
+  ϝ: (g, r) => rockWall(g, r, 's', true),
   ι: (g) => {
     px(g, 0, 0, '#8a8a92', T, T);
     px(g, 3, 0, '#d8d8e0', 10, T);
@@ -286,11 +328,11 @@ const DRAW = {
     for (let y = 0; y < T; y += 5) px(g, 0, y, '#6a4a30', T, 1);
     for (let i = 0; i < 8; i++) px(g, r.int(0, 14), r.int(0, 14), r.pick(['#a8845a', '#5c3e26']), 2, 1);
   },
-  k: (g, r) => {
-    px(g, 0, 0, '#a8845a', T, T);
-    px(g, 0, 12, '#6a4a30', T, 4);
-    for (let i = 0; i < 6; i++) px(g, r.int(0, 14), r.int(0, 11), '#8a6a4a', 3, 1);
-  },
+  k: (g, r) => rockWall(g, r, 'w', false),
+  ϰ: (g, r) => rockWall(g, r, 'e', false),
+  ϱ: (g, r) => rockWall(g, r, 'n', false),
+  ϲ: (g, r) => rockWall(g, r, 's', false),
+  ...Object.fromEntries(Object.entries(WALL_CAPS).flatMap(([side, [a, b]]) => [[a, (g, r) => rockWall(g, r, side, false, -1)], [b, (g, r) => rockWall(g, r, side, false, 1)]])),
   F: (g, r) => {
     grass(g, r);
     px(g, 0, 6, '#8a5a2a', T, 2); px(g, 0, 11, '#8a5a2a', T, 2);
@@ -912,14 +954,15 @@ THEMES.cueva = {
   S: (g) => { caveFloor(g, new Rng(5)); px(g, 7, 7, '#5a3a1a', 2, 8); px(g, 2, 2, '#5a3a1a', 12, 7); px(g, 3, 3, '#c8905a', 10, 5); px(g, 4, 4, '#7a4a2a', 8, 1); px(g, 4, 6, '#7a4a2a', 6, 1); },
 };
 
-export function tileCanvas(ch, frame = 0, theme = null) {
+export function tileCanvas(ch, frame = 0, theme = null, onWater = false) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;
   const set = theme ? THEMES[theme] : null;
-  const ground = set?.['.'] ?? null;
+  const f0 = info?.anim ? frame % 4 : 0;
+  const ground = onWater ? (g, r) => DRAW['~'](g, r, f0) : (set?.['.'] ?? null);
   const draw = set?.[ch] || null;
-  const themed = draw || (ground && (DRAW[ch] || OVER[ch]));
-  const key = (themed ? `${theme}|` : '') + ch + f;
+  const themed = draw || (ground && (DRAW[ch] || OVER[ch])) || onWater;
+  const key = (themed ? `${theme}|` : '') + (onWater ? 'w|' : '') + ch + f;
   const drawn = override(`tile:${key}`, T, T);
   if (drawn) return drawn;
   let c = cache.get(key);

@@ -193,7 +193,7 @@ const BASE_LIST = [
     { plan: 'croc', c1: '#4a5a2a', c2: '#2a3a1a', c3: '#e8d8a0', feats: ['spikes'], size: 1.35 }),
 
   // --- Legendary ------------------------------------------------------
-  S(40, 'pamperon', 'Pampero', ['electrico', 'volador'], [90, 90, 85, 125, 90, 100], 3, 261,
+  S(40, 'pamperon', 'Cardenal Azul', ['electrico', 'volador'], [90, 90, 85, 125, 90, 100], 3, 261,
     [[1, 'impactrueno'], [1, 'ataque_ala'], [30, 'chispa'], [40, 'rayo_pampero'], [50, 'vendaval'], [60, 'meditacion']],
     'El espíritu del viento pampero. Al batir las alas llega el frío y se despeja el cielo.',
     { plan: 'bird', c1: '#3a5ad8', c2: '#f2f2ff', c3: '#f2e05c', feats: ['crest', 'big_wings', 'lightning'], size: 1.3 },

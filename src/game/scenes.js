@@ -193,7 +193,7 @@ const CINEMATIC = [
   },
   {
     dur: 7000,
-    lines: ['Dicen que cuando el Pampero cruza el cielo,', 'el país entero se detiene a mirarlo.'],
+    lines: ['Dicen que cuando el Cardenal Azul cruza el cielo,', 'el país entero se detiene a mirarlo.'],
     draw(g, t, p) {
       sky(g, [[0, '#14182c'], [0.5, '#3a4466'], [1, '#6a6a7a']]);
       g.fillStyle = 'rgba(30,34,56,0.9)';

@@ -75,9 +75,11 @@ const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'swimmer', 'ci
 const npc = (x, y, look, text, extra = {}) => ({ x, y, look, text: [].concat(text), ...extra });
 
 const stockAt = (i) => (i < 9 ? ['esfera', 'te_marcela', 'ruda', 'alfajor']
-  : i < 20 ? ['esfera', 'superesfera', 'te_marcela', 'mate', 'ruda', 'linimento', 'alfajor', 'repelente']
-    : i < 30 ? ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'aloe', 'despertador', 'alfajor', 'torta_frita']
-      : ['ultraesfera', 'mate_dulce', 'dulce_de_leche', 'aloe', 'despertador', 'torta_frita', 'chivito']);
+  : i < 20 ? ['esfera', 'superesfera', 'te_marcela', 'mate', 'ruda', 'linimento', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa']
+    : i < 30 ? ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'aloe', 'despertador', 'alfajor', 'torta_frita', 'repelente_super', 'refuerzo_precision', 'refuerzo_resistencia']
+      : ['ultraesfera', 'mate_dulce', 'dulce_de_leche', 'aloe', 'despertador', 'torta_frita', 'chivito', 'repelente_max', 'concentracion', 'refuerzo_precision']);
+
+const WORK_AT = { colonia: 'Soy empleado del puerto.', sanjose: 'Soy empleado de la intendencia.', trinidad: 'Soy soldado del centro de tropas.', mercedes: 'Soy socio del club de remo.', artigas: 'Soy minero de la cooperativa.' };
 
 // Gyms of the cities that have one here (the older cities with a gym are built in maps-act2.js).
 const GYM_TYPE = { inc: 'tierra', correo: 'normal', boiso: 'volador', inavi: 'bicho' };
@@ -190,6 +192,16 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
         { x: 0, y: 0, look: 'sailor', dir: 'left', sight: 4, trainer: TR('col_b', 'Ramiro', 'Marinero', [['nandulin', 5], ['oruga', 5], ['tuco', 5]], 130, 'Mientras espero el barco, entreno.', 'Me hundiste.', 'El río da muchas vueltas, igual que la vida.') },
         { x: 0, y: 0, look: 'gaucho', dir: 'down', sight: 4, trainer: TR('col_c', 'Don Eusebio', 'Paisano', [['hormiga', 5], ['tuco', 6]], 140, 'Pasá, pasá. Pero primero me mostrás qué traés.', 'Se nota que practicaste.', 'Con la PokeDex todo se aprende más rápido.') },
       ] : []),
+      ...(id === 'sanjose' ? [
+        { x: 0, y: 0, look: 'clerk', dir: 'down', sight: 4, trainer: TR('sj_a', 'Hernán', 'Empleado de la intendencia', teamOf(types, [lo, lo + 1], 'sja'), 120, 'Salí a almorzar y me quedaron ganas de pelear.', 'Perdí el recreo.', 'En Trinidad hay una líder de tipo Tierra. Llevá algo que le gane.') },
+        { x: 0, y: 0, look: 'gaucho', dir: 'left', sight: 4, trainer: TR('sj_b', 'Don Washington', 'Tambero', teamOf(types, [lo, lo + 2], 'sjb'), 150, 'Mis vacas dan leche y mis criaturas dan batalla.', 'Se me cortó la leche.', 'Camino a Trinidad hay un monte espeso. No te metas de noche sin criaturas descansadas.') },
+        npc(0, 0, 'oldman', ['Del Cabildo salió un aviso: gente de gris anda ofreciendo "niebla por contrato" a los productores.', 'Si seguís al oeste, en Trinidad y Mercedes vas a saber más. Yo no me fiaría de ellos.'], { dir: 'down' }),
+      ] : []),
+      ...(id === 'ecilda' ? [
+        { x: 0, y: 0, look: 'boy', dir: 'down', sight: 4, trainer: TR('ec_a', 'Lautaro', 'Camionero', teamOf(types, [lo, lo + 1], 'eca'), 130, 'Paré a descansar y a pelear.', 'Me dejaste sin nafta.', 'En Trinidad, antes de entrar al gimnasio, conviene tener un par de curaciones.') },
+        { x: 0, y: 0, look: 'girl', dir: 'right', sight: 4, trainer: TR('ec_b', 'Brenda', 'Almacenera', teamOf(types, [lo, lo + 2], 'ecb'), 150, 'No vendo nada sin antes verte pelear.', 'Está bien, te lo cobro igual.', 'Las Pokeballs se acaban rápido. Comprá antes de seguir.') },
+        npc(0, 0, 'gaucho', ['Los camiones de gris pasan de noche con unas máquinas tapadas con lona.', 'Dicen que van a Palmitas. Si vas para allá, andá con cuidado.'], { dir: 'down' }),
+      ] : []),
       ...(id === 'melo' ? [npc(0, 0, 'oldman', ['La torre vieja del Cabildo tiene luces de noche. Dicen que es el Sereno, que sigue de guardia.', 'Nadie se anima a subir.'], { dir: 'down' })] : []),
       ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: 'cop', dir: 'right', script: 'town_gate', stop: id }] : []),
     ],
@@ -213,7 +225,8 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
   if (isCity) ROUTE_INTERIOR[`poli_${id}`] = poli(`Policlínica de ${stop.name}`);
   if (isCity) ROUTE_INTERIOR[`shop_${id}`] = shop(`Almacén de ${stop.name}`, stockAt(i));
   if (id === 'colonia') ROUTE_INTERIOR.shop_colonia.npcs[0].script = 'shop_carta';
-  ROUTE_INTERIOR[`casa_${id}`] = room(HOUSE, { name: `Casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 1) % HOUSE_LOOKS.length], isCity && place ? [`Soy del ${place}.`, lines[1]] : lines)] });
+  ROUTE_INTERIOR[`casa_${id}`] = room(HOUSE, { name: `Casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 1) % HOUSE_LOOKS.length], isCity && place ? [WORK_AT[id] ?? `Trabajo en ${place}.`, lines[1]] : lines)] });
+  if (id === 'colonia') ROUTE_INTERIOR.casa_colonia.npcs.push({ x: 7, y: 5, look: 'clerk', dir: 'left', script: 'gift_mapa' });
   if (isCity) ROUTE_INTERIOR[`casa_${id}2`] = room(HOUSE, { name: `Otra casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 4) % HOUSE_LOOKS.length], [lines[1], 'Cuando pasa gente de afuera, se anima el pueblo.'])] });
 }
 
