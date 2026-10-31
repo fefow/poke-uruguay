@@ -27,7 +27,7 @@ const KEYS = [['Flechas', 'Mover'], ['Z / Enter', 'Aceptar'], ['X', 'Correr / vo
 
 export function updateSidebar(now, inGame) {
   if (!stage) return;
-  stage.classList.toggle('is-game', inGame);
+  stage.classList.toggle('is-game', inGame && !document.querySelector('.bhud'));
   if (now < nextPoll) return;
   nextPoll = now + 250;
   const S = inGame ? state() : null;

@@ -30,7 +30,7 @@ import { mountPerf, perfTick } from './core/perf.js';
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { validateSave, tileCanvas, titleRenderer, keys: DEX_ORDER, pamperoFrame, creatureSprite, updateWorld, poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { validateSave, tileCanvas, titleRenderer, keys: DEX_ORDER, pamperoFrame, creatureSprite, updateWorld, poisonTick, charSprite, newState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), createCreature, addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();

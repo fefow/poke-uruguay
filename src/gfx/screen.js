@@ -1,6 +1,6 @@
-// The single game canvas (320x240 logical pixels), scaled with CSS.
-export const W = 320;
-export const H = 240;
+// The single game canvas (480x270 logical pixels), scaled with CSS.
+export const W = 480;
+export const H = 270;
 
 let canvas, ctx;
 let renderer = null;

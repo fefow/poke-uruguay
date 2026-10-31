@@ -93,7 +93,8 @@ button { font: inherit; color: inherit; }
 
 .ui {
   position: absolute;
-  inset: 0;
+  inset: 0 12.5%; /* centred 4:3 column (1440 of 1920): every cqi below keeps its old scale */
+  container-type: inline-size;
   font-size: 4.2cqi;
   line-height: 1.25;
   color: var(--ink);
@@ -520,9 +521,9 @@ button { font: inherit; color: inherit; }
 
 /* ---------------------------------------------------------------- loader */
 .loader {
-  position: absolute; inset: 0; z-index: 100;
+  position: absolute; inset: 0 12.5%; container-type: inline-size; z-index: 100;
   display: grid; place-content: center; justify-items: center; gap: 2.4cqi;
-  background: radial-gradient(80% 70% at 50% 40%, var(--night-2), var(--night));
+  background: radial-gradient(80% 70% at 50% 40%, var(--night-2), var(--night)); box-shadow: 0 0 0 100vmax var(--night);
   font-size: 4cqi;
   view-transition-name: loader;
 }
@@ -957,37 +958,13 @@ body {
 
 
 /* ------------------------------------------------ 1920x1080 stage */
-.stage {
-  --k: 1;
-  width: 1920px; height: 1080px;
-  transform: scale(var(--k)); transform-origin: center;
-  display: grid; grid-template-columns: 1fr 1440px 1fr;
-  background:
-    radial-gradient(60% 90% at 50% 50%, oklch(0.3 0.08 265 / 0.5), transparent 70%),
-    var(--night);
-}
-#side-r { padding-top: 64px; }
-#side-l { grid-column: 1; grid-row: 1; } #side-r { grid-column: 3; grid-row: 1; }
-.stage > .screen { grid-column: 2; grid-row: 1; width: 1440px; height: 1080px; aspect-ratio: auto; max-height: none; align-self: center; }
-.side { display: none; flex-direction: column; gap: 16px; padding: 28px 14px; min-width: 0; font-family: var(--font-ui); }
-.stage.is-game .side { display: flex; }
-.side-logo { margin: 0; font: 400 22px/1.2 var(--font-pixel); color: var(--sun); text-shadow: 0 2px 0 #000; }
-.side-sub { margin: -8px 0 4px; font-size: 14px; color: var(--celeste); }
-.side-card { background: oklch(0.18 0.05 270 / 0.75); border: 1px solid oklch(0.6 0.1 250 / 0.35); border-radius: 12px; padding: 14px 16px; backdrop-filter: blur(4px);
-  & h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--celeste); font-weight: 600; }
-  & p { margin: 4px 0; font-size: 18px; } }
-.side-place { font-size: 22px !important; color: var(--paper); }
+.stage { --k: 1; width: 1920px; height: 1080px; transform: scale(var(--k)); transform-origin: center; position: relative; flex: none; }
+.stage > .screen { width: 1920px; height: 1080px; aspect-ratio: auto; max-height: none; }
+.side { display: none; }
+.stage.is-game #side-l { display: flex; position: absolute; top: 18px; left: 18px; width: 300px; z-index: 40; pointer-events: none; flex-direction: column; gap: 10px; }
+.side-logo, .side-sub, .side-ver { display: none; }
+.side-card { background: oklch(0.16 0.05 270 / 0.82); border: 1px solid oklch(0.7 0.1 250 / 0.4); border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(3px);
+  & h2 { margin: 0 0 4px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--celeste); font-weight: 600; }
+  & p { margin: 2px 0; font-size: 18px; } }
+.side-place { font-size: 22px !important; }
 .side-row { display: flex; justify-content: space-between; & b { color: var(--sun); } }
-.side-ver { margin-top: auto; font-size: 12px; color: oklch(0.7 0.03 270); }
-.side-team { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px;
-  & li { display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center; }
-  & li.is-down { opacity: .5; }
-  & img { image-rendering: pixelated; }
-  & b { display: block; font-size: 16px; }
-  & small { color: oklch(0.8 0.03 270); font-size: 12px; }
-  & em { font-style: normal; font-size: 13px; color: oklch(0.8 0.03 270); } }
-.side-bar { display: block; height: 7px; margin-top: 4px; border-radius: 4px; background: oklch(0.1 0.02 270);
-  &::after { content: ''; display: block; height: 100%; width: calc(var(--hp) * 100%); border-radius: 4px; background: var(--hp-good); }
-  &.is-mid::after { background: var(--hp-mid); } &.is-low::after { background: var(--hp-low); } }
-.side-keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 14px;
-  & dt { color: var(--sun); font-weight: 600; } & dd { margin: 0; } }
