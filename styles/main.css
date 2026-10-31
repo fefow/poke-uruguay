@@ -93,7 +93,7 @@ button { font: inherit; color: inherit; }
 
 .ui {
   position: absolute;
-  inset: 0 12.5%; /* centred 4:3 column (1440 of 1920): every cqi below keeps its old scale */
+  inset: 0 17.5%; /* centred column (1248 of 1920): every cqi below scales with it, so the whole UI is smaller */
   container-type: inline-size;
   font-size: 4.2cqi;
   line-height: 1.25;
@@ -210,7 +210,8 @@ button { font: inherit; color: inherit; }
 
 .menu-battle {
   inset: auto 1.5cqi 1.5cqi auto;
-  width: 44%;
+  width: 48%;
+  font-size: 3.6cqi;
   min-width: 0;
   min-height: 24%;
   & .menu-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6cqi; }
