@@ -7,7 +7,7 @@ import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
 
 await mkdir('dist/styles', { recursive: true });
 const result = await build({
-  entryPoints: ['src/main.js'],
+  entryPoints: ['src/main.ts'],
   bundle: true,
   minify: true,
   format: 'esm',
@@ -23,13 +23,13 @@ const html = await readFile('index.html', 'utf8');
 await writeFile('dist/game.js', js);
 await copyFile('styles/main.css', 'dist/styles/main.css');
 for (const f of ['manifest.webmanifest', 'icon.svg']) await copyFile(f, `dist/${f}`);
-const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.js'", "'./game.js'").replace('__BUILD__', Date.now().toString(36));
+const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.ts'", "'./game.ts'").replace('__BUILD__', Date.now().toString(36));
 await writeFile('dist/sw.js', sw);
-await writeFile('dist/index.html', html.replace('src="src/main.js"', 'src="game.js"'));
+await writeFile('dist/index.html', html.replace('src="src/main.ts"', 'src="game.js"'));
 
 // Visual sprite editor (editor.html): its own bundle; it writes src/data/sprite-overrides.js.
 const editor = await build({
-  entryPoints: ['src/editor/main.js'],
+  entryPoints: ['src/editor/main.ts'],
   bundle: true,
   minify: true,
   format: 'esm',
@@ -41,7 +41,7 @@ const editorJs = editor.outputFiles[0].text;
 await writeFile('dist/editor.js', editorJs);
 await copyFile('styles/editor.css', 'dist/styles/editor.css');
 const editorHtml = await readFile('editor.html', 'utf8');
-await writeFile('dist/editor.html', editorHtml.replace('src="src/editor/main.js"', 'src="editor.js"'));
+await writeFile('dist/editor.html', editorHtml.replace('src="src/editor/main.ts"', 'src="editor.js"'));
 // Single-file editor (for an Artifact preview): CSS and JS inlined.
 const editorBody = editorHtml.split('<!--APP-->')[1].split('<!--/APP-->')[0];
 const editorCss = await readFile('styles/editor.css', 'utf8');
@@ -58,7 +58,7 @@ ${editorJs.replace(/<\/script/gi, '<\\/script')}
 
 // Visual map editor (map-editor.html): writes src/data/map-overrides.js.
 const mapEditor = await build({
-  entryPoints: ['src/map-editor/main.js'],
+  entryPoints: ['src/map-editor/main.ts'],
   bundle: true,
   minify: true,
   format: 'esm',
@@ -69,7 +69,7 @@ const mapEditor = await build({
 });
 await writeFile('dist/map-editor.js', mapEditor.outputFiles[0].text);
 await copyFile('styles/map-editor.css', 'dist/styles/map-editor.css');
-await writeFile('dist/map-editor.html', (await readFile('map-editor.html', 'utf8')).replace('src="src/map-editor/main.js"', 'src="map-editor.js"'));
+await writeFile('dist/map-editor.html', (await readFile('map-editor.html', 'utf8')).replace('src="src/map-editor/main.ts"', 'src="map-editor.js"'));
 
 // Single file: CSS + JS inlined, no external files except Google Fonts.
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];

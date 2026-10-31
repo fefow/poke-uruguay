@@ -1,4 +1,4 @@
-import { rivalTeamFor, LEADERS, ELITES, CHAMPION } from '../src/data/story.js';
+import { rivalTeamFor, LEADERS, ELITES, CHAMPION } from '../src/data/story.ts';
 
 // What a normal player (no grinding) roughly has at each story beat:
 // the starter (evolved when due) plus a couple of caught creatures a few levels behind.

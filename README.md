@@ -15,6 +15,8 @@ Open `http://localhost:8080`. No build step is needed in development: the game i
 
 **Controls:** arrows / WASD move · hold Space for 2x speed (walking and battles) · Z = A · X or Shift = B · Enter, Esc or M = menu · N toggles music · O opens settings · P toggles the team panel. Gamepads work, and phones get on-screen touch controls.
 
+**TypeScript:** `npm run typecheck` runs `tsc --noEmit`; the build (esbuild) strips types. The two editor-written override files stay plain `.js`.
+
 **Bug log:** the 🐞 button (or F2) opens a panel that records errors automatically, plus map changes and battles as context. You can add your own notes, then copy the report, download it as a .txt, or open a prefilled GitHub issue. If you paste a fine-grained GitHub token (Contents: write on this repo only) into the panel, it is kept only in that browser and the log is uploaded automatically to `reports/<device>.json` on the `bug-reports` branch.
 
 ## Build and deploy to a VPS
@@ -30,14 +32,14 @@ Copy `dist/` to any static host (nginx, Caddy…). Serve it over HTTPS so the of
 
 | Area | Where |
 | --- | --- |
-| Boot, loader, game loop | `src/main.js` |
-| World maps, NPCs, trainers, story scripts | `src/data/maps.js`, `src/data/story.js` |
+| Boot, loader, game loop | `src/main.ts` |
+| World maps, NPCs, trainers, story scripts | `src/data/maps.ts`, `src/data/story.ts` |
 | Creatures, moves, items, type chart | `src/data/*.js` (deep-frozen at runtime) |
-| Overworld engine (movement, warps, encounters, trainer sight) | `src/game/world.js` |
-| Battle rules (pure, seeded, replayable) | `src/game/battle-engine.js` |
-| Battle presentation | `src/game/battle-scene.js` |
-| Menus: team, bag, PokeDex, card, options, save, shop, PC | `src/game/menus.js` |
-| Title, intro, hall of fame, credits | `src/game/scenes.js` |
+| Overworld engine (movement, warps, encounters, trainer sight) | `src/game/world.ts` |
+| Battle rules (pure, seeded, replayable) | `src/game/battle-engine.ts` |
+| Battle presentation | `src/game/battle-scene.ts` |
+| Menus: team, bag, PokeDex, card, options, save, shop, PC | `src/game/menus.ts` |
+| Title, intro, hall of fame, credits | `src/game/scenes.ts` |
 | Pixel art generators | `src/gfx/` |
 | Save system | `src/save/` (provider interface, signing, validation) |
 | Supabase schema for the VPS phase | `supabase/schema.sql` |
@@ -58,8 +60,8 @@ ES modules, private class fields, HMAC save signing with Web Crypto (plus a pure
 
 Saves go through one interface (`list / load / save / remove`). `LocalStorageProvider` is active today. To move to your self-hosted Supabase:
 
-1. Run `supabase/schema.sql` in your database and insert the game's build fingerprint into `game_builds` (shown by `getBuildHash()` in `src/save/index.js`).
-2. Set `backend: 'supabase'` and your URL / anon key in `src/save/config.js`, and pass a `getAccessToken` that returns the signed-in user's JWT.
+1. Run `supabase/schema.sql` in your database and insert the game's build fingerprint into `game_builds` (shown by `getBuildHash()` in `src/save/index.ts`).
+2. Set `backend: 'supabase'` and your URL / anon key in `src/save/config.ts`, and pass a `getAccessToken` that returns the signed-in user's JWT.
 3. Add your Supabase origin to `connect-src` in the Content-Security-Policy in `index.html`.
 
 See `docs/SECURITY.md` for what is protected today and the plan for server-authoritative validation.

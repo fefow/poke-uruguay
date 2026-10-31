@@ -1,6 +1,6 @@
-import { TILE_INFO } from '../src/gfx/tiles.js';
+import { TILE_INFO } from '../src/gfx/tiles.ts';
 // Static checks on world data: row widths, NPC/item placement, doors, exits.
-import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.js';
+import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.ts';
 const SOLID = new Set(Object.entries(TILE_INFO).filter(([, v]) => v.solid).map(([k]) => k));
 let problems = 0;
 const bad = (m) => { problems++; console.log('✗', m); };

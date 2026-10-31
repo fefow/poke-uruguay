@@ -1,11 +1,11 @@
 // Dev tool (not part of npm test): Monte Carlo win rates for scripted fights.
 // Usage: node tests/balance.mjs
-import { BattleEngine } from '../src/game/battle-engine.js';
-import { createCreature, calcStats } from '../src/game/creature.js';
-import { effectiveness } from '../src/data/types.js';
-import { MOVES } from '../src/data/moves.js';
-import { SPECIES } from '../src/data/species.js';
-import { Rng } from '../src/core/rng.js';
+import { BattleEngine } from '../src/game/battle-engine.ts';
+import { createCreature, calcStats } from '../src/game/creature.ts';
+import { effectiveness } from '../src/data/types.ts';
+import { MOVES } from '../src/data/moves.ts';
+import { SPECIES } from '../src/data/species.ts';
+import { Rng } from '../src/core/rng.ts';
 import { SCRIPTS_FOR_TEST } from './balance-teams.mjs';
 
 const N = 300;

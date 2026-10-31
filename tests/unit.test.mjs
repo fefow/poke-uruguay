@@ -1,16 +1,16 @@
 // Node unit tests (no browser): run with `node --test tests/`
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeDamage, makeBattler, BattleEngine, applyItem } from '../src/game/battle-engine.js';
-import { createCreature, calcStats, expForLevel, gainExp, legalMoves, tmCompatible } from '../src/game/creature.js';
-import { ITEMS } from '../src/data/items.js';
-import { effectiveness } from '../src/data/types.js';
-import { MOVES } from '../src/data/moves.js';
-import { SPECIES } from '../src/data/species.js';
-import { Rng } from '../src/core/rng.js';
-import { validateSave } from '../src/save/validate.js';
-import { canonical, sha256, hmacSha256 } from '../src/save/integrity.js';
-import { newState } from '../src/game/state.js';
+import { computeDamage, makeBattler, BattleEngine, applyItem } from '../src/game/battle-engine.ts';
+import { createCreature, calcStats, expForLevel, gainExp, legalMoves, tmCompatible } from '../src/game/creature.ts';
+import { ITEMS } from '../src/data/items.ts';
+import { effectiveness } from '../src/data/types.ts';
+import { MOVES } from '../src/data/moves.ts';
+import { SPECIES } from '../src/data/species.ts';
+import { Rng } from '../src/core/rng.ts';
+import { validateSave } from '../src/save/validate.ts';
+import { canonical, sha256, hmacSha256 } from '../src/save/integrity.ts';
+import { newState } from '../src/game/state.ts';
 
 const mon = (sp, lvl, seed = 1) => createCreature(sp, lvl, { rng: new Rng(seed) });
 
@@ -164,8 +164,8 @@ test('pure-JS SHA-256/HMAC match known vectors', () => {
 });
 
 test('Dex: 151 criaturas, 81 base, 70 evoluciones, 5 legendarias, tipos parejos', async () => {
-  const { DEX_ORDER } = await import('../src/data/species.js');
-  const { TYPES } = await import('../src/data/types.js');
+  const { DEX_ORDER } = await import('../src/data/species.ts');
+  const { TYPES } = await import('../src/data/types.ts');
   assert.equal(DEX_ORDER.length, 151);
   const evolved = new Set(DEX_ORDER.map((k) => SPECIES[k].evo?.to).filter(Boolean));
   assert.equal(DEX_ORDER.length - evolved.size, 81);
@@ -183,8 +183,8 @@ test('Dex: 151 criaturas, 81 base, 70 evoluciones, 5 legendarias, tipos parejos'
 });
 
 test('toda criatura no legendaria se puede conseguir (inicial, salvaje o pesca) o es evolución', async () => {
-  const { MAPS } = await import('../src/data/maps.js');
-  const { DEX_ORDER, STARTERS } = await import('../src/data/species.js');
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { DEX_ORDER, STARTERS } = await import('../src/data/species.ts');
   const found = new Set(STARTERS);
   for (const m of Object.values(MAPS)) for (const [sp] of [...(m.enc?.list ?? []), ...(m.fish ?? [])]) found.add(sp);
   const evolved = new Set(DEX_ORDER.map((k) => SPECIES[k].evo?.to).filter(Boolean));
@@ -193,7 +193,7 @@ test('toda criatura no legendaria se puede conseguir (inicial, salvaje o pesca) 
 });
 
 test('captura: nivel, vida, rareza y pokeball cuentan', async () => {
-  const { catchValue, catchProbability } = await import('../src/game/capture.js');
+  const { catchValue, catchProbability } = await import('../src/game/capture.ts');
   const P = (o) => catchProbability(catchValue({ catchRate: 190, level: 5, hp: 20, maxHp: 20, ball: 1, ...o }));
   // menos vida y mejor pokeball, más chance
   assert.ok(P({ hp: 3 }) > P({}));
@@ -240,7 +240,7 @@ test('al cambiar de criatura, la que sale muestra sus PS de antes del ataque', (
 });
 
 test('sprite codec round-trips pixels, alpha and big palettes', async () => {
-  const { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } = await import('../src/gfx/sprite-codec.js');
+  const { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } = await import('../src/gfx/sprite-codec.ts');
   const w = 12, h = 9;
   const px = new Uint8ClampedArray(w * h * 4);
   for (let i = 0; i < w * h; i++) {
@@ -259,8 +259,8 @@ test('sprite codec round-trips pixels, alpha and big palettes', async () => {
 });
 
 test('ruta: de Colonia se llega a Montevideo siguiendo las salidas, y cada ciudad bloquea el camino hacia adelante', async () => {
-  const { OUTDOOR } = await import('../src/data/maps.js');
-  const { CHAIN, STOPS, STOP_INDEX, openFlag } = await import('../src/data/route.js');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  const { CHAIN, STOPS, STOP_INDEX, openFlag } = await import('../src/data/route.ts');
   for (let i = 0; i < CHAIN.length - 1; i++) {
     const a = OUTDOOR[CHAIN[i]];
     const fwd = Object.values(a.exits).find((e) => e.to === CHAIN[i + 1]);
@@ -274,9 +274,9 @@ test('ruta: de Colonia se llega a Montevideo siguiendo las salidas, y cada ciuda
 });
 
 test('medallas: el N-ésimo gimnasio de la ruta da la medalla N y los equipos suben con el camino', async () => {
-  const { LEADERS, rivalTeamFor } = await import('../src/data/story.js');
-  const { GYM_STOPS, gymAce } = await import('../src/data/route.js');
-  const { fitSpecies, minLevelOf } = await import('../src/data/levels.js');
+  const { LEADERS, rivalTeamFor } = await import('../src/data/story.ts');
+  const { GYM_STOPS, gymAce } = await import('../src/data/route.ts');
+  const { fitSpecies, minLevelOf } = await import('../src/data/levels.ts');
   GYM_STOPS.forEach((st, i) => {
     const L = LEADERS[st.gym];
     assert.equal(L.order, i + 1, `${st.gym} debería ser el gimnasio ${i + 1}`);
@@ -293,9 +293,9 @@ test('medallas: el N-ésimo gimnasio de la ruta da la medalla N y los equipos su
 });
 
 test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstáculo', async () => {
-  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.js');
-  const { CHAIN } = await import('../src/data/route.js');
-  const { SCRIPTS } = await import('../src/data/story.js');
+  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.ts');
+  const { CHAIN } = await import('../src/data/route.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
   const has = (id, ch) => OUTDOOR[id].tiles.some((r) => r.includes(ch));
   const at = (id) => CHAIN.indexOf(id);
   assert.ok(has('r_belen_artigas', '%'), 'falta el zarzal de Corte');
@@ -318,8 +318,8 @@ test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstácul
 });
 
 test('ciudades: las 18 miden como Montevideo y ninguna se repite; las localidades tampoco', async () => {
-  const { OUTDOOR } = await import('../src/data/maps.js');
-  const { CITY_SPECS, LOC_PLAN } = await import('../src/data/town-specs.js');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  const { CITY_SPECS, LOC_PLAN } = await import('../src/data/town-specs.ts');
   const seen = new Map();
   for (const id of Object.keys(CITY_SPECS)) {
     const t = OUTDOOR[id].tiles;
@@ -339,20 +339,20 @@ test('ciudades: las 18 miden como Montevideo y ninguna se repite; las localidade
 });
 
 test('historia nueva: Dr. Díaz, Torre de las Ánimas en Melo, Calle Victoria y decisiones de niebla', async () => {
-  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.js');
-  const { SCRIPTS } = await import('../src/data/story.js');
+  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
   assert.ok(SCRIPTS.anima && SCRIPTS.keeper_colonia);
   assert.ok(OUTDOOR.melo.doors.some((d) => (d.to ?? d) === 'anima_1'), 'la torre está en Melo');
   for (const id of ['anima_1', 'anima_2', 'anima_3']) assert.ok(INTERIOR[id], id);
   assert.equal(OUTDOOR.r_laspiedras_montevideo.name, 'Calle Victoria');
-  const src = (await import('node:fs')).readFileSync(new URL('../src/data/story.js', import.meta.url), 'utf8');
+  const src = (await import('node:fs')).readFileSync(new URL('../src/data/story.ts', import.meta.url), 'utf8');
   assert.ok(!/Calima/.test(src.replace(/id: 'calima'|look: 'calima'|async calima|npcLeave\('calima'\)/g, '')), 'queda un Calima en los textos');
 });
 
 test('Casino Peninsula: fichas, tragamonedas y premios existen', async () => {
-  const { MAPS } = await import('../src/data/maps.js');
-  const { SCRIPTS } = await import('../src/data/story.js');
-  const { ITEMS } = await import('../src/data/items.js');
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const { ITEMS } = await import('../src/data/items.ts');
   assert.ok(ITEMS.ficha);
   assert.ok(MAPS.casino_pde.npcs.every((n) => !n.script || SCRIPTS[n.script]));
   assert.ok(MAPS.punta.doors.some((d) => (d.to ?? d) === 'casino_pde'));
@@ -360,7 +360,7 @@ test('Casino Peninsula: fichas, tragamonedas y premios existen', async () => {
 });
 
 test('inicio: bosque grande, cueva con el PP y Buquebus en Fray Bentos', async () => {
-  const { OUTDOOR } = await import('../src/data/maps.js');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
   assert.equal(OUTDOOR.r_rosario_sanjose.name, 'Bosque Grande');
   assert.equal(OUTDOOR.r_palmitas_mercedes.name, 'Cueva de Palmitas');
   assert.ok(OUTDOOR.r_palmitas_mercedes.npcs.some((n) => n.trainer?.cls === 'Equipo PP'));
@@ -368,8 +368,8 @@ test('inicio: bosque grande, cueva con el PP y Buquebus en Fray Bentos', async (
 });
 
 test('rutas guiadas: desniveles de un solo sentido y paredes de árboles', async () => {
-  const { OUTDOOR } = await import('../src/data/maps.js');
-  const { TILE_INFO } = await import('../src/gfx/tiles.js');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
   assert.ok(TILE_INFO['λ'].ledge);
   const total = Object.values(OUTDOOR).reduce((n, m) => n + m.tiles.join('').split('λ').length - 1, 0);
   assert.ok(total > 20, 'hay desniveles en las rutas');
@@ -379,8 +379,8 @@ test('rutas guiadas: desniveles de un solo sentido y paredes de árboles', async
 });
 
 test('historias de ruta: las marcas rq_/rf_ son válidas en una partida guardada', async () => {
-  const { validateSave } = await import('../src/save/validate.js');
-  const { OUTDOOR } = await import('../src/data/maps.js');
+  const { validateSave } = await import('../src/save/validate.ts');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
   const flags = Object.values(OUTDOOR).flatMap((m) => (m.npcs ?? []).map((n) => n.doneFlag).filter(Boolean));
   assert.ok(flags.length > 10, 'hay misiones de ruta');
   assert.ok(flags.every((f) => /^(rq|rf)_[a-z0-9_]{1,40}$/.test(f)), 'formato de marca');
@@ -388,7 +388,7 @@ test('historias de ruta: las marcas rq_/rf_ son válidas en una partida guardada
 
 test('música por zona: todas las notas de las pistas son válidas y existen las zonas', async () => {
   const { readFileSync } = await import('node:fs');
-  const src = readFileSync(new URL('../src/core/audio.js', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../src/core/audio.ts', import.meta.url), 'utf8');
   for (const name of ['cave', 'gym', 'beach', 'forest', 'sierra', 'pp', 'casino', 'ferry', 'league']) assert.ok(new RegExp(`\\n  ${name}: \\{`).test(src), `pista ${name}`);
   const seqs = [...src.matchAll(/(?:lead|bass): '([^']+)'/g)].map((m) => m[1]);
   for (const s of seqs) {
@@ -408,7 +408,7 @@ test('objetos de batalla nuevos: precisión, resistencia, concentración y repel
 });
 
 test('clima: la lluvia es determinista por mapa y franja y ocupa cerca de una de cada cinco', async () => {
-  const { weatherAt } = await import('../src/gfx/fx.js');
+  const { weatherAt } = await import('../src/gfx/fx.ts');
   assert.equal(weatherAt('carmelo', 1e12), weatherAt('carmelo', 1e12 + 1000));
   let rainy = 0;
   for (let i = 0; i < 500; i++) if (weatherAt('colonia', 1e12 + i * 600000) === 'rain') rainy++;
@@ -416,7 +416,7 @@ test('clima: la lluvia es determinista por mapa y franja y ocupa cerca de una de
 });
 
 test('map editor patches apply and survive a parse round trip', async () => {
-  const { applyMapEdits, fitsTiles, npcKeys, mapEditsSource, parseMapEditsSource } = await import('../src/data/map-edits.js');
+  const { applyMapEdits, fitsTiles, npcKeys, mapEditsSource, parseMapEditsSource } = await import('../src/data/map-edits.ts');
   assert.deepEqual(npcKeys([{ look: 'boy' }, { look: 'boy' }, { trainer: { id: 'a' } }, { script: 'x' }]), ['look:boy', 'look:boy@1', 'tr:a', 's:x']);
   const tiles = ['#D#', '.S.', '...'];
   assert.ok(fitsTiles(tiles, ['#D#', '.S.', '~~~']));
@@ -440,11 +440,11 @@ test('map editor patches apply and survive a parse round trip', async () => {
 });
 
 test('todo camino cerrado entre ciudades tiene algo en la historia que lo abre', async () => {
-  const { MAPS } = await import('../src/data/maps.js');
-  const { STOPS, CHAIN } = await import('../src/data/route.js');
-  const { EVENTS } = await import('../src/data/story.js');
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { STOPS, CHAIN } = await import('../src/data/route.ts');
+  const { EVENTS } = await import('../src/data/story.ts');
   const fs = await import('node:fs');
-  const story = fs.readFileSync(new URL('../src/data/story.js', import.meta.url), 'utf8');
+  const story = fs.readFileSync(new URL('../src/data/story.ts', import.meta.url), 'utf8');
   const canOpen = (flag) => {
     const id = flag.replace(/^open_/, '');
     const st = STOPS.find((x) => x.id === id);
@@ -465,7 +465,7 @@ test('todo camino cerrado entre ciudades tiene algo en la historia que lo abre',
 });
 
 test('revancha: cada mapa pertenece al primer gimnasio por delante en la ruta', async () => {
-  const { refGymOrder } = await import('../src/data/maps.js');
+  const { refGymOrder } = await import('../src/data/maps.ts');
   assert.equal(refGymOrder('ruta1'), 1);
   assert.equal(refGymOrder('r_ecilda_trinidad'), 1);
   assert.equal(refGymOrder('gym_trinidad'), 1);

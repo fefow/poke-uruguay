@@ -1,7 +1,7 @@
 // Offline cache for self-hosted deployments (not used inside the artifact viewer).
 const CACHE = 'pokeuy-__BUILD__';
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './styles/main.css', './src/main.js', './icon.svg'])));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './styles/main.css', './src/main.ts', './icon.svg'])));
   self.skipWaiting();
 });
 self.addEventListener('activate', (e) => {
