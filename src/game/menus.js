@@ -107,7 +107,8 @@ async function pickFlight() {
  * mode: 'field' | 'battle' | 'forced' | 'item' | 'select'
  * returns chosen index (battle/forced/item/select) or -1/null.
  */
-export function openParty({ mode = 'field', active = -1, title, onUse } = {}) {
+/** compat(c) -> { ok, label } marks each creature as able or not to take the item being used (TM, stone). */
+export function openParty({ mode = 'field', active = -1, title, onUse, compat = null } = {}) {
   const S = state();
   return panel('panel-party', (el, close) => {
     const head = h('header', { class: 'panel-title', text: title ?? (mode === 'forced' ? 'Elegí la próxima criatura' : mode === 'item' || mode === 'select' || mode === 'use' ? 'Elegí una criatura' : 'Equipo') });
@@ -120,13 +121,15 @@ export function openParty({ mode = 'field', active = -1, title, onUse } = {}) {
       rows.length = 0;
       list.replaceChildren(...S.party.map((c, i) => {
         const shown = anim && anim.i === i ? { ...c, hp: anim.from } : c;
-        const li = h('li', { class: `party-row ${shown.hp <= 0 ? 'is-fainted' : ''} ${i === active ? 'is-current' : ''} ${swapFrom === i ? 'is-swapping' : ''}` },
+        const cp = compat ? compat(c) : null;
+        const li = h('li', { class: `party-row ${shown.hp <= 0 ? 'is-fainted' : ''} ${i === active ? 'is-current' : ''} ${swapFrom === i ? 'is-swapping' : ''} ${cp ? (cp.ok ? 'is-compat' : 'is-incompat') : ''}` },
           h('img', { src: creatureIcon(c.species), alt: '', class: 'party-icon', width: 80, height: 80 }),
           h('div', { class: 'party-main' },
             h('div', { class: 'party-name' }, h('span', { text: displayName(c) }), c.status ? h('span', { class: 'status-chip', 'data-status': c.status, text: STATUS_SHORT[c.status] }) : null),
             h('div', { class: 'party-lv', text: `Nv${c.level}` }),
             hpBar(shown),
             h('div', { class: 'party-hp', text: `${shown.hp}/${maxHp(c)}` }),
+            cp ? h('div', { class: `party-compat ${cp.ok ? 'is-ok' : 'is-no'}`, text: cp.label }) : null,
           ));
         rows.push(li);
         return li;
@@ -179,6 +182,7 @@ export function openParty({ mode = 'field', active = -1, title, onUse } = {}) {
         makeNav(i);
         return;
       }
+      if (compat && !compat(c).ok) return say(`${displayName(c)}: ${compat(c).label.toLowerCase()}.`);
       if (mode === 'item' || mode === 'select') return close(i);
       if (mode === 'use') { if (await onUse(i, animate)) close(i); return; }
       if (mode === 'forced' || mode === 'battle') {
@@ -306,7 +310,14 @@ export function openBag({ mode = 'field', wild = false } = {}) {
           const act = S.party.findIndex((c) => c.hp > 0);
           return close({ item: key, target: act });
         }
-        const t = await openParty({ mode: 'item', title: `Usar ${it.name}` });
+        const compat = (c) => {
+    if (it.tm) {
+      if (c.moves.some((m) => m.id === it.tm)) return { ok: false, label: 'Ya lo sabe' };
+      return tmCompatible(c.species, it.tm) ? { ok: true, label: '✓ Puede aprenderlo' } : { ok: false, label: '✗ No es compatible' };
+    }
+    return itemUsable(key, c) ? { ok: true, label: '✓ Compatible' } : { ok: false, label: '✗ No es compatible' };
+  };
+  const t = await openParty({ mode: 'item', title: `Usar ${it.name}`, compat });
         if (t < 0) return;
         if (!itemUsable(key, S.party[t])) return say('No tendría ningún efecto.');
         return close({ item: key, target: t });
@@ -363,7 +374,14 @@ async function useInField(key) {
     });
     return;
   }
-  const t = await openParty({ mode: 'item', title: `Usar ${it.name}` });
+  const compat = (c) => {
+    if (it.tm) {
+      if (c.moves.some((m) => m.id === it.tm)) return { ok: false, label: 'Ya lo sabe' };
+      return tmCompatible(c.species, it.tm) ? { ok: true, label: '✓ Puede aprenderlo' } : { ok: false, label: '✗ No es compatible' };
+    }
+    return itemUsable(key, c) ? { ok: true, label: '✓ Compatible' } : { ok: false, label: '✗ No es compatible' };
+  };
+  const t = await openParty({ mode: 'item', title: `Usar ${it.name}`, compat });
   if (t < 0) return;
   const c = S.party[t];
   if (!itemUsable(key, c)) return say('No tendría ningún efecto.');

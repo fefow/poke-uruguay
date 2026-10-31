@@ -463,3 +463,13 @@ test('todo camino cerrado entre ciudades tiene algo en la historia que lo abre',
   }
   assert.deepEqual(stuck, []);
 });
+
+test('revancha: cada mapa pertenece al primer gimnasio por delante en la ruta', async () => {
+  const { refGymOrder } = await import('../src/data/maps.js');
+  assert.equal(refGymOrder('ruta1'), 1);
+  assert.equal(refGymOrder('r_ecilda_trinidad'), 1);
+  assert.equal(refGymOrder('gym_trinidad'), 1);
+  assert.equal(refGymOrder('palmitas'), 2);
+  assert.equal(refGymOrder('fraybentos'), 3);
+  assert.equal(refGymOrder('gym_mvd'), 12);
+});

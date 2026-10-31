@@ -795,6 +795,32 @@ const PLACES = {
   florida: ['gym_florida'],
   canelones: ['gym_canelones'],
 };
+/**
+ * The gym a map "belongs to" for rematches: the first gym at or after the map on the story route
+ * (everything before Trinidad belongs to Trinidad's medal). Returns the medal order, 1-based.
+ * Maps off the route fall back on their trainers' level against each gym's ace.
+ */
+const ABBR = { mvd: 'montevideo', pde: 'punta', tyt: 'quebrada', tac: 'tacuarembo', riv: 'rivera', sal: 'salto', pay: 'paysandu', frb: 'fraybentos', dur: 'durazno', min: 'minas', ros: 'rosario', pir: 'piriapolis', pal: 'paloma' };
+function stopOfMap(id) {
+  if (STOP_INDEX[id] !== undefined) return STOP_INDEX[id];
+  const ci = CHAIN.indexOf(id);
+  if (ci >= 0) { let b = ci; while (STOP_INDEX[CHAIN[b]] === undefined) b++; return STOP_INDEX[CHAIN[b]]; }
+  for (const [stop, ids] of Object.entries(PLACES)) if (ids.includes(id)) return STOP_INDEX[stop];
+  const tail = id.replace(/^(gym|poli|shop|casa|anglo|ferry|torre|anima|represa|obs|liga|pp)_/, '').replace(/\d+$/, '');
+  const key = ABBR[tail] ?? tail;
+  return STOP_INDEX[key];
+}
+export function refGymOrder(mapId, maxLevel = 0) {
+  const gyms = GYM_STOPS.map((g) => STOP_INDEX[g.id]);
+  const i = stopOfMap(mapId);
+  if (i !== undefined) {
+    const k = gyms.findIndex((g) => g >= i);
+    return k < 0 ? gyms.length : k + 1;
+  }
+  const k = GYM_STOPS.findIndex((g) => gymAce(g.id) + 1 >= maxLevel);
+  return k < 0 ? GYM_STOPS.length : k + 1;
+}
+
 (function retuneBuildings() {
   for (const [stop, ids] of Object.entries(PLACES)) {
     const [lo, hi] = stopBand(STOP_INDEX[stop]);

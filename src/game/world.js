@@ -1,6 +1,6 @@
 // Overworld: map loading/linking, movement, NPCs, trainers, encounters,
 // rendering and the script API used by story scripts.
-import { MAPS, OUTDOOR, INTERIOR } from '../data/maps.js';
+import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.js';
 import { SCRIPTS } from '../data/story.js';
 import { SPECIES } from '../data/species.js';
 import { badgeOf } from '../data/route.js';
@@ -558,11 +558,15 @@ async function talkTo(n) {
   if (d.text) return say(d.text);
 }
 
-// Rematches: common trainers can be challenged again after each medal (and the Liga),
-// with stronger and already evolved teams. Rivals, leaders and bosses use scripts, not this path.
+// Rematches: a common trainer belongs to the first gym ahead of their map (everything before Trinidad
+// belongs to Trinidad's medal) and only offers a rematch once you hold the medal two gyms later.
+// Each extra medal (and the Liga) raises the tier: stronger, already evolved teams.
+// Rivals, leaders and bosses use scripts, not this path.
 const RM_BONUS = [0, 4, 7, 10, 13, 16, 19, 22, 25, 28];
-function rematchTier() {
-  return badgeCount() + (flag('champion') ? 1 : 0);
+export function rematchTier(mapId, team = []) {
+  const ref = refGymOrder(mapId, Math.max(0, ...team.map((m) => m[1])));
+  const progress = badgeCount() + (flag('champion') ? 1 : 0);
+  return Math.max(0, Math.min(RM_BONUS.length - 1, progress - ref - 1));
 }
 
 function rematchTeam(team, tier) {
@@ -577,7 +581,7 @@ function rematchTeam(team, tier) {
 async function trainerTalk(n) {
   const t = n.def.trainer;
   if (flag(`tr_${t.id}`)) {
-    const tier = rematchTier();
+    const tier = rematchTier(W_.map.id, t.team);
     if (tier < 1 || flag(`rm${tier}_${t.id}`)) return say(t.after, { name: t.name });
     await say([t.after, 'Estuve entrenando desde la última vez.'].flat().filter(Boolean), { name: t.name });
     if (!(await ask('¿Aceptás una revancha?'))) return;
