@@ -65,9 +65,10 @@ test('battles replay identically from seed + actions', () => {
 test('exp curve and level up', () => {
   const c = mon('ceibito', 5);
   assert.equal(c.moves.length, 2, 'starters begin with two moves');
-  const ev = gainExp(c, expForLevel(10) - c.exp);
-  assert.equal(c.level, 10);
-  assert.ok(ev.some((e) => e.type === 'learn' && e.move === 'megaagotar'));
+  const ev = gainExp(c, expForLevel(12) - c.exp);
+  assert.equal(c.level, 12);
+  assert.ok(ev.some((e) => e.type === 'learn' && e.move === 'latigo_cepa'));
+  assert.ok(c.moves.length <= 4);
 });
 
 test('legacy starter moves stay legal for old saves', () => {
@@ -290,10 +291,85 @@ test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstácul
   assert.ok(has('r_tupambae_melo', '\\'), 'falta la roca de Fuerza');
   assert.ok(OUTDOOR.r_piriapolis_minas.dark, 'falta el túnel oscuro de Destello');
   // the move is handed out in a city before the obstacle, and that script exists
-  for (const [house, city, block, script] of [['casa_pay', 'paysandu', 'r_belen_artigas', 'gift_corte'], ['casa_artigas', 'artigas', 'ruta30', 'gift_surf'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'gift_fuerza']]) {
+  for (const [house, city, block, script] of [['casa_artigas', 'artigas', 'ruta30', 'gift_surf'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'gift_fuerza']]) {
     assert.equal(INTERIOR[house].npcs[0].script, script);
     assert.ok(SCRIPTS[script]);
     assert.ok(at(city) < at(block), `${script} debe darse antes de su obstáculo`);
   }
   assert.ok(at('paloma') < at('r_piriapolis_minas'), 'el farol se da antes del túnel');
+  // the Machete comes from the Buquebus captain in Fray Bentos, long before the thicket
+  assert.equal(INTERIOR.casa_frb_faro.npcs[0].script, 'keeper_colonia');
+  assert.ok(SCRIPTS.keeper_colonia && SCRIPTS.ferry_captain);
+  assert.ok(OUTDOOR.fraybentos.doors.some((d) => d.to === 'ferry_1'), 'la terminal está en Fray Bentos');
+  assert.ok(!OUTDOOR.montevideo.doors.some((d) => d.to === 'ferry_1'), 'Montevideo ya no tiene el Buquebus');
+  assert.ok(at('fraybentos') < at('r_belen_artigas'));
+});
+
+test('ciudades: las 18 miden como Montevideo y ninguna se repite; las localidades tampoco', async () => {
+  const { OUTDOOR } = await import('../src/data/maps.js');
+  const { CITY_SPECS, LOC_PLAN } = await import('../src/data/town-specs.js');
+  const seen = new Map();
+  for (const id of Object.keys(CITY_SPECS)) {
+    const t = OUTDOOR[id].tiles;
+    assert.equal(t.length, 30, `${id} alto`);
+    assert.equal(t[0].length, 44, `${id} ancho`);
+  }
+  for (const id of [...Object.keys(CITY_SPECS), ...Object.keys(LOC_PLAN)]) {
+    const key = OUTDOOR[id].tiles.join('|');
+    assert.ok(!seen.has(key), `${id} es idéntica a ${seen.get(key)}`);
+    seen.set(key, id);
+  }
+  // each locality has its own landscape: the set of scenery tiles differs from its neighbours'
+  const scenery = (id) => [...new Set(OUTDOOR[id].tiles.join('').replace(/[#.cDwrugovWCQIUtHS=]/g, ''))].sort().join('');
+  const locs = Object.keys(LOC_PLAN);
+  const kinds = new Set(locs.map(scenery));
+  assert.ok(kinds.size >= 8, `pocas identidades distintas en las localidades: ${kinds.size}`);
+});
+
+test('historia nueva: Dr. Díaz, Torre de las Ánimas en Melo, Calle Victoria y decisiones de niebla', async () => {
+  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.js');
+  const { SCRIPTS } = await import('../src/data/story.js');
+  assert.ok(SCRIPTS.anima && SCRIPTS.keeper_colonia);
+  assert.ok(OUTDOOR.melo.doors.some((d) => (d.to ?? d) === 'anima_1'), 'la torre está en Melo');
+  for (const id of ['anima_1', 'anima_2', 'anima_3']) assert.ok(INTERIOR[id], id);
+  assert.equal(OUTDOOR.r_laspiedras_montevideo.name, 'Calle Victoria');
+  const src = (await import('node:fs')).readFileSync(new URL('../src/data/story.js', import.meta.url), 'utf8');
+  assert.ok(!/Calima/.test(src.replace(/id: 'calima'|look: 'calima'|async calima|npcLeave\('calima'\)/g, '')), 'queda un Calima en los textos');
+});
+
+test('Casino Peninsula: fichas, tragamonedas y premios existen', async () => {
+  const { MAPS } = await import('../src/data/maps.js');
+  const { SCRIPTS } = await import('../src/data/story.js');
+  const { ITEMS } = await import('../src/data/items.js');
+  assert.ok(ITEMS.ficha);
+  assert.ok(MAPS.casino_pde.npcs.every((n) => !n.script || SCRIPTS[n.script]));
+  assert.ok(MAPS.punta.doors.some((d) => (d.to ?? d) === 'casino_pde'));
+  for (const k of ['mate_dulce', 'ultraesfera', 'dulce_de_leche', 'piedra_agata', 'mt_sombra_nocturna', 'mt_garra_charrua']) assert.ok(ITEMS[k], k);
+});
+
+test('inicio: bosque grande, cueva con el PP y Buquebus en Fray Bentos', async () => {
+  const { OUTDOOR } = await import('../src/data/maps.js');
+  assert.equal(OUTDOOR.r_rosario_sanjose.name, 'Bosque Grande');
+  assert.equal(OUTDOOR.r_palmitas_mercedes.name, 'Cueva de Palmitas');
+  assert.ok(OUTDOOR.r_palmitas_mercedes.npcs.some((n) => n.trainer?.cls === 'Equipo PP'));
+  assert.ok(!OUTDOOR.colonia.doors.some((d) => (d.to ?? d) === 'ferry_1'));
+});
+
+test('rutas guiadas: desniveles de un solo sentido y paredes de árboles', async () => {
+  const { OUTDOOR } = await import('../src/data/maps.js');
+  const { TILE_INFO } = await import('../src/gfx/tiles.js');
+  assert.ok(TILE_INFO['λ'].ledge);
+  const total = Object.values(OUTDOOR).reduce((n, m) => n + m.tiles.join('').split('λ').length - 1, 0);
+  assert.ok(total > 20, 'hay desniveles en las rutas');
+  const r = OUTDOOR.r_rosario_sanjose.tiles.join('');
+  const trees = (r.match(/[#q]/g) ?? []).length;
+  assert.ok(trees / r.length > 0.4, 'el Bosque Grande es denso');
+});
+
+test('historias de ruta: las marcas rq_/rf_ son válidas en una partida guardada', async () => {
+  const { validateSave } = await import('../src/save/validate.js');
+  const { OUTDOOR } = await import('../src/data/maps.js');
+  const flags = Object.values(OUTDOOR).flatMap((m) => (m.npcs ?? []).map((n) => n.doneFlag).filter(Boolean));
+  assert.ok(flags.length > 10, 'hay misiones de ruta');
+  assert.ok(flags.every((f) => /^(rq|rf)_[a-z0-9_]{1,40}$/.test(f)), 'formato de marca');
 });

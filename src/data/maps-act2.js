@@ -1,6 +1,6 @@
 // Act 2: Durazno and the north and west of the country (Durazno, Tacuarembó, Rivera, Salto,
 // Paysandú, Fray Bentos), the Equipo PP hideouts and the Liga. Maps come from map-gen.js.
-import { TR, room, HOUSE, GYM, poli, shop } from './map-kit.js';
+import { TR, room, HOUSE, GYM, poli, shop, casaNpc } from './map-kit.js';
 import { city, route, wildList, fishList, teamOf, fitToMap } from './map-gen.js';
 
 // ---------------------------------------------------------------- helpers
@@ -12,7 +12,6 @@ const grunt = (spot, id, levels, intro, lose, after, opts = {}) => tr(spot, 'gru
 const npc = (x, y, look, text, extra = {}) => ({ x, y, look, text: [].concat(text), ...extra });
 const wander = (x, y, look, text) => npc(x, y, look, text, { wander: true });
 const house = (name, ...npcs) => room(HOUSE, { name, npcs });
-const casaNpc = (look, text) => ({ x: 6, y: 3, look, dir: 'left', text: [].concat(text) });
 
 const FOREST = ['planta', 'bicho', 'veneno'];
 
@@ -301,7 +300,7 @@ export const ACT2_OUTDOOR = {
     fish: fishList(46, 48, 3),
     npcs: [
       tr(R3.spots[0], 'boy', 'r3_a', 'Facundo', 'Camionero', ['normal', 'tierra'], [46, 47], ['Voy y vengo por esta ruta todos los días.', 'Me quedé sin nafta.', 'En Paysandú hay una feria de artesanos.']),
-      grunt(R3.spots[1], 'r3_g1', [47, 48], 'Sin la Represa, la niebla manda.', 'Imposible.', 'Calima nos va a premiar igual.'),
+      grunt(R3.spots[1], 'r3_g1', [47, 48], 'Sin la Represa, la niebla manda.', 'Imposible.', 'Dr. Díaz nos va a premiar igual.'),
       tr(R3.spots[2], 'girl', 'r3_b', 'Lorena', 'Navegante', ['agua', 'volador'], [47, 48], ['El río es más grande que el mar para mí.', 'Buen viento.', 'Paysandú es la heroica.']),
       grunt(R3.spots[3], 'r3_g2', [48, 48], 'Mejor volvé.', 'No era tan difícil.', 'Nos vemos en el frigorífico.'),
       tr(R3.gateSpots[0], 'oldman', 'r3_c', 'Aníbal', 'Veterano', ['tierra', 'roca'], [47, 48], ['El puente es angosto y yo ocupo todo el ancho.', 'Me rindo. Pasá.', 'Fray Bentos está al sur de Paysandú.'], { gate: true, sight: 4 }),
@@ -334,10 +333,10 @@ export const ACT2_OUTDOOR = {
     fish: fishList(48, 51, 24),
     npcs: [
       tr(R24.spots[0], 'girl', 'r24_a', 'Valeria', 'Ingeniera', ['electrico', 'psiquico'], [48, 49], ['Estudio cómo funciona la niebla artificial.', 'Muy interesante.', 'Es una red de torres. Todas conectadas.']),
-      grunt(R24.spots[1], 'r24_g1', [49, 50], 'El jefe no recibe visitas.', 'No.', 'Calima está arriba del frigorífico.'),
+      grunt(R24.spots[1], 'r24_g1', [49, 50], 'El jefe no recibe visitas.', 'No.', 'Dr. Díaz está arriba del frigorífico.'),
       tr(R24.spots[2], 'boy', 'r24_b', 'Santiago', 'Obrero', ['tierra', 'roca'], [48, 50], ['Salí del turno y me topé con vos.', 'Qué cansancio.', 'En el frigorífico hay movimientos raros.']),
       tr(R24.gateSpots[0], 'boy', 'r24_gate', 'Capataz Rivas', 'Obrero', ['roca', 'tierra'], [49, 50], ['La cantera está cerrada. A menos que me ganes.', 'Pasá, pero con cuidado.', 'Fray Bentos queda al sur.'], { gate: true, sight: 3 }),
-      grunt(R24.spots[3], 'r24_g2', [50, 51], 'Última advertencia.', 'No lo puedo creer.', 'Calima es más fuerte que todos nosotros.'),
+      grunt(R24.spots[3], 'r24_g2', [50, 51], 'Última advertencia.', 'No lo puedo creer.', 'Dr. Díaz es más fuerte que todos nosotros.'),
     ],
     items: [{ ...R24.itemSpots[0], item: 'alfajor_triple', id: 'r24_item1' }],
   },
@@ -474,7 +473,7 @@ export const ACT2_INTERIOR = {
   poli_sal: poli('Policlínica de Salto'),
   poli_pay: poli('Policlínica de Paysandú'),
   poli_frb: poli('Policlínica de Fray Bentos'),
-  shop_tac: shop('Almacén de Tacuarembó', shopStock(['pan_casero', 'alfajor_triple', 'refuerzo_ataque', 'refuerzo_defensa', 'piedra_basalto'])),
+  shop_tac: shop('Almacén de Tacuarembó', shopStock(['mate', 'pan_casero', 'alfajor_triple', 'refuerzo_ataque', 'refuerzo_defensa', 'piedra_basalto'])),
   shop_riv: shop('Almacén de Rivera', shopStock(['pan_casero', 'alfajor_triple', 'refuerzo_especial', 'refuerzo_velocidad', 'piedra_amatista'])),
   shop_sal: shop('Almacén de Salto', shopStock(['pan_casero', 'alfajor_triple', 'refuerzo_especial', 'refuerzo_velocidad', 'torta_frita'])),
   shop_pay: shop('Almacén de Paysandú', shopStock(['pan_casero', 'alfajor_triple', 'torta_frita'])),
@@ -488,6 +487,7 @@ export const ACT2_INTERIOR = {
   casa_pay: house('Casa en Paysandú', casaNpc('oldman', ['Paysandú resistió un sitio de varios meses.', 'Por eso le dicen la Heroica.'])),
   casa_pay2: house('Casa en Paysandú', { x: 6, y: 3, look: 'sailor', dir: 'left', script: 'gift_pay' }, { x: 3, y: 5, look: 'oldman', dir: 'right', script: 'gift_cana3' }),
   casa_frb: house('Casa en Fray Bentos', casaNpc('clerk', ['Mi abuelo trabajó en el Anglo. Decía que el olor del frigorífico se sentía a kilómetros.'])),
+  casa_frb_faro: house('Casa del farero', { x: 6, y: 3, look: 'keeper', dir: 'left', script: 'keeper_colonia' }),
   casa_frb2: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_frb' }),
 
   // --- Buquebus "China Zorrilla" (Montevideo): the ferry the player boards once, three decks, the captain at the top
@@ -537,13 +537,40 @@ export const ACT2_INTERIOR = {
     npcs: [
       tr({ x: 3, y: 5 }, 'clerk', 'ob_c', 'Técnica Moreira', 'Técnica PP', ['psiquico', 'veneno'], [35, 36], ['Estos instrumentos midieron el viento del Río de la Plata durante décadas.', 'Se desajustó todo.', 'Los registros originales están arriba.'], { dir: 'right', sight: 4 }),
       tr({ x: 8, y: 3 }, 'grunt', 'ob_d', 'Recluta Bruma Baja', 'Equipo PP', ['siniestro', 'psiquico'], [35, 36], ['Esto fue un laboratorio serio, antes de que lo usáramos nosotros.', 'Ahora sí me asusté.', 'El que manda acá arriba es Almada.'], { dir: 'down', sight: 3 }),
-      npc(9, 5, 'biologo', ['Una placa dice: "Proyecto Pampero, estudio del clima rioplatense. Dir. Tabárez y Calima".', 'Había dos nombres. Alguien raspó uno de los dos.'], { dir: 'left' }),
+      npc(9, 5, 'biologo', ['Una placa dice: "Proyecto Pampero, estudio del clima rioplatense. Dir. Tabárez y Dr. Díaz".', 'Había dos nombres. Alguien raspó uno de los dos.'], { dir: 'left' }),
     ],
   }),
   obs_3: room(FLOOR_TOP, {
     name: 'Observatorio del Cerro: cúpula', music: 'cave',
     exitTo: { map: 'obs_2', x: 11, y: 2 },
     npcs: [{ x: 5, y: 2, look: 'biologo', dir: 'down', id: 'almada', cond: (f) => !f.obs_clear, script: 'almada' }],
+  }),
+
+  // --- Torre de las Ánimas (Melo): the old watchtower of the Cabildo, three floors of Siniestro trainers; the Ánima of the Sereno rests at the top
+  anima_1: room(FLOOR_UP, {
+    name: 'Torre de las Ánimas: planta baja', music: 'cave',
+    warps: [{ x: 11, y: 1, to: 'anima_2', tx: 5, ty: 7 }],
+    npcs: [
+      tr({ x: 2, y: 4 }, 'oldman', 'an_a', 'Sereno Ramiro', 'Sereno', ['siniestro'], [26, 27], ['Hace cuarenta años que cuido esta torre de noche.', 'Hasta el cuidador pierde alguna vez.', 'Arriba las luces se mueven solas.'], { dir: 'right', sight: 4 }),
+      tr({ x: 8, y: 6 }, 'girl', 'an_b', 'Lorena', 'Curiosa', ['siniestro', 'veneno'], [26, 27], ['Subí a ver las luces y me quedé.', 'Qué susto.', 'El piso de arriba es más frío.'], { dir: 'left', sight: 4 }),
+      npc(6, 2, 'boy', ['La torre era el vigía del Cabildo. De noche se ven luces en las ventanas.', 'Dicen que son las ánimas del pueblo: las Luces Malas de Cerro Largo.'], { dir: 'down' }),
+    ],
+    items: [{ x: 1, y: 7, item: 'mate_dulce', id: 'an_item1' }],
+  }),
+  anima_2: room(FLOOR_MID, {
+    name: 'Torre de las Ánimas: sala del vigía', music: 'cave',
+    exitTo: { map: 'anima_1', x: 11, y: 2 },
+    warps: [{ x: 0, y: 1, to: 'anima_3', tx: 5, ty: 6 }, { x: 11, y: 1, to: 'anima_3', tx: 5, ty: 6 }],
+    npcs: [
+      tr({ x: 3, y: 5 }, 'clerk', 'an_c', 'Escribano Olivera', 'Archivista', ['siniestro', 'psiquico'], [27, 28], ['Acá guardaban las actas del Cabildo.', 'Se borró la tinta.', 'Más arriba hay algo que no es del pueblo.'], { dir: 'right', sight: 4 }),
+      grunt({ x: 8, y: 3 }, 'an_g1', [27, 28], 'Esta torre nos sirve para esconder una pieza de la máquina de niebla.', 'Nadie me avisó que subía alguien.', 'El Ánima no nos deja subir. Pero vos vas a intentar, ¿no?', { dir: 'down', sight: 3 }),
+      npc(9, 5, 'oldman', ['Cuando era chico, mi abuelo subía a prender el farol del vigía.', 'Una noche el farol no se prendió. Desde entonces las luces andan por su cuenta.'], { dir: 'left' }),
+    ],
+  }),
+  anima_3: room(FLOOR_TOP, {
+    name: 'Torre de las Ánimas: cúpula', music: 'cave',
+    exitTo: { map: 'anima_2', x: 11, y: 2 },
+    npcs: [{ x: 5, y: 2, look: 'anima', dir: 'down', id: 'anima', cond: (f) => !f.anima_clear, script: 'anima' }],
   }),
 
   // --- Torre de Niebla (Rivera): three floors, Bruma at the top
@@ -564,7 +591,7 @@ export const ACT2_INTERIOR = {
     npcs: [
       grunt({ x: 3, y: 5 }, 'tw_g4', [42, 42], 'El transmisor no se toca.', 'No era tan difícil.', 'Es el corazón de la torre.', { dir: 'right', sight: 4 }),
       grunt({ x: 8, y: 3 }, 'tw_g5', [42, 42], 'Un metro más y te hago volar.', 'Me ganaste.', 'Seguí hasta Bruma.', { dir: 'down', sight: 3 }),
-      tr({ x: 9, y: 5, dir: 'left' }, 'clerk', 'tw_t1', 'Dr. Salazar', 'Técnico PP', ['electrico', 'veneno'], [42, 43], ['Yo diseñé la red de niebla.', 'Mis cálculos fallaron.', 'Calima nos dio los planos.'], { sight: 4 }),
+      tr({ x: 9, y: 5, dir: 'left' }, 'clerk', 'tw_t1', 'Dr. Salazar', 'Técnico PP', ['electrico', 'veneno'], [42, 43], ['Yo diseñé la red de niebla.', 'Mis cálculos fallaron.', 'Dr. Díaz nos dio los planos.'], { sight: 4 }),
     ],
     items: [{ x: 9, y: 6, item: 'alfajor_triple', id: 'tw_item2' }],
   }),
@@ -591,12 +618,12 @@ export const ACT2_INTERIOR = {
     npcs: [{ x: 5, y: 2, look: 'garua', dir: 'down', id: 'garua2', cond: (f) => !f.represa_clear, script: 'garua2' }],
   }),
 
-  // --- Frigorífico Anglo (Fray Bentos): three floors, Brumario and then Calima
+  // --- Frigorífico Anglo (Fray Bentos): three floors, Brumario and then Dr. Díaz
   anglo_1: room(FLOOR_UP, {
     name: 'Frigorífico Anglo: galpón', music: 'cave',
     warps: [{ x: 11, y: 1, to: 'anglo_2', tx: 5, ty: 7 }],
     npcs: [
-      grunt({ x: 2, y: 4 }, 'an_g1', [48, 48], 'Este galpón es del Equipo PP.', 'No pasa nada.', 'Subí. Calima te espera.', { dir: 'right', sight: 4 }),
+      grunt({ x: 2, y: 4 }, 'an_g1', [48, 48], 'Este galpón es del Equipo PP.', 'No pasa nada.', 'Subí. Dr. Díaz te espera.', { dir: 'right', sight: 4 }),
       grunt({ x: 8, y: 6 }, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'La escalera está al fondo.', { dir: 'left', sight: 4 }),
       grunt({ x: 6, y: 2 }, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'La administradora está arriba.', { dir: 'down', sight: 3 }),
     ],

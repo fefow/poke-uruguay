@@ -4,7 +4,7 @@
 import { badgeOf } from '../data/route.js';
 import { SPECIES, MIN_LEVEL, STARTERS } from '../data/species.js';
 import { MOVES } from '../data/moves.js';
-import { ITEMS, MAX_STACK } from '../data/items.js';
+import { ITEMS, MAX_STACK, MAX_FICHAS } from '../data/items.js';
 import { MAPS } from '../data/maps.js';
 import { LOOKS } from '../gfx/characters.js';
 import { expForLevel, calcStats, legalMoves, MAX_LEVEL } from '../game/creature.js';
@@ -20,12 +20,12 @@ const LINES = {
 const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'dex_quest', 'got_carta', 'rival1', 'rival2', 'rival3', 'rival4',
   'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
-  'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
+  'anima_clear', 'fog1', 'fog2', 'fog3', 'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
   'rival5', 'rival6', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
-  'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
+  'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
-const FLAG_PATTERN = /^(tr|it|v|cl|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 
@@ -104,11 +104,11 @@ export function validateSave(d) {
     ['cabo_clear', badgeOf('quebrada'), 'el faro de Cabo Polonio'],
     ['obs_clear', 'quebrada_clear', 'el Observatorio'],
     ['pp_clear', badgeOf('punta'), 'la fábrica de Minas'],
-    ['anglo_clear', 'badge12', 'Calima'],
+    ['anglo_clear', 'badge12', 'Dr. Díaz'],
   ];
   for (const [flag, req, what] of needs) if (flags[flag] && !flags[req]) e(`${what} no pudo haberse completado`);
   if (flags.pp_clear && !flags.quebrada_clear) e('la fábrica de Minas no pudo haberse completado');
-  if (flags.anglo_clear && !flags.pp_clear) e('Calima no pudo haberse vencido antes que Garúa');
+  if (flags.anglo_clear && !flags.pp_clear) e('Dr. Díaz no pudo haberse vencido antes que Garúa');
   for (let i = 2; i <= 4; i++) if (flags[`elite${i}`] && !flags[`elite${i - 1}`]) e('Alto Mando fuera de orden');
   if (flags.elite1 && !(flags.badge12 && flags.anglo_clear)) e('Alto Mando sin las doce medallas');
   if (flags.champion && !(flags.badge12 && flags.anglo_clear && flags.elite4 && flags.rival4)) e('campeón sin completar la Liga');
@@ -149,7 +149,7 @@ export function validateSave(d) {
   for (const [k, q] of Object.entries(d.bag ?? {})) {
     const it = ITEMS[k];
     if (!it) { e(`objeto desconocido "${k}"`); continue; }
-    const max = it.pocket === 'key' ? 1 : MAX_STACK;
+    const max = it.pocket === 'key' ? 1 : k === 'ficha' ? MAX_FICHAS : MAX_STACK;
     if (!isInt(q, 1, max)) { e(`cantidad inválida de ${it.name}`); continue; }
     bag[k] = q;
   }
@@ -163,6 +163,7 @@ export function validateSave(d) {
   if (bag.machete && !flags.got_machete) e('Machete sin haberlo recibido');
   if (bag.ticket_ferry && !(flags.got_ticket && !flags.ferry_done)) e('Ticket del Buquebus imposible');
   if (flags.ferry_done && !flags.got_ticket) e('el Buquebus no pudo haber zarpado');
+  if (flags.got_machete && !flags.ferry_done) e('el Machete lo entrega el capitán del Buquebus');
   if (bag.bici && !flags.got_bici) e('Bicicleta sin haberla recibido');
   if (bag.guantes && !flags.got_guantes) e('Guantes sin haberlos recibido');
   if (bag.farol && !flags.got_farol) e('Farol sin haberlo recibido');

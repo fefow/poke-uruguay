@@ -47,9 +47,9 @@ export function tmCompatible(speciesKey, moveId) {
 /** Every move a species could legitimately know at this level (incl. pre-evolutions). */
 // Starters used to learn moves faster; saves made before the slower curve stay valid.
 const LEGACY_LEARN = {
-  ceibito: [[1, 'grunido'], [5, 'absorber'], [9, 'megaagotar'], [10, 'somnifero'], [15, 'hoja_afilada'], [30, 'mate_amargo']],
-  tejuchispa: [[1, 'grunido'], [3, 'ascuas'], [8, 'ataque_rapido'], [24, 'mordisco'], [30, 'parrillada']],
-  carpinchito: [[1, 'grunido'], [3, 'pistola_agua'], [7, 'burbuja'], [13, 'mate_amargo'], [20, 'golpe_cuerpo'], [30, 'cascada']],
+  ceibito: [[1, 'latigo_cepa'], [7, 'absorber'], [12, 'grunido'], [13, 'somnifero'], [1, 'grunido'], [5, 'absorber'], [9, 'megaagotar'], [10, 'somnifero'], [15, 'hoja_afilada'], [30, 'mate_amargo']],
+  tejuchispa: [[1, 'aranazo'], [1, 'ascuas'], [7, 'ataque_rapido'], [9, 'grunido'], [11, 'rueda_fuego'], [13, 'malicioso'], [1, 'grunido'], [3, 'ascuas'], [8, 'ataque_rapido'], [24, 'mordisco'], [30, 'parrillada']],
+  carpinchito: [[1, 'pistola_agua'], [6, 'grunido'], [8, 'burbuja'], [11, 'hidropulso'], [13, 'mate_amargo'], [1, 'grunido'], [3, 'pistola_agua'], [7, 'burbuja'], [13, 'mate_amargo'], [20, 'golpe_cuerpo'], [30, 'cascada']],
 };
 
 export function legalMoves(speciesKey, level) {

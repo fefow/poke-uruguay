@@ -4,6 +4,7 @@ import { MOVES } from './moves.js';
 // pocket: 'items' | 'balls' | 'key'
 // use: what the item does; validated in game/items logic, never trusted from saves.
 const BASE_ITEMS = {
+  ficha: { name: 'Ficha de Casino', pocket: 'items', price: 0, desc: 'Se compran en el Casino Peninsula de Maldonado y se juegan en las tragamonedas. Se cambian por premios, no por dinero.' },
   esfera: { name: 'Pokeball', pocket: 'balls', price: 200, ball: 1, desc: 'Una bola de cuero para atrapar criaturas salvajes. Efectividad ×1.' },
   superesfera: { name: 'Superball', pocket: 'balls', price: 600, ball: 1.5, desc: 'Mejor que la Pokeball. Cosida a mano en Tacuarembó. Efectividad ×1,5.' },
   ultraesfera: { name: 'Ultraball', pocket: 'balls', price: 1200, ball: 2, desc: 'Alta tecnología oriental. Efectividad ×2. Ideal para criaturas raras o de nivel alto.' },
@@ -35,7 +36,7 @@ const BASE_ITEMS = {
   refuerzo_velocidad: { name: 'Refuerzo de Velocidad', pocket: 'items', price: 550, xstat: 'spe', desc: 'Solo en combate. Sube la Velocidad de la criatura activa.' },
   repelente: { name: 'Repelente', pocket: 'items', price: 350, repel: 100, desc: 'Evita criaturas salvajes débiles por 100 pasos.' },
 
-  carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de San José de Mayo guardaba para el Maestro Tabárez.' },
+  carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de Colonia del Sacramento guardaba para el Maestro Tabárez.' },
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
   lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
   mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
@@ -47,7 +48,7 @@ const BASE_ITEMS = {
   guantes: { name: 'Guantes de Domador', pocket: 'key', price: 0, desc: 'Fuerza: empujá rocas pesadas caminando contra ellas. Hace falta la Medalla Tacuarembó.' },
   farol: { name: 'Farol de Gaucho', pocket: 'key', price: 0, desc: 'Destello: ilumina las cuevas oscuras. Se usa desde el menú. Hace falta la Medalla Maldonado.' },
   bici: { name: 'Bicicleta', pocket: 'key', price: 0, bike: true, desc: 'Cuatro veces más rápida que caminar, pero solo para moverse: no cambia nada en los combates. Se usa desde el menú. No se puede usar bajo techo.' },
-  ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Montevideo.' },
+  ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Fray Bentos.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
 };
@@ -63,3 +64,4 @@ export const ITEMS = deepFreeze(BASE_ITEMS);
 
 export const KEY_ITEMS = deepFreeze(Object.keys(ITEMS).filter((k) => ITEMS[k].pocket === 'key'));
 export const MAX_STACK = 99;
+export const MAX_FICHAS = 999;

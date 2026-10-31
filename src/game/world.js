@@ -253,7 +253,21 @@ function tryMove(d) {
     if (!req(door.req)) return void runScript(async () => { await say(door.deny ?? 'Está cerrado.'); });
     return void runScript(() => enterInterior(door.to));
   }
+  if (tileAt(nx, ny) === 'λ') {
+    // desnivel: only crossed downwards, hopping to the tile below
+    if (d !== 'down' || tileAt(nx, ny + 1) === 'λ' || solidAt(nx, ny + 1, { player: true })) return bump();
+    p.from = { x: p.x, y: p.y };
+    p.x = nx;
+    p.y = ny + 1;
+    p.moving = true;
+    p.t = 0;
+    p.dur = WALK_MS * 1.7;
+    p.step++;
+    return;
+  }
   if (tileAt(nx, ny) === '\\') return void pushBoulder(dx, dy, nx, ny);
+  const blocker = W_.npcs.find((n) => n.visible && n.x === nx && n.y === ny && n.def.blocker);
+  if (blocker) return void runScript(async () => { await say(blocker.def.text, { name: blocker.def.name }); });
   if (solidAt(nx, ny, { player: true })) {
     if (tileAt(nx, ny) === '~' && hasItem('canoa') && !flag(badgeOf('rivera'))) hint('La Canoa no aguanta esta corriente todavía: hace falta la Medalla Rivera.');
     return bump();
@@ -693,6 +707,15 @@ export async function runScript(fn) {
   input.clear();
   try {
     await fn();
+    // Lost a friendly (rival) match: after the scene, the party rests at the last place it healed (the mother's house by default).
+    if (W_.sendHome) {
+      W_.sendHome = false;
+      const lh = state().lastHeal;
+      await say('Volviste a descansar para recuperarte.');
+      await fadeOut(300);
+      loadMap(lh.map, lh.x, lh.y, 'up');
+      await fadeIn(300);
+    }
   } catch (err) {
     console.error(err);
     await say(`Ups, algo salió mal: ${err.message}`);
@@ -713,6 +736,7 @@ export const api = {
   flag,
   setFlag,
   hasItem,
+  countItem: (k) => state().bag[k] ?? 0,
   badges: () => badgeCount(),
   takeItem: (k, q = 1) => removeItem(k, q),
   sfx,
@@ -796,7 +820,7 @@ export const api = {
     const foes = trainer.team.map(([sp, lvl]) => createCreature(sp, lvl));
     const res = await runBattle({ foes, wild: false, trainer, bg: W_.map.bg, canLose, music });
     if (res === 'lose') {
-      if (canLose) { for (const c of state().party) healCreature(c); }
+      if (canLose) { for (const c of state().party) healCreature(c); W_.sendHome = true; }
       else { await blackout(); }
     }
     return res;
@@ -821,6 +845,14 @@ export const api = {
   },
   /** Moves the player to another map with a fade (used when the ferry sails). */
   warp: (map, x, y, dir = 'down') => doWarp(map, x, y, dir),
+  /** The tile in front of the door of `map` that leads to `to` (where someone stepping out of that building stands). */
+  doorFront(map, to) {
+    const m = MAPS[map];
+    const k = m.doors.findIndex((d) => (typeof d === 'string' ? d : d.to) === to);
+    let n = 0;
+    for (let y = 0; y < m.tiles.length; y++) for (let x = 0; x < m.tiles[y].length; x++) if (m.tiles[y][x] === 'D' && n++ === k) return { x, y: y + 1 };
+    return { x: 2, y: 2 };
+  },
   pay: (n) => spend(n),
   /** Buy safari time: the clock only runs inside the Safari map. */
   safariStart(minutes) {
@@ -907,9 +939,20 @@ function drawWorld(g, t) {
     const sy = Math.round(pos.y - cy);
     if (!player && n.def.look === null) continue;
     if (!player && n.def.look === 'ball') { drawBallIcon(g, sx + 8, sy + 6); continue; }
+    if (!player && n.def.look === 'machine') { drawFogMachine(g, sx, sy, t); continue; }
     const look = player ? state().player.look : n.def.look;
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
     const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : 0) : n.moving ? frameIdx : 0;
+    if (!player && typeof look === 'string' && look.startsWith('animal:')) {
+      // creatures seen in the distance: they wander but cannot be fought or caught
+      shadow(g, sx + 8, sy + 13, 6, 2.4);
+      const hop = n.moving ? Math.abs(Math.sin(t / 90)) * 2 : 0;
+      g.save();
+      if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), 0, sy - 7 - hop, 24, 24); }
+      else g.drawImage(creatureSprite(look.slice(7)), sx - 4, sy - 7 - hop, 24, 24);
+      g.restore();
+      continue;
+    }
     shadow(g, sx + 8, sy + 13, 5.5, 2.2);
     if (player && tileAt(p.x, p.y) === '~') {
       g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
@@ -1044,6 +1087,18 @@ function entityPos(e) {
     return { x: (e.from.x + (e.x - e.from.x) * k) * T, y: (e.from.y + (e.y - e.from.y) * k) * T };
   }
   return { x: e.x * T, y: e.y * T };
+}
+
+/** PP fog machine: a grey box with a vent that puffs smoke. */
+function drawFogMachine(g, sx, sy, t) {
+  shadow(g, sx + 8, sy + 14, 7, 2.4);
+  g.fillStyle = '#4a4a5a'; g.fillRect(sx + 1, sy + 4, 14, 10);
+  g.fillStyle = '#7a7a8a'; g.fillRect(sx + 1, sy + 4, 14, 3);
+  g.fillStyle = '#2a2a3a'; g.fillRect(sx + 3, sy + 9, 6, 4);
+  g.fillStyle = '#c83a3a'; g.fillRect(sx + 11, sy + 9, 2, 2);
+  const k = (t / 400) % 1;
+  g.fillStyle = `rgba(210,215,225,${0.7 - k * 0.6})`;
+  g.beginPath(); g.arc(sx + 8 + Math.sin(t / 300) * 2, sy + 2 - k * 7, 2.5 + k * 2.5, 0, 7); g.fill();
 }
 
 function drawBallIcon(g, x, y) {
