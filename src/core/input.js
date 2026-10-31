@@ -87,7 +87,8 @@ addEventListener('blur', () => held.clear());
 const padPrev = {};
 const PAD_BUTTONS = { 0: 'a', 1: 'b', 9: 'start', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
 export function pollGamepads() {
-  const pads = navigator.getGamepads?.() ?? [];
+  let pads = [];
+  try { pads = navigator.getGamepads?.() ?? []; } catch { return; } // blocked by permissions policy (iframes)
   for (const gp of pads) {
     if (!gp) continue;
     const now = {};
@@ -114,7 +115,9 @@ export function pollGamepads() {
 
 /** Gamepad vibration for hits and faints; does nothing without a pad that supports it. */
 export function rumble(ms = 120, strong = 0.5, weak = 0.5) {
-  for (const gp of navigator.getGamepads?.() ?? []) {
+  let pads = [];
+  try { pads = navigator.getGamepads?.() ?? []; } catch { return; }
+  for (const gp of pads) {
     gp?.vibrationActuator?.playEffect?.('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch?.(() => {});
   }
 }

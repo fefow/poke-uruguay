@@ -961,15 +961,15 @@ body {
   --k: 1;
   width: 1920px; height: 1080px;
   transform: scale(var(--k)); transform-origin: center;
-  display: grid; grid-template-columns: 1fr 1280px 1fr;
+  display: grid; grid-template-columns: 1fr 1440px 1fr;
   background:
     radial-gradient(60% 90% at 50% 50%, oklch(0.3 0.08 265 / 0.5), transparent 70%),
     var(--night);
 }
 #side-r { padding-top: 64px; }
 #side-l { grid-column: 1; grid-row: 1; } #side-r { grid-column: 3; grid-row: 1; }
-.stage > .screen { grid-column: 2; grid-row: 1; width: 1280px; height: 960px; aspect-ratio: auto; max-height: none; align-self: center; }
-.side { display: none; flex-direction: column; gap: 16px; padding: 28px 20px; min-width: 0; font-family: var(--font-ui); }
+.stage > .screen { grid-column: 2; grid-row: 1; width: 1440px; height: 1080px; aspect-ratio: auto; max-height: none; align-self: center; }
+.side { display: none; flex-direction: column; gap: 16px; padding: 28px 14px; min-width: 0; font-family: var(--font-ui); }
 .stage.is-game .side { display: flex; }
 .side-logo { margin: 0; font: 400 22px/1.2 var(--font-pixel); color: var(--sun); text-shadow: 0 2px 0 #000; }
 .side-sub { margin: -8px 0 4px; font-size: 14px; color: var(--celeste); }

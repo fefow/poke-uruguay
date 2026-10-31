@@ -50,6 +50,7 @@ setContext(() => {
 // ---------------------------------------------------------------- loop
 let last = performance.now();
 function frame(now) {
+  requestAnimationFrame(frame); // schedule first so one error never freezes the game
   const raw = now - last;
   const dt = Math.min(50, raw);
   last = now;
@@ -63,7 +64,6 @@ function frame(now) {
   updateHud(now);
   updateSidebar(now, mode === 'game');
   render(now);
-  requestAnimationFrame(frame);
 }
 
 // ---------------------------------------------------------------- loader
