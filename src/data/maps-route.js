@@ -122,6 +122,9 @@ const dirOf = (mapId) => LEG_DIR[OWNER[mapId]];
 const ARROW = { e: '→', w: '←', n: '↑', s: '↓' };
 
 const LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'clerk', 'sailor'];
+// Townsfolk are drawn from a wider pool than trainers; trainers get the look of their class.
+const FOLK_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'campesina', 'pescador', 'maestra', 'obrero', 'turista', 'hincha', 'artesana', 'abuela', 'camionero', 'cartero', 'estudiante', 'murguero', 'nino', 'almacenero'];
+const CLASS_LOOK = { Naturalista: 'biologo', Peón: 'gaucho', Estudiante: 'estudiante', Pescador: 'pescador', Viajero: 'turista', Baqueano: 'oldman' };
 const TRAINERS = [
   ['Naturalista', ['bicho', 'planta'], ['Estudio las especies de esta zona.', 'Anoto el resultado.', 'Seguí por el camino principal.']],
   ['Peón', ['normal', 'lucha'], ['Pasé la mañana arreando, ahora toca combatir.', 'Se me escapó la tropilla y el combate.', 'Buen viaje.']],
@@ -131,7 +134,32 @@ const TRAINERS = [
   ['Baqueano', ['planta', 'tierra'], ['Conozco cada rincón de este camino.', 'Me ganaste de local.', 'Seguí derecho.']],
 ];
 
-const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'swimmer', 'ciclista', 'keeper', 'biologo'];
+const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'swimmer', 'ciclista', 'keeper', 'biologo', 'campesina', 'pescador', 'maestra', 'obrero', 'artesana', 'abuela', 'camionero', 'cartero', 'cocinero', 'murguero', 'hincha'];
+
+const houseFolk = (first, look2, text2) => [first, ...(look2 ? [casaNpc(look2, text2, first)] : [])];
+
+// Each department has its own flavour: its townsfolk talk about what their land is known for.
+const DEPT_FOLK = {
+  colonia: ['Del Barrio Histórico no se va nadie sin sacarse una foto en las calles de piedra.', 'El faro se ve desde todo el casco viejo, de día y de noche.', 'Los barcos llegan y se van, pero la gente de acá se queda.'],
+  sanjose: ['Acá hay chacras y tambos en cada camino. La leche llega fresca a la mesa.', 'En el teatro del centro se hacen obras todo el año.', 'Los domingos la plaza se llena de familias con termo.'],
+  flores: ['En Trinidad la plaza es el punto de encuentro: se habla de campo y de fútbol.', 'Hay más caballos que autos en las calles de tierra.', 'La lana de acá se vende en todo el país.'],
+  soriano: ['En el Río Negro se pesca el dorado. Dicen que pelea más que un entrenador.', 'Mercedes tiene la costanera más linda del litoral.', 'Las islas del río se llenan de pájaros en primavera.'],
+  rionegro: ['El río Uruguay se ve ancho desde la costanera.', 'Hay una fábrica vieja que dio de comer a medio pueblo.', 'Cuando baja el río aparecen playas de arena por todos lados.'],
+  paysandu: ['Acá se hace la cerveza artesanal más rica del litoral, dicen los de acá.', 'La playa Park es el lugar de verano de la ciudad.', 'Los paysandueros somos de hablar fuerte y de abrazar más fuerte.'],
+  salto: ['Las termas de Salto son lo mejor para el cuerpo y el bolsillo.', 'De las quintas salen naranjas para todo el país.', 'La represa de Salto Grande es una de las obras más grandes de la región.'],
+  artigas: ['Acá la frontera con Brasil se cruza a pie, para comprar y para pasear.', 'Se dice que de las minas salen amatistas que brillan como nada.', 'En esta tierra nació una de las figuras más grandes de la historia.'],
+  rivera: ['Rivera y Santana do Livramento son una sola ciudad con dos banderas.', 'En el centro se habla español, portugués y el mezclado de los dos.', 'Los fines de semana la gente cruza la calle para ir de compras a otro país.'],
+  tacuarembo: ['En Tacuarembó hay mucha ganadería y mucho gaucho de verdad.', 'La fiesta de la Patria Gaucha reúne a todo el país en marzo.', 'El Valle Edén tiene una leyenda para cada piedra.'],
+  cerrolargo: ['La Laguna Merín está cerca y de ahí viene medio mundo a pescar.', 'En el campo de Cerro Largo hay más ovejas que gente.', 'Melo es ciudad de frontera: cuando uno cruza, sigue todo igual pero con otro acento.'],
+  treintaytres: ['Cerca de acá hay quebradas y cascadas en medio de las sierras.', 'Treinta y Tres se llama así por los Treinta y Tres Orientales, y a mucha honra.', 'Los arrozales se ven como espejos cuando los inundan.'],
+  rocha: ['Rocha es de playas largas y desiertas, con dunas y lobos marinos.', 'En verano llega mucha gente de Argentina y Brasil. En invierno quedan los de acá.', 'Los pescadores salen antes del amanecer y vuelven con la red llena.'],
+  maldonado: ['Punta del Este tiene la Mano más fotografiada del país.', 'En la temporada los precios suben más que la marea.', 'Los lobos marinos de la isla se oyen desde el puerto.'],
+  lavalleja: ['Las sierras de Minas están llenas de arroyos y cerros para trepar.', 'Acá se hace la mejor agua mineral del país.', 'En abril hay peregrinación al Cerro Verdún.'],
+  florida: ['En Florida se firmó la independencia; acá la historia está en las calles.', 'La plaza tiene un monumento para cada fecha importante.', 'Los carnavales de los pueblos de al lado son ruidosos y alegres.'],
+  durazno: ['El Río Negro cruza por el medio de Durazno y hace una isla en la ciudad.', 'Acá se realiza una fiesta nacional del folklore que no se la pierde nadie.', 'Durazno queda al centro del país: de acá todo está a la misma distancia.'],
+  canelones: ['Canelones es de viñedos y quintas; la uva tannat se da como en pocos lados.', 'Acá hay vino bueno y se sirve con chivito.', 'Todos los fines de semana alguien hace un asado con vista a los viñedos.'],
+  montevideo: ['En Montevideo el mate se toma caminando por la rambla.', 'En el Palacio Salvo sobran leyendas y faltan ascensores.', 'Los sábados el fútbol corta las calles; el candombe corta el resto.'],
+};
 const npc = (x, y, look, text, extra = {}) => ({ x, y, look, text: [].concat(text), ...extra });
 
 const stockAt = (i) => (i < 9 ? ['esfera', 'te_marcela', 'ruda', 'alfajor']
@@ -202,8 +230,12 @@ function addFolk(m, id, n) {
   m.npcs = m.npcs ?? [];
   addFogHints(m, id);
   for (let k = 0; k < Math.max(0, n - have); k++) {
-    const a = FOLK[(i * 3 + k * 5) % FOLK.length], b = FOLK[(i * 3 + k * 5 + 4) % FOLK.length];
-    m.npcs.push(npc(0, 0, LOOKS[(i + k * 2 + 1) % LOOKS.length], [a, b], k % 2 ? { wander: true } : { dir: ['down', 'left', 'right'][k % 3] }));
+    // Every other neighbour talks about the department they live in; the rest keep the general chatter.
+    const dept = DEPT_FOLK[STOPS[i]?.dept] ?? FOLK;
+    const local = k % 2 === 0;
+    const a = local ? dept[(k >> 1) % dept.length] : FOLK[(i * 3 + k * 5) % FOLK.length];
+    const b = local ? dept[((k >> 1) + 1) % dept.length] : FOLK[(i * 3 + k * 5 + 4) % FOLK.length];
+    m.npcs.push(npc(0, 0, FOLK_LOOKS[(i * 3 + k * 5 + 1) % FOLK_LOOKS.length], [a, b], k % 2 ? { wander: true } : { dir: ['down', 'left', 'right'][k % 3] }));
   }
   if (!m.items?.length) m.items = [{ x: 0, y: 0, item: ITEMS_BY_BAND[Math.min(5, Math.floor(i / 7))], id: `${id}_item1` }];
 }
@@ -245,8 +277,8 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
     enc: { rate: 0.1, list: wildList(types, lo, hi, 6, id) },
     fish: undefined,
     npcs: [
-      npc(0, 0, LOOKS[i % LOOKS.length], lines, { wander: true }),
-      npc(0, 0, LOOKS[(i + 2) % LOOKS.length], [lines[1], isCity ? 'La Policlínica y el almacén están sobre la calle principal.' : 'Acá hay un almacén y poco más. Es lo bueno del pueblo.'], { dir: 'down' }),
+      npc(0, 0, FOLK_LOOKS[(i * 7) % FOLK_LOOKS.length], lines, { wander: true }),
+      npc(0, 0, FOLK_LOOKS[(i * 7 + 5) % FOLK_LOOKS.length], [lines[1], isCity ? 'La Policlínica y el almacén están sobre la calle principal.' : 'Acá hay un almacén y poco más. Es lo bueno del pueblo.'], { dir: 'down' }),
       ...(id === 'colonia' ? [
         { x: 0, y: 0, look: 'girl', dir: 'down', sight: 4, trainer: TR('col_a', 'Valentina', 'Turista', [['teruterito', 5], ['hornerito', 5]], 100, 'Vine a ver el puerto y me quedé a pelear.', 'Buen combate.', 'Colonia tiene más para ver de lo que parece.') },
         { x: 0, y: 0, look: 'sailor', dir: 'left', sight: 4, trainer: TR('col_b', 'Ramiro', 'Marinero', [['nandulin', 5], ['oruga', 5], ['tuco', 5]], 130, 'Mientras espero el barco, entreno.', 'Me hundiste.', 'El río da muchas vueltas, igual que la vida.') },
@@ -278,7 +310,7 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
         { x: 5, y: 2, look: `leader_${stop.gym}`, dir: 'down', script: 'leader', leader: stop.gym },
         ...GYM_TRAINERS[gymType].map(([nm, cls, [intro, lose, after]], k) => {
           const spot = k ? { x: 3, y: 9, dir: 'right' } : { x: 8, y: 6, dir: 'left' };
-          return { ...spot, look: LOOKS[(i + k) % LOOKS.length], sight: 4, trainer: TR(`g_${id}_${k}`, nm, cls, teamOf([gymType], [lo2 + k, hi2], `g${id}${k}`), (hi2 + 2) * 20, intro, lose, after) };
+          return { ...spot, look: CLASS_LOOK[cls] ?? LOOKS[(i + k) % LOOKS.length], sight: 4, trainer: TR(`g_${id}_${k}`, nm, cls, teamOf([gymType], [lo2 + k, hi2], `g${id}${k}`), (hi2 + 2) * 20, intro, lose, after) };
         }),
       ],
     });
@@ -286,9 +318,9 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
   if (isCity) ROUTE_INTERIOR[`poli_${id}`] = poli(`Policlínica de ${stop.name}`);
   if (isCity) ROUTE_INTERIOR[`shop_${id}`] = shop(`Almacén de ${stop.name}`, stockAt(i));
   if (id === 'colonia') ROUTE_INTERIOR.shop_colonia.npcs[0].script = 'shop_carta';
-  ROUTE_INTERIOR[`casa_${id}`] = room(HOUSE, { name: `Casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 1) % HOUSE_LOOKS.length], isCity && place ? [WORK_AT[id] ?? `Trabajo en ${place}.`, lines[1]] : lines)] });
+  ROUTE_INTERIOR[`casa_${id}`] = room(HOUSE, { name: `Casa en ${stop.name}`, npcs: houseFolk(casaNpc(HOUSE_LOOKS[(i * 5 + 1) % HOUSE_LOOKS.length], isCity && place ? [WORK_AT[id] ?? `Trabajo en ${place}.`, lines[1]] : lines), i % 2 ? HOUSE_LOOKS[(i * 3 + 2) % HOUSE_LOOKS.length] : null, (DEPT_FOLK[stop.dept] ?? FOLK).slice(0, 2)) });
   if (id === 'colonia') ROUTE_INTERIOR.casa_colonia.npcs.push({ x: 7, y: 5, look: 'clerk', dir: 'left', script: 'gift_mapa' });
-  if (isCity) ROUTE_INTERIOR[`casa_${id}2`] = room(HOUSE, { name: `Otra casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 4) % HOUSE_LOOKS.length], [lines[1], 'Cuando pasa gente de afuera, se anima el pueblo.'])] });
+  if (isCity) ROUTE_INTERIOR[`casa_${id}2`] = room(HOUSE, { name: `Otra casa en ${stop.name}`, npcs: houseFolk(casaNpc(HOUSE_LOOKS[(i * 5 + 4) % HOUSE_LOOKS.length], [lines[1], 'Cuando pasa gente de afuera, se anima el pueblo.']), HOUSE_LOOKS[(i * 5 + 9) % HOUSE_LOOKS.length], (DEPT_FOLK[stop.dept] ?? FOLK).slice(1, 3)) });
 }
 
 /** Older cities and localities built by hand keep their buildings, people and exits but get a new plan. */
@@ -340,7 +372,7 @@ for (const s of STOPS) for (const via of s.via) {
     const [cls, tt, [intro, lose, after]] = fishTrainer(k);
     const lv = [Math.max(lo, hi - 2 + (k % 2)), Math.min(hi, hi - (k % 2))];
     const nm = ['Gonzalo', 'Mariana', 'Atilio', 'Rosario', 'Julián', 'Lucía', 'Bruno', 'Carmen'][(rn * 3 + k) % 8];
-    return { x: R.spots[k].x, y: R.spots[k].y, look: LOOKS[(rn + k) % 5], dir: R.spots[k].dir, sight: 4, trainer: TR(`${via}_${k}`, nm, cls, teamOf(tt, lv, `${via}${k}`), Math.round(lv[1] * 20), intro, lose, after) };
+    return { x: R.spots[k].x, y: R.spots[k].y, look: CLASS_LOOK[cls] ?? LOOKS[(rn + k) % 5], dir: R.spots[k].dir, sight: 4, trainer: TR(`${via}_${k}`, nm, cls, teamOf(tt, lv, `${via}${k}`), Math.round(lv[1] * 20), intro, lose, after) };
   });
   ROUTE_OUTDOOR[via] = {
     name: REAL_ROAD[via] ?? `Camino a ${b.name}`, music: 'route', bg: 'field', tiles: R.tiles,

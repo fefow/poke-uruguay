@@ -563,7 +563,7 @@ export const SCRIPTS = {
   },
 
   async shop(api, npc) {
-    await api.say('Buenas. ¿Qué se lleva?', { name: 'Almacenero', keep: true });
+    await api.say(npc.greeting ?? 'Buenas. ¿Qué se lleva?', { name: npc.clerkName ?? 'Almacenero', keep: true });
     await api.openShop(npc.stock);
   },
 
