@@ -7,7 +7,12 @@ import { MAPS } from '../data/maps.ts';
 import { creatureIcon } from '../gfx/creatures.ts';
 import { displayName, maxHp } from './creature.ts';
 import { fmt } from './ui.ts';
+import { charSprite } from '../gfx/characters.ts';
+import { TILE_INFO } from '../gfx/tiles.ts';
+import { worldState } from './world.ts';
 
+let portrait, nameEl, leadEl, card, mini, mapBox, mapSig = '', lastFace = '';
+const MW = 288, MH = 192;
 let stage, bar, placeEl, medalEl, moneyEl, teamEl, btns: Record<string, any> = {}, handlers: Record<string, any> = {}, sig = '', nextPoll = 0;
 
 const ICON = {
@@ -42,7 +47,6 @@ export function mountSidebar(stageEl, hs = {}) {
   placeEl = h('span', { class: 'tb-place' });
   medalEl = h('b');
   moneyEl = h('b');
-  teamEl = h('ol', { class: 'tb-team' });
   const guard = (fn) => () => { if (!stage.classList.contains('is-game') || input.busy) return; fn?.(); };
   btns = {
     dex: button('dex', 'PokeDex', guard(() => handlers.dex?.())),
@@ -53,12 +57,26 @@ export function mountSidebar(stageEl, hs = {}) {
     options: button('gear', 'Ajustes (O)', guard(() => handlers.options?.())),
     menu: button('menu', 'Menú (Enter)', guard(() => input.press('start'))),
   };
-  bar = h('header', { class: 'topbar', 'aria-label': 'Barra superior' },
-    h('div', { class: 'tb-chip tb-chip-place', 'data-tip': 'Lugar actual' }, icon('pin'), placeEl),
-    h('div', { class: 'tb-chip', 'data-tip': 'Medallas' }, icon('medal'), medalEl),
-    h('div', { class: 'tb-chip', 'data-tip': 'Dinero' }, icon('coin'), moneyEl),
-    teamEl,
+  // player card (top left)
+  portrait = h('canvas', { class: 'hud-face', width: 16, height: 16 });
+  nameEl = h('b', { class: 'hud-name' });
+  leadEl = h('div', { class: 'hud-lead' });
+  card = h('section', { class: 'hud-card', 'aria-label': 'Entrenador' },
+    h('div', { class: 'hud-face-wrap' }, portrait),
+    h('div', { class: 'hud-card-main' },
+      h('div', { class: 'hud-card-top' }, nameEl,
+        h('span', { class: 'tb-chip', 'data-tip': 'Medallas' }, icon('medal'), medalEl),
+        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, icon('coin'), moneyEl)),
+      leadEl));
+  // minimap + place + tools (top right)
+  mini = h('canvas', { class: 'hud-mini', width: MW, height: MH });
+  mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
+    h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, icon('pin'), placeEl),
+    mini,
     h('nav', { class: 'tb-tools' }, ...Object.values(btns)));
+  // hotbar (bottom centre)
+  teamEl = h('ol', { class: 'hud-hotbar tb-team', 'aria-label': 'Equipo' });
+  bar = h('div', { class: 'hud' }, card, mapBox, teamEl);
   stage.append(bar);
   fit();
   addEventListener('resize', fit);
@@ -74,6 +92,49 @@ function fit() {
   stage.style.setProperty('--k', k.toFixed(4));
 }
 
+const MINI_COL: Record<string, string> = {
+  '.': '#5aa23c', f: '#7ac04a', ',': '#2f7a2a', '=': '#c9a566', c: '#a8a8b4', s: '#e3cf8f', b: '#8a5a30', '~': '#3a78c8',
+  '#': '#1f5a2a', q: '#1f5a2a', p: '#2a7a3a', R: '#6a6a74', K: '#6a5a4a', D: '#f0d060', '_': '#4a4a52', '0': '#4a4a52',
+};
+const miniColor = (ch) => MINI_COL[ch] ?? (TILE_INFO[ch]?.solid ? '#7a5a4a' : '#7a9a5a');
+
+/** Minimap: the area around the player, one block per tile, the player as a blinking dot. */
+function drawMini(now) {
+  const W = worldState, tiles = W.tiles;
+  if (!tiles?.length) return;
+  const g = mini.getContext('2d');
+  const px = Math.round(W.player.x), py = Math.round(W.player.y);
+  const cols = 48, rows = 32, bs = MW / cols;
+  const x0 = Math.max(0, Math.min(tiles[0].length - cols, px - (cols >> 1)));
+  const y0 = Math.max(0, Math.min(tiles.length - rows, py - (rows >> 1)));
+  g.fillStyle = '#0c1020'; g.fillRect(0, 0, MW, MH);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    const ch = tiles[y0 + y]?.[x0 + x];
+    if (ch === undefined) continue;
+    g.fillStyle = miniColor(ch);
+    g.fillRect(Math.floor(x * bs), Math.floor(y * bs), Math.ceil(bs), Math.ceil(bs));
+  }
+  for (const o of [...(W.npcs ?? []), ...(W.items ?? [])]) {
+    const x = o.x - x0, y = o.y - y0;
+    if (x < 0 || y < 0 || x >= cols || y >= rows || o.gone) continue;
+    g.fillStyle = o.item ? '#f0d060' : o.trainer ? '#e05050' : '#f0f0f0';
+    g.fillRect(Math.floor(x * bs) + 1, Math.floor(y * bs) + 1, 4, 4);
+  }
+  const blink = Math.floor(now / 350) % 2 === 0;
+  g.fillStyle = blink ? '#ffffff' : '#e03030';
+  g.beginPath(); g.arc((px - x0 + 0.5) * bs, (py - y0 + 0.5) * bs, 6, 0, 7); g.fill();
+  g.strokeStyle = '#101828'; g.lineWidth = 2; g.stroke();
+}
+
+function drawFace(look) {
+  if (look === lastFace) return;
+  lastFace = look;
+  const g = portrait.getContext('2d');
+  g.clearRect(0, 0, 16, 16);
+  g.imageSmoothingEnabled = false;
+  g.drawImage(charSprite(look, 'down', 0), 0, 0, 16, 16, 0, 0, 16, 16);
+}
+
 export function updateSidebar(now, inGame) {
   if (!stage) return;
   const show = inGame && !document.querySelector('.bhud');
@@ -86,18 +147,34 @@ export function updateSidebar(now, inGame) {
   btns.dex.hidden = !S.flags.dex;
   btns.party.hidden = !S.party.length;
   btns.map.hidden = !S.bag.mapa_uruguay;
+  mapBox.classList.toggle('is-hidden', !S.flags.has_starter && !S.party.length);
+  drawMini(now);
+  drawFace(S.player.look);
   const place = fmt(MAPS[S.pos.map]?.name ?? '');
   const team = S.party.map((c) => `${c.species}${c.level}${c.hp}${c.status ?? ''}`).join(',');
-  const next = [place, S.rivalName, S.player.money, badgeCount(), team].join('|');
+  const next = [place, S.rivalName, S.player.name, S.player.money, badgeCount(), team].join('|');
   if (next === sig) return;
   sig = next;
   placeEl.textContent = place;
+  nameEl.textContent = S.player.name ?? '';
   medalEl.textContent = String(badgeCount());
   moneyEl.textContent = `$${S.player.money}`;
-  teamEl.replaceChildren(...S.party.map((c) => {
+  const lead = S.party.find((c) => c.hp > 0) ?? S.party[0];
+  leadEl.replaceChildren(...(lead ? [hpRow(lead)] : []));
+  teamEl.replaceChildren(...S.party.map((c, i) => {
     const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
     return h('li', { class: c.hp <= 0 ? 'is-down' : '', 'data-tip': `${displayName(c)} · Nv ${c.level} · ${c.hp}/${max} PS${c.status ? ' · ' + c.status : ''}` },
-      h('img', { src: creatureIcon(c.species), alt: displayName(c), width: 36, height: 36 }),
+      h('kbd', { text: String(i + 1) }),
+      h('img', { src: creatureIcon(c.species), alt: displayName(c), width: 64, height: 64 }),
+      h('span', { class: 'hud-lv', text: `Nv${c.level}` }),
       h('span', { class: `tb-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) } }));
   }));
+}
+
+function hpRow(c) {
+  const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
+  return h('div', { class: 'hud-hp' },
+    h('span', { class: 'hud-hp-name', text: `${displayName(c)} Nv${c.level}` }),
+    h('span', { class: `tb-bar${pct < 0.25 ? ' is-low' : pct < 0.5 ? ' is-mid' : ''}`, style: { '--hp': pct.toFixed(3) } }),
+    h('span', { class: 'hud-hp-num', text: `${c.hp}/${max}` }));
 }
