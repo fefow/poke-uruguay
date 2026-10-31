@@ -1041,3 +1041,7 @@ body {
 .menu-moves { padding-left: 4cqi; }
 .move-info { z-index: 67; right: -17cqi; bottom: 4.4cqi; block-size: calc(26% - 2.8cqi); }
 .menu-moves { height: 28%; }
+
+/* menus and panels: wider than the centred column on the 16:9 stage, with the world dimmed behind them */
+.panel:not(.panel-card):not(.panel-qty):not(.panel-name) { inset: 1.5cqi -10cqi; box-shadow: 0 0 0 100vmax oklch(0.1 0.03 270 / 0.55); }
+.panel-card { box-shadow: inset 0 0 0 0.5cqi #fff6b0, inset 0 0 0 1cqi #e0b020, 0 0 0 100vmax oklch(0.1 0.03 270 / 0.55); }
