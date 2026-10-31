@@ -19,6 +19,7 @@ import * as battle from './game/battle-scene.js';
 import { openOptions, openMap } from './game/menus.js';
 import { createCreature } from './game/creature.js';
 import { mountHud, updateHud, flashSaved } from './game/hud.js';
+import { mountSidebar, updateSidebar } from './game/sidebar.js';
 import { VERSION } from './version.js';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.js';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.js';
@@ -60,6 +61,7 @@ function frame(now) {
     if (S) S.stats.playtime += dt / 1000;
   }
   updateHud(now);
+  updateSidebar(now, mode === 'game');
   render(now);
   requestAnimationFrame(frame);
 }
@@ -68,6 +70,7 @@ function frame(now) {
 async function boot() {
   mountScreen($('#view'));
   mountUI($('#ui'));
+  mountSidebar($('#stage'));
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   mountFullscreen();
