@@ -868,7 +868,7 @@ for (const [house, script] of [['casa_artigas', 'gift_surf'], ['casa_tac', 'gift
  * Field-move obstacles on the main road. Each one sits on the route right after the city where the player
  * receives the move and wins the medal that lets them use it:
  *   Corte (Machete, Medalla Salto): a thicket across the road after Belén.
- *   Surf (Canoa, Medalla Rivera): a river across Tranqueras.
+ *   Surf (Canoa, Medalla Rivera): a river across Paso del Río Tacuarembó (map tranqueras).
  *   Fuerza (Guantes, Medalla Tacuarembó): a boulder in a gap in a wall of trees after Tupambaé.
  *   Destello (Farol, Medalla Maldonado): the dark mountain road between Piriápolis and Minas.
  */

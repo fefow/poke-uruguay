@@ -218,14 +218,14 @@ const GATE_STORY = {
     name: 'Minero de la cooperativa',
     intro: ['Un tipo de capa gris se metió en la cantera y se lleva las geodas en bolsas.', 'Dice que las piedras sirven para cargar las máquinas de niebla. Está acá nomás, en la salida.'],
     foe: { types: ['roca', 'siniestro'], intro: ['Estas geodas son del Proyecto Pampero ahora. Andá a buscar las tuyas.'], lose: 'Las piedras pesan demasiado.', after: ['Me llevo lo que pude. El jefe va a estar furioso.'] },
-    thanks: ['¡Se fue sin las bolsas! La cooperativa te debe una.', 'El camino a Baltasar Brum queda abierto. Si ves más de esos, avisá.'],
+    thanks: ['¡Se fue sin las bolsas! La cooperativa te debe una.', 'El camino a Tranqueras queda abierto. Si ves más de esos, avisá.'],
     open: ['Las geodas vuelven a la cooperativa. Gracias otra vez.'],
   },
   melo: {
     name: 'Vecino', need: 'anima_clear',
     waiting: ['Desde que se apagaron las luces de la Torre de las Ánimas, nadie se anima a salir hacia Treinta y Tres.', 'Dicen que en la torre hay una máquina rara, y que las Luces Malas no dejan pasar a nadie.', 'Si alguien la apagara…'],
     intro: ['¡Volvieron las luces de la torre! Vi desde acá cómo se apagaban las Luces Malas.'],
-    thanks: ['Ya se puede salir hacia Cerro Chato. Gracias, {player}.'],
+    thanks: ['Ya se puede salir hacia Arbolito. Gracias, {player}.'],
     open: ['Esta noche la torre está tranquila.'],
   },
   rocha: {
