@@ -402,3 +402,27 @@ test('clima: la lluvia es determinista por mapa y franja y ocupa cerca de una de
   for (let i = 0; i < 500; i++) if (weatherAt('colonia', 1e12 + i * 600000) === 'rain') rainy++;
   assert.ok(rainy > 60 && rainy < 140, `lluvia ${rainy}/500`);
 });
+
+test('map editor patches apply and survive a parse round trip', async () => {
+  const { applyMapEdits, fitsTiles, npcKeys, mapEditsSource, parseMapEditsSource } = await import('../src/data/map-edits.js');
+  assert.deepEqual(npcKeys([{ look: 'boy' }, { look: 'boy' }, { trainer: { id: 'a' } }, { script: 'x' }]), ['look:boy', 'look:boy@1', 'tr:a', 's:x']);
+  const tiles = ['#D#', '.S.', '...'];
+  assert.ok(fitsTiles(tiles, ['#D#', '.S.', '~~~']));
+  assert.ok(!fitsTiles(tiles, ['###', '.S.', '...']), 'a missing door is rejected');
+  assert.ok(!fitsTiles(tiles, ['#D#', '.S.']), 'a smaller grid is rejected');
+  const maps = { a: { tiles: [...tiles], npcs: [{ look: 'boy', x: 0, y: 2, text: ['hola'] }, { look: 'boy', x: 2, y: 2, text: ['chau'] }], items: [{ id: 'p1', x: 1, y: 2, item: 'mate' }] } };
+  const edits = parseMapEditsSource(mapEditsSource({ a: {
+    tiles: ['#D#', '.S.', '~..'],
+    npcs: { 'look:boy': { x: 1, y: 2, text: ['buenas'] }, 'look:boy@1': { remove: true } },
+    addNpcs: [{ x: 2, y: 1, look: 'girl', text: ['nueva'] }],
+    items: { p1: { remove: true } }, addItems: [{ x: 0, y: 1, item: 'pokeball', id: 'ed_a_1' }],
+  } }));
+  applyMapEdits(maps, edits);
+  const m = maps.a;
+  assert.equal(m.tiles[2], '~..');
+  assert.equal(m.npcs.length, 2);
+  assert.deepEqual([m.npcs[0].x, m.npcs[0].text[0]], [1, 'buenas']);
+  assert.equal(m.npcs[1].look, 'girl');
+  assert.deepEqual(m.items.map((i) => i.id), ['ed_a_1']);
+  assert.deepEqual(parseMapEditsSource(mapEditsSource({})), {});
+});

@@ -954,6 +954,16 @@ THEMES.cueva = {
   S: (g) => { caveFloor(g, new Rng(5)); px(g, 7, 7, '#5a3a1a', 2, 8); px(g, 2, 2, '#5a3a1a', 12, 7); px(g, 3, 3, '#c8905a', 10, 5); px(g, 4, 4, '#7a4a2a', 8, 1); px(g, 4, 6, '#7a4a2a', 6, 1); },
 };
 
+/** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
+const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);
+export function sitsInWater(tiles, x, y) {
+  const ch = tiles[y][x];
+  if (LAND_BASE.has(ch)) return false;
+  let n = 0;
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (tiles[y + dy]?.[x + dx] === '~') n++;
+  return n >= 3 || (n >= 2 && (TILE_INFO[ch]?.over || ch === 'R'));
+}
+
 export function tileCanvas(ch, frame = 0, theme = null, onWater = false) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;

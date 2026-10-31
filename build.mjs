@@ -56,6 +56,21 @@ ${editorJs.replace(/<\/script/gi, '<\\/script')}
 </script>
 `);
 
+// Visual map editor (map-editor.html): writes src/data/map-overrides.js.
+const mapEditor = await build({
+  entryPoints: ['src/map-editor/main.js'],
+  bundle: true,
+  minify: true,
+  format: 'esm',
+  target: ['chrome120', 'firefox121', 'safari17'],
+  write: false,
+  legalComments: 'none',
+  define: { __QA__: process.env.QA ? 'true' : 'false' },
+});
+await writeFile('dist/map-editor.js', mapEditor.outputFiles[0].text);
+await copyFile('styles/map-editor.css', 'dist/styles/map-editor.css');
+await writeFile('dist/map-editor.html', (await readFile('map-editor.html', 'utf8')).replace('src="src/map-editor/main.js"', 'src="map-editor.js"'));
+
 // Single file: CSS + JS inlined, no external files except Google Fonts.
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];
 const single = `<title>Poke Uruguay</title>

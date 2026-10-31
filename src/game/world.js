@@ -6,7 +6,7 @@ import { SPECIES } from '../data/species.js';
 import { badgeOf } from '../data/route.js';
 import { TYPES } from '../data/types.js';
 import { ITEMS } from '../data/items.js';
-import { T, TILE_INFO, tileCanvas } from '../gfx/tiles.js';
+import { T, TILE_INFO, tileCanvas, sitsInWater } from '../gfx/tiles.js';
 import { charSprite } from '../gfx/characters.js';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.js';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.js';
@@ -907,16 +907,6 @@ export const api = {
 };
 
 // ---------------------------------------------------------------- render
-/** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
-const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);
-function sitsInWater(tiles, x, y) {
-  const ch = tiles[y][x];
-  if (LAND_BASE.has(ch)) return false;
-  let n = 0;
-  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (tiles[y + dy]?.[x + dx] === '~') n++;
-  return n >= 3 || (n >= 2 && (TILE_INFO[ch]?.over || ch === 'R'));
-}
-
 function drawWorld(g, t) {
   const m = W_.map;
   if (!m) return;

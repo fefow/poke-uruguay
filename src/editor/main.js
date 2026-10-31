@@ -108,6 +108,7 @@ const fileInput = h('input', { type: 'file', accept: '.js,.json,text/javascript,
 
 const header = h('header', { class: 'ed-head' },
   h('div', { class: 'ed-brand' }, h('b', { text: 'Poke Uruguay' }), h('span', { text: 'Editor de sprites' })),
+  h('a', { class: 'ed-btn ed-mini', href: 'map-editor.html', text: 'Editor de mapas' }),
   pending,
   h('div', { class: 'ed-actions' },
     h('button', { class: 'ed-btn', type: 'button', text: 'Cargar archivo', onclick: () => fileInput.click() }),

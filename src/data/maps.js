@@ -707,6 +707,8 @@ import { guideMap } from './guide.js';
 import { addRouteStory } from './route-stories.js';
 import { layoutGym } from './gym-layouts.js';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.js';
+import { MAP_OVERRIDES } from './map-overrides.js';
+import { applyMapEdits, npcKeys } from './map-edits.js';
 
 export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR, ...ROUTE_OUTDOOR };
 export const INTERIOR = { ...BASE_INTERIOR, ...ACT2_INTERIOR, ...ROUTE_INTERIOR };
@@ -1138,3 +1140,14 @@ const MO_BLOCKS = [
     if (kind === 'fuerza') for (const cx of [x + 1, x + 2, x - 1, x - 2]) if (solid(rows[gap][cx])) set(cx, gap, '.');
   }
 })();
+
+// What the map editor sees as "the original" (before its own changes), then the editor's changes on top.
+export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m]) => {
+  const keys = npcKeys(m.npcs);
+  return [id, {
+    tiles: [...m.tiles],
+    npcs: (m.npcs ?? []).map((n, i) => ({ key: keys[i], x: n.x, y: n.y, look: n.look, dir: n.dir, text: n.text && !n.script && !n.trainer ? [].concat(n.text) : null, kind: n.trainer ? 'trainer' : n.script ? 'script' : n.critter ? 'critter' : n.blocker ? 'blocker' : 'npc', name: n.name ?? n.trainer?.name ?? null })),
+    items: (m.items ?? []).map((it) => ({ id: it.id, x: it.x, y: it.y, item: it.item })),
+  }];
+}));
+applyMapEdits(MAPS, MAP_OVERRIDES);
