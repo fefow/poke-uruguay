@@ -8,8 +8,8 @@ import { TR, room, HOUSE, POLI, SHOP, GYM, nurse, pc, poli, shop } from './map-k
 
 // ---------------------------------------------------------------- OUTDOORS
 const BASE_OUTDOOR = {
-  colonia: {
-    name: 'Colonia del Sacramento',
+  carmelo: {
+    name: 'Carmelo',
     music: 'town',
     bg: 'field',
     tiles: [
@@ -34,13 +34,13 @@ const BASE_OUTDOOR = {
     ],
     doors: ['casa_jugador', 'casa_rival', 'lab'],
     signs: [
-      'COLONIA DEL SACRAMENTO\nBarrio Histórico, Patrimonio de la Humanidad. Calles de piedra desde 1680.',
-      'FARO DE COLONIA\nConstruido sobre las ruinas del convento de San Francisco. ¡Cuidado con el Río de la Plata!',
+      'CARMELO\nPueblo de bodegas y astilleros sobre el arroyo de las Vacas. Acá vive el Maestro Tabárez.',
+      'RAMBLA DE CARMELO\nDesde la costa se ve la orilla argentina, al otro lado del río.',
     ],
     fish: [['pejerrey', 3, 6, 60], ['camalote', 3, 5, 30], ['aguaviva', 4, 6, 10]],
     exits: { e: { to: 'ruta1', req: 'has_starter', deny: ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.'] } },
     npcs: [
-      { x: 20, y: 13, look: 'girl', wander: true, text: ['Los turistas vienen desde Buenos Aires en barco.', 'Dicen que en las noches de niebla el faro se ve borroso.'] },
+      { x: 20, y: 13, look: 'girl', wander: true, text: ['Los turistas vienen desde Buenos Aires en lancha, a ver los astilleros.', 'Dicen que en las noches de niebla el río se ve más ancho que el mar.'] },
       { x: 8, y: 11, look: 'oldman', text: ['Cuando yo era joven, había Ceibos en todas las orillas.', 'Ahora casi solo los cuida el Maestro Tabárez.'] },
       { x: 14, y: 12, look: 'boy', cond: (f) => !f.has_starter, text: ['¿Vas al laboratorio? Hoy entregan criaturas.'] },
       { x: 14, y: 12, look: 'boy', cond: (f) => f.has_starter, text: ['Buen compañero te tocó. Cuidalo.', 'Si se debilita, pasá por tu casa: tu madre siempre tiene el mate listo.'] },
@@ -71,8 +71,8 @@ const BASE_OUTDOOR = {
       '#..........R.............#',
       '##########################',
     ],
-    signs: ['RUTA 1\n← Colonia del Sacramento   Montevideo →'],
-    exits: { w: { to: 'colonia' }, e: { to: 'rosario' } },
+    signs: ['RUTA 1\n← Carmelo   Colonia del Sacramento →'],
+    exits: { w: { to: 'carmelo' }, e: { to: 'colonia' } },
     enc: { rate: 0.12, list: [['teruterito', 2, 3, 28], ['hornerito', 2, 3, 22], ['nandulin', 3, 4, 14], ['hormiga', 2, 4, 14], ['ternero', 2, 4, 14], ['oruga', 2, 4, 14], ['tuco', 3, 4, 14], ['venadito', 4, 4, 4]] },
     fish: [['pejerrey', 3, 5, 70], ['camalote', 3, 5, 30]],
     npcs: [
@@ -111,7 +111,7 @@ const BASE_OUTDOOR = {
       '___]]]]]]]]]]_______0:0________(((((((((((__',
       '__"______"___"_____|0:0|_______(((((((((((__',
       '--------------------000-------0(((((((((((__',
-      '0000000000000000000000000000000(((((D(((((__',
+      '0000000000000000000000000000000(((((((((((__',
       '????????|???????|?????????|?????????????????',
       '????????????S???????????????????????????????',
       '[[[[[[[[}}[[[[[[[[[[[[[[[[[[[[[[[[[[[[}}[[[[',
@@ -120,11 +120,10 @@ const BASE_OUTDOOR = {
       '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
       '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
     ],
-    // Row-major order of the door tiles: Estadio, Palacio Salvo, Palacio de la Luz (gimnasio), Policlínica, tienda, casa, terminal del Buquebus.
+    // Row-major order of the door tiles: Estadio, Palacio Salvo, Palacio de la Luz (gimnasio), Policlínica, tienda, casa.
     doors: [
-      { to: 'liga_1', req: (f) => f.badge12 && f.anglo_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido a Calima, el fundador del Equipo PP.'] },
+      { to: 'liga_1', req: (f) => f.badge12 && f.anglo_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido al Dr. Díaz, el fundador del Equipo PP.'] },
       'palacio', 'gym_mvd', 'poli_mvd', 'shop_mvd', 'casa_mvd',
-      { to: 'ferry_1', req: (f) => f.got_ticket && !f.ferry_done, deny: ['Terminal del Buquebus "China Zorrilla".', 'Para subir hace falta el ticket. Y cuando el barco zarpa, no vuelve.'] },
     ],
     fish: [['pejerrey', 8, 10, 55], ['aguaviva', 8, 10, 30], ['anguila', 9, 11, 15]],
     signs: [
@@ -137,9 +136,7 @@ const BASE_OUTDOOR = {
     npcs: [
       { x: 16, y: 24, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
       { x: 26, y: 6, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Sofía, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
-      { x: 37, y: 23, look: 'sailor', dir: 'up', cond: (f) => !f.got_ticket && !f.ferry_done, text: ['Terminal del Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz.', 'Sin ticket no se sube. Dicen que el farero de Cabo Polonio consigue pasajes.'] },
-      { x: 37, y: 23, look: 'sailor', dir: 'up', cond: (f) => f.got_ticket && !f.ferry_done, text: ['Ya podés subir con tu ticket.', 'Preguntá por el capitán: está en su camarote, en la cubierta de arriba.'] },
-      { x: 37, y: 23, look: 'sailor', dir: 'up', cond: (f) => f.ferry_done, text: ['El "China Zorrilla" zarpó hacia Buenos Aires.', 'Dicen que volverá en la próxima temporada.'] },
+      { x: 37, y: 23, look: 'sailor', dir: 'up', text: ['La terminal del Buquebus está cerrada por reformas.', 'Los barcos a Buenos Aires salen desde Colonia del Sacramento.'] },
       { x: 33, y: 5, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
     ],
   },
@@ -363,7 +360,7 @@ const BASE_OUTDOOR = {
       '##########################',
     ],
     doors: ['shop_ros', 'casa_ros'],
-    signs: ['ROSARIO\nLocalidad del departamento de Colonia. Aquí termina el campo y empieza el camino a la capital.'],
+    signs: ['ROSARIO\nLocalidad del departamento de Colonia. Pueblo de paso en el camino al centro del país.'],
     exits: { w: { to: 'ruta1' }, e: { to: 'montevideo' } },
     enc: { rate: 0.1, list: [['tuco', 6, 8, 16], ['gaviota', 6, 8, 16], ['tatu', 7, 9, 14], ['chimango', 7, 9, 14], ['hormiga', 6, 8, 14], ['yacarito', 7, 9, 12], ['lobito', 7, 9, 10], ['cascarudo', 7, 9, 10]] },
     fish: [['pejerrey', 6, 9, 60], ['camalote', 6, 8, 30], ['aguaviva', 7, 9, 10]],
@@ -603,9 +600,6 @@ const BASE_INTERIOR = {
     exitTo: { map: 'pp_1', x: 11, y: 2 },
     npcs: [{ x: 5, y: 3, look: 'garua', dir: 'down', cond: (f) => !f.pp_clear, script: 'garua' }],
   }),
-  shop_ros: shop('Almacén de Rosario', ['esfera', 'te_marcela', 'mate', 'ruda', 'linimento', 'aloe', 'repelente']),
-  shop_pir: shop('Almacén de Piriápolis', ['esfera', 'superesfera', 'mate', 'mate_dulce', 'ruda', 'linimento', 'aloe', 'despertador', 'repelente']),
-  shop_pal: shop('Almacén de La Paloma', ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'alfajor', 'torta_frita', 'despertador', 'repelente']),
   shop_min: shop('Almacén de Minas', ['superesfera', 'ultraesfera', 'mate_dulce', 'dulce_de_leche', 'alfajor', 'torta_frita', 'chivito', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'piedra_agata', 'piedra_amatista', 'piedra_basalto', 'mt_parrillada', 'mt_tormenta_ceibo', 'mt_punio_gaucho']),
   casa_ros: room(HOUSE, {
     name: 'Casa en Rosario',
@@ -630,6 +624,15 @@ const BASE_INTERIOR = {
   }),
   poli_mvd: poli('Policlínica de Montevideo'),
   poli_pde: poli('Policlínica de Punta del Este'),
+  casino_pde: room(['xxXxxxxXxx', 'BBiiiiiiBB', 'iiiiiiiiii', 'nnniiiinnn', 'iiiiiiiiii', 'iPiPiiPiPi', 'iiiiiiiiii', 'iiiimmiiii'], {
+    name: 'Casino Peninsula',
+    npcs: [
+      { x: 1, y: 2, look: 'clerk', dir: 'down', script: 'casino_cashier' },
+      { x: 8, y: 2, look: 'clerk', dir: 'down', script: 'casino_prizes' },
+      ...[1, 3, 6, 8].map((x) => ({ x, y: 5, look: null, script: 'casino_slots' })),
+      { x: 4, y: 4, look: 'oldman', wander: true, text: ['Siete años sin ganar un Siete. Hoy es mi día.'] },
+    ],
+  }),
   poli_tyt: poli('Policlínica de Treinta y Tres'),
   shop_mvd: shop('Almacén de Montevideo', ['esfera', 'te_marcela', 'mate', 'ruda', 'linimento', 'aloe', 'despertador', 'repelente']),
   shop_pde: shop('Almacén de Punta del Este', ['esfera', 'superesfera', 'te_marcela', 'mate', 'mate_dulce', 'ruda', 'linimento', 'aloe', 'despertador', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa']),
@@ -697,9 +700,11 @@ import { ACT2_OUTDOOR, ACT2_INTERIOR } from './maps-act2.js';
 import { SPECIES } from './species.js';
 import { MAP_BIOME, BIOMES } from './atlas.js';
 import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.js';
-import { CHAIN, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from './route.js';
+import { CHAIN, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from './route.js';
 import { fitDown, fitSpecies } from './levels.js';
-import { fitToMap, wildList, teamOf } from './map-gen.js';
+import { fitToMap, wildList, teamOf, rng } from './map-gen.js';
+import { guideMap } from './guide.js';
+import { layoutGym } from './gym-layouts.js';
 import { TILE_INFO } from '../gfx/tiles.js';
 
 export const OUTDOOR = { ...BASE_OUTDOOR, ...ACT2_OUTDOOR, ...ROUTE_OUTDOOR };
@@ -769,7 +774,7 @@ export const ZONE_LEVELS = Object.fromEntries(CHAIN.map((id) => [id, mapBand(id)
  * dungeons between the wild band and the ace.
  */
 const PLACES = {
-  fraybentos: ['gym_frb', 'anglo_1', 'anglo_2', 'anglo_3'],
+  fraybentos: ['gym_frb', 'anglo_1', 'anglo_2', 'anglo_3', 'casa_frb_faro', 'ferry_1', 'ferry_2'],
   paysandu: ['muelle_pay'],
   salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
   rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],
@@ -779,8 +784,9 @@ const PLACES = {
   punta: ['gym_pde'],
   piriapolis: ['obs_1', 'obs_2', 'obs_3'],
   minas: ['pp_1', 'pp_2'],
+  melo: ['anima_1', 'anima_2', 'anima_3'],
   durazno: ['gym_dur'],
-  montevideo: ['gym_mvd', 'ferry_1', 'ferry_2'],
+  montevideo: ['gym_mvd'],
   trinidad: ['gym_trinidad'],
   mercedes: ['gym_mercedes'],
   florida: ['gym_florida'],
@@ -849,8 +855,8 @@ for (const [mapId, script, flag] of RIVAL_AT) {
 // The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.
 Object.assign(INTERIOR.casa_florida.npcs[0], { script: 'gift_vuelo', text: undefined });
 
-// Gift NPCs for the field moves (the Machete, the Canoa and the Guantes de Domador).
-for (const [house, script] of [['casa_pay', 'gift_corte'], ['casa_artigas', 'gift_surf'], ['casa_tac', 'gift_fuerza']]) {
+// Gift NPCs for the field moves (the Canoa and the Guantes de Domador; the Machete comes from the Buquebus captain in Colonia).
+for (const [house, script] of [['casa_artigas', 'gift_surf'], ['casa_tac', 'gift_fuerza']]) {
   Object.assign(INTERIOR[house].npcs[0], { script, text: undefined });
 }
 
@@ -886,6 +892,149 @@ function makeCave(m) {
     n.trainer.intro = intro; n.trainer.lose = lose; n.trainer.after = after;
     n.trainer.team = teamOf(types, n.trainer.team.map((t) => t[1]), `cueva${k}`);
   });
+}
+
+/** The last road before the capital becomes the "Calle Victoria": a cave full of veterans on the way to the Liga. */
+function makeVictory(m) {
+  m.theme = 'cueva';
+  m.music = 'cave';
+  m.name = 'Calle Victoria';
+  m.signs = ['CALLE VICTORIA\nLas Piedras ←  ·  → Montevideo\nSolo siguen los entrenadores que ya ganaron muchas medallas.'].slice(0, m.signs?.length ?? 1);
+  const levels = m.enc.list.flatMap((e) => [e[1], e[2]]);
+  const lo = Math.min(...levels), hi = Math.max(...levels);
+  const fresh = wildList(['roca', 'lucha', 'siniestro', 'tierra'], lo, hi, 8, 'victoria');
+  m.enc.list = [...fresh, ...m.enc.list.filter((e) => !fresh.some((f) => f[0] === e[0])).map((e) => [e[0], e[1], e[2], 2])];
+  const folk = [
+    ['Veterano Aníbal', 'Veterano de la Liga', ['lucha', 'roca'], ['Pasé por acá hace veinte años y todavía me acuerdo de cada piedra.', 'Se nota que viniste a ganar.', 'Faltan pocos metros para el Estadio.']],
+    ['Capitana Soledad', 'Ex finalista', ['normal', 'tierra'], ['Perdí la final por un solo punto. No pienso perder otra vez.', 'Merecías pasar.', 'Que el Campeón te encuentre en forma.']],
+    ['Aspirante Néstor', 'Aspirante', ['siniestro', 'roca'], ['Llevo tres intentos a la Liga. Hoy no me frenás.', 'Quizás el cuarto sí.', 'La capital se ve desde la salida.']],
+  ];
+  (m.npcs ?? []).filter((n) => n.trainer).forEach((n, k) => {
+    const [name, cls, types, [intro, lose, after]] = folk[k % folk.length];
+    n.trainer.name = name; n.trainer.cls = cls; n.trainer.intro = intro; n.trainer.lose = lose; n.trainer.after = after;
+    n.trainer.team = teamOf(types, n.trainer.team.map((t) => t[1] + 2), `victoria${k}`);
+  });
+}
+makeVictory(OUTDOOR.r_laspiedras_montevideo);
+
+/** The first long forest of the trip (Bosque Grande): thick trees, lots of bichos, plantas and voladores before the first gym. */
+function makeForest(m, name, sign, seed, folk) {
+  m.name = name;
+  m.signs = [sign].slice(0, m.signs?.length ?? 1);
+  const levels = m.enc.list.flatMap((e) => [e[1], e[2]]);
+  const lo = Math.min(...levels), hi = Math.max(...levels);
+  const fresh = wildList(['bicho', 'planta', 'volador'], lo, hi, 8, seed);
+  m.enc.list = [...fresh, ...m.enc.list.filter((e) => !fresh.some((f) => f[0] === e[0])).map((e) => [e[0], e[1], e[2], 2])];
+  (m.npcs ?? []).filter((n) => n.trainer).forEach((n, k) => {
+    const [tname, cls, types, [intro, lose, after]] = folk[k % folk.length];
+    n.trainer.name = tname; n.trainer.cls = cls; n.trainer.intro = intro; n.trainer.lose = lose; n.trainer.after = after;
+    n.trainer.team = teamOf(types, n.trainer.team.map((t) => t[1]), `${seed}${k}`);
+  });
+}
+makeForest(OUTDOOR.r_rosario_sanjose, 'Bosque Grande', 'BOSQUE GRANDE\nRosario ←  ·  → San José de Mayo\nHay más bichos que árboles. Cuidado con las telarañas.', 'bosque1', [
+  ['Cazabichos Lautaro', 'Cazabichos', ['bicho'], ['Con la red no se me escapa nadie. Con vos, veremos.', 'Se me fue el más grande.', 'Los bichos de acá no pican, casi.']],
+  ['Botánica Irene', 'Botánica', ['planta', 'bicho'], ['Estudio cada hoja de este monte.', 'Hasta las plantas pierden.', 'Seguí por el camino de tierra.']],
+  ['Ornitólogo Matías', 'Ornitólogo', ['volador'], ['Desde las copas se oye de todo.', 'Se me voló la ventaja.', 'Mirá para arriba de vez en cuando.']],
+]);
+makeForest(OUTDOOR.r_ecilda_trinidad, 'Monte Espeso', 'MONTE ESPESO\nEcilda Paullier ↓  ·  ↑ Trinidad\nEl bosque sigue hasta Flores. No te salgas del camino.', 'bosque2', [
+  ['Guardabosques Elías', 'Guardabosques', ['planta', 'volador'], ['Este monte tiene dueño: el que lo cuida.', 'Tenés buen paso.', 'Trinidad está al final del monte.']],
+  ['Apicultor Ramón', 'Apicultor', ['bicho', 'volador'], ['Las abejas ya te vieron.', 'Me picó la derrota.', 'Dejá algo de miel.']],
+  ['Cazabichos Delfina', 'Cazabichos', ['bicho', 'planta'], ['Un buen cazabichos nunca sale sin red.', 'Me ganaste limpio.', 'Seguí, el gimnasio te espera.']],
+]);
+
+/** First cave of the trip, between the first and second gym: miners, and the first PP grunts guarding the way out. */
+function makePPCave(m) {
+  m.theme = 'cueva';
+  m.music = 'cave';
+  m.name = 'Cueva de Palmitas';
+  m.signs = ['CUEVA DE PALMITAS\nPalmitas ←  ·  → Mercedes\nHay luces de máquinas al fondo. Mejor no hacer ruido.'].slice(0, m.signs?.length ?? 1);
+  const levels = m.enc.list.flatMap((e) => [e[1], e[2]]);
+  const lo = Math.min(...levels), hi = Math.max(...levels);
+  const fresh = wildList(['roca', 'bicho', 'tierra'], lo, hi, 8, 'cuevapalmitas');
+  m.enc.list = [...fresh, ...m.enc.list.filter((e) => !fresh.some((f) => f[0] === e[0])).map((e) => [e[0], e[1], e[2], 2])];
+  const folk = [
+    ['Minero Wilson', 'Minero', ['roca'], ['Hace años que pico acá y nunca vi tanta gente rara.', 'Se me cayó el casco.', 'Los de gris pasaron por el fondo con cajas.'], 'boy'],
+    ['Recluta PP', 'Equipo PP', ['siniestro', 'bicho'], ['Esta cueva es del Proyecto Pampero. Seguí de largo.', 'Informo que perdí.', 'No digas que nos viste.'], 'grunt'],
+    ['Recluta PP', 'Equipo PP', ['siniestro', 'roca'], ['Instalamos una máquina de niebla acá. No la toques.', 'Qué problema.', 'Cuando la niebla se venda, vas a entender.'], 'grunt'],
+  ];
+  (m.npcs ?? []).filter((n) => n.trainer).forEach((n, k) => {
+    const [tname, cls, types, [intro, lose, after], look] = folk[k % folk.length];
+    n.trainer.name = tname; n.trainer.cls = cls; n.trainer.intro = intro; n.trainer.lose = lose; n.trainer.after = after;
+    n.trainer.team = teamOf(types, n.trainer.team.map((t) => t[1]), `cuevap${k}`);
+    n.look = look;
+  });
+}
+makePPCave(OUTDOOR.r_palmitas_mercedes);
+// Mercedes' gym is closed: Marta, the Correo leader, is trapped at the end of the cave by two PP recruits.
+{
+  const cave = OUTDOOR.r_palmitas_mercedes;
+  const ppIds = cave.npcs.filter((n) => n.trainer?.cls === 'Equipo PP').map((n) => n.trainer.id);
+  const w = cave.tiles[0].length;
+  const trail = [];
+  cave.tiles.forEach((r, y) => { for (let x = 3; x < 9; x++) if (r[x] === '.' && [r[x - 1], r[x + 1], cave.tiles[y - 1]?.[x], cave.tiles[y + 1]?.[x]].includes('=')) trail.push([x, y]); });
+  const spot = trail.find(([x, y]) => !cave.npcs.some((n) => Math.abs(n.x - x) + Math.abs(n.y - y) < 3)) ?? trail[0];
+  cave.npcs.push({ x: spot[0], y: spot[1], look: 'leader_correo', dir: 'down', script: 'marta_cave', ppIds, cond: (f) => !f.marta_help });
+  const gymDoor = OUTDOOR.mercedes.doors.findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_mercedes');
+  OUTDOOR.mercedes.doors[gymDoor] = { to: 'gym_mercedes', req: 'marta_help', deny: ['El gimnasio del Correo está cerrado con un cartel: "Volvemos pronto".', 'Dicen que Marta salió a entregar un paquete por la cueva de Palmitas y no volvió.'] };
+}
+
+// Every gym has its own floor plan.
+GYM_STOPS.forEach((stop, i) => {
+  const door = (OUTDOOR[stop.id]?.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to)).find((to) => to.startsWith('gym_'));
+  if (door && INTERIOR[door]) layoutGym(INTERIOR[door], i);
+});
+
+/** A cave mouth: rocks close in on the trail near the edge and the last tile becomes a dark opening. */
+function caveMouth(m, side) {
+  const rows = m.tiles.map((r) => [...r]);
+  const h = rows.length, w = rows[0].length;
+  const cell = (d, k) => (side === 'e' ? [w - 1 - d, k] : side === 'w' ? [d, k] : side === 'n' ? [k, d] : [k, h - 1 - d]);
+  const span = side === 'e' || side === 'w' ? h : w;
+  const busy = new Set([...(m.npcs ?? []), ...(m.items ?? [])].map((o) => `${o.x},${o.y}`));
+  const pathAt = (d, k) => { const [x, y] = cell(d, k); return rows[y]?.[x] === '=' || rows[y]?.[x] === 'c' || rows[y]?.[x] === 'b' || rows[y]?.[x] === '.' && false; };
+  const trail = [];
+  for (let k = 0; k < span; k++) if (pathAt(0, k)) trail.push(k);
+  if (!trail.length) return;
+  for (let d = 0; d <= 2; d++) for (let k = 0; k < span; k++) {
+    const [x, y] = cell(d, k);
+    if (busy.has(`${x},${y}`)) continue;
+    const near = trail.some((t) => Math.abs(t - k) <= 1);
+    if (near) { if (d === 0 && pathAt(0, k)) rows[y][x] = 'ϗ'; continue; }
+    if (TILE_INFO[rows[y][x]]?.solid) continue;
+    rows[y][x] = 'k';
+  }
+  m.tiles = rows.map((r) => r.join(''));
+}
+for (const caveId of ['r_palmitas_mercedes', 'r_piriapolis_minas']) {
+  const cave = OUTDOOR[caveId];
+  for (const [side, ex] of Object.entries(cave.exits ?? {})) {
+    caveMouth(cave, side);
+    const opp = { e: 'w', w: 'e', n: 's', s: 'n' }[side];
+    if (OUTDOOR[ex.to]) caveMouth(OUTDOOR[ex.to], opp);
+  }
+}
+
+// A road that is closed has someone standing in it (a police officer, or PP once they are around) who says why.
+for (const [mapId, m] of Object.entries(OUTDOOR)) {
+  for (const [side, ex] of Object.entries(m.exits ?? {})) {
+    if (!ex.req || !Array.isArray(ex.deny)) continue;
+    const w = m.tiles[0].length, h = m.tiles.length;
+    const cells = side === 'e' ? m.tiles.map((_, y) => [w - 1, y]) : side === 'w' ? m.tiles.map((_, y) => [0, y]) : side === 'n' ? [...m.tiles[0]].map((_, x) => [x, 0]) : [...m.tiles[h - 1]].map((_, x) => [x, h - 1]);
+    const open = cells.filter(([x, y]) => !TILE_INFO[m.tiles[y][x]]?.solid);
+    if (!open.length || open.length > 5) continue;
+    const pp = STOP_INDEX[mapId] >= STOP_INDEX.fraybentos;
+    const done = (f) => (typeof ex.req === 'string' ? f[ex.req] : ex.req(f));
+    for (const [x, y] of open) {
+      if ((m.npcs ?? []).some((n) => n.x === x && n.y === y)) continue;
+      (m.npcs ??= []).push({ x, y, look: pp ? 'grunt' : 'cop', dir: side === 'e' ? 'left' : side === 'w' ? 'right' : side === 'n' ? 'down' : 'up', blocker: true, name: pp ? 'Equipo PP' : 'Guardia', text: ex.deny, cond: (f) => !done(f) });
+    }
+  }
+}
+
+// Routes are guided, not open fields: a trail between tree walls, grass clusters, side pockets and one-way ledges.
+for (const [id, m] of Object.entries(OUTDOOR)) {
+  if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
+  guideMap(m, id, { width: id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3 });
 }
 
 const MO_BLOCKS = [

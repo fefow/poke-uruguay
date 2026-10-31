@@ -138,6 +138,7 @@ export const LOOKS = {
   leader_dojo: { h: '#2a1a1a', H: '#2a1a1a', s: '#f2c8a0', S: '#d8a880', c: '#f4f4f4', C: '#c8c8d0', p: '#f4f4f4', b: '#2a2a2a', long: true },
   leader_psy: { h: '#e8e8f0', H: '#e8e8f0', s: '#e8c8a8', S: '#c8a888', c: '#6a3a9a', C: '#3e2266', p: '#3e2266', b: '#1a1020' },
   leader_dark: { h: '#c8c8d8', H: '#c8c8d8', s: '#e8d0c8', S: '#c8b0a8', c: '#2a2a3a', C: '#14141e', p: '#14141e', b: '#0a0a12', long: true },
+  anima: { h: '#d8e4f0', H: '#d8e4f0', s: '#e8f0f8', S: '#c0d0e0', c: '#9fb4d0', C: '#7f94b0', p: '#7f94b0', b: '#5a6a85' },
   calima: { h: '#a8a8b8', H: '#a8a8b8', s: '#e8c8a8', S: '#c8a888', c: '#f2f2f2', C: '#c8c8d8', p: '#22222e', b: '#14141e' },
   elite1: { h: '#6a4a2a', H: '#6a4a2a', s: '#f2c8a0', S: '#d8a880', c: '#7ac8f0', C: '#3f86c8', p: '#f2f2f2', b: '#2a5a9a', long: true },
   elite2: { h: '#3a2a1a', H: '#e8b02a', s: '#c8946a', S: '#a8744a', c: '#a8782c', C: '#6a4a1a', p: '#5a4a3a', b: '#2a1a10' },

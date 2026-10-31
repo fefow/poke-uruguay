@@ -32,9 +32,17 @@ const BLOCKS = {
   houseO: ['ooooo', 'ooooo', 'HwDwH'],
   houseV: ['vvvvv', 'vvvvv', 'HwDwH'],
   torre: ['zzz', 'zzz', 'zDz'],
+  casino: ['vvvvvvv', 'vwvvvwv', 'vvvDvvv'],
+  terminal: ['WWWWWWW', 'WwWWWwW', 'WWWDWWW'],
+  casaFaro: ['ggg', 'ggg', 'wDw'],
   fabrica: ['WWWWWWW', 'WWWWWWW', 'WWWDWWW'],
+  agua: ['GGGGGGG', 'GGGaGGG', 'hhhDhhh'],
+  roca: ['VVVVVVV', 'VVVeVVV', 'yyyDyyy'],
 };
-const block = (kind) => (GYM_CHARS[kind] ? gymBlock(kind) : BLOCKS[kind]);
+// Gyms are imposing: stone pillars ('ι') at the corners and flanking the door.
+const GYM_KINDS = new Set([...Object.keys(GYM_CHARS), 'agua', 'roca']);
+const tall = (g) => { const f = g[2][0]; return [g[0], `ι${g[1].slice(1, 6)}ι`, `ι${f}ιDι${f}ι`]; };
+export const block = (kind) => (GYM_KINDS.has(kind) ? tall(GYM_CHARS[kind] ? gymBlock(kind) : BLOCKS[kind]) : BLOCKS[kind]);
 
 function put(g, x, y, pattern) {
   pattern.forEach((line, dy) => [...line].forEach((c, dx) => { if (g[y + dy]?.[x + dx] !== undefined) g[y + dy][x + dx] = c; }));

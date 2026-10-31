@@ -12,7 +12,7 @@ const S = (id, key, name, types, base, catchRate, baseExp, learn, desc, art, evo
 const BASE_LIST = [
   // --- Starters -------------------------------------------------------
   S(1, 'ceibito', 'Ceibo', ['planta'], [45, 49, 49, 63, 63, 45], 45, 64,
-    [[1, 'placaje'], [1, 'latigo_cepa'], [7, 'absorber'], [10, 'megaagotar'], [12, 'grunido'], [13, 'somnifero']],
+    [[1, 'placaje'], [1, 'grunido'], [7, 'latigo_cepa'], [12, 'absorber'], [17, 'megaagotar'], [22, 'somnifero']],
     'Un brote de ceibo de las orillas de los arroyos. Su flor roja se abre cuando está en calma.',
     { plan: 'quad', c1: '#6cbf4a', c2: '#2f7a3a', c3: '#e0263a', feats: ['flower', 'ears_round', 'tail_short'] },
     { lvl: 14, to: 'ceibal' }),
@@ -26,7 +26,7 @@ const BASE_LIST = [
     'Un ceibo andante de siglos de edad. Se dice que conserva la memoria de los montes nativos.',
     { plan: 'quad', c1: '#3e8a33', c2: '#6b4a2a', c3: '#e0263a', feats: ['flower', 'flower2', 'tree', 'tail_short'], size: 1.25 }),
   S(4, 'tejuchispa', 'Tejuchispa', ['fuego'], [39, 52, 43, 60, 50, 65], 45, 62,
-    [[1, 'aranazo'], [1, 'ascuas'], [7, 'ataque_rapido'], [9, 'grunido'], [11, 'rueda_fuego'], [13, 'malicioso']],
+    [[1, 'placaje'], [1, 'grunido'], [7, 'ascuas'], [12, 'ataque_rapido'], [16, 'aranazo'], [21, 'rueda_fuego'], [26, 'malicioso']],
     'Un lagarto overo que guarda brasas bajo las escamas. Busca el calor de las parrillas encendidas.',
     { plan: 'lizard', c1: '#3a3a3a', c2: '#f2f0e6', c3: '#ff8a2a', feats: ['spots', 'flame_tail'] },
     { lvl: 14, to: 'tejubrasa' }),
@@ -40,7 +40,7 @@ const BASE_LIST = [
     'Su fuego recuerda al de un fogón de estancia: congrega a los suyos y aleja a los intrusos.',
     { plan: 'lizard', c1: '#262626', c2: '#f5d6a0', c3: '#ff4a10', feats: ['spots', 'flame_tail', 'crest', 'mane'], size: 1.25 }),
   S(7, 'carpinchito', 'Carpincho', ['agua'], [50, 48, 60, 50, 54, 42], 45, 63,
-    [[1, 'placaje'], [1, 'pistola_agua'], [6, 'grunido'], [8, 'burbuja'], [11, 'hidropulso'], [13, 'mate_amargo']],
+    [[1, 'placaje'], [1, 'grunido'], [7, 'pistola_agua'], [12, 'burbuja'], [17, 'hidropulso'], [22, 'mate_amargo']],
     'Pasa el día en los esteros, sumergido junto a otros de su especie. Rara vez se altera.',
     { plan: 'quad', c1: '#9a6a3c', c2: '#6e4826', c3: '#3f86e0', feats: ['ears_round', 'snout', 'tail_none'] },
     { lvl: 14, to: 'carpincho' }),

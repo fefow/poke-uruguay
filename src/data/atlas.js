@@ -13,7 +13,7 @@ export const OUTLINE = [
 // kind: 'city' (con gimnasio) | 'loc' (localidad: almacén y gente con objetos) | 'place' (lugar de la historia)
 // maps: ids de mapa que cuentan como "estar en" ese lugar (además de sus interiores).
 const POS = {
-  colonia: [-57.84, -34.47, '#f2f2f2', 'Laboratorio del Maestro Tabárez'], rosario: [-57.35, -34.31, null, 'Pescador retirado'],
+  carmelo: [-58.28, -33.99, '#f2f2f2', 'Laboratorio del Maestro Tabárez'], colonia: [-57.84, -34.47, '#e8d8b8', 'Buquebus y Faro'], rosario: [-57.35, -34.31, null, 'Pescador retirado'],
   sanjose: [-56.71, -34.34, '#d8c8a0', 'Intendencia'], ecilda: [-56.8, -33.95], trinidad: [-56.9, -33.52, '#c8b890', 'Centro de tropas'],
   palmitas: [-57.3, -33.45], mercedes: [-57.6, -33.3, '#a8c8d8', 'Club de remo'], villasoriano: [-57.85, -33.2],
   fraybentos: [-58.0, -33.1, '#c8506a', 'Gimnasio Siniestro · Frigorífico Anglo'], young: [-57.97, -32.7],

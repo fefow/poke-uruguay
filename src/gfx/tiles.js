@@ -19,6 +19,9 @@ export const TILE_INFO = {
   p: { name: 'palmera', solid: true },
   R: { name: 'roca', solid: true },
   K: { name: 'acantilado', solid: true },
+  ι: { name: 'pilar', solid: true },
+  ϗ: { name: 'boca de cueva' },
+  λ: { name: 'desnivel', solid: true, ledge: true },
   k: { name: 'risco', solid: true },
   F: { name: 'cerco', solid: true },
   S: { name: 'cartel', solid: true },
@@ -73,6 +76,30 @@ export const TILE_INFO = {
   '>': { name: 'cartel Buquebus (2)', solid: true },
   '|': { name: 'farola', solid: true },
   '"': { name: 'árbol de vereda', solid: true },
+  // overworld scenery that sits on the map's ground (grass, sand, dry grass...), see OVER below
+  'Ñ': { name: 'pino', solid: true, over: true },
+  'Ö': { name: 'eucalipto', solid: true, over: true },
+  'ñ': { name: 'sauce', solid: true, over: true },
+  'ö': { name: 'ombú', solid: true, over: true },
+  'ξ': { name: 'arbusto', solid: true, over: true },
+  'Σ': { name: 'farola de plaza', solid: true, over: true },
+  'Δ': { name: 'banco', solid: true, over: true },
+  'Ω': { name: 'macizo de flores', solid: true, over: true },
+  'Γ': { name: 'monumento', solid: true, over: true },
+  'Θ': { name: 'pozo', solid: true, over: true },
+  'Λ': { name: 'molino de viento', solid: true, over: true },
+  'Ξ': { name: 'rollo de pasto', solid: true, over: true },
+  'Π': { name: 'buzón', solid: true, over: true },
+  'μ': { name: 'cerro', solid: true, over: true },
+  'ρ': { name: 'tapia de piedra', solid: true, over: true },
+  'τ': { name: 'leña', solid: true, over: true },
+  'β': { name: 'bote', solid: true, over: true },
+  'γ': { name: 'contenedor', solid: true, over: true },
+  'ψ': { name: 'tendedero', solid: true, over: true },
+  'ζ': { name: 'pasto seco' },
+  'η': { name: 'tierra colorada' },
+  'ß': { name: 'duna' },
+  'ν': { name: 'piedras sueltas' },
   // interiors
   i: { name: 'piso' },
   Y: { name: 'piso gimnasio' },
@@ -105,8 +132,10 @@ function speckle(g, rng, base, dots, n) {
   for (let i = 0; i < n; i++) px(g, rng.int(0, 15), rng.int(0, 15), rng.pick(dots));
 }
 
+let GROUND = null; // the map theme's ground while a themed tile is drawn, so trees, rocks and signs sit on it
 function grass(g, rng) {
-  speckle(g, rng, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14);
+  if (GROUND) GROUND(g, rng);
+  else speckle(g, rng, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14);
 }
 
 function roof(g, base, dark, light) {
@@ -226,6 +255,31 @@ const DRAW = {
     g.fillStyle = '#7a6a62'; g.beginPath(); g.ellipse(8, 9, 7, 5.5, 0, 0, 7); g.fill();
     g.fillStyle = '#a89a90'; g.beginPath(); g.ellipse(6.5, 7.5, 4.5, 3, 0, 0, 7); g.fill();
     px(g, 4, 6, '#d0c4ba', 3, 1); px(g, 9, 10, '#4e423c', 4, 1); px(g, 7, 12, '#4e423c', 2, 1); px(g, 11, 8, '#4e423c', 1, 3);
+  },
+  ϗ: (g, r) => {
+    px(g, 0, 0, '#5a4a3e', T, T);
+    px(g, 0, 0, '#7a6a5c', T, 3);
+    px(g, 1, 3, '#16121a', 14, 13);
+    px(g, 2, 3, '#241c28', 12, 2);
+    for (let i = 0; i < 6; i++) px(g, r.int(0, 14), r.int(5, 14), '#33283a', 2, 1);
+    px(g, 0, 0, '#a89686', 3, 2); px(g, 13, 0, '#a89686', 3, 2);
+  },
+  ι: (g) => {
+    px(g, 0, 0, '#8a8a92', T, T);
+    px(g, 3, 0, '#d8d8e0', 10, T);
+    px(g, 4, 0, '#f2f2f6', 3, T);
+    px(g, 11, 0, '#a8a8b2', 2, T);
+    px(g, 2, 0, '#c8c8d2', 12, 2);
+    px(g, 2, 14, '#c8c8d2', 12, 2);
+    px(g, 3, 6, '#b8b8c4', 10, 1);
+  },
+  λ: (g, r) => {
+    grass(g, r);
+    px(g, 0, 8, '#3f7a52', T, 3);
+    px(g, 0, 7, '#c08a64', T, 2);
+    for (let x = 0; x < T; x += 4) px(g, x, 6, '#c08a64', 3, 1);
+    px(g, 0, 9, '#8a5a3e', T, 1);
+    px(g, 0, 11, '#2f5e40', T, 1);
   },
   K: (g, r) => {
     px(g, 0, 0, '#8a6a4a', T, T);
@@ -549,7 +603,145 @@ const GYM_ROCA = {
   T: (g) => { stoneFloor(g); px(g, 1, 3, '#7a5a38', 14, 9); px(g, 1, 3, '#a98f66', 14, 3); },
 };
 
-export const THEMES = { poli: POLI_T, gym_agua: GYM_AGUA, gym_elec: GYM_ELEC, gym_roca: GYM_ROCA };
+
+// ---- overworld scenery drawn on top of the map's ground (the ground comes from the theme's '.' tile) ----
+const shade = (g, cx, cy, rx, ry) => { g.fillStyle = 'rgba(0,0,0,0.18)'; g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, 7); g.fill(); };
+const OVER = {
+  'Ñ': (g) => {
+    shade(g, 8, 14, 5, 1.6);
+    px(g, 7, 11, '#5a3a1e', 2, 4);
+    g.fillStyle = '#1f6a3a'; g.beginPath(); g.moveTo(8, 0); g.lineTo(14, 6); g.lineTo(2, 6); g.fill();
+    g.fillStyle = '#25803f'; g.beginPath(); g.moveTo(8, 3); g.lineTo(15, 10); g.lineTo(1, 10); g.fill();
+    g.fillStyle = '#2f9a4a'; g.beginPath(); g.moveTo(8, 6); g.lineTo(15, 13); g.lineTo(1, 13); g.fill();
+    px(g, 6, 3, '#5ab86a', 2, 1); px(g, 5, 7, '#5ab86a', 2, 1); px(g, 9, 10, '#5ab86a', 2, 1);
+  },
+  'Ö': (g) => {
+    shade(g, 8, 14, 4, 1.4);
+    px(g, 7, 5, '#d8d0bc', 2, 10); px(g, 8, 5, '#b8a888', 1, 10); px(g, 7, 9, '#8a7a5a', 1, 1); px(g, 8, 12, '#8a7a5a', 1, 1);
+    g.fillStyle = '#6a9a82';
+    for (const [x, y, r] of [[8, 3, 3.2], [4, 5, 2.4], [12, 5, 2.4], [6, 1.5, 2], [10, 1.5, 2]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+    g.fillStyle = '#9ac2a6'; g.fillRect(5, 2, 2, 1); g.fillRect(9, 4, 2, 1);
+  },
+  'ñ': (g) => {
+    shade(g, 8, 14, 5, 1.5);
+    px(g, 7, 6, '#6a4a2a', 2, 9);
+    g.fillStyle = '#7ab04a'; g.beginPath(); g.arc(8, 5, 6, 0, 7); g.fill();
+    g.fillStyle = '#5a9a3a';
+    for (let x = 2; x < 14; x += 2) px(g, x, 7, '#5a9a3a', 1, 7 - Math.abs(8 - x) / 2);
+    px(g, 5, 2, '#a4d060', 3, 1);
+  },
+  'ö': (g) => {
+    shade(g, 8, 14, 7, 1.8);
+    g.fillStyle = '#6a4a2a'; g.beginPath(); g.moveTo(4, 15); g.lineTo(6, 8); g.lineTo(10, 8); g.lineTo(12, 15); g.fill();
+    px(g, 7, 9, '#8a6a3a', 1, 5);
+    g.fillStyle = '#2a7a30'; g.beginPath(); g.ellipse(8, 5, 8, 5.5, 0, 0, 7); g.fill();
+    g.fillStyle = '#3a9a40'; g.beginPath(); g.ellipse(6.5, 4, 5, 3, 0, 0, 7); g.fill();
+    px(g, 4, 2, '#5ac060', 3, 1);
+  },
+  'ξ': (g) => {
+    shade(g, 8, 13, 5, 1.3);
+    g.fillStyle = '#2f7a34'; g.beginPath(); g.arc(8, 10, 5, 0, 7); g.fill();
+    g.fillStyle = '#4aa044'; g.beginPath(); g.arc(7, 9, 3, 0, 7); g.fill();
+    px(g, 10, 8, '#f2e05c', 1, 1); px(g, 5, 11, '#f2e05c', 1, 1);
+  },
+  'Σ': (g) => {
+    shade(g, 8, 15, 3, 1);
+    px(g, 7, 4, '#33333c', 2, 11); px(g, 6, 14, '#33333c', 4, 1);
+    px(g, 5, 1, '#33333c', 6, 1); px(g, 5, 2, '#fff2a0', 6, 3); px(g, 6, 2, '#ffe060', 4, 2); px(g, 5, 5, '#33333c', 6, 1);
+    px(g, 7, 0, '#33333c', 2, 1);
+  },
+  'Δ': (g) => {
+    shade(g, 8, 14, 7, 1.4);
+    px(g, 1, 7, '#8a5a2a', 14, 2); px(g, 1, 9, '#6a4020', 14, 1); px(g, 1, 4, '#a87038', 14, 2);
+    px(g, 2, 10, '#33333c', 2, 4); px(g, 12, 10, '#33333c', 2, 4);
+  },
+  'Ω': (g) => {
+    px(g, 1, 4, '#9a9a9a', 14, 11); px(g, 2, 5, '#4a3020', 12, 9);
+    const cols = ['#f04a4a', '#f2e05c', '#ffffff', '#c86ae0', '#ff8ac0'];
+    for (let i = 0; i < 12; i++) { const x = 3 + (i % 4) * 3; const y = 6 + Math.floor(i / 4) * 3; px(g, x, y, cols[(i * 2) % 5], 2, 2); px(g, x, y + 2, '#3a8a30', 1, 1); }
+  },
+  'Γ': (g) => {
+    shade(g, 8, 15, 6, 1.4);
+    px(g, 3, 11, '#a8a4a0', 10, 4); px(g, 4, 9, '#c4c0bc', 8, 2); px(g, 3, 14, '#7e7a76', 10, 1);
+    g.fillStyle = '#7a8a7a'; g.fillRect(7, 2, 2, 2); g.fillRect(6, 4, 4, 5); g.fillRect(5, 5, 1, 3); g.fillRect(10, 5, 1, 3);
+    px(g, 7, 2, '#a4b4a4', 1, 1);
+  },
+  'Θ': (g) => {
+    shade(g, 8, 14, 6, 1.4);
+    px(g, 3, 8, '#8a8a92', 10, 6); px(g, 4, 9, '#2a5a8a', 8, 3); px(g, 4, 9, '#5a9ad0', 8, 1);
+    px(g, 3, 3, '#6a4020', 1, 5); px(g, 12, 3, '#6a4020', 1, 5); px(g, 3, 3, '#6a4020', 10, 1); px(g, 5, 2, '#a85a30', 6, 2);
+  },
+  'Λ': (g) => {
+    shade(g, 8, 15, 5, 1.4);
+    g.fillStyle = '#7a7a82'; g.beginPath(); g.moveTo(5, 15); g.lineTo(7, 5); g.lineTo(9, 5); g.lineTo(11, 15); g.fill();
+    px(g, 6, 10, '#5a5a62', 4, 1); px(g, 7, 7, '#5a5a62', 2, 1);
+    g.fillStyle = '#d8d8e0';
+    g.beginPath(); g.moveTo(8, 4); g.lineTo(2, 1); g.lineTo(3, 4); g.fill();
+    g.beginPath(); g.moveTo(8, 4); g.lineTo(14, 1); g.lineTo(13, 4); g.fill();
+    g.beginPath(); g.moveTo(8, 4); g.lineTo(6, 0); g.lineTo(9, 0); g.fill();
+    g.beginPath(); g.moveTo(8, 4); g.lineTo(5, 7); g.lineTo(11, 7); g.fill();
+    px(g, 7, 3, '#c84a2a', 2, 2);
+  },
+  'Ξ': (g) => {
+    shade(g, 8, 14, 6, 1.5);
+    g.fillStyle = '#c8a038'; g.beginPath(); g.arc(8, 9, 6, 0, 7); g.fill();
+    g.fillStyle = '#e0bc50'; g.beginPath(); g.arc(8, 9, 4, 0, 7); g.fill();
+    g.fillStyle = '#a88028'; g.beginPath(); g.arc(8, 9, 2, 0, 7); g.fill();
+    px(g, 5, 5, '#f0d878', 2, 1);
+  },
+  'Π': (g) => {
+    shade(g, 8, 15, 3, 1);
+    px(g, 7, 8, '#6a4020', 2, 7); px(g, 4, 3, '#c83a3a', 8, 5); px(g, 5, 4, '#e86a6a', 6, 1); px(g, 10, 5, '#f2e05c', 1, 3);
+  },
+  'μ': (g) => {
+    px(g, 0, 11, '#7a7a82', T, 5);
+    g.fillStyle = '#8c8c96'; g.beginPath(); g.moveTo(0, 14); g.lineTo(5, 3); g.lineTo(9, 9); g.lineTo(12, 5); g.lineTo(16, 14); g.fill();
+    g.fillStyle = '#b4b4be'; g.beginPath(); g.moveTo(5, 3); g.lineTo(9, 9); g.lineTo(6, 9); g.fill();
+    px(g, 4, 4, '#f2f2f8', 2, 1); px(g, 11, 6, '#f2f2f8', 2, 1);
+    px(g, 0, 14, '#5e5e66', T, 2);
+  },
+  'ρ': (g) => {
+    px(g, 0, 6, '#9a9488', T, 8); px(g, 0, 6, '#b4aea2', T, 2); px(g, 0, 13, '#6e695f', T, 1);
+    for (let x = 0; x < T; x += 5) px(g, x, 8, '#7e786c', 1, 5);
+    px(g, 3, 10, '#7e786c', 4, 1); px(g, 9, 11, '#7e786c', 5, 1);
+  },
+  'τ': (g) => {
+    shade(g, 8, 14, 6, 1.4);
+    for (const [x, y] of [[2, 9], [7, 9], [4, 4], [9, 4]]) { px(g, x, y, '#8a5a30', 5, 5); px(g, x + 1, y + 1, '#c89a5a', 3, 3); px(g, x + 2, y + 2, '#8a5a30', 1, 1); }
+  },
+  'β': (g) => {
+    shade(g, 8, 13, 7, 1.5);
+    g.fillStyle = '#c84a3a'; g.beginPath(); g.moveTo(1, 7); g.lineTo(15, 7); g.lineTo(12, 13); g.lineTo(4, 13); g.fill();
+    px(g, 1, 6, '#f2f2f2', 14, 1); px(g, 4, 9, '#2a6ab0', 8, 1); px(g, 7, 1, '#6a4020', 1, 6); px(g, 8, 2, '#f2e6c8', 4, 4);
+  },
+  'γ': (g) => {
+    px(g, 1, 3, '#2a5a9a', 14, 11); px(g, 1, 3, '#4a7aba', 14, 1);
+    for (let x = 3; x < 15; x += 3) px(g, x, 4, '#1e4a82', 1, 9);
+    px(g, 1, 13, '#1a3a6a', 14, 1);
+  },
+  'ψ': (g) => {
+    px(g, 1, 2, '#6a4020', 1, 13); px(g, 14, 2, '#6a4020', 1, 13); px(g, 1, 3, '#cfcfd6', 14, 1);
+    px(g, 3, 4, '#f2f2f8', 4, 5); px(g, 9, 4, '#e86a6a', 4, 6); px(g, 4, 5, '#d8d8e8', 1, 3);
+  },
+};
+// Ground variants: what '.' looks like on each kind of map (and the plain tiles that belong to it).
+const dryGrass = (g, r) => speckle(g, r, '#c8b868', ['#b8a858', '#d8c878', '#a89a4c'], 16);
+const sandGround = (g, r) => speckle(g, r, '#f0dca0', ['#e4cc8a', '#f8e8b4', '#d8bc78'], 12);
+const redGround = (g, r) => speckle(g, r, '#b8684a', ['#a85a3e', '#c87858', '#985034'], 16);
+const stoneGround = (g, r) => speckle(g, r, '#9a9a8c', ['#8a8a7c', '#aaaa9c', '#7a7a6e'], 16);
+const GROUND_DRAW = {
+  'ζ': dryGrass,
+  'ß': (g, r) => { sandGround(g, r); for (let i = 0; i < 3; i++) { const x = r.int(2, 12), y = r.int(4, 12); px(g, x, y, '#6a9a3a', 1, 3); px(g, x + 1, y + 1, '#7aaa4a', 1, 2); px(g, x - 1, y + 1, '#7aaa4a', 1, 2); } },
+  'η': redGround,
+  'ν': (g, r) => { stoneGround(g, r); for (let i = 0; i < 4; i++) { const x = r.int(1, 12), y = r.int(1, 12); px(g, x, y, '#6a6a60', 3, 2); px(g, x, y, '#b8b8aa', 2, 1); } },
+};
+
+export const THEMES = {
+  poli: POLI_T, gym_agua: GYM_AGUA, gym_elec: GYM_ELEC, gym_roca: GYM_ROCA,
+  // ground themes: the map's '.' changes and everything drawn on grass follows it
+  arena: { '.': sandGround }, seca: { '.': dryGrass }, colorada: { '.': redGround }, sierra: { '.': stoneGround },
+};
+Object.assign(DRAW, GROUND_DRAW);
 
 
 // ---- gym families for the later cities: roof, facade and emblem tiles plus an interior theme ----
@@ -723,15 +915,23 @@ THEMES.cueva = {
 export function tileCanvas(ch, frame = 0, theme = null) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;
-  const draw = (theme && THEMES[theme]?.[ch]) || null;
-  const key = (draw ? `${theme}|` : '') + ch + f;
+  const set = theme ? THEMES[theme] : null;
+  const ground = set?.['.'] ?? null;
+  const draw = set?.[ch] || null;
+  const themed = draw || (ground && (DRAW[ch] || OVER[ch]));
+  const key = (themed ? `${theme}|` : '') + ch + f;
   const drawn = override(`tile:${key}`, T, T);
   if (drawn) return drawn;
   let c = cache.get(key);
   if (!c) {
     c = mk();
     const g = c.getContext('2d');
-    (draw ?? DRAW[ch] ?? DRAW.O)(g, new Rng(ch.charCodeAt(0) * 97 + 13), f);
+    const rng = new Rng(ch.charCodeAt(0) * 97 + 13);
+    GROUND = ground;
+    try {
+      if (!draw && !DRAW[ch] && OVER[ch]) { grass(g, new Rng(7)); OVER[ch](g, rng, f); }
+      else (draw ?? DRAW[ch] ?? DRAW.O)(g, rng, f);
+    } finally { GROUND = null; }
     cache.set(key, c);
   }
   return c;

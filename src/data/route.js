@@ -1,4 +1,4 @@
-// The adventure's backbone: 19 cities from Colonia del Sacramento to Montevideo, with a locality between
+// The adventure's backbone: 19 cities from Carmelo to Montevideo, with a locality between
 // every pair. Everything that depends on the order of the story (level curve, which border opens when,
 // the atlas, gym order) is derived from this one table.
 import { deepFreeze } from '../core/util.js';
@@ -9,7 +9,8 @@ import { deepFreeze } from '../core/util.js';
  * (routes between stops; the stop itself is not repeated).
  */
 export const STOPS = deepFreeze([
-  { id: 'colonia', name: 'Colonia del Sacramento', kind: 'city', dept: 'colonia', via: ['ruta1'] },
+  { id: 'carmelo', name: 'Carmelo', kind: 'city', dept: 'colonia', via: ['ruta1'] },
+  { id: 'colonia', name: 'Colonia del Sacramento', kind: 'city', dept: 'colonia', via: ['r_colonia_rosario'] },
   { id: 'rosario', name: 'Rosario', kind: 'loc', dept: 'colonia', via: ['r_rosario_sanjose'] },
   { id: 'sanjose', name: 'San José de Mayo', kind: 'city', dept: 'sanjose', via: [] },
   { id: 'ecilda', name: 'Ecilda Paullier', kind: 'loc', dept: 'sanjose', via: ['r_ecilda_trinidad'] },
@@ -53,11 +54,12 @@ export const GYM_STOPS = deepFreeze(STOPS.filter((s) => s.gym));
 /** Flag of the medal won at a city's gym: medals are numbered in route order. */
 export const badgeOf = (stopId) => `badge${GYM_STOPS.findIndex((s) => s.id === stopId) + 1}`;
 
-/** Full walk order of maps, routes included: [colonia, ruta1, rosario, r_rosario_sanjose, sanjose, ...]. */
+/** Full walk order of maps, routes included: [carmelo, ruta1, colonia, r_colonia_rosario, rosario, r_rosario_sanjose, sanjose, ...]. */
 export const CHAIN = deepFreeze(STOPS.flatMap((s) => [s.id, ...s.via]));
 
-/** Centre of the wild-level band at a stop: gentle at first, steeper after the first gym. */
-export const stopCentre = (i) => (i <= 8 ? 2 + 0.9 * i : 9.2 + (i - 8) * 1.24);
+/** Centre of the wild-level band at a stop: gentle at first, steeper after the first gym, and a little more after every gym passed. */
+const gymsBefore = (i) => STOPS.slice(0, i).filter((s) => s.gym).length;
+export const stopCentre = (i) => (i <= 8 ? 2 + 0.9 * i : 9.2 + (i - 8) * 1.3) + 0.9 * gymsBefore(i);
 /** Wild level band [lo, hi] of stop i. */
 export const stopBand = (i) => { const c = stopCentre(i); return [Math.max(2, Math.round(c - 2)), Math.max(3, Math.round(c + 1.2))]; };
 /** Level of a gym leader's ace: just above the wild creatures of their city. */

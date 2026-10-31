@@ -1,8 +1,10 @@
 // The cities, localities and roads added when the adventure became a 19-city route from Colonia
 // to Montevideo (see route.js). Maps come from map-gen.js; `rewire` then connects every map on the
 // chain to its neighbours and locks each city's road forward until the story opens it.
-import { TR, room, HOUSE, GYM, poli, shop } from './map-kit.js';
-import { city, route, wildList, teamOf, fitToMap, rng } from './map-gen.js';
+import { TR, room, HOUSE, GYM, poli, shop, casaNpc } from './map-kit.js';
+import { route, wildList, teamOf, fitToMap, rng } from './map-gen.js';
+import { retown } from './town-build.js';
+import { CITY_SPECS, LOC_ARCHETYPES, LOC_PLAN } from './town-specs.js';
 import { STOPS, STOP_INDEX, CHAIN, mapBand, openFlag } from './route.js';
 import { BIOMES, DEPARTMENTS, PLACES } from './atlas.js';
 import { TILE_INFO } from '../gfx/tiles.js';
@@ -12,6 +14,7 @@ const typesOf = (stopId) => BIOMES[DEPT[STOPS[STOP_INDEX[stopId]].dept].biome].t
 
 // ---------------------------------------------------------------- what each new place says about itself
 const NEW = {
+  colonia: ['city', ['Colonia del Sacramento es Patrimonio de la Humanidad: calles empedradas, un faro y el río ancho como mar.', 'Desde el puerto salen los Buquebus hacia Buenos Aires.'], 'Puerto'],
   sanjose: ['city', ['San José de Mayo, capital de un departamento de tambos y chacras.', 'Acá se hace la Fiesta de la Torta Frita, y nadie se queda con las ganas.'], 'Intendencia'],
   ecilda: ['loc', ['Ecilda Paullier vive del campo y de los viajeros que pasan por la ruta 1.', 'Un mate en el almacén y seguís camino.']],
   trinidad: ['city', ['Trinidad queda en el centro del país. Dicen que desde acá todo queda cerca.', 'La Plaza Independencia tiene la fuente más fotografiada de Flores.'], 'Centro de tropas'],
@@ -50,6 +53,10 @@ STOPS.forEach((st, k) => {
   const dx = (b.lon - a.lon) * 0.82, dy = b.lat - a.lat;
   LEG_DIR[k] = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'e' : 'w') : (dy > 0 ? 'n' : 's');
 });
+// Two cities keep a dead-end branch on a fixed side (Tacuarembó: the Ciclovía to the north, Rocha/La Paloma: Cabo Polonio),
+// so the legs that would collide with it head another way.
+const LEG_OVERRIDE = { tranqueras: 'w', tacuarembo: 's' };
+for (const [stop, dir] of Object.entries(LEG_OVERRIDE)) LEG_DIR[OWNER[stop]] = dir;
 /** Side of `mapId` the road to the next map leaves through. */
 const dirOf = (mapId) => LEG_DIR[OWNER[mapId]];
 const ARROW = { e: '→', w: '←', n: '↑', s: '↓' };
@@ -64,7 +71,7 @@ const TRAINERS = [
   ['Baqueano', ['planta', 'tierra'], ['Conozco cada rincón de este camino.', 'Me ganaste de local.', 'Seguí derecho.']],
 ];
 
-const casaNpc = (look, text) => ({ x: 6, y: 3, look, dir: 'left', text: [].concat(text) });
+const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'swimmer', 'ciclista', 'keeper', 'biologo'];
 const npc = (x, y, look, text, extra = {}) => ({ x, y, look, text: [].concat(text), ...extra });
 
 const stockAt = (i) => (i < 9 ? ['esfera', 'te_marcela', 'ruda', 'alfajor']
@@ -81,6 +88,8 @@ const GYM_TRAINERS = {
   volador: [['Ismael', 'Aeromodelista', ['Mi planeador y yo somos uno.', 'Aterricé mal.', 'El maestro Boiso está arriba.']], ['Clara', 'Paracaidista', ['Un salto y listo.', 'Se me abrió tarde.', 'Seguí adelante.']]],
   bicho: [['Gabriel', 'Viñatero', ['Los bichos cuidan mis uvas.', 'Cosecha perdida.', 'Tomás te espera.']], ['Rosa', 'Apicultora', ['Cuidado con el aguijón.', 'Me picó la derrota.', 'Seguí, no te voy a frenar.']]],
 };
+const KEEP_TARGETS = new Set(['ciclovia', 'cabo']); // dead-end branches that keep their own exits
+const FERRY_DOOR = { to: 'ferry_1', req: (f) => f.got_ticket && !f.ferry_done, deny: ['Terminal del Buquebus "China Zorrilla".', 'Para subir hace falta el ticket. Y cuando el barco zarpa, no vuelve.'] };
 export const ROUTE_OUTDOOR = {};
 export const ROUTE_INTERIOR = {};
 
@@ -92,68 +101,61 @@ function settle(m) {
 }
 
 
-// ---------------------------------------------------------------- town layouts
-// Every generated town picks one of these, so no two neighbours look alike: plazas with a fountain,
-// a river with bridges, a seafront, a long road town, a park, hills. Slots are [street, x, size]:
-// 'L' fits a gym (7 wide), 'S' a Policlínica, shop or house (5 wide).
-const A = 'a', B = 'b', C = 'c';
-const CITY_STYLES = {
-  plaza: { w: 32, h: 22, sa: 6, sb: 16, vroads: [7, 24], plazas: [[11, 7, 10, 6]], decor: { '#': 8, f: 10 },
-    slots: [[A, 2, 'L'], [A, 11, 'L'], [A, 20, 'L'], [B, 2, 'S'], [B, 9, 'S'], [B, 15, 'S'], [B, 26, 'S']] },
-  rio: { w: 34, h: 20, sa: 7, sb: 15, vroads: [13, 22], water: [[16, 1, 3, 18]], bridges: [[16, 18, 7], [16, 18, 15]], decor: { '#': 8, f: 6 },
-    slots: [[A, 2, 'L'], [A, 9, 'S'], [A, 20, 'L'], [A, 28, 'S'], [B, 2, 'S'], [B, 8, 'S'], [B, 24, 'S'], [B, 29, 'S']] },
-  costa: { w: 36, h: 18, sa: 6, sb: 11, vroads: [9, 26], water: [[1, 13, 34, 4]], decor: { '#': 6, f: 6 },
-    slots: [[A, 2, 'L'], [A, 11, 'L'], [A, 20, 'L'], [A, 29, 'S'], [B, 3, 'S'], [B, 12, 'S'], [B, 19, 'S'], [B, 29, 'S']] },
-  cruz: { w: 30, h: 26, sa: 7, sb: 15, sc: 23, vroads: [14], decor: { '#': 10, f: 8, q: 4 },
-    slots: [[A, 2, 'L'], [A, 11, 'L'], [A, 20, 'L'], [B, 2, 'S'], [B, 8, 'S'], [B, 17, 'S'], [B, 23, 'S'], [C, 3, 'S'], [C, 9, 'S'], [C, 17, 'S'], [C, 23, 'S']] },
-  parque: { w: 28, h: 22, sa: 6, sb: 16, vroads: [13], groves: [[3, 8, 9, 6, '#']], water: [[16, 9, 6, 4]], decor: { f: 10, q: 4 },
-    slots: [[A, 2, 'L'], [A, 10, 'S'], [A, 15, 'L'], [B, 2, 'S'], [B, 8, 'S'], [B, 17, 'S'], [B, 22, 'S']] },
-  cerros: { w: 30, h: 20, sa: 7, sb: 14, vroads: [10, 20], decor: { R: 14, '#': 6, f: 4 },
-    slots: [[A, 2, 'L'], [A, 12, 'L'], [A, 22, 'S'], [B, 3, 'S'], [B, 14, 'S'], [B, 23, 'S']] },
-  larga: { w: 44, h: 14, sa: 8, groves: [[3, 10, 38, 2, 'q']], decor: { '#': 8, f: 10 },
-    slots: [[A, 2, 'L'], [A, 10, 'S'], [A, 16, 'S'], [A, 22, 'L'], [A, 30, 'S'], [A, 36, 'S']] },
-  calle: { w: 26, h: 18, sa: 6, sb: 13, vroads: [14], decor: { '#': 10, q: 5, f: 10 },
-    slots: [[A, 1, 'L'], [A, 9, 'S'], [A, 15, 'S'], [A, 21, 'S'], [B, 4, 'S'], [B, 16, 'S']] },
-};
-const LOC_STYLES = {
-  ruta: { w: 30, h: 12, sa: 7, decor: { '#': 8, f: 6 }, slots: [[A, 3, 'S'], [A, 10, 'S'], [A, 17, 'S'], [A, 24, 'S']] },
-  plazita: { w: 24, h: 16, sa: 6, plazas: [[9, 8, 6, 5]], decor: { '#': 6, f: 8 }, slots: [[A, 2, 'S'], [A, 9, 'S'], [A, 16, 'S']] },
-  arroyo: { w: 26, h: 16, sa: 7, water: [[12, 1, 2, 14]], bridges: [[12, 13, 7]], decor: { '#': 8, f: 6 }, slots: [[A, 2, 'S'], [A, 7, 'S'], [A, 15, 'S'], [A, 20, 'S']] },
-  cerrito: { w: 24, h: 20, sa: 8, sb: 15, vroads: [11], decor: { R: 8, '#': 6 }, slots: [[A, 3, 'S'], [A, 15, 'S'], [B, 3, 'S'], [B, 15, 'S']] },
-  costera: { w: 28, h: 14, sa: 6, water: [[1, 9, 26, 3]], decor: { '#': 4, f: 6 }, slots: [[A, 3, 'S'], [A, 11, 'S'], [A, 19, 'S']] },
-  cruce: { w: 22, h: 22, sa: 7, sb: 15, vroads: [10], decor: { '#': 8, f: 6 }, slots: [[A, 2, 'S'], [A, 14, 'S'], [B, 2, 'S'], [B, 14, 'S']] },
-};
-const CITY_ORDER = ['plaza', 'rio', 'costa', 'cruz', 'parque', 'cerros', 'larga', 'calle'];
-const LOC_ORDER = ['ruta', 'plazita', 'arroyo', 'cerrito', 'costera', 'cruce'];
-const DECOR_HOUSES = ['house', 'houseB', 'houseG', 'houseO'];
+// ---------------------------------------------------------------- cities and localities
+// Every city has its own plan (town-specs.js: 44x30 like Montevideo) and every locality one of the landscape
+// archetypes, so no two places look alike. town-build.js turns a plan into tiles, doors, people and animals.
+/** Sides of `mapId` the story walks through: where the previous map's road arrives and where ours leaves. */
+function edgesFor(mapId) {
+  const k = CHAIN.indexOf(mapId);
+  const out = [];
+  if (k > 0) out.push(OPP[dirOf(CHAIN[k - 1])]);
+  if (dirOf(mapId)) out.push(dirOf(mapId));
+  return [...new Set(out)];
+}
+const LOC_SIZES = [[30, 16], [26, 16], [28, 16], [24, 20], [28, 18], [24, 22]];
+const kindOfDoor = (to, i) => (to.startsWith('shop') ? 'shop' : to.startsWith('poli') ? 'poli' : to.startsWith('casa') ? DECOR_HOUSES[i % 4] : 'houseB');
 
-/** Lay out a town: required buildings first (gym on a large slot), the other slots get plain houses. */
-function layoutTown(styleName, table, id, required) {
-  const st = table[styleName];
-  const r = rng(`town${id}`);
-  const free = st.slots.map((s, k) => ({ s, k }));
-  const slotFor = (kind) => {
-    const pool = free.filter(({ s }) => (kind === 'gym' ? s[2] === 'L' : true));
-    // prefer small slots for small buildings so large ones stay available
-    const small = kind === 'gym' ? pool : (pool.filter(({ s }) => s[2] === 'S').length ? pool.filter(({ s }) => s[2] === 'S') : pool);
-    const pick = small[Math.floor(r() * small.length)];
-    free.splice(free.indexOf(pick), 1);
-    return pick.s;
-  };
-  const rowsOf = { a: [], b: [], c: [] };
-  for (const [kind, target] of required) {
-    const [row, x] = slotFor(kind);
-    rowsOf[row].push([kind === 'gym' ? target.gym : kind === 'house2' ? 'houseG' : kind, x, target.to]);
+
+// Townsfolk so a 44x30 city does not feel empty: a few extra neighbours with local chatter and one loose item.
+const FOLK = [
+  'Acá se toma mate hasta en la fila del banco.', 'Dicen que cuando se levanta el Pampero se aclara hasta el último rincón.', 'Mi hijo salió a entrenar y todavía no volvió.',
+  'El almacén tiene de todo, hasta lo que no necesitás.', 'Si ves un carpincho cruzando, esperá: no tiene apuro.', 'En verano esto se llena de turistas. Ahora se oye el viento.',
+  'Antes el camino era de tierra y se cortaba con cada lluvia.', 'La murga ensaya los sábados en la plaza.', 'Los domingos hay fútbol en la canchita del barrio.',
+  'Al atardecer el cielo se pone de un color que no se explica.', 'Mi abuela dice que el mejor chivito es el que se come de parado.', 'Cuando la tormenta viene del sur, se avisa sola: las gaviotas se meten tierra adentro.',
+];
+const ITEMS_BY_BAND = ['alfajor', 'esfera', 'pan_casero', 'torta_frita', 'superesfera', 'alfajor_triple'];
+// The fog is sold: early towns hear about it as a business before the player meets the PP.
+const FOG_HINTS = {
+  colonia: [['oldman', ['En el puerto repartieron folletos: "Niebla garantizada, 30 días, $4000 por zona".', 'Nadie sabe quién los imprime. Solo dice "Proyecto Pampero".']]],
+  sanjose: [['girl', ['Mi cuñado cerró el campo con "niebla contratada". Dice que así no helaba.', 'Le salió un ojo de la cara y ahora no la puede cortar.']]],
+  trinidad: [['gaucho', ['Vendo menos desde que apareció la niebla en el norte.', 'Los de gris compran toda la nafta y pagan en efectivo.']]],
+  mercedes: [['boy', ['Vi camiones del Equipo PP bajando máquinas con un cartel: "Cliente: pueblo de la costa".', '¿Quién compra niebla?']]],
+};
+function addFogHints(m, id) {
+  for (const [look, text] of FOG_HINTS[id] ?? []) m.npcs.push(npc(0, 0, look, text, { dir: 'down' }));
+}
+function addFolk(m, id, n) {
+  const i = STOP_INDEX[id] ?? 0;
+  const have = (m.npcs ?? []).filter((o) => !o.critter).length;
+  m.npcs = m.npcs ?? [];
+  addFogHints(m, id);
+  for (let k = 0; k < Math.max(0, n - have); k++) {
+    const a = FOLK[(i * 3 + k * 5) % FOLK.length], b = FOLK[(i * 3 + k * 5 + 4) % FOLK.length];
+    m.npcs.push(npc(0, 0, LOOKS[(i + k * 2 + 1) % LOOKS.length], [a, b], k % 2 ? { wander: true } : { dir: ['down', 'left', 'right'][k % 3] }));
   }
-  free.forEach(({ s: [row, x, size] }, i) => rowsOf[row].push([size === 'L' ? 'houseB' : DECOR_HOUSES[i % 4], x]));
-  const G = city({ seed: id, w: st.w, h: st.h, sa: st.sa, sb: st.sb ?? 0, sc: st.sc ?? 0, a: rowsOf.a, b: rowsOf.b, c: rowsOf.c, vroads: st.vroads ?? [], decor: st.decor ?? {}, water: st.water ?? [], plazas: st.plazas ?? [], groves: st.groves ?? [], bridges: st.bridges ?? [], signs: [[st.w - 3, st.sa + 1]] });
-  const want = required.length;
-  const doors = G.tiles.join('').split('').filter((c) => c === 'D').length;
-  if (doors !== G.doors.length || G.doors.length < want) throw new Error(`pueblo ${id} (${styleName}): edificios superpuestos`);
-  return { G, st };
+  if (!m.items?.length) m.items = [{ x: 0, y: 0, item: ITEMS_BY_BAND[Math.min(5, Math.floor(i / 7))], id: `${id}_item1` }];
 }
 
-// ---------------------------------------------------------------- cities and localities
+/** Plan of a locality: the archetype's landscape plus a shop and houses for its doors. */
+function localityPlan(id, doors, size) {
+  const [arch, theme] = LOC_PLAN[id] ?? ['campo', null];
+  const [w, h] = LOC_SIZES[size % LOC_SIZES.length];
+  const spec = LOC_ARCHETYPES[arch](id, w, h, rng(`loc${id}`));
+  return { spec, theme, bld: doors.map((d, i) => [kindOfDoor(doorTo(d), i), doorTo(d)]), fill: 2 + (size % 3) };
+}
+const doorTo = (d) => (typeof d === 'string' ? d : d.to);
+const DECOR_HOUSES = ['house', 'houseB', 'houseG', 'houseO'];
+
 for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
   const stop = STOPS[STOP_INDEX[id]];
   const i = STOP_INDEX[id];
@@ -161,29 +163,40 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
   const types = typesOf(id);
   const isCity = kind === 'city';
   const gymType = isCity && stop.gym ? GYM_TYPE[stop.gym] : null;
-  const required = [
-    ...(gymType ? [['gym', { gym: gymType, to: `gym_${id}` }]] : []),
-    ...(isCity ? [['poli', { to: `poli_${id}` }]] : []),
-    ['shop', { to: `shop_${id}` }],
-    ['house', { to: `casa_${id}` }],
-    ...(isCity ? [['house2', { to: `casa_${id}2` }]] : []),
+  const doors = [
+    ...(id === 'melo' ? ['anima_1'] : []),
+    ...(gymType ? [`gym_${id}`] : []),
+    ...(isCity ? [`poli_${id}`] : []),
+    ...(isCity ? [`shop_${id}`] : []),
+    `casa_${id}`,
+    ...(isCity ? [`casa_${id}2`] : []),
   ];
   const kindIdx = Object.keys(NEW).filter((k) => (NEW[k][0] === 'city') === isCity).indexOf(id);
-  const order = isCity ? CITY_ORDER : LOC_ORDER;
-  const { G, st } = layoutTown(order[kindIdx % order.length], isCity ? CITY_STYLES : LOC_STYLES, id, required);
-  ROUTE_OUTDOOR[id] = {
-    name: stop.name, music: 'town', bg: 'field', tiles: G.tiles, doors: [...G.doors],
+  const cfg = isCity
+    ? { ...CITY_SPECS[id], spec: CITY_SPECS[id].spec, fill: CITY_SPECS[id].fill, edges: edgesFor(id), gate: dirOf(id) }
+    : { ...localityPlan(id, doors, kindIdx), edges: edgesFor(id) };
+  if (isCity) cfg.bld = cfg.bld.map(([k, to, hint]) => [k === 'gym' ? gymType : k, to ?? undefined, hint]);
+  const m = {
+    name: stop.name, music: 'town', bg: 'field', tiles: null, doors,
     signs: [`${stop.name.toUpperCase()}\n${lines[0]}`],
     exits: {},
     enc: { rate: 0.1, list: wildList(types, lo, hi, 6, id) },
     fish: undefined,
     npcs: [
-      npc(st.w >> 1, st.sa + 2, LOOKS[i % LOOKS.length], lines, { wander: true }),
-      npc((st.w >> 1) + 4, st.sa + 3, LOOKS[(i + 2) % LOOKS.length], [lines[1], isCity ? 'La Policlínica y el almacén están sobre la calle principal.' : 'Acá hay un almacén y poco más. Es lo bueno del pueblo.'], { dir: 'down' }),
-      ...(isCity && !stop.gym ? [{ x: 5, y: st.sa + 2, look: 'cop', dir: 'right', script: 'town_gate', stop: id }] : []),
+      npc(0, 0, LOOKS[i % LOOKS.length], lines, { wander: true }),
+      npc(0, 0, LOOKS[(i + 2) % LOOKS.length], [lines[1], isCity ? 'La Policlínica y el almacén están sobre la calle principal.' : 'Acá hay un almacén y poco más. Es lo bueno del pueblo.'], { dir: 'down' }),
+      ...(id === 'colonia' ? [
+        { x: 0, y: 0, look: 'girl', dir: 'down', sight: 4, trainer: TR('col_a', 'Valentina', 'Turista', [['teruterito', 5], ['hornerito', 5]], 100, 'Vine a ver el puerto y me quedé a pelear.', 'Buen combate.', 'Colonia tiene más para ver de lo que parece.') },
+        { x: 0, y: 0, look: 'sailor', dir: 'left', sight: 4, trainer: TR('col_b', 'Ramiro', 'Marinero', [['nandulin', 5], ['oruga', 5], ['tuco', 5]], 130, 'Mientras espero el barco, entreno.', 'Me hundiste.', 'El río da muchas vueltas, igual que la vida.') },
+        { x: 0, y: 0, look: 'gaucho', dir: 'down', sight: 4, trainer: TR('col_c', 'Don Eusebio', 'Paisano', [['hormiga', 5], ['tuco', 6]], 140, 'Pasá, pasá. Pero primero me mostrás qué traés.', 'Se nota que practicaste.', 'Con la PokeDex todo se aprende más rápido.') },
+      ] : []),
+      ...(id === 'melo' ? [npc(0, 0, 'oldman', ['La torre vieja del Cabildo tiene luces de noche. Dicen que es el Sereno, que sigue de guardia.', 'Nadie se anima a subir.'], { dir: 'down' })] : []),
+      ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: 'cop', dir: 'right', script: 'town_gate', stop: id }] : []),
     ],
   };
-  settle(ROUTE_OUTDOOR[id]);
+  addFolk(m, id, isCity ? 7 : 4);
+  ROUTE_OUTDOOR[id] = m;
+  retown(m, id, cfg);
   if (gymType) {
     const [lo2, hi2] = [Math.max(2, mapBand(id)[1] - 3), mapBand(id)[1] + 1];
     ROUTE_INTERIOR[`gym_${id}`] = room(GYM, {
@@ -198,10 +211,29 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
     });
   }
   if (isCity) ROUTE_INTERIOR[`poli_${id}`] = poli(`Policlínica de ${stop.name}`);
-  ROUTE_INTERIOR[`shop_${id}`] = shop(`Almacén de ${stop.name}`, stockAt(i));
-  if (id === 'sanjose') ROUTE_INTERIOR.shop_sanjose.npcs[0].script = 'shop_carta';
-  ROUTE_INTERIOR[`casa_${id}`] = room(HOUSE, { name: `Casa en ${stop.name}`, npcs: [casaNpc(LOOKS[(i + 1) % LOOKS.length], isCity && place ? [`Soy del ${place}.`, lines[1]] : lines)] });
-  if (isCity) ROUTE_INTERIOR[`casa_${id}2`] = room(HOUSE, { name: `Otra casa en ${stop.name}`, npcs: [casaNpc(LOOKS[(i + 3) % LOOKS.length], [lines[1], 'Cuando pasa gente de afuera, se anima el pueblo.'])] });
+  if (isCity) ROUTE_INTERIOR[`shop_${id}`] = shop(`Almacén de ${stop.name}`, stockAt(i));
+  if (id === 'colonia') ROUTE_INTERIOR.shop_colonia.npcs[0].script = 'shop_carta';
+  ROUTE_INTERIOR[`casa_${id}`] = room(HOUSE, { name: `Casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 1) % HOUSE_LOOKS.length], isCity && place ? [`Soy del ${place}.`, lines[1]] : lines)] });
+  if (isCity) ROUTE_INTERIOR[`casa_${id}2`] = room(HOUSE, { name: `Otra casa en ${stop.name}`, npcs: [casaNpc(HOUSE_LOOKS[(i * 5 + 4) % HOUSE_LOOKS.length], [lines[1], 'Cuando pasa gente de afuera, se anima el pueblo.'])] });
+}
+
+/** Older cities and localities built by hand keep their buildings, people and exits but get a new plan. */
+function replanExisting(OUTDOOR) {
+  const doneBefore = new Set(Object.keys(ROUTE_OUTDOOR));
+  for (const [id, cfg] of Object.entries(CITY_SPECS)) {
+    if (doneBefore.has(id) || !OUTDOOR[id]) continue;
+    const keepSides = Object.entries(OUTDOOR[id].exits ?? {}).filter(([, e]) => KEEP_TARGETS.has(e.to)).map(([s]) => s);
+    addFolk(OUTDOOR[id], id, 7);
+    retown(OUTDOOR[id], id, { ...cfg, newDoors: id === 'fraybentos' ? { ferry_1: FERRY_DOOR } : cfg.newDoors, edges: [...new Set([...edgesFor(id), ...keepSides])] });
+  }
+  for (const id of Object.keys(LOC_PLAN)) {
+    if (doneBefore.has(id) || !OUTDOOR[id]) continue;
+    const m = OUTDOOR[id];
+    const keepSides = Object.entries(m.exits ?? {}).filter(([, e]) => KEEP_TARGETS.has(e.to)).map(([s]) => s);
+    const plan = localityPlan(id, (m.doors ?? []).filter((d) => !/^(shop|poli)_/.test(doorTo(d))), Object.keys(LOC_PLAN).indexOf(id));
+    addFolk(m, id, 4);
+    retown(m, id, { ...plan, drop: /^(shop|poli)_/, edges: [...new Set([...edgesFor(id), ...keepSides])] });
+  }
 }
 
 // ---------------------------------------------------------------- roads between stops
@@ -250,7 +282,6 @@ for (const s of STOPS) for (const via of s.via) {
 }
 
 // ---------------------------------------------------------------- wiring
-const KEEP_TARGETS = new Set(['ciclovia', 'cabo']); // dead-end branches that keep their own exits
 const CARVABLE = new Set('.,#qpRFfKks%`;=cb'.split(''));
 const walkable = (ch) => ch !== undefined && !TILE_INFO[ch]?.solid;
 
@@ -286,16 +317,19 @@ const edgeOpen = (m, side) => {
   return cells.some((ch) => walkable(ch) && ch !== '~');
 };
 
-const FWD_DENY = (a, b) => (a.gym
+const FWD_DENY = (a, b) => (a.id === 'fraybentos'
+  ? [`El camino a ${b} está cerrado.`, 'Hace falta la medalla del Anglo y haber ayudado al capitán del Buquebus: su Machete abre el camino al norte.']
+  : a.gym
   ? [`El camino a ${b} está cerrado.`, `Un guardia dice: "Primero tenés que ganar la medalla de ${a.name}."`]
-  : a.id === 'colonia'
-    ? ['Antes de salir hace falta una criatura.', 'El Maestro Tabárez te espera en el laboratorio.']
+  : a.id === 'carmelo'
+    ? ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.']
     : a.kind === 'city'
-      ? [`El camino a ${b} está cerrado.`, `Habla con la gente de ${a.name}: alguien necesita una mano para abrir el paso.`]
-      : []);
+        ? [`El camino a ${b} está cerrado.`, `Habla con la gente de ${a.name}: alguien necesita una mano para abrir el paso.`]
+        : []);
 
 /** Connect the whole chain: each consecutive pair of maps gets an exit on opposite sides. */
 export function rewire(OUTDOOR) {
+  replanExisting(OUTDOOR);
   const had = {};
   const extras = {};
   for (const id of CHAIN) {
@@ -329,8 +363,8 @@ export function rewire(OUTDOOR) {
       const fwd = stopA && STOP_INDEX[B] !== undefined ? STOPS[STOP_INDEX[B]].name : OUTDOOR[B].name.replace(/^Camino a /, '');
       const exit = { to: B };
       if (stopA && (stopA.kind === 'city')) {
-        const flag = A === 'colonia' ? 'has_starter' : openFlag(A);
-        exit.req = flag;
+        const flag = A === 'carmelo' ? 'has_starter' : openFlag(A);
+        exit.req = A === 'fraybentos' ? (f) => f[flag] && f.ferry_done : flag;
         exit.deny = FWD_DENY(stopA, fwd);
       }
       a.exits[s] = exit;
@@ -338,6 +372,19 @@ export function rewire(OUTDOOR) {
       done = true;
       break;
     }
-    if (!done) throw new Error(`no se pudo conectar ${A} con ${B}`);
+    if (!done) throw new Error(`no se pudo conectar ${A} con ${B} (cand ${cand}; A ${Object.keys(a.exits)} B ${Object.keys(b.exits)}; edgeA ${["n","s","e","w"].filter((s)=>edgeOpen(a,s))} edgeB ${["n","s","e","w"].filter((s)=>edgeOpen(b,s))})`);
+  }
+  // A road edge with no exit would be a silent dead end: close it with the border tile.
+  for (const id of ['ruta1', 'ciclovia', 'r_laspiedras_montevideo', 'montevideo']) {
+    const m = OUTDOOR[id];
+    if (!m) continue;
+    const rows = m.tiles.map((r) => [...r]);
+    const h = rows.length, w = rows[0].length;
+    const sides = { n: [...Array(w).keys()].map((x) => [x, 0]), s: [...Array(w).keys()].map((x) => [x, h - 1]), w: [...Array(h).keys()].map((y) => [0, y]), e: [...Array(h).keys()].map((y) => [w - 1, y]) };
+    for (const [side, cells] of Object.entries(sides)) {
+      if (m.exits?.[side]) continue;
+      for (const [x, y] of cells) if (!TILE_INFO[rows[y][x]]?.solid) rows[y][x] = '#';
+    }
+    m.tiles = rows.map((r) => r.join(''));
   }
 }

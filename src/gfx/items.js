@@ -64,6 +64,7 @@ const ART = {
   superesfera: (g) => ball(g, '#3a6ad8', '#9ac0ff'),
   ultraesfera: (g) => { ball(g, '#2a2a3a'); r(g, 3, 4, 3, 1, '#f2c02a'); r(g, 10, 4, 3, 1, '#f2c02a'); },
   safari_ball: (g) => { ball(g, '#4aa84a', '#c8f09a'); r(g, 7, 3, 2, 2, '#f2e8c0'); },
+  ficha: (g) => { r(g, 3, 3, 10, 10, INK); r(g, 4, 2, 8, 12, INK); r(g, 4, 3, 8, 10, '#f2c02a'); r(g, 5, 4, 6, 8, '#c8941a'); r(g, 7, 5, 2, 6, '#fff2b0'); r(g, 6, 7, 4, 2, '#fff2b0'); },
   cebo: (g) => { r(g, 3, 4, 10, 10, INK); r(g, 4, 5, 8, 8, '#c89a58'); r(g, 4, 3, 8, 2, INK); r(g, 5, 3, 6, 1, '#e8c888'); for (const [x, y] of [[5, 8], [8, 7], [10, 10], [6, 11]]) r(g, x, y, 2, 1, '#5cae3c'); },
   esfera_celeste: (g) => { ball(g, '#bfe8ff', '#fff'); r(g, 7, 3, 2, 2, '#f2c02a'); },
   te_marcela: (g) => mate(g, '#b8e08a'),

@@ -1,6 +1,6 @@
 // Live game state. Module-private (never attached to window) and only
 // mutated through the game's own systems.
-import { ITEMS, MAX_STACK } from '../data/items.js';
+import { ITEMS, MAX_STACK, MAX_FICHAS } from '../data/items.js';
 import { clamp, safeStorage } from '../core/util.js';
 
 export const MAX_MONEY = 999999;
@@ -42,7 +42,7 @@ export function setFlag(k, v = true) {
 export function addItem(key, qty = 1) {
   if (!ITEMS[key]) return 0;
   const before = S.bag[key] ?? 0;
-  const max = ITEMS[key].pocket === 'key' ? 1 : MAX_STACK;
+  const max = ITEMS[key].pocket === 'key' ? 1 : key === 'ficha' ? MAX_FICHAS : MAX_STACK;
   S.bag[key] = clamp(before + qty, 0, max);
   if (S.bag[key] === 0) delete S.bag[key];
   return (S.bag[key] ?? 0) - before;
