@@ -577,19 +577,26 @@ async function saveToGitHub() {
   const headers = { Authorization: `Bearer ${devToken()}`, Accept: 'application/vnd.github+json' };
   status('Guardando en GitHub…');
   try {
-    const cur = await fetch(`${url}?ref=main`, { headers });
-    if (!cur.ok) throw await ghError(cur);
-    const meta = await cur.json();
-    // Merge on top of what is on GitHub now, so edits made from another computer are kept.
-    const merged = parseMapEditsSource(b64decode(meta.content));
-    for (const [k, v] of Object.entries(drafts)) {
-      if (v) merged[k] = v;
-      else delete merged[k];
+    // The browser may keep an old copy of the file (and its sha): always ask GitHub again, and if someone
+    // saved in between (409), read the new copy and retry a few times before giving up.
+    let merged;
+    for (let attempt = 1; ; attempt++) {
+      const cur = await fetch(`${url}?ref=main&t=${Date.now()}`, { headers, cache: 'no-store' });
+      if (!cur.ok) throw await ghError(cur);
+      const meta = await cur.json();
+      // Merge on top of what is on GitHub now, so edits made from another computer are kept.
+      merged = parseMapEditsSource(b64decode(meta.content));
+      for (const [k, v] of Object.entries(drafts)) {
+        if (v) merged[k] = v;
+        else delete merged[k];
+      }
+      const names = Object.keys(drafts).map(nameOf).join(', ');
+      const body = { message: `Editor de mapas: ${names}`, content: b64encode(mapEditsSource(merged)), sha: meta.sha, branch: 'main' };
+      const put = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body), cache: 'no-store' });
+      if ((put.status === 409 || put.status === 422) && attempt < 5) { await new Promise((r) => setTimeout(r, 1200 * attempt)); continue; }
+      if (!put.ok) throw await ghError(put);
+      break;
     }
-    const names = Object.keys(drafts).map(nameOf).join(', ');
-    const body = { message: `Editor de mapas: ${names}`, content: b64encode(mapEditsSource(merged)), sha: meta.sha, branch: 'main' };
-    const put = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
-    if (!put.ok) throw await ghError(put);
     base = merged;
     drafts = {};
     persist();
