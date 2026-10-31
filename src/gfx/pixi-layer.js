@@ -3,7 +3,7 @@
 // shows it through a colour-grading shader (vignette, warm light, soft bloom).
 // If WebGL is unavailable the plain 2D canvas stays visible.
 import 'pixi.js/unsafe-eval'; // no new Function(): the page CSP forbids eval
-import { Application, Sprite, Texture, Filter, GlProgram } from 'pixi.js';
+import { Application, Sprite, Texture, Filter, GlProgram, Container } from 'pixi.js';
 import { W, H } from './screen.js';
 
 const VERT = `in vec2 aPosition;
@@ -47,6 +47,44 @@ void main(){
 let app = null;
 let tex = null;
 let uniforms = null;
+let lightLayer = null;
+let partLayer = null;
+let glowTex = null;
+const lightSprites = [];
+const parts = [];
+// What the world renderer says is on screen this frame (positions in 480x270 logical pixels).
+const fx = { at: -1e9, outdoor: false, night: 0, lights: [] };
+const SC = 4;
+
+function glowTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,255,255,1)');
+  gr.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+  gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr;
+  g.fillRect(0, 0, 128, 128);
+  return Texture.from(c);
+}
+
+/** Called by the world renderer every frame: outdoor flag, 0..1 night level and light sources [{x, y, r, color}]. */
+export function setFx(outdoor, night, lights) {
+  fx.at = performance.now();
+  fx.outdoor = outdoor;
+  fx.night = night;
+  fx.lights = lights;
+}
+
+/** 0 by day, 1 at night, in between at dusk and dawn (real clock, like the colour grade). */
+export function nightLevel(date = new Date()) {
+  const hr = date.getHours() + date.getMinutes() / 60;
+  if (hr >= 20 || hr < 5.5) return 1;
+  if (hr >= 18) return 0.55;
+  if (hr < 7.5) return 0.3;
+  return 0;
+}
 
 /** Create the WebGL canvas on top of the 2D one. Resolves false when WebGL is not available. */
 export async function mountPixi(source, host) {
@@ -63,6 +101,17 @@ export async function mountPixi(source, host) {
     uniforms = { uWarm: { value: 0, type: 'f32' }, uVig: { value: 0.28, type: 'f32' }, uTexel: { value: [1 / W, 1 / H], type: 'vec2<f32>' } };
     sprite.filters = [new Filter({ glProgram: GlProgram.from({ vertex: VERT, fragment: FRAG }), resources: { grade: uniforms } })];
     app.stage.addChild(sprite);
+    glowTex = glowTexture();
+    lightLayer = new Container();
+    partLayer = new Container();
+    app.stage.addChild(lightLayer, partLayer);
+    for (let i = 0; i < 36; i++) {
+      const sp = new Sprite(glowTex);
+      sp.anchor.set(0.5);
+      sp.blendMode = 'add';
+      partLayer.addChild(sp);
+      parts.push({ sp, x: Math.random() * 480, y: Math.random() * 270, v: 0.4 + Math.random() * 0.8, ph: Math.random() * 7, sz: 0.05 + Math.random() * 0.07 });
+    }
     app.ticker.stop(); // we render manually, once per game frame
     host.append(canvas);
     host.classList.add('has-gl');
@@ -80,8 +129,50 @@ export function setGrade({ warm = 0, vignette = 0.28 } = {}) {
   uniforms.uVig.value = vignette;
 }
 
+const lamp = (i) => {
+  while (lightSprites.length <= i) {
+    const sp = new Sprite(glowTex);
+    sp.anchor.set(0.5);
+    sp.blendMode = 'add';
+    lightLayer.addChild(sp);
+    lightSprites.push(sp);
+  }
+  return lightSprites[i];
+};
+
+function updateFx(now) {
+  const live = now - fx.at < 150 && fx.outdoor;
+  // lights: lamps and fires, warm pools that flicker; stronger at night
+  const lights = now - fx.at < 150 ? fx.lights : [];
+  const glow = 0.25 + fx.night * 0.75;
+  lights.forEach((l, i) => {
+    const sp = lamp(i);
+    const flick = 0.88 + 0.12 * Math.sin(now / 130 + l.x * 3.1 + l.y);
+    sp.visible = true;
+    sp.tint = l.color ?? 0xffc870;
+    sp.position.set(l.x * SC, l.y * SC);
+    sp.scale.set(((l.r ?? 34) * 2 * SC) / 128 * (0.96 + 0.04 * flick));
+    sp.alpha = (l.strength ?? 0.6) * glow * flick;
+  });
+  for (let i = lights.length; i < lightSprites.length; i++) lightSprites[i].visible = false;
+  // ambient particles: fireflies at night, floating pollen by day
+  const night = fx.night;
+  for (const p of parts) {
+    p.sp.visible = live;
+    if (!live) continue;
+    p.x += (Math.sin(now / 1900 + p.ph) * 0.12 + 0.05) * p.v;
+    p.y += Math.cos(now / 2300 + p.ph) * 0.1 * p.v - 0.03;
+    if (p.x > 484) p.x = -4; if (p.x < -4) p.x = 484; if (p.y < -4) p.y = 274; if (p.y > 274) p.y = -4;
+    const blink = Math.max(0, Math.sin(now / 700 + p.ph * 2));
+    p.sp.position.set(p.x * SC, p.y * SC);
+    if (night > 0.5) { p.sp.tint = 0xc8ff78; p.sp.scale.set(p.sz * 1.6); p.sp.alpha = 0.15 + 0.85 * blink * blink * night; }
+    else { p.sp.tint = 0xfff4c8; p.sp.scale.set(p.sz); p.sp.alpha = 0.18 + 0.12 * blink; }
+  }
+}
+
 export function renderPixi() {
   if (!app) return;
+  updateFx(performance.now());
   tex.source.update();
   app.renderer.render(app.stage);
 }

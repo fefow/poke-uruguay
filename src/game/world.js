@@ -11,6 +11,7 @@ import { charSprite } from '../gfx/characters.js';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.js';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.js';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain } from '../gfx/fx.js';
+import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.js';
 import { input } from '../core/input.js';
 import { sfx, playMusic } from '../core/audio.js';
 import { worldRng } from '../core/rng.js';
@@ -558,6 +559,14 @@ async function talkTo(n) {
   if (d.text) return say(d.text);
 }
 
+// Tiles that give light to the WebGL layer: [dy = height of the glow inside the tile, radius in logical px, colour, strength].
+const LIGHT_TILES = {
+  '|': { dy: 3, r: 30, color: 0xffd890, s: 0.7 },
+  'Σ': { dy: 4, r: 30, color: 0xffd890, s: 0.7 },
+  'П': { dy: 8, r: 26, color: 0xff9a40, s: 0.85, always: true },
+  w: { dy: 8, r: 16, color: 0xffe0a0, s: 0.45 },
+};
+
 // Rematches: a common trainer belongs to the first gym ahead of their map (everything before Trinidad
 // belongs to Trinidad's medal) and only offers a rematch once you hold the medal two gyms later.
 // Each extra medal (and the Liga) raises the tier: stronger, already evolved teams.
@@ -934,6 +943,7 @@ function drawWorld(g, t) {
   g.scale(Z, Z);
   if (mw < VW || mh < VH) mapGlow(g, Math.max(0, -cx), Math.max(0, -cy), Math.min(mw, VW), Math.min(mh, VH));
   const frame = Math.floor(t / 400);
+  const night0 = nightLevel();
   const x0 = Math.max(0, Math.floor(cx / T));
   const y0 = Math.max(0, Math.floor(cy / T));
   const x1 = Math.min(m.w - 1, Math.ceil((cx + VW) / T));
@@ -941,6 +951,21 @@ function drawWorld(g, t) {
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y)), x * T - cx, y * T - cy);
+  }
+  // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
+  {
+    const lights = [];
+    if (pixiActive()) {
+      for (let y = y0; y <= y1; y++) {
+        const row = W_.tiles[y];
+        for (let x = x0; x <= x1; x++) {
+          const ch = row[x];
+          const L = LIGHT_TILES[ch];
+          if (L && (L.always || night0 > 0.2)) lights.push({ x: ((x * T - cx) + 8) * Z, y: ((y * T - cy) + L.dy) * Z, r: L.r * Z, color: L.color, strength: L.s });
+        }
+      }
+    }
+    setFx(!m.indoor && !m.dark, night0, lights.slice(0, 48));
   }
   // ground items
   for (const it of W_.items) {
@@ -999,7 +1024,7 @@ function drawWorld(g, t) {
   g.restore();
   if (!m.indoor) {
     const night = grade(g);
-    motes(g, t, { night });
+    if (!pixiActive()) motes(g, t, { night });
     if (!m.dark && m.theme !== 'cueva' && weatherAt(m.id) === 'rain') rain(g, t);
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
   }
