@@ -17,7 +17,7 @@ import { SCRIPTS } from './data/story.js';
 import { startTitle, newGameIntro, credits, slotCard, titleRenderer } from './game/scenes.js';
 import * as menus from './game/menus.js';
 import * as battle from './game/battle-scene.js';
-import { openOptions, openMap } from './game/menus.js';
+import { openOptions, openMap, openBag, openParty, openDex } from './game/menus.js';
 import { createCreature } from './game/creature.js';
 import { mountHud, updateHud, flashSaved } from './game/hud.js';
 import { mountSidebar, updateSidebar } from './game/sidebar.js';
@@ -72,7 +72,7 @@ async function boot() {
   mountScreen($('#view'));
   if (await mountPixi($('#view'), $('#screen'))) setAfterRender(renderPixi);
   mountUI($('#ui'));
-  mountSidebar($('#stage'));
+  mountSidebar($('#stage'), { menu: null, bag: () => runScript(() => openBag({ mode: 'field' })), party: () => runScript(() => openParty({ mode: 'field' })), dex: () => runScript(() => openDex()), map: () => runScript(() => openMap()), options: () => runScript(() => openOptions()) });
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   mountFullscreen();
