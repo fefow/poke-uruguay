@@ -979,7 +979,16 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   const spot = trail.find(([x, y]) => !cave.npcs.some((n) => Math.abs(n.x - x) + Math.abs(n.y - y) < 3)) ?? trail[0];
   cave.npcs.push({ x: spot[0], y: spot[1], look: 'leader_correo', dir: 'down', script: 'marta_cave', ppIds, cond: (f) => !f.marta_help });
   const gymDoor = OUTDOOR.mercedes.doors.findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_mercedes');
-  OUTDOOR.mercedes.doors[gymDoor] = { to: 'gym_mercedes', req: 'marta_help', deny: ['El gimnasio del Correo está cerrado con un cartel: "Volvemos pronto".', 'Dicen que Marta salió a entregar un paquete por la cueva de Palmitas y no volvió.'] };
+  OUTDOOR.mercedes.doors[gymDoor] = { to: 'gym_mercedes', req: 'marta_help', deny: ['El gimnasio del Correo está cerrado.', 'Un cartel en la puerta dice: "Volvemos pronto".'] };
+  // Someone in town knows where Marta went (the gym only says it is closed).
+  const mer = OUTDOOR.mercedes;
+  let dx = 0, dy = 0;
+  mer.tiles.forEach((r, y) => { let k = 0; [...r].forEach((c, x) => { if (c === 'D') { if (k++ === gymDoor) { dx = x; dy = y; } } }); });
+  const cartero = { x: dx + 2, y: dy + 2, look: 'clerk', dir: 'left', id: 'mer_cartero', text: ['Soy cartero del Correo y hoy no tengo a quién entregarle nada: la presidenta no está.', 'Marta salió ayer a llevar un paquete por la cueva de Palmitas, al oeste, y no volvió.', 'Unos tipos de gris la seguían. Si vas para allá, andá con cuidado.'], cond: (f) => !f.marta_help };
+  const carteroAfter = { ...cartero, id: 'mer_cartero2', text: ['¡Marta volvió! Llegó con un paquete de planos y abrió el gimnasio.', 'Gracias por ir a buscarla.'], cond: (f) => !!f.marta_help };
+  fitToMap(mer.tiles, [cartero]);
+  carteroAfter.x = cartero.x; carteroAfter.y = cartero.y; // the same man, once Marta is back
+  mer.npcs.push(cartero, carteroAfter);
 }
 
 // Every gym has its own floor plan.
