@@ -144,6 +144,7 @@ function freeSpot(m, busy, prefer) {
 
 /** Adds the toll keeper, the lost-item person and the fog machine to a guided route map. */
 export function addRouteStory(m, id) {
+  addParaje(m, id);
   const st = ROUTE_STORIES[id];
   if (!st || m.theme === 'cueva' || m.dark || m.safari) return;
   m.npcs ??= [];
@@ -182,4 +183,73 @@ export function addRouteStory(m, id) {
     rcut.forEach(([x, y]) => { m.npcs.push({ x, y, look: 'oldman', dir: 'down', blocker: true, name: 'Guardián del paso', script: 'route_riddle', riddleId: id, doneFlag: flag, text: 'El paso está cerrado. Un guardián pide una respuesta a quien quiera cruzar.', cond: (f) => !f[flag] }); busy.add(`${x},${y}`); });
   }
   if (mach) m.npcs.push({ x: mach[0], y: mach[1], look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', clue: st.fog, doneFlag: `rf_${id}` });
+}
+
+
+// ---------------------------------------------------------------- parajes
+const RANCHO = ['rrrrr', 'rrrrr', 'HwwwH'];
+const PARAJE_FOLK: [string, string, string[]][] = [
+  ['Doña Ramona', 'mom', ['Esta posta es de mi familia desde hace tres generaciones.', 'Acá paran los carreros, los viajantes y ahora hasta los entrenadores.']],
+  ['Don Teodoro', 'gaucho', ['Si el camino te parece largo, es que lo estás mirando con apuro.', 'Los arroyos de esta ruta bajan con ganas después de la lluvia.']],
+  ['Viajante Marcos', 'boy', ['Hago esta ruta una vez por semana y siempre veo algo distinto.', 'Hay un guardián en el paso al que le gustan los acertijos.']],
+  ['Maestra rural Inés', 'maestra', ['Doy clase a seis chicos en el rancho del fondo.', 'Les enseño a mirar el campo antes de salir a contarlo.']],
+];
+
+/** A paraje: a small cluster of ranchos with fence, a well and two neighbours, set beside the trail of a long route. */
+export function addParaje(m, id) {
+  const w = m.tiles[0].length, h = m.tiles.length;
+  if (Math.max(w, h) < 60 || m.theme === 'cueva' || m.dark || m.safari) return;
+  const g = m.tiles.map((r) => [...r]);
+  const free = (c) => c === '.' || c === ',' || c === 'f' || c === 'q' || c === '#' || c === 'R' || c === 'p';
+  const trail = (c) => c === '=' || c === 'b';
+  const AW = 9, AH = 6;
+  const seed = [...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 11);
+  const cands: [number, number][] = [];
+  for (let y = 3; y < h - AH - 2; y++) for (let x = 3; x < w - AW - 2; x++) {
+    let ok = true, near = false;
+    for (let dy = -1; dy <= AH && ok; dy++) for (let dx = -1; dx <= AW && ok; dx++) {
+      const c = g[y + dy]?.[x + dx];
+      if (c === undefined || (dx >= 0 && dx < AW && dy >= 0 && dy < AH && !free(c))) ok = false;
+      if (c && trail(c)) near = true;
+    }
+    const busy = [...(m.npcs ?? []), ...(m.items ?? [])].some((o) => o.x >= x - 1 && o.x <= x + AW && o.y >= y - 1 && o.y <= y + AH);
+    if (ok && !busy) cands.push([x, y]);
+    void near;
+  }
+  if (!cands.length) return;
+  // prefer areas close to the trail (within 4 tiles) but not touching it
+  const dTrail = (x, y) => { let best = 99; for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) if (trail(g[yy][xx])) best = Math.min(best, Math.abs(xx - x) + Math.abs(yy - y)); return best; };
+  const dist = Array.from({ length: h }, () => Array(w).fill(999));
+  const queue: [number, number][] = [];
+  for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) if (trail(g[yy][xx])) { dist[yy][xx] = 0; queue.push([xx, yy]); }
+  for (let i = 0; i < queue.length; i++) { const [qx, qy] = queue[i]; for (const [dx, dy] of D4) { const nx = qx + dx, ny = qy + dy; if (dist[ny]?.[nx] > dist[qy][qx] + 1) { dist[ny][nx] = dist[qy][qx] + 1; queue.push([nx, ny]); } } }
+  void dTrail;
+  const scored = cands.map(([x, y]) => [x, y, dist[y + (AH >> 1)][x + (AW >> 1)]] as [number, number, number]).filter(([, , d]) => d >= 3 && d <= 16).sort((a, b) => a[2] - b[2]);
+  const pick = scored[seed % Math.max(1, Math.min(scored.length, 4))];
+  if (!pick) return;
+  const [x0, y0] = pick;
+  const put = (x, y, pat) => pat.forEach((line, dy) => [...line].forEach((c, dx) => { g[y + dy][x + dx] = c; }));
+  // signs are matched to 'S' tiles in reading order: find where the new one falls
+  let signIdx = 0;
+  for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) if (g[yy][xx] === 'S' && (yy < y0 + 4 || (yy === y0 + 4 && xx < x0 + 4))) signIdx++;
+  const backup = g.map((r) => [...r]);
+  for (let dy = 0; dy < AH; dy++) for (let dx = 0; dx < AW; dx++) g[y0 + dy][x0 + dx] = '.';
+  put(x0 + 2, y0, RANCHO);
+  for (let dx = 0; dx < AW; dx++) g[y0 + 5][x0 + dx] = dx === 4 ? '.' : 'F';   // fence with a gap
+  g[y0 + 4][x0 + 4] = 'S';
+  // the whole area must stay reachable from the trail, otherwise the paraje is skipped
+  const start = (() => { for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) if (trail(g[yy][xx])) return [xx, yy]; return null; })();
+  if (!start) return;
+  const seen = new Set([start.join()]);
+  const stack = [start];
+  while (stack.length) { const [qx, qy] = stack.pop(); for (const [dx, dy] of D4) { const nx = qx + dx, ny = qy + dy, c = g[ny]?.[nx]; if (c !== undefined && !solid(c) && c !== 'λ' && !seen.has(`${nx},${ny}`)) { seen.add(`${nx},${ny}`); stack.push([nx, ny]); } } }
+  if (![[x0 + 1, y0 + 3], [x0 + 7, y0 + 3], [x0 + 6, y0 + 4]].every(([ex, ey]) => seen.has(`${ex},${ey}`))) { void backup; return; }
+  m.tiles = g.map((r) => r.join(''));
+  const folk = [PARAJE_FOLK[seed % 4], PARAJE_FOLK[(seed + 2) % 4]];
+  (m.npcs ??= []).push(
+    { x: x0 + 1, y: y0 + 3, look: folk[0][1], dir: 'down', name: folk[0][0], text: folk[0][2] },
+    { x: x0 + 7, y: y0 + 3, look: folk[1][1], dir: 'down', wander: true, name: folk[1][0], text: folk[1][2] },
+  );
+  (m.signs ??= []).splice(signIdx, 0, 'Posta del camino\nAgua fresca y sombra. Se agradece pasar de a uno.');
+  (m.items ??= []).push({ x: x0 + 6, y: y0 + 4, item: 'mate', id: `${id}_paraje` });
 }
