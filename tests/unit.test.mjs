@@ -528,3 +528,16 @@ test('palancas: el orden correcto abre la tranquera y un error reinicia', async 
   const { MAPS } = await import('../src/data/maps.ts');
   assert.ok(Object.values(MAPS).some((m) => (m.npcs ?? []).some((n) => n.script === 'route_palanca')));
 });
+
+test('carrera de bicicletas: ida y vuelta dentro del límite da premio una sola vez', async () => {
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const flags = {}; const given = [];
+  const api = { flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, ask: async () => true, give: async (i) => { given.push(i); }, hasItem: () => true, sfx() {} };
+  await SCRIPTS.ev_carrera_juez(api); // start
+  await SCRIPTS.ev_carrera_meta(api); // top
+  await SCRIPTS.ev_carrera_juez(api); // finish
+  assert.ok(flags.ev_carrera && given.length >= 2);
+  const n = given.length;
+  await SCRIPTS.ev_carrera_juez(api);
+  assert.equal(given.length, n);
+});

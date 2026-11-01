@@ -215,6 +215,44 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
   },
 };
 
+// ---------------------------------------------------------------- bike race (Ciclovía de Tacuarembó)
+let race: { t0: number; top: boolean } | null = null;
+const secs = (ms: number) => (ms / 1000).toFixed(1).replace('.', ',');
+Object.assign(EVENT_SCRIPTS, {
+  async ev_carrera_juez(api) {
+    const who = 'Juez de largada';
+    if (api.flag('ev_carrera')) return api.say('La carrera ya la ganaste. El récord de la ciclovía sigue siendo tuyo.', { name: who });
+    if (!api.hasItem('bici')) return api.say('Esto es una carrera de bicicletas. Sin bici no se larga.', { name: who });
+    if (race?.top) {
+      const ms = Date.now() - race.t0;
+      race = null;
+      await api.say(`Cronometrado: ${secs(ms)} segundos de ida y vuelta.`, { name: who });
+      if (ms > 24000) return api.say('Se te fue el tiempo. El límite es de 24 segundos. Podés largar de nuevo cuando quieras.', { name: who });
+      api.setFlag('ev_carrera');
+      api.sfx('catch');
+      if (ms <= 12500) { await api.say('Es un tiempo de campeonato. Medalla de oro.', { name: who }); await api.give('piedra_basalto', 1); await api.give('ultraesfera', 3); }
+      else if (ms <= 17000) { await api.say('Muy buen tiempo. Medalla de plata.', { name: who }); await api.give('alfajor_triple', 1); await api.give('ultraesfera', 2); }
+      else { await api.say('Llegaste dentro del límite. Medalla de bronce.', { name: who }); await api.give('superesfera', 3); }
+      return;
+    }
+    await api.say(['Carrera de ida y vuelta por la Ciclovía: hasta el cronometrista del final y de regreso acá.', 'El límite son 24 segundos. Los ciclistas del camino tienen que haber quedado atrás: si te cruzan, te frenan.'], { name: who });
+    if (!(await api.ask('¿Largás?', { name: who }))) return;
+    race = { t0: 0, top: false };
+    await api.say('Preparados… ¡Ya!', { name: who });
+    race.t0 = Date.now();
+  },
+  async ev_carrera_meta(api) {
+    const who = 'Cronometrista';
+    if (api.flag('ev_carrera')) return api.say('Qué carrera. Todavía se comenta.', { name: who });
+    if (!race) return api.say('Acá termina la Ciclovía. El que organiza las carreras está en la largada, al sur.', { name: who });
+    const ms = Date.now() - race.t0;
+    if (ms > 24000) { race = null; return api.say('Llegaste tarde: ya pasó el tiempo límite. Volvé a largar desde el sur.', { name: who }); }
+    race.top = true;
+    api.sfx('confirm');
+    await api.say(`Marca de ida: ${secs(ms)} segundos. ¡Volvé a la largada!`, { name: who });
+  },
+});
+
 // ---------------------------------------------------------------- placement
 export function addCityEvents(OUTDOOR: Record<string, any>) {
   const put = (mapId: string, list: any[]) => {
@@ -233,6 +271,14 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
     { x: 30, y: 12, look: 'nino', dir: 'down', name: 'Nene', script: 'ev_pista', clue: 3, text: ['A mediodía la sombra de la palmera señala hacia el mar. Mi tío dice que ahí hay que cavar.'] },
     { x: 20, y: 22, look: 'obrero', dir: 'down', name: 'Buscatesoros', script: 'ev_buscatesoros' },
   ]);
+  const cic = OUTDOOR.ciclovia;
+  if (cic) {
+    const hh = cic.tiles.length;
+    put('ciclovia', [
+      { x: 9, y: hh - 5, look: 'cop', dir: 'down', name: 'Juez de largada', script: 'ev_carrera_juez' },
+      { x: 9, y: 5, look: 'ciclista', dir: 'down', name: 'Cronometrista', script: 'ev_carrera_meta' },
+    ]);
+  }
   const t = OUTDOOR[CONTEST_CITY];
   if (t) {
     const org = { x: 20, y: 14, look: 'cop', dir: 'down', name: 'Organizador del concurso', script: 'ev_concurso' };
