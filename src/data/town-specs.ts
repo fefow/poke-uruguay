@@ -163,7 +163,7 @@ export const CITY_SPECS = {
       scatter: [['ö', 3, 'away'], ['Ω', 4, 'road']],
       animals: [{ sp: 'criollo', n: 3, rect: [24, 10, 14, 3] }, { sp: 'oveja', n: 2, rect: [24, 10, 14, 3] }],
     },
-    bld: [['planta', 'gym_tac', [24, 12]], ['poli', 'poli_tac'], ['shop', 'shop_tac'], ['houseG', 'casa_tac'], ['houseO', 'casa_tac2'], ['houseV', 'parrilla_tac', [14, 18]]],
+    bld: [['planta', 'gym_tac', [24, 12]], ['poli', 'poli_tac'], ['shop', 'shop_tac'], ['houseG', 'casa_tac'], ['houseO', 'casa_tac2'], ['houseB', 'bici_tac'], ['houseV', 'parrilla_tac', [14, 18]]],
     fill: 7,
   },
   // Melo: laguna Merín and low hills; a diagonal staircase main street, ombú in the plaza.

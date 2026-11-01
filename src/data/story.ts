@@ -987,12 +987,12 @@ export const SCRIPTS = {
   },
 
   async gift_tac(api) {
-    if (api.flag('got_bici')) return api.say('Al norte de la ciudad empieza la Ciclovía. Solo se entra en bicicleta. Usala desde el menú.', { name: 'Vecina' });
-    await api.say(['Vengo todos los días a regar estas plantas. Son del monte.', 'Esta bicicleta era de mi hijo y ya no la usa. Llevatela: va cuatro veces más rápido que caminando.', 'Se usa desde el menú. Bajo techo no se puede, y en combate no cambia nada.'], { name: 'Vecina' });
+    if (api.flag('got_bici')) return api.say('Al norte de la ciudad empieza la Ciclovía. Solo se entra en bicicleta. Usala desde el menú.', { name: 'Dueña' });
+    await api.say(['Bienvenido a El Pedal. Hace veinte años que armo bicicletas para el norte.', 'Esta quedó en el taller: era de mi hijo y ya no la usa. Llevatela, va cuatro veces más rápido que caminando.', 'Se usa desde el menú. Bajo techo no se puede, y en combate no cambia nada.'], { name: 'Dueña' });
     await api.give('bici', 1);
     api.setFlag('got_bici');
     api.setFlag('gift_tac');
-    await api.say('Al norte de la ciudad hay una Ciclovía. Solo se entra en bicicleta.', { name: 'Vecina' });
+    await api.say('Al norte de la ciudad hay una Ciclovía. Solo se entra en bicicleta.', { name: 'Dueña' });
   },
 
   async gift_ciclovia(api) {

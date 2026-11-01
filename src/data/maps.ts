@@ -1066,6 +1066,27 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   });
 }
 
+// Tacuarembó's bicycle shop: racks of bikes, a mechanic's bench, and the owner gives the family bike away (script gift_tac).
+{
+  const W = 16, H = 10;
+  const g: string[][] = Array.from({ length: H }, () => Array(W).fill('i'));
+  for (let x = 0; x < W; x++) g[0][x] = 'x';
+  g[0][3] = 'X'; g[0][12] = 'X';
+  for (let x = 1; x <= 5; x++) g[2][x] = 'T';
+  for (let x = 10; x <= 14; x++) g[2][x] = 'T';
+  for (let x = 6; x <= 9; x++) g[5][x] = 'T';
+  g[1][0] = 'N'; g[1][15] = 'N'; g[8][0] = 'N'; g[8][15] = 'N';
+  g[9][7] = 'm'; g[9][8] = 'm';
+  INTERIOR.bici_tac = MAPS.bici_tac = room(g.map((r) => r.join('')), {
+    name: 'Bicicletería El Pedal',
+    npcs: [
+      { x: 7, y: 4, look: 'campesina', dir: 'down', script: 'gift_tac', name: 'Dueña' },
+      { x: 3, y: 6, look: 'boy', dir: 'right', text: ['Mi bici tiene dieciocho cambios. Con eso subo cualquier cuesta del norte.', 'Dicen que la Ciclovía tiene tramos tan largos que ni se ve el final.'] },
+      { x: 12, y: 6, look: 'gaucho', dir: 'left', wander: true, text: ['Vine a arreglar una goma. Siempre se pincha en el peor momento.', 'A caballo no se pincha, pero tampoco se va al supermercado.'] },
+    ] as any,
+  });
+}
+
 // Montevideo's shop is the Shopping: three floors of shops joined by a lift ('Ͽ' in the wall walks you to the next floor up).
 {
   const W = 22, H = 14;

@@ -35,7 +35,7 @@ const R5 = route({ seed: 'ruta5', w: 30, h: 30, axis: 'v', from: 14, to: 9, gras
 const TAC = city({
   seed: 'tacuarembo', sa: 6, sb: 15,
   a: [['houseG', 2, 'casa_tac'], ['planta', 8, 'gym_tac'], ['poli', 17, 'poli_tac'], ['shop', 23, 'shop_tac']],
-  b: [['houseO', 4, 'casa_tac2'], ['houseV', 17, 'parrilla_tac']],
+  b: [['houseO', 4, 'casa_tac2'], ['houseB', 10, 'bici_tac'], ['houseV', 17, 'parrilla_tac']],
   vroads: [14], nroads: [14], sroads: [14], decor: { '#': 14, q: 6, f: 14 },
   signs: [[26, 7], [7, 16]],
   exits: { w: 6, e: 6, s: 14, n: 14 },
@@ -481,7 +481,6 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
   shop_pay: shop('Almacén de Paysandú', shopStock(['pan_casero', 'alfajor_triple', 'torta_frita'])),
   shop_frb: shop('Almacén de Fray Bentos', shopStock(['pan_casero', 'alfajor_triple', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'torta_frita'])),
   casa_tac: house('Casa en Tacuarembó', casaNpc('gaucho', ['Acá se asa de todo. Menos prisa.', 'Dicen que la Patria Gaucha reúne a más de cien mil personas.'])),
-  casa_tac2: house('Casa en Tacuarembó', { x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_tac' }),
   casa_riv: house('Casa en Rivera', casaNpc('boy', ['Mi tía vive del otro lado de la plaza. Ella es de Brasil, yo de Uruguay.', 'Para nosotros no hay frontera.'])),
   casa_riv2: house('Casa en Rivera', { x: 6, y: 3, look: 'oldman', dir: 'left', script: 'gift_riv' }),
   casa_sal: house('Casa en Salto', casaNpc('girl', ['Las naranjas de Salto son las mejores. Probá un gajo.', 'Los termas relajan hasta al más nervioso.'])),
