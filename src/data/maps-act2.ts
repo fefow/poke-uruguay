@@ -3,6 +3,7 @@
 import type { MapDef } from '../types.ts';
 import { TR, room, HOUSE, GYM, poli, shop, casaNpc } from './map-kit.ts';
 import { city, route, wildList, fishList, teamOf, fitToMap } from './map-gen.ts';
+import { spinMaze } from './spin-maze.ts';
 
 // ---------------------------------------------------------------- helpers
 const tr = (spot, look, id, name, cls, types, levels, [intro, lose, after], opts: any = {}) => ({
@@ -619,32 +620,25 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     npcs: [{ x: 5, y: 2, look: 'garua', dir: 'down', id: 'garua2', cond: (f) => !f.represa_clear, script: 'garua2' }],
   }),
 
-  // --- Frigorífico Anglo (Fray Bentos): three floors, Brumario and then Dr. Díaz
-  anglo_1: room(FLOOR_UP, {
-    name: 'Frigorífico Anglo: galpón', music: 'cave',
-    warps: [{ x: 11, y: 1, to: 'anglo_2', tx: 5, ty: 7 }],
-    npcs: [
-      grunt({ x: 2, y: 4 }, 'an_g1', [48, 48], 'Este galpón es del Equipo PP.', 'No pasa nada.', 'Subí. Dr. Díaz te espera.', { dir: 'right', sight: 4 }),
-      grunt({ x: 8, y: 6 }, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'La escalera está al fondo.', { dir: 'left', sight: 4 }),
-      grunt({ x: 6, y: 2 }, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'La administradora está arriba.', { dir: 'down', sight: 3 }),
-    ],
-    items: [{ x: 1, y: 7, item: 'pan_casero', id: 'an_item1' }],
-  }),
-  anglo_2: room(FLOOR_MID, {
-    name: 'Frigorífico Anglo: oficinas', music: 'cave',
-    exitTo: { map: 'anglo_1', x: 11, y: 2 },
-    warps: [{ x: 0, y: 1, to: 'anglo_3', tx: 5, ty: 6 }, { x: 11, y: 1, to: 'anglo_3', tx: 5, ty: 6 }],
-    npcs: [
-      grunt({ x: 3, y: 5 }, 'an_g4', [49, 50], 'Las oficinas son privadas.', 'Me ganaste.', 'El jefe de verdad está arriba.', { dir: 'right', sight: 4 }),
-      grunt({ x: 8, y: 3 }, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.', { dir: 'down', sight: 3 }),
-    ],
-    items: [{ x: 9, y: 6, item: 'alfajor_triple', id: 'an_item2' }],
-  }),
-  anglo_3: room(FLOOR_TOP, {
-    name: 'Frigorífico Anglo: dirección', music: 'cave',
-    exitTo: { map: 'anglo_2', x: 11, y: 2 },
-    npcs: [{ x: 5, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' }],
-  }),
+  // --- Frigorífico Anglo (Fray Bentos): one big spinner maze (see spin-maze.ts); Bruma waits in the office at the end
+  anglo_1: (() => {
+    const mz = spinMaze();
+    const al = mz.alcoves;
+    const at = (k, extra: any = {}) => ({ x: al[k].x, y: al[k].y, dir: al[k].face, ...extra });
+    const gr = (k, id, lv, a, b, c, sight = 3) => grunt({ x: al[k].x, y: al[k].y }, id, lv, a, b, c, { dir: al[k].face, sight });
+    return room(mz.tiles, {
+      name: 'Frigorífico Anglo', music: 'cave', theme: 'gym_siniestro',
+      npcs: [
+        gr(0, 'an_g1', [48, 48], 'Este frigorífico es del Equipo PP.', 'No pasa nada.', 'Las flechas te llevan solas. Fijate bien adónde apuntan.'),
+        gr(1, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'Si una cinta te devuelve al principio, probá otra.'),
+        gr(2, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'Hay cintas que solo van en un sentido.'),
+        gr(3, 'an_g4', [49, 50], 'Las cámaras frías son privadas.', 'Me ganaste.', 'El jefe de verdad está arriba, en las oficinas.'),
+        gr(4, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.'),
+        { x: 13, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' },
+      ],
+      items: [{ x: al[5].x, y: al[5].y, item: 'pan_casero', id: 'an_item1' }, { x: al[6].x, y: al[6].y, item: 'alfajor_triple', id: 'an_item2' }],
+    });
+  })(),
 
   // --- Liga: Alto Mando en cuatro salas, luego el Campeón
   liga_1: room([

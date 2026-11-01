@@ -212,6 +212,7 @@ export function updateWorld(dt, now) {
   for (const n of W_.npcs) updateNpc(n, now, dt);
   if (W_.scriptRunning) return;
 
+  if (!p.moving && spin()) return;
   if (p.moving) {
     p.t += dt;
     if (p.t >= p.dur) {
@@ -246,6 +247,22 @@ export function updateWorld(dt, now) {
   }
   if (W_.lastDirPress && now - W_.lastDirPress < 70) return;
   tryMove(d);
+}
+
+const SPIN_DIR = { 'Ϣ': 'up', 'Ϥ': 'down', 'Ϧ': 'left', 'Ϩ': 'right' };
+/** Launch arrows: standing on one throws the player along it, tile after tile, until a plain tile (or a wall) stops them. */
+function spin() {
+  const p = W_.player;
+  const d = SPIN_DIR[tileAt(p.x, p.y)];
+  if (!d) return false;
+  const [dx, dy] = DIRS[d];
+  const nx = p.x + dx, ny = p.y + dy;
+  p.dir = d;
+  if (solidAt(nx, ny, { player: true })) return false;
+  p.from = { x: p.x, y: p.y };
+  p.x = nx; p.y = ny;
+  p.moving = true; p.t = 0; p.dur = 80; p.step++;
+  return true;
 }
 
 function tryMove(d) {

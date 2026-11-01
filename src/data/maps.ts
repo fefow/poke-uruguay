@@ -783,7 +783,7 @@ export const ZONE_LEVELS = Object.fromEntries(CHAIN.map((id) => [id, mapBand(id)
  * dungeons between the wild band and the ace.
  */
 const PLACES = {
-  fraybentos: ['gym_frb', 'anglo_1', 'anglo_2', 'anglo_3', 'casa_frb_faro', 'ferry_1', 'ferry_2'],
+  fraybentos: ['gym_frb', 'anglo_1', 'casa_frb_faro', 'ferry_1', 'ferry_2'],
   paysandu: ['muelle_pay'],
   salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
   rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],

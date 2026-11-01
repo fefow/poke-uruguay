@@ -42,9 +42,10 @@ export const TILE_INFO = {
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
   ϼ: { name: 'equipo de la sala', solid: true },
-  Ϛ: { name: 'caja teletransportadora roja', solid: true, anim: true },
-  Ϝ: { name: 'caja teletransportadora azul', solid: true, anim: true },
-  Ϟ: { name: 'caja teletransportadora amarilla', solid: true, anim: true },
+  Ϣ: { name: 'flecha lanzadora' },
+  Ϥ: { name: 'flecha lanzadora' },
+  Ϧ: { name: 'flecha lanzadora' },
+  Ϩ: { name: 'flecha lanzadora' },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -1125,14 +1126,16 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
 }
 
 
-// Anglo teleport crates: a crate with a glowing coloured lid.
-for (const [ch, lit, dark] of [['Ϛ', '#ff5a5a', '#a02828'], ['Ϝ', '#5ab4ff', '#2858a0'], ['Ϟ', '#ffe05a', '#a08a28']]) {
-  (THEMES as any).gym_siniestro[ch] = (g, r) => {
-    (THEMES as any).gym_siniestro.Y(g, r);
-    px(g, 1, 4, '#3a3a4e', 14, 11); px(g, 2, 5, '#5a5a74', 12, 9); px(g, 2, 9, '#3a3a4e', 12, 1);
-    px(g, 2, 2, dark, 12, 4); px(g, 3, 3, lit, 10, 2); px(g, 5, 1, lit, 6, 1); px(g, 6, 0, '#ffffff', 4, 1);
-    px(g, 2, 14, '#00000050', 12, 1);
-  };
+// Launch arrows (see data/spin-maze.ts): a dark plate with a lit arrow pointing the way you are thrown.
+{
+  const A = ['...##...', '..####..', '.######.', '...##...', '...##...', '...##...', '...##...', '........'];
+  const rot = { up: (x, y) => [x, y], right: (x, y) => [7 - y, x], down: (x, y) => [7 - x, 7 - y], left: (x, y) => [y, 7 - x] };
+  for (const [dir, ch] of [['up', 'Ϣ'], ['down', 'Ϥ'], ['left', 'Ϧ'], ['right', 'Ϩ']]) {
+    (THEMES as any).gym_siniestro[ch] = (g) => {
+      px(g, 0, 0, '#26262f', T, T); px(g, 0, 0, '#3a3a48', T, 1); px(g, 0, 0, '#3a3a48', 1, T); px(g, 0, 15, '#16161c', T, 1);
+      for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (A[y][x] === '#') { const [rx, ry] = (rot as any)[dir](x, y); px(g, rx * 2, ry * 2, '#e0607c', 2, 2); px(g, rx * 2, ry * 2, '#ff9ab0', 2, 1); }
+    };
+  }
 }
 
 // Shopping mall lift: steel double doors with a floor indicator, set in the wall.
