@@ -35,6 +35,7 @@ export const TILE_INFO = {
   ϊ: { name: 'casilleros de correo', solid: true },
   ϋ: { name: 'encomiendas', solid: true },
   ΐ: { name: 'cinta transportadora' },
+  Ͽ: { name: 'ascensor', solid: true },
   ϸ: { name: 'piscina de la sala', solid: true },
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
@@ -1117,6 +1118,17 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
     };
   }
 }
+
+
+// Shopping mall lift: steel double doors with a floor indicator, set in the wall.
+Object.assign(DRAW, {
+  'Ͽ': (g) => {
+    px(g, 0, 0, '#6a6662', T, T); px(g, 0, 0, '#8a8680', T, 1);
+    px(g, 1, 3, '#3a3a44', 14, 13); px(g, 2, 4, '#9aa6b4', 6, 12); px(g, 8, 4, '#8a96a4', 6, 12); px(g, 8, 4, '#3a3a44', 1, 12);
+    px(g, 3, 5, '#c8d4e0', 1, 9); px(g, 9, 5, '#b8c4d0', 1, 9);
+    px(g, 5, 1, '#1a1a24', 6, 2); px(g, 7, 1, '#ff8a3a', 2, 1);
+  },
+});
 
 const cache = new Map();
 

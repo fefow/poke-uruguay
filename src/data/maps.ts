@@ -1041,6 +1041,73 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   mer.npcs.push(cartero as any, carteroAfter);
 }
 
+// Tacuarembó's second house is the Criadero Los Teros: pens where creatures grow while you travel (api.criadero).
+{
+  const W = 24, H = 14;
+  const g: string[][] = Array.from({ length: H }, () => Array(W).fill('i'));
+  for (let x = 0; x < W; x++) g[0][x] = 'x';
+  g[0][4] = 'X'; g[0][19] = 'X';
+  for (let x = 9; x <= 14; x++) g[2][x] = 'T';
+  g[1][0] = 'N'; g[1][23] = 'N'; g[12][0] = 'N'; g[12][23] = 'N';
+  const pens = [1, 9, 17];
+  for (const px of pens) for (let y = 5; y <= 10; y++) for (let x = px; x <= px + 5; x++) g[y][x] = (y === 5 || y === 10 || x === px || x === px + 5) ? 'F' : '.';
+  g[13][11] = 'm'; g[13][12] = 'm';
+  const beasts = [['alazan', 'corcel'], ['carpincho', 'carpincho'], ['gatomontes', 'pibe']];
+  const critters = pens.flatMap((px, k) => beasts[k].map((sp, j) => ({ x: px + 1 + j * 3, y: 7 + j, look: `animal:${sp}`, wander: true, critter: true, dir: 'down', text: [`${SPECIES[sp].name} come tranquilo y no te hace caso.`] })));
+  INTERIOR.casa_tac2 = MAPS.casa_tac2 = room(g.map((r) => r.join('')), {
+    name: 'Criadero Los Teros',
+    npcs: [
+      { x: 11, y: 3, look: 'campesina', dir: 'down', script: 'criadero', name: 'Criadora' },
+      { x: 4, y: 3, look: 'gaucho', dir: 'right', text: ['Mi yegua lleva una semana acá y volvió más mansa que nunca.', 'Se nota quién camina mucho: acá se les paga el tiempo en kilómetros.'] },
+      { x: 20, y: 12, look: 'boy', dir: 'left', text: ['Dejé a mi bicho de compañero y ya cambió de forma. ¡Ni lo reconocí!', 'Si dejás a uno que está por evolucionar, lo hace acá solo.'] },
+      ...critters,
+    ] as any,
+  });
+}
+
+// Montevideo's shop is the Shopping: three floors of shops joined by a lift ('Ͽ' in the wall walks you to the next floor up).
+{
+  const W = 22, H = 14;
+  type Store = [string[], string, string, string]; // stock, clerk look, clerk name, greeting
+  const floors: { id: string; name: string; stores: [Store, Store]; folk: [string, string[]] }[] = [
+    { id: 'shop_mvd', name: 'Shopping de Montevideo · Planta baja', folk: ['abuela', ['Vengo todos los sábados a mirar vidrieras. Comprar, casi nunca.', 'El ascensor sube hasta la confitería.']], stores: [
+      [['esfera', 'superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'dulce_de_leche'], 'clerk', 'Almacenero', 'Almacén Central. ¿Qué se lleva?'],
+      [['aloe', 'ruda', 'linimento', 'despertador', 'repelente'], 'maestra', 'Farmacéutica', 'Farmacia del Shopping. Pase, pase.'],
+    ] },
+    { id: 'shopping_2', name: 'Shopping de Montevideo · Primer piso', folk: ['hincha', ['Entrené tres meses con los suplementos de arriba y ni así le gané a mi primo.', 'Arriba hay una confitería que es una locura.']], stores: [
+      [['refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'refuerzo_precision', 'refuerzo_resistencia', 'concentracion'], 'obrero', 'Preparador', 'Suplementos para entrenadores. Todo con boleta.'],
+      [['repelente', 'repelente_super', 'repelente_max'], 'campesina', 'Vendedora', 'Casa del Campo. Repelentes de todo tipo.'],
+    ] },
+    { id: 'shopping_3', name: 'Shopping de Montevideo · Confitería y joyas', folk: ['boy', ['Me gasté la mesada en una torta frita. Valió la pena.', 'El ascensor de este piso baja directo a la planta baja.']], stores: [
+      [['alfajor', 'torta_frita', 'chivito', 'pan_casero', 'alfajor_triple'], 'cocinero', 'Confitero', 'Confitería. Lo que cura, cura rico.'],
+      [['piedra_agata', 'piedra_amatista', 'piedra_basalto'], 'artesana', 'Joyera', 'Piedras de las sierras. Cada una despierta algo distinto.'],
+    ] },
+  ];
+  floors.forEach((f, k) => {
+    const g: string[][] = Array.from({ length: H }, () => Array(W).fill('i'));
+    for (let x = 0; x < W; x++) g[0][x] = 'x';
+    for (const x of [3, 7, 14, 18]) g[0][x] = 'X';
+    g[0][10] = 'Ͽ'; g[0][11] = 'Ͽ';
+    for (const x of [1, 2, 3, 4, 5, 6, 15, 16, 17, 18, 19, 20]) g[1][x] = 'B';
+    for (const x of [2, 3, 4, 17, 18, 19]) g[3][x] = 'n';
+    for (const [x, y] of [[0, 1], [21, 1], [8, 6], [13, 6], [0, 12], [21, 12], [4, 9], [17, 9]]) g[y][x] = 'N';
+    for (const x of [7, 8, 13, 14]) g[9][x] = 'T';
+    g[13][10] = 'm'; g[13][11] = 'm';
+    const [[stockL, lookL, nameL, greetL], [stockR, lookR, nameR, greetR]] = f.stores;
+    const next = floors[(k + 1) % floors.length].id;
+    INTERIOR[f.id] = MAPS[f.id] = room(g.map((r) => r.join('')), {
+      name: f.name,
+      npcs: [
+        { x: 3, y: 2, look: lookL, dir: 'down', script: 'shop', fixedStock: true, stock: stockL, greeting: greetL, clerkName: nameL },
+        { x: 18, y: 2, look: lookR, dir: 'down', script: 'shop', fixedStock: true, stock: stockR, greeting: greetR, clerkName: nameR },
+        { x: 10, y: 7, look: f.folk[0], dir: 'down', wander: true, text: f.folk[1] },
+      ] as any,
+      warps: [{ x: 10, y: 0, to: next, tx: 10, ty: 1 }, { x: 11, y: 0, to: next, tx: 11, ty: 1 }],
+      ...(k ? { exitTo: { map: floors[k - 1].id, x: 10, y: 1 } } : {}),
+    });
+  });
+}
+
 // Every gym has its own floor plan.
 GYM_STOPS.forEach((stop, i) => {
   const door = (OUTDOOR[stop.id]?.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to)).find((to) => to.startsWith('gym_'));
@@ -1172,7 +1239,7 @@ for (const stop of STOPS) {
     const to = typeof d === 'string' ? d : d.to;
     if (!/^shop_/.test(to) || !INTERIOR[to]) continue;
     for (const n of INTERIOR[to].npcs) {
-      if (n.script !== 'shop' && n.script !== 'shop_carta') continue;
+      if ((n.script !== 'shop' && n.script !== 'shop_carta') || n.fixedStock) continue;
       const keep = (n.stock ?? []).filter((x) => /^(piedra_|mt_)/.test(x) && i >= 12);
       n.stock = [...tier, ...keep];
     }

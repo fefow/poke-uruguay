@@ -43,6 +43,7 @@ export interface GameState {
   lastHeal: Pos;
   repel: number;
   daycare: any;
+  criadero: { uid: string; steps: number }[];
   safari: any;
   created: number;
   saveCount: number;

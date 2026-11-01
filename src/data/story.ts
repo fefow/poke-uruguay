@@ -900,6 +900,10 @@ export const SCRIPTS = {
     await api.warp(api.safariGate.map, api.safariGate.x, api.safariGate.y, 'down');
   },
 
+  async criadero(api) {
+    await api.criadero();
+  },
+
   async guarderia(api) {
     await api.daycare();
   },

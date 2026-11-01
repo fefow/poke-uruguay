@@ -20,7 +20,7 @@ import { h, wait, clamp } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount } from './state.ts';
-import { createCreature, heal as healCreature, displayName, maxHp, gainExp } from './creature.ts';
+import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
 import { drawItem } from '../gfx/items.ts';
@@ -839,6 +839,64 @@ export const api = {
       if (ev.type === 'learn') await learnFlow(kept, ev.move);
     }
     await say(`¡${displayName(kept)} está en el nivel ${kept.level}!`);
+  },
+  /**
+   * Criadero (Tacuarembó): up to three creatures stay here and gain experience with every step the player takes
+   * (stored in the box, S.criadero marks them). Picking one up costs more the more it grew, and it can evolve on the spot.
+   */
+  async criadero() {
+    const S = state();
+    S.criadero = (S.criadero ?? []).filter((e) => S.box.some((c) => c.uid === e.uid));
+    const MAX = 3;
+    const growth = (e) => {
+      const kept = S.box.find((c) => c.uid === e.uid);
+      const gained = Math.max(0, (S.stats.steps - e.steps) * 3);
+      const sim = { ...kept, moves: kept.moves.map((m) => ({ ...m })) };
+      const before = sim.level;
+      gainExp(sim, gained);
+      return { kept, gained, levels: sim.level - before, price: 150 + (sim.level - before) * 120 };
+    };
+    await say(['Bienvenido al Criadero Los Teros. Acá las criaturas crecen con aire libre y buen pasto.', `Podés dejar hasta ${MAX}. Ganan experiencia con cada paso que das, y al retirarlas cobramos según lo que crecieron.`]);
+    for (;;) {
+      const opts = ['Dejar una criatura', ...(S.criadero.length ? ['Retirar una criatura'] : []), 'Nada, gracias'];
+      const r = await choose(opts, { cancel: true });
+      const pick = r < 0 ? 'Nada, gracias' : opts[r];
+      if (pick === 'Nada, gracias') return say('Cuando quieras. Acá las cuidamos bien.');
+      if (pick === 'Dejar una criatura') {
+        if (S.criadero.length >= MAX) { await say('Los corrales están llenos. Retirá a alguna primero.'); continue; }
+        if (S.party.filter((c) => c.hp > 0).length < 2) { await say('Necesitás otra criatura en condiciones para seguir viaje.'); continue; }
+        const i = await openParty({ mode: 'select', title: '¿A quién dejás?' });
+        if (i < 0) continue;
+        const c = S.party[i];
+        if (S.party.filter((x, k) => k !== i && x.hp > 0).length < 1) { await say('Necesitás otra criatura en condiciones para seguir viaje.'); continue; }
+        S.party.splice(i, 1);
+        S.box.push(c);
+        S.criadero.push({ uid: c.uid, steps: S.stats.steps });
+        sfx('confirm');
+        await say(`${displayName(c)} se va al corral. Caminá tranquilo, que acá crece.`);
+        continue;
+      }
+      const list = S.criadero.map((e) => ({ e, ...growth(e) }));
+      const names = [...list.map((x) => `${displayName(x.kept)} Nv${x.kept.level} (+${x.levels})`), 'Volver'];
+      const k = await choose(names, { cancel: true });
+      if (k < 0 || k >= list.length) continue;
+      const { e, kept, gained, levels, price } = list[k];
+      await say(`${displayName(kept)} está bien. Subió ${levels} ${levels === 1 ? 'nivel' : 'niveles'} desde que lo dejaste.`);
+      if (S.party.length >= PARTY_MAX) { await say('Tu equipo está completo. Dejá lugar y volvé a buscarla.'); continue; }
+      if (!(await ask(`¿Retirar a ${displayName(kept)} por $${price}?`))) continue;
+      if (S.player.money < price) { await say('No te alcanza el dinero.'); continue; }
+      loseMoney(price);
+      S.box.splice(S.box.indexOf(kept), 1);
+      S.criadero.splice(S.criadero.indexOf(e), 1);
+      S.party.push(kept);
+      const { learnFlow, evolutionScene } = await import('./battle-scene.ts');
+      sfx('levelup');
+      for (const ev of gainExp(kept, gained)) {
+        if (ev.type === 'learn') await learnFlow(kept, ev.move);
+      }
+      await say(`¡${displayName(kept)} está en el nivel ${kept.level}!`);
+      if (canEvolve(kept)) await evolutionScene(kept);
+    }
   },
   /** Gym rematches unlock every two gyms (badges, Liga, PP base) after the one being challenged. */
   gymRematchTier(order) {

@@ -197,6 +197,7 @@ export function validateSave(d: any) {
       repel: isInt(d.repel, 0, 100) ? d.repel : 0,
       safari: d.safari && Number.isFinite(d.safari.until) && d.safari.until <= Date.now() + 30 * 60000 ? { until: Math.floor(d.safari.until) } : null,
       daycare: d.daycare && box.some((c) => c.uid === d.daycare.uid) && isInt(d.daycare.steps, 0, st.steps) ? { uid: d.daycare.uid, steps: d.daycare.steps } : null,
+      criadero: Array.isArray(d.criadero) ? d.criadero.filter((e, k, a) => e && box.some((c) => c.uid === e.uid) && isInt(e.steps, 0, st.steps) && a.findIndex((x) => x?.uid === e.uid) === k).slice(0, 3).map((e) => ({ uid: e.uid, steps: e.steps })) : [],
       created: Number.isFinite(d.created) ? d.created : Date.now(),
       saveCount: isInt(d.saveCount, 0, 1e7) ? d.saveCount : 0,
       battleLog: Array.isArray(d.battleLog) ? d.battleLog.slice(-20) : [],
