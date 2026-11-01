@@ -445,7 +445,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
   gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_ancap', 'ancap', [
     tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria es más dura que el hierro.'], { dir: 'left' }),
     tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria usa tipo Fuego.'], { dir: 'right' }),
-    npc(6, 10, 'oldman', ['Gimnasio de Durazno. La líder usa criaturas de tipo Fuego.', 'Las de Agua, Tierra y Roca le hacen frente.'], { dir: 'down' }),
+    npc(12, 17, 'oldman', ['Gimnasio de Durazno. La líder usa criaturas de tipo Fuego.', 'Las de Agua, Tierra y Roca le hacen frente.'], { dir: 'down' }),
   ]),
   gym_tac: gym('Ministerio de Ganadería (Tacuarembó)', 'gym_planta', 'leader_mgap', 'mgap', [
     tr({ x: 8, y: 6 }, 'boy', 'g5_a', 'Mateo', 'Guardabosque', ['planta', 'bicho'], [37, 38], ['El monte me enseñó a combatir.', 'Perdí en mi bosque.', 'El ministro conoce cada árbol.'], { dir: 'left' }),
@@ -463,9 +463,9 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     npc(6, 10, 'oldman', ['Gimnasio de Salto. El líder usa criaturas de tipo Psíquico.', 'Las de tipo Siniestro y Bicho tienen ventaja.'], { dir: 'down' }),
   ]),
   gym_frb: gym('Museo del Anglo (Fray Bentos)', 'gym_siniestro', 'leader_dark', 'anglo', [
-    tr({ x: 8, y: 6 }, 'boy', 'g8_a', 'Dante', 'Sereno', ['siniestro'], [46, 46], ['La noche es mi territorio.', 'Salí de la sombra.', 'Zoraida cierra el camino a la Liga.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g8_b', 'Alma', 'Sombra', ['siniestro', 'veneno'], [46, 47], ['No me vas a ver venir.', 'Me ganaste.', 'La Liga está en Montevideo, en el Centenario.'], { dir: 'right' }),
-    npc(6, 10, 'oldman', ['Gimnasio de Fray Bentos. La líder usa criaturas de tipo Siniestro.', 'Las de Lucha, Bicho y Hada... digo, las de Lucha y Bicho le hacen frente.'], { dir: 'down' }),
+    tr({ x: 8, y: 6 }, 'boy', 'g8_a', 'Dante', 'Sereno', ['siniestro'], [46, 46], ['La noche es mi territorio. Para entrar al museo, siempre la amarilla; después, la roja.', 'Salí de la sombra.', 'Zoraida cierra el camino a la Liga.'], { dir: 'left' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g8_b', 'Alma', 'Sombra', ['siniestro', 'veneno'], [46, 47], ['No me vas a ver venir. Dos azules seguidas y te pierdo el rastro.', 'Me ganaste.', 'La Liga está en Montevideo, en el Centenario.'], { dir: 'right' }),
+    npc(6, 10, 'oldman', ['Gimnasio de Fray Bentos. La líder usa criaturas de tipo Siniestro.', 'Acá no hay puertas hacia la oficina: las cajas te llevan, o te devuelven al principio.', 'Dicen que el recorrido termina con amarilla y roja. Ojo con los guardias.'], { dir: 'down' }),
   ]),
 
   // --- Policlínicas, almacenes y casas

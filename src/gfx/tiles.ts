@@ -42,6 +42,9 @@ export const TILE_INFO = {
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
   ϼ: { name: 'equipo de la sala', solid: true },
+  Ϛ: { name: 'caja teletransportadora roja', solid: true, anim: true },
+  Ϝ: { name: 'caja teletransportadora azul', solid: true, anim: true },
+  Ϟ: { name: 'caja teletransportadora amarilla', solid: true, anim: true },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -1121,6 +1124,16 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
   }
 }
 
+
+// Anglo teleport crates: a crate with a glowing coloured lid.
+for (const [ch, lit, dark] of [['Ϛ', '#ff5a5a', '#a02828'], ['Ϝ', '#5ab4ff', '#2858a0'], ['Ϟ', '#ffe05a', '#a08a28']]) {
+  (THEMES as any).gym_siniestro[ch] = (g, r) => {
+    (THEMES as any).gym_siniestro.Y(g, r);
+    px(g, 1, 4, '#3a3a4e', 14, 11); px(g, 2, 5, '#5a5a74', 12, 9); px(g, 2, 9, '#3a3a4e', 12, 1);
+    px(g, 2, 2, dark, 12, 4); px(g, 3, 3, lit, 10, 2); px(g, 5, 1, lit, 6, 1); px(g, 6, 0, '#ffffff', 4, 1);
+    px(g, 2, 14, '#00000050', 12, 1);
+  };
+}
 
 // Shopping mall lift: steel double doors with a floor indicator, set in the wall.
 Object.assign(DRAW, {

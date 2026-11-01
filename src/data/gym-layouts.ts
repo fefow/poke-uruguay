@@ -99,17 +99,52 @@ const blank = (W = 28, H = 20) => {
   return { g, rect, office, mat, out: () => g.map((r) => r.join('')) };
 };
 
-/** Anglo (Fray Bentos, siniestro): a meat-packing plant. A long corridor with cold rooms off it, hooks on the walls. */
-function angloPlan(): GymPlan {
-  const { g, rect, office, mat, out } = blank();
-  rect(1, 9, 26, 11, 'Y');                                        // main corridor
-  office(); rect(10, 5, 17, 8, 'Y'); rect(13, 5, 14, 8, 'A');      // the director's room opens straight onto it
-  rect(2, 2, 8, 7, 'Y'); rect(5, 8, 5, 8, 'Y');                    // cold room, left
-  rect(19, 2, 25, 7, 'Y'); rect(22, 8, 22, 8, 'Y');                // cold room, right
-  rect(10, 12, 17, 18, 'Y'); rect(2, 13, 8, 17, 'Y'); rect(7, 12, 7, 12, 'Y'); rect(19, 13, 25, 17, 'Y'); rect(20, 12, 20, 12, 'Y');
-  for (const [x, y] of [[2, 2], [8, 2], [19, 2], [25, 2], [2, 13], [8, 17], [19, 17], [25, 13], [3, 16], [24, 14], [3, 3], [24, 3]]) g[y][x] = 'ϼ';
+/**
+ * Anglo (Fray Bentos, siniestro): a museum of teleport crates. Every room is sealed; each holds three crates (red, blue,
+ * yellow) that send the visitor to another room. Only one crate per room moves you forward; the director's office has no
+ * door at all and can only be reached by the last crate of the chain. Two trainers stand next to crates.
+ */
+const ANGLO_CHAIN = ['Ϟ', 'Ϛ', 'Ϝ', 'Ϝ', 'Ϟ', 'Ϛ']; // lobby, then R5, R3, R1, R4, R2: the colour that moves forward in each
+function angloPlan(id = 'gym_frb'): GymPlan & { warps: any[] } {
+  const { g, rect, mat, out } = blank();
+  type Room = { x1: number; y1: number; x2: number; y2: number };
+  const rooms: Room[] = [
+    { x1: 10, y1: 14, x2: 17, y2: 18 }, // lobby
+    { x1: 2, y1: 15, x2: 8, y2: 18 },   // R5
+    { x1: 2, y1: 9, x2: 8, y2: 13 },    // R3
+    { x1: 2, y1: 2, x2: 8, y2: 7 },     // R1
+    { x1: 19, y1: 9, x2: 25, y2: 13 },  // R4
+    { x1: 19, y1: 2, x2: 25, y2: 7 },   // R2
+  ];
+  const office: Room = { x1: 10, y1: 1, x2: 17, y2: 5 };
+  for (const r of [...rooms, office]) rect(r.x1, r.y1, r.x2, r.y2, 'Y');
+  rect(13, 1, 14, 5, 'A'); g[0][13] = 'X'; g[0][14] = 'Z';
+  for (const [x, y] of [[10, 1], [17, 1], [10, 5], [17, 5]]) g[y][x] = 'N';
   mat();
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 7, y: 10, dir: 'right' }, { x: 13, y: 7, dir: 'down' }], guide: { x: 5, y: 15 } };
+  for (const [x, y] of [[10, 18], [17, 18], [3, 16], [7, 11], [20, 11], [24, 4], [4, 4]]) g[y][x] = 'ϼ';
+  const land = (r: Room) => ({ x: r.x1 + ((r.x2 - r.x1) >> 1), y: r.y2 });
+  const warps: any[] = [];
+  const pads: { x: number; y: number }[][] = [];
+  rooms.forEach((r, k) => {
+    const cx = r.x1 + ((r.x2 - r.x1) >> 1), py = r.y1 + 1;
+    const xs = [r.x1 + 1, cx, r.x2 - 1];
+    // a different arrangement of colours in each room, so a position never means the same thing twice
+    const order = [['Ϛ', 'Ϝ', 'Ϟ'], ['Ϝ', 'Ϟ', 'Ϛ'], ['Ϟ', 'Ϛ', 'Ϝ'], ['Ϝ', 'Ϛ', 'Ϟ'], ['Ϟ', 'Ϝ', 'Ϛ'], ['Ϛ', 'Ϟ', 'Ϝ']][(k * 5 + 2) % 6];
+    pads[k] = [];
+    order.forEach((c, j) => {
+      const x = xs[j]; g[py][x] = c; pads[k].push({ x, y: py });
+      const good = c === ANGLO_CHAIN[k];
+      const dest = good ? (k === 5 ? office : rooms[k + 1]) : (j === 1 && k > 1 ? rooms[k - 1] : rooms[0]);
+      const l = good && k === 5 ? { x: 13, y: 5 } : land(dest);
+      warps.push({ x, y: py, to: id, tx: l.x, ty: l.y });
+    });
+  });
+  g[5][11] = 'Ϟ'; warps.push({ x: 11, y: 5, to: id, tx: 13, ty: 17 }); // the way out of the office
+  return {
+    tiles: out(), leader: { x: 13, y: 2 }, warps,
+    trainers: [{ x: pads[3][1].x - 1, y: pads[3][1].y, dir: 'right' }, { x: pads[4][2].x - 1, y: pads[4][2].y, dir: 'right' }],
+    guide: { x: 12, y: 17 },
+  };
 }
 
 /** Quiroga (Salto, psíquico): a library whose rooms spiral inwards; the director sits at the very centre. */
@@ -229,10 +264,11 @@ function utePlan(): GymPlan {
 const FLIP = { left: 'right', right: 'left', up: 'up', down: 'down' };
 
 /** Re-lay a gym interior with plan `i` (0-11): plans 6-11 are the mirror images of 0-5. */
-export function layoutGym(m, i) {
+export function layoutGym(m, i, id = '') {
   const made = ({ correo: correoPlan, ose: osePlan, anglo: angloPlan, quiroga: quirogaPlan, defensa: defensaPlan, mgap: mgapPlan, lavalleja: lavallejaPlan, boiso: boisoPlan, ancap: ancapPlan, inavi: inaviPlan, ute: utePlan } as Record<string, () => any>)[(m.npcs ?? []).find((n) => n.leader)?.leader];
   const bespoke = !!made;
-  const plan = made ? made() : PLANS[i % PLANS.length];
+  const plan = made ? (made as any)(id) : PLANS[i % PLANS.length];
+  if ((plan as any).warps) m.warps = (plan as any).warps;
   const mirror = !bespoke && i >= PLANS.length;
   const fx = (x) => (mirror ? 11 - x : x);
   const lead = (plan as any).leader ?? { x: 5, y: 2 };

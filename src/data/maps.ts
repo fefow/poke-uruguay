@@ -1135,7 +1135,7 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
 // Every gym has its own floor plan.
 GYM_STOPS.forEach((stop, i) => {
   const door = (OUTDOOR[stop.id]?.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to)).find((to) => to.startsWith('gym_'));
-  if (door && INTERIOR[door]) layoutGym(INTERIOR[door], i);
+  if (door && INTERIOR[door]) layoutGym(INTERIOR[door], i, door);
 });
 
 /** A cave mouth: a wall of rock runs along the edge of the map beside the trail, and the trail ends in a dark opening in it. */
