@@ -567,11 +567,20 @@ export const SCRIPTS = {
     await api.openShop(npc.stock);
   },
 
+  // Mercedes mail carrier: tells the player the gym is closed because Marta never came back, which starts the search.
+  async cartero_marta(api, npc) {
+    await api.say(npc.text, { name: 'Cartero' });
+    if (!api.flag('marta_lost')) {
+      api.setFlag('marta_lost');
+      await api.say('Si te animás a buscarla, empezá por la cueva de Palmitas: ahí la vieron por última vez.', { name: 'Cartero' });
+    }
+  },
+
   // Marta, the Correo leader, is held at the end of the Palmitas cave by two PP recruits: freeing her opens Mercedes' gym.
   async marta_cave(api, npc) {
     const left = (npc.ppIds ?? []).filter((id) => !api.flag(`tr_${id}`)).length;
     if (left) return api.say(['Soy Marta, del Correo. Me siguieron hasta acá para quitarme un paquete con planos.', 'Los reclutas del PP me cierran el paso. Si los vencés, te lo agradezco.'], { name: 'Marta' });
-    await api.say(['Gracias, {player}. Sin vos seguiría encerrada entre esas rocas.', 'Llevaban los planos de unas máquinas de niebla. Esto lo tiene que ver todo el país.', 'Volvé a Mercedes: el gimnasio abre en cuanto llegue. Me va a gustar medir tu equipo.'], { name: 'Marta' });
+    await api.say(['Gracias, {player}. Sin vos seguiría encerrada entre esas rocas.', 'Llevaban los planos de unas máquinas de niebla. Esto lo tiene que ver todo el país.', 'Ya no hace falta que me trates de usted. Después de esto, somos amigos.', 'Voy ahora mismo para el gimnasio. Cuando llegues, me va a gustar medir tu equipo.'], { name: 'Marta' });
     api.setFlag('marta_help');
   },
 

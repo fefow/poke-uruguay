@@ -994,31 +994,36 @@ function makePPCave(m) {
     ['Recluta PP', 'Equipo PP', ['siniestro', 'bicho'], ['Esta cueva es del Proyecto Pampero. Seguí de largo.', 'Informo que perdí.', 'No digas que nos viste.'], 'grunt'],
     ['Recluta PP', 'Equipo PP', ['siniestro', 'roca'], ['Instalamos una máquina de niebla acá. No la toques.', 'Qué problema.', 'Cuando la niebla se venda, vas a entender.'], 'grunt'],
   ];
+  // two more people of the mountain, so the way through is not empty before anyone has heard of Marta
+  const base = (m.npcs ?? []).find((n) => n.trainer);
+  if (base) for (const [k, look] of [[3, 'girl'], [4, 'boy']] as const) m.npcs.push({ ...base, look, trainer: { ...base.trainer, id: `${base.trainer.id}_x${k}` } });
+  folk.splice(1, 0,
+    ['Espeleóloga Rosario', 'Espeleóloga', ['bicho', 'roca'], ['Bajo cada fin de semana a mirar la roca. Hoy te toca a vos.', 'Buen ojo.', 'Hay algo raro al fondo: se oyen voces.'], 'girl'],
+    ['Minero Gastón', 'Minero', ['tierra', 'roca'], ['Acá abajo no se pasa sin pelear.', 'Me ganaste. Seguí.', 'Si ves a los de gris, no los sigas.'], 'boy'],
+  );
   (m.npcs ?? []).filter((n) => n.trainer).forEach((n, k) => {
     const [tname, cls, types, [intro, lose, after], look] = folk[k % folk.length];
     n.trainer.name = tname; n.trainer.cls = cls; n.trainer.intro = intro; n.trainer.lose = lose; n.trainer.after = after;
     n.trainer.team = teamOf(types, n.trainer.team.map((t) => t[1]), `cuevap${k}`);
     n.look = look;
+    if (cls === 'Equipo PP') { n.hideout = true; n.cond = (f) => !!f.marta_lost && !f.marta_help; }
   });
 }
 makePPCave(OUTDOOR.r_palmitas_mercedes);
-mazeMap(OUTDOOR.r_palmitas_mercedes, 'r_palmitas_mercedes', { kind: 'cave', extraItems: ['esfera', 'te_marcela'] });
 // Mercedes' gym is closed: Marta, the Correo leader, is trapped at the end of the cave by two PP recruits.
 {
   const cave = OUTDOOR.r_palmitas_mercedes;
   const ppIds = cave.npcs.filter((n) => n.trainer?.cls === 'Equipo PP').map((n) => n.trainer.id);
-  const w = cave.tiles[0].length;
-  const trail = [];
-  cave.tiles.forEach((r, y) => { for (let x = 3; x < 14; x++) if (r[x] === '.' && [r[x - 1], r[x + 1]].every((c) => c === '.' || c === ',')) trail.push([x, y]); });
-  const spot = trail.find(([x, y]) => !cave.npcs.some((n) => Math.abs(n.x - x) + Math.abs(n.y - y) < 3)) ?? trail[0];
-  cave.npcs.push({ x: spot[0], y: spot[1], look: 'leader_correo', dir: 'down', script: 'marta_cave', ppIds, cond: (f) => !f.marta_help });
+  // Marta is only in the cave once the player has heard she is missing (the Mercedes mail carrier tells them).
+  cave.npcs.push({ x: 0, y: 0, look: 'leader_correo', dir: 'down', script: 'marta_cave', ppIds, hideout: true, cond: (f) => !!f.marta_lost && !f.marta_help });
+  mazeMap(cave, 'r_palmitas_mercedes', { kind: 'cave', extraItems: ['esfera', 'te_marcela'] });
   const gymDoor = OUTDOOR.mercedes.doors.findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_mercedes');
   OUTDOOR.mercedes.doors[gymDoor] = { to: 'gym_mercedes', req: 'marta_help', deny: ['El gimnasio del Correo está cerrado.', 'Un cartel en la puerta dice: "Volvemos pronto".'] };
   // Someone in town knows where Marta went (the gym only says it is closed).
   const mer = OUTDOOR.mercedes;
   let dx = 0, dy = 0;
   mer.tiles.forEach((r, y) => { let k = 0; [...r].forEach((c, x) => { if (c === 'D') { if (k++ === gymDoor) { dx = x; dy = y; } } }); });
-  const cartero = { x: dx + 2, y: dy + 2, look: 'clerk', dir: 'left', id: 'mer_cartero', text: ['Soy cartero del Correo y hoy no tengo a quién entregarle nada: la presidenta no está.', 'Marta salió ayer a llevar un paquete por la cueva de Palmitas, al oeste, y no volvió.', 'Unos tipos de gris la seguían. Si vas para allá, andá con cuidado.'], cond: (f) => !f.marta_help };
+  const cartero = { x: dx + 2, y: dy + 2, look: 'clerk', dir: 'left', id: 'mer_cartero', script: 'cartero_marta', text: ['Soy cartero del Correo y hoy no tengo a quién entregarle nada: la presidenta no está.', 'Marta salió ayer a llevar un paquete por la cueva de Palmitas, al oeste, y no volvió.', 'Unos tipos de gris la seguían. Si vas para allá, andá con cuidado.'], cond: (f) => !f.marta_help };
   const carteroAfter: any = { ...cartero, id: 'mer_cartero2', text: ['¡Marta volvió! Llegó con un paquete de planos y abrió el gimnasio.', 'Gracias por ir a buscarla.'], cond: (f) => !!f.marta_help };
   fitToMap(mer.tiles, [cartero]);
   carteroAfter.x = cartero.x; carteroAfter.y = cartero.y; // the same man, once Marta is back

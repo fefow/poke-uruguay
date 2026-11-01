@@ -228,8 +228,9 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
 
     // --- objects
     const people = (m.npcs ?? []).filter((n) => !n.blocker);
-    const trainers = people.filter((n) => n.trainer);
-    const others = people.filter((n) => !n.trainer);
+    const hideout = people.filter((n) => n.hideout); // a captive and her captors: they wait together in a side chamber
+    const trainers = people.filter((n) => n.trainer && !n.hideout);
+    const others = people.filter((n) => !n.trainer && !n.hideout);
     const used: [number, number][] = [];
     const clear = (x, y) => g[y]?.[x] === '.' && room(x, y) && !used.some(([a, b]) => Math.abs(a - x) + Math.abs(b - y) < 3);
     const near = (x, y, ok): [number, number] | null => {
@@ -247,12 +248,20 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
       if (!spot) { bad = true; return; }
       n.x = spot[0]; n.y = spot[1]; n.dir = faceBack(idx); used.push(spot);
     });
+    const prison = chambers[0];
+    hideout.forEach((n) => {
+      const spot = prison ? near(Math.round(prison.x), Math.round(prison.y), clear) : null;
+      if (!spot) { bad = true; return; }
+      n.x = spot[0]; n.y = spot[1]; used.push(spot);
+      const q = path.reduce((b, p) => (Math.hypot(p[0] - spot[0], p[1] - spot[1]) < Math.hypot(b[0] - spot[0], b[1] - spot[1]) ? p : b), path[0]);
+      n.dir = Math.abs(q[0] - spot[0]) >= Math.abs(q[1] - spot[1]) ? (q[0] < spot[0] ? 'left' : 'right') : (q[1] < spot[1] ? 'up' : 'down');
+    });
     onPath(trainers, (i) => 0.18 + (0.62 * (i + 0.5)) / Math.max(1, trainers.length));
     const story = others.filter((n) => /rival|marta/.test(n.script ?? ''));
     onPath(story, (i) => 0.85 - i * 0.1);
     const rest = others.filter((n) => !story.includes(n));
     rest.forEach((n, i) => {
-      const c = chambers[i % Math.max(1, chambers.length)];
+      const pool = chambers.slice(hideout.length ? 1 : 0); const c = pool[i % Math.max(1, pool.length)];
       const spot = c ? near(Math.round(c.x), Math.round(c.y), clear) : null;
       if (spot) { n.x = spot[0]; n.y = spot[1]; n.dir = 'down'; used.push(spot); return; }
       onPath([n], () => 0.3 + 0.1 * i);
@@ -260,7 +269,7 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
     // items in the side chambers: those already in the map keep their count, new ones fill the rest
     const itemList = m.items ?? (m.items = []);
     const extra = [...(opts.extraItems ?? [])];
-    const slots = chambers.map((c) => near(Math.round(c.x), Math.round(c.y), clear)).filter(Boolean) as [number, number][];
+    const slots = chambers.slice(hideout.length ? 1 : 0).map((c) => near(Math.round(c.x), Math.round(c.y), clear)).filter(Boolean) as [number, number][];
     itemList.forEach((it, i) => { const s = slots[i]; if (!s) { bad = true; return; } it.x = s[0]; it.y = s[1]; used.push(s); });
     for (let i = itemList.length; i < slots.length && extra.length; i++) { itemList.push({ x: slots[i][0], y: slots[i][1], item: extra.shift(), id: `${seed}_mz${i}` }); used.push(slots[i]); }
     if (bad) continue;
