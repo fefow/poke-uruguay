@@ -515,3 +515,16 @@ test('eventos: acertijo de ruta, puntaje del concurso y mapa del parque', async 
   assert.ok(MAPS.canelones.npcs.some((n) => n.script === 'ev_concurso') && MAPS.canelones.contestGate);
   for (const c of ['colonia', 'sanjose', 'mercedes', 'rocha']) assert.ok(MAPS[c].npcs.some((n) => /^ev_/.test(n.script ?? '')), c);
 });
+
+test('palancas: el orden correcto abre la tranquera y un error reinicia', async () => {
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const flags = {};
+  const api = { flag: (k) => !!flags[k], setFlag: (k, v = true) => { if (v) flags[k] = true; else delete flags[k]; }, say: async () => {}, sfx() {} };
+  const mk = (lever) => ({ name: 'P', routeId: 'ruta1', lever, order: [2, 0, 1], doneFlag: 'rf_gt_ruta1' });
+  await SCRIPTS.route_palanca(api, mk(0)); // wrong first lever
+  assert.ok(!flags.rf_pl_ruta1_0);
+  for (const k of [2, 0, 1]) await SCRIPTS.route_palanca(api, mk(k));
+  assert.ok(flags.rf_gt_ruta1);
+  const { MAPS } = await import('../src/data/maps.ts');
+  assert.ok(Object.values(MAPS).some((m) => (m.npcs ?? []).some((n) => n.script === 'route_palanca')));
+});

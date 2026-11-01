@@ -111,7 +111,7 @@ export const ROUTE_STORIES = {
 };
 
 /** Narrowest cross-section of the trail (fewest walkable tiles) away from the map edges and from every object. */
-function narrowestCut(m, busy, from = 0.3, to = 0.7) {
+function narrowestCut(m, busy, from = 0.3, to = 0.7, maxCells = 4) {
   const h = m.tiles.length, w = m.tiles[0].length;
   const long = w >= h;
   const span = long ? w : h, cross = long ? h : w;
@@ -122,7 +122,7 @@ function narrowestCut(m, busy, from = 0.3, to = 0.7) {
       const [x, y] = long ? [a, b] : [b, a];
       if (!solid(m.tiles[y][x]) && m.tiles[y][x] !== '~' && m.tiles[y][x] !== 'λ') cells.push([x, y]);
     }
-    if (!cells.length || cells.length > 4 || cells.some(([x, y]) => busy.has(`${x},${y}`))) continue;
+    if (!cells.length || cells.length > maxCells || cells.some(([x, y]) => busy.has(`${x},${y}`))) continue;
     if (!best || cells.length < best.length) best = cells;
   }
   return best;
@@ -176,6 +176,7 @@ export function addRouteStory(m, id) {
 
   // fog machine: a PP object with a clue about the business
   const mach = freeSpot(m, busy, 0.75);
+  addLeverGate(m, id, busy);
   // riddle gate: a second obstacle earlier on the trail, opened by answering a riddle (never a battle)
   const rcut = narrowestCut(m, busy, 0.12, 0.28);
   if (rcut) {
@@ -252,4 +253,44 @@ export function addParaje(m, id) {
   );
   (m.signs ??= []).splice(signIdx, 0, 'Posta del camino\nAgua fresca y sombra. Se agradece pasar de a uno.');
   (m.items ??= []).push({ x: x0 + 6, y: y0 + 4, item: 'mate', id: `${id}_paraje` });
+}
+
+
+// ---------------------------------------------------------------- lever gate
+const LEVERS = [['Palanca verde', 'verde'], ['Palanca azul', 'azul'], ['Palanca roja', 'roja']];
+const ORDERS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
+
+/** A gate held by three levers on each side of it: they must be pulled in the right order, learned from a farmhand. */
+export function addLeverGate(m, id, busy) {
+  const w = m.tiles[0].length, h = m.tiles.length;
+  if (Math.max(w, h) < 60) return;
+  const cut = narrowestCut(m, busy, 0.6, 0.9, 5);
+  if (!cut) return;
+  const long = w >= h;
+  const gateAt = long ? cut[0][0] : cut[0][1];
+  const order = ORDERS[[...id].reduce((a, c) => (a * 17 + c.charCodeAt(0)) >>> 0, 3) % ORDERS.length];
+  const taken = new Set<string>(busy);
+  const spotsOn = (sign: number) => {
+    const out: [number, number][] = [];
+    for (let d = 3; d <= 26 && out.length < 4; d++) {
+      for (let b = 2; b < (long ? h : w) - 2 && out.length < 4; b++) {
+        const [x, y] = long ? [gateAt + sign * d, b] : [b, gateAt + sign * d];
+        if (!['.', ','].includes(m.tiles[y]?.[x]) || !D4.every(([dx, dy]) => !solid(m.tiles[y + dy]?.[x + dx]))) continue;
+        if ([...taken].some((k) => { const [bx, by] = k.split(',').map(Number); return Math.abs(bx - x) + Math.abs(by - y) < 3; })) continue;
+        if (out.some(([ox, oy]) => Math.abs(ox - x) + Math.abs(oy - y) < 3)) continue;
+        out.push([x, y]);
+      }
+    }
+    return out;
+  };
+  const sides = [spotsOn(-1), spotsOn(1)];
+  if (sides.some((l) => l.length < 4)) return;
+  const done = `rf_gt_${id}`.slice(0, 40);
+  const a = LEVERS[order[0]][1], c = LEVERS[order[2]][1];
+  cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: 'gaucho', dir: 'down', blocker: true, name: 'Tranquera', text: ['La tranquera está trabada con tres cerrojos.', 'Cada lado del camino tiene palancas que los mueven.'], cond: (f) => !f[done] }); taken.add(`${x},${y}`); });
+  sides.forEach((list) => {
+    LEVERS.forEach(([name], k) => { const [x, y] = list[k]; m.npcs.push({ x, y, look: 'machine', dir: 'down', name, script: 'route_palanca', routeId: id, lever: k, order, doneFlag: done }); taken.add(`${x},${y}`); });
+    const [x, y] = list[3];
+    m.npcs.push({ x, y, look: 'gaucho', dir: 'down', name: 'Peón', text: [`Esa tranquera la arreglé yo. La traba ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, los cerrojos vuelven a su lugar y se empieza de nuevo.'] });
+  });
 }
