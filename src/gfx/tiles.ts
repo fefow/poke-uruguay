@@ -1126,14 +1126,29 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
 }
 
 
-// Launch arrows (see data/spin-maze.ts): a dark plate with a lit arrow pointing the way you are thrown.
+// Frigorífico Anglo: a cold-storage plant (pale tiled floor, riveted steel walls, meat hooks) crossed by conveyor belts.
 {
+  const floor = (g) => { px(g, 0, 0, '#d4e0ea', T, T); px(g, 0, 15, '#aebfce', T, 1); px(g, 15, 0, '#aebfce', 1, T); px(g, 7, 0, '#c2d0dc', 1, T); px(g, 0, 7, '#c2d0dc', T, 1); px(g, 3, 3, '#e8f0f6', 2, 1); px(g, 10, 11, '#e8f0f6', 3, 1); };
+  const wall = (g) => { px(g, 0, 0, '#6f8aa2', T, T); px(g, 0, 0, '#9cb6cc', T, 2); px(g, 0, 12, '#3e5468', T, 4); px(g, 0, 11, '#8aa6bc', T, 1); for (const x of [2, 7, 12]) { px(g, x, 4, '#4e667c', 2, 2); px(g, x, 8, '#4e667c', 2, 2); } px(g, 4, 2, '#e8f4fc', 3, 1); px(g, 10, 6, '#e8f4fc', 4, 1); };
   const A = ['...##...', '..####..', '.######.', '...##...', '...##...', '...##...', '...##...', '........'];
   const rot = { up: (x, y) => [x, y], right: (x, y) => [7 - y, x], down: (x, y) => [7 - x, 7 - y], left: (x, y) => [y, 7 - x] };
+  const T_: any = (THEMES as any).frigorifico = {
+    Y: floor,
+    x: wall,
+    X: (g) => { wall(g); px(g, 1, 2, '#2a6ab0', 15, 8); px(g, 1, 2, '#8ac8f0', 15, 1); px(g, 3, 5, '#f4faff', 2, 2); px(g, 6, 4, '#f4faff', 6, 1); px(g, 6, 7, '#f4faff', 6, 1); },
+    Z: (g) => { wall(g); px(g, 0, 2, '#2a6ab0', 15, 8); px(g, 0, 2, '#8ac8f0', 15, 1); px(g, 3, 4, '#f4faff', 6, 1); px(g, 3, 7, '#f4faff', 6, 1); px(g, 11, 5, '#f4faff', 2, 2); },
+    N: (g) => { floor(g); px(g, 2, 2, '#3e5468', 12, 13); px(g, 3, 3, '#8aa6bc', 10, 11); for (let y = 5; y < 13; y += 2) px(g, 4, y, '#3e5468', 8, 1); px(g, 11, 4, '#6ae0a0', 1, 1); },
+    A: (g) => { px(g, 0, 0, '#8a3a3a', T, T); px(g, 1, 0, '#b85a5a', 1, T); px(g, 14, 0, '#b85a5a', 1, T); px(g, 5, 6, '#b85a5a', 6, 1); px(g, 5, 11, '#b85a5a', 6, 1); },
+    m: (g) => { floor(g); px(g, 1, 3, '#2a2a32', 14, 10); px(g, 2, 4, '#3e3e48', 12, 8); for (let x = 3; x < 13; x += 2) px(g, x, 6, '#2a2a32', 1, 4); },
+    'Ϲ': (g) => { px(g, 0, 0, '#8a96a4', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 15, '#f2c02a', T, 1); px(g, 0, 0, '#f2c02a', 1, T); px(g, 15, 0, '#f2c02a', 1, T); for (let i = 3; i < 13; i += 4) { px(g, i, 4, '#aab4c0', 2, 2); px(g, i + 2, 9, '#aab4c0', 2, 2); } },
+    'ϻ': (g) => { wall(g); px(g, 0, 1, '#1e2a36', T, 2); for (const x of [2, 9]) { px(g, x + 1, 3, '#aab4c0', 1, 2); px(g, x, 5, '#c85a5a', 4, 8); px(g, x + 1, 5, '#e8908a', 1, 6); px(g, x + 2, 9, '#a03a3a', 2, 4); } },
+  };
   for (const [dir, ch] of [['up', 'Ϣ'], ['down', 'Ϥ'], ['left', 'Ϧ'], ['right', 'Ϩ']]) {
-    (THEMES as any).gym_siniestro[ch] = (g) => {
-      px(g, 0, 0, '#26262f', T, T); px(g, 0, 0, '#3a3a48', T, 1); px(g, 0, 0, '#3a3a48', 1, T); px(g, 0, 15, '#16161c', T, 1);
-      for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (A[y][x] === '#') { const [rx, ry] = (rot as any)[dir](x, y); px(g, rx * 2, ry * 2, '#e0607c', 2, 2); px(g, rx * 2, ry * 2, '#ff9ab0', 2, 1); }
+    T_[ch] = (g) => {
+      px(g, 0, 0, '#454a54', T, T); px(g, 0, 0, '#6a707c', T, 1); px(g, 0, 15, '#2a2e36', T, 1);
+      const horiz = dir === 'left' || dir === 'right';
+      for (let i = 2; i < T; i += 4) horiz ? px(g, i, 1, '#5a606c', 1, 14) : px(g, 1, i, '#5a606c', 14, 1); // rollers
+      for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (A[y][x] === '#') { const [rx, ry] = (rot as any)[dir](x, y); px(g, rx * 2, ry * 2, '#f2c02a', 2, 2); px(g, rx * 2, ry * 2 + 1, '#b88a10', 2, 1); }
     };
   }
 }

@@ -627,14 +627,14 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     const at = (k, extra: any = {}) => ({ x: al[k].x, y: al[k].y, dir: al[k].face, ...extra });
     const gr = (k, id, lv, a, b, c, sight = 3) => grunt({ x: al[k].x, y: al[k].y }, id, lv, a, b, c, { dir: al[k].face, sight });
     return room(mz.tiles, {
-      name: 'Frigorífico Anglo', music: 'cave', theme: 'gym_siniestro',
+      name: 'Frigorífico Anglo', music: 'cave', theme: 'frigorifico',
       npcs: [
         gr(0, 'an_g1', [48, 48], 'Este frigorífico es del Equipo PP.', 'No pasa nada.', 'Las flechas te llevan solas. Fijate bien adónde apuntan.'),
         gr(1, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'Si una cinta te devuelve al principio, probá otra.'),
         gr(2, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'Hay cintas que solo van en un sentido.'),
         gr(3, 'an_g4', [49, 50], 'Las cámaras frías son privadas.', 'Me ganaste.', 'El jefe de verdad está arriba, en las oficinas.'),
         gr(4, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.'),
-        { x: al[7].x, y: al[7].y, look: 'obrero', dir: al[7].face, script: 'obrero_anglo', cond: (f) => !f.ferry_done },
+        { x: 16, y: 3, look: 'obrero', dir: 'left', script: 'obrero_anglo', cond: (f) => !f.ferry_done },
         { x: 13, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' },
       ],
       items: [{ x: al[5].x, y: al[5].y, item: 'pan_casero', id: 'an_item1' }, { x: al[6].x, y: al[6].y, item: 'alfajor_triple', id: 'an_item2' }, { x: al[8].x, y: al[8].y, item: 'credencial_anglo', id: 'an_cred' }],

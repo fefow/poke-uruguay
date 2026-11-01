@@ -815,7 +815,7 @@ export const SCRIPTS = {
       api.setFlag('got_ticket');
       return api.say('Si el capitán anda mareado, llevale un Mate. Dicen que es lo único que lo calma.', { name: 'Operario' });
     }
-    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me obligan a quedarme.', 'Perdí mi credencial de operario en algún rincón de las cintas y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
+    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me tienen encerrado en esta oficina, a la vista de la jefa.', 'Perdí mi credencial de operario en algún rincón de las cintas y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
   },
 
   async ferry_captain(api) {
