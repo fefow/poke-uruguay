@@ -428,15 +428,21 @@ const edgeOpen = (m, side) => {
   return cells.some((ch) => walkable(ch) && ch !== '~');
 };
 
+// What a closed road says: only the situation, never what to do. The way forward comes from the townsfolk (rumors.ts).
+const VAGUE = [
+  'Nadie sabe bien cuánto va a durar.',
+  'Pregunté por el pueblo y cada uno cuenta una cosa distinta.',
+  'Dicen que alguien sabe más, pero no es fácil dar con esa persona.',
+  'Por ahora no se puede pasar. Más no sé.',
+  'Volvé en un rato, o fijate si alguien por acá conoce a los que decidieron cortarlo.',
+];
 const FWD_DENY = (a, b) => (a.id === 'fraybentos'
-  ? [`El camino a ${b} está cerrado.`, 'Hace falta la medalla del Anglo y haber ayudado al capitán del Buquebus: su Machete abre el camino al norte.']
-  : a.gym
-  ? [`El camino a ${b} está cerrado.`, `Un guardia dice: "Primero tenés que ganar la medalla de ${a.name}."`]
+  ? [`El camino a ${b} está cerrado.`, 'Los zarzales taparon la huella y con las manos no se pasa.']
   : a.id === 'carmelo'
     ? ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.']
-    : a.kind === 'city'
-        ? [`El camino a ${b} está cerrado.`, `Hablá con la gente de ${a.name}: alguien necesita una mano para abrir el paso.`]
-        : []);
+    : a.gym || a.kind === 'city'
+      ? [`El camino a ${b} está cerrado.`, VAGUE[Math.abs([...a.id].reduce((h, c) => h * 31 + c.charCodeAt(0), 7)) % VAGUE.length]]
+      : []);
 
 /** Connect the whole chain: each consecutive pair of maps gets an exit on opposite sides. */
 export function rewire(OUTDOOR) {

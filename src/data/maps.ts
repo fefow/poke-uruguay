@@ -708,6 +708,7 @@ import { guideMap } from './guide.ts';
 import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
 import { flavorRoute, ROUTE_FLAVOR } from './route-flavor.ts';
+import { addRumors } from './rumors.ts';
 import { CUSTOM } from './custom-content.js';
 import { layoutGym } from './gym-layouts.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
@@ -1211,8 +1212,7 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
     // Only roads that wait for a medal or a favour get a cover story; special ones (the bike path, the Machete) keep their own text.
     const dest = String(ex.deny[0] ?? '').match(/^El camino a (.+?) está cerrado\.?$/)?.[1];
     const why = String(ex.deny[1] ?? '');
-    const medal = why.match(/medalla (?:de |del )?([^."]+)/)?.[1];
-    const hint = medal ? `Dicen que lo habilitan cuando consigas la Medalla ${medal}.` : /necesita una mano/.test(why) ? why : null;
+    const hint = why || null; // already vague (see FWD_DENY); the real clues are the rumours (rumors.ts)
     let who: any = null;
     if (mapId !== 'carmelo' && dest && hint) {
       const civil = [
@@ -1225,7 +1225,7 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
         ['cop', 'Guardia', `Estamos trabajando en una situación en el camino a ${dest}. Le pido que espere un poco y vuelva en un rato.`],
       ];
       const list = pp ? [...civil.slice(0, 6), ['grunt', 'Equipo PP', `El camino a ${dest} está cerrado por orden del PP.`]] : civil;
-      const [look, name, intro] = list[(STOP_INDEX[mapId] ?? 0) % list.length];
+      const [look, name, intro] = mapId === 'fraybentos' ? ['gaucho', 'Arriero', `Los zarzales se cerraron sobre el camino a ${dest}.`] : list[(STOP_INDEX[mapId] ?? 0) % list.length];
       who = { look, name, text: look === 'grunt' ? ex.deny : [intro, hint] };
     }
     for (const [x, y] of open) {
@@ -1234,6 +1234,9 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
     }
   }
 }
+
+// The gossip that explains, a little at a time, why the roads are closed.
+addRumors(OUTDOOR);
 
 // Routes are guided, not open fields: a trail between tree walls, grass clusters, side pockets and one-way ledges.
 for (const [id, m] of Object.entries(OUTDOOR)) {
