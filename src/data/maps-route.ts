@@ -436,7 +436,7 @@ const VAGUE = [
   'Volvé en un rato, o fijate si alguien por acá conoce a los que decidieron cortarlo.',
 ];
 const FWD_DENY = (a, b) => (a.id === 'fraybentos'
-  ? [`El camino a ${b} está cerrado.`, 'Los zarzales taparon la huella y con las manos no se pasa.']
+  ? ['Todavía no podés dejar Fray Bentos.', 'Alguien en el pueblo espera que resuelvas lo del Anglo antes de que sigas camino.']
   : a.id === 'carmelo'
     ? ['Esperá, {player}.', 'Afuera del pueblo hay criaturas salvajes en los pastizales.', 'Pasá primero por el laboratorio del Maestro Tabárez.']
     : a.gym || a.kind === 'city'
@@ -480,7 +480,7 @@ export function rewire(OUTDOOR) {
       const exit: any = { to: B };
       if (stopA && (stopA.kind === 'city')) {
         const flag = A === 'carmelo' ? 'has_starter' : openFlag(A);
-        exit.req = A === 'fraybentos' ? (f) => f[flag] && f.ferry_done : flag;
+        exit.req = flag;
         exit.deny = FWD_DENY(stopA, fwd);
       }
       a.exits[s] = exit;

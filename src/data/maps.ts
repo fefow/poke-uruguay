@@ -1206,6 +1206,10 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
       for (const [x, y] of open) if (y !== keep[1]) m.tiles[y] = m.tiles[y].slice(0, x) + '#' + m.tiles[y].slice(x + 1);
       open = [keep];
     }
+    if (mapId === 'fraybentos' && side === 'n') { // the road to Young is overgrown: real thickets that only the Machete opens
+      for (const [x] of open) for (const [tx, ty] of [[x, 0], [x - 1, 1], [x, 1], [x + 1, 1]]) if (m.tiles[ty][tx] !== '#') m.tiles[ty] = m.tiles[ty].slice(0, tx) + '%' + m.tiles[ty].slice(tx + 1);
+      continue;
+    }
     const pp = STOP_INDEX[mapId] >= STOP_INDEX.fraybentos;
     const done = (f) => (typeof ex.req === 'string' ? f[ex.req] : ex.req(f));
     // Who stands in the way, and why, varies from road to road: a fallen tree, works, a flood, a herd, a stranded truck.

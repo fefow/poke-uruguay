@@ -677,7 +677,7 @@ async function legendEncounter(L) {
 
 async function cutBush(x, y) {
   if (!hasItem('machete')) return say('Un zarzal espeso y espinoso. Con algo filoso se podría abrir paso.');
-  if (!flag(badgeOf('salto'))) return say('Un zarzal espeso. El Machete no alcanza todavía: hace falta la Medalla Salto.');
+  if (W_.map.id !== 'fraybentos' && !flag(badgeOf('salto'))) return say('Un zarzal espeso. El Machete no alcanza todavía: hace falta la Medalla Salto.');
   await say('Un zarzal espeso. Con el Machete se puede abrir paso.');
   if (!(await ask('¿Cortar el zarzal?'))) return;
   sfx('select');
