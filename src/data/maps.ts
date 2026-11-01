@@ -705,6 +705,7 @@ import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng } from './map-gen.ts';
 import { guideMap } from './guide.ts';
+import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
 import { layoutGym } from './gym-layouts.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
@@ -948,6 +949,7 @@ function makeVictory(m) {
   });
 }
 makeVictory(OUTDOOR.r_laspiedras_montevideo);
+mazeMap(OUTDOOR.r_laspiedras_montevideo, 'r_laspiedras_montevideo', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'] });
 
 /** The first long forest of the trip (Bosque Grande): thick trees, lots of bichos, plantas and voladores before the first gym. */
 function makeForest(m, name, sign, seed, folk) {
@@ -974,6 +976,9 @@ makeForest(OUTDOOR.r_ecilda_trinidad, 'Monte Espeso', 'MONTE ESPESO\nEcilda Paul
   ['Cazabichos Delfina', 'Cazabichos', ['bicho', 'planta'], ['Un buen cazabichos nunca sale sin red.', 'Me ganaste limpio.', 'Seguí, el gimnasio te espera.']],
 ]);
 
+mazeMap(OUTDOOR.r_rosario_sanjose, 'r_rosario_sanjose', { kind: 'forest', extraItems: ['te_marcela', 'esfera'] });
+mazeMap(OUTDOOR.r_ecilda_trinidad, 'r_ecilda_trinidad', { kind: 'forest', extraItems: ['esfera', 'te_marcela'] });
+
 /** First cave of the trip, between the first and second gym: miners, and the first PP grunts guarding the way out. */
 function makePPCave(m) {
   m.theme = 'cueva';
@@ -997,6 +1002,7 @@ function makePPCave(m) {
   });
 }
 makePPCave(OUTDOOR.r_palmitas_mercedes);
+mazeMap(OUTDOOR.r_palmitas_mercedes, 'r_palmitas_mercedes', { kind: 'cave', extraItems: ['esfera', 'te_marcela'] });
 // Mercedes' gym is closed: Marta, the Correo leader, is trapped at the end of the cave by two PP recruits.
 {
   const cave = OUTDOOR.r_palmitas_mercedes;
@@ -1058,6 +1064,7 @@ function caveMouth(m, side) {
   if (TILE_INFO[rows[fy][fx]]?.solid) rows[fy][fx] = '=';
   m.tiles = rows.map((r) => r.join(''));
 }
+mazeMap(OUTDOOR.r_piriapolis_minas, 'r_piriapolis_minas', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'] });
 for (const caveId of ['r_palmitas_mercedes', 'r_piriapolis_minas']) {
   const cave = OUTDOOR[caveId];
   for (const [side, ex] of Object.entries(cave.exits ?? {})) {
@@ -1092,6 +1099,7 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
 // Routes are guided, not open fields: a trail between tree walls, grass clusters, side pockets and one-way ledges.
 for (const [id, m] of Object.entries(OUTDOOR)) {
   if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
+  if (m.maze) { addRouteStory(m, id); continue; }
   guideMap(m, id, { width: id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3 });
   addRouteStory(m, id);
 }
