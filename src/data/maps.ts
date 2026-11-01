@@ -836,7 +836,11 @@ export function refGymOrder(mapId, maxLevel = 0) {
     for (const id of ids) {
       const m = INTERIOR[id] ?? OUTDOOR[id];
       const gym = id.startsWith('gym_');
-      const target = gym ? [Math.max(lo, ace - 4), ace - 1] : [hi, Math.max(hi + 1, ace - 1)];
+      let target = gym ? [Math.max(lo, ace - 4), ace - 1] : [hi, Math.max(hi + 1, ace - 1)];
+      if (/^ferry_/.test(id)) { // the ship climbs from the main deck to the upper deck, in steps
+        const t = ({ ferry_1: [0, 1], ferry_2: [1, 1], ferry_3: [2, 3], ferry_bodega: [2, 4], ferry_deck: [4, 5] } as any)[id] ?? [1, 2];
+        target = [Math.min(lo + t[0], ace - 1), Math.min(lo + t[1], ace - 1)];
+      }
       const lists = [m.enc?.list, m.fish].filter(Boolean);
       const wild = lists.flatMap((l) => l.flatMap((e) => [e[1], e[2]]));
       if (wild.length) {

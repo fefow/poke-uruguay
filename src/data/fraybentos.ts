@@ -16,6 +16,13 @@ export function addFrayBentosStory(m: any) {
     // someone who knows the port's rumours
     { x: 28, y: 19, look: 'camionero', dir: 'left', wander: true, name: 'Camionero', text: ['Traigo carga de Young. Desde que cerraron la salida norte con el zarzal, tengo que dar la vuelta por la ruta.', 'Alguien con una herramienta filosa lo arreglaría en un minuto.'] },
   ];
+  // river life along the shore: animals seen up close but not fought
+  const critter = (x, y, sp, text) => ({ x, y, look: `animal:${sp}`, wander: true, critter: true, dir: 'down', text });
+  folk.push(
+    critter(16, 22, 'carpincho', ['Un carpincho tomando sol en la costa, como si el puerto fuera suyo.']),
+    critter(30, 22, 'cumulo', ['Un cuervo mira desde la orilla las latas viejas del Anglo.']),
+    critter(36, 21, 'nimbo', ['Una golondrina va y viene del muelle al techo del museo.']),
+  );
   fitToMap(m.tiles, folk, taken);
   (m.npcs ??= []).push(...folk);
 }
