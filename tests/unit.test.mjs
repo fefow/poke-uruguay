@@ -408,12 +408,14 @@ test('objetos de batalla nuevos: precisión, resistencia, concentración y repel
   assert.ok(ITEMS.repelente_max.repel > ITEMS.repelente_super.repel && ITEMS.repelente_super.repel > ITEMS.repelente.repel);
 });
 
-test('clima: la lluvia es determinista por mapa y franja y ocupa cerca de una de cada cinco', async () => {
+test('clima: aleatorio determinista por mapa y franja, y fijo cuando el editor lo define', async () => {
   const { weatherAt } = await import('../src/gfx/fx.ts');
-  assert.equal(weatherAt('carmelo', 1e12), weatherAt('carmelo', 1e12 + 1000));
-  let rainy = 0;
-  for (let i = 0; i < 500; i++) if (weatherAt('colonia', 1e12 + i * 600000) === 'rain') rainy++;
-  assert.ok(rainy > 60 && rainy < 140, `lluvia ${rainy}/500`);
+  assert.equal(weatherAt('carmelo', null, 1e12), weatherAt('carmelo', null, 1e12 + 1000));
+  const seen = {};
+  for (let i = 0; i < 600; i++) { const w = weatherAt('colonia', null, 1e12 + i * 240000); seen[w] = (seen[w] ?? 0) + 1; }
+  for (const k of ['clear', 'rain', 'storm', 'fog']) assert.ok(seen[k] > 5, `${k} ${JSON.stringify(seen)}`);
+  assert.ok(seen.clear > seen.rain && seen.rain > seen.storm);
+  for (const k of ['rain', 'storm', 'fog', 'clear']) assert.equal(weatherAt('x', k, 5), k);
 });
 
 test('map editor patches apply and survive a parse round trip', async () => {

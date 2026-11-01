@@ -1227,7 +1227,7 @@ function drawShip() {
   tier(40, 172, 18, 28, '#2a3550');
   tier(58, 150, 10, 18, '#2a3550');
   tier(82, 128, 4, 10, '#5a9ad8');
-  for (const x of [134, 150]) { px(g, x, 0, '#1a1a24', 11, 3); px(g, x, 3, '#e89a20', 11, 9); px(g, x + 1, 3, '#f8c050', 2, 9); px(g, x, 11, '#b06a10', 11, 1); }
+  for (const x of [128, 140]) { px(g, x, 0, '#1a1a24', 10, 3); px(g, x, 3, '#e89a20', 10, 7); px(g, x + 1, 3, '#f8c050', 2, 7); px(g, x, 9, '#b06a10', 10, 1); }  // funnels sit on the middle superstructure
   px(g, 62, 7, '#d8dce8', 10, 3); px(g, 64, 8, '#5a9ad8', 6, 1);  // lifeboat / radar plate on the bridge deck
   px(g, 92, 0, '#9aa8bc', 1, 4); px(g, 90, 1, '#d8dce8', 5, 1);   // mast
   return c;

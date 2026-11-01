@@ -1,7 +1,8 @@
 // Lighting and ambience layered over the pixel art: soft shadows, vignette,
 // drifting motes, a lit backdrop for small interiors and multiply-style
 // time-of-day grading. Everything is pre-rendered or a handful of draw calls.
-import { W, H } from './screen.ts';
+import { W, H, skyHour } from './screen.ts';
+export { skyHour };
 
 let vignetteCanvas;
 function vignetteImg() {
@@ -77,12 +78,28 @@ export function motes(g, t, { night = false } = {}) {
   g.restore();
 }
 
-/** Weather changes every ten minutes of real time and is the same for everyone on a given map; about one slot in five is rain. */
-export function weatherAt(mapId, now = Date.now()) {
-  const slot = Math.floor(now / 600000);
+// ---- Sky: an in-game clock and random weather (independent of the player's computer clock) ----
+const SESSION = Math.floor(Math.random() * 1e9);
+export type Weather = 'clear' | 'rain' | 'storm' | 'fog';
+const FIXED = new Set(['clear', 'rain', 'storm', 'fog']);
+/** Weather of a zone: fixed when the map editor set one, otherwise random per map and per 4-minute slot (about 60% clear, 18% rain, 6% storm, 16% fog). */
+export function weatherAt(mapId: string, fixed?: string | null, now = Date.now()): Weather {
+  if (fixed && FIXED.has(fixed)) return fixed as Weather;
+  const slot = Math.floor(now / 240000);
   let h = 2166136261;
-  for (const c of `${mapId}|${slot}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  return ((h >>> 0) % 100) < 20 ? 'rain' : null;
+  for (const c of `${SESSION}|${mapId}|${slot}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  const r = (h >>> 0) % 100;
+  return r < 60 ? 'clear' : r < 78 ? 'rain' : r < 84 ? 'storm' : 'fog';
+}
+
+/** Storm: a rare white flash with a short rumble tint. */
+export function lightning(g, t) {
+  const k = Math.floor(t / 1000), ph = (t % 1000) / 1000;
+  let h = k * 2654435761 >>> 0;
+  if ((h % 100) < 28 && ph < 0.16) {
+    g.fillStyle = `rgba(235,240,255,${(ph < 0.06 ? 0.55 : 0.25) * (1 - ph * 3)})`;
+    g.fillRect(0, 0, W, H);
+  }
 }
 
 const DROPS = Array.from({ length: 130 }, (_, i) => ({ x: (i * 53) % W, y: (i * 89) % H, s: 0.8 + ((i * 7) % 5) / 8, l: 5 + (i % 4) }));
@@ -112,8 +129,7 @@ export function rain(g, t) {
 }
 
 /** Time-of-day grading with multiply (richer than a flat alpha wash) plus a warm/cool lift. */
-export function grade(g, date = new Date()) {
-  const hr = date.getHours() + date.getMinutes() / 60;
+export function grade(g, hr = skyHour()) {
   let mult = null;
   let lift = null;
   if (hr >= 20 || hr < 5.5) { mult = '#7b86c8'; lift = 'rgba(30,40,120,0.12)'; }

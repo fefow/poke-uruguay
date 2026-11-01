@@ -11,7 +11,7 @@ import { T, TILE_INFO, tileCanvas, groundUnder } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.ts';
-import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain } from '../gfx/fx.ts';
+import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
 import { sfx, playMusic } from '../core/audio.ts';
@@ -1137,7 +1137,12 @@ function drawWorld(g, t) {
   if (!m.indoor) {
     const night = grade(g);
     if (!pixiActive()) motes(g, t, { night });
-    if (!m.dark && m.theme !== 'cueva' && weatherAt(m.id) === 'rain') rain(g, t);
+    if (!m.dark && m.theme !== 'cueva') {
+      const wx = weatherAt(m.id, m.weather);
+      if (wx === 'rain' || wx === 'storm') rain(g, t);
+      if (wx === 'storm') { rain(g, t * 1.7); lightning(g, t); }
+      if (wx === 'fog') { drawFog(g, t); g.fillStyle = 'rgba(205,212,222,0.22)'; g.fillRect(0, 0, W, H); }
+    }
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
     // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
     const machines = activeMachines();

@@ -4,7 +4,7 @@
 // If WebGL is unavailable the plain 2D canvas stays visible.
 import 'pixi.js/unsafe-eval'; // no new Function(): the page CSP forbids eval
 import { Application, Sprite, Texture, Filter, GlProgram, Container } from 'pixi.js';
-import { W, H } from './screen.ts';
+import { W, H, skyHour } from './screen.ts';
 
 const VERT = `in vec2 aPosition;
 out vec2 vTextureCoord;
@@ -77,9 +77,8 @@ export function setFx(outdoor, night, lights) {
   fx.lights = lights;
 }
 
-/** 0 by day, 1 at night, in between at dusk and dawn (real clock, like the colour grade). */
-export function nightLevel(date = new Date()) {
-  const hr = date.getHours() + date.getMinutes() / 60;
+/** 0 by day, 1 at night, in between at dusk and dawn (in-game clock, like the colour grade). */
+export function nightLevel(hr = skyHour()) {
   if (hr >= 20 || hr < 5.5) return 1;
   if (hr >= 18) return 0.55;
   if (hr < 7.5) return 0.3;

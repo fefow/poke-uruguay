@@ -41,9 +41,16 @@ export function text(g, str, x, y, { color = '#fff', size = 8, align = 'left', s
   g.fillText(str, Math.round(x), Math.round(y));
 }
 
-/** Time-of-day tint from the player's real clock. */
-export function dayTint(date = new Date()) {
-  const hr = date.getHours() + date.getMinutes() / 60;
+const START_HOUR = 8 + Math.random() * 8;
+const BOOT = typeof performance !== 'undefined' ? performance.now() : 0;
+const MS_PER_HOUR = 45000; // a full in-game day lasts 18 real minutes
+/** In-game hour 0..24. */
+export function skyHour(now = typeof performance !== 'undefined' ? performance.now() : 0) {
+  return (START_HOUR + (now - BOOT) / MS_PER_HOUR) % 24;
+}
+
+/** Time-of-day tint from the in-game clock. */
+export function dayTint(hr = skyHour()) {
   if (hr >= 20 || hr < 5.5) return 'rgba(20,30,90,0.32)';
   if (hr >= 18) return 'rgba(255,120,40,0.14)';
   if (hr < 7.5) return 'rgba(255,170,120,0.12)';

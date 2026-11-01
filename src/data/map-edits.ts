@@ -4,6 +4,7 @@
 //   addNpcs   [{ x, y, look, dir, text, wander }] new people (they only talk)
 //   items     { id: { x, y } | { remove: true } } for items already in the map
 //   addItems  [{ x, y, item, id }] new items on the ground
+//   weather   'clear' | 'rain' | 'storm' | 'fog' fixed weather for the zone (absent = random)
 // The game applies them after building every map (end of maps.js), so a generator change keeps the edits.
 
 /** A stable name for a person in a map: what it is (trainer id, script or look) and which one of those it is. */
@@ -24,6 +25,7 @@ export function applyMapEdits(maps, edits) {
   for (const [id, e] of Object.entries((edits ?? {}) as Record<string, any>)) {
     const m = maps[id];
     if (!m || !e) continue;
+    if (typeof e.weather === 'string') m.weather = e.weather;
     if (Array.isArray(e.tiles) && fitsTiles(m.tiles, e.tiles)) m.tiles = [...e.tiles];
     if (e.npcs || e.addNpcs) {
       const keys = npcKeys(m.npcs);
