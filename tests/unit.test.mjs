@@ -164,8 +164,9 @@ test('pure-JS SHA-256/HMAC match known vectors', () => {
 });
 
 test('Dex: 151 criaturas, 81 base, 70 evoluciones, 5 legendarias, tipos parejos', async () => {
-  const { DEX_ORDER } = await import('../src/data/species.ts');
+  const { DEX_ORDER: ALL, CUSTOM_KEYS } = await import('../src/data/species.ts');
   const { TYPES } = await import('../src/data/types.ts');
+  const DEX_ORDER = ALL.filter((k) => !CUSTOM_KEYS.includes(k)); // creatures made in the editor are extra
   assert.equal(DEX_ORDER.length, 151);
   const evolved = new Set(DEX_ORDER.map((k) => SPECIES[k].evo?.to).filter(Boolean));
   assert.equal(DEX_ORDER.length - evolved.size, 81);
@@ -173,7 +174,7 @@ test('Dex: 151 criaturas, 81 base, 70 evoluciones, 5 legendarias, tipos parejos'
   const byType = {};
   for (const k of DEX_ORDER) byType[SPECIES[k].types[0]] = (byType[SPECIES[k].types[0]] ?? 0) + 1;
   for (const t of Object.keys(TYPES)) assert.ok(byType[t] === 11 || byType[t] === 12, `${t}: ${byType[t]}`);
-  DEX_ORDER.forEach((k, i) => {
+  ALL.forEach((k, i) => {
     const s = SPECIES[k];
     assert.equal(s.id, i + 1);
     if (s.evo) assert.ok(SPECIES[s.evo.to], `${k} evoluciona a algo que no existe`);

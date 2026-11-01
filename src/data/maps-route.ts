@@ -137,7 +137,11 @@ const TRAINERS = [
 
 const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'swimmer', 'ciclista', 'keeper', 'biologo', 'campesina', 'pescador', 'maestra', 'obrero', 'artesana', 'abuela', 'camionero', 'cartero', 'cocinero', 'murguero', 'hincha'];
 
-const houseFolk = (first, look2, text2) => [first, ...(look2 ? [casaNpc(look2, text2, first)] : [])];
+// Residents are not statues: the second one in a house always wanders, and about a third of the first ones do too.
+const houseFolk = (first, look2, text2) => {
+  const wanders = [].concat(first.text).join('').length % 3 === 0;
+  return [wanders ? { ...first, wander: true } : first, ...(look2 ? [{ ...casaNpc(look2, text2, first), wander: true }] : [])];
+};
 
 // Each department has its own flavour: its townsfolk talk about what their land is known for.
 const DEPT_FOLK = {

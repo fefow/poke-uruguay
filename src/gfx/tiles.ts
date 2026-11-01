@@ -1,4 +1,5 @@
 // Procedural 16x16 pixel tileset (no external images).
+import { CUSTOM } from '../data/custom-content.js';
 import { Rng } from '../core/rng.ts';
 import { override } from './overrides.ts';
 
@@ -1406,6 +1407,12 @@ export function groundUnder(tiles, x, y): string | boolean {
 }
 
 /** under: false (grass / theme floor), true or '~' (water) or a ground char from BASES (see groundUnder). */
+// Map pieces made in the sprite editor start as grass; the drawing comes from the overrides.
+for (const t of CUSTOM.tiles) {
+  (TILE_INFO as any)[t.ch] = { name: t.name, solid: !!t.solid };
+  (DRAW as any)[t.ch] = (g, r) => grass(g, r);
+}
+
 export function tileCanvas(ch, frame = 0, theme: string | null = null, under: string | boolean = false) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;

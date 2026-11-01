@@ -1,4 +1,5 @@
 // Pixel-template character sprites (player + NPCs), 16x16, 4 directions, 3 frames.
+import { CUSTOM } from '../data/custom-content.js';
 import { override } from './overrides.ts';
 
 const DOWN = [
@@ -187,6 +188,8 @@ export const LOOKS = {
   champion: { h: '#2a2a2a', H: '#5aa8e8', s: '#a87a5a', S: '#8a5a3a', c: '#5aa8e8', C: '#ffffff', p: '#1a1a1a', b: '#1a1a1a' },
   keeper: { h: '#5a5a5a', H: '#1a2a5a', s: '#e8b890', S: '#c89870', c: '#1a2a5a', C: '#f2f2f2', p: '#3a3a3a', b: '#1a1a1a' },
 };
+// Looks made in the sprite editor start as a copy of an existing one; their drawings come from the overrides.
+for (const l of CUSTOM.looks) (LOOKS as any)[l.key] = (LOOKS as any)[l.base] ?? (LOOKS as any).boy;
 
 // Unique characters get extra pixels on top of the shared body templates.
 // d(x, y, colour, w, h) draws one rectangle in unflipped (right-facing) coordinates.

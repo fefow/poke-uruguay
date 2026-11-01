@@ -708,6 +708,7 @@ import { guideMap } from './guide.ts';
 import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
 import { flavorRoute, ROUTE_FLAVOR } from './route-flavor.ts';
+import { CUSTOM } from './custom-content.js';
 import { layoutGym } from './gym-layouts.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1226,6 +1227,16 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
 for (const stop of STOPS) {
   if (stop.kind !== 'loc' || !OUTDOOR[stop.id]) continue;
   guideMap(OUTDOOR[stop.id], stop.id, { width: 4, town: true });
+}
+
+// Creatures made in the sprite editor join the wild lists of the maps they were given.
+for (const c of CUSTOM.creatures) {
+  for (const id of c.habitats ?? []) {
+    const lst = OUTDOOR[id]?.enc?.list;
+    if (!lst?.length) continue;
+    const lo = Math.min(...lst.map((e) => e[1])), hi = Math.max(...lst.map((e) => e[2]));
+    if (!lst.some((e) => e[0] === c.key)) lst.push([c.key, lo, hi, 8]);
+  }
 }
 
 // Battle backdrops follow the land: caves, forests, wetlands and sierras get their own, coastal routes the beach.

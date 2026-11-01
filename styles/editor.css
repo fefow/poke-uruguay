@@ -146,3 +146,13 @@ kbd { font: 600 10px/1 ui-monospace, monospace; padding: 2px 4px; border-radius:
   & p { margin: 0; color: var(--muted); }
 }
 .ed-lock-msg { min-height: 1.3em; }
+
+/* ---- new content (creature / character / map piece) */
+.ed-new { width: 100%; }
+.ed-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgb(0 0 0 / 0.6); padding: 16px; }
+.ed-dialog { display: flex; flex-direction: column; gap: 10px; width: min(520px, 100%); max-height: 90vh; overflow: auto; padding: 18px; border-radius: 12px; background: var(--panel, #1f1d2b); border: 1px solid var(--line, #3a3650); }
+.ed-dialog h2 { margin: 0 0 4px; font-size: 18px; }
+.ed-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.ed-field > span { color: var(--muted, #a8a4c0); }
+.ed-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 2px 10px; max-height: 160px; overflow: auto; padding: 6px; border: 1px solid var(--line, #3a3650); border-radius: 8px; font-size: 12px; }
+.ed-row { display: flex; gap: 8px; justify-content: flex-end; }

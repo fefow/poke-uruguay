@@ -4,6 +4,9 @@
 import { SPECIES, DEX_ORDER } from '../data/species.ts';
 import { ITEMS } from '../data/items.ts';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
+import { CUSTOM } from '../data/custom-content.js';
+import { TYPES } from '../data/types.ts';
+import { OUTDOOR } from '../data/maps.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas } from '../gfx/items.ts';
@@ -18,6 +21,8 @@ const REPO = 'fefow/poke-uruguay';
 const FILE = 'src/data/sprite-overrides.js';
 const store = safeStorage();
 const DRAFTS_KEY = 'pokeuy:sprite-drafts';
+const CUSTOM_KEY = 'pokeuy:custom-drafts';
+const CUSTOM_FILE = 'src/data/custom-content.js';
 const MAX_UNDO = 60;
 
 // ---------------------------------------------------------------- catalogue
@@ -26,16 +31,34 @@ const MEDALS = ['Montevideo', 'Maldonado', 'Treinta y Tres', 'Durazno', 'Tacuare
 const THEME_NAMES = { poli: 'Policlínica', gym_agua: 'Gimnasio Agua', gym_elec: 'Gimnasio Eléctrico', gym_roca: 'Gimnasio Roca' };
 const lookName = (k) => k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
-const CATS = [
+// New content made here (creatures, looks, map pieces) waits in the browser until it is saved to the game.
+type NewCustom = { creatures: any[]; looks: any[]; tiles: any[] };
+function loadCustom(): NewCustom {
+  try {
+    const o = JSON.parse(store.getItem(CUSTOM_KEY) || '{}');
+    const fresh = (list, field, deployed) => (list ?? []).filter((x) => !deployed.some((d) => d[field] === x[field])); // already in the deployed game: drop
+    return { creatures: fresh(o.creatures, 'key', CUSTOM.creatures), looks: fresh(o.looks, 'key', CUSTOM.looks), tiles: fresh(o.tiles, 'ch', CUSTOM.tiles) };
+  } catch { return { creatures: [], looks: [], tiles: [] }; }
+}
+let newCustom: NewCustom = loadCustom();
+const persistCustom = () => { try { store.setItem(CUSTOM_KEY, JSON.stringify(newCustom)); } catch { /* no space */ } };
+const blank = (w, hgt) => { const c = document.createElement('canvas'); c.width = w; c.height = hgt; return c; };
+const draftBase = (look) => newCustom.looks.find((l) => l.key === look)?.base ?? look;
+
+const CATS: any[] = [
   {
     id: 'creature', name: 'Criaturas', hint: '80×80. El dorso en combate es el mismo dibujo espejado.',
-    entries: () => DEX_ORDER.map((k, i) => ({ key: `creature:${k}`, label: SPECIES[k].name, sub: `#${String(i + 1).padStart(3, '0')}`, w: SPRITE, h: SPRITE, draw: () => creatureSprite(k), kind: 'creature' })),
+    make: 'creature',
+    entries: () => [
+      ...DEX_ORDER.map((k, i) => ({ key: `creature:${k}`, label: SPECIES[k].name, sub: `#${String(i + 1).padStart(3, '0')}`, w: SPRITE, h: SPRITE, draw: () => creatureSprite(k), kind: 'creature' })),
+      ...newCustom.creatures.map((c) => ({ key: `creature:${c.key}`, label: c.name, sub: c.saved ? 'nueva · guardada' : 'nueva · sin guardar', w: SPRITE, h: SPRITE, draw: () => blank(SPRITE, SPRITE), kind: 'creature' })),
+    ],
   },
   {
-    id: 'char', name: 'Personajes', hint: '16×17, cuatro direcciones y tres pasos cada una.',
-    entries: () => Object.keys(LOOKS).map((look) => ({
-      key: `char:${look}|down|0`, label: lookName(look), sub: look, w: 16, h: 17, draw: () => charSprite(look, 'down', 0), kind: 'char', look,
-      frames: DIRS.flatMap(([d]) => [0, 1, 2].map((f) => ({ key: `char:${look}|${d}|${f}`, dir: d, frame: f, w: 16, h: 17, draw: () => charSprite(look, d, f), kind: 'char', look, label: lookName(look) }))),
+    id: 'char', make: 'char', name: 'Personajes', hint: '16×17, cuatro direcciones y tres pasos cada una.',
+    entries: () => [...Object.keys(LOOKS), ...newCustom.looks.map((l) => l.key)].map((look) => ({
+      key: `char:${look}|down|0`, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)), sub: look, w: 16, h: 17, draw: () => charSprite(draftBase(look), 'down', 0), kind: 'char', look,
+      frames: DIRS.flatMap(([d]) => [0, 1, 2].map((f) => ({ key: `char:${look}|${d}|${f}`, dir: d, frame: f, w: 16, h: 17, draw: () => charSprite(draftBase(look), d, f), kind: 'char', look, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)) }))),
     })),
   },
   {
@@ -47,8 +70,9 @@ const CATS = [
     entries: () => MEDALS.map((n, i) => ({ key: `badge:${i + 1}`, label: `Medalla ${n}`, sub: `#${i + 1}`, w: 16, h: 16, draw: () => badgeCanvas(i + 1), kind: 'item' })),
   },
   {
-    id: 'tile', name: 'Suelo y edificios', hint: '16×16. Las piezas se repiten para formar los mapas.',
+    id: 'tile', make: 'tile', name: 'Suelo y edificios', hint: '16×16. Las piezas se repiten para formar los mapas.',
     entries: () => [
+      ...newCustom.tiles.map((t) => ({ key: `tile:${t.ch}0`, label: t.name, sub: t.saved ? 'nueva · guardada' : 'nueva · sin guardar', w: T, h: T, draw: () => tileCanvas('.', 0), kind: 'tile' })),
       ...Object.keys(TILE_INFO).flatMap((ch) => {
         const n = TILE_INFO[ch].anim ? 4 : 1;
         return Array.from({ length: n }, (_, f) => ({ key: `tile:${ch}${f}`, label: TILE_INFO[ch].name + (n > 1 ? ` (cuadro ${f + 1})` : ''), sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, f), kind: 'tile' }));
@@ -124,7 +148,8 @@ const tabs = h('nav', { class: 'ed-tabs' }, CATS.map((c) => h('button', { type: 
 const search = h('input', { class: 'ed-input ed-search', type: 'search', placeholder: 'Buscar…', oninput: () => { S.filter = search.value.trim().toLowerCase(); renderList(); } });
 const catHint = h('p', { class: 'ed-hint' });
 const list = h('ul', { class: 'ed-list' });
-const side = h('aside', { class: 'ed-side' }, tabs, search, catHint, list);
+const newBtn = h('button', { class: 'ed-btn is-primary ed-new', type: 'button', onclick: () => openNewForm() });
+const side = h('aside', { class: 'ed-side' }, tabs, newBtn, search, catHint, list);
 
 const title = h('h1', { class: 'ed-title' });
 const subtitle = h('p', { class: 'ed-sub' });
@@ -204,11 +229,87 @@ function canvasFromPixels(px, w, hgt) {
   return c;
 }
 
+// ---------------------------------------------------------------- new content
+const slug = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+const ROLES = [['b', 'Equilibrado'], ['a', 'Físico (ataque)'], ['s', 'Especial'], ['t', 'Resistente'], ['f', 'Veloz']];
+const POWER = [['330', 'Débil (nivel temprano)'], ['430', 'Normal'], ['520', 'Fuerte (evolucionada)']];
+const unsavedCustom = () => [...newCustom.creatures, ...newCustom.looks, ...newCustom.tiles].filter((x) => !x.saved).length;
+
+function field(label, input) { return h('label', { class: 'ed-field' }, h('span', { text: label }), input); }
+
+function openNewForm() {
+  const make = S.cat.make;
+  if (!make) return;
+  const err = h('p', { class: 'ed-hint', role: 'alert' });
+  const name = h('input', { class: 'ed-input', type: 'text', maxlength: '28', placeholder: make === 'creature' ? 'Ej.: Yaguareté' : make === 'char' ? 'Ej.: Pescadora' : 'Ej.: Baldosa de patio' });
+  const opts = (pairs, empty = null) => [...(empty ? [h('option', { value: '', text: empty })] : []), ...pairs.map(([v, t]) => h('option', { value: v, text: t }))];
+  let fields: any[] = [field('Nombre', name)];
+  let read: () => any = () => ({});
+  if (make === 'creature') {
+    const t1 = h('select', { class: 'ed-input' }, opts(Object.entries(TYPES).map(([k, v]) => [k, v.name])));
+    const t2 = h('select', { class: 'ed-input' }, opts(Object.entries(TYPES).map(([k, v]) => [k, v.name]), 'Sin segundo tipo'));
+    const role = h('select', { class: 'ed-input' }, opts(ROLES));
+    const power = h('select', { class: 'ed-input' }, opts(POWER)); power.value = '430';
+    const desc = h('textarea', { class: 'ed-input', rows: '3', maxlength: '200', placeholder: 'Una o dos frases sobre la criatura.' });
+    const routes = Object.entries(OUTDOOR).filter(([id, m]: any) => (id.startsWith('r_') || id.startsWith('ruta')) && m.enc?.list?.length);
+    const boxes = routes.map(([id, m]: any) => ({ id, cb: h('input', { type: 'checkbox' }), name: m.name }));
+    fields = [...fields, field('Tipo', t1), field('Segundo tipo', t2), field('Rol de estadísticas', role), field('Fuerza', power), field('Descripción', desc),
+      h('div', { class: 'ed-field' }, h('span', { text: 'Dónde aparece salvaje (opcional)' }), h('div', { class: 'ed-checks' }, boxes.map((b) => h('label', {}, b.cb, ` ${b.name} (${b.id.replace(/^r_/, '')})`))))];
+    read = () => ({ type: t1.value, type2: t2.value || undefined, role: role.value, bst: +power.value, desc: desc.value.trim() || undefined, habitats: boxes.filter((b) => b.cb.checked).map((b) => b.id) });
+  } else if (make === 'char') {
+    const baseSel = h('select', { class: 'ed-input' }, opts(Object.keys(LOOKS).map((k) => [k, lookName(k)])));
+    fields = [...fields, field('Empezar desde el aspecto de', baseSel)];
+    read = () => ({ base: baseSel.value });
+  } else {
+    const solid = h('input', { type: 'checkbox' });
+    fields = [...fields, h('label', { class: 'ed-field' }, solid, ' Sólida (no se puede atravesar)')];
+    read = () => ({ solid: solid.checked });
+  }
+  const close = () => modal.remove();
+  const submit = () => {
+    const nm = name.value.trim();
+    if (!nm) { err.textContent = 'Ponele un nombre.'; return; }
+    const extra = read();
+    if (make === 'creature') {
+      const key = slug(nm);
+      if (!key) { err.textContent = 'El nombre necesita letras o números.'; return; }
+      if (SPECIES[key] || newCustom.creatures.some((c) => c.key === key)) { err.textContent = 'Ya hay una criatura con ese nombre.'; return; }
+      newCustom.creatures.push({ key, name: nm, ...extra });
+    } else if (make === 'char') {
+      const key = slug(nm) || 'personaje';
+      if (LOOKS[key] || newCustom.looks.some((l) => l.key === key)) { err.textContent = 'Ya hay un personaje con ese nombre.'; return; }
+      newCustom.looks.push({ key, name: nm, ...extra });
+    } else {
+      let code = 0xE200;
+      const taken = (c) => c in TILE_INFO || newCustom.tiles.some((t) => t.ch === c);
+      while (taken(String.fromCharCode(code))) code++;
+      newCustom.tiles.push({ ch: String.fromCharCode(code), name: nm, ...extra });
+    }
+    persistCustom();
+    close();
+    selectCat(S.cat);
+    const added = S.entries[S.entries.length - 1];
+    const e = make === 'tile' ? S.entries[0] : added;
+    select(e);
+    syncPending();
+    status(`Se creó «${nm}». Dibujalo y tocá «Guardar en el juego».`, 'ok');
+  };
+  const modal = h('div', { class: 'ed-modal', onkeydown: (ev) => { ev.stopPropagation(); if (ev.key === 'Escape') close(); } },
+    h('form', { class: 'ed-dialog', onsubmit: (ev) => { ev.preventDefault(); submit(); } },
+      h('h2', { text: make === 'creature' ? 'Nueva criatura' : make === 'char' ? 'Nuevo personaje' : 'Nueva pieza de mapa' }),
+      ...fields, err,
+      h('div', { class: 'ed-row' }, h('button', { class: 'ed-btn', type: 'button', text: 'Cancelar', onclick: close }), h('button', { class: 'ed-btn is-primary', type: 'submit', text: 'Crear' }))));
+  document.body.append(modal);
+  name.focus();
+}
+
 // ---------------------------------------------------------------- list
 function selectCat(c) {
   S.cat = c;
   S.entries = c.entries();
   catHint.textContent = c.hint;
+  newBtn.hidden = !c.make;
+  newBtn.textContent = c.make === 'creature' ? '＋ Nueva criatura' : c.make === 'char' ? '＋ Nuevo personaje' : '＋ Nueva pieza';
   for (const b of tabs.children) b.classList.toggle('is-active', b.dataset.cat === c.id);
   renderList();
   select(S.entries[0]);
@@ -705,7 +806,7 @@ function syncColor() {
 }
 
 function syncPending() {
-  const n = Object.keys(drafts).length;
+  const n = Object.keys(drafts).length + unsavedCustom();
   pending.textContent = n ? `${n} cambio${n === 1 ? '' : 's'} sin guardar en el juego` : 'Todo guardado';
   pending.classList.toggle('has-changes', n > 0);
 }
@@ -738,8 +839,25 @@ function download(quiet = false) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  if (!quiet) status('Archivo descargado. Para que el juego lo use, va en src/data/sprite-overrides.js del repo.');
+  if (unsavedCustom()) {
+    const b2 = new Blob([customSource(mergeCustom(CUSTOM))], { type: 'text/javascript' });
+    const a2 = h('a', { href: URL.createObjectURL(b2), download: 'custom-content.js' });
+    document.body.append(a2);
+    a2.click();
+    a2.remove();
+    setTimeout(() => URL.revokeObjectURL(a2.href), 2000);
+  }
+  if (!quiet) status('Archivo descargado. Para que el juego lo use, va en src/data/sprite-overrides.js del repo (y custom-content.js si hay contenido nuevo).');
 }
+
+const strip = ({ saved, ...rest }: any) => rest;
+/** The deployed custom content plus everything created here. */
+function mergeCustom(cur: any) {
+  const add = (a: any[], b: any[], f: string) => [...(a ?? []).filter((x) => !b.some((y) => y[f] === x[f])), ...b.map(strip)];
+  return { creatures: add(cur.creatures, newCustom.creatures, 'key'), looks: add(cur.looks, newCustom.looks, 'key'), tiles: add(cur.tiles, newCustom.tiles, 'ch') };
+}
+const customSource = (c) => `// Content created from the sprite editor ("＋ Nuevo"): new creatures, character looks and map pieces.\n// The editor rewrites this file; do not edit by hand.\nexport const CUSTOM = ${JSON.stringify(c)};\n`;
+const parseCustomSource = (t) => { const m = t.match(/=\s*(\{[\s\S]*\})\s*;?\s*$/); const o = m ? JSON.parse(m[1]) : {}; return { creatures: o.creatures ?? [], looks: o.looks ?? [], tiles: o.tiles ?? [] }; };
 
 async function importFile() {
   const f = fileInput.files?.[0];
@@ -769,38 +887,54 @@ const b64decode = (b64) => decodeURIComponent(escape(atob(b64.replace(/\s/g, '')
 
 async function saveToGitHub() {
   const token = devToken();
-  if (!Object.keys(drafts).length) return status('No hay cambios para guardar.');
-  const url = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+  const hasSprites = Object.keys(drafts).length > 0;
+  if (!hasSprites && !unsavedCustom()) return status('No hay cambios para guardar.');
   const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
   status('Guardando en GitHub…');
-  try {
-    // The browser may keep an old copy of the file (and its sha): always ask GitHub again, and if someone
-    // saved in between (409), read the new copy and retry a few times before giving up.
-    let merged;
+  // The browser may keep an old copy of a file (and its sha): always ask GitHub again, and if someone saved
+  // in between (409), read the new copy and retry a few times before giving up.
+  const putFile = async (file, message, makeContent) => {
+    const url = `https://api.github.com/repos/${REPO}/contents/${file}`;
     for (let attempt = 1; ; attempt++) {
       const cur = await fetch(`${url}?ref=main&t=${Date.now()}`, { headers, cache: 'no-store' });
-      if (!cur.ok) throw await ghError(cur);
-      const meta = await cur.json();
-      // Merge on top of what is on GitHub now, so edits made from another computer are kept.
-      merged = parseOverridesSource(b64decode(meta.content));
-      for (const [k, v] of Object.entries(drafts)) {
-        if (v) merged[k] = v;
-        else delete merged[k];
-      }
-      const n = Object.keys(drafts).length;
-      const body = { message: `Editor de sprites: ${n} cambio${n === 1 ? '' : 's'}`, content: b64encode(overridesSource(merged)), sha: meta.sha, branch: 'main' };
+      if (!cur.ok && cur.status !== 404) throw await ghError(cur);
+      const meta = cur.ok ? await cur.json() : null;
+      const { text, result } = makeContent(meta ? b64decode(meta.content) : '');
+      const body: any = { message, content: b64encode(text), branch: 'main' };
+      if (meta) body.sha = meta.sha;
       const put = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body), cache: 'no-store' });
       if ((put.status === 409 || put.status === 422) && attempt < 5) { await new Promise((r) => setTimeout(r, 1200 * attempt)); continue; }
       if (!put.ok) throw await ghError(put);
-      break;
+      return result;
     }
-    base = merged;
-    drafts = {};
-    persist();
-    refreshLive();
-    renderList();
+  };
+  try {
+    if (hasSprites) {
+      const n = Object.keys(drafts).length;
+      // Merge on top of what is on GitHub now, so edits made from another computer are kept.
+      base = await putFile(FILE, `Editor de sprites: ${n} cambio${n === 1 ? '' : 's'}`, (cur) => {
+        const merged = parseOverridesSource(cur);
+        for (const [k, v] of Object.entries(drafts)) {
+          if (v) merged[k] = v;
+          else delete merged[k];
+        }
+        return { text: overridesSource(merged), result: merged };
+      });
+      drafts = {};
+      persist();
+      refreshLive();
+    }
+    if (unsavedCustom()) {
+      await putFile(CUSTOM_FILE, 'Editor de sprites: contenido nuevo (criaturas, personajes o piezas)', (cur) => {
+        const merged = mergeCustom(cur ? parseCustomSource(cur) : { creatures: [], looks: [], tiles: [] });
+        return { text: customSource(merged), result: merged };
+      });
+      for (const list of [newCustom.creatures, newCustom.looks, newCustom.tiles]) for (const x of list) x.saved = true;
+      persistCustom();
+    }
+    selectCat(S.cat);
     syncPending();
-    status('Guardado. El juego publicado se actualiza solo en uno o dos minutos.', 'ok');
+    status('Guardado. El juego publicado se actualiza solo en uno o dos minutos; lo nuevo aparece al recargarlo.', 'ok');
   } catch (err) {
     status(`No se pudo guardar en GitHub: ${err.message} Se descargó el archivo con tus dibujos para que no los pierdas.`, 'error');
     download(true);

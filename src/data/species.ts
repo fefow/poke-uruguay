@@ -2,6 +2,7 @@ import { deepFreeze } from '../core/util.ts';
 import type { Species } from '../types.ts';
 import { MOVES } from './moves.ts';
 import { LINES, LEGENDS } from './species-extra.ts';
+import { CUSTOM } from './custom-content.js';
 
 // Original creatures inspired by Uruguayan wildlife and culture.
 // base: [hp, atk, def, spa, spd, spe]
@@ -250,9 +251,9 @@ function learnsetFor(types, role) {
   return out.sort((x, y) => x[0] - y[0]);
 }
 
-function buildLines() {
+function buildLines(lines: any[] = LINES) {
   const out = [];
-  for (const L of LINES) {
+  for (const L of lines) {
     L.mons.forEach(([key, name, sec, plan, c1, c2, c3, feats, size, desc], i) => {
       const types = sec ? [L.t, sec] : [L.t];
       const bst = L.bst[Math.min(i, L.bst.length - 1)];
@@ -270,6 +271,16 @@ function buildLines() {
   return out;
 }
 
+/** Creatures made in the sprite editor: one-stage lines with stats from their role (see custom-content.js). */
+export const CUSTOM_KEYS: string[] = CUSTOM.creatures.map((c) => c.key);
+function buildCustom() {
+  const lines = CUSTOM.creatures.map((c) => ({
+    t: c.type, role: c.role || 'b', bst: [c.bst || 430], evo: [],
+    mons: [[c.key, c.name, c.type2 || null, 'quad', '#8a8a8a', '#5a5a5a', '#e0e0e0', '', c.size || 1, c.desc || 'Una criatura nueva del Uruguay.']],
+  }));
+  return buildLines(lines);
+}
+
 function buildLegends() {
   return LEGENDS.map((l) => ({
     id: 0, key: l.key, name: l.name, types: l.types, base: l.base, catchRate: 3, baseExp: 270, learn: l.learn, desc: l.desc,
@@ -280,7 +291,7 @@ function buildLegends() {
 // Dex order: the original 39 regular species, the new lines, then the five legendaries.
 const REGULAR = BASE_LIST.filter((s: any) => !s.legendary);
 const OLD_LEGENDS = BASE_LIST.filter((s: any) => s.legendary);
-const LIST = [...REGULAR, ...buildLines(), ...OLD_LEGENDS, ...buildLegends()].map((s, i) => ({ ...s, id: i + 1 }));
+const LIST = [...REGULAR, ...buildLines(), ...OLD_LEGENDS, ...buildLegends(), ...buildCustom()].map((s, i) => ({ ...s, id: i + 1 }));
 
 export const SPECIES: Record<string, Species> = deepFreeze(Object.fromEntries(LIST.map((s) => [s.key, s])));
 export const DEX_ORDER: string[] = deepFreeze(LIST.map((s) => s.key));
