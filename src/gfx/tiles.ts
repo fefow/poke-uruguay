@@ -29,6 +29,9 @@ export const TILE_INFO = {
   ϝ: { name: 'boca de cueva' },
   ϰ: { name: 'pared de roca', solid: true },
   ϱ: { name: 'pared de roca', solid: true },
+  ϳ: { name: 'pared de roca', solid: true },
+  ϴ: { name: 'roca', solid: true },
+  ϵ: { name: 'suelo de cueva' },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -1110,6 +1113,50 @@ const caveWall = (g, r) => {
   f: (g, r) => { caveFloor(g, r); g.fillStyle = '#7ad8f0'; g.beginPath(); g.moveTo(8, 3); g.lineTo(11, 12); g.lineTo(5, 12); g.fill(); g.fillStyle = '#c8f4ff'; g.beginPath(); g.moveTo(8, 3); g.lineTo(9, 8); g.lineTo(7, 8); g.fill(); px(g, 3, 12, '#2a8aa8', 10, 1); },
   S: (g) => { caveFloor(g, new Rng(5)); px(g, 7, 7, '#5a3a1a', 2, 8); px(g, 2, 2, '#5a3a1a', 12, 7); px(g, 3, 3, '#c8905a', 10, 5); px(g, 4, 4, '#7a4a2a', 8, 1); px(g, 4, 6, '#7a4a2a', 6, 1); },
 };
+
+
+
+// Dense forest: a dark leafy floor and a canopy that fills the whole tile, so the trees read as a wall, not as scattered plants.
+const forestFloor = (g, r) => speckle(g, r, '#4f8a3a', ['#477f34', '#5a9644', '#3f742e', '#6a7a3a'], 18);
+const canopy = (g, r) => {
+  px(g, 0, 0, '#1b4026', T, T);
+  for (let i = 0; i < 4; i++) {
+    const x = r.int(-1, 9), y = r.int(-1, 9), w = r.int(6, 9);
+    px(g, x + 1, y, '#256336', w - 2, w); px(g, x, y + 1, '#256336', w, w - 2);
+    px(g, x + 1, y + 1, '#37823f', w - 3, 2); px(g, x + 1, y + 1, '#37823f', 2, w - 3);
+    px(g, x + 2, y + 2, '#58a850', 2, 1);
+    px(g, x + 2, y + w - 1, '#16341f', w - 3, 1);
+  }
+  for (let i = 0; i < 6; i++) px(g, r.int(0, 15), r.int(0, 15), '#14301c', 2, 1);
+};
+(THEMES as any).bosque = {
+  '.': forestFloor,
+  ',': (g, r) => { forestFloor(g, r); for (let i = 0; i < 6; i++) { const x = r.int(0, 13), y = r.int(2, 13); px(g, x, y, '#2f7a34', 1, 3); px(g, x + 1, y - 1, '#3f9a42', 1, 3); px(g, x + 2, y + 1, '#2a6a30', 1, 2); } },
+  '=': (g, r) => speckle(g, r, '#9a7a4a', ['#8a6c40', '#aa8a58', '#7e6238'], 12),
+  '#': canopy,
+  q: canopy,
+};
+
+// Cave rock is drawn from above and from the front: 'ϴ' is the dark mass of rock, 'ϳ' the lit face of a wall with
+// floor in front of it (strata, cracks and a jagged foot), 'ϵ' the floor in the shade right below that face.
+const rockMass = (g, r) => {
+  px(g, 0, 0, '#2a2632', T, T);
+  for (let i = 0; i < 5; i++) { const x = r.int(0, 11), y = r.int(0, 11), w = r.int(3, 6), h = r.int(2, 4); px(g, x, y, '#36323f', w, h); px(g, x + 1, y, '#403b4a', w - 2, 1); }
+  for (let i = 0; i < 4; i++) px(g, r.int(0, 15), r.int(0, 15), '#221f29', 2, 1);
+};
+const rockFace = (g, r) => {
+  rockMass(g, r);
+  px(g, 0, 0, '#46414f', T, 3); px(g, 0, 0, '#6a6478', T, 1); // lit upper lip
+  px(g, 0, 3, '#5d586a', T, 10);
+  for (let x = 0; x < T; x += r.int(3, 5)) px(g, x, 3, '#4b4658', 1, r.int(7, 10)); // vertical cracks
+  for (let i = 0; i < 4; i++) px(g, r.int(0, 12), r.int(4, 11), '#736d82', r.int(2, 4), 1); // strata highlights
+  px(g, 0, 13, '#3a3646', T, 2);
+  for (let x = 0; x < T; x += 2) px(g, x, 13 + r.int(0, 1), '#2a2632', 2, 2); // jagged foot
+  px(g, 0, 15, '#17151c', T, 1);
+};
+(THEMES as any).cueva['ϴ'] = rockMass;
+(THEMES as any).cueva['ϳ'] = rockFace;
+(THEMES as any).cueva['ϵ'] = (g, r) => { caveFloor(g, r); px(g, 0, 0, '#46424e', T, 3); px(g, 0, 3, '#504b58', T, 2); px(g, 0, 5, '#565160', T, 1); };
 
 /** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
 const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);

@@ -115,7 +115,7 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
 
   // --- floor: dirt path along the main route, grass clearings, a few boulders and crystals
   const forest = opts.kind === 'forest';
-  const path = (x, y) => { if (g[y][x] === '.') g[y][x] = '='; };
+  const path = (x, y) => { if (!forest && (x === 0 || x === W - 1) && g[y][x] === '.') g[y][x] = '='; };
   for (const y of west) for (let x = 0; x <= ccx(entry[0]); x++) path(x, y);
   for (const y of east) for (let x = ccx(exit[0]); x < W; x++) path(x, y);
   for (let n = 0; n < mainKeys.length; n++) {
@@ -186,10 +186,20 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
   // --- the sign stands by the entrance, in the corner of the first room
   const nSign = m.signs?.length ?? 0;
   if (nSign) {
-    const corner: [number, number][] = [[cx0(entry[0]), cy0(entry[1])], [cx0(entry[0]), cy0(entry[1]) + 2], [cx0(entry[0]) + 2, cy0(entry[1])]];
+    const corner: [number, number][] = [[cx0(entry[0]) + 2, cy0(entry[1])], [cx0(entry[0]) + 2, cy0(entry[1]) + 2]];
     let placed = 0;
     for (const [x, y] of corner) if (placed < nSign && g[y][x] === '.') { g[y][x] = 'S'; placed++; }
-    for (let k = 0; placed < nSign && k < 40; k++) { const x = 1 + Math.floor(rand() * (W - 2)), y = 1 + Math.floor(rand() * (H - 2)); if (g[y][x] === '.') { g[y][x] = 'S'; placed++; } }
+    for (let k = 0; placed < nSign && k < 80; k++) { const [i, j] = pick(order); const x = cx0(i) + 2 * Math.floor(rand() * 2), y = cy0(j) + 2 * Math.floor(rand() * 2); if (g[y][x] === '.' && x > 2 && x < W - 3 && ![entry, exit].some(([a, b]) => a === i && b === j)) { g[y][x] = 'S'; placed++; } }
+  }
+
+  // --- cave rock gets its volume: wall tiles with floor in front show their face, the floor below it is shaded
+  if (!forest) {
+    const isFloor = (x, y) => g[y]?.[x] !== undefined && !solid(g[y][x]);
+    const snap = g.map((r) => [...r]);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (snap[y][x] === '#') g[y][x] = !isFloor(x, y + 1) || y + 1 >= H ? 'ϴ' : 'ϳ';
+      else if (snap[y][x] === '.' && snap[y - 1]?.[x] === '#' ) g[y][x] = 'ϵ';
+    }
   }
 
   // --- write back (transposing again for north/south routes)
@@ -200,5 +210,6 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
   }
   m.tiles = out;
   m.maze = true;
+  if (forest) m.theme = 'bosque';
   return true;
 }

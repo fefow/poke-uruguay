@@ -1009,7 +1009,7 @@ mazeMap(OUTDOOR.r_palmitas_mercedes, 'r_palmitas_mercedes', { kind: 'cave', extr
   const ppIds = cave.npcs.filter((n) => n.trainer?.cls === 'Equipo PP').map((n) => n.trainer.id);
   const w = cave.tiles[0].length;
   const trail = [];
-  cave.tiles.forEach((r, y) => { for (let x = 3; x < 9; x++) if (r[x] === '.' && [r[x - 1], r[x + 1], cave.tiles[y - 1]?.[x], cave.tiles[y + 1]?.[x]].includes('=')) trail.push([x, y]); });
+  cave.tiles.forEach((r, y) => { for (let x = 3; x < 14; x++) if (r[x] === '.' && [r[x - 1], r[x + 1]].every((c) => c === '.' || c === ',')) trail.push([x, y]); });
   const spot = trail.find(([x, y]) => !cave.npcs.some((n) => Math.abs(n.x - x) + Math.abs(n.y - y) < 3)) ?? trail[0];
   cave.npcs.push({ x: spot[0], y: spot[1], look: 'leader_correo', dir: 'down', script: 'marta_cave', ppIds, cond: (f) => !f.marta_help });
   const gymDoor = OUTDOOR.mercedes.doors.findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_mercedes');
