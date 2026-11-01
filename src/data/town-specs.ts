@@ -167,21 +167,24 @@ export const CITY_SPECS = {
     fill: 7,
   },
   // Melo: laguna Merín and low hills; a diagonal staircase main street, ombú in the plaza.
+  // Melo (64x42): a stepped avenue crossing the cuchilla from the south-west to the north-east, a plaza with ñandubay
+  // trees, the old tower on the east side, a pond with herons to the north-east and stony hills to the north-west.
   melo: {
     theme: 'seca',
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 9,
-      water: [{ blob: [36, 6, 7, 4] }],
-      fills: [{ rect: [28, 1, 14, 11], ch: 's', only: '.' }],
-      hills: [{ rect: [2, 2, 16, 7], ch: 'μ', density: 0.35 }],
-      paths: [[[1, 27], [10, 27], [10, 22], [20, 22], [20, 17], [30, 17], [30, 12], [42, 12]], [[20, 1], [20, 22]], [[10, 27], [10, 12], [4, 12]], [[30, 17], [30, 28]], [[40, 12], [40, 17]]],
-      plazas: [{ x: 21, y: 18, w: 8, h: 6, piece: 'ö', benches: true }],
-      scatter: [['ö', 5, 'away'], ['Ω', 4, 'road'], ['R', 5, 'away']],
-      props: [['β', 34, 9]],
-      animals: [{ sp: 'garza', n: 2, rect: [29, 3, 6, 4] }],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      water: [{ blob: [52, 8, 9, 5] }, { blob: [10, 30, 6, 3] }],
+      fills: [{ rect: [40, 1, 22, 15], ch: 's', only: '.' }],
+      hills: [{ rect: [2, 2, 24, 10], ch: 'μ', density: 0.35 }],
+      paths: [[[1, 38], [14, 38], [14, 30], [30, 30], [30, 22], [46, 22], [46, 14], [62, 14]], [[30, 1], [30, 36]], [[14, 38], [14, 14], [5, 14]], [[46, 22], [46, 40]], [[58, 14], [58, 26]], [[30, 36], [60, 36]]],
+      plazas: [{ x: 31, y: 24, w: 10, h: 6, piece: 'ö', benches: true }, { x: 16, y: 31, w: 8, h: 5, piece: 'ö', benches: true }],
+      groves: [{ rect: [2, 18, 10, 9], tree: 'ö', density: 0.35 }, { rect: [48, 28, 12, 6], tree: 'ö', density: 0.3 }],
+      scatter: [['ö', 8, 'away'], ['Ω', 6, 'road'], ['R', 8, 'away']],
+      props: [['β', 50, 11], ['Λ', 30, 23], ['Λ', 45, 21], ['Λ', 15, 37]],
+      animals: [{ sp: 'garza', n: 3, rect: [41, 4, 9, 6] }],
     },
-    bld: [['poli', 'poli_melo'], ['shop', 'shop_melo'], ['house', 'casa_melo'], ['houseG', 'casa_melo2'], ['torre', 'anima_1', [34, 18]]],
-    fill: 10,
+    bld: [['poli', 'poli_melo', [24, 24]], ['shop', 'shop_melo', [38, 26]], ['house', 'casa_melo', [8, 33]], ['houseG', 'casa_melo2', [50, 18]], ['torre', 'anima_1', [52, 22]]],
+    fill: 16,
   },
   // Treinta y Tres: a stone canyon across the town with a narrow bridge, cuervos nest in the cliffs.
   quebrada: {
