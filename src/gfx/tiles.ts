@@ -1138,6 +1138,43 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
   }
 }
 
+// The Buquebus "China Zorrilla": a 12x3-tile ship (bow to the left) drawn once and sliced into tiles over animated water.
+export const SHIP_W = 12, SHIP_H = 3, SHIP_BASE = 0xe400;
+export const shipChar = (ix: number, iy: number) => String.fromCharCode(SHIP_BASE + iy * SHIP_W + ix);
+let shipArt: HTMLCanvasElement | null = null;
+function drawShip() {
+  const c = document.createElement('canvas');
+  c.width = SHIP_W * T; c.height = SHIP_H * T;
+  const g = c.getContext('2d')!;
+  const top = (x) => (x < 30 ? 28 - Math.floor((30 - x) * 0.25) : 28);
+  const bot = (x) => (x < 30 ? 42 - Math.floor((30 - x) * 0.5) : x > 182 ? 42 - (x - 182) : 42);
+  for (let x = 4; x < 190; x++) {
+    px(g, x, top(x), '#e8eef4', 1, bot(x) - top(x));
+    px(g, x, bot(x) - 5, '#2a3a5a', 1, 5);                // dark lower hull
+    px(g, x, bot(x) - 6, '#c83a3a', 1, 1);                // waterline stripe
+    px(g, x, top(x), '#c8a060', 1, 3);                    // wooden rail along the deck
+    if (x % 9 === 0) px(g, x, top(x) + 5, '#2a3550', 3, 2); // portholes
+  }
+  px(g, 4, top(4) + 1, '#1a1a2a', 2, 8);
+  const tier = (x1, x2, y1, y2, glass) => { px(g, x1, y1, '#f4f8fc', x2 - x1, y2 - y1); px(g, x1, y1, '#9aa8bc', x2 - x1, 1); px(g, x1, y2 - 1, '#b8c4d4', x2 - x1, 1); for (let x = x1 + 3; x < x2 - 4; x += 7) px(g, x, y1 + 3, glass, 4, 3); };
+  tier(40, 172, 18, 28, '#2a3550');
+  tier(58, 150, 10, 18, '#2a3550');
+  tier(82, 128, 4, 10, '#5a9ad8');
+  for (const x of [134, 150]) { px(g, x, 0, '#1a1a24', 11, 3); px(g, x, 3, '#e89a20', 11, 9); px(g, x + 1, 3, '#f8c050', 2, 9); px(g, x, 11, '#b06a10', 11, 1); }
+  px(g, 62, 7, '#d8dce8', 10, 3); px(g, 64, 8, '#5a9ad8', 6, 1);  // lifeboat / radar plate on the bridge deck
+  px(g, 92, 0, '#9aa8bc', 1, 4); px(g, 90, 1, '#d8dce8', 5, 1);   // mast
+  return c;
+}
+for (let iy = 0; iy < SHIP_H; iy++) for (let ix = 0; ix < SHIP_W; ix++) {
+  const ch = shipChar(ix, iy);
+  TILE_INFO[ch] = { name: 'Buquebus China Zorrilla', solid: true, anim: true };
+  DRAW[ch] = (g, r, f) => {
+    DRAW['~'](g, r, f);
+    shipArt ??= drawShip();
+    g.drawImage(shipArt, ix * T, iy * T, T, T, 0, 0, T, T);
+  };
+}
+
 // Shopping mall lift: steel double doors with a floor indicator, set in the wall.
 Object.assign(DRAW, {
   'Ͽ': (g) => {

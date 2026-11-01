@@ -711,6 +711,7 @@ import { flavorRoute, ROUTE_FLAVOR } from './route-flavor.ts';
 import { addRumors } from './rumors.ts';
 import { CUSTOM } from './custom-content.js';
 import { layoutGym } from './gym-layouts.ts';
+import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
 import { applyMapEdits, npcKeys } from './map-edits.ts';
@@ -1130,6 +1131,16 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
       ...(k ? { exitTo: { map: floors[k - 1].id, x: 10, y: 1 } } : {}),
     });
   });
+}
+
+// Fray Bentos harbour: the Buquebus is moored off the terminal pier; it sails away for good when the ferry quest is done.
+{
+  const fb: any = OUTDOOR.fraybentos;
+  const put = (x, y, c) => { fb.tiles[y] = fb.tiles[y].slice(0, x) + c + fb.tiles[y].slice(x + 1); };
+  const flagTiles: any[] = [];
+  for (let iy = 0; iy < SHIP_H; iy++) for (let ix = 0; ix < SHIP_W; ix++) { put(2 + ix, 26 + iy, shipChar(ix, iy)); flagTiles.push({ flag: 'ferry_done', x: 2 + ix, y: 26 + iy, ch: '~' }); }
+  for (const x of [6, 7]) for (const y of [24, 25]) { put(x, y, '}'); flagTiles.push({ flag: 'ferry_done', x, y, ch: '~' }); }
+  fb.flagTiles = flagTiles;
 }
 
 // Every gym has its own floor plan.

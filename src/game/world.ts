@@ -163,6 +163,8 @@ export function loadMap(id, x, y, dir = 'down') {
       if (row[x] === '%' && S.flags[`cl_${id}_${x}_${y}`]) W_.tiles[y] = W_.tiles[y].slice(0, x) + '.' + W_.tiles[y].slice(x + 1);
     }
   });
+  // Scenery that changes with the story (e.g. the Buquebus leaves for good): m.flagTiles = [{ flag, x, y, ch }]
+  for (const e of (m as any).flagTiles ?? []) if (S.flags[e.flag]) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
   if (changed) { W_.npcs = []; W_.lit = false; }
   // The bicycle is never used indoors, and bike-only zones put you on it.
   if (m.indoor) W_.bike = false;

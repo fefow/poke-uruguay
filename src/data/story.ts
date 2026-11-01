@@ -801,9 +801,21 @@ export const SCRIPTS = {
   async keeper_colonia(api) {
     if (api.flag('ferry_done')) return api.say('Mi hermano ya no está mareado. Gracias por el favor.', { name: 'Farero' });
     if (api.flag('got_ticket')) return api.say(['El Buquebus "China Zorrilla" está en la terminal, al lado del muelle.', 'Mi hermano, el capitán, está en su camarote. Llevale un Mate: en el almacén venden.'], { name: 'Farero' });
-    await api.say(['Soy el farero de Fray Bentos. Hace cuarenta años que miro el río desde acá arriba.', 'Mi hermano es el capitán del Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz. Está atracado en la terminal.', 'Desde la prueba de mar anda mareado, y no hay nada que lo calme como un Mate bien cebado.', 'Tomá este ticket para subir. Si le llevás un Mate del almacén, seguro te lo agradece.'], { name: 'Farero' });
-    await api.give('ticket_ferry', 1);
-    api.setFlag('got_ticket');
+    await api.say(['Soy el farero de Fray Bentos. Hace cuarenta años que miro el río desde acá arriba.', 'Mi hermano es el capitán del Buquebus "China Zorrilla", el ferry nuevo que lleva el nombre de la actriz. Está atracado en la terminal.', 'Desde la prueba de mar anda mareado, y no hay nada que lo calme como un Mate bien cebado.', 'Para subir hace falta un ticket, y los reparte alguien de la empresa. Yo solo sé que hay gente de la planta que trabaja en el frigorífico a la fuerza.'], { name: 'Farero' });
+  },
+
+  /** A neutral worker kept inside the Anglo by the PP: returns his lost badge, gives the Buquebus ticket. */
+  async obrero_anglo(api) {
+    if (api.flag('got_ticket')) return api.say('Gracias por la credencial. Cuando salgas de este laberinto, subí al barco con el ticket.', { name: 'Operario' });
+    if (api.hasItem('credencial_anglo')) {
+      await api.say('¡Esa es mi credencial! Estaba perdida en alguna de las cintas.', { name: 'Operario' });
+      api.takeItem('credencial_anglo');
+      await api.say(['No soy del PP. Me tienen acá adentro manejando las cintas porque soy el único que las conoce.', 'Soy de los que despachan los pasajes del Buquebus. Tomá uno, es lo mínimo.'], { name: 'Operario' });
+      await api.give('ticket_ferry', 1);
+      api.setFlag('got_ticket');
+      return api.say('Si el capitán anda mareado, llevale un Mate. Dicen que es lo único que lo calma.', { name: 'Operario' });
+    }
+    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me obligan a quedarme.', 'Perdí mi credencial de operario en algún rincón de las cintas y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
   },
 
   async ferry_captain(api) {

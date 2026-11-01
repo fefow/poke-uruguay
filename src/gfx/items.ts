@@ -113,6 +113,7 @@ const ART = {
     g.strokeStyle = '#d83a3a'; g.lineWidth = 1; g.beginPath(); g.moveTo(4, 11); g.lineTo(7, 5); g.lineTo(12, 11); g.moveTo(7, 5); g.lineTo(10, 5); g.stroke();
   },
   ticket_ferry: (g) => { r(g, 1, 3, 14, 10, INK); r(g, 2, 4, 12, 8, '#f2e8c0'); r(g, 2, 4, 12, 2, '#2a6ab0'); r(g, 4, 8, 5, 1, '#16141c'); r(g, 4, 10, 8, 1, '#16141c'); r(g, 11, 7, 2, 2, '#d83a3a'); },
+  credencial_anglo: (g) => { r(g, 2, 2, 12, 12, INK); r(g, 3, 3, 10, 10, '#e8e4d8'); r(g, 3, 3, 10, 3, '#c83a3a'); r(g, 4, 7, 4, 4, '#d8a070'); r(g, 9, 8, 3, 1, '#16141c'); r(g, 9, 10, 3, 1, '#16141c'); },
   silbato: (g) => { r(g, 2, 6, 10, 6, INK); r(g, 3, 7, 8, 4, '#d8dce8'); r(g, 10, 4, 4, 3, INK); r(g, 11, 5, 2, 1, '#d8dce8'); r(g, 4, 8, 3, 1, '#f2c02a'); r(g, 3, 12, 1, 2, INK); r(g, 3, 14, 5, 1, INK); },
   guantes: (g) => { r(g, 3, 6, 10, 8, INK); r(g, 4, 7, 8, 6, '#a8703a'); r(g, 4, 3, 2, 4, INK); r(g, 7, 2, 2, 5, INK); r(g, 10, 3, 2, 4, INK); r(g, 4, 4, 1, 3, '#a8703a'); r(g, 7, 3, 1, 4, '#a8703a'); r(g, 10, 4, 1, 3, '#a8703a'); r(g, 5, 11, 6, 1, '#5a3a1a'); },
   farol: (g) => { r(g, 6, 1, 4, 2, INK); r(g, 3, 3, 10, 11, INK); r(g, 4, 4, 8, 9, '#f2c02a'); r(g, 6, 6, 4, 5, '#fff2a0'); r(g, 4, 8, 8, 1, INK); r(g, 5, 14, 6, 1, INK); },
