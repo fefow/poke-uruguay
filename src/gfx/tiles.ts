@@ -1068,6 +1068,56 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
   };
 }
 
+
+// Generic gym kit: every gym theme gets the same four extra chars drawn in its own colours.
+//   ϸ hazard (solid): liquid, hedge or planting bed   Ϲ walkway (walkable)   ϻ decorated wall (solid)   ϼ object (solid)
+{
+  type Kit = { haz: [string, string, string, string]; walk: [string, string, string, string]; wall: [string, string, string, string]; obj: [string, string, string, string] };
+  const rim = (g, c) => { px(g, 0, 0, c, T, 1); px(g, 0, 0, c, 1, T); };
+  const KITS: Record<string, Kit> = {
+    gym_siniestro: { haz: ['liquid', '#1a1a26', '#2e2e42', '#c8506a'], walk: ['stone', '#3e3e4c', '#2a2a34', ''], wall: ['hooks', '#585870', '#8a8aa0', '#c8506a'], obj: ['crate', '#5a5a74', '#3a3a4e', '#c8506a'] },
+    gym_psiquico: { haz: ['liquid', '#2a1a4a', '#4a3a7a', '#e8d8ff'], walk: ['stone', '#5a4a8a', '#3a2a6a', ''], wall: ['shelf', '#3a2a6a', '#c8506a', '#e8d8ff'], obj: ['barrel', '#6a3a9a', '#a878e0', '#e8d8ff'] },
+    gym_lucha: { haz: ['liquid', '#7a2a2a', '#a84a3a', '#f8e0c0'], walk: ['stone', '#c8b070', '#a89050', ''], wall: ['pipe', '#7a2a2a', '#c8402a', '#f8e0c0'], obj: ['sandbag', '#c8b070', '#8a6a3a', '#f8e0c0'] },
+    gym_planta: { haz: ['bed', '#6a4a2a', '#4aa03c', '#b8f090'], walk: ['stone', '#b8a878', '#8a7a58', ''], wall: ['shelf', '#2a5a2a', '#4aa03c', '#b8f090'], obj: ['barrel', '#8a5a30', '#c89058', '#f0d8a0'] },
+    gym_roca: { haz: ['liquid', '#3f86c8', '#5aa0e0', '#bfe4ff'], walk: ['stone', '#9a9488', '#6a645a', ''], wall: ['pipe', '#4a4640', '#8a8478', '#bdb5a6'], obj: ['sandbag', '#8a8478', '#5a554c', '#bdb5a6'] },
+    gym_volador: { haz: ['liquid', '#6aa0d8', '#8ac8f0', '#ffffff'], walk: ['stone', '#8a96a8', '#5a6678', '#f4faff'], wall: ['pipe', '#2a5a9a', '#8ac8f0', '#f4faff'], obj: ['engine', '#8aa0b8', '#4a6888', '#f4faff'] },
+    gym_fuego: { haz: ['liquid', '#a83a1a', '#e8702a', '#ffd070'], walk: ['grate', '#4a3a3a', '#2a1a1a', '#8a6a5a'], wall: ['pipe', '#6a2a1a', '#a8502a', '#ffb040'], obj: ['barrel', '#a83a1a', '#e8702a', '#ffb040'] },
+    gym_bicho: { haz: ['hedge', '#2f6a1a', '#4a8a2a', '#8ac83a'], walk: ['stone', '#b8a878', '#8a7a58', ''], wall: ['shelf', '#3a5a1a', '#6a9a2a', '#e8f090'], obj: ['barrel', '#7a5a2a', '#b88a4a', '#e8f090'] },
+    gym_elec: { haz: ['liquid', '#23232e', '#3a4a6a', '#5ae0ff'], walk: ['grate', '#f2c02a', '#23232e', '#fff6a8'], wall: ['pipe', '#2c2d3a', '#5a5c70', '#5ae0ff'], obj: ['engine', '#454656', '#23232e', '#5ae0ff'] },
+  };
+  for (const [theme, k] of Object.entries(KITS)) {
+    const t = (THEMES as any)[theme];
+    if (!t) continue;
+    const floor = t.Y;
+    const [hk, ha, hb, hc] = k.haz, [wk, wa, wb, wc] = k.walk, [dk, da, db, dc] = k.wall, [ok, oa, ob, oc] = k.obj;
+    t['ϸ'] = (g, r) => {
+      px(g, 0, 0, ha, T, T);
+      if (hk === 'liquid') { for (let i = 0; i < 5; i++) px(g, r.int(0, 12), r.int(1, 14), hb, r.int(3, 6), 1); for (let i = 0; i < 3; i++) px(g, r.int(0, 13), r.int(1, 14), hc, 2, 1); rim(g, '#00000040'); }
+      else if (hk === 'hedge') { for (let i = 0; i < 9; i++) { const x = r.int(0, 12), y = r.int(0, 12); px(g, x, y, hb, 4, 3); px(g, x, y, hc, 2, 1); } px(g, 0, 14, '#00000050', T, 2); }
+      else { px(g, 0, 0, '#3a2a18', T, T); px(g, 0, 0, ha, T, 14); for (let x = 1; x < 15; x += 4) { px(g, x, 4, hb, 3, 6); px(g, x + 1, 2, hc, 1, 3); } px(g, 0, 14, '#00000050', T, 2); }
+    };
+    t['Ϲ'] = (g, r) => {
+      px(g, 0, 0, wa, T, T);
+      if (wk === 'grate') { for (let x = 0; x < T; x += 4) px(g, x, 0, wb, 1, T); for (let y = 3; y < T; y += 4) px(g, 0, y, wb, T, 1); px(g, 0, 0, wc, T, 1); }
+      else { for (let i = 0; i < 6; i++) px(g, r.int(0, 13), r.int(0, 13), wb, 3, 2); px(g, 0, 15, wb, T, 1); px(g, 15, 0, wb, 1, T); if (wc) { px(g, 2, 7, wc, 4, 1); px(g, 10, 7, wc, 4, 1); } }
+    };
+    t['ϻ'] = (g, r) => {
+      if (t.x) t.x(g, r);
+      if (dk === 'pipe') { px(g, 0, 3, da, T, 4); px(g, 0, 3, db, T, 1); px(g, 5, 2, dc, 2, 6); px(g, 12, 2, dc, 2, 6); px(g, 0, 11, da, T, 2); px(g, 0, 11, db, T, 1); }
+      else if (dk === 'shelf') { px(g, 1, 1, da, 14, 9); for (let y = 1; y < 9; y += 4) { px(g, 1, y + 3, '#00000060', 14, 1); for (let x = 2; x < 14; x += 2) px(g, x, y + (x % 3), (x % 4 ? db : dc), 1, 3 - (x % 3)); } }
+      else { px(g, 0, 2, db, T, 1); for (const x of [3, 8, 13]) { px(g, x, 3, db, 1, 4); px(g, x, 7, dc, 2, 1); px(g, x, 6, dc, 1, 3); } px(g, 0, 11, da, T, 2); }
+    };
+    t['ϼ'] = (g, r) => {
+      floor(g, r);
+      if (ok === 'crate') { px(g, 1, 3, ob, 14, 11); px(g, 2, 4, oa, 12, 9); px(g, 2, 8, ob, 12, 1); px(g, 7, 4, ob, 2, 9); px(g, 2, 4, oc, 3, 1); }
+      else if (ok === 'barrel') { px(g, 3, 2, ob, 10, 13); px(g, 4, 3, oa, 8, 11); px(g, 3, 5, oc, 10, 1); px(g, 3, 11, oc, 10, 1); px(g, 5, 3, ob, 1, 11); }
+      else if (ok === 'sandbag') { px(g, 1, 8, ob, 14, 6); px(g, 2, 9, oa, 12, 4); px(g, 3, 3, ob, 10, 6); px(g, 4, 4, oa, 8, 4); px(g, 7, 3, oc, 2, 1); }
+      else { px(g, 2, 4, ob, 12, 9); px(g, 3, 5, oa, 10, 7); px(g, 1, 8, ob, 14, 2); px(g, 6, 2, oc, 4, 3); px(g, 7, 13, ob, 2, 2); }
+      px(g, 2, 14, '#00000050', 12, 1);
+    };
+  }
+}
+
 const cache = new Map();
 
 // ---- big city tiles ----

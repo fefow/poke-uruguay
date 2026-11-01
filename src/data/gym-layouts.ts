@@ -1,3 +1,4 @@
+import { rng } from './map-gen.ts';
 // Six gym floor plans (12x12), each also mirrored: twelve gyms, twelve different insides. The leader always waits at
 // the far end; trainers stand where the player has to pass; the old guide stands near the entrance.
 const TOP = 'xxxxxXZxxxxx';
@@ -84,11 +85,152 @@ function osePlan() {
   };
 }
 
+
+type GymPlan = { tiles: string[]; leader: { x: number; y: number; dir?: string }; trainers: { x: number; y: number; dir: string }[]; guide: { x: number; y: number } };
+const blank = (W = 28, H = 20) => {
+  const g: string[][] = Array.from({ length: H }, () => Array(W).fill('x'));
+  const rect = (x1, y1, x2, y2, c) => { for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) g[y][x] = c; };
+  /** the director's room at the top: carpet down the middle, pillars at the corners, banners over it, a door below */
+  const office = (x1 = 10, x2 = 17, doorX1 = 12, doorX2 = 15) => {
+    rect(x1, 1, x2, 4, 'Y'); rect(13, 1, 14, 4, 'A'); for (const [x, y] of [[x1, 1], [x2, 1], [x1, 4], [x2, 4]]) g[y][x] = 'N';
+    g[0][13] = 'X'; g[0][14] = 'Z'; rect(doorX1, 5, doorX2, 5, 'Y');
+  };
+  const mat = (x = 13) => { g[19][x] = 'm'; g[19][x + 1] = 'm'; };
+  return { g, rect, office, mat, out: () => g.map((r) => r.join('')) };
+};
+
+/** Anglo (Fray Bentos, siniestro): a meat-packing plant. A long corridor with cold rooms off it, hooks on the walls. */
+function angloPlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  rect(1, 9, 26, 11, 'Y');                                        // main corridor
+  office(); rect(10, 5, 17, 8, 'Y'); rect(13, 5, 14, 8, 'A');      // the director's room opens straight onto it
+  rect(2, 2, 8, 7, 'Y'); rect(5, 8, 5, 8, 'Y');                    // cold room, left
+  rect(19, 2, 25, 7, 'Y'); rect(22, 8, 22, 8, 'Y');                // cold room, right
+  rect(10, 12, 17, 18, 'Y'); rect(2, 13, 8, 17, 'Y'); rect(7, 12, 7, 12, 'Y'); rect(19, 13, 25, 17, 'Y'); rect(20, 12, 20, 12, 'Y');
+  for (const [x, y] of [[2, 2], [8, 2], [19, 2], [25, 2], [2, 13], [8, 17], [19, 17], [25, 13], [3, 16], [24, 14], [3, 3], [24, 3]]) g[y][x] = 'ϼ';
+  mat();
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 7, y: 10, dir: 'right' }, { x: 13, y: 7, dir: 'down' }], guide: { x: 5, y: 15 } };
+}
+
+/** Quiroga (Salto, psíquico): a library whose rooms spiral inwards; the director sits at the very centre. */
+function quirogaPlan(): GymPlan {
+  const { g, rect, out } = blank();
+  for (const [a, b, c, d] of [[2, 17, 13, 18], [2, 2, 3, 18], [2, 2, 25, 3], [24, 2, 25, 14], [7, 13, 25, 14], [7, 6, 8, 14], [7, 6, 20, 7], [19, 6, 20, 10], [12, 9, 20, 10]]) rect(a, b, c, d, 'Y');
+  rect(12, 9, 14, 11, 'Y'); rect(13, 9, 13, 11, 'A');
+  g[19][13] = 'm'; g[19][12] = 'm'; g[18][12] = 'Y'; g[18][13] = 'Y';
+  g[0][13] = 'X'; g[0][14] = 'Z';
+  for (const [x, y] of [[12, 9], [12, 11], [15, 11]]) g[y][x] = 'N';
+  for (const [x, y] of [[5, 5], [22, 5], [5, 15], [26, 8]]) if (g[y][x] === 'x') g[y][x] = 'ϻ';
+  return { tiles: out(), leader: { x: 13, y: 10, dir: 'right' }, trainers: [{ x: 3, y: 8, dir: 'down' }, { x: 12, y: 13, dir: 'right' }], guide: { x: 6, y: 17 } };
+}
+
+/** Defensa (Rivera, lucha): an army training course; sandbags and dummies scattered over a long parade ground. */
+function defensaPlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  office(); rect(1, 6, 26, 17, 'Y'); rect(10, 18, 17, 18, 'Y');
+  for (let y = 8; y <= 15; y += 3) for (let x = (y % 6 === 2 ? 3 : 6); x <= 24; x += 6) { g[y][x] = 'ϼ'; if (y % 2 === 0) g[y][x + 1] = 'ϼ'; }
+  for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
+  mat();
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 9, y: 10, dir: 'down' }, { x: 19, y: 12, dir: 'left' }], guide: { x: 4, y: 17 } };
+}
+
+/** MGAP (Tacuarembó, planta): a greenhouse with six long planting beds and watering barrels at the corners. */
+function mgapPlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  office(); rect(1, 6, 26, 17, 'Y'); rect(10, 18, 17, 18, 'Y');
+  for (const y of [8, 12]) for (const x of [2, 11, 20]) rect(x, y, x + 5, y + 1, 'ϸ');
+  for (const [x, y] of [[1, 6], [26, 6], [1, 17], [26, 17], [9, 16], [18, 16]]) g[y][x] = 'ϼ';
+  for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
+  mat();
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 9, y: 10, dir: 'down' }, { x: 18, y: 11, dir: 'left' }], guide: { x: 4, y: 15 } };
+}
+
+/** Lavalleja (Treinta y Tres, roca): a quarry cut by a river. One stone bridge joins the bank where you arrive with the far bank. */
+function lavallejaPlan(): GymPlan {
+  const { g, rect, out } = blank();
+  rect(17, 1, 24, 4, 'Y'); rect(20, 1, 21, 4, 'A'); for (const [x, y] of [[17, 1], [24, 1], [17, 4], [24, 4]]) g[y][x] = 'N';
+  g[0][20] = 'X'; g[0][21] = 'Z';
+  rect(19, 5, 22, 5, 'Y');
+  rect(1, 6, 26, 17, 'Y'); rect(12, 6, 14, 17, 'ϸ'); rect(12, 12, 14, 13, 'Ϲ');
+  rect(4, 18, 9, 18, 'Y'); g[19][6] = 'm'; g[19][7] = 'm';
+  for (const [x, y] of [[2, 7], [5, 9], [9, 8], [3, 14], [8, 15], [10, 11], [16, 8], [24, 7], [17, 15], [22, 12], [25, 16], [19, 9], [26, 11]]) g[y][x] = 'ϼ';
+  for (let x = 2; x < 26; x += 3) if (g[5][x] === 'x') g[5][x] = 'ϻ';
+  return { tiles: out(), leader: { x: 20, y: 2 }, trainers: [{ x: 9, y: 12, dir: 'right' }, { x: 20, y: 10, dir: 'left' }], guide: { x: 3, y: 17 } };
+}
+
+/** Boiso (Florida, volador): an airfield hangar; engines and fuselages stand in two rows beside a marked runway. */
+function boisoPlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  office(); rect(1, 6, 26, 17, 'Y'); rect(10, 18, 17, 18, 'Y');
+  rect(12, 6, 15, 17, 'Ϲ');
+  for (const [x, y] of [[3, 8], [3, 13], [7, 10], [7, 15], [20, 10], [20, 15], [24, 8], [24, 13]]) { g[y][x] = 'ϼ'; g[y][x + 1] = 'ϼ'; g[y + 1][x] = 'ϼ'; g[y + 1][x + 1] = 'ϼ'; }
+  for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
+  mat();
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 13, y: 12, dir: 'down' }, { x: 9, y: 7, dir: 'right' }], guide: { x: 22, y: 17 } };
+}
+
+/** ANCAP (Durazno, fuego): a refinery. The floor is molten metal; the way through is a snaking steel walkway. */
+function ancapPlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  office(); rect(1, 6, 26, 17, 'ϸ'); rect(10, 18, 17, 18, 'Y');
+  for (const [a, b, c, d] of [[12, 16, 15, 17], [3, 16, 15, 17], [3, 12, 4, 17], [3, 12, 24, 13], [23, 8, 24, 13], [5, 8, 24, 9], [5, 6, 6, 9], [5, 6, 15, 7]]) rect(a, b, c, d, 'Ϲ');
+  for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
+  mat();
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 14, y: 13, dir: 'left' }, { x: 9, y: 8, dir: 'right' }], guide: { x: 4, y: 17 } };
+}
+
+/** INAVI (Canelones, bicho): a vineyard hedge maze, different every gym but always solvable; trainers wait at junctions. */
+function inaviPlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  office(9, 16, 11, 12); rect(1, 6, 26, 17, 'ϸ');
+  const NC = 8, NR = 4, ox = 2, oy = 6;
+  const rand = rng('inavi-maze');
+  const seen = new Set<number>(); const parent = new Map<number, number>();
+  const key = (i, j) => j * NC + i;
+  const start: [number, number] = [3, NR - 1];
+  const stack: [number, number][] = [start]; seen.add(key(...start));
+  while (stack.length) {
+    const [i, j] = stack[stack.length - 1];
+    const nx = ([[1, 0], [-1, 0], [0, 1], [0, -1]] as [number, number][]).map(([dx, dy]) => [i + dx, j + dy] as [number, number]).filter(([a, b]) => a >= 0 && a < NC && b >= 0 && b < NR && !seen.has(key(a, b)));
+    if (!nx.length) { stack.pop(); continue; }
+    const n = nx[Math.floor(rand() * nx.length)];
+    seen.add(key(...n)); parent.set(key(...n), key(i, j)); stack.push(n);
+  }
+  const cell = (k) => [k % NC, Math.floor(k / NC)] as [number, number];
+  for (let k = 0; k < NC * NR; k++) { const [i, j] = cell(k); rect(ox + 3 * i, oy + 3 * j, ox + 3 * i + 1, oy + 3 * j + 1, 'Y'); }
+  for (const [c, p] of parent) {
+    const [ci, cj] = cell(c), [pi, pj] = cell(p);
+    if (ci !== pi) rect(ox + 3 * Math.min(ci, pi) + 2, oy + 3 * cj, ox + 3 * Math.min(ci, pi) + 2, oy + 3 * cj + 1, 'Y');
+    else rect(ox + 3 * ci, oy + 3 * Math.min(cj, pj) + 2, ox + 3 * ci + 1, oy + 3 * Math.min(cj, pj) + 2, 'Y');
+  }
+  // the exit cell (top row, under the office door) and the way to it
+  const exit: [number, number] = [3, 0];
+  const route: number[] = []; for (let k: number | undefined = key(...exit); k !== undefined; k = parent.get(k)) route.unshift(k);
+  rect(ox + 3 * 3, 5, ox + 3 * 3 + 1, 5, 'Y');
+  rect(10, 18, 17, 18, 'Y'); rect(ox + 3 * 3, 17, ox + 3 * 3 + 1, 18, 'Y'); g[19][ox + 9] = 'm'; g[19][ox + 10] = 'm';
+  for (const [x, y] of [[2, 18], [25, 18]]) g[y][x] = 'ϼ';
+  const spot = (n: number) => { const [i, j] = cell(route[Math.min(route.length - 1, Math.max(1, Math.floor((route.length * n))))]); return { x: ox + 3 * i, y: oy + 3 * j }; };
+  const t1 = spot(0.35), t2 = spot(0.7);
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ ...t1, dir: 'down' }, { ...t2, dir: 'down' }], guide: { x: 13, y: 18 } };
+}
+
+/** UTE (Montevideo, eléctrico): the power station. A live transformer hub in the middle; the ring around it is the only way, with generators at the corners. */
+function utePlan(): GymPlan {
+  const { g, rect, office, mat, out } = blank();
+  office(); rect(1, 6, 26, 17, 'Y'); rect(10, 18, 17, 18, 'Y');
+  rect(9, 8, 18, 14, 'ϸ');
+  rect(12, 6, 15, 7, 'Ϲ'); rect(12, 15, 15, 17, 'Ϲ'); rect(3, 6, 3, 17, 'Ϲ'); rect(24, 6, 24, 17, 'Ϲ');
+  for (const [x, y] of [[1, 6], [26, 6], [1, 17], [26, 17], [6, 9], [6, 14], [21, 9], [21, 14]]) { g[y][x] = 'ϼ'; }
+  for (let x = 2; x < 26; x += 2) g[5][x] = 'ϻ';
+  mat();
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 24, y: 7, dir: 'down' }, { x: 3, y: 7, dir: 'down' }], guide: { x: 10, y: 17 } };
+}
+
 const FLIP = { left: 'right', right: 'left', up: 'up', down: 'down' };
 
 /** Re-lay a gym interior with plan `i` (0-11): plans 6-11 are the mirror images of 0-5. */
 export function layoutGym(m, i) {
-  const made = { correo: correoPlan, ose: osePlan }[(m.npcs ?? []).find((n) => n.leader)?.leader];
+  const made = ({ correo: correoPlan, ose: osePlan, anglo: angloPlan, quiroga: quirogaPlan, defensa: defensaPlan, mgap: mgapPlan, lavalleja: lavallejaPlan, boiso: boisoPlan, ancap: ancapPlan, inavi: inaviPlan, ute: utePlan } as Record<string, () => any>)[(m.npcs ?? []).find((n) => n.leader)?.leader];
   const bespoke = !!made;
   const plan = made ? made() : PLANS[i % PLANS.length];
   const mirror = !bespoke && i >= PLANS.length;
@@ -98,7 +240,7 @@ export function layoutGym(m, i) {
   const trainers = (m.npcs ?? []).filter((n) => n.trainer);
   const leader = (m.npcs ?? []).find((n) => n.script === 'leader');
   const guide = (m.npcs ?? []).find((n) => !n.trainer && n.script !== 'leader');
-  if (leader) { leader.x = lead.x; leader.y = lead.y; }
+  if (leader) { leader.x = lead.x; leader.y = lead.y; if (lead.dir) leader.dir = lead.dir; }
   trainers.forEach((n, k) => { const s = plan.trainers[k % plan.trainers.length]; n.x = fx(s.x); n.y = s.y; n.dir = mirror ? FLIP[s.dir] : s.dir; });
   if (guide) { guide.x = fx(plan.guide.x); guide.y = plan.guide.y; }
 }
