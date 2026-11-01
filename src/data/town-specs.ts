@@ -246,20 +246,23 @@ export const CITY_SPECS = {
     fill: 9,
   },
   // Florida: the Piedra Alta monument plaza, windmills on the plain, a creek with willows.
+  // Florida (64x42): the river Santa Lucía Chico to the west with two bridges, a civic square with a ring of trees,
+  // a long avenue, the aero club field (dry grass) to the east with a ranch and sheep, and a grid of barrios.
   florida: {
     theme: 'seca',
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 9,
-      water: [{ pts: [[4, 1], [4, 10], [10, 14], [10, 28]], w: 2 }],
-      paths: [[[1, 15], [42, 15]], [[22, 1], [22, 28]], [[14, 6], [40, 6]], [[14, 24], [40, 24]], [[14, 6], [14, 24]], [[34, 6], [34, 24]]],
-      plazas: [{ x: 18, y: 11, w: 9, h: 9, piece: 'Γ', benches: true, ring: 'Ω' }],
-      fills: [{ rect: [36, 8, 6, 14], ch: 'ζ' }],
-      props: [['Λ', 38, 9], ['Λ', 40, 13], ['Λ', 38, 18], ['ñ', 6, 4], ['ñ', 7, 12], ['ñ', 11, 20], ...fence([36, 8, 7, 14], { side: 'w', at: 6 })],
-      scatter: [['Ω', 6, 'road'], ['ö', 4, 'away']],
-      animals: [{ sp: 'oveja', n: 3, rect: [37, 10, 4, 10] }],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      water: [{ pts: [[5, 1], [5, 14], [11, 20], [11, 40]], w: 3 }],
+      paths: [[[1, 22], [62, 22]], [[32, 1], [32, 40]], [[16, 9], [58, 9]], [[16, 35], [58, 35]], [[16, 9], [16, 35]], [[48, 9], [48, 35]], [[16, 28], [48, 28]]],
+      plazas: [{ x: 26, y: 15, w: 11, h: 9, piece: 'Γ', benches: true, ring: 'Ω' }],
+      fills: [{ rect: [50, 11, 12, 22], ch: 'ζ' }],
+      groves: [{ rect: [18, 3, 12, 4], tree: 'ñ', density: 0.6 }, { rect: [36, 3, 12, 4], tree: 'ñ', density: 0.6 }, { rect: [18, 37, 12, 3], tree: 'ñ', density: 0.6 }],
+      props: [['Λ', 30, 21], ['Λ', 34, 23], ['Λ', 50, 13], ['Λ', 60, 18], ['Λ', 50, 28], ['ñ', 8, 5], ['ñ', 9, 17], ['ñ', 14, 30], ['ñ', 3, 36], ...fence([50, 11, 13, 22], { side: 'w', at: 11 })],
+      scatter: [['Ω', 10, 'road'], ['ö', 8, 'away'], ['Ь', 3, 'road']],
+      animals: [{ sp: 'oveja', n: 4, rect: [52, 13, 8, 16] }],
     },
-    bld: [['volador', 'gym_florida', [22, 23]], ['poli', 'poli_florida'], ['shop', 'shop_florida'], ['house', 'casa_florida'], ['houseG', 'casa_florida2']],
-    fill: 9,
+    bld: [['volador', 'gym_florida', [32, 31]], ['poli', 'poli_florida', [22, 12]], ['shop', 'shop_florida', [42, 12]], ['house', 'casa_florida', [20, 26]], ['houseG', 'casa_florida2', [42, 26]]],
+    fill: 16,
   },
   // Durazno: ash country over an old volcano: lava pools, an iron bridge over the Yí.
   durazno: {
