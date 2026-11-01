@@ -487,7 +487,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
   casa_sal2: house('Casa en Salto', { x: 6, y: 3, look: 'cop', dir: 'left', script: 'gift_sal' }),
   casa_pay: house('Casa en Paysandú', casaNpc('oldman', ['Paysandú resistió un sitio de varios meses.', 'Por eso le dicen la Heroica.'])),
   casa_pay2: house('Casa en Paysandú', { x: 6, y: 3, look: 'sailor', dir: 'left', script: 'gift_pay' }, { x: 3, y: 5, look: 'oldman', dir: 'right', script: 'gift_cana3' }),
-  casa_frb: house('Casa en Fray Bentos', casaNpc('clerk', ['Mi abuelo trabajó en el Anglo. Decía que el olor del frigorífico se sentía a kilómetros.'])),
+  casa_frb: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'gaucho', dir: 'left', script: 'gift_soga', name: 'Escalador' }, casaNpc('clerk', ['Mi abuelo trabajó en el Anglo. Decía que el olor del frigorífico se sentía a kilómetros.'], { x: 6, y: 3 })),
   casa_frb_faro: house('Casa del farero', { x: 6, y: 3, look: 'keeper', dir: 'left', script: 'keeper_colonia' }),
   casa_frb2: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_frb' }),
 

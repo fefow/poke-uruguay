@@ -52,6 +52,7 @@ const BASE_ITEMS = {
   machete: { name: 'Machete', pocket: 'key', price: 0, desc: 'Corte: parate frente a un zarzal y apretá A para abrirte paso. Hace falta la Medalla Salto.' },
   canoa: { name: 'Canoa', pocket: 'key', price: 0, desc: 'Surf: permite navegar por el agua. Caminá hacia la orilla para subirte. Hace falta la Medalla Rivera.' },
   guantes: { name: 'Guantes de Domador', pocket: 'key', price: 0, desc: 'Fuerza: empujá rocas pesadas caminando contra ellas. Hace falta la Medalla Tacuarembó.' },
+  soga: { name: 'Soga de Escalador', pocket: 'key', price: 0, desc: 'Trepar: parate frente a una cascada de la cueva y caminá contra ella para subir por la soga. Para bajar, caminá hacia abajo desde la cornisa.' },
   farol: { name: 'Farol de Gaucho', pocket: 'key', price: 0, desc: 'Destello: ilumina las cuevas oscuras. Se usa desde el menú. Hace falta la Medalla Maldonado.' },
   bici: { name: 'Bicicleta', pocket: 'key', price: 0, bike: true, desc: 'Cuatro veces más rápida que caminar, pero solo para moverse: no cambia nada en los combates. Se usa desde el menú. No se puede usar bajo techo.' },
   ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Fray Bentos.' },

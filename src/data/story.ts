@@ -444,6 +444,13 @@ export const SCRIPTS = {
     api.setFlag('got_canoa');
   },
 
+  async gift_soga(api) {
+    if (api.flag('got_soga')) return api.say('En las cuevas, las cascadas esconden cornisas. Subí con la soga y fijate qué guardan.', { name: 'Escalador' });
+    await api.say(['Trepé cuanta pared hay entre Fray Bentos y Rivera, y ya no me quedan fuerzas para más.', 'Llevate mi soga. En las cuevas hay cascadas que caen sobre cornisas escondidas.', 'Caminá contra la cascada y subís; para bajar, caminá hacia abajo desde la cornisa.'], { name: 'Escalador' });
+    await api.give('soga', 1);
+    api.setFlag('got_soga');
+  },
+
   async gift_fuerza(api) {
     if (api.flag('got_guantes')) return api.say('Con esos guantes movés lo que quieras. Pero la Medalla Tacuarembó es la que te da el derecho.', { name: 'Domador' });
     await api.say(['Domo potros hace años y no hay animal que me gane de fuerza.', 'Llevate estos guantes. Con ellos podés empujar rocas pesadas, caminando contra ellas.', 'Solo te van a servir si ganás la Medalla Tacuarembó.'], { name: 'Domador' });

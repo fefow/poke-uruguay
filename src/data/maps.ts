@@ -952,7 +952,7 @@ function makeVictory(m) {
 makeVictory(OUTDOOR.r_laspiedras_montevideo);
 // A field nurse sets up camp in a side chamber, and a Liga guard keeps the Montevideo end closed until the three veterans are beaten.
 OUTDOOR.r_laspiedras_montevideo.npcs.push({ x: 0, y: 0, look: 'nurse', dir: 'down', name: 'Enfermera de campaña', script: 'camp_nurse' });
-mazeMap(OUTDOOR.r_laspiedras_montevideo, 'r_laspiedras_montevideo', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'] });
+mazeMap(OUTDOOR.r_laspiedras_montevideo, 'r_laspiedras_montevideo', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'], fall: 'dulce_de_leche' });
 {
   const m = OUTDOOR.r_laspiedras_montevideo;
   const ids = m.npcs.filter((n) => n.trainer).map((n) => n.trainer.id);
@@ -1028,7 +1028,7 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   const ppIds = cave.npcs.filter((n) => n.trainer?.cls === 'Equipo PP').map((n) => n.trainer.id);
   // Marta is only in the cave once the player has heard she is missing (the Mercedes mail carrier tells them).
   cave.npcs.push({ x: 0, y: 0, look: 'leader_correo', dir: 'down', script: 'marta_cave', ppIds, hideout: true, cond: (f) => !!f.marta_lost && !f.marta_help });
-  mazeMap(cave, 'r_palmitas_mercedes', { kind: 'cave', extraItems: ['esfera', 'te_marcela'] });
+  mazeMap(cave, 'r_palmitas_mercedes', { kind: 'cave', extraItems: ['esfera', 'te_marcela'], fall: 'mate_dulce' });
   const gymDoor = OUTDOOR.mercedes.doors.findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_mercedes');
   OUTDOOR.mercedes.doors[gymDoor] = { to: 'gym_mercedes', req: 'marta_help', deny: ['El gimnasio del Correo está cerrado.', 'Un cartel en la puerta dice: "Volvemos pronto".'] };
   // Someone in town knows where Marta went (the gym only says it is closed).
@@ -1181,7 +1181,7 @@ function caveMouth(m, side) {
     { x: 0, y: 0, look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', hideout: true, doneFlag: 'rf_r_piriapolis_minas', reward: 'mate_dulce', clue: 'Una máquina de la PP escondida entre los cristales. Sus luces rojas son lo único que se ve en la oscuridad. Echa niebla por el túnel hacia Minas.' },
   );
 }
-mazeMap(OUTDOOR.r_piriapolis_minas, 'r_piriapolis_minas', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'] });
+mazeMap(OUTDOOR.r_piriapolis_minas, 'r_piriapolis_minas', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'], fall: 'ultraesfera' });
 for (const caveId of ['r_palmitas_mercedes', 'r_piriapolis_minas']) {
   const cave = OUTDOOR[caveId];
   for (const [side, ex] of Object.entries(cave.exits ?? {})) {

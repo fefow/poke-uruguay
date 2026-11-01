@@ -43,7 +43,7 @@ function progressTo(k) {
   set(`v_${STOPS[k].id}`);
   if (passed('palmitas')) set('marta_help');
   if (passed('fraybentos')) set('anglo_pp');
-  if (passed('fraybentos')) { set('got_ticket', 'ferry_done', 'got_machete'); give('machete'); }
+  if (passed('fraybentos')) { set('got_ticket', 'ferry_done', 'got_machete', 'got_soga'); give('machete'); give('soga'); }
   if (passed('salto')) set('represa_clear');
   if (passed('artigas')) { set('got_canoa'); give('canoa'); }
   if (passed('rivera')) set('torre_clear');

@@ -36,6 +36,7 @@ export const TILE_INFO = {
   ϋ: { name: 'encomiendas', solid: true },
   ΐ: { name: 'cinta transportadora' },
   Ͽ: { name: 'ascensor', solid: true },
+  Ϡ: { name: 'cascada', solid: true, anim: true },
   ϸ: { name: 'piscina de la sala', solid: true },
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
@@ -1361,6 +1362,15 @@ for (const [kind, set, base] of [['cave', (THEMES as any).cueva, caveFloor], ['f
   hidden(puddle, 'charco', false); hidden(litter, 'suelo de cueva', false);
   hidden(stalag, 'estalagmita', true); hidden(crystal, 'cristales', true);
 }
+
+// a waterfall pouring down a rock face; climbed with the soga (see world.ts)
+(THEMES as any).cueva['Ϡ'] = (g, r, f = 0) => {
+  px(g, 0, 0, '#2e2a36', T, T); px(g, 0, 0, '#44404e', 2, T); px(g, 14, 0, '#44404e', 2, T);
+  px(g, 2, 0, '#3f7fb8', 12, T);
+  for (const [x, o] of [[3, 0], [6, 5], [9, 2], [12, 8]] as const) for (let y = (o + f * 4) % 16 - 16; y < T; y += 11) { px(g, x, y, '#bfe8fa', 1, 5); px(g, x + 1, y + 2, '#7ab8e0', 1, 4); }
+  px(g, 2, 0, '#2a5f94', 1, T); px(g, 13, 0, '#2a5f94', 1, T);
+};
+DRAW['Ϡ'] = (THEMES as any).cueva['Ϡ'];
 
 /** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
 const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);

@@ -11,6 +11,8 @@ export interface MazeOpts {
   kind: 'forest' | 'cave';
   /** ids for extra items placed in the side chambers that have no item yet */
   extraItems?: string[];
+  /** caves only: carve one hidden ledge behind a waterfall (climbed with the soga) holding this item */
+  fall?: string;
 }
 
 const N8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]];
@@ -288,6 +290,33 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
     for (let i = 0; i < q2.length; i++) for (const [dx, dy] of N4) { const nx = q2[i][0] + dx, ny = q2[i][1] + dy; if (walk(nx, ny) && !seen.has(`${nx},${ny}`)) { seen.add(`${nx},${ny}`); q2.push([nx, ny]); } }
     if (!mouths.every((mo) => mo.cells.every(([x, y]) => seen.has(`${x},${y}`)))) continue;
     if (![...(m.items ?? []), ...people].every((o) => N4.some(([dx, dy]) => seen.has(`${o.x + dx},${o.y + dy}`)))) continue;
+
+    // --- a ledge behind a waterfall: a block of rock grows out of a hall's north side. It has two tiles of falls ('Ϡ')
+    // facing the hall and a small pocket above them; the hall must stay connected with the block in place
+    if (!forest && opts.fall) {
+      const spots: [number, number][] = [];
+      for (let y = 6; y < H - 2; y++) for (let x = 3; x < W - 3; x++) {
+        if (g[y][x] !== '.' || g[y + 1]?.[x] !== '.') continue;
+        const near = (o) => Math.abs(o.x - x) <= 3 && Math.abs(o.y - y) <= 6;
+        if ([...(m.items ?? []), ...people].some(near) || mouths.some((mo) => mo.cells.some(([cx, cy]) => Math.abs(cx - x) <= 4 && Math.abs(cy - y) <= 6))) continue;
+        spots.push([x, y]);
+      }
+      for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
+      const connected = () => {
+        const ok = (x, y) => g[y]?.[x] !== undefined && g[y][x] !== '#' && g[y][x] !== 'Ϡ' && !block.has(`${x},${y}`) && !['R', 'q', 'f', 'S', 'F'].includes(g[y][x]);
+        const sn = new Set<string>([`${e0[0]},${e0[1]}`]); const qq: [number, number][] = [[e0[0], e0[1]]];
+        for (let i = 0; i < qq.length; i++) for (const [dx, dy] of N4) { const nx = qq[i][0] + dx, ny = qq[i][1] + dy; if (ok(nx, ny) && !sn.has(`${nx},${ny}`)) { sn.add(`${nx},${ny}`); qq.push([nx, ny]); } }
+        return mouths.every((mo) => mo.cells.every(([x, y]) => sn.has(`${x},${y}`))) && [...(m.items ?? []), ...people].every((o) => N4.some(([dx, dy]) => sn.has(`${o.x + dx},${o.y + dy}`)));
+      };
+      for (const [fx, fy] of spots.slice(0, 80)) {
+        const saved: string[][] = []; for (let yy = fy - 5; yy <= fy - 1; yy++) saved.push(g[yy].slice(fx - 2, fx + 3));
+        for (let yy = fy - 5; yy <= fy - 1; yy++) for (let xx = fx - 2; xx <= fx + 2; xx++) g[yy][xx] = '#';
+        for (let yy = fy - 4; yy <= fy - 3; yy++) for (let xx = fx - 1; xx <= fx + 1; xx++) g[yy][xx] = '.';
+        g[fy - 1][fx] = 'Ϡ'; g[fy - 2][fx] = 'Ϡ';
+        if (connected()) { (m.items ?? (m.items = [])).push({ x: fx, y: fy - 4, item: opts.fall, id: `${seed}_fall` }); break; }
+        for (let k = 0; k < 5; k++) for (let xx = 0; xx < 5; xx++) g[fy - 5 + k][fx - 2 + xx] = saved[k][xx];
+      }
+    }
 
     // --- autotile the rock/trees: each wall tile knows which sides face open ground; floors vary and get a shade
     const wallOf = (x, y) => g[y]?.[x] === '#' || g[y]?.[x] === undefined;

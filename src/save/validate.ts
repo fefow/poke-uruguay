@@ -21,7 +21,7 @@ const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'dex_quest', 'got_carta', 'rival1', 'rival2', 'rival3', 'rival4',
   'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'anima_clear', 'fog1', 'fog2', 'fog3', 'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
-  'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
+  'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_soga', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
   'rival5', 'rival6', 'rival_bosque', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
   'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'marta_lost', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'refineria_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
@@ -161,6 +161,7 @@ export function validateSave(d: any) {
   if (bag.cana_super && !flags.got_cana3) e('Súper Caña sin haberla recibido');
   if (bag.carta_tabarez && !(flags.got_carta && !flags.dex)) e('Carta de Tabárez imposible');
   if (bag.machete && !flags.got_machete) e('Machete sin haberlo recibido');
+  if (bag.soga && !flags.got_soga) e('Soga sin haberla recibido');
   if (bag.ticket_ferry && !(flags.got_ticket && !flags.ferry_done)) e('Ticket del Buquebus imposible');
   if (flags.ferry_done && !flags.got_ticket) e('el Buquebus no pudo haber zarpado');
   if (flags.got_machete && !flags.ferry_done) e('el Machete lo entrega el capitán del Buquebus');

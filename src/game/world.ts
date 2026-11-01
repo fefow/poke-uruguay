@@ -287,6 +287,7 @@ function tryMove(d) {
     return;
   }
   if (tileAt(nx, ny) === '\\') return void pushBoulder(dx, dy, nx, ny);
+  if (tileAt(nx, ny) === 'Ϡ') return void climbFalls(dx, dy, nx, ny);
   const blocker = W_.npcs.find((n) => n.visible && n.x === nx && n.y === ny && n.def.blocker);
   if (blocker) return void runScript(async () => { await say(blocker.def.text, { name: blocker.def.name }); });
   if (solidAt(nx, ny, { player: true })) {
@@ -325,6 +326,25 @@ function pushBoulder(dx, dy, bx, by) {
   const put = (x, y, c) => { W_.tiles[y] = W_.tiles[y].slice(0, x) + c + W_.tiles[y].slice(x + 1); };
   put(bx, by, '.');
   put(tx, ty, '\\');
+}
+
+let fallAt = 0;
+/** Trepar: walking up into a waterfall climbs it with the soga (asks first); walking down from the ledge drops back. */
+function climbFalls(dx, dy, fx, fy) {
+  const now = performance.now();
+  if (now - fallAt < 400) return;
+  fallAt = now;
+  if (dy === 0) return bump();
+  let ey = fy;
+  while (tileAt(fx, ey) === 'Ϡ') ey += dy;
+  if (tileAt(fx, ey) == null || TILE_INFO[tileAt(fx, ey)]?.solid || solidAt(fx, ey)) return bump();
+  const go = () => { sfx('confirm'); W_.player = { ...W_.player, x: fx, y: ey, dir: dy < 0 ? 'up' : 'down', moving: false, from: null }; };
+  if (dy > 0) return go();
+  if (!hasItem('soga')) return hint('Una cascada cae por la pared. Con una soga se podría trepar.');
+  void runScript(async () => {
+    if (!(await ask('Una cascada cae sobre una cornisa. ¿Trepar con la soga?'))) return;
+    go();
+  });
 }
 
 /** Destello: lights up a dark map until the player leaves it. Returns what to tell the player. */
