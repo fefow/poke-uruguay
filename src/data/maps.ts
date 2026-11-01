@@ -1207,9 +1207,30 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
     }
     const pp = STOP_INDEX[mapId] >= STOP_INDEX.fraybentos;
     const done = (f) => (typeof ex.req === 'string' ? f[ex.req] : ex.req(f));
+    // Who stands in the way, and why, varies from road to road: a fallen tree, works, a flood, a herd, a stranded truck.
+    // Only roads that wait for a medal or a favour get a cover story; special ones (the bike path, the Machete) keep their own text.
+    const dest = String(ex.deny[0] ?? '').match(/^El camino a (.+?) está cerrado\.?$/)?.[1];
+    const why = String(ex.deny[1] ?? '');
+    const medal = why.match(/medalla (?:de |del )?([^."]+)/)?.[1];
+    const hint = medal ? `Dicen que lo habilitan cuando consigas la Medalla ${medal}.` : /necesita una mano/.test(why) ? why : null;
+    let who: any = null;
+    if (mapId !== 'carmelo' && dest && hint) {
+      const civil = [
+        ['obrero', 'Bombero', `Se cayó un árbol sobre el camino a ${dest} y ya están los bomberos cortándolo. No se puede pasar.`],
+        ['obrero', 'Obrero vial', `Estamos reparando el asfalto del camino a ${dest}. Está cortado hasta nuevo aviso.`],
+        ['campesina', 'Vecina', `Se desbordó el arroyo y el camino a ${dest} quedó bajo agua. Esperá a que baje.`],
+        ['camionero', 'Camionero', `Mi camión quedó varado en el camino a ${dest}, atravesado en la ruta. Estamos esperando la grúa.`],
+        ['gaucho', 'Arriero', `Hay una tropa de vacas cruzando el camino a ${dest}. Va a tardar un rato.`],
+        ['clerk', 'Funcionario', `La Intendencia cortó el camino a ${dest} por una obra. El desvío también está cerrado.`],
+        ['cop', 'Guardia', `Estamos trabajando en una situación en el camino a ${dest}. Le pido que espere un poco y vuelva en un rato.`],
+      ];
+      const list = pp ? [...civil.slice(0, 6), ['grunt', 'Equipo PP', `El camino a ${dest} está cerrado por orden del PP.`]] : civil;
+      const [look, name, intro] = list[(STOP_INDEX[mapId] ?? 0) % list.length];
+      who = { look, name, text: look === 'grunt' ? ex.deny : [intro, hint] };
+    }
     for (const [x, y] of open) {
       if ((m.npcs ?? []).some((n) => n.x === x && n.y === y)) continue;
-      (m.npcs ??= []).push({ x, y, look: mapId === 'carmelo' ? 'oldman' : pp ? 'grunt' : 'cop', dir: side === 'e' ? 'left' : side === 'w' ? 'right' : side === 'n' ? 'down' : 'up', blocker: true, name: mapId === 'carmelo' ? 'Vecino' : pp ? 'Equipo PP' : 'Guardia', text: ex.deny, cond: (f) => !done(f) });
+      (m.npcs ??= []).push({ x, y, look: who?.look ?? (mapId === 'carmelo' ? 'oldman' : pp ? 'grunt' : 'cop'), dir: side === 'e' ? 'left' : side === 'w' ? 'right' : side === 'n' ? 'down' : 'up', blocker: true, name: who?.name ?? (mapId === 'carmelo' ? 'Vecino' : pp ? 'Equipo PP' : 'Guardia'), text: who?.text ?? ex.deny, cond: (f) => !done(f) });
     }
   }
 }
