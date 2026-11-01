@@ -264,19 +264,23 @@ export const CITY_SPECS = {
     bld: [['volador', 'gym_florida', [32, 31]], ['poli', 'poli_florida', [22, 12]], ['shop', 'shop_florida', [42, 12]], ['house', 'casa_florida', [20, 26]], ['houseG', 'casa_florida2', [42, 26]]],
     fill: 16,
   },
-  // Durazno: ash country over an old volcano: lava pools, an iron bridge over the Yí.
+  // Durazno (64x42): ash country over an old volcano: lava fields at the corners, the Yí river across the south with an
+  // iron bridge, a grid of barrios on the ash terrace and the refinery by the water.
   durazno: {
     spec: {
-      w: W, h: H, border: 'K', tree: 'R', road: '=', lamps: 0,
-      fills: [{ rect: [1, 1, 42, 28], ch: '`' }],
-      water: [{ rect: [1, 19, 42, 3] }],
-      paths: [[[1, 13], [42, 13]], [[22, 1], [22, 28]], [[6, 6], [38, 6]], [[6, 25], [38, 25]], [[22, 19], [22, 22]], [[10, 6], [10, 13]], [[34, 6], [34, 13]]],
-      props: [['^', 3, 3], ['^', 4, 3], ['^', 4, 4], ['^', 38, 3], ['^', 39, 3], ['^', 39, 4], ['^', 3, 27], ['^', 38, 27]],
-      scatter: [[';', 30, 'away'], ['R', 14, 'away'], ['Ω', 3, 'road']],
+      w: 64, h: 42, border: 'K', tree: 'R', road: '=', lamps: 0,
+      fills: [{ rect: [1, 1, 62, 40], ch: '`' }],
+      water: [{ rect: [1, 30, 62, 3] }],
+      paths: [[[1, 18], [62, 18]], [[32, 1], [32, 40]], [[8, 8], [56, 8]], [[8, 25], [56, 25]], [[14, 8], [14, 25]], [[50, 8], [50, 25]], [[32, 36], [58, 36]], [[6, 36], [32, 36]]],
+      props: [
+        ['^', 3, 3], ['^', 4, 3], ['^', 4, 4], ['^', 5, 4], ['^', 3, 4], ['^', 58, 3], ['^', 59, 3], ['^', 59, 4], ['^', 60, 4], ['^', 58, 4],
+        ['^', 3, 38], ['^', 4, 38], ['^', 59, 38], ['^', 60, 38], ['^', 60, 37], ['^', 4, 37],
+      ],
+      scatter: [[';', 50, 'away'], ['R', 24, 'away'], ['Ω', 5, 'road']],
       animals: [],
     },
-    bld: [['fuego', 'gym_dur', [26, 10]], ['poli', 'poli_dur'], ['shop', 'shop_dur'], ['house', 'casa_dur'], ['houseB', 'refineria_dur']],
-    fill: 7,
+    bld: [['fuego', 'gym_dur', [34, 12]], ['poli', 'poli_dur', [22, 12]], ['shop', 'shop_dur', [44, 12]], ['house', 'casa_dur', [18, 21]], ['houseB', 'refineria_dur', [44, 33]]],
+    fill: 14,
   },
   // Canelones: vineyards in long rows around a plaza, windmills and the bodega.
   // Canelones: a bigger city (64x42) in barrios: the civic centre with the fountain and the bug gym, a creek with
