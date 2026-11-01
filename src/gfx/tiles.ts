@@ -32,6 +32,9 @@ export const TILE_INFO = {
   ϳ: { name: 'pared de roca', solid: true },
   ϴ: { name: 'roca', solid: true },
   ϵ: { name: 'suelo de cueva' },
+  ϊ: { name: 'casilleros de correo', solid: true },
+  ϋ: { name: 'encomiendas', solid: true },
+  ΐ: { name: 'cinta transportadora' },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -1005,6 +1008,29 @@ gymFamily(['Ã', 'Ä', 'Å'], { type: 'normal', roof: '#9a8a78', roofLight: '#c8
 gymFamily(['È', 'É', 'Ê'], { type: 'bicho', roof: '#5a8a1a', roofLight: '#9ac83a', roofDark: '#2a4a0a', rim: '#e8f090', wall: '#d8e0a8', wallDark: '#a8b878', wallLight: '#f2f8d0', trim: '#2a4a0a', door: '#6a9a2a', doorLight: '#e8f090', wallIn: '#3a5a1a', wallInLight: '#6a9a2a', floorA: '#a8c868', floorB: '#7aa03a', accent: '#9ac83a' });
 gymFamily(['Ì', 'Í', 'Î'], { type: 'volador', roof: '#4a88c8', roofLight: '#8ac8f0', roofDark: '#1a3a6a', rim: '#f4faff', wall: '#e0eef8', wallDark: '#a8c0d8', wallLight: '#ffffff', trim: '#1a3a6a', door: '#5a98d8', doorLight: '#f4faff', wallIn: '#2a5a9a', wallInLight: '#5a98d8', floorA: '#b8d8f0', floorB: '#88b0d8', accent: '#8ac8f0' });
 gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a5a78', roofDark: '#12121c', rim: '#c8506a', wall: '#585870', wallDark: '#3a3a4e', wallLight: '#7a7a94', trim: '#12121c', door: '#2a2a3a', doorLight: '#c8506a', wallIn: '#1e1e2c', wallInLight: '#3a3a52', floorA: '#2a2a34', floorB: '#3e3e4c', accent: '#c8506a' });
+
+// Correo Uruguayo gym: pigeonhole shelves, parcel stacks and belts (all drawn on the plain gym floor).
+{
+  const floorN = (g) => { px(g, 0, 0, '#d8d0bc', T, T); px(g, 0, 15, '#b8ae98', T, 1); px(g, 15, 0, '#b8ae98', 1, T); px(g, 3, 3, '#b8ae98', 2, 2); px(g, 10, 9, '#b8ae98', 3, 1); };
+  const t = (THEMES as any).gym_normal;
+  t['ϊ'] = (g) => {
+    px(g, 0, 0, '#4a4238', T, T);
+    for (let y = 1; y < 15; y += 4) for (let x = 1; x < 15; x += 5) { px(g, x, y, '#2a2620', 4, 3); px(g, x, y + 3, '#8a7a60', 4, 1); if ((x + y) % 3 === 0) px(g, x + 1, y + 1, '#f4ecd8', 2, 2); }
+    px(g, 0, 0, '#6a6254', T, 1);
+  };
+  t['ϋ'] = (g) => {
+    floorN(g);
+    px(g, 1, 7, '#8a5a30', 14, 8); px(g, 1, 7, '#c89058', 14, 2); px(g, 7, 7, '#e8d8a8', 2, 8);
+    px(g, 3, 1, '#a8703a', 10, 6); px(g, 3, 1, '#d8a868', 10, 1); px(g, 7, 1, '#e8d8a8', 2, 6); px(g, 10, 4, '#f4ecd8', 2, 2);
+    px(g, 1, 15, '#4a2a14', 14, 1);
+  };
+  t['ΐ'] = (g) => {
+    px(g, 0, 0, '#d8d0bc', T, T);
+    px(g, 0, 3, '#3a3a44', T, 10); px(g, 0, 3, '#5a5a66', T, 1); px(g, 0, 12, '#26262e', T, 1);
+    for (let x = 0; x < T; x += 4) px(g, x, 5, '#6a6a78', 1, 6);
+    for (let x = 1; x < T; x += 8) { px(g, x, 7, '#e8c040', 2, 1); px(g, x + 1, 8, '#e8c040', 2, 1); px(g, x, 9, '#e8c040', 2, 1); }
+  };
+}
 
 const cache = new Map();
 
