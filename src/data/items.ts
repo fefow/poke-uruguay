@@ -57,6 +57,9 @@ const BASE_ITEMS = {
   bici: { name: 'Bicicleta', pocket: 'key', price: 0, bike: true, desc: 'Cuatro veces más rápida que caminar, pero solo para moverse: no cambia nada en los combates. Se usa desde el menú. No se puede usar bajo techo.' },
   ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Fray Bentos.' },
   credencial_anglo: { name: 'Credencial de operario', pocket: 'key', price: 0, desc: 'Credencial del Frigorífico Anglo a nombre de un operario. Alguien la perdió adentro.' },
+  llave_c2: { name: 'Llave del camarote 2', pocket: 'key', price: 0, desc: 'Llave de bronce con una chapita: "Camarote 2". Del Buquebus China Zorrilla.' },
+  llave_bodega: { name: 'Llave de la bodega', pocket: 'key', price: 0, desc: 'Llave grande y oxidada. Abre la bodega del Buquebus China Zorrilla.' },
+  llave_cubierta: { name: 'Llave de la cubierta', pocket: 'key', price: 0, desc: 'Llave de la puerta a la cubierta superior del Buquebus China Zorrilla.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
 };

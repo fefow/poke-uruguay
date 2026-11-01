@@ -841,6 +841,7 @@ export const SCRIPTS = {
     await api.give('esfera', 5);
     await api.give('pan_casero', 2);
     api.takeItem('ticket_ferry');
+    for (const k of ['llave_c2', 'llave_bodega', 'llave_cubierta']) if (api.hasItem(k)) api.takeItem(k);
     api.setFlag('ferry_done');
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
     await api.warp('fraybentos', 3, 24, 'down');

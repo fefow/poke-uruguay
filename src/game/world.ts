@@ -287,7 +287,10 @@ function tryMove(d) {
   }
   // Warps on solid tiles (e.g. lighthouse door)
   const warp = m.warps?.find((w) => w.x === nx && w.y === ny);
-  if (warp) return void runScript(() => doWarp(warp.to, warp.tx, warp.ty, 'up'));
+  if (warp) {
+    if (warp.needs && !hasItem(warp.needs)) return void runScript(async () => { await say(warp.deny ?? 'Está cerrado con llave.'); });
+    return void runScript(() => doWarp(warp.to, warp.tx, warp.ty, 'up'));
+  }
   const door = m.doorWarps?.[`${nx},${ny}`];
   if (door) {
     if (!req(door.req)) return void runScript(async () => { await say(door.deny ?? 'Está cerrado.'); });

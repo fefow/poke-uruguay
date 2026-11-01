@@ -393,7 +393,7 @@ const shipRows = (w, h, set: [number, number, string][] = []) => {
 const D = 'Ϫ'; // cabin door (solid; a `warps` entry on it takes you through)
 const cabin = (n, door, name, extra: any[], itemSpec) => room(shipRows(9, 8, [[1, 1, 'E'], [1, 2, 'E'], [7, 1, 'B'], [6, 1, 'B'], [4, 3, 'T'], [5, 3, 'T'], [1, 5, 'N'], [7, 4, 'N']]), {
   name: `Buquebus China Zorrilla: ${name}`, music: 'town', exitTo: { map: 'ferry_2', x: door, y: 1 },
-  npcs: extra, items: [{ ...itemSpec, id: `fe_it_${n}` }],
+  npcs: extra, items: [].concat(itemSpec).map((it, k) => ({ ...it, id: k ? `fe_it_${n}_${k}` : `fe_it_${n}` })),
 });
 const FERRY: Record<string, any> = {
   // main deck, open air: the player comes up the gangway from the pier (north), the cabin block stands in the middle
@@ -424,24 +424,24 @@ const FERRY: Record<string, any> = {
   ferry_2: room(shipRows(28, 7, [...[3, 8, 13, 18, 23].map((x) => [x, 0, D] as [number, number, string]), [0, 3, D], [27, 3, D], [1, 1, 'N'], [26, 1, 'N'], [1, 5, 'N'], [26, 5, 'N'], ...Array.from({ length: 26 }, (_, x) => [x + 1, 3, 'A'] as [number, number, string]), [6, 1, 'T'], [20, 1, 'T']]), {
     name: 'Buquebus China Zorrilla: pasillo de camarotes', music: 'town', exitTo: { map: 'ferry_1', x: 9, y: 9 },
     warps: [
-      ...[3, 8, 13, 18, 23].map((x, k) => ({ x, y: 0, to: `ferry_c${k + 1}`, tx: 4, ty: 6 })),
-      { x: 0, y: 3, to: 'ferry_bodega', tx: 10, ty: 8 }, { x: 27, y: 3, to: 'ferry_3', tx: 10, ty: 10 },
+      ...[3, 8, 13, 18, 23].map((x, k) => ({ x, y: 0, to: `ferry_c${k + 1}`, tx: 4, ty: 6, ...(k === 1 ? { needs: 'llave_c2', deny: 'La puerta del camarote 2 está cerrada con llave.' } : {}) })),
+      { x: 0, y: 3, to: 'ferry_bodega', tx: 10, ty: 8, needs: 'llave_bodega', deny: 'La puerta de la bodega tiene un candado grande. Hace falta la llave.' }, { x: 27, y: 3, to: 'ferry_3', tx: 10, ty: 10 },
     ],
     npcs: [
       tr({ x: 7, y: 4 }, 'oldman', 'fe_e', 'Don Aníbal', 'Caballero', ['normal', 'fuego'], [18, 19], ['Viajo solo. ¡Mis criaturas son mis únicas amigas!', '¡Mis amigas!', 'Cuidá a tus compañeros: son lo único que tenés.'], { dir: 'right', sight: 4 }),
       tr({ x: 20, y: 2 }, 'girl', 'fe_f', 'Azafata Lorena', 'Azafata', ['normal', 'volador'], [17, 18], ['Los pasajeros no pueden pasear con criaturas armadas.', 'Qué vergüenza.', 'El comedor está al final del pasillo, y la bodega al otro lado.'], { dir: 'left', sight: 4 }),
-      npc(15, 5, 'maestra', ['Cinco camarotes y todos con candado. Bueno, casi todos.'], { dir: 'up' }),
+      npc(15, 5, 'maestra', ['Cinco camarotes y alguno con candado de verdad. El del medio de la izquierda no se abre así nomás.', 'Y la bodega, ni hablar. Si querés la llave, andá a ver quién tiene las cosas del barco.'], { dir: 'up' }),
     ],
   }),
   ferry_c1: cabin(1, 3, 'camarote 1', [tr({ x: 4, y: 4 }, 'boy', 'fe_g', 'Joven Tilo', 'Joven', ['normal', 'veneno'], [18, 19], ['¡Me gustan las criaturas! ¿A vos?', '¡Guau, sos bueno!', 'Hagamos amistad: así podemos intercambiar.'], { dir: 'down', sight: 3 })], { x: 7, y: 5, item: 'superesfera' }),
-  ferry_c2: cabin(2, 8, 'camarote 2', [npc(3, 5, 'oldman', ['Este camarote tiene vista al río. Dicen que de noche se ven las luces de Argentina.'], { dir: 'right' })], { x: 7, y: 6, item: 'mate_dulce' }),
+  ferry_c2: cabin(2, 8, 'camarote 2', [npc(3, 5, 'oldman', ['Este camarote tiene vista al río. Dicen que de noche se ven las luces de Argentina.', 'Soy mecánico del barco. Dejé unas llaves de trabajo en el cajón, por si las necesita alguien de confianza.'], { dir: 'right' })], [{ x: 7, y: 6, item: 'mate_dulce' }, { x: 7, y: 5, item: 'llave_bodega' }]),
   ferry_c3: cabin(3, 13, 'camarote 3', [tr({ x: 4, y: 4 }, 'artesana', 'fe_h', 'Doña Elvira', 'Señora', ['normal', 'psiquico'], [19, 20], ['¡Oiga, usted! ¿Cómo se atreve a entrar en mi camarote?', '¡Qué falta de educación!', 'Déjeme tranquila, por favor.'], { dir: 'down', sight: 3 })], { x: 7, y: 5, item: 'ruda' }),
   ferry_c4: cabin(4, 18, 'camarote 4', [tr({ x: 4, y: 4 }, 'girl', 'fe_i', 'Ada', 'Chica', ['veneno', 'volador'], [17, 18], ['¡Atrapé criaturas por todo el país!', '¡Con lo que viajé por ellas!', 'Les hiciste daño a mis criaturas. Curalas en una Policlínica.'], { dir: 'down', sight: 3 })], { x: 7, y: 5, item: 'aloe' }),
   ferry_c5: cabin(5, 23, 'camarote 5', [tr({ x: 4, y: 4 }, 'sailor', 'fe_j', 'Pescador Beltrán', 'Pescador', ['agua'], [18, 19], ['¡Mirá lo que pesqué!', '¡Estoy acabado!', 'En el comedor hay una fiesta, o la había.'], { dir: 'down', sight: 3 })], { x: 7, y: 5, item: 'linimento' }),
   // dining room + kitchen
   ferry_3: room(shipRows(22, 12, [[10, 0, D], [21, 5, D], ...[2, 5, 8, 11, 14, 17].flatMap((x) => [[x, 3, 'T'], [x + 1, 3, 'T'], [x, 8, 'T'], [x + 1, 8, 'T']] as [number, number, string][]), [1, 1, 'N'], [20, 1, 'N'], [1, 10, 'N']]), {
     name: 'Buquebus China Zorrilla: comedor', music: 'town', exitTo: { map: 'ferry_2', x: 26, y: 3 },
-    warps: [{ x: 10, y: 0, to: 'ferry_deck', tx: 9, ty: 7 }, { x: 21, y: 5, to: 'ferry_cocina', tx: 4, ty: 6 }],
+    warps: [{ x: 10, y: 0, to: 'ferry_deck', tx: 9, ty: 7, needs: 'llave_cubierta', deny: 'La puerta a la cubierta superior está con llave. Solo la tripulación tiene una.' }, { x: 21, y: 5, to: 'ferry_cocina', tx: 4, ty: 6 }],
     npcs: [
       tr({ x: 3, y: 5 }, 'clerk', 'fe_c', 'Maitre Ibarra', 'Maitre', ['normal'], [19, 20], ['Para subir hay que reservar. Y para pasar, ganarme.', 'Retiro lo dicho.', 'El capitán no se siente bien: hace días que no sale.'], { dir: 'right', sight: 4 }),
       tr({ x: 15, y: 5 }, 'oldman', 'fe_k', 'Don Celio', 'Caballero', ['electrico', 'normal'], [21, 22], ['Competir con los jóvenes me mantiene joven.', '¡Buen combate! Me siento como un chico.', 'Hace quince años te ganaba.'], { dir: 'left', sight: 4 }),
@@ -453,8 +453,8 @@ const FERRY: Record<string, any> = {
   }),
   ferry_cocina: room(shipRows(10, 8, [[1, 1, 'n'], [2, 1, 'n'], [3, 1, 'n'], [6, 1, 'n'], [7, 1, 'n'], [8, 1, 'n'], [5, 3, 'T'], [6, 3, 'T']]), {
     name: 'Buquebus China Zorrilla: cocina', music: 'town', exitTo: { map: 'ferry_3', x: 20, y: 5 },
-    npcs: [npc(4, 2, 'clerk', ['La cocina del barco: chivitos, milanesas y mucho mate.', 'El capitán anda mareado; hace días que no prueba bocado.'], { dir: 'down', name: 'Cocinero' }), npc(8, 5, 'girl', ['Si pelás papas para tres días, aprendés a pelear con cuchillo y todo.'], { dir: 'left' })],
-    items: [{ x: 1, y: 5, item: 'torta_frita', id: 'fe_it_coc' }],
+    npcs: [npc(4, 2, 'clerk', ['La cocina del barco: chivitos, milanesas y mucho mate.', 'El capitán anda mareado; hace días que no prueba bocado.', 'Si buscás algo perdido, mirá en las mesadas: siempre se queda algo.'], { dir: 'down', name: 'Cocinero' }), npc(8, 5, 'girl', ['Si pelás papas para tres días, aprendés a pelear con cuchillo y todo.'], { dir: 'left' })],
+    items: [{ x: 1, y: 5, item: 'torta_frita', id: 'fe_it_coc' }, { x: 8, y: 3, item: 'llave_c2', id: 'fe_key_c2' }],
   }),
   // the hold: sailors and fishermen among the cargo
   ferry_bodega: room(shipRows(22, 10, [[10, 0, 'x'], ...[3, 7, 13, 17].flatMap((x) => [[x, 2, 'B'], [x + 1, 2, 'B'], [x, 6, 'B'], [x + 1, 6, 'B']] as [number, number, string][]), [1, 1, 'N'], [20, 1, 'N']]), {
@@ -466,7 +466,7 @@ const FERRY: Record<string, any> = {
       tr({ x: 16, y: 4 }, 'sailor', 'fe_q', 'Pescador Gonzalo', 'Pescador', ['agua', 'veneno'], [18, 19], ['¡Eh! No sé si sos de tierra o de mar, pero frená y hablá conmigo.', '¡Dejé que te escaparas!', 'Yo también te iba a hacer ayudante.'], { dir: 'left', sight: 4 }),
       tr({ x: 19, y: 8 }, 'sailor', 'fe_r', 'Marinero Felipe', 'Marinero', ['lucha'], [19, 20], ['¡Si perdés, caminás por el tablón!', '¡Derrotado por alguien más joven!', 'A veces caen medusas dentro del barco.'], { dir: 'up', sight: 4 }),
     ],
-    items: [{ x: 1, y: 7, item: 'ultraesfera', id: 'fe_it_b1' }, { x: 20, y: 4, item: 'dulce_de_leche', id: 'fe_it_b2' }, { x: 8, y: 8, item: 'repelente', id: 'fe_it_b3' }],
+    items: [{ x: 1, y: 7, item: 'ultraesfera', id: 'fe_it_b1' }, { x: 20, y: 4, item: 'dulce_de_leche', id: 'fe_it_b2' }, { x: 8, y: 8, item: 'repelente', id: 'fe_it_b3' }, { x: 20, y: 7, item: 'llave_cubierta', id: 'fe_key_deck' }],
   }),
   // upper deck: two sailors and, in front of the captain's door, the rival
   ferry_deck: room(shipRows(20, 9, [[9, 0, D], [1, 1, 'N'], [18, 1, 'N'], [3, 3, 'T'], [4, 3, 'T'], [15, 6, 'T'], [16, 6, 'T']]), {
