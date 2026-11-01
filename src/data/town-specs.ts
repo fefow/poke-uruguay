@@ -108,18 +108,21 @@ export const CITY_SPECS = {
     fill: 10,
   },
   // Salto: a reservoir and dam wall in the north, thermal pools and orchards.
+  // Salto (64x42): the Uruguay river along the whole north side with a railed embankment, the dam works to the east,
+  // thermal-baths neighbourhood and a grid of barrios with citrus groves in the south.
   salto: {
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 9,
-      water: [{ rect: [4, 2, 26, 4] }, { blob: [36, 22, 3, 2] }, { blob: [38, 25, 2, 1] }],
-      props: [...row('ρ', 3, 6, 28), ...row('ρ', 3, 1, 28)],
-      paths: [[[1, 9], [42, 9]], [[16, 7], [16, 28]], [[32, 7], [32, 28]], [[3, 17], [40, 17]], [[8, 9], [8, 25]], [[24, 17], [24, 27]]],
-      groves: [{ rect: [2, 19, 12, 8], tree: 'ö', density: 0.55, rows: true, lanes: 4 }, { rect: [34, 11, 8, 5], tree: 'ξ', rows: true, density: 0.9 }],
-      scatter: [['Ω', 6, 'road'], ['ξ', 8, 'away']],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      water: [{ rect: [4, 2, 54, 5] }, { blob: [52, 28, 4, 3] }, { blob: [56, 33, 3, 2] }],
+      props: [...row('ρ', 3, 7, 56), ...row('ρ', 3, 1, 56)],
+      paths: [[[1, 11], [62, 11]], [[22, 8], [22, 40]], [[44, 8], [44, 40]], [[4, 24], [60, 24]], [[10, 11], [10, 36]], [[32, 24], [32, 40]], [[4, 36], [44, 36]]],
+      plazas: [{ x: 33, y: 12, w: 10, h: 5, piece: 'fuente', benches: true }],
+      groves: [{ rect: [2, 26, 16, 8], tree: 'ö', density: 0.55, rows: true, lanes: 4 }, { rect: [46, 13, 14, 8], tree: 'ξ', rows: true, density: 0.9 }, { rect: [46, 26, 12, 6], tree: 'ö', density: 0.5, rows: true, lanes: 4 }],
+      scatter: [['Ω', 8, 'road'], ['ξ', 10, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['psiquico', 'gym_sal', [22, 13]], ['poli', 'poli_sal'], ['shop', 'shop_sal'], ['houseV', 'casa_sal'], ['houseB', 'radio_sal', [10, 14]], ['fabrica', 'represa_1', [26, 8]], ['house', 'casa_sal2']],
-    fill: 8,
+    bld: [['psiquico', 'gym_sal', [34, 19]], ['poli', 'poli_sal', [14, 14]], ['shop', 'shop_sal', [26, 14]], ['houseV', 'casa_sal', [14, 20]], ['houseB', 'radio_sal', [28, 28]], ['fabrica', 'represa_1', [50, 9], 2], ['house', 'casa_sal2', [36, 28]]],
+    fill: 16,
   },
   // Artigas: a mining town climbing a stony hill on a zigzag road, amethyst country.
   artigas: {
