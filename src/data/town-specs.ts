@@ -276,18 +276,24 @@ export const CITY_SPECS = {
     fill: 7,
   },
   // Canelones: vineyards in long rows around a plaza, windmills and the bodega.
+  // Canelones: a bigger city (64x42) in barrios: the civic centre with the fountain and the bug gym, a creek with
+  // bridges to the north, orchards (ξ) on both sides, and a park to the south-east.
   canelones: {
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 10,
-      paths: [[[1, 12], [42, 12]], [[22, 1], [22, 28]], [[4, 20], [40, 20]], [[10, 12], [10, 20]], [[34, 12], [34, 20]]],
-      plazas: [{ x: 18, y: 13, w: 9, h: 6, piece: 'fuente', benches: true }],
-      groves: [{ rect: [2, 22, 18, 6], tree: 'ξ', rows: true, density: 1 }, { rect: [24, 22, 18, 6], tree: 'ξ', rows: true, density: 1 }, { rect: [2, 2, 14, 7], tree: 'ξ', rows: true, density: 1 }, { rect: [28, 2, 14, 7], tree: 'ξ', rows: true, density: 1 }],
-      props: [['Λ', 20, 4], ['Λ', 24, 27], ['Ξ', 2, 10], ['Ξ', 41, 10]],
-      scatter: [['Ω', 6, 'road'], ['#', 6, 'away']],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 18,
+      water: [{ pts: [[1, 8], [20, 9], [44, 8], [62, 9]], w: 3 }],
+      paths: [[[1, 18], [62, 18]], [[32, 1], [32, 40]], [[1, 32], [62, 32]], [[12, 12], [12, 40]], [[52, 12], [52, 40]], [[12, 25], [52, 25]]],
+      plazas: [{ x: 27, y: 19, w: 11, h: 6, piece: 'fuente', benches: true }, { x: 42, y: 33, w: 9, h: 6, piece: 'fuente', benches: true }],
+      groves: [
+        { rect: [2, 2, 18, 5], tree: 'ξ', rows: true, density: 1 }, { rect: [24, 2, 16, 5], tree: 'ξ', rows: true, density: 1 }, { rect: [44, 2, 18, 5], tree: 'ξ', rows: true, density: 1 },
+        { rect: [2, 34, 8, 6], tree: 'ξ', rows: true, density: 1 }, { rect: [14, 34, 16, 6], tree: 'ξ', rows: true, density: 1 }, { rect: [54, 34, 8, 6], tree: 'ξ', rows: true, density: 1 },
+      ],
+      props: [['Λ', 30, 17], ['Λ', 34, 26], ['Λ', 10, 31], ['Λ', 54, 31], ['Ξ', 2, 17], ['Ξ', 61, 17], ['Ξ', 2, 31], ['Ξ', 61, 31]],
+      scatter: [['Ω', 10, 'road'], ['#', 8, 'away'], ['Ь', 4, 'road']],
       animals: [],
     },
-    bld: [['bicho', 'gym_canelones', [22, 9]], ['poli', 'poli_canelones'], ['shop', 'shop_canelones'], ['house', 'casa_canelones'], ['houseG', 'casa_canelones2']],
-    fill: 8,
+    bld: [['bicho', 'gym_canelones', [32, 13]], ['poli', 'poli_canelones', [20, 14]], ['shop', 'shop_canelones', [44, 14]], ['house', 'casa_canelones', [8, 22]], ['houseG', 'casa_canelones2', [56, 22]]],
+    fill: 16,
   },
 };
 

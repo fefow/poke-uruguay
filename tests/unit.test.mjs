@@ -318,14 +318,14 @@ test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstácul
   assert.ok(at('fraybentos') < at('r_belen_artigas'));
 });
 
-test('ciudades: las 18 miden como Montevideo y ninguna se repite; las localidades tampoco', async () => {
+test('ciudades: las 18 miden al menos como Montevideo y ninguna se repite; las localidades tampoco', async () => {
   const { OUTDOOR } = await import('../src/data/maps.ts');
   const { CITY_SPECS, LOC_PLAN } = await import('../src/data/town-specs.ts');
   const seen = new Map();
   for (const id of Object.keys(CITY_SPECS)) {
     const t = OUTDOOR[id].tiles;
-    assert.equal(t.length, 30, `${id} alto`);
-    assert.equal(t[0].length, 44, `${id} ancho`);
+    assert.ok(t.length >= 30, `${id} alto`);
+    assert.ok(t[0].length >= 44, `${id} ancho`);
   }
   for (const id of [...Object.keys(CITY_SPECS), ...Object.keys(LOC_PLAN)]) {
     const key = OUTDOOR[id].tiles.join('|');
