@@ -146,6 +146,14 @@ export const TILE_INFO = {
   'С': { name: 'cesto de basura', solid: true, over: true },
   'Ь': { name: 'maceta grande', solid: true, over: true },
   'Ъ': { name: 'bebedero de campo', solid: true, over: true },
+  'א': { name: 'fardo de pasto', solid: true, over: true },
+  'ב': { name: 'carreta', solid: true, over: true },
+  'ג': { name: 'espantapájaros', solid: true, over: true },
+  'ד': { name: 'banco de plaza', solid: true, over: true },
+  'ה': { name: 'colmenas', solid: true, over: true },
+  'ו': { name: 'piedra con musgo', solid: true, over: true },
+  'ז': { name: 'charco', over: true },
+  'ח': { name: 'cartel de chacra', solid: true, over: true },
   'β': { name: 'bote', solid: true, over: true },
   'γ': { name: 'contenedor', solid: true, over: true },
   'ψ': { name: 'tendedero', solid: true, over: true },
@@ -903,6 +911,50 @@ const OVER = {
     g.fillStyle = '#2f9a4a'; g.beginPath(); g.arc(8, 5, 5, 0, 7); g.fill(); g.fillStyle = '#4ab860'; g.beginPath(); g.arc(7, 4, 3, 0, 7); g.fill();
     px(g, 4, 3, '#e84a6a', 2, 2); px(g, 10, 5, '#f4c030', 2, 2); px(g, 7, 7, '#f4f4f4', 2, 1);
     px(g, 4, 9, '#c8643a', 8, 5); px(g, 3, 9, '#d8744a', 10, 2); px(g, 4, 9, '#e89060', 8, 1); px(g, 5, 13, '#a8482a', 6, 1);
+  },
+  'א': (g) => {
+    shade(g, 8, 14, 7, 1.3);
+    px(g, 2, 6, '#c9a53a', 12, 8); px(g, 3, 4, '#d8b848', 10, 3); px(g, 2, 6, '#e6c95a', 12, 1);
+    for (const x of [4, 7, 10]) px(g, x, 5, '#a8842a', 1, 9);
+    px(g, 2, 9, '#8a6a22', 12, 1); px(g, 2, 12, '#8a6a22', 12, 1);
+  },
+  'ב': (g) => {
+    shade(g, 8, 14, 7, 1.3);
+    px(g, 1, 7, '#7a5230', 14, 4); px(g, 1, 7, '#9a6c40', 14, 1); px(g, 2, 5, '#7a5230', 1, 2); px(g, 13, 5, '#7a5230', 1, 2);
+    g.fillStyle = '#3a2a1a'; g.beginPath(); g.arc(5, 12, 3, 0, 7); g.fill(); g.beginPath(); g.arc(11, 12, 3, 0, 7); g.fill();
+    g.fillStyle = '#a88858'; g.beginPath(); g.arc(5, 12, 1, 0, 7); g.fill(); g.beginPath(); g.arc(11, 12, 1, 0, 7); g.fill();
+    px(g, 3, 3, '#d8b848', 10, 3);
+  },
+  'ג': (g) => {
+    shade(g, 8, 14, 4, 1);
+    px(g, 7, 6, '#6a4a2a', 2, 9); px(g, 2, 7, '#6a4a2a', 12, 1);
+    px(g, 5, 2, '#d8b070', 6, 5); px(g, 4, 1, '#6a4a2a', 8, 2); px(g, 6, 3, '#1a1a1a', 1, 1); px(g, 9, 3, '#1a1a1a', 1, 1);
+    px(g, 4, 8, '#a83a3a', 3, 4); px(g, 9, 8, '#a83a3a', 3, 4); px(g, 7, 7, '#3a5aa8', 2, 5);
+  },
+  'ד': (g) => {
+    shade(g, 8, 14, 7, 1.2);
+    px(g, 2, 8, '#8a5a2e', 12, 2); px(g, 2, 5, '#9a6a38', 12, 2); px(g, 2, 5, '#b88650', 12, 1);
+    px(g, 3, 10, '#4a3018', 2, 4); px(g, 11, 10, '#4a3018', 2, 4); px(g, 3, 7, '#4a3018', 1, 3); px(g, 12, 7, '#4a3018', 1, 3);
+  },
+  'ה': (g) => {
+    shade(g, 8, 14, 7, 1.3);
+    for (const [x, y] of [[2, 8], [9, 8], [5, 3]]) { px(g, x, y, '#e8d05a', 5, 5); px(g, x, y, '#f4e27a', 5, 1); px(g, x, y + 2, '#8a6a22', 5, 1); px(g, x + 1, y + 3, '#2a1a0a', 3, 1); }
+    px(g, 2, 13, '#6a4a2a', 3, 1); px(g, 9, 13, '#6a4a2a', 3, 1);
+  },
+  'ו': (g) => {
+    shade(g, 8, 14, 6, 1.3);
+    g.fillStyle = '#8a8a90'; g.beginPath(); g.ellipse(8, 9, 6, 5, 0, 0, 7); g.fill();
+    g.fillStyle = '#a8a8b0'; g.beginPath(); g.ellipse(7, 7, 4, 3, 0, 0, 7); g.fill();
+    px(g, 4, 5, '#4ab860', 4, 2); px(g, 9, 7, '#3a9a50', 3, 2); px(g, 5, 11, '#4ab860', 3, 1);
+  },
+  'ז': (g) => {
+    g.fillStyle = 'rgba(70,120,170,0.75)'; g.beginPath(); g.ellipse(8, 9, 6, 3.2, 0, 0, 7); g.fill();
+    g.fillStyle = 'rgba(170,210,240,0.7)'; g.beginPath(); g.ellipse(7, 8, 3, 1.2, 0, 0, 7); g.fill();
+  },
+  'ח': (g) => {
+    shade(g, 8, 14, 5, 1);
+    px(g, 7, 8, '#6a4a2a', 2, 7); px(g, 2, 3, '#8a5a2e', 12, 6); px(g, 2, 3, '#b88650', 12, 1);
+    px(g, 4, 5, '#f4f0e0', 8, 1); px(g, 4, 7, '#f4f0e0', 6, 1);
   },
   'Ъ': (g) => {
     shade(g, 8, 14, 7, 1.3);
