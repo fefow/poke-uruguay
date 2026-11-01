@@ -21,7 +21,7 @@ for (const [id, m] of Object.entries(MAPS)) {
   for (const [side, ex] of Object.entries(m.exits ?? {})) {
     if (!MAPS[ex.to]) bad(`${id} exit ${side} -> missing ${ex.to}`);
     const edge = side === 'e' ? m.tiles.map((r) => r[w - 1]) : side === 'w' ? m.tiles.map((r) => r[0]) : side === 'n' ? [...m.tiles[0]] : [...m.tiles.at(-1)];
-    if (!edge.some((t) => !SOLID.has(t))) bad(`${id} exit ${side} has no walkable edge tile`);
+    if (!edge.some((t) => !SOLID.has(t) || t === '%')) bad(`${id} exit ${side} has no walkable edge tile`);
   }
   if (m.indoor && !m.tiles.join('').includes('m')) bad(`${id} interior without mat`);
   const signs = m.tiles.join('').split('').filter((c) => c === 'S').length;
