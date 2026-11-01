@@ -1,5 +1,5 @@
 // Title screen, new-game intro, hall of fame and credits.
-import { W, H, setRenderer, text } from '../gfx/screen.ts';
+import { W, H, W as CW, H as CH, setRenderer, text } from '../gfx/screen.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { pamperoAt, PAMPERO_W, PAMPERO_H } from '../gfx/pampero.ts';
 import { charSprite } from '../gfx/characters.ts';
@@ -13,6 +13,10 @@ import { displayName } from './creature.ts';
 
 // ---------------------------------------------------------------- TITLE
 function drawSky(g, t) {
+  // drawn on the original 320x240 canvas and stretched to the 16:9 one (vector shapes only, so no pixel art gets resampled)
+  const W = 320, H = 240;
+  g.save();
+  g.scale(CW / 320, CH / 240);
   const grd = g.createLinearGradient(0, 0, 0, H);
   grd.addColorStop(0, '#1d2a5c');
   grd.addColorStop(0.45, '#e86a4a');
@@ -23,6 +27,8 @@ function drawSky(g, t) {
   g.fillRect(0, 0, W, H);
   // Sol de Mayo setting over the river
   const sx = 160, sy = 140;
+  g.save(); // the sun stays round: undo the vertical squash of the stretched canvas around its centre
+  g.translate(sx, sy); g.scale(1, (CW / 320) / (CH / 240)); g.translate(-sx, -sy);
   g.save();
   g.translate(sx, sy);
   g.rotate(t / 9000);
@@ -38,6 +44,7 @@ function drawSky(g, t) {
   g.restore();
   g.fillStyle = '#ffe070';
   g.beginPath(); g.arc(sx, sy, 22, 0, 7); g.fill();
+  g.restore();
   // river glints
   g.fillStyle = 'rgba(255,220,150,0.5)';
   for (let i = 0; i < 14; i++) {
@@ -64,6 +71,7 @@ function drawSky(g, t) {
     const y = (i * 53) % 70;
     if ((Math.floor(t / 500) + i) % 7) g.fillRect(x, y, 1, 1);
   }
+  g.restore();
 }
 
 /**
@@ -91,12 +99,12 @@ function glitter(g, t, at, count = 36, gap = 36) {
 /** Draws a sprite with its wings beating: columns away from the body swing up and down with the flap phase. */
 export function titleRenderer(g, t) {
   drawSky(g, t);
-  text(g, 'Poke Uruguay', W / 2, 38, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
-  text(g, 'Aventuras en tierras charruas', W / 2, 72, { size: 8, align: 'center', color: '#f8d040', shadow: '#2a1830' });
+  text(g, 'Poke Uruguay', W / 2, 52, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
+  text(g, 'La tierra de los charrúas', W / 2, 92, { size: 10, align: 'center', color: '#f8d040', shadow: '#2a1830' });
   // The Pampero crosses in front of the title from left to right, facing where it is going, leaving glitter behind.
-  const pos = (tt) => ({ x: ((tt / 18) % (W + 200)) - 100, y: 22 + Math.sin(tt / 500) * 6 });
+  const pos = (tt) => ({ x: ((tt / 14) % (W + 260)) - 130, y: 24 + Math.sin(tt / 500) * 8 });
   const here = pos(t);
-  const tw = PAMPERO_W * 0.6, th = PAMPERO_H * 0.6;
+  const tw = PAMPERO_W, th = PAMPERO_H; // native size: no resampling
   glitter(g, t, (tt) => { const q = pos(tt); return q.x <= here.x ? { x: q.x + 8, y: q.y + th * 0.52 } : null; });
   g.globalAlpha = 0.9;
   g.save();
@@ -109,7 +117,7 @@ export function titleRenderer(g, t) {
   const keys = ['ceibito', 'tejuchispa', 'carpinchito'];
   keys.forEach((k, i) => {
     const bob = Math.round(Math.sin(t / 260 + i) * 2);
-    g.drawImage(creatureSprite(k), 8 + i * 58, 168 + bob, 60, 60);
+    g.drawImage(creatureSprite(k), Math.round(W / 2 - 40 + (i - 1) * 96), 162 + bob, 80, 80); // native 80x80, centred
   });
 }
 
@@ -171,7 +179,7 @@ const CINEMATIC = [
       g.fillStyle = 'rgba(255,255,255,0.12)';
       for (let i = 0; i < 12; i++) g.fillRect((i * 61 + t / 30) % W, 160 + (i * 17) % 70, 18, 1);
       const bob = Math.sin(t / 500) * 3;
-      g.drawImage(creatureSprite('ballenaplata'), 40 + p * 40, 105 + bob, 100, 100);
+      g.drawImage(creatureSprite('ballenaplata'), Math.round(60 + p * 40), Math.round(95 + bob), 80, 80); // native size, whole-pixel position
       if (Math.floor(t / 900) % 2) { g.fillStyle = 'rgba(220,240,255,0.8)'; g.fillRect(70 + p * 40, 104 + bob, 2, 8); g.fillRect(68 + p * 40, 100 + bob, 6, 3); }
     },
   },
@@ -186,8 +194,8 @@ const CINEMATIC = [
       hills(g, t, 160, 10, '#5aa046', 0.02, 120);
       hills(g, t, 190, 8, '#3a8038', 0.04, 90);
       const cycle = (t / 18) % (W + 120);
-      g.drawImage(creatureSprite('nandulin'), W - cycle, 148 + Math.abs(Math.sin(t / 120)) * -3, 56, 56);
-      g.drawImage(creatureSprite('teruterito'), ((t / 26) % (W + 100)) - 60, 70 + Math.sin(t / 400) * 8, 40, 40);
+      g.drawImage(creatureSprite('nandulin'), Math.round(W - cycle), Math.round(130 + Math.abs(Math.sin(t / 120)) * -3), 80, 80);
+      g.drawImage(creatureSprite('teruterito'), Math.round(((t / 26) % (W + 100)) - 60), Math.round(70 + Math.sin(t / 400) * 8), 40, 40);
       ceibo(g, 60 - p * 30, 188, 1.6);
     },
   },
@@ -212,8 +220,8 @@ const CINEMATIC = [
       {
         const at = (tt) => { const kk = Math.min(1, (p - (t - tt) / 7000) * 1.5); if (kk <= 0) return null; const sc = 0.9 + kk * 1.1; return { x: 120 + (1 - kk) * 160 - 10 + PAMPERO_W * sc * 0.85, y: 40 - kk * 10 + Math.sin(tt / 300) * 4 + PAMPERO_H * sc * 0.5 }; };
         glitter(g, t, at, 30, 55);
-        const sc = 0.9 + k * 1.1;
-        g.drawImage(pamperoAt(t, 760), 120 + (1 - k) * 160 - 10, 40 - k * 10 + Math.sin(t / 300) * 4, PAMPERO_W * sc, PAMPERO_H * sc);
+        const sc = 1; // native size: any other scale makes some art pixels wider than others
+        g.drawImage(pamperoAt(t, 760), Math.round(120 + (1 - k) * 160 - 10), Math.round(40 - k * 10 + Math.sin(t / 300) * 4), PAMPERO_W * sc, PAMPERO_H * sc);
       }
       g.globalAlpha = 1;
     },
@@ -230,7 +238,7 @@ const CINEMATIC = [
       const a = Math.min(1, p * 3);
       g.globalAlpha = a;
       text(g, 'Poke Uruguay', W / 2, 96, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
-      text(g, 'Aventuras en tierras charruas', W / 2, 132, { size: 8, align: 'center', color: '#fff6c0', shadow: '#2a1830' });
+      text(g, 'La tierra de los charrúas', W / 2, 132, { size: 8, align: 'center', color: '#fff6c0', shadow: '#2a1830' });
       g.globalAlpha = 1;
     },
   },
@@ -332,7 +340,7 @@ export async function hallOfFame() {
     S.party.slice(0, shown).forEach((c, i) => {
       const x = 20 + (i % 3) * 100;
       const y = 40 + Math.floor(i / 3) * 96;
-      g.drawImage(creatureSprite(c.species), x, y, 72, 72);
+      g.drawImage(creatureSprite(c.species), x, y, 80, 80);
       text(g, displayName(c), x + 36, y + 74, { size: 6, align: 'center' });
       text(g, `Nv${c.level}`, x + 36, y + 84, { size: 6, align: 'center', color: '#f8d040' });
     });
@@ -348,7 +356,7 @@ export async function hallOfFame() {
 
 // ---------------------------------------------------------------- CREDITS
 const CREDITS = [
-  ['Poke Uruguay', 'Aventuras en tierras charruas'],
+  ['Poke Uruguay', 'La tierra de los charrúas'],
   ['Una aventura por el Uruguay', ''],
   ['Diseño y programación', 'Hecho con Claude para Dusius'],
   ['Lugares', 'Carmelo · Colonia · Montevideo · Punta del Este'],
@@ -384,7 +392,7 @@ export async function credits() {
       if (b) text(g, b, W / 2, y + 16, { size: 7, align: 'center' });
     });
     const k = parade[Math.floor(t / 1200) % parade.length];
-    g.drawImage(creatureSprite(k), W - 70, H - 72, 64, 64);
+    g.drawImage(creatureSprite(k), W - 90, H - 86, 80, 80);
   });
   await new Promise((res) => {
     let last = performance.now();

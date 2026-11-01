@@ -3,6 +3,7 @@
 import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
+import { encounterList } from '../data/encounters.ts';
 import { badgeOf } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
@@ -442,14 +443,24 @@ function onStep() {
     if (!t || !n.visible || flag(`tr_${t.id}`) || !n.def.sight) continue;
     if (sees(n)) return void runScript(() => trainerSpotted(n));
   }
-  // Wild encounters
-  if (TILE_INFO[ch]?.enc && W_.map.enc && S.party.some((c) => c.hp > 0)) {
-    if (worldRng.chance(W_.map.enc.rate)) {
-      const e = worldRng.weighted(W_.map.enc.list.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
-      const lvl = worldRng.int(e.lo, e.hi);
-      const lead = S.party.find((c) => c.hp > 0);
-      if (S.repel > 0 && lvl < lead.level) return;
-      return void runScript(() => wildBattle(e.sp, lvl));
+  // Wild encounters. Grass never holds water creatures; they live in the water (canoe or rod). Caves have their own
+  // biome: ground, rock, poison and bug creatures come out on any floor tile, with plain grass patches staying rare.
+  if ((W_.map.enc || W_.map.fish) && S.party.some((c) => c.hp > 0)) {
+    const base = W_.map.enc?.rate ?? 0.1;
+    const cave = W_.map.theme === 'cueva';
+    const surfing = ch === '~';
+    const grass = !!TILE_INFO[ch]?.enc;
+    const floor = cave && !surfing && !TILE_INFO[ch]?.solid;
+    if (surfing || grass || floor) {
+      const pick = encounterList(W_.map, surfing ? 'water' : cave ? 'cave' : 'grass');
+      const rate = surfing ? Math.max(0.1, base * 0.7) : floor && !grass ? Math.min(0.1, base) : base;
+      if (pick.length && worldRng.chance(rate)) {
+        const e = worldRng.weighted(pick.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
+        const lvl = worldRng.int(e.lo, e.hi);
+        const lead = S.party.find((c) => c.hp > 0);
+        if (S.repel > 0 && lvl < lead.level) return;
+        return void runScript(() => wildBattle(e.sp, lvl));
+      }
     }
   }
 }

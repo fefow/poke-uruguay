@@ -200,10 +200,10 @@ button { font: inherit; color: inherit; }
 .menu-pause { top: 2cqi; bottom: auto; min-width: 36cqi; max-height: calc(100% - 4cqi); overflow: visible; & .menu-list li { padding-block: 0.6cqi; } }
 .menu-sub { bottom: 3cqi; min-width: 28cqi; z-index: 60; }
 .menu-title-screen {
-  right: 4cqi;
+  right: -26cqi;
   bottom: 5cqi;
-  min-width: 40cqi;
-  font-size: 4.6cqi;
+  min-width: 0; width: 38cqi;
+  font-size: 3.8cqi;
 }
 .menu-slots { left: 3cqi; right: auto; bottom: auto; top: 3cqi; min-width: 50cqi; z-index: 60; }
 .menu-shop { top: 3cqi; bottom: auto; min-width: 54cqi; max-height: 62%; z-index: 60; }
@@ -292,7 +292,7 @@ button { font: inherit; color: inherit; }
 
 .title-press {
   position: absolute;
-  bottom: 12cqi;
+  bottom: 3cqi;
   left: 50%;
   translate: -50% 0;
   font-family: var(--font-pixel);

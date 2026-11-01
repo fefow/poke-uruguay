@@ -473,3 +473,19 @@ test('revancha: cada mapa pertenece al primer gimnasio por delante en la ruta', 
   assert.equal(refGymOrder('fraybentos'), 3);
   assert.equal(refGymOrder('gym_mvd'), 12);
 });
+
+test('encuentros: el agua no sale en pastizal y las cuevas tienen su propio bioma', async () => {
+  const { encounterList } = await import('../src/data/encounters.ts');
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { SPECIES } = await import('../src/data/species.ts');
+  const water = (sp) => SPECIES[sp].types.includes('agua');
+  let checked = 0;
+  for (const m of Object.values(MAPS)) {
+    if (!m.enc) continue;
+    assert.ok(encounterList(m, 'grass').every(([sp]) => !water(sp)), `${m.name}: agua en pastizal`);
+    assert.ok(encounterList(m, 'water').every(([sp]) => water(sp)), `${m.name}: no-agua en el agua`);
+    if (m.theme === 'cueva') assert.ok(encounterList(m, 'cave').length > 0, `${m.name}: cueva sin criaturas`);
+    checked++;
+  }
+  assert.ok(checked > 20);
+});
