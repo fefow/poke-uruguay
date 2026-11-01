@@ -285,7 +285,8 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
     const hash = (x, y) => ((x * 73856093) ^ (y * 19349663) ^ (attempt * 83492791)) >>> 0;
     const kind = forest ? 'forest' : 'cave';
     const out = g.map((r) => [...r]);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    // forests keep the game's own grass and trees; only caves use the autotiled rock
+    for (let y = 0; y < H; y++) for (let x = 0; x < W && !forest; x++) {
       if (g[y][x] === '#') {
         const mask = (wallOf(x, y - 1) ? 0 : 1) | (wallOf(x + 1, y) ? 0 : 2) | (wallOf(x, y + 1) ? 0 : 4) | (wallOf(x - 1, y) ? 0 : 8);
         out[y][x] = wallChar(kind, mask, hash(x, y) % 3);
@@ -302,7 +303,6 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
     const final = out.map((r) => r.join(''));
     m.tiles = final;
     m.maze = true;
-    if (forest) m.theme = 'bosque';
     return true;
   }
   return false;
