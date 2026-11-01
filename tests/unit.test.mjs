@@ -374,7 +374,7 @@ test('rutas guiadas: desniveles de un solo sentido y paredes de árboles', async
   const total = Object.values(OUTDOOR).reduce((n, m) => n + m.tiles.join('').split('λ').length - 1, 0);
   assert.ok(total > 20, 'hay desniveles en las rutas');
   const r = OUTDOOR.r_rosario_sanjose.tiles.join('');
-  const trees = (r.match(/[#q]/g) ?? []).length;
+  const trees = [...r].filter((c) => c === '#' || c === 'q' || (c >= '\uE040' && c < '\uE080')).length;
   assert.ok(trees / r.length > 0.4, 'el Bosque Grande es denso');
 });
 

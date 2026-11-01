@@ -1184,6 +1184,75 @@ const rockFace = (g, r) => {
 (THEMES as any).cueva['ϳ'] = rockFace;
 (THEMES as any).cueva['ϵ'] = (g, r) => { caveFloor(g, r); px(g, 0, 0, '#46424e', T, 3); px(g, 0, 3, '#504b58', T, 2); px(g, 0, 5, '#565160', T, 1); };
 
+
+// ---- autotiled cave rock and forest walls: each wall tile is drawn for the sides that face open ground ----
+// Wall chars live in the Unicode private-use area: 0xE000 + kind * 64 + variant * 16 + mask, where mask bits are the
+// open sides (1 north, 2 east, 4 south, 8 west). Floors: 0xE080 + kind * 8 + (0, 1 = variants, 2 = shaded under a wall).
+export const wallChar = (kind: 'cave' | 'forest', mask: number, variant: number) => String.fromCharCode(0xE000 + (kind === 'cave' ? 0 : 64) + variant * 16 + mask);
+export const floorChar = (kind: 'cave' | 'forest', which: number) => String.fromCharCode(0xE080 + (kind === 'cave' ? 0 : 8) + which);
+
+const hidden = (ch: string, name: string, solid: boolean) => Object.defineProperty(TILE_INFO, ch, { value: { name, solid }, enumerable: false, configurable: true });
+const rockTile = (mask: number, v: number) => (g, r) => {
+  caveFloor(g, r);
+  const N = mask & 1, E = mask & 2, S = mask & 4, Wd = mask & 8;
+  const x0 = Wd ? 2 : 0, x1 = E ? 14 : 16, y0 = N ? 2 : 0, y1 = S ? 14 : 16;
+  px(g, x0, y0, '#2a2632', x1 - x0, y1 - y0);
+  for (let i = 0; i < 5; i++) { const w = r.int(3, 6), h = r.int(2, 4), x = r.int(x0, Math.max(x0, x1 - w)), y = r.int(y0, Math.max(y0, y1 - h)); px(g, x, y, '#36323f', Math.min(w, x1 - x), Math.min(h, y1 - y)); px(g, x + 1, y, '#403b4a', Math.max(0, Math.min(w, x1 - x) - 2), 1); }
+  for (let i = 0; i < 3 + v; i++) px(g, r.int(x0, x1 - 2), r.int(y0, y1 - 1), '#221f29', 2, 1);
+  if (N) { px(g, x0, 1, '#6a6478', x1 - x0, 1); px(g, x0, 2, '#4a4558', x1 - x0, 1); }
+  if (Wd) { px(g, 1, y0, '#5a5568', 1, y1 - y0); px(g, 2, y0, '#3f3b4a', 1, y1 - y0); }
+  if (E) { px(g, 14, y0, '#1e1b24', 1, y1 - y0); px(g, 13, y0, '#33303c', 1, y1 - y0); }
+  if (S) {
+    px(g, x0, y1 - 9, '#5d586a', x1 - x0, 7); px(g, x0, y1 - 9, '#6a6478', x1 - x0, 1);
+    for (let x = x0 + 1; x < x1; x += r.int(3, 5)) px(g, x, y1 - 8, '#4b4658', 1, r.int(4, 6));
+    for (let i = 0; i < 3; i++) px(g, r.int(x0, Math.max(x0, x1 - 4)), y1 - r.int(3, 8), '#736d82', r.int(2, 4), 1);
+    px(g, x0, y1 - 2, '#3a3646', x1 - x0, 2);
+    for (let x = x0; x < x1; x += 2) px(g, x, y1 - 2 + r.int(0, 1), '#2a2632', 2, 1);
+    px(g, x0, y1, '#17151c', x1 - x0, 2);
+  }
+  // rounded corners where two open sides meet
+  const floorC = '#5a5560';
+  if (N && Wd) { px(g, 0, 0, floorC, 2, 2); px(g, 2, 2, '#4a4558'); }
+  if (N && E) { px(g, 14, 0, floorC, 2, 2); }
+  if (S && Wd) { px(g, 0, 14, floorC, 2, 2); }
+  if (S && E) { px(g, 14, 14, floorC, 2, 2); }
+};
+const leafTile = (mask: number, v: number) => (g, r) => {
+  forestFloor(g, r);
+  const N = mask & 1, E = mask & 2, S = mask & 4, Wd = mask & 8;
+  const x0 = Wd ? 1 : 0, x1 = E ? 15 : 16, y0 = N ? 1 : 0, y1 = S ? 11 : 16;
+  px(g, x0, y0, '#1b4026', x1 - x0, y1 - y0);
+  for (let i = 0; i < 4; i++) {
+    const w = r.int(6, 9), x = r.int(x0 - 2, x1 - w + 2), y = r.int(y0 - 2, Math.max(y0, y1 - w) + 1);
+    const cx = Math.max(x0, x), cy = Math.max(y0, y), cw = Math.min(x + w, x1) - cx, ch = Math.min(y + w, y1) - cy;
+    if (cw <= 2 || ch <= 2) continue;
+    px(g, cx, cy, '#256336', cw, ch); px(g, cx, cy, '#37823f', Math.max(1, cw - 2), 2); px(g, cx, cy, '#37823f', 2, Math.max(1, ch - 2)); px(g, cx + 2, cy + 2, '#58a850', 2, 1); px(g, cx + 1, cy + ch - 1, '#16341f', Math.max(1, cw - 2), 1);
+  }
+  for (let i = 0; i < 4 + v; i++) px(g, r.int(x0, x1 - 2), r.int(y0, y1 - 1), '#14301c', 2, 1);
+  // scalloped silhouette on the sides that face open ground
+  const bump = (cx, cy, rad) => { px(g, cx - rad, cy - 1, '#256336', rad * 2, 3); px(g, cx - 1, cy - rad, '#256336', 3, rad * 2); px(g, cx - rad + 1, cy - rad + 1, '#37823f', 2, 1); };
+  if (N) for (const cx of [3, 8, 13]) bump(cx + r.int(-1, 1), 1, 3);
+  if (S) for (const cx of [3, 8, 13]) bump(cx + r.int(-1, 1), 11, 3);
+  if (Wd) for (const cy of [3, 8, 13]) bump(1, cy + r.int(-1, 1), 3);
+  if (E) for (const cy of [3, 8, 13]) bump(15, cy + r.int(-1, 1), 3);
+  if (S) { // trunks under the canopy
+    px(g, 0, 11, '#16341f', 16, 1);
+    for (const tx of [3, 10]) { px(g, tx + r.int(0, 2), 12, '#5a3a1a', 2, 4); px(g, tx + 1, 12, '#7a5028', 1, 4); }
+  }
+};
+for (let v = 0; v < 3; v++) for (let mask = 0; mask < 16; mask++) {
+  const cc = wallChar('cave', mask, v), fc = wallChar('forest', mask, v);
+  (THEMES as any).cueva[cc] = rockTile(mask, v); hidden(cc, 'pared de roca', true);
+  (THEMES as any).bosque[fc] = leafTile(mask, v); hidden(fc, 'monte espeso', true);
+}
+for (const [kind, set, base] of [['cave', (THEMES as any).cueva, caveFloor], ['forest', (THEMES as any).bosque, forestFloor]] as const) {
+  const c0 = floorChar(kind, 0), c1 = floorChar(kind, 1), c2 = floorChar(kind, 2);
+  set[c0] = (g, r) => { base(g, r); for (let i = 0; i < 3; i++) { const x = r.int(2, 11), y = r.int(2, 11); px(g, x, y, kind === 'cave' ? '#3e3a46' : '#3a6a2a', 3, 2); px(g, x, y, kind === 'cave' ? '#6e6a78' : '#6aa84a', 2, 1); } };
+  set[c1] = (g, r) => { base(g, r); for (let i = 0; i < 4; i++) { const x = r.int(1, 13), y = r.int(1, 13); if (kind === 'cave') { px(g, x, y, '#4a4650', 2, 1); } else { px(g, x, y, '#8a6a3a', 2, 1); px(g, x + 1, y + 1, '#a8864a', 1, 1); } } };
+  set[c2] = (g, r) => { base(g, r); px(g, 0, 0, kind === 'cave' ? '#46424e' : '#2f5a2a', T, 3); px(g, 0, 3, kind === 'cave' ? '#504b58' : '#3a6e32', T, 2); px(g, 0, 5, kind === 'cave' ? '#565160' : '#437a3a', T, 1); };
+  for (const c of [c0, c1, c2]) hidden(c, kind === 'cave' ? 'suelo de cueva' : 'suelo de monte', false);
+}
+
 /** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
 const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);
 export function sitsInWater(tiles, x, y) {
