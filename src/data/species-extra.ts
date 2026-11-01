@@ -31,8 +31,8 @@ export const LINES = [
     ['crinfuego', 'Crinfuego', 'lucha', 'quad', '#d83a10', '#3a1408', '#ffd040', 'ears_pointy snout_long legs_long tail_bushy mane', 1.3, 'Un corcel de leyenda. Los viejos jinetes decían verlo en las noches de tormenta.'],
   ] },
   { t: 'fuego', role: 's', bst: PAIR, evo: ['piedra_agata'], mons: [
-    ['pavesa', 'Pavesa', null, 'wisp', '#ff8a2a', '#d8441a', '#ffe05c', '', 0.85, 'Una chispa viva que flota sobre las brasas. Se apaga si nadie la alimenta.'],
-    ['fogata', 'Fogata', 'psiquico', 'wisp', '#ff6a1a', '#b0301a', '#fff08a', 'halo', 1.1, 'Reúne otras chispas a su alrededor. En invierno da calor a quienes se acercan.'],
+    ['pavesa', 'Polilla', null, 'moth', '#d8a050', '#8a5a2a', '#ffe05c', '', 0.85, 'Gira alrededor de las brasas y las lámparas hasta quemarse las alas. Vuelve cada noche igual.'],
+    ['fogata', 'Falena', 'psiquico', 'moth', '#e8742a', '#7a3a1a', '#fff08a', '', 1.1, 'Su vuelo errático hipnotiza a quien la mira. En las noches de invierno se acerca a los fogones.'],
   ] },
   { t: 'bicho', role: 'a', bst: PAIR, evo: [26], mons: [
     ['alacran', 'Alacrán', null, 'spider', '#c8441a', '#5a2410', '#ffb02a', 'tail_sting claws', 0.95, 'Vive bajo las piedras calientes. Su aguijón guarda un calor intenso.'],
@@ -79,9 +79,9 @@ export const LINES = [
 
   // ---------------------------------------------------------------- ELÉCTRICO
   { t: 'electrico', role: 's', bst: TRIO, evo: [18, 36], mons: [
-    ['nimbo', 'Nimbo', null, 'wisp', '#8a96b0', '#6a7690', '#f2e05c', 'cloud', 0.85, 'Una nube pequeña que se carga de estática. Anuncia las tormentas de verano.'],
-    ['cumulo', 'Cúmulo', 'volador', 'wisp', '#6a789a', '#4a5878', '#ffe44a', 'cloud', 1.1, 'Guarda rayos en su interior y los descarga hacia el suelo. Avanza empujada por el viento.'],
-    ['tormenton', 'Tormentón', 'agua', 'wisp', '#3a4668', '#222c48', '#fff27a', 'cloud', 1.3, 'Una tormenta con voluntad propia. Donde pasa, el cielo se oscurece y el aire pesa.'],
+    ['nimbo', 'Golondrina', null, 'bird', '#2a3a5a', '#e8e8f0', '#f2e05c', 'big_wings', 0.85, 'Llega con las primeras tormentas de verano. Vuela bajo cuando el aire se carga de electricidad.'],
+    ['cumulo', 'Cuervillo', 'volador', 'bird', '#4a4a5a', '#2a2a34', '#ffe44a', 'big_wings', 1.1, 'Pesca en los bañados antes de las lluvias. Los gauchos dicen que sus graznidos llaman al rayo.'],
+    ['tormenton', 'Cisne de Cuello Negro', 'agua', 'bird', '#f0f0f4', '#222c48', '#fff27a', 'long_neck', 1.3, 'Domina las lagunas del este. Cuando bate las alas levanta olas que desbordan la orilla.'],
   ] },
   { t: 'electrico', role: 'a', bst: PAIR, evo: ['piedra_agata'], mons: [
     ['anguila', 'Anguila', null, 'snake', '#4a6a5a', '#8ad0c0', '#f2e05c', 'pattern', 0.95, 'Vive en los fondos barrosos y aturde a sus presas con descargas.'],
@@ -92,10 +92,10 @@ export const LINES = [
     ['vespertino', 'Vespertino', 'volador', 'moth', '#3a2a4a', '#6a5a7a', '#ffe44a', 'bat', 1.2, 'Sale al anochecer en grandes bandadas. Su mordida deja un veneno que adormece.'],
   ] },
   { t: 'electrico', role: 's', bst: [450], evo: [], mons: [
-    ['fanal', 'Fanal', 'psiquico', 'wisp', '#f2e05c', '#c8a02a', '#fffbd0', 'lantern', 1.0, 'Una luz que guía a los barcos en la niebla. Se la ve de lejos aunque no haya faro.'],
+    ['fanal', 'Luciérnaga', 'psiquico', 'bug', '#3a3a2a', '#c8a02a', '#fffbd0', 'antennae glow', 1.0, 'Su luz titila en los pastizales de noche. Se comunican entre ellas con destellos.'],
   ] },
   { t: 'electrico', role: 't', bst: [455], evo: [], mons: [
-    ['pararrayo', 'Pararrayo', 'roca', 'golem', '#8a8a98', '#5a5a6a', '#ffe44a', 'rod', 1.0, 'Atrae los rayos hacia su cuerpo metálico y los almacena sin sufrir daño.'],
+    ['pararrayo', 'Martín Pescador', 'roca', 'bird', '#3a6a9a', '#c8783a', '#ffe44a', 'long_beak crest', 1.0, 'Se lanza sobre el agua como un rayo azul. Anida en barrancas de roca que excava con el pico.'],
   ] },
 
   // ---------------------------------------------------------------- TIERRA
@@ -175,9 +175,9 @@ export const LINES = [
 
   // ---------------------------------------------------------------- PSÍQUICO
   { t: 'psiquico', role: 's', bst: TRIO, evo: [18, 36], mons: [
-    ['candil', 'Candil', null, 'wisp', '#8ad8f0', '#5ab0d8', '#f2fcff', 'lantern', 0.85, 'Una luz tenue que aparece sobre los pastizales por la noche. Hipnotiza a quienes la siguen.'],
-    ['fatuo', 'Fatuo', 'fuego', 'wisp', '#a8e8d0', '#5ac0a0', '#f2fffa', 'halo', 1.1, 'Flota a ras del suelo. Los viajeros dicen que prefiere guiarlos lejos del camino.'],
-    ['luzmala', 'Luz Mala', 'fuego', 'wisp', '#d8f0ff', '#8ad0f0', '#ffffff', 'halo lantern', 1.3, 'La luz de las leyendas rurales. Aparece donde algo quedó enterrado, y nadie sabe por qué.'],
+    ['candil', 'Zorro Gris', null, 'quad', '#9a9a9a', '#5a5a62', '#f2fcff', 'ears_pointy snout_long tail_bushy', 0.85, 'Sale al atardecer a recorrer los pastizales. Sus ojos reflejan la luz como espejos.'],
+    ['fatuo', 'Zorro de Monte', 'fuego', 'quad', '#b8742a', '#6a4a22', '#f2d8a0', 'ears_pointy snout_long tail_bushy', 1.1, 'Recorre los montes ribereños de noche. Despista a quien lo sigue y se pierde entre los matorrales.'],
+    ['luzmala', 'Aguará Guazú', 'fuego', 'quad', '#c8541a', '#3a2a1a', '#f2e8d0', 'ears_pointy snout_long legs_long tail_bushy mane', 1.3, 'El mayor cánido de la región, de patas largas y pelaje rojizo. Casi nadie lo ha visto, y por eso lo rodean leyendas.'],
   ] },
   { t: 'psiquico', role: 's', bst: PAIR, evo: ['piedra_amatista'], mons: [
     ['franciscana', 'Franciscana', 'agua', 'whale', '#9aa8b8', '#e8eef4', '#c8e0f0', '', 0.62, 'El delfín más pequeño del Plata. Se comunica con sonidos que parecen un idioma.'],
@@ -227,27 +227,27 @@ export const LINES = [
 
   // ---------------------------------------------------------------- ROCA
   { t: 'roca', role: 't', bst: TRIO, evo: [17, 35], mons: [
-    ['guijarro', 'Guijarro', null, 'golem', '#a8a8a0', '#8a8a82', '#e8e8e0', 'moss', 0.85, 'Una piedra redonda pulida por el arroyo. Rueda sin rumbo hasta encontrar un lugar.'],
-    ['pedrusco', 'Pedrusco', null, 'golem', '#8c8c84', '#6a6a62', '#d8d8d0', 'moss', 1.05, 'Se endurece con el sol. Es difícil moverlo una vez que se planta.'],
-    ['penasco', 'Peñasco', 'tierra', 'golem', '#7a7a74', '#5a5a54', '#c8c8c0', 'moss', 1.3, 'Una montaña pequeña que camina. Su peso hace temblar el suelo.'],
+    ['guijarro', 'Mulita', null, 'armadillo', '#a8a090', '#7a7266', '#e8e8e0', '', 0.85, 'Se enrosca para protegerse y rueda por las laderas. Cava madrigueras entre las piedras del arroyo.'],
+    ['pedrusco', 'Tatú de Rabo Molle', null, 'armadillo', '#8c8478', '#6a6258', '#d8d8d0', 'spikes', 1.05, 'Tiene la coraza floja y las uñas enormes. Cuando se planta contra una roca es difícil moverlo.'],
+    ['penasco', 'Tatú Gigante', 'tierra', 'armadillo', '#6a6258', '#4a443c', '#c8c8c0', 'spikes', 1.3, 'Su peso hace temblar el suelo. Abre cuevas enteras con sus garras para alimentarse de termitas.'],
   ] },
   { t: 'roca', role: 's', bst: PAIR, evo: ['piedra_basalto'], mons: [
-    ['geoda', 'Geoda', null, 'golem', '#8c8478', '#6a6258', '#b070e8', 'crystals', 0.95, 'Parece una piedra común hasta que se abre y muestra un interior violeta.'],
-    ['amatista', 'Amatista', 'psiquico', 'golem', '#7a6a8a', '#5a4a6a', '#c890f8', 'crystals', 1.2, 'Los cristales de su espalda brillan con luz propia. Proviene de las canteras de Artigas.'],
+    ['geoda', 'Ermitaño', null, 'crab', '#8c8478', '#6a6258', '#b070e8', '', 0.95, 'Carga a cuestas una concha rugosa. Por dentro está tapizada de cristales violeta.'],
+    ['amatista', 'Cangrejo Violinista', 'psiquico', 'crab', '#7a6a8a', '#5a4a6a', '#c890f8', '', 1.2, 'Agita su pinza enorme para llamar a las hembras. Vive en las playas de arena y barro del Río de la Plata.'],
   ] },
   { t: 'roca', role: 't', bst: PAIR, evo: ['piedra_basalto'], mons: [
     ['fosil', 'Fósil', null, 'armadillo', '#b8a888', '#8a7a5a', '#6a5a40', '', 0.95, 'Un resto antiguo que cobra vida al contacto con la humedad. Conserva memoria de eras pasadas.'],
     ['gliptodonte', 'Gliptodonte', 'tierra', 'armadillo', '#9a8a68', '#6a5a3a', '#4a3a28', 'spikes', 1.3, 'Un animal blindado de la prehistoria. Su caparazón era una armadura completa.'],
   ] },
   { t: 'roca', role: 'a', bst: PAIR, evo: [26], mons: [
-    ['arenisca', 'Arenisca', null, 'golem', '#c8a070', '#a87a4a', '#e8c890', 'columns', 0.95, 'Se deshace con el viento, pero se recompone con la lluvia.'],
-    ['cuarcita', 'Cuarcita', null, 'golem', '#d8d0c0', '#b0a890', '#ffffff', 'columns', 1.2, 'Dura y filosa. Sus aristas brillan al sol como espejos.'],
+    ['arenisca', 'Lagarto Overo', null, 'quad', '#c8a070', '#7a5a3a', '#e8c890', 'snout tail_bushy', 0.95, 'Toma sol en los médanos y se entierra en la arena. Si lo molestan, huye a gran velocidad.'],
+    ['cuarcita', 'Teyú', null, 'quad', '#6a5a4a', '#d8d0c0', '#ffffff', 'snout_long tail_bushy', 1.2, 'Robusto y de escamas duras, brilla al sol como un espejo. Muerde con fuerza a quien lo acorrala.'],
   ] },
   { t: 'roca', role: 'a', bst: [450], evo: [], mons: [
-    ['cuchilla', 'Cuchilla', 'lucha', 'golem', '#6a7a6a', '#4a5a4a', '#c8d8c0', 'columns', 1.1, 'Una serranía hecha criatura. Se alza como una hoja de piedra sobre los campos.'],
+    ['cuchilla', 'Ñandú', 'lucha', 'bird', '#8a8478', '#5a5448', '#c8d8c0', 'long_neck', 1.1, 'Corre por la cuchilla a gran velocidad y patea con precisión. Los machos cuidan los nidos y las crías.'],
   ] },
   { t: 'roca', role: 't', bst: [460], evo: [], mons: [
-    ['cerro', 'Cerro', 'planta', 'golem', '#6a8a6a', '#4a6a4a', '#8ad060', 'moss', 1.2, 'Una colina con vida propia. Sobre su lomo crecen árboles y viven aves.'],
+    ['cerro', 'Yacaré', 'planta', 'quad', '#4a6a4a', '#2a4a2a', '#8ad060', 'snout_long tail_bushy', 1.2, 'Inmóvil en el bañado parece un tronco cubierto de plantas. Sobre su lomo descansan aves y crecen juncos.'],
   ] },
 ];
 

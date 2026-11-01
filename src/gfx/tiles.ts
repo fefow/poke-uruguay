@@ -1350,6 +1350,17 @@ for (const [kind, set, base] of [['cave', (THEMES as any).cueva, caveFloor], ['f
   set[c2] = (g, r) => { base(g, r); px(g, 0, 0, kind === 'cave' ? '#46424e' : '#2f5a2a', T, 3); px(g, 0, 3, kind === 'cave' ? '#504b58' : '#3a6e32', T, 2); px(g, 0, 5, kind === 'cave' ? '#565160' : '#437a3a', T, 1); };
   for (const c of [c0, c1, c2]) hidden(c, kind === 'cave' ? 'suelo de cueva' : 'suelo de monte', false);
 }
+// cave dressing: a puddle and moss/bones on the floor (walkable), and a stalagmite and a crystal cluster (solid)
+{
+  const cv = (THEMES as any).cueva;
+  const [puddle, litter, stalag, crystal] = [3, 4, 5, 6].map((k) => floorChar('cave', k));
+  cv[puddle] = (g, r) => { caveFloor(g, r); const x = r.int(2, 5), y = r.int(4, 8); px(g, x, y, '#2a3a52', 8, 4); px(g, x + 1, y - 1, '#2a3a52', 6, 1); px(g, x + 1, y + 4, '#2a3a52', 6, 1); px(g, x + 1, y + 1, '#4a6a8e', 4, 1); px(g, x + 5, y + 2, '#6a8eb0', 2, 1); };
+  cv[litter] = (g, r) => { caveFloor(g, r); for (let i = 0; i < 3; i++) { const x = r.int(1, 12), y = r.int(2, 12); px(g, x, y, '#3a6a4a', 3, 2); px(g, x + 1, y, '#5a9a62', 1, 1); } const bx = r.int(2, 9), by = r.int(9, 12); px(g, bx, by, '#d8d0b8', 4, 1); px(g, bx + 3, by - 1, '#d8d0b8', 1, 3); px(g, bx, by + 1, '#b0a890', 2, 1); };
+  cv[stalag] = (g, r) => { caveFloor(g, r); px(g, 3, 12, '#1c1a22', 10, 2); px(g, 4, 9, '#5a5566', 8, 4); px(g, 5, 6, '#6a6576', 6, 4); px(g, 6, 3, '#7a7586', 4, 4); px(g, 7, 1, '#8a8596', 2, 3); px(g, 4, 9, '#3e3a48', 2, 4); px(g, 6, 3, '#4e4a58', 1, 5); };
+  cv[crystal] = (g, r) => { caveFloor(g, r); px(g, 3, 13, '#1c1a22', 11, 2); for (const [x, h, c] of [[4, 6, '#5ab8d8'], [7, 10, '#7ad8f0'], [10, 7, '#5ab8d8']] as const) { px(g, x, 13 - h, c, 3, h); px(g, x + 1, 12 - h, c, 1, 1); px(g, x, 13 - h, '#c8f4ff', 1, h - 1); px(g, x + 2, 14 - h, '#2e7a9a', 1, h - 1); } };
+  hidden(puddle, 'charco', false); hidden(litter, 'suelo de cueva', false);
+  hidden(stalag, 'estalagmita', true); hidden(crystal, 'cristales', true);
+}
 
 /** Objects standing in the water (boats, rocks, willows...) are drawn over water, not over grass. */
 const LAND_BASE = new Set(['~', '.', ',', 'f', '=', 'c', 's', 'b', '}']);

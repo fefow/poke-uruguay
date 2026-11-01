@@ -306,6 +306,22 @@ export function mazeMap(m, seed, opts: MazeOpts): boolean {
         else if (h < 17) out[y][x] = floorChar(kind, 1);
       }
     }
+    // cave dressing: puddles and litter on the floor; stalagmites and crystal clusters only where all eight neighbours
+    // are open floor and no person or item is close, so no corridor can be narrowed or blocked
+    if (!forest) {
+      const floorCh = (x, y) => g[y]?.[x] === '.';
+      const busy = (x, y) => [...(m.items ?? []), ...people].some((o) => Math.abs(o.x - x) <= 2 && Math.abs(o.y - y) <= 2) || mouths.some((mo) => mo.cells.some(([cx, cy]) => Math.abs(cx - x) <= 3 && Math.abs(cy - y) <= 3));
+      const placedSolid: [number, number][] = [];
+      for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) {
+        if (out[y][x] !== floorChar('cave', 0) && out[y][x] !== floorChar('cave', 1) && out[y][x] !== '.') continue;
+        if (busy(x, y)) continue;
+        const h = hash(x * 7 + 3, y * 13 + 5) % 100;
+        const open8 = [-1, 0, 1].every((dy) => [-1, 0, 1].every((dx) => floorCh(x + dx, y + dy)));
+        if (open8 && h < 4 && placedSolid.every(([px2, py2]) => Math.abs(px2 - x) > 3 || Math.abs(py2 - y) > 3)) { out[y][x] = floorChar('cave', h < 2 ? 5 : 6); placedSolid.push([x, y]); }
+        else if (floorCh(x, y) && h >= 4 && h < 8) out[y][x] = floorChar('cave', 3);
+        else if (floorCh(x, y) && h >= 8 && h < 11) out[y][x] = floorChar('cave', 4);
+      }
+    }
     // the mouths keep a plain trail tile on the very edge (cave mouths are built from it)
     for (const mo of mouths) for (const [x, y] of mo.cells) out[y][x] = '=';
 
