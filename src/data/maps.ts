@@ -784,7 +784,7 @@ export const ZONE_LEVELS = Object.fromEntries(CHAIN.map((id) => [id, mapBand(id)
  * dungeons between the wild band and the ace.
  */
 const PLACES = {
-  fraybentos: ['gym_frb', 'anglo_1', 'casa_frb_faro', 'ferry_1', 'ferry_2'],
+  fraybentos: ['gym_frb', 'anglo_1', 'casa_frb_faro', 'ferry_1', 'ferry_2', 'ferry_c1', 'ferry_c2', 'ferry_c3', 'ferry_c4', 'ferry_c5', 'ferry_3', 'ferry_cocina', 'ferry_bodega', 'ferry_deck', 'ferry_cap'],
   paysandu: ['muelle_pay'],
   salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
   rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],
@@ -864,7 +864,6 @@ export function refGymOrder(mapId, maxLevel = 0) {
 const RIVAL_AT = [
   ['r_rosario_sanjose', 'rival_bosque', 'rival_bosque'],
   ['ruta24', 'rival_mvd', 'rival2'],
-  ['ruta30', 'rival_ferry', 'rival3'],
   ['r_lascano_rocha', 'rival_r5', 'rival5'],
   ['r_sarandi_durazno', 'rival_r24', 'rival6'],
 ];

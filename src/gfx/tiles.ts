@@ -42,6 +42,7 @@ export const TILE_INFO = {
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
   ϼ: { name: 'equipo de la sala', solid: true },
+  Ϫ: { name: 'puerta de camarote', solid: true },
   Ϣ: { name: 'flecha lanzadora' },
   Ϥ: { name: 'flecha lanzadora' },
   Ϧ: { name: 'flecha lanzadora' },
@@ -1152,6 +1153,14 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
     };
   }
 }
+
+// Interior cabin / ship door: a wooden door set in the panelled wall.
+DRAW['Ϫ'] = (g) => {
+  px(g, 0, 0, '#7a5a3a', T, T); px(g, 0, 0, '#9a7a56', T, 1);
+  px(g, 2, 1, '#3e2a18', 12, 15); px(g, 3, 2, '#8a5a30', 10, 14); px(g, 3, 2, '#a8723c', 10, 1);
+  px(g, 5, 4, '#bfe4ff', 6, 4); px(g, 5, 4, '#e8f6ff', 6, 1); px(g, 8, 4, '#3e2a18', 1, 4);
+  px(g, 10, 10, '#f2c02a', 2, 2); px(g, 0, 15, '#4a3220', T, 1);
+};
 
 // The Buquebus "China Zorrilla": a 12x3-tile ship (bow to the left) drawn once and sliced into tiles over animated water.
 export const SHIP_W = 12, SHIP_H = 3, SHIP_BASE = 0xe400;
