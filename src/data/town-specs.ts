@@ -141,17 +141,19 @@ export const CITY_SPECS = {
     fill: 8,
   },
   // Rivera: twin plazas on the border with a line of boundary stones down the middle.
+  // Rivera (64x42): the dry border runs down the middle (marker posts, 'ρ'); two squares face each other across it, the
+  // customs house stands on the avenue and the Mi Zoo gate and the tower sit in the east barrios.
   rivera: {
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 7,
-      paths: [[[1, 14], [42, 14]], [[22, 1], [22, 28]], [[4, 6], [40, 6]], [[4, 22], [40, 22]], [[11, 6], [11, 22]], [[33, 6], [33, 22]]],
-      plazas: [{ x: 15, y: 15, w: 6, h: 6, piece: 'fuente', benches: false }, { x: 24, y: 15, w: 6, h: 6, piece: 'Γ' }, { x: 15, y: 7, w: 6, h: 6 }, { x: 24, y: 7, w: 6, h: 6, ring: 'Σ' }],
-      props: [...row('ρ', 23, 2, 3, 1, true), ...row('ρ', 23, 8, 5, 1, true), ...row('ρ', 23, 16, 5, 1, true), ...row('ρ', 23, 23, 5, 1, true)],
-      scatter: [['Ω', 6, 'road'], ['#', 8, 'away']],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      paths: [[[1, 21], [62, 21]], [[32, 1], [32, 40]], [[6, 8], [58, 8]], [[6, 34], [58, 34]], [[16, 8], [16, 34]], [[48, 8], [48, 34]], [[16, 27], [48, 27]]],
+      plazas: [{ x: 22, y: 22, w: 8, h: 6, piece: 'fuente', benches: false }, { x: 35, y: 22, w: 8, h: 6, piece: 'Γ' }, { x: 22, y: 12, w: 8, h: 6 }, { x: 35, y: 12, w: 8, h: 6, ring: 'Σ' }],
+      props: [...row('ρ', 33, 2, 5, 1, true), ...row('ρ', 33, 11, 6, 1, true), ...row('ρ', 33, 22, 6, 1, true), ...row('ρ', 33, 30, 3, 1, true), ...row('ρ', 33, 36, 4, 1, true)],
+      scatter: [['Ω', 8, 'road'], ['#', 10, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['lucha', 'gym_riv', [8, 18]], ['poli', 'poli_riv'], ['shop', 'shop_riv'], ['houseB', 'casa_riv'], ['house', 'aduana_riv'], ['houseG', 'safari_gate'], ['houseO', 'casa_riv2'], ['torre', 'torre_1', [34, 18]]],
-    fill: 8,
+    bld: [['lucha', 'gym_riv', [12, 14]], ['poli', 'poli_riv', [24, 4]], ['shop', 'shop_riv', [38, 4]], ['houseB', 'casa_riv', [8, 28]], ['house', 'aduana_riv', [26, 30]], ['houseG', 'safari_gate', [52, 14]], ['houseO', 'casa_riv2', [54, 28]], ['torre', 'torre_1', [44, 30]]],
+    fill: 14,
   },
   // Tacuarembó: gaucho country: red earth, pine plantations to the west, eucalyptus to the east, parrilla.
   tacuarembo: {

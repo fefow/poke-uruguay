@@ -123,6 +123,12 @@ export const SAFARI_GATE = { map: 'rivera', x: 11, y: 15 };
 const gateFor = (id: string) => {
   const m: any = MAPS[id];
   if (m?.contest) { const t: any = MAPS[CONTEST_CITY]; const g = t?.contestGate; if (g) return { map: CONTEST_CITY, x: g.x, y: g.y }; }
+  if (m?.safari) {
+    // the Safari gate is the tile in front of the Mi Zoo ticket office, wherever Rivera's plan put it
+    const dw: Record<string, any> = (MAPS[SAFARI_GATE.map] as any)?.doorWarps ?? {};
+    const k = Object.keys(dw).find((key) => dw[key].to === 'safari_gate');
+    if (k) { const [dx, dy] = k.split(',').map(Number); return { map: SAFARI_GATE.map, x: dx, y: dy + 1 }; }
+  }
   return SAFARI_GATE;
 };
 const safariLeft = () => (state().safari?.until ?? 0) - Date.now();
@@ -1015,7 +1021,7 @@ export const api = {
   },
   safariLeft: () => Math.max(0, safariLeft()),
   safariLeave() { state().safari = null; safariStrip(); },
-  safariGate: SAFARI_GATE,
+  get safariGate() { return gateFor('safari'); },
   /** Capture contest: the timed park with 20 balls; creatures caught go to the box and are judged afterwards. */
   contestStart(minutes, balls) {
     const S = state();
