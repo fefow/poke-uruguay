@@ -707,6 +707,7 @@ import { fitToMap, wildList, teamOf, rng } from './map-gen.ts';
 import { guideMap } from './guide.ts';
 import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
+import { flavorRoute } from './route-flavor.ts';
 import { layoutGym } from './gym-layouts.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1196,6 +1197,7 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
   if (m.maze) { addRouteStory(m, id); continue; }
   guideMap(m, id, { width: id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3 });
+  flavorRoute(m, id);
   addRouteStory(m, id);
 }
 
