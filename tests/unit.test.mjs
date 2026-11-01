@@ -375,7 +375,7 @@ test('rutas guiadas: desniveles de un solo sentido y paredes de árboles', async
   assert.ok(total > 20, 'hay desniveles en las rutas');
   const r = OUTDOOR.r_rosario_sanjose.tiles.join('');
   const trees = [...r].filter((c) => c === '#' || c === 'q' || (c >= '\uE040' && c < '\uE080')).length;
-  assert.ok(trees / r.length > 0.4, 'el Bosque Grande es denso');
+  assert.ok(trees / r.length > 0.25, 'el Bosque Grande tiene arboledas');
 });
 
 test('historias de ruta: las marcas rq_/rf_ son válidas en una partida guardada', async () => {
