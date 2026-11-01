@@ -199,20 +199,23 @@ export const CITY_SPECS = {
     fill: 8,
   },
   // Rocha: butiá palm groves, a lagoon and dunes.
+  // Rocha (64x42): palm groves in the north, the main avenue with a long square, a lagoon, and dunes opening to the
+  // south where the town turns into beach. A promenade runs along the dunes.
   rocha: {
     theme: 'arena',
     spec: {
-      w: W, h: H, border: 'p', tree: 'p', road: 'c', lamps: 12,
-      water: [{ blob: [8, 24, 8, 3] }, { blob: [34, 5, 6, 3] }],
-      fills: [{ rect: [1, 18, 42, 11], ch: 'ß', only: '.' }],
-      groves: [{ rect: [2, 2, 14, 8], tree: 'p', density: 0.5, lanes: 4 }, { rect: [26, 10, 14, 6], tree: 'p', density: 0.45, lanes: 4 }],
-      paths: [[[1, 13], [42, 13]], [[22, 1], [22, 18]], [[22, 13], [22, 17], [38, 17]], [[10, 13], [10, 7]], [[32, 13], [32, 1]]],
-      plazas: [{ x: 15, y: 14, w: 6, h: 3, piece: 'fuente', ring: null }],
-      scatter: [['p', 12, 'away'], ['ξ', 6, 'away'], ['Ω', 3, 'road']],
-      animals: [{ sp: 'tuco', n: 2, rect: [12, 20, 20, 5] }],
+      w: 64, h: 42, border: 'p', tree: 'p', road: 'c', lamps: 16,
+      water: [{ blob: [12, 34, 10, 4] }, { blob: [52, 6, 8, 3] }, { blob: [46, 36, 7, 3] }],
+      fills: [{ rect: [1, 28, 62, 13], ch: 'ß', only: '.' }],
+      groves: [{ rect: [2, 2, 22, 10], tree: 'p', density: 0.5, lanes: 4 }, { rect: [38, 12, 22, 7], tree: 'p', density: 0.45, lanes: 4 }, { rect: [28, 2, 12, 6], tree: 'p', density: 0.5, lanes: 4 }],
+      paths: [[[1, 20], [62, 20]], [[32, 1], [32, 27]], [[32, 20], [32, 25], [58, 25]], [[14, 20], [14, 8]], [[48, 20], [48, 5]], [[6, 25], [32, 25]], [[8, 12], [24, 12]]],
+      plazas: [{ x: 22, y: 21, w: 10, h: 3, piece: 'fuente', ring: null }, { x: 38, y: 21, w: 8, h: 3, piece: 'fuente', ring: null }],
+      props: [['Λ', 30, 19], ['Λ', 40, 19], ['Λ', 10, 24], ['Λ', 56, 24]],
+      scatter: [['p', 20, 'away'], ['ξ', 10, 'away'], ['Ω', 6, 'road']],
+      animals: [{ sp: 'tuco', n: 3, rect: [10, 30, 40, 6] }],
     },
-    bld: [['poli', 'poli_rocha'], ['shop', 'shop_rocha'], ['house', 'casa_rocha'], ['houseG', 'casa_rocha2']],
-    fill: 8,
+    bld: [['poli', 'poli_rocha', [20, 16]], ['shop', 'shop_rocha', [44, 16]], ['house', 'casa_rocha', [8, 16]], ['houseG', 'casa_rocha2', [54, 16]]],
+    fill: 14,
   },
   // Maldonado / Punta del Este: a peninsula with the rambla, La Mano rising from the sand, the port with boats.
   punta: {
