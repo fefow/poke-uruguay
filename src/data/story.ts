@@ -547,6 +547,12 @@ export const SCRIPTS = {
     await api.say('Listo, están recuperadas. Volvé cuando lo necesites.', { name: 'Enfermera' });
   },
 
+  async camp_nurse(api) {
+    await api.say(['Armé este puesto para los que van a la Liga. Todos llegan con las criaturas cansadas.', 'Dejame que las atienda.'], { name: 'Enfermera de campaña' });
+    await api.healParty();
+    await api.say('Listo. Que la Calle Victoria te sea corta.', { name: 'Enfermera de campaña' });
+  },
+
   async pc(api) {
     api.sfx('confirm');
     await api.openPC();

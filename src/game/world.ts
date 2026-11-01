@@ -1040,22 +1040,15 @@ function drawWorld(g, t) {
     if (!m.dark && m.theme !== 'cueva' && weatherAt(m.id) === 'rain') rain(g, t);
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
     // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
-    const machines = W_.npcs.filter((n) => n.def.script === 'route_fog' && n.def.doneFlag && !flag(n.def.doneFlag));
-    if (machines.length) {
+    const machines = activeMachines();
+    if (machines.length && !m.dark) {
       const px0 = ppos.x - cx + T / 2, py0 = ppos.y - cy + T / 2;
       const gr = g.createRadialGradient(px0, py0, T * 1.2, px0, py0, T * 4);
       gr.addColorStop(0, 'rgba(196,204,216,0.35)');
       gr.addColorStop(1, 'rgba(196,204,216,0.93)');
       g.fillStyle = gr; g.fillRect(0, 0, W, H);
       drawFog(g, t);
-      for (const n of machines) {
-        const pos = entityPos(n), sx = Math.round(pos.x - cx), sy = Math.round(pos.y - cy);
-        const pulse = 0.55 + 0.25 * Math.sin(t / 260);
-        const glow = g.createRadialGradient(sx + 12, sy + 10, 1, sx + 12, sy + 10, 26);
-        glow.addColorStop(0, `rgba(255,70,60,${pulse})`); glow.addColorStop(1, 'rgba(255,70,60,0)');
-        g.fillStyle = glow; g.fillRect(sx - 20, sy - 18, 64, 64);
-        drawFogMachine(g, sx, sy, t);
-      }
+      drawMachineGlows(g, t, cx, cy, machines);
     }
   }
   if (m.dark && !W_.lit) {
@@ -1066,6 +1059,7 @@ function drawWorld(g, t) {
     g.fillStyle = gr;
     g.fillRect(0, 0, W, H);
   }
+  if (m.dark && !m.indoor) drawMachineGlows(g, t, cx, cy, activeMachines());
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
 }
@@ -1146,6 +1140,23 @@ function drawFishing(g, cx, cy, t) {
     const ex = Math.round(ppos.x - cx) + 4, ey = Math.round(ppos.y - cy) - 18;
     g.fillStyle = '#fff'; g.fillRect(ex, ey, 9, 11);
     g.fillStyle = '#1a1a24'; g.fillRect(ex + 3, ey + 2, 3, 5); g.fillRect(ex + 3, ey + 8, 3, 2);
+  }
+}
+
+/** PP fog machines in this map that are still running. */
+function activeMachines() {
+  return W_.npcs.filter((n) => n.def.script === 'route_fog' && n.def.doneFlag && !flag(n.def.doneFlag));
+}
+
+/** The lit panel of each running machine, drawn over the fog (or the darkness of a cave). */
+function drawMachineGlows(g, t, cx, cy, machines) {
+  for (const n of machines) {
+    const pos = entityPos(n), sx = Math.round(pos.x - cx), sy = Math.round(pos.y - cy);
+    const pulse = 0.55 + 0.25 * Math.sin(t / 260);
+    const glow = g.createRadialGradient(sx + 12, sy + 10, 1, sx + 12, sy + 10, 26);
+    glow.addColorStop(0, `rgba(255,70,60,${pulse})`); glow.addColorStop(1, 'rgba(255,70,60,0)');
+    g.fillStyle = glow; g.fillRect(sx - 20, sy - 18, 64, 64);
+    drawFogMachine(g, sx, sy, t);
   }
 }
 

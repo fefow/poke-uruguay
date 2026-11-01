@@ -918,7 +918,7 @@ function makeCave(m) {
     ['Espeleóloga Bianca', 'Espeleóloga', ['bicho', 'roca'], ['Estudio lo que vive donde no llega el sol.', 'No esperaba perder.', 'Los cristales marcan el camino.']],
     ['Entomólogo Ramiro', 'Entomólogo', ['bicho'], ['¿Sabías que acá hay escarabajos sin ojos?', 'Hoy me tocó a mí.', 'No pises los hongos.']],
   ];
-  (m.npcs ?? []).filter((n) => n.trainer).forEach((n, k) => {
+  (m.npcs ?? []).filter((n) => n.trainer && !n.hideout).forEach((n, k) => {
     const [name, cls, types, [intro, lose, after]] = folk[k % folk.length];
     n.trainer.name = name;
     n.trainer.cls = cls;
@@ -949,7 +949,18 @@ function makeVictory(m) {
   });
 }
 makeVictory(OUTDOOR.r_laspiedras_montevideo);
+// A field nurse sets up camp in a side chamber, and a Liga guard keeps the Montevideo end closed until the three veterans are beaten.
+OUTDOOR.r_laspiedras_montevideo.npcs.push({ x: 0, y: 0, look: 'nurse', dir: 'down', name: 'Enfermera de campaña', script: 'camp_nurse' });
 mazeMap(OUTDOOR.r_laspiedras_montevideo, 'r_laspiedras_montevideo', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'] });
+{
+  const m = OUTDOOR.r_laspiedras_montevideo;
+  const ids = m.npcs.filter((n) => n.trainer).map((n) => n.trainer.id);
+  const w = m.tiles[0].length;
+  m.tiles.forEach((row, y) => {
+    if (row[w - 1] !== '=') return;
+    m.npcs.push({ x: w - 1, y, look: 'cop', dir: 'left', blocker: true, name: 'Guardia de la Liga', text: ['Calle Victoria: solo pasa quien venció a los tres veteranos del camino.', 'Es la regla de la Liga. Todavía te falta alguno.'], cond: (f) => !ids.every((id) => f[`tr_${id}`]) });
+  });
+}
 
 /** The first long forest of the trip (Bosque Grande): thick trees, lots of bichos, plantas and voladores before the first gym. */
 function makeForest(m, name, sign, seed, folk) {
@@ -1068,6 +1079,18 @@ function caveMouth(m, side) {
   const [fx, fy] = cell(1, mid);
   if (TILE_INFO[rows[fy][fx]]?.solid) rows[fy][fx] = '=';
   m.tiles = rows.map((r) => r.join(''));
+}
+// PP built a fog machine deep inside the Cueva de las Sierras; two recruits guard it. It is lit from the moment you arrive.
+{
+  const m = OUTDOOR.r_piriapolis_minas;
+  const base = m.npcs.find((n) => n.trainer);
+  const lv = base.trainer.team.map((t) => t[1]);
+  const pp = (k, types, intro, lose, after) => ({ ...base, look: 'grunt', hideout: true, trainer: { ...base.trainer, id: `${base.trainer.id}_pp${k}`, name: 'Recluta PP', cls: 'Equipo PP', intro, lose, after, team: teamOf(types, lv.map((l) => l + 1), `sierraspp${k}`) as any } as any });
+  m.npcs.push(
+    pp(0, ['siniestro', 'roca'], 'La máquina funciona mejor sin luz. Nos gusta la oscuridad.', 'Se apagó todo.', 'Hacé lo que quieras con la máquina, yo no vi nada.'),
+    pp(1, ['siniestro', 'bicho'], 'Este túnel va a dejar pasar niebla hasta Minas. Vos no la vas a frenar.', 'Se nos arruina el negocio.', 'El jefe se va a enterar de esto.'),
+    { x: 0, y: 0, look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', hideout: true, doneFlag: 'rf_r_piriapolis_minas', reward: 'mate_dulce', clue: 'Una máquina de la PP escondida entre los cristales. Sus luces rojas son lo único que se ve en la oscuridad. Echa niebla por el túnel hacia Minas.' },
+  );
 }
 mazeMap(OUTDOOR.r_piriapolis_minas, 'r_piriapolis_minas', { kind: 'cave', extraItems: ['mate_dulce', 'superesfera'] });
 for (const caveId of ['r_palmitas_mercedes', 'r_piriapolis_minas']) {
