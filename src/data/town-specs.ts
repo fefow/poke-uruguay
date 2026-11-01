@@ -88,7 +88,7 @@ export const CITY_SPECS = {
       scatter: [['γ', 4, 'away'], ['τ', 4, 'road']],
       animals: [],
     },
-    bld: [['siniestro', 'gym_frb', [24, 10]], ['poli', 'poli_frb', [14, 17]], ['shop', 'shop_frb', [34, 17]], ['house', 'casa_frb'], ['houseG', 'casa_frb2'], ['fabrica', 'anglo_1', [30, 8]], ['terminal', 'ferry_1', [4, 17]], ['casaFaro', 'casa_frb_faro', [24, 17]]],
+    bld: [['siniestro', 'gym_frb', [24, 10]], ['poli', 'poli_frb', [14, 17]], ['shop', 'shop_frb', [34, 17]], ['house', 'casa_frb'], ['houseG', 'casa_frb2'], ['fabrica', 'anglo_1', [30, 8]], ['terminal', 'terminal_frb', [4, 17]], ['casaFaro', 'casa_frb_faro', [24, 17]]],
     fill: 6, fillKinds: ['fabrica', 'houseB'],
   },
   // Paysandú: the Uruguay river to the west with a long bridge, a hill with the cathedral, stepped streets.

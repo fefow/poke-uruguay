@@ -784,7 +784,7 @@ export const ZONE_LEVELS = Object.fromEntries(CHAIN.map((id) => [id, mapBand(id)
  * dungeons between the wild band and the ace.
  */
 const PLACES = {
-  fraybentos: ['gym_frb', 'anglo_1', 'casa_frb_faro', 'ferry_1', 'ferry_2', 'ferry_c1', 'ferry_c2', 'ferry_c3', 'ferry_c4', 'ferry_c5', 'ferry_3', 'ferry_cocina', 'ferry_bodega', 'ferry_deck', 'ferry_cap'],
+  fraybentos: ['gym_frb', 'anglo_1', 'casa_frb_faro', 'ferry_1', 'ferry_2', 'ferry_c1', 'ferry_c2', 'ferry_c3', 'ferry_c4', 'ferry_c5', 'terminal_frb', 'ferry_3', 'ferry_cocina', 'ferry_bodega', 'ferry_deck', 'ferry_cap'],
   paysandu: ['muelle_pay'],
   salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
   rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],
@@ -1132,16 +1132,6 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   });
 }
 
-// Fray Bentos harbour: the Buquebus is moored off the terminal pier; it sails away for good when the ferry quest is done.
-{
-  const fb: any = OUTDOOR.fraybentos;
-  const put = (x, y, c) => { fb.tiles[y] = fb.tiles[y].slice(0, x) + c + fb.tiles[y].slice(x + 1); };
-  const flagTiles: any[] = [];
-  for (let iy = 0; iy < SHIP_H; iy++) for (let ix = 0; ix < SHIP_W; ix++) { put(2 + ix, 26 + iy, shipChar(ix, iy)); flagTiles.push({ flag: 'ferry_done', x: 2 + ix, y: 26 + iy, ch: '~' }); }
-  for (const x of [6, 7]) for (const y of [24, 25]) { put(x, y, '}'); flagTiles.push({ flag: 'ferry_done', x, y, ch: '~' }); }
-  fb.flagTiles = flagTiles;
-}
-
 // Every gym has its own floor plan.
 GYM_STOPS.forEach((stop, i) => {
   const door = (OUTDOOR[stop.id]?.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to)).find((to) => to.startsWith('gym_'));
@@ -1393,3 +1383,20 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);
+
+// Fray Bentos harbour: the Buquebus is moored at the end of the pier (the pier is drawn in the map editor, the ship is
+// added here, after the editor's patches). A sailor stands at the end of the pier and does not let anyone board without
+// the ticket; the hull tile in front of the pier is the gangway to the ship's main deck. When the ferry quest is done the
+// ship and the pier extension vanish for good.
+{
+  const fb: any = OUTDOOR.fraybentos;
+  const put = (x, y, c) => { fb.tiles[y] = fb.tiles[y].slice(0, x) + c + fb.tiles[y].slice(x + 1); };
+  const flagTiles: any[] = [];
+  const X0 = 1, Y0 = 26;
+  for (let iy = 0; iy < SHIP_H; iy++) for (let ix = 0; ix < SHIP_W; ix++) { put(X0 + ix, Y0 + iy, shipChar(ix, iy)); flagTiles.push({ flag: 'ferry_done', x: X0 + ix, y: Y0 + iy, ch: '~' }); }
+  for (const y of [25, 26]) { put(3, y, 'b'); flagTiles.push({ flag: 'ferry_done', x: 3, y, ch: '~' }); }
+  // the ship hull's gangway tile sits just below the pier end, at (3, 27)
+  fb.flagTiles = flagTiles;
+  (fb.warps ??= []).push({ x: 3, y: 27, to: 'ferry_1', tx: 11, ty: 4 });
+  (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
+}

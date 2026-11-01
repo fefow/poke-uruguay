@@ -396,19 +396,33 @@ const cabin = (n, door, name, extra: any[], itemSpec) => room(shipRows(9, 8, [[1
   npcs: extra, items: [{ ...itemSpec, id: `fe_it_${n}` }],
 });
 const FERRY: Record<string, any> = {
-  ferry_1: room(shipRows(20, 12, [[9, 0, D], [10, 0, D], ...[1, 18].flatMap((x) => [[x, 1, 'N'], [x, 10, 'N']] as [number, number, string][]), [3, 5, 'T'], [4, 5, 'T'], [15, 5, 'T'], [16, 5, 'T'], ...Array.from({ length: 10 }, (_, y) => [[9, y + 1, 'A'], [10, y + 1, 'A']] as [number, number, string][]).flat()]), {
-    name: 'Buquebus China Zorrilla: salón de embarque', music: 'town',
-    warps: [{ x: 9, y: 0, to: 'ferry_2', tx: 13, ty: 5 }, { x: 10, y: 0, to: 'ferry_2', tx: 14, ty: 5 }],
-    npcs: [
-      tr({ x: 5, y: 8 }, 'sailor', 'fe_a', 'Marinero Gómez', 'Marinero', ['agua', 'volador'], [16, 17], ['Primer viaje del barco y ya tengo que defenderlo.', 'Zozobré.', 'Los camarotes están por el pasillo, al fondo.'], { dir: 'right', sight: 4 }),
-      tr({ x: 14, y: 7 }, 'girl', 'fe_b', 'Gimena', 'Turista', ['normal', 'volador'], [16, 18], ['Viajo a Buenos Aires por el día. Pero un combate no le hace mal a nadie.', 'Qué mala suerte.', 'Si buscás al capitán, andá hasta la cubierta de arriba.'], { dir: 'left', sight: 4 }),
-      { x: 12, y: 3, look: 'biologo', dir: 'left', script: 'ferry_bio' },
-      npc(7, 2, 'oldman', ['El barco se llama como la actriz China Zorrilla, una de las grandes de nuestro teatro.', 'Dicen que le hubiera gustado verlo navegar.'], { dir: 'down' }),
-    ],
-  }),
+  // main deck, open air: the player comes up the gangway from the pier (north), the cabin block stands in the middle
+  ferry_1: (() => {
+    const W = 26, H = 14;
+    const g: string[][] = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x): string => (x >= 3 && x <= 22 && y >= 3 && y <= 10 ? 'i' : '~')));
+    const set = (x, y, c) => { g[y][x] = c; };
+    for (let x = 2; x <= 23; x++) { set(x, 2, 'F'); set(x, 11, 'F'); }
+    for (let y = 2; y <= 11; y++) { set(2, y, 'F'); set(23, y, 'F'); }
+    set(11, 2, 'i'); set(12, 2, 'i'); set(11, 0, '}'); set(12, 0, '}'); set(11, 1, '}'); set(12, 1, '}');
+    for (let y = 5; y <= 8; y++) for (let x = 6; x <= 17; x++) set(x, y, y === 8 && (x - 6) % 3 === 1 ? 'X' : 'x');
+    set(9, 8, D); set(14, 8, D); set(9, 6, 'P'); set(14, 6, 'P');
+    for (const [x, y] of [[7, 3], [8, 3], [17, 3], [18, 3], [4, 9], [5, 9], [20, 9], [21, 9]]) set(x, y, 'Ϭ');
+    for (const [x, y] of [[3, 3], [22, 3], [3, 10]]) set(x, y, 'ϭ');
+    set(22, 10, 'm');
+    return room(g.map((r) => r.join('')), {
+      name: 'Buquebus China Zorrilla: cubierta principal', music: 'town', exitTo: { map: 'fraybentos', x: 3, y: 25 },
+      warps: [{ x: 11, y: 0, to: 'fraybentos', tx: 3, ty: 25 }, { x: 12, y: 0, to: 'fraybentos', tx: 3, ty: 25 }, { x: 9, y: 8, to: 'ferry_2', tx: 13, ty: 5 }, { x: 14, y: 8, to: 'ferry_2', tx: 14, ty: 5 }],
+      npcs: [
+        tr({ x: 4, y: 5 }, 'sailor', 'fe_a', 'Marinero Gómez', 'Marinero', ['agua', 'volador'], [16, 17], ['Primer viaje del barco y ya tengo que defenderlo.', 'Zozobré.', 'Los camarotes están por el pasillo: las puertas del centro de la cubierta.'], { dir: 'down', sight: 4 }),
+        tr({ x: 20, y: 6 }, 'girl', 'fe_b', 'Gimena', 'Turista', ['normal', 'volador'], [16, 18], ['Viajo a Buenos Aires por el día. Pero un combate no le hace mal a nadie.', 'Qué mala suerte.', 'Si buscás al capitán, subí hasta la cubierta de arriba.'], { dir: 'down', sight: 4 }),
+        { x: 12, y: 10, look: 'biologo', dir: 'up', script: 'ferry_bio' },
+        npc(7, 4, 'oldman', ['El barco se llama como la actriz China Zorrilla, una de las grandes de nuestro teatro.', 'Dicen que le hubiera gustado verlo navegar.'], { dir: 'down' }),
+      ],
+    });
+  })(),
   // long corridor: five cabins to the north, the hold to the west, the dining room to the east
   ferry_2: room(shipRows(28, 7, [...[3, 8, 13, 18, 23].map((x) => [x, 0, D] as [number, number, string]), [0, 3, D], [27, 3, D], [1, 1, 'N'], [26, 1, 'N'], [1, 5, 'N'], [26, 5, 'N'], ...Array.from({ length: 26 }, (_, x) => [x + 1, 3, 'A'] as [number, number, string]), [6, 1, 'T'], [20, 1, 'T']]), {
-    name: 'Buquebus China Zorrilla: pasillo de camarotes', music: 'town', exitTo: { map: 'ferry_1', x: 9, y: 1 },
+    name: 'Buquebus China Zorrilla: pasillo de camarotes', music: 'town', exitTo: { map: 'ferry_1', x: 9, y: 9 },
     warps: [
       ...[3, 8, 13, 18, 23].map((x, k) => ({ x, y: 0, to: `ferry_c${k + 1}`, tx: 4, ty: 6 })),
       { x: 0, y: 3, to: 'ferry_bodega', tx: 10, ty: 8 }, { x: 27, y: 3, to: 'ferry_3', tx: 10, ty: 10 },
@@ -470,6 +484,7 @@ const FERRY: Record<string, any> = {
     npcs: [{ x: 4, y: 3, look: 'ferry_captain', dir: 'down', script: 'ferry_captain' }],
   }),
 };
+for (const m of Object.values(FERRY)) m.theme = 'barco';
 
 // dungeon floors (shared 12-wide plans)
 const FLOOR_UP = [
@@ -581,6 +596,8 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
   casa_frb: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'gaucho', dir: 'left', script: 'gift_soga', name: 'Escalador' }, casaNpc('clerk', ['Mi abuelo trabajó en el Anglo. Decía que el olor del frigorífico se sentía a kilómetros.'], { x: 6, y: 3 })),
   casa_frb_faro: house('Casa del farero', { x: 6, y: 3, look: 'keeper', dir: 'left', script: 'keeper_colonia' }),
   casa_frb2: house('Casa en Fray Bentos', { x: 6, y: 3, look: 'girl', dir: 'left', script: 'gift_frb' }),
+
+  terminal_frb: house('Terminal del Buquebus', { x: 6, y: 3, look: 'clerk', dir: 'left', name: 'Boletería', text: ['Boletería del Buquebus "China Zorrilla".', 'El empleado que despacha los pasajes no vino hoy. Dicen que quedó trabajando en el frigorífico, y no lo dejan salir.'] }, npc(3, 5, 'oldman', ['El barco está amarrado al final del muelle. Con la gente de la empresa nunca se sabe.'], { dir: 'right' })),
 
   // --- Buquebus "China Zorrilla" (Fray Bentos): a big ship, several views like a real ferry. Main hall, a corridor of
   // cabins, dining room + kitchen, the hold, the upper deck (where the rival waits) and the captain's cabin.

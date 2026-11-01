@@ -43,6 +43,8 @@ export const TILE_INFO = {
   ϻ: { name: 'instalación', solid: true },
   ϼ: { name: 'equipo de la sala', solid: true },
   Ϫ: { name: 'puerta de camarote', solid: true },
+  Ϭ: { name: 'bote salvavidas', solid: true },
+  ϭ: { name: 'salvavidas', solid: true },
   Ϣ: { name: 'flecha lanzadora' },
   Ϥ: { name: 'flecha lanzadora' },
   Ϧ: { name: 'flecha lanzadora' },
@@ -1160,6 +1162,29 @@ DRAW['Ϫ'] = (g) => {
   px(g, 2, 1, '#3e2a18', 12, 15); px(g, 3, 2, '#8a5a30', 10, 14); px(g, 3, 2, '#a8723c', 10, 1);
   px(g, 5, 4, '#bfe4ff', 6, 4); px(g, 5, 4, '#e8f6ff', 6, 1); px(g, 8, 4, '#3e2a18', 1, 4);
   px(g, 10, 10, '#f2c02a', 2, 2); px(g, 0, 15, '#4a3220', T, 1);
+};
+
+// Ship interiors and decks ("barco" theme): teak planking, white painted steel with portholes. Furniture keeps its default
+// drawing but stands on teak (the default floor is swapped while it is drawn).
+{
+  const teak = (g, r) => { px(g, 0, 0, '#c4925a', T, T); for (let y = 0; y < T; y += 5) px(g, 0, y, '#8a6238', T, 1); px(g, 0, 1, '#d8a870', T, 1); px(g, r ? r.int(2, 13) : 6, 2, '#8a6238', 1, 3); };
+  const steel = (g) => { px(g, 0, 0, '#eef3f7', T, T); px(g, 0, 11, '#2a5a9a', T, 2); px(g, 0, 13, '#c8d4de', T, 3); px(g, 0, 10, '#9aa8b8', T, 1); for (const x of [2, 7, 12]) px(g, x, 4, '#c0ccd8', 2, 1); };
+  const on = (ch) => (g, r, f) => { const i0 = DRAW.i, x0 = DRAW.x; DRAW.i = teak; DRAW.x = steel; try { DRAW[ch](g, r, f); } finally { DRAW.i = i0; DRAW.x = x0; } };
+  const B_: any = (THEMES as any).barco = { i: teak, x: steel };
+  for (const ch of ['T', 'n', 'm', 'E', 'N', 'B', 'P', 'X']) B_[ch] = on(ch);
+  B_.X = (g) => { steel(g); px(g, 3, 1, '#8a96a4', 10, 10); px(g, 4, 2, '#2a3a5a', 8, 8); px(g, 5, 3, '#8ac8f0', 6, 6); px(g, 5, 3, '#d8f0ff', 6, 1); px(g, 3, 1, '#c8d4de', 10, 1); };
+  B_.F = (g, r, f) => { DRAW['~'](g, r, f); px(g, 0, 7, '#f4f8fc', T, 2); px(g, 0, 9, '#9aa8b8', T, 1); for (const x of [1, 7, 13]) { px(g, x, 3, '#f4f8fc', 2, 10); px(g, x, 3, '#ffffff', 1, 10); } };
+}
+DRAW['Ϭ'] = (g, r) => {
+  const t = (THEMES as any).barco.i; t(g, r);
+  px(g, 1, 5, '#2a3a5a', 14, 8); px(g, 2, 4, '#f08a2a', 12, 8); px(g, 2, 4, '#ffb060', 12, 2); px(g, 2, 9, '#c86a1a', 12, 3);
+  px(g, 3, 6, '#f4f8fc', 3, 2); px(g, 10, 6, '#f4f8fc', 3, 2); px(g, 1, 12, '#00000040', 14, 2);
+};
+DRAW['ϭ'] = (g, r) => {
+  (THEMES as any).barco.i(g, r);
+  px(g, 3, 3, '#2a3a5a', 10, 10); px(g, 4, 2, '#d83a3a', 8, 12); px(g, 3, 4, '#d83a3a', 10, 8);
+  px(g, 6, 5, '#eef3f7', 4, 6); px(g, 5, 6, '#eef3f7', 6, 4); px(g, 7, 7, '#2a3a5a', 2, 2);
+  px(g, 4, 6, '#f4f8fc', 2, 2); px(g, 10, 8, '#f4f8fc', 2, 2);
 };
 
 // The Buquebus "China Zorrilla": a 12x3-tile ship (bow to the left) drawn once and sliced into tiles over animated water.

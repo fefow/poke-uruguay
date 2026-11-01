@@ -835,8 +835,7 @@ export const SCRIPTS = {
     api.takeItem('ticket_ferry');
     api.setFlag('ferry_done');
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
-    const out = api.doorFront('fraybentos', 'ferry_1');
-    await api.warp('fraybentos', out.x, out.y, 'down');
+    await api.warp('fraybentos', 3, 24, 'down');
     await api.say('Desde el muelle mirás cómo el Buquebus "China Zorrilla" se aleja. No va a volver a este puerto.');
     await api.say('Con el Machete ya podés abrir los zarzales del camino al norte.');
   },

@@ -313,7 +313,7 @@ test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstácul
   // the Machete comes from the Buquebus captain in Fray Bentos, long before the thicket
   assert.equal(INTERIOR.casa_frb_faro.npcs[0].script, 'keeper_colonia');
   assert.ok(SCRIPTS.keeper_colonia && SCRIPTS.ferry_captain);
-  assert.ok(OUTDOOR.fraybentos.doors.some((d) => d.to === 'ferry_1'), 'la terminal está en Fray Bentos');
+  assert.ok(OUTDOOR.fraybentos.warps.some((w) => w.to === 'ferry_1'), 'el barco está al final del muelle de Fray Bentos');
   assert.ok(!OUTDOOR.montevideo.doors.some((d) => d.to === 'ferry_1'), 'Montevideo ya no tiene el Buquebus');
   assert.ok(at('fraybentos') < at('r_belen_artigas'));
 });

@@ -184,7 +184,6 @@ const GYM_TRAINERS = {
   bicho: [['Gabriel', 'Viñatero', ['Los bichos cuidan mis uvas.', 'Cosecha perdida.', 'Tomás te espera.']], ['Rosa', 'Apicultora', ['Cuidado con el aguijón.', 'Me picó la derrota.', 'Seguí, no te voy a frenar.']]],
 };
 const KEEP_TARGETS = new Set(['ciclovia', 'cabo']); // dead-end branches that keep their own exits
-const FERRY_DOOR = { to: 'ferry_1', req: (f) => f.got_ticket && !f.ferry_done, deny: ['Terminal del Buquebus "China Zorrilla".', 'Para subir hace falta el ticket. Y cuando el barco zarpa, no vuelve.'] };
 export const ROUTE_OUTDOOR: Record<string, MapDef> = {};
 export const ROUTE_INTERIOR: Record<string, MapDef> = {};
 
@@ -335,7 +334,7 @@ function replanExisting(OUTDOOR) {
     if (doneBefore.has(id) || !OUTDOOR[id]) continue;
     const keepSides = Object.entries((OUTDOOR[id].exits ?? {}) as Record<string, any>).filter(([, e]) => KEEP_TARGETS.has(e.to)).map(([s]) => s);
     addFolk(OUTDOOR[id], id, 7);
-    retown(OUTDOOR[id], id, { ...cfg, newDoors: id === 'fraybentos' ? { ferry_1: FERRY_DOOR } : (cfg as any).newDoors, edges: [...new Set([...edgesFor(id), ...keepSides])] });
+    retown(OUTDOOR[id], id, { ...cfg, newDoors: (cfg as any).newDoors, edges: [...new Set([...edgesFor(id), ...keepSides])] });
   }
   for (const id of Object.keys(LOC_PLAN)) {
     if (doneBefore.has(id) || !OUTDOOR[id]) continue;
