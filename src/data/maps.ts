@@ -707,7 +707,7 @@ import { fitToMap, wildList, teamOf, rng } from './map-gen.ts';
 import { guideMap } from './guide.ts';
 import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
-import { flavorRoute } from './route-flavor.ts';
+import { flavorRoute, ROUTE_FLAVOR } from './route-flavor.ts';
 import { layoutGym } from './gym-layouts.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1226,6 +1226,16 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
 for (const stop of STOPS) {
   if (stop.kind !== 'loc' || !OUTDOOR[stop.id]) continue;
   guideMap(OUTDOOR[stop.id], stop.id, { width: 4, town: true });
+}
+
+// Battle backdrops follow the land: caves, forests, wetlands and sierras get their own, coastal routes the beach.
+{
+  const BG_OF_FLAVOR = { coast: 'beach', wetland: 'wetland', sierra: 'sierra', farm: 'field', suburb: 'city' };
+  for (const [id, m] of Object.entries(OUTDOOR)) {
+    if (m.theme === 'cueva') m.bg = 'cave';
+    else if (id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad') m.bg = 'forest';
+    else if (ROUTE_FLAVOR[id]) m.bg = BG_OF_FLAVOR[ROUTE_FLAVOR[id]];
+  }
 }
 
 // What the player finds and can buy follows the story: mates and shops scale with how far along the route the place is.
