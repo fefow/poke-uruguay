@@ -1038,6 +1038,7 @@ body {
 .bhud-foe { top: 4cqi; left: -18cqi; }
 .bhud-ply { top: auto; bottom: 36cqi; right: -18cqi; }
 .dialog.is-battle { inset: auto -20cqi 2cqi -20cqi; min-height: 26%; padding-left: 6cqi; }
+.dialog.is-battle.has-face { padding-left: 17.5cqi; }
 .menu-battle { inset: auto -20cqi 2cqi auto; width: 44cqi; }
 .menu-moves { inset: auto -20cqi 2cqi -20cqi; }
 .menu-moves { padding-left: 4cqi; }
