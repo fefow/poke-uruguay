@@ -111,12 +111,12 @@ export const ROUTE_STORIES = {
 };
 
 /** Narrowest cross-section of the trail (fewest walkable tiles) away from the map edges and from every object. */
-function narrowestCut(m, busy) {
+function narrowestCut(m, busy, from = 0.3, to = 0.7) {
   const h = m.tiles.length, w = m.tiles[0].length;
   const long = w >= h;
   const span = long ? w : h, cross = long ? h : w;
   let best = null;
-  for (let a = Math.floor(span * 0.3); a <= Math.floor(span * 0.7); a++) {
+  for (let a = Math.floor(span * from); a <= Math.floor(span * to); a++) {
     const cells = [];
     for (let b = 1; b < cross - 1; b++) {
       const [x, y] = long ? [a, b] : [b, a];
@@ -175,5 +175,11 @@ export function addRouteStory(m, id) {
 
   // fog machine: a PP object with a clue about the business
   const mach = freeSpot(m, busy, 0.75);
+  // riddle gate: a second obstacle earlier on the trail, opened by answering a riddle (never a battle)
+  const rcut = narrowestCut(m, busy, 0.12, 0.28);
+  if (rcut) {
+    const flag = `rf_rid_${id}`.slice(0, 40);
+    rcut.forEach(([x, y]) => { m.npcs.push({ x, y, look: 'oldman', dir: 'down', blocker: true, name: 'Guardián del paso', script: 'route_riddle', riddleId: id, doneFlag: flag, text: 'El paso está cerrado. Un guardián pide una respuesta a quien quiera cruzar.', cond: (f) => !f[flag] }); busy.add(`${x},${y}`); });
+  }
   if (mach) m.npcs.push({ x: mach[0], y: mach[1], look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', clue: st.fog, doneFlag: `rf_${id}` });
 }

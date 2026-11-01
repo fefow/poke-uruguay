@@ -492,3 +492,26 @@ test('encuentros: el agua no sale en pastizal y las cuevas tienen su propio biom
   }
   assert.ok(checked > 20);
 });
+
+test('eventos: acertijo de ruta, puntaje del concurso y mapa del parque', async () => {
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const { contestScore, riddleFor, parkTiles, PARK } = await import('../src/data/events.ts');
+  const { MAPS } = await import('../src/data/maps.ts');
+  // riddle: right answer opens the gate, a wrong one does not
+  const flags = {};
+  const say = []; 
+  const api = (pick) => ({ flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async (t) => { say.push(t); }, choose: async (o) => pick(o), sfx() {} });
+  const npc = { riddleId: 'ruta1', doneFlag: 'rf_rid_ruta1', name: 'G', text: 'x' };
+  const [, opts, ans] = riddleFor('ruta1');
+  await SCRIPTS.route_riddle(api((o) => o.findIndex((t) => t !== opts[ans])), npc);
+  assert.ok(!flags.rf_rid_ruta1);
+  await SCRIPTS.route_riddle(api((o) => o.indexOf(opts[ans])), npc);
+  assert.ok(flags.rf_rid_ruta1);
+  // contest
+  assert.ok(contestScore({ species: 'hornerito', level: 20, hp: 50, maxHp: 50 }) > contestScore({ species: 'hornerito', level: 20, hp: 5, maxHp: 50 }));
+  assert.equal(parkTiles()[PARK.gate.y][PARK.gate.x], '=');
+  const park = MAPS.parque_concurso;
+  assert.ok(park.safari && park.contest);
+  assert.ok(MAPS.canelones.npcs.some((n) => n.script === 'ev_concurso') && MAPS.canelones.contestGate);
+  for (const c of ['colonia', 'sanjose', 'mercedes', 'rocha']) assert.ok(MAPS[c].npcs.some((n) => /^ev_/.test(n.script ?? '')), c);
+});

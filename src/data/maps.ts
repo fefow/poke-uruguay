@@ -712,6 +712,7 @@ import { addRumors } from './rumors.ts';
 import { CUSTOM } from './custom-content.js';
 import { layoutGym } from './gym-layouts.ts';
 import { addFrayBentosStory } from './fraybentos.ts';
+import { addCityEvents } from './events.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1358,8 +1359,8 @@ const MO_BLOCKS = [
     const mid = Math.floor(rows[0].length / 2) + (kind === 'surf' ? 0 : 3);
     // First column near the middle with no NPC around it and a road tile to anchor on.
     let x = mid;
-    for (let d = 0; d < 10; d++) {
-      const c = [mid + d, mid - d].find((cx) => !npcCols.has(cx) && !npcCols.has(cx + 1) && !npcCols.has(cx + 2) && rows.some((r) => r[cx] === '='));
+    for (let d = 0; d < 30; d++) {
+      const c = [mid + d, mid - d].find((cx) => !npcCols.has(cx) && !npcCols.has(cx + 1) && !npcCols.has(cx + 2) && rows.filter((r) => r[cx] === '=').length === (kind === 'fuerza' ? 1 : rows.filter((r) => r[cx] === '=').length || -1));
       if (c !== undefined) { x = c; break; }
     }
     const set = (cx, y, ch) => { rows[y] = rows[y].slice(0, cx) + ch + rows[y].slice(cx + 1); };
@@ -1413,5 +1414,6 @@ applyMapEdits(MAPS, MAP_OVERRIDES);
     for (const [tx, ty] of [[x, 0], [x - 1, 1], [x, 1], [x + 1, 1]]) if (fb.tiles[ty][tx] !== '#') put(tx, ty, '%');
   }
   addFrayBentosStory(fb);
+  addCityEvents(OUTDOOR);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }

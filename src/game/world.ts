@@ -11,6 +11,7 @@ import { T, TILE_INFO, tileCanvas, groundUnder } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.ts';
+import { CONTEST_CITY } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
@@ -118,6 +119,12 @@ function refreshEntities() {
 
 // Safari: the ticket is a deadline (S.safari.until). Nobody stays inside, or loads a save inside, without paid time.
 export const SAFARI_GATE = { map: 'rivera', x: 11, y: 15 };
+/** Where a timed park sends you out: the Safari's gate, or the contest organizer's spot. */
+const gateFor = (id: string) => {
+  const m: any = MAPS[id];
+  if (m?.contest) { const t: any = MAPS[CONTEST_CITY]; const g = t?.contestGate; if (g) return { map: CONTEST_CITY, x: g.x, y: g.y }; }
+  return SAFARI_GATE;
+};
 const safariLeft = () => (state().safari?.until ?? 0) - Date.now();
 // Park equipment goes back to the park when you leave.
 const safariStrip = () => { const S = state(); S.bag.safari_ball && delete S.bag.safari_ball; S.bag.cebo && delete S.bag.cebo; };
@@ -147,7 +154,7 @@ export function loadMap(id, x, y, dir = 'down') {
   if (MAPS[id]?.safari && safariLeft() <= 0) {
     S.safari = null;
     safariStrip();
-    ({ map: id, x, y } = SAFARI_GATE);
+    ({ map: id, x, y } = gateFor(id));
     dir = 'down';
   }
   const m = MAPS[id];
@@ -196,13 +203,16 @@ function safariClock() {
     runScript(async () => {
       S.safari = null;
       for (let i = 0; i < 3; i++) { sfx('levelup'); await wait(450); }
-      await say(['¡Ding, dong! Se terminó el tiempo contratado.', 'Los guardias del Safari te acompañan hasta la salida.']);
-      await doWarp(SAFARI_GATE.map, SAFARI_GATE.x, SAFARI_GATE.y, 'down');
+      const g = gateFor(W_.map.id);
+      if ((W_.map as any).contest) await say(['¡Ding, dong! Se terminó el tiempo del concurso.', 'Los guardaparques te acompañan de vuelta con los jueces.']);
+      else await say(['¡Ding, dong! Se terminó el tiempo contratado.', 'Los guardias del Safari te acompañan hasta la salida.']);
+      safariStrip();
+      await doWarp(g.map, g.x, g.y, 'down');
     }).finally(() => { W_.safariEnding = false; });
   } else if (left <= 60000 && W_.safariWarned !== S.safari.until) {
     W_.safariWarned = S.safari.until;
     sfx('levelup');
-    toast('Aviso del Safari: queda 1 minuto de visita.', 5000);
+    toast((W_.map as any).contest ? 'Aviso del concurso: queda 1 minuto.' : 'Aviso del Safari: queda 1 minuto de visita.', 5000);
   }
 }
 
@@ -400,7 +410,7 @@ async function crossEdge(side, to) {
   // find nearest walkable tile along the arrival edge
   const walk = (cx, cy) => !TILE_INFO[m2.tiles[cy]?.[cx]]?.solid && m2.tiles[cy]?.[cx] != null;
   if (!walk(x, y)) {
-    for (let d = 1; d < 30; d++) {
+    for (let d = 1; d < 200; d++) {
       const cand = side === 'e' || side === 'w' ? [[x, y - d], [x, y + d]] : [[x - d, y], [x + d, y]];
       const ok = cand.find(([cx, cy]) => walk(cx, cy));
       if (ok) { [x, y] = ok; break; }
@@ -1006,6 +1016,26 @@ export const api = {
   safariLeft: () => Math.max(0, safariLeft()),
   safariLeave() { state().safari = null; safariStrip(); },
   safariGate: SAFARI_GATE,
+  /** Capture contest: the timed park with 20 balls; creatures caught go to the box and are judged afterwards. */
+  contestStart(minutes, balls) {
+    const S = state();
+    S.safari = { until: Date.now() + minutes * 60000, contest: true };
+    S.contest = { uids: [] };
+    addItem('safari_ball', balls);
+  },
+  contestActive: () => !!state().contest,
+  contestGate: () => gateFor('parque_concurso'),
+  contestLeave() { state().safari = null; safariStrip(); },
+  contestCreatures() { const S = state(); const ids = new Set(S.contest?.uids ?? []); return S.box.filter((c) => ids.has(c.uid)); },
+  /** Keep one creature (it stays in the box); the others are released. */
+  contestFinish(keepUid) {
+    const S = state();
+    const ids = new Set(S.contest?.uids ?? []);
+    S.box = S.box.filter((c) => !ids.has(c.uid) || c.uid === keepUid);
+    S.contest = null;
+    S.safari = null;
+    safariStrip();
+  },
   markSeen: (sp) => markSeen(sp),
   openShop: (stock) => openShop(stock),
   openPC: () => openPC(),

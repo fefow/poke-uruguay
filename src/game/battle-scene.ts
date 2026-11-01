@@ -865,6 +865,13 @@ async function handleCatch(foe) {
   markCaught(foe.species);
   S.stats.caught++;
   await say(`¡Los datos de ${SPECIES[foe.species].name} se agregaron a la PokeDex!`, { battle: true });
+  if (S.contest && S.safari?.contest) {
+    // Capture contest: it waits in the box until the judges choose; no nickname.
+    S.contest.uids.push(foe.uid);
+    S.box.push(foe);
+    await say(`${displayName(foe)} quedó registrado en el concurso.`, { battle: true });
+    return;
+  }
   if (await ask(`¿Querés ponerle un apodo a ${SPECIES[foe.species].name}?`, { battle: true })) {
     const raw = await textInput('Apodo (máx. 10 letras)', '');
     const nick = sanitizeName(raw, '');

@@ -117,8 +117,10 @@ export function city({ seed, w = 28, h = 20, base = '.', border = '#', road = 'c
  * (axis 'h' = west to east, 'v' = north to south). Returns tiles plus candidate spots
  * for trainers (grass tiles next to the path, spaced out) and items.
  */
-export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', border = '#', path = '=', grass = [], ponds = [], trees = 0, treeChar = 'q', rocks = 6, flowers = 8, signs = 1, bridge = null, gates = [], fence = 'F' }) {
+export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', border = '#', path = '=', grass = [], ponds = [], trees = 0, treeChar = 'q', rocks = 6, flowers = 8, signs = 1, bridge = null, gates = [], fence = 'F', winding = 0 }: any) {
   const r = rng(seed);
+  // one river [t0, t1] or several [[t0, t1], ...]
+  const rivers: number[][] = !bridge ? [] : Array.isArray(bridge[0]) ? bridge : [bridge];
   const g = grid(w, h, base);
   for (let x = 0; x < w; x++) { g[0][x] = border; g[h - 1][x] = border; }
   for (let y = 0; y < h; y++) { g[y][0] = border; g[y][w - 1] = border; }
@@ -126,20 +128,21 @@ export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', 
   const along = axis === 'h' ? w : h;
   const across = axis === 'h' ? h : w;
   const phase = r() * 6;
-  const amp = 2 + Math.floor(r() * 3);
+  const amp = 2 + Math.floor(r() * 3) + winding;
+  const phase2 = r() * 6;
   for (let t = 0; t < along; t++) {
     const env = Math.min(1, t / 5, (along - 1 - t) / 5);
-    let c = Math.round(from + ((to - from) * t) / (along - 1) + Math.sin(t * 0.38 + phase) * amp * env);
+    let c = Math.round(from + ((to - from) * t) / (along - 1) + (Math.sin(t * 0.38 + phase) + (winding ? Math.sin(t * 0.13 + phase2) * 0.9 : 0)) * amp * env);
     c = Math.max(3, Math.min(across - 4, c));
     if (t === 0) c = from;
     if (t === along - 1) c = to;
     pts.push(c);
   }
-  if (bridge) for (let t = bridge[0]; t <= bridge[1]; t++) pts[t] = pts[bridge[0]];
+  for (const [b0, b1] of rivers) for (let t = b0; t <= b1; t++) pts[t] = pts[b0];
   // gates sit on straight stretches so a single guard fills the whole gap
   const gateAt = gates.map((want) => {
     for (let d = 0; d < along; d++) for (const t of [want + d, want - d]) {
-      if (t > 7 && t < along - 8 && (bridge ? true : (t - 6) % 4 !== 0) && pts[t - 1] === pts[t] && pts[t] === pts[t + 1]) return t;
+      if (t > 7 && t < along - 8 && (rivers.length ? true : (t - 6) % 4 !== 0) && pts[t - 1] === pts[t] && pts[t] === pts[t + 1]) return t;
     }
     return want;
   });
@@ -176,13 +179,13 @@ export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', 
   for (let x = 1; x < w - 1; x++) for (const y of [1, h - 2]) if (g[y][x] === base && r() < 0.55 && !nearPath(x, y, 1)) g[y][x] = border;
   for (let y = 1; y < h - 1; y++) for (const x of [1, w - 2]) if (g[y][x] === base && r() < 0.55 && !nearPath(x, y, 1)) g[y][x] = border;
   // river crossing: water on both sides of a straight bridge
-  if (bridge) {
-    for (let t = bridge[0]; t <= bridge[1]; t++) for (let k = 1; k < across - 1; k++) set(t, k, k === pts[t] ? 'b' : '~');
+  for (const [b0, b1] of rivers) {
+    for (let t = b0; t <= b1; t++) for (let k = 1; k < across - 1; k++) set(t, k, k === pts[t] ? 'b' : '~');
   }
   // gate: a fence line across the route with a single opening where a guard stands (skipped over water)
   const gateSpots = [];
   for (const t of gateAt) {
-    const over = bridge && t >= bridge[0] && t <= bridge[1];
+    const over = rivers.some(([b0, b1]) => t >= b0 && t <= b1);
     if (!over) for (let k = 1; k < across - 1; k++) if (k !== pts[t]) set(t, k, fence);
     gateSpots.push(axis === 'h' ? { x: t, y: pts[t], dir: 'left' } : { x: pts[t], y: t, dir: 'up' });
   }

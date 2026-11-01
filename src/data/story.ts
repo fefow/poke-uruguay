@@ -1,6 +1,7 @@
 // Story scripts. Each receives the script API (see game/script-api.js) and the
 // NPC that triggered it. Text uses Rioplatense Spanish ("vos"), in a sober tone aimed at adults.
 import { SPECIES } from './species.ts';
+import { EVENT_SCRIPTS, riddleFor } from './events.ts';
 import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from './route.ts';
 import { teamOf } from './map-gen.ts';
 import { bossTeam, rescaleTeam } from './levels.ts';
@@ -1095,6 +1096,21 @@ export const SCRIPTS = {
         : ['Algunos pueblos pasaron un año difícil y otros siguen con la red de niebla. Nadie quedó del todo conforme, y todos entendieron por qué.']);
     await api.say(['Algunas semanas después, en Carmelo.', 'Se habla de criaturas legendarias avistadas en el país:', 'un viento helado en la Quebrada, un canto en la costa de Punta del Este.', 'Tu aventura continúa.']);
   },
+  // A guard who asks a riddle before letting you through (placed on routes by addRouteStory).
+  async route_riddle(api, npc) {
+    const [q, opts, ans] = riddleFor(npc.riddleId);
+    if (api.flag(npc.doneFlag)) return api.say('Ya respondiste. Pasá nomás.', { name: npc.name });
+    await api.say([npc.text, q], { name: npc.name, keep: true });
+    // shuffled by the route so the right answer is not always the first
+    const order = opts.map((_, i) => i).sort((a, b) => ((a * 7 + npc.riddleId.length) % 5) - ((b * 7 + npc.riddleId.length) % 5));
+    const r = await api.choose(order.map((i) => opts[i]), { cancel: false });
+    if (order[r] !== ans) return api.say('No es eso. Pensalo y volvé a intentar.', { name: npc.name });
+    api.sfx('confirm');
+    api.setFlag(npc.doneFlag);
+    await api.say('Correcto. Se abre el paso.', { name: npc.name });
+  },
+
+  ...EVENT_SCRIPTS,
 };
 
 // The late-game content was written for a longer climb: bring it down to the route's level curve.

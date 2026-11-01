@@ -25,7 +25,7 @@ const STORY_FLAGS = new Set([
   'rival5', 'rival6', 'rival_bosque', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
   'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'marta_lost', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'refineria_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
 ]);
-const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
+const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|ev|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
 
 const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 
@@ -196,7 +196,8 @@ export function validateSave(d: any) {
       stats: { playtime: st.playtime, steps: st.steps, battlesWon: st.battlesWon, moneyEarned: st.moneyEarned, moneySpent: st.moneySpent, caught: st.caught },
       lastHeal: { map: lh.map, x: lh.x | 0, y: lh.y | 0 },
       repel: isInt(d.repel, 0, 100) ? d.repel : 0,
-      safari: d.safari && Number.isFinite(d.safari.until) && d.safari.until <= Date.now() + 30 * 60000 ? { until: Math.floor(d.safari.until) } : null,
+      safari: d.safari && Number.isFinite(d.safari.until) && d.safari.until <= Date.now() + 30 * 60000 ? { until: Math.floor(d.safari.until), ...(d.safari.contest ? { contest: true } : {}) } : null,
+      contest: d.contest && Array.isArray(d.contest.uids) ? { uids: d.contest.uids.filter((u, k, a) => box.some((c) => c.uid === u) && a.indexOf(u) === k) } : null,
       daycare: d.daycare && box.some((c) => c.uid === d.daycare.uid) && isInt(d.daycare.steps, 0, st.steps) ? { uid: d.daycare.uid, steps: d.daycare.steps } : null,
       criadero: Array.isArray(d.criadero) ? d.criadero.filter((e, k, a) => e && box.some((c) => c.uid === e.uid) && isInt(e.steps, 0, st.steps) && a.findIndex((x) => x?.uid === e.uid) === k).slice(0, 3).map((e) => ({ uid: e.uid, steps: e.steps })) : [],
       created: Number.isFinite(d.created) ? d.created : Date.now(),

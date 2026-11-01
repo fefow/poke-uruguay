@@ -25,6 +25,7 @@ export function newState({ name, look }) {
     daycare: null,
     criadero: [],
     safari: null,
+    contest: null,
     created: Date.now(),
     saveCount: 0,
   };

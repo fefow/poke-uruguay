@@ -45,6 +45,7 @@ export interface GameState {
   daycare: any;
   criadero: { uid: string; steps: number }[];
   safari: any;
+  contest?: any;
   created: number;
   saveCount: number;
   [extra: string]: any;

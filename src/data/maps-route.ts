@@ -349,12 +349,12 @@ function replanExisting(OUTDOOR) {
 // ---------------------------------------------------------------- roads between stops
 // Road shapes: w x h are for an east-west road (a north-south one swaps them).
 const ROUTE_STYLES = [
-  { w: 30, h: 16, grass: [[4, 3, 4]], ponds: [], trees: 8, rocks: 4, sign: 'Un camino de tierra y pasto, con tránsito de tropas y de camiones.' },
-  { w: 46, h: 16, grass: [[6, 3, 4]], ponds: [], trees: 16, rocks: 6, sign: 'Un camino largo entre estancias y alambrados.' },
-  { w: 36, h: 24, grass: [[3, 3, 5]], ponds: [[2, 5, 3]], trees: 10, rocks: 4, sign: 'Pasto alto y bañados a los costados. Cuidado con el barro.' },
-  { w: 54, h: 14, grass: [[5, 3, 4]], ponds: [], trees: 8, rocks: 3, bridge: [26, 29], sign: 'Un puente de madera cruza el arroyo.' },
-  { w: 34, h: 28, grass: [[2, 3, 4]], ponds: [], trees: 6, rocks: 14, sign: 'Tierra pedregosa y cerros bajos. Se camina despacio.' },
-  { w: 42, h: 20, grass: [[4, 3, 5]], ponds: [[1, 6, 4]], trees: 12, rocks: 5, sign: 'Un monte criollo bordea la ruta.' },
+  { w: 72, h: 28, grass: [[9, 3, 5]], ponds: [[2, 4, 3]], trees: 40, rocks: 10, winding: 2, sign: 'Un camino de tierra y pasto, con tránsito de tropas y de camiones.' },
+  { w: 96, h: 26, grass: [[12, 3, 5]], ponds: [], trees: 56, rocks: 14, winding: 3, bridge: [[30, 33], [64, 67]], sign: 'Un camino largo entre estancias y alambrados. Dos arroyos lo cortan.' },
+  { w: 66, h: 40, grass: [[10, 3, 6]], ponds: [[3, 6, 4], [1, 9, 5]], trees: 34, rocks: 8, winding: 2, sign: 'Pasto alto y bañados a los costados. Cuidado con el barro.' },
+  { w: 100, h: 24, grass: [[11, 3, 5]], ponds: [[1, 7, 3]], trees: 44, rocks: 8, winding: 3, bridge: [[44, 48]], sign: 'Un puente de madera cruza el arroyo.' },
+  { w: 64, h: 44, grass: [[8, 2, 5]], ponds: [], trees: 26, rocks: 36, winding: 4, sign: 'Tierra pedregosa y cerros bajos. Se camina despacio.' },
+  { w: 84, h: 32, grass: [[10, 3, 6]], ponds: [[2, 5, 5]], trees: 52, rocks: 12, winding: 3, bridge: [[52, 55]], sign: 'Un monte criollo bordea la ruta.' },
 ];
 
 let rn = 0;
@@ -370,9 +370,9 @@ for (const s of STOPS) for (const via of s.via) {
   const [lw, lh] = vertical ? [sty.h, sty.w] : [sty.w, sty.h];
   const mid = (vertical ? lw : lh) >> 1;
   const lane = mid + ((rn % 3) - 1) * 2;
-  const R = route({ seed: via, w: lw, h: lh, axis: vertical ? 'v' : 'h', from: lane, to: lane, grass: sty.grass, ponds: sty.ponds, trees: sty.trees, treeChar: rn % 2 ? '#' : 'q', rocks: sty.rocks, flowers: 8, bridge: sty.bridge ?? null });
+  const R = route({ seed: via, w: lw, h: lh, axis: vertical ? 'v' : 'h', from: lane, to: lane, grass: sty.grass, ponds: sty.ponds, trees: sty.trees, treeChar: rn % 2 ? '#' : 'q', rocks: sty.rocks, flowers: 14, bridge: sty.bridge ?? null, winding: sty.winding });
   const fishTrainer = (k) => TRAINERS[(rn + k) % TRAINERS.length];
-  const ts = [0, 1, 2].filter((k) => R.spots[k]).map((k) => {
+  const ts = [...Array(Math.min(R.spots.length, Math.max(3, Math.round((vertical ? lh : lw) / 15))))].map((_, k) => k).filter((k) => R.spots[k]).map((k) => {
     const [cls, tt, [intro, lose, after]]: any = fishTrainer(k);
     const lv = [Math.max(lo, hi - 2 + (k % 2)), Math.min(hi, hi - (k % 2))];
     const nm = ['Gonzalo', 'Mariana', 'Atilio', 'Rosario', 'Julián', 'Lucía', 'Bruno', 'Carmen'][(rn * 3 + k) % 8];

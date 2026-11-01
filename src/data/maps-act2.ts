@@ -4,6 +4,8 @@ import type { MapDef } from '../types.ts';
 import { TR, room, HOUSE, GYM, poli, shop, casaNpc } from './map-kit.ts';
 import { city, route, wildList, fishList, teamOf, fitToMap } from './map-gen.ts';
 import { spinMaze } from './spin-maze.ts';
+import { parkTiles, PARK, CONTEST_CITY } from './events.ts';
+import { mapBand } from './route.ts';
 
 // ---------------------------------------------------------------- helpers
 const tr = (spot, look, id, name, cls, types, levels, [intro, lose, after], opts: any = {}) => ({
@@ -139,6 +141,22 @@ export const ACT2_OUTDOOR: Record<string, MapDef> = {
     npcs: [
       { x: 12, y: 18, look: 'cop', dir: 'up', script: 'safari_exit' },
       { ...npc(14, 17, 'oldman', ['Esto es un parque, no un campo de batalla: acá se viene a ver y a atrapar criaturas.', 'Fijate el tiempo que contrataste. Cuando suena la campana, los guardias te acompañan a la salida.'], { dir: 'left' }) },
+    ],
+  },
+  // Capture contest park (Canelones): timed visit like the Safari, balls given at the start, judged afterwards.
+  parque_concurso: {
+    name: 'Parque de Canelones', music: 'route', bg: 'field', safari: true, contest: true, fullWild: true,
+    tiles: parkTiles(),
+    signs: [],
+    enc: {
+      rate: 0.24,
+      list: (() => {
+        const [lo, hi] = mapBand(CONTEST_CITY) as [number, number];
+        return [...wildList(['bicho'], lo, hi, 6, 'pc1'), ...wildList(['planta', 'volador'], lo, hi, 4, 'pc2'), ...wildList(['veneno', 'tierra'], lo, hi, 3, 'pc3')].map(([k, a, b]) => [k, a, b, 6]);
+      })(),
+    },
+    npcs: [
+      { x: PARK.gate.x, y: PARK.gate.y, look: 'cop', dir: 'up', script: 'ev_concurso_salida', name: 'Guardaparque' },
     ],
   },
   durazno: {
