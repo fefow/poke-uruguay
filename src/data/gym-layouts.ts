@@ -121,7 +121,8 @@ function angloPlan(id = 'gym_frb'): GymPlan & { warps: any[] } {
   rect(13, 1, 14, 5, 'A'); g[0][13] = 'X'; g[0][14] = 'Z';
   for (const [x, y] of [[10, 1], [17, 1], [10, 5], [17, 5]]) g[y][x] = 'N';
   mat();
-  for (const [x, y] of [[10, 18], [17, 18], [3, 16], [7, 11], [20, 11], [24, 4], [4, 4]]) g[y][x] = 'ϼ';
+  [[10, 18, 'Ϯ'], [17, 18, 'Ϯ'], [3, 16, 'ϯ'], [7, 11, 'Ϯ'], [20, 11, 'ϯ'], [24, 4, 'Ϯ'], [4, 4, 'ϯ'], [10, 14, 'ϯ'], [17, 14, 'ϯ'], [2, 13, 'ϼ'], [25, 9, 'ϼ'], [8, 7, 'Ϯ'], [19, 7, 'Ϯ']].forEach(([x, y, c]: any) => { g[y][x] = c; });
+  rect(13, 15, 14, 18, 'A');                                       // red runner in the lobby
   const land = (r: Room) => ({ x: r.x1 + ((r.x2 - r.x1) >> 1), y: r.y2 });
   const warps: any[] = [];
   const pads: { x: number; y: number }[][] = [];

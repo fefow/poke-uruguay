@@ -42,6 +42,8 @@ export const TILE_INFO = {
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
   ϼ: { name: 'equipo de la sala', solid: true },
+  Ϯ: { name: 'vitrina del museo', solid: true },
+  ϯ: { name: 'busto del museo', solid: true },
   Ϫ: { name: 'puerta de camarote', solid: true },
   Ϭ: { name: 'bote salvavidas', solid: true },
   ϭ: { name: 'salvavidas', solid: true },
@@ -1128,6 +1130,22 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
   }
 }
 
+
+// Museo del Anglo (gym): display cases with old tins and a bust on a pedestal, on the dark gym floor.
+{
+  const t = (THEMES as any).gym_siniestro;
+  t['Ϯ'] = (g, r) => {
+    t.Y(g, r);
+    px(g, 2, 6, '#3a3a4e', 12, 9); px(g, 3, 4, '#8ac8f0', 10, 8); px(g, 3, 4, '#d8f0ff', 10, 1); px(g, 3, 4, '#d8f0ff', 1, 8);
+    px(g, 6, 7, '#c8506a', 4, 4); px(g, 6, 6, '#e8e0f0', 4, 1); px(g, 7, 8, '#f2c02a', 2, 1); px(g, 2, 14, '#00000050', 12, 1);
+  };
+  t['ϯ'] = (g, r) => {
+    t.Y(g, r);
+    px(g, 3, 11, '#5a5a74', 10, 4); px(g, 3, 11, '#8a8aa0', 10, 1); px(g, 5, 10, '#3a3a4e', 6, 1);
+    px(g, 6, 2, '#c8c8d8', 4, 6); px(g, 5, 8, '#c8c8d8', 6, 3); px(g, 6, 2, '#e8e8f4', 1, 6); px(g, 7, 4, '#3a3a4e', 1, 1); px(g, 9, 4, '#3a3a4e', 1, 1);
+    px(g, 3, 14, '#00000050', 10, 1);
+  };
+}
 
 // Frigorífico Anglo: a cold-storage plant (pale tiled floor, riveted steel walls, meat hooks) crossed by conveyor belts.
 {
