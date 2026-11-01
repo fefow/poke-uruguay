@@ -153,3 +153,13 @@ export function itemIcon(key) {
 export function drawItem(g, key, x, y) {
   g.drawImage(canvasFor(key), x, y);
 }
+
+/** Every item on the ground looks the same: a small ball, so nobody knows what it holds until they pick it up. */
+export function drawGroundBall(g, x, y) {
+  const px = (dx, dy, w, h, c) => { g.fillStyle = c; g.fillRect(x + dx, y + dy, w, h); };
+  px(5, 6, 6, 1, '#16141e'); px(4, 7, 8, 1, '#16141e'); px(3, 8, 10, 4, '#16141e'); px(4, 12, 8, 1, '#16141e'); px(5, 13, 6, 1, '#16141e');
+  px(5, 7, 6, 1, '#e0263a'); px(4, 8, 8, 2, '#e0263a'); px(5, 8, 2, 1, '#f27a84');
+  px(4, 10, 8, 1, '#16141e');
+  px(4, 11, 8, 1, '#f2f2f2'); px(5, 12, 6, 1, '#d8d8e0');
+  px(7, 9, 2, 3, '#16141e'); px(7, 10, 2, 1, '#f2f2f2');
+}

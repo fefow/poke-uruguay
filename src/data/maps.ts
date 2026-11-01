@@ -1270,6 +1270,25 @@ for (const c of CUSTOM.creatures) {
   }
 }
 
+// The things lying on the ground are varied: remedies, repellent and mates as well as balls and food, by stage of the route.
+{
+  const COMMON = new Set(['esfera', 'superesfera', 'ultraesfera', 'alfajor', 'alfajor_triple', 'pan_casero', 'torta_frita']);
+  const POOLS = [
+    ['ruda', 'aloe', 'linimento', 'repelente', 'te_marcela', 'mate', 'esfera', 'alfajor'],
+    ['ruda', 'aloe', 'linimento', 'repelente', 'mate', 'mate_dulce', 'superesfera', 'alfajor_triple', 'repelente_super'],
+    ['aloe', 'linimento', 'repelente_super', 'repelente_max', 'mate_dulce', 'dulce_de_leche', 'ultraesfera', 'alfajor_triple', 'pan_casero'],
+  ];
+  const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  for (const [id, m] of Object.entries(OUTDOOR)) {
+    for (const it of m.items ?? []) {
+      if (!COMMON.has(it.item) || String(it.id).endsWith('_fall')) continue;
+      const hi = mapBand(id)?.[1] ?? 0;
+      const pool = POOLS[hi <= 12 ? 0 : hi <= 36 ? 1 : 2];
+      it.item = pool[hash(String(it.id)) % pool.length];
+    }
+  }
+}
+
 // What the player finds and can buy follows the story: mates and shops scale with how far along the route the place is.
 const MATES = ['te_marcela', 'mate', 'mate_dulce', 'dulce_de_leche'];
 const mateAt = (id) => {

@@ -23,7 +23,7 @@ import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSee
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
-import { drawItem } from '../gfx/items.ts';
+import { drawGroundBall } from '../gfx/items.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -642,7 +642,7 @@ async function pickItem(it) {
   addItem(it.item, 1);
   sfx('confirm');
   refreshEntities();
-  await say(`¡{player} encontró ${ITEMS[it.item].name}!`);
+  await say(`¡Obtuviste ${ITEMS[it.item].name}!`);
 }
 
 async function legendEncounter(L) {
@@ -1060,7 +1060,7 @@ function drawWorld(g, t) {
   // ground items
   for (const it of W_.items) {
     shadow(g, it.x * T - cx + 8, it.y * T - cy + 13, 5, 2);
-    drawItem(g, it.item, it.x * T - cx, it.y * T - cy - 1);
+    drawGroundBall(g, it.x * T - cx, it.y * T - cy - 1);
   }
   // legend
   if (W_.legend) {
