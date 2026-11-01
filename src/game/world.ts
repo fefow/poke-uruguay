@@ -1039,6 +1039,24 @@ function drawWorld(g, t) {
     if (!pixiActive()) motes(g, t, { night });
     if (!m.dark && m.theme !== 'cueva' && weatherAt(m.id) === 'rain') rain(g, t);
     if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
+    // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
+    const machines = W_.npcs.filter((n) => n.def.script === 'route_fog' && n.def.doneFlag && !flag(n.def.doneFlag));
+    if (machines.length) {
+      const px0 = ppos.x - cx + T / 2, py0 = ppos.y - cy + T / 2;
+      const gr = g.createRadialGradient(px0, py0, T * 1.2, px0, py0, T * 4);
+      gr.addColorStop(0, 'rgba(196,204,216,0.35)');
+      gr.addColorStop(1, 'rgba(196,204,216,0.93)');
+      g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      drawFog(g, t);
+      for (const n of machines) {
+        const pos = entityPos(n), sx = Math.round(pos.x - cx), sy = Math.round(pos.y - cy);
+        const pulse = 0.55 + 0.25 * Math.sin(t / 260);
+        const glow = g.createRadialGradient(sx + 12, sy + 10, 1, sx + 12, sy + 10, 26);
+        glow.addColorStop(0, `rgba(255,70,60,${pulse})`); glow.addColorStop(1, 'rgba(255,70,60,0)');
+        g.fillStyle = glow; g.fillRect(sx - 20, sy - 18, 64, 64);
+        drawFogMachine(g, sx, sy, t);
+      }
+    }
   }
   if (m.dark && !W_.lit) {
     const px0 = ppos.x - cx + T / 2, py0 = ppos.y - cy + T / 2;
@@ -1156,7 +1174,8 @@ function drawFogMachine(g, sx, sy, t) {
   g.fillStyle = '#4a4a5a'; g.fillRect(sx + 1, sy + 4, 14, 10);
   g.fillStyle = '#7a7a8a'; g.fillRect(sx + 1, sy + 4, 14, 3);
   g.fillStyle = '#2a2a3a'; g.fillRect(sx + 3, sy + 9, 6, 4);
-  g.fillStyle = '#c83a3a'; g.fillRect(sx + 11, sy + 9, 2, 2);
+  g.fillStyle = Math.floor(t / 400) % 2 ? '#ff5a4a' : '#c83a3a'; g.fillRect(sx + 11, sy + 9, 2, 2);
+  g.fillStyle = Math.floor(t / 400) % 2 ? '#5aff7a' : '#2a8a44'; g.fillRect(sx + 11, sy + 6, 2, 2); g.fillStyle = '#ffd24a'; g.fillRect(sx + 4, sy + 5, 2, 1);
   const k = (t / 400) % 1;
   g.fillStyle = `rgba(210,215,225,${0.7 - k * 0.6})`;
   g.beginPath(); g.arc(sx + 8 + Math.sin(t / 300) * 2, sy + 2 - k * 7, 2.5 + k * 2.5, 0, 7); g.fill();
