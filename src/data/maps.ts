@@ -711,6 +711,7 @@ import { flavorRoute, ROUTE_FLAVOR } from './route-flavor.ts';
 import { addRumors } from './rumors.ts';
 import { CUSTOM } from './custom-content.js';
 import { layoutGym } from './gym-layouts.ts';
+import { addFrayBentosStory } from './fraybentos.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1402,5 +1403,6 @@ applyMapEdits(MAPS, MAP_OVERRIDES);
   // the ship hull's gangway tile sits just below the pier end, at (3, 27)
   fb.flagTiles = flagTiles;
   (fb.warps ??= []).push({ x: 3, y: 27, to: 'ferry_1', tx: 11, ty: 4 });
+  addFrayBentosStory(fb);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }

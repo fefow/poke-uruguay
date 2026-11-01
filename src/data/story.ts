@@ -126,9 +126,9 @@ export const LEADERS = {
   anglo: {
     order: 1, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Museo del Anglo', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
     team: [['yarara', 47], ['zorromonte', 48], ['vespertino', 48], ['zarigueya', 48], ['buho', 49], ['yacaron', 50]], prize: 6500, badge: 'badge1', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
-    intro: ['Gracias por abrir el gimnasio, {player}. Estuve encerrada demasiado tiempo.', 'Soy Zoraida. Trabajo de noche, entre las sombras.', 'No me subestimes: la oscuridad también tiene sus reglas.'],
-    lose: 'Salí de la sombra gracias a vos.',
-    after: ['La Medalla Fray Bentos es tuya. Es la tercera de doce.', 'El Equipo PP usa el viejo Anglo como depósito. Ahí hay algo que no cierra.', 'Seguí hacia Paysandú y Salto. Entrená y curá a tu equipo en cada ciudad.'],
+    intro: ['Bienvenido al Museo del Anglo, {player}. Cada caja de despacho de estas salas fue una máquina de otra época.', 'Soy Zoraida. Cuido el museo de noche, entre las sombras y los mecanismos.', 'Llegaste hasta acá usando las cajas. Ahora demostrá que sabés pelear como sabés moverte.'],
+    lose: 'Salí de la sombra gracias a vos. Y llegaste mejor de lo que pensé.',
+    after: ['La Medalla Fray Bentos es tuya. Es la tercera de doce.', 'El Equipo PP usa el viejo frigorífico como depósito. Hay gente que trabaja ahí adentro sin querer.', 'Del puerto sale un barco que lleva el nombre de una gran actriz. Quien lo sube puede conseguir una herramienta que abre el monte.'],
   },
 };
 
@@ -752,6 +752,14 @@ export const SCRIPTS = {
     }
     if (api.flag('lamp_returned')) return api.say('Gracias a vos, los barcos navegan seguros.', { name: 'Farero' });
     await api.say(['Se llevaron la lámpara. Fue una mujer vestida de gris, con capa.', 'Sigue afuera, del lado de las rocas.'], { name: 'Farero' });
+  },
+
+  /** Fray Bentos' history teacher: the Anglo, the museum, then the PP, as the player advances. */
+  async frb_historia(api) {
+    const nm = { name: 'Profesora Irene' };
+    if (api.flag('anglo_pp')) return api.say(['Las máquinas que había en las cámaras de frío no eran de la fábrica. Las trajo alguien de afuera.', 'Y esa niebla artificial que se vende por el litoral, creo que no es una casualidad.', 'Esta ciudad fue la cocina del mundo. Que no sea ahora un depósito de máquinas ajenas.'], nm);
+    if (api.flag(badgeOf('fraybentos'))) return api.say(['Veo que pasaste por el museo. Zoraida cuida ese lugar como a un tesoro.', 'Las cajas del museo se usaban para despachar mercadería entre depósitos. Ahora las usa ella para recibir a los visitantes.', 'Si te interesa la historia del Anglo, andá a ver el frigorífico viejo. Pero con cuidado: se movió gente rara por ahí.'], nm);
+    return api.say(['Soy docente de historia. Fray Bentos nació alrededor de una fábrica de extracto de carne, hace más de un siglo y medio.', 'El Anglo faenaba miles de reses por día y mandaba conservas a medio mundo. Por eso le decían "la cocina del mundo".', 'Hoy el museo guarda esa historia. Preguntá por Zoraida, la directora.'], nm);
   },
 
   async rival_ferry(api) {
