@@ -35,6 +35,10 @@ export const TILE_INFO = {
   ϊ: { name: 'casilleros de correo', solid: true },
   ϋ: { name: 'encomiendas', solid: true },
   ΐ: { name: 'cinta transportadora' },
+  ϸ: { name: 'piscina de la sala', solid: true },
+  Ϲ: { name: 'pasarela' },
+  ϻ: { name: 'instalación', solid: true },
+  ϼ: { name: 'equipo de la sala', solid: true },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -1029,6 +1033,38 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
     px(g, 0, 3, '#3a3a44', T, 10); px(g, 0, 3, '#5a5a66', T, 1); px(g, 0, 12, '#26262e', T, 1);
     for (let x = 0; x < T; x += 4) px(g, x, 5, '#6a6a78', 1, 6);
     for (let x = 1; x < T; x += 8) { px(g, x, 7, '#e8c040', 2, 1); px(g, x + 1, 8, '#e8c040', 2, 1); px(g, x, 9, '#e8c040', 2, 1); }
+  };
+}
+
+
+// OSE gym (agua): treatment-plant tank with a catwalk across it, pipe walls and valves.
+{
+  const t = (THEMES as any).gym_agua;
+  const floor = t.Y;
+  t['ϸ'] = (g, r) => {
+    px(g, 0, 0, '#2a6aa8', T, T);
+    for (let i = 0; i < 5; i++) px(g, r.int(0, 12), r.int(1, 14), '#4a8ac8', r.int(3, 6), 1);
+    for (let i = 0; i < 3; i++) px(g, r.int(0, 13), r.int(1, 14), '#8ac0f0', 2, 1);
+    px(g, 0, 0, '#1d4f8a', T, 1); px(g, 0, 0, '#1d4f8a', 1, T);
+  };
+  t['Ϲ'] = (g) => {
+    px(g, 0, 0, '#2a6aa8', T, T); px(g, 0, 0, '#1d4f8a', T, 1);
+    px(g, 0, 1, '#8a98a8', T, 14);
+    for (let x = 0; x < T; x += 4) px(g, x, 1, '#4a5868', 1, 14);
+    for (let y = 3; y < 15; y += 4) px(g, 0, y, '#4a5868', T, 1);
+    px(g, 0, 1, '#c8d4e0', T, 1); px(g, 0, 14, '#5a6878', T, 1);
+  };
+  t['ϻ'] = (g) => {
+    px(g, 0, 0, '#2a6ab0', T, T); px(g, 0, 11, '#1d4f8a', T, 5);
+    px(g, 0, 3, '#7a8aa0', T, 4); px(g, 0, 3, '#c8d8e8', T, 1); px(g, 0, 6, '#4a5a70', T, 1);
+    px(g, 5, 2, '#4a5a70', 2, 6); px(g, 12, 2, '#4a5a70', 2, 6);
+    px(g, 0, 11, '#7a8aa0', T, 2); px(g, 0, 11, '#c8d8e8', T, 1);
+  };
+  t['ϼ'] = (g) => {
+    floor(g);
+    px(g, 6, 8, '#7a8aa0', 4, 7); px(g, 6, 8, '#c8d8e8', 1, 7);
+    px(g, 3, 4, '#d83a3a', 10, 2); px(g, 7, 2, '#d83a3a', 2, 8); px(g, 4, 4, '#ff8a7a', 3, 1);
+    px(g, 5, 14, '#4a5a70', 6, 1);
   };
 }
 

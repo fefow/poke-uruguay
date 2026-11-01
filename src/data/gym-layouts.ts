@@ -59,12 +59,38 @@ function correoPlan() {
   };
 }
 
+/**
+ * OSE (Punta del Este), a water treatment plant 28x20: a big tank with a catwalk across it ('Ϲ'). The way to the
+ * director's office goes over the catwalk or around the tank by either side; valves and pipes crowd the walls.
+ */
+function osePlan() {
+  const W = 28, H = 20;
+  const g: string[][] = Array.from({ length: H }, () => Array(W).fill('x'));
+  const rect = (x1, y1, x2, y2, c) => { for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) g[y][x] = c; };
+  rect(10, 1, 17, 4, 'Y'); rect(13, 1, 14, 4, 'A'); for (const [x, y] of [[10, 1], [17, 1], [10, 4], [17, 4]]) g[y][x] = 'N';
+  g[0][13] = 'X'; g[0][14] = 'Z';
+  rect(12, 5, 15, 5, 'Y');
+  rect(1, 6, 26, 17, 'Y');
+  rect(8, 8, 19, 14, 'ϸ'); rect(13, 8, 14, 14, 'Ϲ');           // the tank and the catwalk across it
+  for (let x = 2; x < 10; x++) g[5][x] = 'ϻ'; for (let x = 18; x < 26; x++) g[5][x] = 'ϻ';
+  for (const [x, y] of [[2, 8], [2, 14], [25, 8], [25, 14], [6, 16], [21, 16], [4, 11], [23, 11]]) g[y][x] = 'ϼ';
+  rect(10, 18, 17, 18, 'Y');
+  g[19][13] = 'm'; g[19][14] = 'm';
+  return {
+    tiles: g.map((r) => r.join('')),
+    leader: { x: 13, y: 2 },
+    trainers: [{ x: 13, y: 11, dir: 'down' }, { x: 17, y: 7, dir: 'left' }],
+    guide: { x: 5, y: 16 },
+  };
+}
+
 const FLIP = { left: 'right', right: 'left', up: 'up', down: 'down' };
 
 /** Re-lay a gym interior with plan `i` (0-11): plans 6-11 are the mirror images of 0-5. */
 export function layoutGym(m, i) {
-  const bespoke = (m.npcs ?? []).some((n) => n.leader === 'correo');
-  const plan = bespoke ? correoPlan() : PLANS[i % PLANS.length];
+  const made = { correo: correoPlan, ose: osePlan }[(m.npcs ?? []).find((n) => n.leader)?.leader];
+  const bespoke = !!made;
+  const plan = made ? made() : PLANS[i % PLANS.length];
   const mirror = !bespoke && i >= PLANS.length;
   const fx = (x) => (mirror ? 11 - x : x);
   const lead = (plan as any).leader ?? { x: 5, y: 2 };
