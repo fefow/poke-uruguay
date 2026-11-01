@@ -221,19 +221,22 @@ export const CITY_SPECS = {
     fill: 14,
   },
   // Maldonado / Punta del Este: a peninsula with the rambla, La Mano rising from the sand, the port with boats.
+  // Punta del Este (64x42): the peninsula. The Rambla runs along the beach, the marina with moored boats opens to the
+  // north-east, the casino stands on the avenue and the water gym sits near the sea wall.
   punta: {
     theme: 'arena',
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 7,
-      fills: [{ rect: [1, 20, 42, 3], ch: 's', only: '.' }],
-      water: [{ rect: [1, 23, 42, 6] }, { rect: [34, 1, 9, 12] }],
-      paths: [[[1, 18], [34, 18], [34, 14], [42, 14]], [[22, 1], [22, 19]], [[6, 1], [6, 18]], [[14, 6], [30, 6]], [[3, 11], [18, 11]], [[28, 11], [28, 18]], [[18, 19], [18, 21]]],
-      props: [['M', 12, 21], ['β', 30, 22], ['β', 37, 20], ['β', 36, 15], ['γ', 38, 17], ['γ', 39, 17], ['Δ', 9, 17], ['Δ', 25, 17], ['Δ', 31, 17]],
-      scatter: [['Ω', 4, 'road'], ['p', 6, 'away']],
-      animals: [{ sp: 'lobito', n: 2, rect: [4, 21, 30, 1] }],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      fills: [{ rect: [1, 28, 62, 3], ch: 's', only: '.' }],
+      water: [{ rect: [1, 31, 62, 10] }, { rect: [48, 1, 15, 14] }],
+      paths: [[[1, 26], [48, 26], [48, 18], [62, 18]], [[32, 1], [32, 27]], [[8, 1], [8, 26]], [[20, 8], [44, 8]], [[4, 16], [28, 16]], [[40, 16], [40, 26]], [[20, 27], [20, 29]], [[56, 18], [56, 26]]],
+      plazas: [{ x: 22, y: 17, w: 9, h: 4, piece: 'fuente', benches: true }],
+      props: [['M', 16, 29], ['β', 52, 14], ['β', 55, 12], ['β', 58, 15], ['β', 50, 11], ['γ', 58, 20], ['γ', 59, 20], ['Δ', 12, 25], ['Δ', 30, 25], ['Δ', 44, 25], ['Δ', 6, 25], ['Δ', 52, 25]],
+      scatter: [['Ω', 8, 'road'], ['p', 10, 'away'], ['Ь', 3, 'road']],
+      animals: [{ sp: 'lobito', n: 3, rect: [4, 29, 50, 1] }],
     },
-    bld: [['agua', 'gym_pde', [20, 12]], ['poli', 'poli_pde'], ['shop', 'shop_pde'], ['casino', 'casino_pde']],
-    fill: 8,
+    bld: [['agua', 'gym_pde', [30, 12]], ['poli', 'poli_pde', [12, 12]], ['shop', 'shop_pde', [44, 22]], ['casino', 'casino_pde', [48, 22]]],
+    fill: 12,
   },
   // Minas: a valley between sierras: dense hills to the north, eucalyptus, a stream and the old factory.
   minas: {
