@@ -370,6 +370,8 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('rivera', [adiv('riv', 'piedra_amatista', 1, 'oldman', 'Adivino de la frontera', 28, 30)]);
   put('artigas', [adiv('art', 'piedra_agata', 1, 'maestra', 'Maestra de acertijos', 26, 18)]);
   put('melo', [adiv('mel', 'ultraesfera', 3, 'gaucho', 'Cuentero', 20, 28)]);
+  put('tacuarembo', [adiv('tac', 'alfajor_triple', 2, 'gaucho', 'Payador de la feria', 24, 28)]);
+  put('salto', [adiv('sal', 'superesfera', 4, 'maestra', 'Guía de las termas', 30, 24)]);
   put('minas', [adiv('min', 'piedra_basalto', 1, 'oldman', 'Sabio del cerro', 28, 28)]);
   const cic = OUTDOOR.ciclovia;
   if (cic) {
