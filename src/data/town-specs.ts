@@ -203,16 +203,17 @@ export const CITY_SPECS = {
   quebrada: {
     theme: 'sierra',
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 11,
-      water: [{ pts: [[1, 14], [14, 14], [18, 12], [30, 12], [32, 16], [42, 16]], w: 2 }],
-      hills: [{ rect: [1, 8, 42, 3], ch: 'K', density: 0.9 }, { rect: [1, 19, 42, 3], ch: 'K', density: 0.9 }],
-      paths: [[[1, 5], [42, 5]], [[22, 1], [22, 28]], [[1, 25], [42, 25]], [[8, 5], [8, 25]], [[36, 5], [36, 25]]],
-      groves: [{ rect: [2, 22, 8, 5], tree: 'Ñ', lanes: 4 }, { rect: [26, 2, 10, 3], tree: 'Ñ', lanes: 4 }],
-      scatter: [['ν', 8, 'away'], ['R', 8, 'away'], ['Ω', 3, 'road']],
-      animals: [{ sp: 'cuervon', n: 3, rect: [10, 2, 10, 3] }],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      water: [{ pts: [[1, 20], [20, 20], [26, 17], [40, 17], [44, 22], [62, 22]], w: 2 }],
+      hills: [{ rect: [1, 14, 62, 2], ch: 'K', density: 0.9 }, { rect: [1, 25, 62, 2], ch: 'K', density: 0.9 }, { rect: [2, 2, 18, 5], ch: 'K', density: 0.4 }],
+      paths: [[[1, 9], [62, 9]], [[32, 1], [32, 40]], [[1, 31], [62, 31]], [[12, 9], [12, 31]], [[50, 9], [50, 31]], [[20, 31], [20, 38]]],
+      groves: [{ rect: [2, 28, 8, 11], tree: 'Ñ', lanes: 4 }, { rect: [38, 2, 14, 5], tree: 'Ñ', lanes: 4 }, { rect: [52, 33, 10, 7], tree: 'Ñ', lanes: 4 }],
+      plazas: [{ x: 33, y: 10, w: 8, h: 4, piece: 'fuente', benches: true }],
+      scatter: [['ν', 12, 'away'], ['R', 12, 'away'], ['Ω', 5, 'road']],
+      animals: [{ sp: 'cuervon', n: 4, rect: [10, 2, 24, 5] }],
     },
-    bld: [['poli', 'poli_tyt'], ['shop', 'shop_tyt'], ['house', 'casa_tyt'], ['roca', 'gym_tyt', [26, 22]]],
-    fill: 8,
+    bld: [['poli', 'poli_tyt', [16, 5]], ['shop', 'shop_tyt', [44, 5]], ['house', 'casa_tyt', [6, 5]], ['roca', 'gym_tyt', [36, 34]]],
+    fill: 14,
   },
   // Rocha: butiá palm groves, a lagoon and dunes.
   // Rocha (64x42): palm groves in the north, the main avenue with a long square, a lagoon, and dunes opening to the
