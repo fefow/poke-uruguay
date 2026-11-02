@@ -361,6 +361,9 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('durazno', [trade('dur', 'tuco', 'coati', 'oldman', 'Coleccionista', 28, 16)]);
   put('melo', [trade('mel', 'garza', 'alacran', 'gaucho', 'Viajante', 34, 24)]);
   put('salto', [trade('sal', 'gaviota', 'tatadios', 'sailor', 'Marinero retirado', 26, 20)]);
+  put('paysandu', [trade('pay', 'pejerrey', 'cangrejo', 'sailor', 'Pescador del puerto', 22, 26)]);
+  put('canelones', [trade('can', 'oruga', 'hormiga', 'maestra', 'Entomóloga', 26, 22)]);
+  put('rocha', [trade('roc', 'chimango', 'comadreja', 'gaucho', 'Paisano', 26, 14)]);
   put('tacuarembo', [trade('tac', 'oveja', 'zorrigris', 'boy', 'Peón', 28, 22)]);
   put('paysandu', [{ x: 30, y: 24, look: 'sailor', dir: 'down', name: 'Juez de pesca', script: 'ev_pesca' }]);
   const adiv = (id, prize, qty, look, name, x, y) => ({ x, y, look, dir: 'down', name, script: 'ev_adivino', tid: id, prize, qty });
