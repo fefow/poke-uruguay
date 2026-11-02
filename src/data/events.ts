@@ -227,6 +227,45 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
   },
 };
 
+// ---------------------------------------------------------------- fishing derby (Paysandú, on the river)
+Object.assign(EVENT_SCRIPTS, {
+  async ev_pesca(api) {
+    const who = 'Juez de pesca';
+    if (api.flag('ev_pesca')) return api.say('El concurso de este año ya tiene ganador: vos. Gracias por participar.', { name: who });
+    if (!api.hasItem('cana_pescar') && !api.hasItem('cana_buena') && !api.hasItem('cana_super')) return api.say('Concurso de pesca del río. Hace falta una caña para anotarse.', { name: who });
+    await api.say(['Concurso de pesca del Uruguay: cinco lanzadas. Cuando pique, tenés que recoger rápido; cuanto antes recojas, más pesa lo que sacás.', 'El pique no avisa mucho. Mirá bien el agua.'], { name: who });
+    if (!(await api.ask('¿Te anotás?', { name: who }))) return;
+    let score = 0;
+    for (let i = 1; i <= 5; i++) {
+      await api.say(`Lanzada ${i} de 5…`, { name: who });
+      await api.wait(1300 + Math.floor(Math.random() * 2600));
+      api.sfx('encounter');
+      const t0 = Date.now();
+      await api.ask('¡Algo tira de la línea! ¿Recogés?', { name: who });
+      const ms = Date.now() - t0;
+      const pts = ms <= 1500 ? 3 : ms <= 2600 ? 2 : 1;
+      score += pts;
+      await api.say(pts === 3 ? 'Un dorado enorme, de más de dos kilos.' : pts === 2 ? 'Un buen pejerrey.' : 'Casi se escapa. Salió una mojarra.', { name: who });
+    }
+    await api.say(`Puntaje final: ${score} de 15.`, { name: who });
+    if (score < 6) return api.say('No alcanza para el podio. Podés anotarte de nuevo cuando quieras.', { name: who });
+    api.setFlag('ev_pesca');
+    api.sfx('catch');
+    if (score >= 12) {
+      await api.say('Primer puesto. Es un récord para el río.', { name: who });
+      if (!api.hasItem('cana_super')) await api.give(api.hasItem('cana_buena') ? 'cana_super' : 'cana_buena', 1);
+      await api.give('ultraesfera', 3);
+    } else if (score >= 9) {
+      await api.say('Segundo puesto. Una pesca muy pareja.', { name: who });
+      await api.give('superesfera', 3);
+      await api.give('alfajor_triple', 1);
+    } else {
+      await api.say('Tercer puesto. Lo importante es participar.', { name: who });
+      await api.give('superesfera', 2);
+    }
+  },
+});
+
 // ---------------------------------------------------------------- bike race (Ciclovía de Tacuarembó)
 let race: { t0: number; top: boolean } | null = null;
 const secs = (ms: number) => (ms / 1000).toFixed(1).replace('.', ',');
@@ -289,6 +328,7 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('melo', [trade('mel', 'garza', 'alacran', 'gaucho', 'Viajante', 34, 24)]);
   put('salto', [trade('sal', 'gaviota', 'tatadios', 'sailor', 'Marinero retirado', 26, 20)]);
   put('tacuarembo', [trade('tac', 'oveja', 'zorrigris', 'boy', 'Peón', 28, 22)]);
+  put('paysandu', [{ x: 30, y: 24, look: 'sailor', dir: 'down', name: 'Juez de pesca', script: 'ev_pesca' }]);
   const cic = OUTDOOR.ciclovia;
   if (cic) {
     const hh = cic.tiles.length;
