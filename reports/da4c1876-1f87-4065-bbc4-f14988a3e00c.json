@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T22:29:59.935Z",
+  "exported": "2026-11-02T22:30:59.919Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (32,20)",
+    "where": "mercedes (23,20)",
     "party": [
       "lobomarino nv22 74PS",
       "curupi nv29 85PS",
@@ -15,33 +15,9 @@
       "cerro nv20 71PS"
     ],
     "badges": 1,
-    "playtime": 8363
+    "playtime": 8409
   },
   "entries": [
-    {
-      "t": "2026-11-02T04:27:39.720Z",
-      "level": "info",
-      "msg": "Entró a r_palmitas_mercedes",
-      "where": "palmitas (0,10)"
-    },
-    {
-      "t": "2026-11-02T04:27:40.743Z",
-      "level": "info",
-      "msg": "Batalla salvaje: crisalida nv14",
-      "where": "r_palmitas_mercedes (79,14)"
-    },
-    {
-      "t": "2026-11-02T04:27:54.672Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Crisálida salvaje usó Telaraña!\" anim dmg0:13 \"¡Es súper eficaz!\" \"¡Yacaré usó Látigo Cepa!\" anim dmg1:10 \"No es muy eficaz…\"",
-      "where": "r_palmitas_mercedes (79,14)"
-    },
-    {
-      "t": "2026-11-02T04:28:09.074Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Crisálida salvaje usó Placaje!\" \"¡Yacaré esquivó el ataque!\" \"¡Yacaré usó Hoja Afilada!\" anim dmg1:11 \"No es muy eficaz…\"",
-      "where": "r_palmitas_mercedes (79,14)"
-    },
     {
       "t": "2026-11-02T04:28:16.133Z",
       "level": "info",
@@ -2424,11 +2400,36 @@
       "where": "poli_mercedes (5,7)"
     },
     {
-      "t": "2026-11-02T22:29:56.624Z",
+      "t": "2026-11-02T22:30:02.626Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
       "where": "mercedes (16,20)",
+      "count": 4
+    },
+    {
+      "t": "2026-11-02T22:30:03.750Z",
+      "level": "info",
+      "msg": "Entró a r_palmitas_mercedes",
+      "where": "mercedes (43,8)"
+    },
+    {
+      "t": "2026-11-02T22:30:44.629Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
+      "where": "r_palmitas_mercedes (27,16)",
       "count": 3
+    },
+    {
+      "t": "2026-11-02T22:30:54.576Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "r_palmitas_mercedes (0,14)"
+    },
+    {
+      "t": "2026-11-02T22:30:56.630Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
+      "where": "mercedes (35,13)"
     }
   ]
 }
