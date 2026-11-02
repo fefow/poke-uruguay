@@ -1,6 +1,6 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:15:59.073Z",
+  "exported": "2026-11-02T02:17:29.119Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
@@ -14,7 +14,7 @@
       "cumulo nv18 25PS"
     ],
     "badges": 2,
-    "playtime": 19718
+    "playtime": 19809
   },
   "entries": [
     {
@@ -2428,10 +2428,11 @@
       "where": "anglo_1 (13,18)"
     },
     {
-      "t": "2026-11-02T02:15:55.562Z",
+      "t": "2026-11-02T02:17:25.576Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
-      "where": "anglo_1 (13,18)"
+      "where": "anglo_1 (13,18)",
+      "count": 3
     }
   ]
 }
