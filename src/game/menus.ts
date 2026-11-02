@@ -207,6 +207,8 @@ export function openParty({ mode = 'field', active = -1, title, onUse, compat = 
 export function openSummary(index) {
   const S = state();
   let i = index;
+  let cur = -1; // move-reorder cursor (-1 = off)
+  let pick = -1; // move picked up to swap
   return panel('panel-summary', (el, close) => {
     const render = () => {
       const c = S.party[i];
@@ -230,16 +232,29 @@ export function openSummary(index) {
         ),
         h('ul', { class: 'summary-moves' }, c.moves.map((m) => {
           const d = MOVES[m.id];
-          return h('li', {},
-            h('div', { class: 'row' }, typeChip(d.type), h('b', { text: d.name }), h('span', { text: `PP ${m.pp}/${d.pp}` })),
+          const k = c.moves.indexOf(m);
+          return h('li', { style: k === cur ? { outline: '2px solid #2a7de1', background: '#cfe8ff' } : k === pick ? { opacity: '0.6' } : {} },
+            h('div', { class: 'row' }, typeChip(d.type), h('b', { text: (k === pick ? '⇄ ' : '') + d.name }), h('span', { text: `PP ${m.pp}/${d.pp}` })),
             h('div', { class: 'small', text: `${d.cat === 'est' ? 'Estado' : d.cat === 'fis' ? 'Físico' : 'Especial'} · Pot. ${d.power || '—'} · Prec. ${d.acc} — ${d.desc}` }));
         })),
-        h('footer', { class: 'panel-foot', text: `↑↓ cambiar · ${keyName('b')} volver` }),
+        h('footer', { class: 'panel-foot', text: cur >= 0 ? `↑↓ elegir ataque · ${keyName('a')} ${pick >= 0 ? 'intercambiar' : 'tomar'} · ${keyName('b')} salir` : `↑↓ cambiar · ${keyName('a')} reordenar ataques · ${keyName('b')} volver` }),
       );
     };
     render();
     return (a) => {
-      if (a === 'b' || a === 'a' || a === 'start') { sfx('cancel'); close(); }
+      const c = S.party[i];
+      if (cur >= 0) {
+        if (a === 'b' || a === 'start') { sfx('cancel'); if (pick >= 0) pick = -1; else cur = -1; render(); }
+        else if (a === 'up' || a === 'down') { cur = (cur + (a === 'up' ? -1 : 1) + c.moves.length) % c.moves.length; sfx('select'); render(); }
+        else if (a === 'a') {
+          sfx('select');
+          if (pick < 0) pick = cur;
+          else { if (pick !== cur) [c.moves[pick], c.moves[cur]] = [c.moves[cur], c.moves[pick]]; pick = -1; }
+          render();
+        }
+      }
+      else if (a === 'a' && c.moves.length > 1) { sfx('select'); cur = 0; render(); }
+      else if (a === 'b' || a === 'a' || a === 'start') { sfx('cancel'); close(); }
       else if (a === 'up' || a === 'down') { i = (i + (a === 'up' ? -1 : 1) + S.party.length) % S.party.length; sfx('select'); render(); }
     };
   });

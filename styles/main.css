@@ -225,7 +225,7 @@ button { font: inherit; color: inherit; }
   & .menu-list { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 0.8cqi 1.4cqi; block-size: 100%; }
   & .menu-list li { padding: 0.6cqi 1.2cqi 0.6cqi 3.8cqi; min-inline-size: 0; align-items: center; }
   & .mv { display: grid; gap: 0.2cqi; min-inline-size: 0; }
-  & .mv-name { font-size: 3.2cqi; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  & .mv-name { font-size: 3.2cqi; line-height: 1.1; overflow-wrap: anywhere; hyphens: auto; }
   & .mv-sub { display: flex; align-items: center; gap: 1cqi; font-size: 2.3cqi; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   & .mv-dot { inline-size: 2cqi; block-size: 2cqi; border-radius: 50%; background: var(--type, #888); border: 0.25cqi solid #16141e; flex: none; }
 }
@@ -331,7 +331,7 @@ button { font: inherit; color: inherit; }
 .bhud-foe { top: 3cqi; left: 3cqi; }
 .bhud-ply { top: 44%; right: 3cqi; }
 .bhud-row { display: flex; align-items: baseline; gap: 1.6cqi; }
-.bhud-name { font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bhud-name { font-weight: 600; flex: 1; overflow-wrap: anywhere; line-height: 1.05; }
 .bhud-status:not(:empty) {
   padding: 0 1cqi;
   border-radius: 0.6cqi;
@@ -432,7 +432,7 @@ button { font: inherit; color: inherit; }
 }
 .party-icon { width: 10cqi; height: 10cqi; image-rendering: pixelated; }
 .party-main { min-width: 0; font-size: 2.9cqi; }
-.party-name { display: flex; gap: 1cqi; align-items: center; font-weight: 600; & span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+.party-name { display: flex; gap: 1cqi; align-items: center; font-weight: 600; & span:first-child { overflow-wrap: anywhere; } }
 .party-lv { font-family: var(--font-pixel); font-size: 2cqi; color: var(--ink-soft); }
 .party-hp { text-align: right; font-variant-numeric: tabular-nums; font-size: 2.8cqi; }
 
@@ -859,7 +859,7 @@ button { font: inherit; color: inherit; }
 }
 .map-info { min-inline-size: 0; display: grid; grid-template-rows: 6.4cqi 2.6cqi 6.4cqi 17cqi 9.5cqi 1fr; gap: 1cqi; padding: 1.2cqi 1.2cqi; border-radius: 1cqi; background: #16141e; color: #fff; overflow: hidden;
   & .mi-name { font-size: 2.6cqi; font-weight: 700; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  & .mi-kind { font-size: 1.8cqi; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  & .mi-kind { font-size: 1.8cqi; opacity: 0.75; overflow-wrap: anywhere; }
   & .mi-block { min-block-size: 0; overflow: hidden; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 0.4cqi; }
   & small { flex-basis: 100%; font-size: 1.5cqi; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.04em; }
   & .mi-dept { font-size: 2.3cqi; font-weight: 700; }
@@ -1042,7 +1042,9 @@ body {
 .menu-battle { inset: auto -20cqi 2cqi auto; width: 44cqi; }
 .menu-moves { inset: auto -20cqi 2cqi -20cqi; }
 .menu-moves { padding-left: 4cqi; }
-.move-info { z-index: 67; right: -17cqi; bottom: 4.4cqi; block-size: calc(26% - 2.8cqi); }
+.move-info { z-index: 67; right: -13cqi; inline-size: 33cqi; padding-right: 1.6cqi; bottom: 4.4cqi; block-size: calc(26% - 2.8cqi); }
+.move-info .mi-head { flex-wrap: wrap; }
+.move-info .mi-desc { -webkit-line-clamp: 4; overflow-wrap: anywhere; }
 .menu-moves { height: 28%; }
 
 /* menus and panels: wider than the centred column on the 16:9 stage, with the world dimmed behind them */

@@ -727,7 +727,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     const mz = spinMaze();
     const al = mz.alcoves;
     const at = (k, extra: any = {}) => ({ x: al[k].x, y: al[k].y, dir: al[k].face, ...extra });
-    const gr = (k, id, lv, a, b, c, sight = 3) => grunt({ x: al[k].x, y: al[k].y }, id, lv, a, b, c, { dir: al[k].face, sight });
+    const gr = (k, id, lv, a, b, c, sight = 1) => grunt({ x: al[k].x, y: al[k].y }, id, lv, a, b, c, { dir: al[k].face, sight });
     return room(mz.tiles, {
       name: 'Frigorífico Anglo', music: 'cave', theme: 'frigorifico',
       npcs: [

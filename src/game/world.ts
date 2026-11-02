@@ -857,6 +857,20 @@ export const api = {
     else S.box.push(c);
     return c;
   },
+  /** Trade: the player hands over a creature of species `want`; gets `offer` at the same level (OT: the player). Returns true if traded. */
+  async tradeCreature(want, offer) {
+    const S = state();
+    const i = await openParty({ mode: 'select', title: `Entregar un ${SPECIES[want].name}` });
+    if (i < 0) return false;
+    const old = S.party[i];
+    if (old.species !== want) { await say(`Eso no es un ${SPECIES[want].name}.`); return false; }
+    if (S.party.filter((c, k) => k !== i && c.hp > 0).length < 1) { await say('Necesitás otra criatura en condiciones para seguir viaje.'); return false; }
+    const nw = createCreature(offer, old.level, { ot: S.player.id });
+    markCaught(offer);
+    S.party[i] = nw;
+    sfx('confirm');
+    return true;
+  },
   /** Guardería: a creature left here gains experience for every step the player takes (stored in the box, S.daycare marks it). */
   async daycare() {
     const S = state();

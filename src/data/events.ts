@@ -141,6 +141,18 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
     api.healParty({ silent: true });
   },
 
+  // Trade NPCs: hand over a creature of one species, get another at the same level. One trade each (flag ev_trade_<id>).
+  async ev_trueque(api, npc) {
+    const { tid: id, want, offer } = npc as any;
+    const who = (npc as any).name ?? 'Coleccionista';
+    if (api.flag(`ev_trade_${id}`)) return api.say('Gracias por el trato. Lo cuido como si fuera mío.', { name: who });
+    await api.say([`Ando buscando un ${SPECIES[want].name} desde hace meses.`, `Si tenés uno, te lo cambio por mi ${SPECIES[offer].name}. Del mismo nivel que me des.`], { name: who });
+    if (!(await api.ask(`¿Hacemos el cambio? (un ${SPECIES[want].name} por un ${SPECIES[offer].name})`))) return;
+    if (!(await api.tradeCreature(want, offer))) return api.say('Cuando tengas uno, volvé.', { name: who });
+    api.setFlag(`ev_trade_${id}`);
+    await api.say(`Trato hecho. {player} recibió a ${SPECIES[offer].name}.`);
+  },
+
   // Rocha: a treasure hunt. Three clues in the town (folk who remember a detail each); the old man puts them together.
   async ev_pista(api, npc) {
     const n = npc.clue as number;
@@ -271,6 +283,12 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
     { x: 30, y: 12, look: 'nino', dir: 'down', name: 'Nene', script: 'ev_pista', clue: 3, text: ['A mediodía la sombra de la palmera señala hacia el mar. Mi tío dice que ahí hay que cavar.'] },
     { x: 20, y: 22, look: 'obrero', dir: 'down', name: 'Buscatesoros', script: 'ev_buscatesoros' },
   ]);
+  const trade = (id, want, offer, look, name, x, y) => ({ x, y, look, dir: 'down', name, script: 'ev_trueque', tid: id, want, offer });
+  put('florida', [trade('flo', 'sapo', 'lechuza', 'maestra', 'Naturalista', 30, 18)]);
+  put('durazno', [trade('dur', 'tuco', 'coati', 'oldman', 'Coleccionista', 28, 16)]);
+  put('melo', [trade('mel', 'garza', 'alacran', 'gaucho', 'Viajante', 34, 24)]);
+  put('salto', [trade('sal', 'gaviota', 'tatadios', 'sailor', 'Marinero retirado', 26, 20)]);
+  put('tacuarembo', [trade('tac', 'oveja', 'zorrigris', 'boy', 'Peón', 28, 22)]);
   const cic = OUTDOOR.ciclovia;
   if (cic) {
     const hh = cic.tiles.length;
