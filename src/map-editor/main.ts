@@ -196,7 +196,9 @@ function loadMine() {
   const all = [...(CUSTOM.tiles ?? []).filter((t) => !(own.tiles ?? []).some((n) => n.ch === t.ch)), ...(own.tiles ?? [])].filter((t) => !gone.includes(t.ch));
   for (const t of all) { registerCustomTile(t.ch, t.name, !!t.solid); MINE.push(t.ch); }
   const table = { ...SPRITE_OVERRIDES };
-  for (const [k, v] of Object.entries(sp)) { if (v) table[k] = v; else delete table[k]; }
+  // Drafts only matter for pieces that are not in the game yet; for everything else the saved art wins (old drafts must not hide it).
+  const fresh = new Set((own.tiles ?? []).filter((n) => !(CUSTOM.tiles ?? []).some((d) => d.ch === n.ch)).map((n) => n.ch));
+  for (const [k, v] of Object.entries(sp)) { if (v && fresh.has(k.replace(/^tile:/, '').slice(0, -1))) table[k] = v; }
   setOverrides(table);
 }
 loadMine();
