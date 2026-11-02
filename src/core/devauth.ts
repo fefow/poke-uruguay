@@ -33,6 +33,12 @@ export async function unlockDev(token) {
   return r;
 }
 
+/** Turns developer mode on/off without forgetting the token (Ctrl+Shift+F2). */
+export const hasToken = () => !!devToken();
+export function setDevOn(on: boolean) {
+  try { if (on) store.setItem(DEV_KEY, '1'); else store.removeItem(DEV_KEY); } catch { /* storage blocked */ }
+}
+
 export function lockDev() {
   try { store.removeItem(TOKEN_KEY); store.removeItem(DEV_KEY); } catch { /* storage blocked */ }
 }

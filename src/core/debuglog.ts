@@ -3,7 +3,7 @@
 // Read-only with respect to game state: it never changes a save.
 import { h, safeStorage } from './util.ts';
 import { REPORT_CONFIG } from '../save/config.ts';
-import { isDev, unlockDev } from './devauth.ts';
+import { isDev, unlockDev, hasToken, setDevOn } from './devauth.ts';
 
 const KEY = 'pokeuy:debuglog';
 const MAX = 400;
@@ -310,9 +310,19 @@ export function mountDebugPanel({ blockInput, getBuild }) {
 
   badge.addEventListener('click', open);
   addEventListener('keydown', async (e) => {
+    if (e.code === 'F2' && e.ctrlKey && e.shiftKey && isDev()) { // switch developer mode off (the token stays saved)
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setDevOn(false);
+      badge.hidden = true;
+      if (panelEl) close();
+      alert('Modo desarrollador apagado. Recargá la página para ocultar el menú Desarrollo. Ctrl+Shift+F2 lo vuelve a activar.');
+      return;
+    }
     if (e.code === 'F2' && e.ctrlKey && e.shiftKey && !isDev()) {
       e.preventDefault();
       e.stopImmediatePropagation();
+      if (hasToken()) { setDevOn(true); badge.hidden = false; alert('Modo desarrollador activado. Recargá la página.'); return; }
       const t = prompt('Modo desarrollador: token de GitHub con permiso de escritura sobre el repo');
       if (!t) return;
       const r = await unlockDev(t);
