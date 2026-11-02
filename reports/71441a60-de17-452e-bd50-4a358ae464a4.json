@@ -1,94 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:02:35.003Z",
+  "exported": "2026-11-02T02:05:35.017Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_villasoriano_fraybentos (22,18)",
+    "where": "r_villasoriano_fraybentos (25,18)",
     "party": [
-      "cortadora nv19 17PS",
-      "ceibal nv27 61PS",
+      "cortadora nv19 0PS",
+      "ceibal nv27 39PS",
       "alacran nv16 0PS",
-      "lobomarino nv14 50PS",
-      "nimbo nv17 13PS"
+      "lobomarino nv14 0PS",
+      "nimbo nv17 0PS"
     ],
     "badges": 2,
-    "playtime": 18958
+    "playtime": 19105
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:08:12.852Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "colonia (7,21)"
-    },
-    {
-      "t": "2026-11-02T00:09:29.462Z",
-      "level": "info",
-      "msg": "Entró a shop_colonia",
-      "where": "colonia (13,20)"
-    },
-    {
-      "t": "2026-11-02T00:09:34.883Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "shop_colonia (4,7)"
-    },
-    {
-      "t": "2026-11-02T00:09:39.032Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "colonia (16,0)"
-    },
-    {
-      "t": "2026-11-02T00:09:47.174Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "ruta1 (0,8)"
-    },
-    {
-      "t": "2026-11-02T00:09:52.332Z",
-      "level": "info",
-      "msg": "Entró a lab",
-      "where": "carmelo (15,11)"
-    },
-    {
-      "t": "2026-11-02T00:10:00.340Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "lab (6,8)"
-    },
-    {
-      "t": "2026-11-02T00:10:02.707Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "carmelo (25,8)"
-    },
-    {
-      "t": "2026-11-02T00:10:03.690Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "ruta1 (0,8)"
-    },
-    {
-      "t": "2026-11-02T00:10:06.112Z",
-      "level": "info",
-      "msg": "Entró a casa_rival",
-      "where": "carmelo (18,5)"
-    },
-    {
-      "t": "2026-11-02T00:10:08.517Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "casa_rival (5,7)"
-    },
-    {
-      "t": "2026-11-02T00:10:12.639Z",
-      "level": "info",
-      "msg": "Entró a casa_jugador",
-      "where": "carmelo (10,5)"
-    },
     {
       "t": "2026-11-02T00:10:17.274Z",
       "level": "info",
@@ -2418,10 +2346,83 @@
       "where": "r_villasoriano_fraybentos (30,21)"
     },
     {
-      "t": "2026-11-02T02:02:31.486Z",
+      "t": "2026-11-02T02:03:07.486Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
-      "where": "r_villasoriano_fraybentos (24,15)"
+      "where": "r_villasoriano_fraybentos (24,15)",
+      "count": 6
+    },
+    {
+      "t": "2026-11-02T02:03:11.059Z",
+      "level": "info",
+      "msg": "Batalla vs Carmen: teruterazo nv19, caudillo nv19",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:03:22.576Z",
+      "level": "info",
+      "msg": "Turno 1: item | \"Usaste Linimento.\" heal hud \"¡Cortadora se curó!\" \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:17 \"¡Es súper eficaz!\" faint \"¡Cortadora se debilitó!\" needSwitch",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:04:38.890Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Terogarra rival usó Chirrido!\" anim stat \"¡Bajó mucho la Defensa de Golondrina!\" \"¡Golondrina usó Impactrueno!\" anim dmg1:26 \"¡Es súper eficaz!\"",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:04:51.580Z",
+      "level": "info",
+      "msg": "Turno 3: item | \"Usaste Mate Lavado.\" heal hud \"Golondrina tomó un mate y recuperó 10 PS.\" \"¡Terogarra rival usó Griterío!\" anim dmg0:22",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:04:58.961Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:1 \"No es muy eficaz…\" faint \"¡Golondrina se debilitó!\" needSwitch",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:07.169Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:38 \"¡Es súper eficaz!\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:13",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:09.601Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:12 \"¡Es súper eficaz!\" faint \"¡Lobo Marino se debilitó!\" needSwitch",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:14.148Z",
+      "level": "info",
+      "msg": "Turno 7: move #0 | \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:27 \"¡Es súper eficaz!\" \"¡Ceibal usó Megaagotar!\" anim dmg1:16 \"No es muy eficaz…\" heal \"¡Terogarra rival perdió energía!\" faint \"¡Terogarra rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:23.235Z",
+      "level": "info",
+      "msg": "Turno 8: move #1 | \"¡Ceibal usó Hoja Afilada!\" anim dmg1:32 \"¡Golpe crítico!\" \"¡Lobo de Crin rival usó Mordisco!\" anim dmg0:17",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:26.370Z",
+      "level": "info",
+      "msg": "Turno 9: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:29 heal \"¡Lobo de Crin rival perdió energía!\" faint \"¡Lobo de Crin rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:29.447Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (19,28)"
+    },
+    {
+      "t": "2026-11-02T02:05:31.502Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "r_villasoriano_fraybentos (19,29)"
     }
   ]
 }
