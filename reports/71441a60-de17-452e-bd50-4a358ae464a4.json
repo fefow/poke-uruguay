@@ -1,97 +1,19 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T04:04:51.677Z",
+  "exported": "2026-11-02T04:13:41.216Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "salto (22,36)",
+    "where": "salto (23,36)",
     "party": [
       "pedrusco nv24 79PS",
       "carpinchon nv47 151PS"
     ],
     "badges": 3,
-    "playtime": 9236
+    "playtime": 9589
   },
   "entries": [
-    {
-      "t": "2026-11-02T02:36:14.147Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:43 \"¡Yarará rival usó Tóxico!\" anim statusAnim hud \"¡Cortadora está envenenado!\" statusAnim dmg0:8 \"Cortadora sufre por el veneno.\"",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:36:18.914Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:4 \"¡Golpe crítico!\" faint \"¡Yarará rival se debilitó!\" exp foeNext statusAnim dmg0:8 \"Cortadora sufre por el veneno.\"",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:36:30.874Z",
-      "level": "info",
-      "msg": "Turno 3: switch #3 | \"¡Cortadora, volvé!\" recall send \"¡Adelante, Lobo Marino!\" \"¡Cururú rival usó Picotazo Veneno!\" anim dmg0:5",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:36:35.565Z",
-      "level": "info",
-      "msg": "Turno 4: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:6 \"No es muy eficaz…\" \"¡Cururú rival usó Hidropulso!\" anim dmg0:8 \"No es muy eficaz…\"",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:36:39.843Z",
-      "level": "info",
-      "msg": "Turno 5: switch #2 | \"¡Lobo Marino, volvé!\" recall send \"¡Adelante, Alacrán!\" \"¡Cururú rival usó Dardo Venenoso!\" anim dmg0:25",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:36:48.499Z",
-      "level": "info",
-      "msg": "Turno 6: move #2 | \"¡Alacrán usó Picadura!\" anim dmg1:6 \"No es muy eficaz…\" \"¡Cururú rival usó Gas Venenoso!\" anim statusAnim hud \"¡Alacrán está envenenado!\" statusAnim dmg0:5 \"Alacrán sufre por el veneno.\"",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:36:53.288Z",
-      "level": "info",
-      "msg": "Turno 7: move #1 | \"¡Alacrán usó Telaraña!\" anim dmg1:3 \"No es muy eficaz…\" \"¡Cururú rival usó Picotazo Veneno!\" anim dmg0:8 statusAnim dmg0:5 \"Alacrán sufre por el veneno.\"",
-      "where": "anglo_1 (21,16)"
-    },
-    {
-      "t": "2026-11-02T02:43:04.926Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "title"
-    },
-    {
-      "t": "2026-11-02T02:43:26.546Z",
-      "level": "info",
-      "msg": "Entró a poli_frb",
-      "where": "fraybentos (17,20)"
-    },
-    {
-      "t": "2026-11-02T02:43:45.809Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "poli_frb (5,7)"
-    },
-    {
-      "t": "2026-11-02T02:44:00.710Z",
-      "level": "info",
-      "msg": "Entró a anglo_1",
-      "where": "fraybentos (36,14)"
-    },
-    {
-      "t": "2026-11-02T02:44:34.709Z",
-      "level": "info",
-      "msg": "Batalla vs Bruma: yararita nv17, zorrigris nv19, carabo nv20",
-      "where": "anglo_1 (13,3)"
-    },
-    {
-      "t": "2026-11-02T02:44:40.362Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Yarará rival usó Ácido!\" \"¡Alacrán esquivó el ataque!\" \"¡Alacrán usó Telaraña!\" anim dmg1:5 \"No es muy eficaz…\"",
-      "where": "anglo_1 (13,3)"
-    },
     {
       "t": "2026-11-02T02:44:42.771Z",
       "level": "info",
@@ -2423,6 +2345,95 @@
         ],
         "badges": 3,
         "playtime": 9234
+      }
+    },
+    {
+      "t": "2026-11-02T04:07:55.438Z",
+      "level": "info",
+      "msg": "Entró a poli_sal",
+      "where": "salto (15,24)"
+    },
+    {
+      "t": "2026-11-02T04:07:59.805Z",
+      "level": "info",
+      "msg": "Entró a salto",
+      "where": "poli_sal (5,7)"
+    },
+    {
+      "t": "2026-11-02T04:08:11.850Z",
+      "level": "info",
+      "msg": "Entró a gym_sal",
+      "where": "salto (37,24)"
+    },
+    {
+      "t": "2026-11-02T04:08:42.868Z",
+      "level": "info",
+      "msg": "Entró a salto",
+      "where": "gym_sal (12,19)"
+    },
+    {
+      "t": "2026-11-02T04:13:13.705Z",
+      "level": "info",
+      "msg": "Entró a represa_1",
+      "where": "salto (54,21)"
+    },
+    {
+      "t": "2026-11-02T04:13:15.423Z",
+      "level": "info",
+      "msg": "Entró a salto",
+      "where": "represa_1 (5,8)"
+    },
+    {
+      "t": "2026-11-02T04:13:16.659Z",
+      "level": "info",
+      "msg": "Entró a represa_1",
+      "where": "salto (54,21)"
+    },
+    {
+      "t": "2026-11-02T04:13:19.145Z",
+      "level": "info",
+      "msg": "Entró a salto",
+      "where": "represa_1 (5,8)"
+    },
+    {
+      "t": "2026-11-02T04:13:20.193Z",
+      "level": "info",
+      "msg": "Entró a represa_1",
+      "where": "salto (54,21)"
+    },
+    {
+      "t": "2026-11-02T04:13:20.913Z",
+      "level": "info",
+      "msg": "Entró a salto",
+      "where": "represa_1 (5,8)"
+    },
+    {
+      "t": "2026-11-02T04:13:21.842Z",
+      "level": "info",
+      "msg": "Entró a represa_1",
+      "where": "salto (54,21)"
+    },
+    {
+      "t": "2026-11-02T04:13:22.467Z",
+      "level": "info",
+      "msg": "Entró a salto",
+      "where": "represa_1 (5,8)"
+    },
+    {
+      "t": "2026-11-02T04:13:37.112Z",
+      "level": "error",
+      "msg": "ResizeObserver loop completed with undelivered notifications.",
+      "where": "salto (23,36)",
+      "detail": ":0:0",
+      "ctx": {
+        "mode": "game",
+        "where": "salto (23,36)",
+        "party": [
+          "pedrusco nv24 79PS",
+          "carpinchon nv47 151PS"
+        ],
+        "badges": 3,
+        "playtime": 9585
       }
     }
   ]
