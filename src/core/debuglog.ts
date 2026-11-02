@@ -139,6 +139,8 @@ export const info = (msg: unknown) => log('info', msg);
 
 export function installErrorCapture() {
   addEventListener('error', (ev) => {
+    // Benign browser notice (a layout observer finished late); not a bug in the game.
+    if (/ResizeObserver loop/i.test(ev.message ?? '')) { ev.stopImmediatePropagation(); return; }
     log('error', ev.message || 'Error', ev.error?.stack ?? `${ev.filename}:${ev.lineno}:${ev.colno}`);
   });
   addEventListener('unhandledrejection', (ev) => {
