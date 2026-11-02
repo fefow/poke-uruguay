@@ -1,13 +1,13 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T22:24:41.895Z",
+  "exported": "2026-11-02T22:25:42.033Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "palmitas (13,5)",
+    "where": "trinidad (36,17)",
     "party": [
-      "lobomarino nv20 11PS",
+      "lobomarino nv20 69PS",
       "curupi nv29 85PS",
       "tejubrasa nv23 61PS",
       "lechuza nv13 36PS",
@@ -15,99 +15,9 @@
       "cerro nv20 71PS"
     ],
     "badges": 1,
-    "playtime": 8084
+    "playtime": 8144
   },
   "entries": [
-    {
-      "t": "2026-11-02T04:16:20.806Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:39 faint \"¡Tuco salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:23.121Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:24.058Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv15",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:27.086Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:48 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:29.735Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:29.937Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv13",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:32.854Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:36 faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:35.245Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:36.472Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv14",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:39.229Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:39 faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:41.668Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:45.334Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv13",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:48.126Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:44 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:50.976Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:16:51.588Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv12",
-      "where": "palmitas (16,11)"
-    },
     {
       "t": "2026-11-02T04:16:54.241Z",
       "level": "info",
@@ -2427,6 +2337,96 @@
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
       "where": "palmitas (13,6)"
+    },
+    {
+      "t": "2026-11-02T22:24:47.141Z",
+      "level": "info",
+      "msg": "Entró a casa_palmitas",
+      "where": "palmitas (17,10)"
+    },
+    {
+      "t": "2026-11-02T22:24:50.589Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
+      "where": "casa_palmitas (5,2)"
+    },
+    {
+      "t": "2026-11-02T22:24:52.065Z",
+      "level": "info",
+      "msg": "Entró a palmitas",
+      "where": "casa_palmitas (4,7)"
+    },
+    {
+      "t": "2026-11-02T22:24:53.736Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "palmitas (25,10)"
+    },
+    {
+      "t": "2026-11-02T22:24:55.485Z",
+      "level": "info",
+      "msg": "Entró a poli_trinidad",
+      "where": "trinidad (7,15)"
+    },
+    {
+      "t": "2026-11-02T22:24:59.534Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "poli_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-02T22:25:07.495Z",
+      "level": "info",
+      "msg": "Entró a casa_trinidad",
+      "where": "trinidad (25,12)"
+    },
+    {
+      "t": "2026-11-02T22:25:08.595Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
+      "where": "casa_trinidad (4,6)"
+    },
+    {
+      "t": "2026-11-02T22:25:11.756Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "casa_trinidad (4,7)"
+    },
+    {
+      "t": "2026-11-02T22:25:14.596Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
+      "where": "trinidad (28,9)"
+    },
+    {
+      "t": "2026-11-02T22:25:16.665Z",
+      "level": "info",
+      "msg": "Entró a shop_trinidad",
+      "where": "trinidad (30,4)"
+    },
+    {
+      "t": "2026-11-02T22:25:19.179Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "shop_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-02T22:25:21.716Z",
+      "level": "info",
+      "msg": "Entró a shop_trinidad",
+      "where": "trinidad (30,4)"
+    },
+    {
+      "t": "2026-11-02T22:25:34.571Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "shop_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-02T22:25:38.599Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
+      "where": "trinidad (40,5)"
     }
   ]
 }
