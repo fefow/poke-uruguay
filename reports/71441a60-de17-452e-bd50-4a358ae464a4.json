@@ -1,75 +1,21 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:58:34.757Z",
+  "exported": "2026-11-02T02:00:11.152Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_villasoriano_fraybentos (45,21)",
+    "where": "r_villasoriano_fraybentos (40,18)",
     "party": [
-      "hormiga nv18 49PS",
-      "ceibal nv27 70PS",
-      "alacran nv16 45PS",
+      "cortadora nv19 17PS",
+      "ceibal nv27 61PS",
+      "alacran nv16 0PS",
       "lobomarino nv14 50PS"
     ],
     "badges": 2,
-    "playtime": 18792
+    "playtime": 18885
   },
   "entries": [
-    {
-      "t": "2026-11-01T15:44:42.713Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_c4 (4,7)"
-    },
-    {
-      "t": "2026-11-01T15:44:46.333Z",
-      "level": "info",
-      "msg": "Entró a ferry_3",
-      "where": "ferry_2 (27,2)"
-    },
-    {
-      "t": "2026-11-01T15:44:49.419Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_3 (10,11)"
-    },
-    {
-      "t": "2026-11-01T15:56:21.447Z",
-      "level": "info",
-      "msg": "Entró a ferry_3",
-      "where": "ferry_2 (26,3)"
-    },
-    {
-      "t": "2026-11-01T15:56:22.789Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_3 (10,11)"
-    },
-    {
-      "t": "2026-11-01T15:56:27.294Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "ferry_2 (14,6)"
-    },
-    {
-      "t": "2026-11-01T15:56:35.085Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "ferry_1 (12,1)"
-    },
-    {
-      "t": "2026-11-02T00:07:35.522Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "title"
-    },
-    {
-      "t": "2026-11-02T00:07:47.457Z",
-      "level": "info",
-      "msg": "Batalla vs Ramiro: nandulin nv5, oruga nv5, tuco nv5",
-      "where": "colonia (7,21)"
-    },
     {
       "t": "2026-11-02T00:07:52.829Z",
       "level": "info",
@@ -2415,11 +2361,65 @@
       "where": "villasoriano (0,8)"
     },
     {
-      "t": "2026-11-02T01:58:31.461Z",
+      "t": "2026-11-02T01:58:43.463Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
       "where": "r_villasoriano_fraybentos (59,22)",
-      "count": 14
+      "count": 16
+    },
+    {
+      "t": "2026-11-02T01:58:45.222Z",
+      "level": "info",
+      "msg": "Batalla salvaje: novillo nv20",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:58:48.507Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Hormiga usó Colmillo Fuego!\" anim dmg1:13 \"¡Novillo salvaje usó Gruñido!\" anim stat \"¡Bajó el Ataque de Hormiga!\"",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:58:51.906Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Hormiga usó Colmillo Fuego!\" anim dmg1:10 \"¡Novillo salvaje usó Griterío!\" anim dmg0:44 \"¡Golpe crítico!\"",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:58:57.934Z",
+      "level": "info",
+      "msg": "Turno 3: switch #2 | \"¡Hormiga, volvé!\" recall send \"¡Adelante, Alacrán!\" \"¡Novillo salvaje usó Arañazo!\" anim dmg0:27 \"¡Golpe crítico!\"",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:59:03.610Z",
+      "level": "info",
+      "msg": "Turno 4: move #3 | \"¡Alacrán usó Disparo Demora!\" anim stat \"¡Bajó mucho la Velocidad de Novillo salvaje!\" \"¡Novillo salvaje usó Griterío!\" anim dmg0:18 faint \"¡Alacrán se debilitó!\" needSwitch",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:59:16.603Z",
+      "level": "info",
+      "msg": "Turno 5: move #1 | \"¡Novillo salvaje usó Ataque Rápido!\" anim dmg0:9 \"¡Ceibal usó Hoja Afilada!\" anim dmg1:28 \"¡Golpe crítico!\"",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:59:19.708Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Ceibal usó Látigo Cepa!\" anim dmg1:16 faint \"¡Novillo salvaje se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T01:59:51.415Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (40,18)"
+    },
+    {
+      "t": "2026-11-02T02:00:07.473Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "r_villasoriano_fraybentos (40,18)"
     }
   ]
 }
