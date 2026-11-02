@@ -477,7 +477,7 @@ let lastAction = 0;
 async function chooseAction() {
   const c = engine.p.c;
   await say(`¿Qué va a hacer ${displayName(c)}?`, { battle: true, keep: true });
-  const pick = await choose(['Luchar', 'Mochila', 'Equipo', 'Huir'], { cancel: false, cls: 'menu-battle', cols: 2, start: lastAction });
+  const pick = await choose(['Luchar', 'Mochila', 'Equipo', 'Huir'], { cancel: false, cls: 'menu-battle', cols: 2, start: 0 });
   lastAction = pick;
   if (pick === 0) {
     const mv = await chooseMove(c);
