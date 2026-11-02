@@ -1,101 +1,21 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:48:58.856Z",
+  "exported": "2026-11-02T01:51:05.069Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (12,15)",
+    "where": "mercedes (6,19)",
     "party": [
-      "hormiga nv17 47PS",
+      "hormiga nv18 13PS",
       "ceibal nv27 70PS",
-      "alacran nv16 45PS",
-      "lobomarino nv13 47PS"
+      "alacran nv16 0PS",
+      "lobomarino nv13 4PS"
     ],
     "badges": 2,
-    "playtime": 18316
+    "playtime": 18438
   },
   "entries": [
-    {
-      "t": "2026-11-01T05:50:41.695Z",
-      "level": "info",
-      "msg": "Turno 10: move #1 | \"¡Carpinchal usó Hidropulso!\" anim dmg1:11 faint \"¡Carnero rival se debilitó!\" exp end",
-      "where": "ferry_1 (5,6)"
-    },
-    {
-      "t": "2026-11-01T05:50:44.221Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_1 (5,6)"
-    },
-    {
-      "t": "2026-11-01T05:59:18.285Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_1 (10,1)"
-    },
-    {
-      "t": "2026-11-01T05:59:20.719Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "ferry_2 (5,8)"
-    },
-    {
-      "t": "2026-11-01T06:21:09.928Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "ferry_1 (5,8)",
-      "count": 2
-    },
-    {
-      "t": "2026-11-01T06:21:20.855Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "fraybentos (6,20)"
-    },
-    {
-      "t": "2026-11-01T06:21:26.424Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_1 (9,1)"
-    },
-    {
-      "t": "2026-11-01T06:21:27.862Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "ferry_2 (13,6)"
-    },
-    {
-      "t": "2026-11-01T15:42:03.288Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "ferry_1 (10,11)",
-      "count": 2
-    },
-    {
-      "t": "2026-11-01T15:42:11.218Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "fraybentos (3,26)"
-    },
-    {
-      "t": "2026-11-01T15:42:13.256Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "ferry_1 (11,1)"
-    },
-    {
-      "t": "2026-11-01T15:42:30.941Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "fraybentos (3,26)"
-    },
-    {
-      "t": "2026-11-01T15:42:55.717Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_1 (14,9)"
-    },
     {
       "t": "2026-11-01T15:42:58.037Z",
       "level": "info",
@@ -2413,10 +2333,89 @@
       "where": "poli_mercedes (5,7)"
     },
     {
-      "t": "2026-11-02T01:48:55.382Z",
+      "t": "2026-11-02T01:49:25.386Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 13",
-      "where": "mercedes (8,22)"
+      "where": "mercedes (8,22)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T01:49:26.101Z",
+      "level": "info",
+      "msg": "Entró a villasoriano",
+      "where": "mercedes (0,8)"
+    },
+    {
+      "t": "2026-11-02T01:49:28.026Z",
+      "level": "info",
+      "msg": "Batalla vs Matías: teruterito nv17, cortadora nv19",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:13.507Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tero rival usó Griterío!\" anim dmg0:14 \"¡Hormiga usó Colmillo Fuego!\" anim dmg1:22",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:17.000Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:10 \"¡Hormiga usó Ascuas!\" anim dmg1:11",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:19.329Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tero rival usó Ataque Ala!\" anim dmg0:12 \"¡Hormiga usó Ascuas!\" anim dmg1:8 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:30.331Z",
+      "level": "info",
+      "msg": "Turno 4: switch #2 | \"¡Hormiga, volvé!\" recall send \"¡Adelante, Alacrán!\" \"¡Cortadora rival usó Telaraña!\" anim dmg0:19 stat \"¡Bajó la Velocidad de Alacrán!\"",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:36.453Z",
+      "level": "info",
+      "msg": "Turno 5: move #3 | \"¡Cortadora rival usó Colmillo Fuego!\" anim dmg0:26 \"¡Es súper eficaz!\" faint \"¡Alacrán se debilitó!\" needSwitch",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:44.937Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Cortadora rival usó Picadura!\" anim dmg0:14 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:21 \"¡Es súper eficaz!\"",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:49.320Z",
+      "level": "info",
+      "msg": "Turno 7: move #0 | \"¡Cortadora rival usó Colmillo Fuego!\" anim dmg0:15 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:23 \"¡Es súper eficaz!\"",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:51.663Z",
+      "level": "info",
+      "msg": "Turno 8: move #0 | \"¡Cortadora rival usó Picadura!\" anim dmg0:14 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:18 \"¡Es súper eficaz!\" faint \"¡Cortadora rival se debilitó!\" exp end",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:50:57.126Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "villasoriano (24,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:00.697Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "villasoriano (27,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:01.396Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (4,8)"
     }
   ]
 }
