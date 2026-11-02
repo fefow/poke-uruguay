@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:09:52.972Z",
+  "exported": "2026-11-02T02:10:52.855Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "fraybentos (42,16)",
+    "where": "fraybentos (3,24)",
     "party": [
       "cortadora nv20 0PS",
       "ceibal nv28 1PS",
@@ -14,27 +14,9 @@
       "nimbo nv17 27PS"
     ],
     "badges": 2,
-    "playtime": 19358
+    "playtime": 19418
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:13:25.234Z",
-      "level": "info",
-      "msg": "Turno 4: move #3 | \"¡Carpincho usó Burbuja!\" anim dmg1:11 \"¡Tortugal rival usó Defensa Férrea!\" anim stat \"¡Subió mucho la Defensa de Tortugal rival!\"",
-      "where": "r_colonia_rosario (18,24)"
-    },
-    {
-      "t": "2026-11-02T00:13:28.664Z",
-      "level": "info",
-      "msg": "Turno 5: move #3 | \"¡Carpincho usó Burbuja!\" anim dmg1:10 faint \"¡Tortugal rival se debilitó!\" exp end",
-      "where": "r_colonia_rosario (18,24)"
-    },
-    {
-      "t": "2026-11-02T00:13:32.472Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (18,24)"
-    },
     {
       "t": "2026-11-02T00:13:37.122Z",
       "level": "info",
@@ -2422,11 +2404,29 @@
       "where": "r_villasoriano_fraybentos (0,22)"
     },
     {
-      "t": "2026-11-02T02:09:49.531Z",
+      "t": "2026-11-02T02:10:43.538Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
       "where": "fraybentos (43,20)",
-      "count": 2
+      "count": 9
+    },
+    {
+      "t": "2026-11-02T02:10:44.163Z",
+      "level": "info",
+      "msg": "Entró a terminal_frb",
+      "where": "fraybentos (6,20)"
+    },
+    {
+      "t": "2026-11-02T02:10:49.205Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "terminal_frb (5,7)"
+    },
+    {
+      "t": "2026-11-02T02:10:49.538Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "fraybentos (5,20)"
     }
   ]
 }
