@@ -1585,6 +1585,13 @@ for (const t of CUSTOM.tiles) {
   (DRAW as any)[t.ch] = (g, r) => grass(g, r);
 }
 
+/** Registers a piece made in the sprite editor that is not in the deployed game yet (map editor preview). */
+export function registerCustomTile(ch: string, name: string, solid = false) {
+  if ((TILE_INFO as any)[ch]) return;
+  (TILE_INFO as any)[ch] = { name, solid };
+  (DRAW as any)[ch] = (g, r) => grass(g, r);
+}
+
 export function tileCanvas(ch, frame = 0, theme: string | null = null, under: string | boolean = false) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;

@@ -6,7 +6,10 @@ import { OUTDOOR, INTERIOR, MAPS, MAP_ORIGINALS } from '../data/maps.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
-import { tileCanvas, groundUnder, TILE_INFO, T } from '../gfx/tiles.ts';
+import { tileCanvas, groundUnder, TILE_INFO, T, registerCustomTile } from '../gfx/tiles.ts';
+import { CUSTOM } from '../data/custom-content.js';
+import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
+import { setOverrides } from '../gfx/overrides.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { drawItem } from '../gfx/items.ts';
 import { h, safeStorage } from '../core/util.ts';
@@ -181,12 +184,33 @@ function renderMapList() {
   mapList.replaceChildren(...group('Exteriores', Object.keys(OUTDOOR)), ...group('Interiores', Object.keys(INTERIOR)));
 }
 
+/** Pieces made in the sprite editor: deployed ones plus drafts waiting in this browser. */
+const MINE: string[] = [];
+function loadMine() {
+  MINE.length = 0;
+  let own: any = { tiles: [], removed: { tiles: [] } };
+  let sp: any = {};
+  try { own = { ...own, ...JSON.parse(localStorage.getItem('pokeuy:custom-drafts') || '{}') }; } catch { /* none */ }
+  try { sp = JSON.parse(localStorage.getItem('pokeuy:sprite-drafts') || '{}'); } catch { /* none */ }
+  const gone = own.removed?.tiles ?? [];
+  const all = [...(CUSTOM.tiles ?? []).filter((t) => !(own.tiles ?? []).some((n) => n.ch === t.ch)), ...(own.tiles ?? [])].filter((t) => !gone.includes(t.ch));
+  for (const t of all) { registerCustomTile(t.ch, t.name, !!t.solid); MINE.push(t.ch); }
+  const table = { ...SPRITE_OVERRIDES };
+  for (const [k, v] of Object.entries(sp)) { if (v) table[k] = v; else delete table[k]; }
+  setOverrides(table);
+}
+loadMine();
+// Coming back from the sprite editor tab: pick up new or redrawn pieces without reloading.
+window.addEventListener('focus', () => { loadMine(); renderPalette(); try { draw(); } catch { /* not ready */ } });
+
 function renderPalette() {
   const theme = MAPS[S.id]?.theme ?? null;
-  palette.replaceChildren(...Object.keys(TILE_INFO).filter((ch) => !LOCKED.has(ch) && (!S.tileFilter || TILE_INFO[ch].name.toLowerCase().includes(S.tileFilter))).map((ch) => {
+  const okCh = (ch) => !LOCKED.has(ch) && (!S.tileFilter || TILE_INFO[ch].name.toLowerCase().includes(S.tileFilter));
+  const order = [...MINE.filter(okCh), ...Object.keys(TILE_INFO).filter((ch) => !MINE.includes(ch) && okCh(ch))];
+  palette.replaceChildren(...order.map((ch) => {
     const c = h('canvas', { width: T, height: T });
     c.getContext('2d').drawImage(tileCanvas(ch, 0, theme), 0, 0);
-    return h('button', { type: 'button', class: `me-tile ${ch === S.tile ? 'is-active' : ''}`, title: `${TILE_INFO[ch].name} "${ch}"${TILE_INFO[ch].solid ? ' · no se pisa' : ''}`, onclick: () => pickTile(ch) }, c);
+    return h('button', { type: 'button', class: `me-tile ${ch === S.tile ? 'is-active' : ''} ${MINE.includes(ch) ? 'is-mine' : ''}`, title: `${MINE.includes(ch) ? '★ Tuya · ' : ''}${TILE_INFO[ch].name} "${ch}"${TILE_INFO[ch].solid ? ' · no se pisa' : ''}`, onclick: () => pickTile(ch) }, c);
   }));
   const c = h('canvas', { width: T, height: T });
   c.getContext('2d').drawImage(tileCanvas(S.tile, 0, theme), 0, 0);

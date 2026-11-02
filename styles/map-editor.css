@@ -64,3 +64,4 @@
 .me-entities li { display: flex; justify-content: space-between; gap: 8px;
   & small { color: var(--muted); font-size: 12px; white-space: nowrap; }
 }
+.me-tile.is-mine { border-color: oklch(0.8 0.15 85); box-shadow: 0 0 0 1px oklch(0.8 0.15 85 / 0.6); }
