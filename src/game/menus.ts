@@ -441,18 +441,13 @@ export function openDex() {
     const seen = new Set(S.dex.seen);
     const caught = new Set(S.dex.caught);
     const head = h('header', { class: 'panel-title' }, h('span', { text: 'PokeDex' }), h('span', { text: `Vistos ${seen.size} · Atrapados ${caught.size}` }));
-    const rows = DEX_ORDER.map((k) => {
-      const sp = SPECIES[k];
-      return h('li', { class: caught.has(k) ? 'is-caught' : '' },
-        h('span', { class: 'num', text: pad(sp.id) }),
-        h('span', { class: 'name', text: seen.has(k) ? sp.name : '???' }),
-        h('i', { class: 'ball', 'aria-hidden': 'true' }));
-    });
-    const list = h('ul', { class: 'dex-list' }, rows);
+    let keys: string[] = DEX_ORDER.slice();
+    const list = h('ul', { class: 'dex-list' });
     // Left column: follows the highlighted row. Nothing is revealed for creatures not yet seen.
     const left = h('section', { class: 'dex-info' });
     const show = (i) => {
-      const k = DEX_ORDER[i];
+      const k = keys[i];
+      if (!k) { left.replaceChildren(h('p', { class: 'dex-desc', text: 'Ninguna criatura coincide con la búsqueda.' })); return; }
       const sp = SPECIES[k];
       if (!seen.has(k)) {
         left.replaceChildren(
@@ -470,8 +465,46 @@ export function openDex() {
         isCaught ? h('div', { class: 'base-stats' }, STAT_KEYS.map((st, j) => h('div', { class: 'row' }, h('span', { text: STAT_NAMES[st] }), h('i', { style: { '--v': sp.base[j] / 160 } }), h('b', { text: String(sp.base[j]) })))) : null,
         sp.evo && isCaught ? h('p', { class: 'small', text: sp.evo.stone ? `Evoluciona con ${ITEMS[sp.evo.stone].name}.` : `Evoluciona en el nivel ${sp.evo.lvl}.` }) : null);
     };
-    el.append(head, h('div', { class: 'dex-layout' }, left, list), h('footer', { class: 'panel-foot', text: `↑↓ recorrer · ${keyName('b')} volver` }));
-    return listNav(rows, { onCancel: () => close(), onPick: () => {}, onMove: show });
+    let nav = null;
+    const norm = (t) => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const rebuild = (keepKey = null) => {
+      const q = norm(search.value.trim());
+      const st = status.value;
+      keys = DEX_ORDER.filter((k) => {
+        const sp = SPECIES[k];
+        if (st === 'caught' && !caught.has(k)) return false;
+        if (st === 'seen' && !(seen.has(k) && !caught.has(k))) return false;
+        if (st === 'unseen' && seen.has(k)) return false;
+        if (!q) return true;
+        if (String(sp.id).padStart(3, '0').includes(q) || String(sp.id) === q.replace(/^#/, '')) return true;
+        return seen.has(k) && (norm(sp.name).includes(q) || sp.types.some((t) => norm(TYPES[t].name).includes(q)));
+      });
+      const rows = keys.map((k) => {
+        const sp = SPECIES[k];
+        return h('li', { class: caught.has(k) ? 'is-caught' : '' },
+          h('span', { class: 'num', text: pad(sp.id) }),
+          h('span', { class: 'name', text: seen.has(k) ? sp.name : '???' }),
+          h('i', { class: 'ball', 'aria-hidden': 'true' }));
+      });
+      list.replaceChildren(...rows);
+      nav = listNav(rows, { onCancel: () => close(), onPick: () => {}, onMove: show, start: Math.max(0, keys.indexOf(keepKey)) });
+      if (!rows.length) show(0);
+    };
+    const search = h('input', { type: 'search', class: 'dex-search', placeholder: 'Buscar por nombre, tipo o número  ( / )', autocomplete: 'off', spellcheck: 'false', oninput: () => rebuild() });
+    const status = h('select', { class: 'dex-status', onchange: () => rebuild() },
+      ...[['all', 'Todos'], ['caught', 'Atrapados'], ['seen', 'Vistos sin atrapar'], ['unseen', 'Sin ver']].map(([v, t]) => h('option', { value: v, text: t })));
+    const back = () => { search.blur(); status.blur(); };
+    for (const f of [search, status]) f.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Enter' || e.key === 'ArrowDown' || e.key === 'ArrowUp') { if (e.key === 'Escape' && search.value) search.value = ''; e.preventDefault(); e.stopPropagation(); back(); rebuild(); }
+    });
+    const slash = (e: KeyboardEvent) => {
+      if (!el.isConnected) return removeEventListener('keydown', slash);
+      if (e.key === '/' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLSelectElement)) { e.preventDefault(); search.focus(); }
+    };
+    addEventListener('keydown', slash);
+    rebuild();
+    el.append(head, h('div', { class: 'dex-filter' }, search, status), h('div', { class: 'dex-layout' }, left, list), h('footer', { class: 'panel-foot', text: `↑↓ recorrer · / buscar · ${keyName('b')} volver` }));
+    return (a) => nav?.(a);
   });
 }
 

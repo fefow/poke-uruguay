@@ -1066,3 +1066,7 @@ body {
   & .mn-name { font-size: 3.6cqi; }
   & .mn-stats { font-size: 2.8cqi; font-weight: 700; }
   & .mn-desc { margin: 0; font-size: 2.6cqi; line-height: 1.25; color: var(--ink-soft); overflow-wrap: anywhere; } }
+.dex-filter { display: flex; gap: 8px; padding: 6px 12px 0; }
+.dex-search { flex: 1; min-width: 0; font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid oklch(1 0 0 / 0.25); background: oklch(0 0 0 / 0.25); color: inherit; }
+.dex-status { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid oklch(1 0 0 / 0.25); background: oklch(0 0 0 / 0.25); color: inherit; }
+.dex-search:focus, .dex-status:focus { outline: 2px solid oklch(0.8 0.15 85); }
