@@ -32,13 +32,14 @@ const THEME_NAMES = { poli: 'Policlínica', gym_agua: 'Gimnasio Agua', gym_elec:
 const lookName = (k) => k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
 // New content made here (creatures, looks, map pieces) waits in the browser until it is saved to the game.
-type NewCustom = { creatures: any[]; looks: any[]; tiles: any[] };
+type NewCustom = { creatures: any[]; looks: any[]; tiles: any[]; removed: { creatures: string[]; looks: string[]; tiles: string[] } };
+const noRemoved = () => ({ creatures: [] as string[], looks: [] as string[], tiles: [] as string[] });
 function loadCustom(): NewCustom {
   try {
     const o = JSON.parse(store.getItem(CUSTOM_KEY) || '{}');
     const fresh = (list, field, deployed) => (list ?? []).filter((x) => !deployed.some((d) => d[field] === x[field])); // already in the deployed game: drop
-    return { creatures: fresh(o.creatures, 'key', CUSTOM.creatures), looks: fresh(o.looks, 'key', CUSTOM.looks), tiles: fresh(o.tiles, 'ch', CUSTOM.tiles) };
-  } catch { return { creatures: [], looks: [], tiles: [] }; }
+    return { creatures: fresh(o.creatures, 'key', CUSTOM.creatures), looks: fresh(o.looks, 'key', CUSTOM.looks), tiles: fresh(o.tiles, 'ch', CUSTOM.tiles), removed: { ...noRemoved(), ...(o.removed ?? {}) } };
+  } catch { return { creatures: [], looks: [], tiles: [], removed: noRemoved() }; }
 }
 let newCustom: NewCustom = loadCustom();
 const persistCustom = () => { try { store.setItem(CUSTOM_KEY, JSON.stringify(newCustom)); } catch { /* no space */ } };
@@ -188,7 +189,8 @@ const search = h('input', { class: 'ed-input ed-search', type: 'search', placeho
 const catHint = h('p', { class: 'ed-hint' });
 const list = h('ul', { class: 'ed-list' });
 const newBtn = h('button', { class: 'ed-btn is-primary ed-new', type: 'button', onclick: () => openNewForm() });
-const side = h('aside', { class: 'ed-side' }, tabs, newBtn, search, catHint, list);
+const delBtn = h('button', { class: 'ed-btn me-danger ed-new', type: 'button', hidden: true, text: 'Borrar esta creación', onclick: () => deleteCustom() });
+const side = h('aside', { class: 'ed-side' }, tabs, newBtn, delBtn, search, catHint, list);
 
 const title = h('h1', { class: 'ed-title' });
 const subtitle = h('p', { class: 'ed-sub' });
@@ -272,7 +274,7 @@ function canvasFromPixels(px, w, hgt) {
 const slug = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 const ROLES = [['b', 'Equilibrado'], ['a', 'Físico (ataque)'], ['s', 'Especial'], ['t', 'Resistente'], ['f', 'Veloz']];
 const POWER = [['330', 'Débil (nivel temprano)'], ['430', 'Normal'], ['520', 'Fuerte (evolucionada)']];
-const unsavedCustom = () => [...newCustom.creatures, ...newCustom.looks, ...newCustom.tiles].filter((x) => !x.saved).length;
+const unsavedCustom = () => [...newCustom.creatures, ...newCustom.looks, ...newCustom.tiles].filter((x) => !x.saved).length + newCustom.removed.creatures.length + newCustom.removed.looks.length + newCustom.removed.tiles.length;
 
 function field(label, input) { return h('label', { class: 'ed-field' }, h('span', { text: label }), input); }
 
@@ -354,6 +356,45 @@ function openNewForm() {
 }
 
 // ---------------------------------------------------------------- list
+/** What the selected entry is, if it was created in this editor (deployed or not). */
+function customOf(e) {
+  if (!e) return null;
+  const cre = (k) => newCustom.creatures.some((c) => c.key === k) || (CUSTOM.creatures ?? []).some((c) => c.key === k);
+  const loo = (k) => newCustom.looks.some((c) => c.key === k) || (CUSTOM.looks ?? []).some((c) => c.key === k);
+  const til = (ch) => newCustom.tiles.some((c) => c.ch === ch) || (CUSTOM.tiles ?? []).some((c) => c.ch === ch);
+  if (e.key.startsWith('creature:') && cre(e.key.slice(9))) return { kind: 'creatures', keys: [e.key.slice(9)], name: e.label };
+  if (e.look && loo(e.look)) return { kind: 'looks', keys: [e.look], name: e.label };
+  if (e.tiles && e.tiles.every((t) => til(t.ch))) return { kind: 'tiles', keys: e.tiles.map((t) => t.ch), name: e.label };
+  const m = e.key.match(/^tile:(.)0$/u);
+  if (m && til(m[1])) return { kind: 'tiles', keys: [m[1]], name: e.label };
+  return null;
+}
+function deleteCustom() {
+  const c = customOf(S.group);
+  if (!c) return;
+  const extra = c.kind === 'tiles' ? ' Si ya la usaste en un mapa, esa casilla se ve como pasto.' : c.kind === 'creatures' ? ' Si alguien la tiene en su equipo, la partida podría fallar.' : '';
+  if (!confirm(`¿Borrar «${c.name}»?${extra}`)) return;
+  const field = c.kind === 'tiles' ? 'ch' : 'key';
+  const inDeployed = (k) => (CUSTOM[c.kind] ?? []).some((x) => x[field] === k);
+  for (const k of c.keys) {
+    newCustom[c.kind] = newCustom[c.kind].filter((x) => x[field] !== k);
+    if (inDeployed(k) && !newCustom.removed[c.kind].includes(k)) newCustom.removed[c.kind].push(k);
+    // its drawings go too
+    const prefix = c.kind === 'creatures' ? `creature:${k}` : c.kind === 'looks' ? `char:${k}|` : `tile:${k}`;
+    for (const key of new Set([...Object.keys(base), ...Object.keys(drafts)])) {
+      const mine = c.kind === 'creatures' ? key === prefix : c.kind === 'looks' ? key.startsWith(prefix) : key.startsWith(prefix) && /^\d$/.test(key.slice(prefix.length));
+      if (!mine) continue;
+      if (base[key]) drafts[key] = null; else delete drafts[key];
+    }
+  }
+  persistCustom();
+  persist();
+  refreshLive();
+  selectCat(S.cat);
+  syncPending();
+  status(`«${c.name}» borrada. ${unsavedCustom() ? 'Tocá «Guardar en el juego» para que desaparezca también del juego.' : ''}`, 'ok');
+}
+
 function selectCat(c) {
   S.cat = c;
   S.entries = c.entries();
@@ -412,6 +453,7 @@ function select(e, frame = null) {
   if (S.group !== e) S.bulk = null;
   S.group = e;
   S.entry = frame ?? (e.frames ? e.frames[0] : e);
+  delBtn.hidden = !customOf(e);
   for (const li of list.children) li.classList.toggle('is-active', li._entry === e);
   S.px = pixelsOf(S.entry);
   S.undo = [];
@@ -912,7 +954,8 @@ const strip = ({ saved, ...rest }: any) => rest;
 /** The deployed custom content plus everything created here. */
 function mergeCustom(cur: any) {
   const add = (a: any[], b: any[], f: string) => [...(a ?? []).filter((x) => !b.some((y) => y[f] === x[f])), ...b.map(strip)];
-  return { creatures: add(cur.creatures, newCustom.creatures, 'key'), looks: add(cur.looks, newCustom.looks, 'key'), tiles: add(cur.tiles, newCustom.tiles, 'ch') };
+  const R = newCustom.removed;
+  return { creatures: add(cur.creatures, newCustom.creatures, 'key').filter((x) => !R.creatures.includes(x.key)), looks: add(cur.looks, newCustom.looks, 'key').filter((x) => !R.looks.includes(x.key)), tiles: add(cur.tiles, newCustom.tiles, 'ch').filter((x) => !R.tiles.includes(x.ch)) };
 }
 const customSource = (c) => `// Content created from the sprite editor ("＋ Nuevo"): new creatures, character looks and map pieces.\n// The editor rewrites this file; do not edit by hand.\nexport const CUSTOM = ${JSON.stringify(c)};\n`;
 const parseCustomSource = (t) => { const m = t.match(/=\s*(\{[\s\S]*\})\s*;?\s*$/); const o = m ? JSON.parse(m[1]) : {}; return { creatures: o.creatures ?? [], looks: o.looks ?? [], tiles: o.tiles ?? [] }; };
@@ -988,6 +1031,7 @@ async function saveToGitHub() {
         return { text: customSource(merged), result: merged };
       });
       for (const list of [newCustom.creatures, newCustom.looks, newCustom.tiles]) for (const x of list) x.saved = true;
+      newCustom.removed = noRemoved();
       persistCustom();
     }
     selectCat(S.cat);
