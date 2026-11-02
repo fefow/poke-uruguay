@@ -45,6 +45,26 @@ const persistCustom = () => { try { store.setItem(CUSTOM_KEY, JSON.stringify(new
 const blank = (w, hgt) => { const c = document.createElement('canvas'); c.width = w; c.height = hgt; return c; };
 const draftBase = (look) => newCustom.looks.find((l) => l.key === look)?.base ?? look;
 
+/** Draws several 16×16 tiles side by side into one canvas (cols×rows), for pieces painted together. */
+function composeTiles(tiles, cols, rows, src) {
+  const c = blank(T * cols, T * rows);
+  const g2 = c.getContext('2d');
+  for (const t of tiles) g2.drawImage(src(t), t.col * T, t.row * T);
+  return c;
+}
+/** The usual list of the game's tiles, themed variants included (the ones painted as a group are left out). */
+function tileEntries(skip: Set<string>) {
+  return [
+    ...Object.keys(TILE_INFO).filter((ch) => !skip.has(ch)).flatMap((ch) => {
+      const n = TILE_INFO[ch].anim ? 4 : 1;
+      return Array.from({ length: n }, (_, f) => ({ key: `tile:${ch}${f}`, label: TILE_INFO[ch].name + (n > 1 ? ` (cuadro ${f + 1})` : ''), sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, f), kind: 'tile' }));
+    }),
+    ...Object.entries(THEMES).flatMap(([theme, set]) => Object.keys(set).map((ch) => ({
+      key: `tile:${theme}|${ch}0`, label: `${TILE_INFO[ch]?.name ?? ch} · ${THEME_NAMES[theme] ?? theme}`, sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, 0, theme), kind: 'tile',
+    }))),
+  ];
+}
+
 const CATS: any[] = [
   {
     id: 'creature', name: 'Criaturas', hint: '80×80. El dorso en combate es el mismo dibujo espejado.',
@@ -71,16 +91,22 @@ const CATS: any[] = [
   },
   {
     id: 'tile', make: 'tile', name: 'Suelo y edificios', hint: '16×16. Las piezas se repiten para formar los mapas.',
-    entries: () => [
-      ...newCustom.tiles.map((t) => ({ key: `tile:${t.ch}0`, label: t.name, sub: t.saved ? 'nueva · guardada' : 'nueva · sin guardar', w: T, h: T, draw: () => tileCanvas('.', 0), kind: 'tile' })),
-      ...Object.keys(TILE_INFO).flatMap((ch) => {
-        const n = TILE_INFO[ch].anim ? 4 : 1;
-        return Array.from({ length: n }, (_, f) => ({ key: `tile:${ch}${f}`, label: TILE_INFO[ch].name + (n > 1 ? ` (cuadro ${f + 1})` : ''), sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, f), kind: 'tile' }));
-      }),
-      ...Object.entries(THEMES).flatMap(([theme, set]) => Object.keys(set).map((ch) => ({
-        key: `tile:${theme}|${ch}0`, label: `${TILE_INFO[ch]?.name ?? ch} · ${THEME_NAMES[theme] ?? theme}`, sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, 0, theme), kind: 'tile',
-      }))),
-    ],
+    entries: () => {
+      const all = [...(CUSTOM.tiles ?? []).filter((t) => !newCustom.tiles.some((n) => n.ch === t.ch)), ...newCustom.tiles];
+      const groups = new Map<string, any[]>();
+      for (const t of all) if (t.grp) groups.set(t.grp.id, [...(groups.get(t.grp.id) ?? []), t].sort((a, b) => a.grp.i - b.grp.i));
+      const grouped = new Set([...groups.values()].flat().map((t) => t.ch));
+      const unsaved = (t) => newCustom.tiles.some((n) => n.ch === t.ch && !n.saved);
+      return [
+        ...[...groups.entries()].map(([id, ts]) => {
+          const { cols, rows } = ts[0].grp;
+          const tiles = ts.map((t) => ({ ch: t.ch, col: t.grp.i % cols, row: Math.floor(t.grp.i / cols) }));
+          return { key: `tilegroup:${id}`, label: ts[0].name.replace(/_\d+$/, ''), sub: `${cols}×${rows} casillas · ${ts.some(unsaved) ? 'sin guardar' : 'guardada'}`, w: T * cols, h: T * rows, tiles, kind: 'tile', draw: () => composeTiles(tiles, cols, rows, (t) => tileCanvas(t.ch in TILE_INFO ? t.ch : '.', 0)) };
+        }),
+        ...newCustom.tiles.filter((t) => !t.grp).map((t) => ({ key: `tile:${t.ch}0`, label: t.name, sub: t.saved ? 'nueva · guardada' : 'nueva · sin guardar', w: T, h: T, draw: () => tileCanvas('.', 0), kind: 'tile' })),
+        ...tileEntries(grouped),
+      ];
+    },
   },
 ];
 
@@ -106,14 +132,27 @@ refreshLive();
 
 /** Current pixels of an entry: drawing if there is one, else the generated art. */
 function pixelsOf(e) {
+  if (e.tiles) return groupPixels(e, pixelsOf);
   const o = live()[e.key];
   const px = o && o.w === e.w && o.h === e.h ? decodeSprite(o) : null;
   if (px) return px;
   return originalOf(e);
 }
 function originalOf(e) {
+  if (e.tiles) return groupPixels(e, originalOf);
   const c = generated(e.draw);
   return c.getContext('2d').getImageData(0, 0, e.w, e.h).data.slice();
+}
+/** The tile entry behind one square of a group painted together. */
+const subTile = (t) => ({ key: `tile:${t.ch}0`, w: T, h: T, draw: () => tileCanvas(t.ch in TILE_INFO ? t.ch : '.', 0) });
+/** Pixels of a whole group: each square comes from its own tile. */
+function groupPixels(e, one) {
+  const W = e.w, out = new Uint8ClampedArray(W * e.h * 4);
+  for (const t of e.tiles) {
+    const px = one(subTile(t));
+    for (let y = 0; y < T; y++) out.set(px.subarray(y * T * 4, (y + 1) * T * 4), ((t.row * T + y) * W + t.col * T) * 4);
+  }
+  return out;
 }
 const sameBytes = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
@@ -262,8 +301,10 @@ function openNewForm() {
     read = () => ({ base: baseSel.value });
   } else {
     const solid = h('input', { type: 'checkbox' });
-    fields = [...fields, h('label', { class: 'ed-field' }, solid, ' Sólida (no se puede atravesar)')];
-    read = () => ({ solid: solid.checked });
+    const layout = h('select', { class: 'ed-input' }, opts([['1x1', '1 casilla'], ['2x1', '2 casillas en horizontal (2×1)'], ['1x2', '2 casillas en vertical (1×2)'], ['2x2', '4 casillas (2×2)'], ['4x1', '4 casillas en horizontal (4×1)'], ['1x4', '4 casillas en vertical (1×4)']]));
+    fields = [...fields, field('Tamaño del dibujo', layout), h('p', { class: 'ed-hint', text: 'Con más de una casilla las dibujás juntas en un lienzo grande y se guardan por separado: Nombre_1, Nombre_2…' }),
+      h('label', { class: 'ed-field' }, solid, ' Sólida (no se puede atravesar)')];
+    read = () => ({ solid: solid.checked, layout: layout.value });
   }
   const close = () => modal.remove();
   const submit = () => {
@@ -280,16 +321,25 @@ function openNewForm() {
       if (LOOKS[key] || newCustom.looks.some((l) => l.key === key)) { err.textContent = 'Ya hay un personaje con ese nombre.'; return; }
       newCustom.looks.push({ key, name: nm, ...extra });
     } else {
+      const { layout = '1x1', ...rest } = extra;
+      const [cols, rows] = layout.split('x').map(Number);
+      const n = cols * rows;
+      const gid = slug(nm) || 'pieza';
+      if (n > 1 && [...(CUSTOM.tiles ?? []), ...newCustom.tiles].some((t) => t.grp?.id === gid)) { err.textContent = 'Ya hay un grupo de piezas con ese nombre.'; return; }
       let code = 0xE200;
-      const taken = (c) => c in TILE_INFO || newCustom.tiles.some((t) => t.ch === c);
-      while (taken(String.fromCharCode(code))) code++;
-      newCustom.tiles.push({ ch: String.fromCharCode(code), name: nm, ...extra });
+      const taken = (c) => c in TILE_INFO || (CUSTOM.tiles ?? []).some((t) => t.ch === c) || newCustom.tiles.some((t) => t.ch === c);
+      for (let i = 0; i < n; i++) {
+        while (taken(String.fromCharCode(code))) code++;
+        newCustom.tiles.push({ ch: String.fromCharCode(code), name: n > 1 ? `${nm}_${i + 1}` : nm, ...rest, ...(n > 1 ? { grp: { id: gid, i, cols, rows } } : {}) });
+        code++;
+      }
     }
     persistCustom();
     close();
     selectCat(S.cat);
     const added = S.entries[S.entries.length - 1];
-    const e = make === 'tile' ? S.entries[0] : added;
+    const mine = make === 'tile' ? S.entries.find((x) => x.label === nm || x.label.replace(/_\d+$/, '') === nm) : null;
+    const e = make === 'tile' ? (mine ?? S.entries[0]) : added;
     select(e);
     syncPending();
     status(`Se creó «${nm}». Dibujalo y tocá «Guardar en el juego».`, 'ok');
@@ -334,7 +384,7 @@ function renderList() {
   const lv = live();
   const shown = S.entries.filter((e) => !S.filter || `${e.label} ${e.sub}`.toLowerCase().includes(S.filter));
   list.replaceChildren(...shown.map((e) => {
-    const keys = e.frames ? e.frames.map((f) => f.key) : [e.key];
+    const keys = e.frames ? e.frames.map((f) => f.key) : e.tiles ? e.tiles.map((t) => `tile:${t.ch}0`) : [e.key];
     const edited = keys.some((k) => lv[k]);
     const draft = keys.some((k) => k in drafts);
     const cv = h('canvas', { class: 'ed-thumb' });
@@ -379,7 +429,7 @@ function select(e, frame = null) {
   subtitle.textContent = `${S.entry.w}×${S.entry.h} px · ${S.entry.dir ? `${DIRS.find(([d]) => d === S.entry.dir)[1]}, paso ${S.entry.frame + 1}` : e.sub}`;
   renderFrames();
   drawAll();
-  status(S.entry.key in drafts ? 'Este sprite tiene cambios sin guardar en el juego.' : live()[S.entry.key] ? 'Este sprite ya está dibujado a mano en el juego.' : 'Sprite original, generado por el juego.');
+  status((S.entry.tiles ? S.entry.tiles.some((t) => `tile:${t.ch}0` in drafts) : S.entry.key in drafts) ? 'Este sprite tiene cambios sin guardar en el juego.' : live()[S.entry.key] ? 'Este sprite ya está dibujado a mano en el juego.' : 'Sprite original, generado por el juego.');
 }
 
 function renderFrames() {
@@ -626,6 +676,14 @@ board.addEventListener('pointerleave', () => { S.hover = null; coords.textConten
 
 /** Store the current pixels as a draft (or drop the draft when they match what the game already has). */
 function storeDraft(e, px) {
+  if (e.tiles) { // a group is saved as separate tiles
+    for (const t of e.tiles) {
+      const part = new Uint8ClampedArray(T * T * 4);
+      for (let y = 0; y < T; y++) part.set(px.subarray(((t.row * T + y) * e.w + t.col * T) * 4, ((t.row * T + y) * e.w + t.col * T + T) * 4), y * T * 4);
+      storeDraft(subTile(t), part);
+    }
+    return;
+  }
   const orig = originalOf(e);
   if (sameBytes(px, orig)) {
     if (base[e.key]) drafts[e.key] = null;
@@ -645,7 +703,7 @@ function commit() {
   refreshThumbs();
   if (S.group?.frames) renderFrames();
   markListDots();
-  status(e.key in drafts ? 'Cambios guardados en este navegador. Falta "Guardar en el juego" para publicarlos.' : 'Igual al sprite que ya tiene el juego.');
+  status((e.tiles ? e.tiles.some((t) => `tile:${t.ch}0` in drafts) : e.key in drafts) ? 'Cambios guardados en este navegador. Falta "Guardar en el juego" para publicarlos.' : 'Igual al sprite que ya tiene el juego.');
 }
 
 function markListDots() {
