@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T04:46:20.831Z",
+  "exported": "2026-11-02T04:47:20.641Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (13,16)",
+    "where": "mercedes (32,13)",
     "party": [
       "tejubrasa nv23 61PS",
       "curupi nv29 85PS",
@@ -15,81 +15,9 @@
       "lechuza nv13 36PS"
     ],
     "badges": 1,
-    "playtime": 7148
+    "playtime": 7207
   },
   "entries": [
-    {
-      "t": "2026-11-02T03:53:16.214Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:53:59.869Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv12",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:05.709Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Mulita salvaje usó Ataque Arena!\" anim stat \"¡Bajó la Precisión de Ñacurutú!\"",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:09.654Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" \"¡Mulita salvaje esquivó el ataque!\" \"¡Mulita salvaje usó Ataque Arena!\" anim stat \"¡Bajó la Precisión de Ñacurutú!\"",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:12.605Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Ñacurutú usó Viento Cortante!\" \"¡Mulita salvaje esquivó el ataque!\" \"¡Mulita salvaje usó Ataque Arena!\" anim stat \"¡Bajó la Precisión de Ñacurutú!\"",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:15.973Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:35 faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:19.142Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:19.978Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv13",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:23.481Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Barrida!\" anim dmg0:2 \"No es muy eficaz…\"",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:26.084Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:43 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:30.459Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:33.318Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv13",
-      "where": "palmitas (15,11)"
-    },
     {
       "t": "2026-11-02T03:54:38.159Z",
       "level": "info",
@@ -2420,6 +2348,80 @@
       "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
       "where": "mercedes (12,20)",
       "count": 2
+    },
+    {
+      "t": "2026-11-02T04:46:27.745Z",
+      "level": "info",
+      "msg": "Entró a shop_mercedes",
+      "where": "mercedes (9,20)"
+    },
+    {
+      "t": "2026-11-02T04:46:35.304Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "shop_mercedes (4,4)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T04:46:36.062Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "shop_mercedes (4,7)"
+    },
+    {
+      "t": "2026-11-02T04:46:47.305Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (17,20)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T04:46:47.976Z",
+      "level": "info",
+      "msg": "Entró a casa_mercedes",
+      "where": "mercedes (33,20)"
+    },
+    {
+      "t": "2026-11-02T04:46:53.306Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "casa_mercedes (2,7)"
+    },
+    {
+      "t": "2026-11-02T04:46:54.498Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "casa_mercedes (4,7)"
+    },
+    {
+      "t": "2026-11-02T04:47:05.308Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (26,23)"
+    },
+    {
+      "t": "2026-11-02T04:47:08.801Z",
+      "level": "info",
+      "msg": "Entró a casa_mercedes2",
+      "where": "mercedes (39,20)"
+    },
+    {
+      "t": "2026-11-02T04:47:11.308Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "casa_mercedes2 (5,5)"
+    },
+    {
+      "t": "2026-11-02T04:47:16.493Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "casa_mercedes2 (5,7)"
+    },
+    {
+      "t": "2026-11-02T04:47:17.309Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (37,20)"
     }
   ]
 }
