@@ -230,12 +230,16 @@ export function openSummary(index) {
             ...STAT_KEYS.slice(1).map((k) => h('div', { class: 'row' }, h('span', { text: STAT_NAMES[k] }), h('b', { text: String(st[k]) }))),
           ),
         ),
+        h('div', { class: 'mv-bar' + (cur >= 0 ? ' is-on' : '') },
+          h('b', { text: 'Ataques' }),
+          h('span', { text: cur < 0 ? `[${keyName('a')}] Reordenar ataques` : pick < 0 ? `↑↓ elegí el ataque · [${keyName('a')}] tomarlo · [${keyName('b')}] listo` : `↑↓ elegí con cuál cambiarlo · [${keyName('a')}] intercambiar · [${keyName('b')}] cancelar` })),
         h('ul', { class: 'summary-moves' }, c.moves.map((m) => {
           const d = MOVES[m.id];
           const k = c.moves.indexOf(m);
-          return h('li', { style: k === cur ? { outline: '2px solid #2a7de1', background: '#cfe8ff' } : k === pick ? { opacity: '0.6' } : {} },
+          return h('li', { style: k === pick ? { outline: '0.6cqi solid #e0a020', background: '#fff3c4' } : k === cur ? { outline: '0.6cqi solid #2a7de1', background: '#cfe8ff' } : {} },
             h('div', { class: 'row' }, typeChip(d.type), h('b', { text: (k === pick ? '⇄ ' : '') + d.name }), h('span', { text: `PP ${m.pp}/${d.pp}` })),
-            h('div', { class: 'small', text: `${d.cat === 'est' ? 'Estado' : d.cat === 'fis' ? 'Físico' : 'Especial'} · Pot. ${d.power || '—'} · Prec. ${d.acc} — ${d.desc}` }));
+            h('div', { class: 'small', text: `${d.cat === 'est' ? 'Estado' : d.cat === 'fis' ? 'Físico' : 'Especial'} · Pot. ${d.power || '—'} · Prec. ${d.acc}` }),
+            h('div', { class: 'small mv-desc', text: d.desc }));
         })),
         h('footer', { class: 'panel-foot', text: cur >= 0 ? `↑↓ elegir ataque · ${keyName('a')} ${pick >= 0 ? 'intercambiar' : 'tomar'} · ${keyName('b')} salir` : `↑↓ cambiar · ${keyName('a')} reordenar ataques · ${keyName('b')} volver` }),
       );
