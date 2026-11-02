@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T21:29:53.726Z",
+  "exported": "2026-11-02T21:30:58.619Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (32,14)",
+    "where": "mercedes (37,8)",
     "party": [
       "tejubrasa nv23 61PS",
       "curupi nv29 85PS",
@@ -15,7 +15,7 @@
       "lobomarino nv13 48PS"
     ],
     "badges": 1,
-    "playtime": 7404
+    "playtime": 7465
   },
   "entries": [
     {
@@ -2419,10 +2419,11 @@
       "where": "poli_mercedes (5,7)"
     },
     {
-      "t": "2026-11-02T21:29:50.249Z",
+      "t": "2026-11-02T21:30:55.139Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #6: Lobo Marino no puede existir con nivel 13",
-      "where": "mercedes (16,21)"
+      "where": "mercedes (16,21)",
+      "count": 7
     }
   ]
 }
