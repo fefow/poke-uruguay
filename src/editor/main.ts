@@ -221,6 +221,8 @@ const usedColors = h('div', { class: 'ed-palette' });
 const BASE_PALETTE = ['#16141e', '#ffffff', '#6cb4ee', '#2a6aae', '#f2c02a', '#e0263a', '#e8702a', '#5cae3c', '#2a6a2a', '#9a6a3c', '#6a3a1a', '#f2c8a0', '#c8ccd8', '#7a7a8a', '#8a4ac8', '#3fa8a0'];
 const basePalette = h('div', { class: 'ed-palette' }, BASE_PALETTE.map((c) => h('button', { type: 'button', class: 'ed-chip', style: { '--c': c }, title: c, onclick: () => pickColor([...hexToRgb(c), 255]) })));
 
+const importSize = h('select', { class: 'ed-input', title: 'Tamaño de la imagen importada dentro del lienzo' }, [['100', 'Importar al 100 %'], ['80', 'Importar al 80 %'], ['65', 'Importar al 65 %'], ['50', 'Importar al 50 %']].map(([v, t]) => h('option', { value: v, text: t })));
+importSize.value = '80';
 const importInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', style: { display: 'none' }, onchange: () => { const f = importInput.files?.[0]; importInput.value = ''; if (f) importImage(f).catch(() => status('No se pudo leer la imagen.', 'error')); } });
 const prev1 = h('canvas', { class: 'ed-prev-1' });
 const prev3 = h('canvas', { class: 'ed-prev-3' });
@@ -239,7 +241,9 @@ const right = h('aside', { class: 'ed-right' },
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('left') }, h('span', { text: 'Mover ←' }), h('kbd', { text: '←' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('right') }, h('span', { text: 'Mover →' }), h('kbd', { text: '→' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Borrar todo el dibujo', onclick: () => transform('clear') }, h('span', { text: 'Vaciar' })),
-    h('button', { type: 'button', class: 'ed-tool', title: 'Carga una imagen (PNG, JPG) ajustada al tamaño de este sprite; se quita el fondo liso', onclick: () => importInput.click() }, h('span', { text: 'Importar imagen' })), importInput,
+    h('button', { type: 'button', class: 'ed-tool', title: 'Carga una imagen (PNG, JPG) ajustada al tamaño de este sprite; se quita el fondo liso', onclick: () => importInput.click() }, h('span', { text: 'Importar imagen' })), importSize, importInput,
+    h('button', { type: 'button', class: 'ed-tool', title: 'Achica el dibujo (o la zona seleccionada) un 20 %, apoyado donde estaba. Varias veces seguidas pierde detalle: mejor importar de nuevo con otro tamaño', onclick: () => resizeBy(0.8) }, h('span', { text: 'Achicar' })),
+    h('button', { type: 'button', class: 'ed-tool', title: 'Agranda el dibujo (o la zona seleccionada) un 25 %', onclick: () => resizeBy(1.25) }, h('span', { text: 'Agrandar' })),
     h('button', { type: 'button', class: 'ed-tool is-danger', title: 'Volver al sprite que genera el juego', onclick: restore }, h('span', { text: 'Restaurar original' })),
   )),
   h('section', {}, h('h2', { text: 'Color' }),
@@ -770,7 +774,7 @@ async function importImage(file: File) {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 20) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
   if (x1 < 0) return status('La imagen está vacía o es toda del color del fondo.', 'warn');
   const cw = x1 - x0 + 1, ch = y1 - y0 + 1, w = S.entry.w, hh = S.entry.h;
-  const k = Math.min(w / cw, hh / ch);
+  const k = Math.min(w / cw, hh / ch) * (+importSize.value / 100);
   const tw = Math.max(1, Math.round(cw * k)), th = Math.max(1, Math.round(ch * k));
   const out = blank(w, hh), og = out.getContext('2d', { willReadFrequently: true });
   og.imageSmoothingEnabled = k < 1;
@@ -905,6 +909,34 @@ function transform(kind) {
     out.set(src.subarray((sy * w + sx) * 4, (sy * w + sx) * 4 + 4), (y * w + x) * 4);
   }
   S.px = out;
+  commit();
+}
+
+/** Scales the drawing (or the selected zone) by f, keeping its bottom-centre where it was. */
+function resizeBy(f: number) {
+  const { w, h: hh } = S.entry;
+  const r = selRect();
+  const src = S.px;
+  let x0 = r.x + r.w, y0 = r.y + r.h, x1 = -1, y1 = -1;
+  for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) if (src[(y * w + x) * 4 + 3]) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  if (x1 < 0) return status('No hay nada para cambiar de tamaño.', 'warn');
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+  const tw = Math.max(1, Math.round(cw * f)), th = Math.max(1, Math.round(ch * f));
+  const piece = blank(cw, ch);
+  piece.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(cut(src, w, { x: x0, y: y0, w: cw, h: ch })), cw, ch), 0, 0);
+  const out = blank(w, hh), og = out.getContext('2d', { willReadFrequently: true });
+  og.imageSmoothingEnabled = f < 1;
+  const cx = Math.round((x0 + x1 + 1) / 2 - tw / 2), by = y1 + 1 - th;
+  og.drawImage(piece, Math.max(0, Math.min(w - tw, cx)), Math.max(0, by), tw, th);
+  const px = og.getImageData(0, 0, w, hh).data;
+  snapshot();
+  const next = src.slice();
+  for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) next.fill(0, (y * w + x) * 4, (y * w + x) * 4 + 4);
+  for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) {
+    const i = (y * w + x) * 4;
+    if (px[i + 3] >= 128) { next[i] = px[i]; next[i + 1] = px[i + 1]; next[i + 2] = px[i + 2]; next[i + 3] = 255; }
+  }
+  S.px = next;
   commit();
 }
 
