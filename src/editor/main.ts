@@ -221,6 +221,7 @@ const usedColors = h('div', { class: 'ed-palette' });
 const BASE_PALETTE = ['#16141e', '#ffffff', '#6cb4ee', '#2a6aae', '#f2c02a', '#e0263a', '#e8702a', '#5cae3c', '#2a6a2a', '#9a6a3c', '#6a3a1a', '#f2c8a0', '#c8ccd8', '#7a7a8a', '#8a4ac8', '#3fa8a0'];
 const basePalette = h('div', { class: 'ed-palette' }, BASE_PALETTE.map((c) => h('button', { type: 'button', class: 'ed-chip', style: { '--c': c }, title: c, onclick: () => pickColor([...hexToRgb(c), 255]) })));
 
+const importInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', style: { display: 'none' }, onchange: () => { const f = importInput.files?.[0]; importInput.value = ''; if (f) importImage(f).catch(() => status('No se pudo leer la imagen.', 'error')); } });
 const prev1 = h('canvas', { class: 'ed-prev-1' });
 const prev3 = h('canvas', { class: 'ed-prev-3' });
 const scene = h('canvas', { class: 'ed-scene', width: 192, height: 112 });
@@ -238,6 +239,7 @@ const right = h('aside', { class: 'ed-right' },
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('left') }, h('span', { text: 'Mover ←' }), h('kbd', { text: '←' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('right') }, h('span', { text: 'Mover →' }), h('kbd', { text: '→' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Borrar todo el dibujo', onclick: () => transform('clear') }, h('span', { text: 'Vaciar' })),
+    h('button', { type: 'button', class: 'ed-tool', title: 'Carga una imagen (PNG, JPG) ajustada al tamaño de este sprite; se quita el fondo liso', onclick: () => importInput.click() }, h('span', { text: 'Importar imagen' })), importInput,
     h('button', { type: 'button', class: 'ed-tool is-danger', title: 'Volver al sprite que genera el juego', onclick: restore }, h('span', { text: 'Restaurar original' })),
   )),
   h('section', {}, h('h2', { text: 'Color' }),
@@ -736,6 +738,51 @@ function storeDraft(e, px) {
     else drafts[e.key] = enc;
   }
 }
+/** Puts an image (e.g. made with an AI pixel-art tool) into the current sprite: background removed, cropped, scaled to fit, bottom-centred. */
+async function importImage(file: File) {
+  if (S.entry.tiles) return status('Importar imagen no está disponible para piezas de varios cuadros.', 'warn');
+  const bmp = await createImageBitmap(file);
+  const src = blank(bmp.width, bmp.height);
+  const sg = src.getContext('2d', { willReadFrequently: true });
+  sg.drawImage(bmp, 0, 0);
+  const id = sg.getImageData(0, 0, bmp.width, bmp.height), d = id.data, W = bmp.width, H = bmp.height;
+  if (!(d as any).some((_, i) => i % 4 === 3 && d[i] < 250)) { // flat background: flood from the borders over the corner colour(s)
+    const corners = [0, (W - 1) * 4, (H - 1) * W * 4, ((H - 1) * W + W - 1) * 4];
+    const near = (i) => corners.some((c) => Math.abs(d[i] - d[c]) + Math.abs(d[i + 1] - d[c + 1]) + Math.abs(d[i + 2] - d[c + 2]) < 60);
+    const seen = new Uint8Array(W * H), st: number[] = [];
+    for (let x = 0; x < W; x++) st.push(x, (H - 1) * W + x);
+    for (let y = 0; y < H; y++) st.push(y * W, y * W + W - 1);
+    while (st.length) {
+      const q = st.pop()!;
+      if (seen[q]) continue;
+      seen[q] = 1;
+      if (!near(q * 4)) continue;
+      d[q * 4 + 3] = 0;
+      const x = q % W;
+      if (x > 0) st.push(q - 1);
+      if (x < W - 1) st.push(q + 1);
+      if (q >= W) st.push(q - W);
+      if (q < W * (H - 1)) st.push(q + W);
+    }
+    sg.putImageData(id, 0, 0);
+  }
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 20) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  if (x1 < 0) return status('La imagen está vacía o es toda del color del fondo.', 'warn');
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1, w = S.entry.w, hh = S.entry.h;
+  const k = Math.min(w / cw, hh / ch);
+  const tw = Math.max(1, Math.round(cw * k)), th = Math.max(1, Math.round(ch * k));
+  const out = blank(w, hh), og = out.getContext('2d', { willReadFrequently: true });
+  og.imageSmoothingEnabled = k < 1;
+  og.drawImage(src, x0, y0, cw, ch, Math.floor((w - tw) / 2), hh - th, tw, th);
+  const px = og.getImageData(0, 0, w, hh).data;
+  for (let i = 3; i < px.length; i += 4) px[i] = px[i] >= 128 ? 255 : 0;
+  snapshot();
+  S.px = new Uint8ClampedArray(px);
+  commit();
+  status('Imagen importada. Si mira para el otro lado usá "Espejar" (en el juego miran a la izquierda).', 'ok');
+}
+
 function commit() {
   const e = S.entry;
   storeDraft(e, S.px);
