@@ -1393,6 +1393,8 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);
+// Trinidad gym: its trainers do not walk up to you, they only act when you pass right beside them
+for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.sight = 1; n.adjacent = true; }
 
 // Fray Bentos harbour: the Buquebus is moored at the end of the pier (the pier is drawn in the map editor, the ship is
 // added here, after the editor's patches). A sailor stands at the end of the pier and does not let anyone board without

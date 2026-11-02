@@ -524,8 +524,14 @@ function onStep() {
 }
 
 function sees(n) {
-  const [dx, dy] = DIRS[n.dir];
   const p = W_.player;
+  if (n.def.adjacent) { // only wakes up when the player stands right next to it, from any side
+    const ax = p.x - n.x, ay = p.y - n.y;
+    if (Math.abs(ax) + Math.abs(ay) !== 1) return false;
+    n.dir = ax === 1 ? 'right' : ax === -1 ? 'left' : ay === 1 ? 'down' : 'up';
+    return true;
+  }
+  const [dx, dy] = DIRS[n.dir];
   for (let i = 1; i <= n.def.sight; i++) {
     const x = n.x + dx * i;
     const y = n.y + dy * i;
