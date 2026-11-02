@@ -1,3 +1,3 @@
 // Content created from the sprite editor ("＋ Nuevo"): new creatures, character looks and map pieces.
 // The editor rewrites this file; do not edit by hand.
-export const CUSTOM = {"creatures":[],"looks":[],"tiles":[]};
+export const CUSTOM = {"creatures":[],"looks":[],"tiles":[{"ch":"","name":"Puente_Carmelo","solid":false},{"ch":"","name":"Puente Carmelo","solid":false},{"ch":"","name":"PuenteCarmelo_1","solid":false,"grp":{"id":"puentecarmelo","i":0,"cols":2,"rows":2}},{"ch":"","name":"PuenteCarmelo_2","solid":false,"grp":{"id":"puentecarmelo","i":1,"cols":2,"rows":2}},{"ch":"","name":"PuenteCarmelo_3","solid":false,"grp":{"id":"puentecarmelo","i":2,"cols":2,"rows":2}},{"ch":"","name":"PuenteCarmelo_4","solid":false,"grp":{"id":"puentecarmelo","i":3,"cols":2,"rows":2}}]};
