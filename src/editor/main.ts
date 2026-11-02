@@ -960,7 +960,10 @@ async function ghError(res) {
 function start() {
   lock.remove();
   syncTools();
-  selectCat(CATS[0]);
+  // Coming from the map editor's "＋ Nueva pieza": open the tile tab with the creation form ready
+  const wantsTile = location.hash === '#nueva-pieza';
+  selectCat(wantsTile ? (CATS.find((c) => c.id === 'tile') ?? CATS[0]) : CATS[0]);
+  if (wantsTile) { history.replaceState(null, '', location.pathname); openNewForm(); }
 }
 const lockInput = h('input', { type: 'password', class: 'ed-input', placeholder: 'Token de GitHub', autocomplete: 'off', spellcheck: 'false' });
 const lockMsg = h('p', { class: 'ed-lock-msg', role: 'status' });

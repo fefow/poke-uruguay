@@ -138,7 +138,7 @@ const weatherSel = h('select', { class: 'ed-input', onchange: () => edit(() => {
 const addLook = h('select', { class: 'ed-input' }, Object.keys(LOOKS).filter((k) => !k.startsWith('leader_') && !k.startsWith('player') && k !== 'rival').map((k) => h('option', { value: k, text: k, selected: k === 'oldman' })));
 const addItemSel = h('select', { class: 'ed-input' }, ITEM_KEYS.map((k) => h('option', { value: k, text: ITEMS[k].name, selected: k === 'te_marcela' })));
 const right = h('aside', { class: 'me-right' },
-  h('section', {}, h('h2', { text: 'Piezas' }), current, tileSearch, palette),
+  h('section', {}, h('h2', { text: 'Piezas' }), h('a', { class: 'ed-btn ed-mini is-primary', href: 'editor.html#nueva-pieza', target: '_blank', rel: 'noopener', title: 'Abre el editor de sprites para crear y dibujar una pieza nueva; después de guardarla aparece acá', text: '＋ Nueva pieza' }), current, tileSearch, palette),
   h('section', {}, h('h2', { text: 'Seleccionado' }), inspector),
   h('section', {}, h('h2', { text: 'Clima de la zona' }), weatherSel,
     h('p', { class: 'ed-hint', text: 'Aleatorio: despejado, lluvia, tormenta o niebla según el momento. En interiores no se nota.' })),
