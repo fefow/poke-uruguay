@@ -17,7 +17,17 @@ const RIDDLES: [string, string[], number][] = [
   ['Cuando el Pampero sopla fuerte, el cielo...', ['Se aclara de golpe', 'Se llena de niebla', 'Se vuelve rojo'], 0],
   ['La piedra semipreciosa que más se saca en Artigas es...', ['La amatista', 'La esmeralda', 'El rubí'], 0],
   ['El río que divide a Uruguay de Brasil en el este es...', ['La laguna Merín', 'El río Negro', 'El río Santa Lucía'], 0],
+  ['Es dulce, se hace con leche y se unta en el alfajor, el pan y la cuchara. ¿Cuál es?', ['La jalea de membrillo', 'El dulce de leche', 'La miel de caña'], 1],
+  ['Tiene dos ruedas, no es moto y en la Ciclovía no puede faltar. ¿Qué es?', ['El monopatín', 'El triciclo', 'La bicicleta'], 2],
+  ['El mate se prepara con las hojas molidas de...', ['Yerba mate', 'Té negro', 'Manzanilla'], 0],
+  ['La fortaleza que domina el Cerro de Montevideo da nombre al...', ['Cerro', 'Pocitos', 'Parque Rodó'], 0],
+  ['¿Qué festividad se celebra con tambores y murgas entre enero y febrero?', ['El carnaval', 'La Vendimia', 'El Día del Patrimonio'], 0],
+  ['El árbol de flor roja que es la flor nacional es...', ['El ombú', 'El tala', 'El ceibo'], 2],
+  ['Si te llevás un termo bajo el brazo, seguro vas a...', ['Dormir', 'Tomar mate', 'Pescar'], 1],
+  ['El mar que baña Punta del Este y Rocha es el...', ['Mar Caribe', 'Océano Atlántico', 'Pacífico'], 1],
+  ['La carne del asado criollo se cocina sobre brasas en la...', ['Parrilla', 'Olla', 'Plancha'], 0],
 ];
+
 export const riddleFor = (id: string) => RIDDLES[[...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % RIDDLES.length];
 
 // ---------------------------------------------------------------- contest scoring
