@@ -1,82 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:05:35.017Z",
+  "exported": "2026-11-02T02:06:34.860Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_villasoriano_fraybentos (25,18)",
+    "where": "r_villasoriano_fraybentos (30,20)",
     "party": [
-      "cortadora nv19 0PS",
-      "ceibal nv27 39PS",
-      "alacran nv16 0PS",
-      "lobomarino nv14 0PS",
-      "nimbo nv17 0PS"
+      "cortadora nv19 61PS",
+      "ceibal nv27 70PS",
+      "alacran nv16 45PS",
+      "lobomarino nv14 50PS",
+      "nimbo nv17 46PS"
     ],
     "badges": 2,
-    "playtime": 19105
+    "playtime": 19165
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:10:17.274Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "casa_jugador (5,7)"
-    },
-    {
-      "t": "2026-11-02T00:10:21.658Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "carmelo (25,8)"
-    },
-    {
-      "t": "2026-11-02T00:10:23.931Z",
-      "level": "info",
-      "msg": "Batalla salvaje: nandulin nv3",
-      "where": "ruta1 (9,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:27.070Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:15 \"¡Ñandú salvaje usó Placaje!\" anim dmg0:6 \"¡Golpe crítico!\"",
-      "where": "ruta1 (9,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:30.321Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:1 faint \"¡Ñandú salvaje se debilitó!\" exp end",
-      "where": "ruta1 (9,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:32.817Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (9,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:33.540Z",
-      "level": "info",
-      "msg": "Batalla salvaje: teruterito nv3",
-      "where": "ruta1 (12,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:36.279Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Carpincho usó Pistola Agua!\" \"¡Tero salvaje esquivó el ataque!\" \"¡Tero salvaje usó Chirrido!\" anim stat \"¡Bajó mucho la Defensa de Carpincho!\"",
-      "where": "ruta1 (12,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:39.289Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:15 faint \"¡Tero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (12,10)"
-    },
-    {
-      "t": "2026-11-02T00:10:41.512Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (12,10)"
-    },
     {
       "t": "2026-11-02T00:10:44.497Z",
       "level": "info",
@@ -2419,10 +2359,73 @@
       "where": "r_villasoriano_fraybentos (19,28)"
     },
     {
-      "t": "2026-11-02T02:05:31.502Z",
+      "t": "2026-11-02T02:05:43.504Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
-      "where": "r_villasoriano_fraybentos (19,29)"
+      "where": "r_villasoriano_fraybentos (19,29)",
+      "count": 3
+    },
+    {
+      "t": "2026-11-02T02:05:48.498Z",
+      "level": "info",
+      "msg": "Entró a villasoriano",
+      "where": "r_villasoriano_fraybentos (63,22)"
+    },
+    {
+      "t": "2026-11-02T02:05:55.506Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "villasoriano (7,8)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T02:05:59.375Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "villasoriano (27,8)"
+    },
+    {
+      "t": "2026-11-02T02:06:01.507Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "mercedes (13,9)"
+    },
+    {
+      "t": "2026-11-02T02:06:04.919Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T02:06:09.334Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T02:06:17.994Z",
+      "level": "info",
+      "msg": "Entró a villasoriano",
+      "where": "mercedes (0,8)"
+    },
+    {
+      "t": "2026-11-02T02:06:19.508Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "villasoriano (17,8)"
+    },
+    {
+      "t": "2026-11-02T02:06:21.965Z",
+      "level": "info",
+      "msg": "Entró a r_villasoriano_fraybentos",
+      "where": "villasoriano (0,8)"
+    },
+    {
+      "t": "2026-11-02T02:06:31.509Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "r_villasoriano_fraybentos (53,25)",
+      "count": 2
     }
   ]
 }
