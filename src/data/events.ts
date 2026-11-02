@@ -372,6 +372,8 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('melo', [adiv('mel', 'ultraesfera', 3, 'gaucho', 'Cuentero', 20, 28)]);
   put('tacuarembo', [adiv('tac', 'alfajor_triple', 2, 'gaucho', 'Payador de la feria', 24, 28)]);
   put('salto', [adiv('sal', 'superesfera', 4, 'maestra', 'Guía de las termas', 30, 24)]);
+  put('punta', [adiv('pun', 'ultraesfera', 2, 'sailor', 'Capitán del puerto', 30, 22)]);
+  put('florida', [adiv('flo', 'piedra_agata', 1, 'oldman', 'Relojero de la plaza', 36, 22)]);
   put('minas', [adiv('min', 'piedra_basalto', 1, 'oldman', 'Sabio del cerro', 28, 28)]);
   const cic = OUTDOOR.ciclovia;
   if (cic) {
