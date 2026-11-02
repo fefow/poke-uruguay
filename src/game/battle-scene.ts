@@ -500,8 +500,19 @@ async function chooseAction() {
   return { type: 'run' };
 }
 
-async function chooseMove(c, { forgetting = false } = {}) {
+async function chooseMove(c, { forgetting = false, incoming = null }: { forgetting?: boolean; incoming?: string | null } = {}) {
   closeDialog();
+  let neu = null;
+  if (incoming) {
+    const d = MOVES[incoming];
+    const cat = { fis: 'Físico', esp: 'Especial', est: 'Estado' }[d.cat];
+    neu = h('div', { class: 'move-new' },
+      h('div', { class: 'mn-title', text: 'Movimiento nuevo' }),
+      h('div', { class: 'mi-head' }, h('b', { class: 'mn-name', text: d.name }), h('span', { class: 'type-chip', style: { '--type': TYPES[d.type].color }, text: TYPES[d.type].name }), h('span', { class: 'mi-cat', text: cat })),
+      h('div', { class: 'mn-stats', text: `Poder ${d.cat === 'est' || !d.power ? '—' : d.power} · Precisión ${d.fx?.never ? '—' : d.acc} · PP ${d.pp}` }),
+      h('p', { class: 'mn-desc', text: d.desc }));
+    uiRoot().append(neu);
+  }
   const info = h('div', { class: 'move-info' });
   uiRoot().append(info);
   const CAT = { fis: 'Físico', esp: 'Especial', est: 'Estado' };
@@ -528,6 +539,7 @@ async function chooseMove(c, { forgetting = false } = {}) {
   };
   const r = await choose(opts, { cls: 'menu-moves', onMove: show, cols: 2 });
   info.remove();
+  neu?.remove();
   return r;
 }
 
@@ -843,7 +855,7 @@ export async function learnFlow(c, moveId, opts = {}) {
     const yes = await ask(`¿Querés que olvide un movimiento para aprender ${mv.name}?`, opts);
     if (yes) {
       await say('¿Cuál movimiento debería olvidar?', opts);
-      const idx = await chooseMove(c, { forgetting: true });
+      const idx = await chooseMove(c, { forgetting: true, incoming: moveId });
       if (idx >= 0) {
         const old = MOVES[c.moves[idx].id].name;
         learnMove(c, moveId, idx);

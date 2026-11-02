@@ -1058,3 +1058,11 @@ body {
 /* menus and panels: wider than the centred column on the 16:9 stage, with the world dimmed behind them */
 .panel:not(.panel-card):not(.panel-qty):not(.panel-name) { inset: 1.5cqi -10cqi; box-shadow: 0 0 0 100vmax oklch(0.1 0.03 270 / 0.55); }
 .panel-card { box-shadow: inset 0 0 0 0.5cqi #fff6b0, inset 0 0 0 1cqi #e0b020, 0 0 0 100vmax oklch(0.1 0.03 270 / 0.55); }
+
+/* new move shown while choosing which one to forget */
+.move-new { position: absolute; z-index: 67; left: -16cqi; bottom: calc(28% + 4cqi); inline-size: 62cqi; padding: 1.6cqi 2.4cqi; border-radius: 1.6cqi; background: var(--paper); border: 0.5cqi solid #e0b020; box-shadow: 0 0 0 0.4cqi var(--ink); display: grid; gap: 0.8cqi;
+  & .mn-title { font-size: 2.4cqi; font-weight: 700; color: #a87800; text-transform: uppercase; letter-spacing: 0.1em; }
+  & .mi-head { display: flex; align-items: center; gap: 1.4cqi; flex-wrap: wrap; }
+  & .mn-name { font-size: 3.6cqi; }
+  & .mn-stats { font-size: 2.8cqi; font-weight: 700; }
+  & .mn-desc { margin: 0; font-size: 2.6cqi; line-height: 1.25; color: var(--ink-soft); overflow-wrap: anywhere; } }
