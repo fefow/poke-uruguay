@@ -1,118 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:10:52.855Z",
+  "exported": "2026-11-02T02:12:53.023Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "fraybentos (3,24)",
+    "where": "fraybentos (36,14)",
     "party": [
       "cortadora nv20 0PS",
-      "ceibal nv28 1PS",
+      "ceibal nv29 58PS",
       "alacran nv16 0PS",
-      "lobomarino nv15 8PS",
-      "nimbo nv17 27PS"
+      "lobomarino nv15 0PS",
+      "nimbo nv17 0PS"
     ],
     "badges": 2,
-    "playtime": 19418
+    "playtime": 19533
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:13:37.122Z",
-      "level": "info",
-      "msg": "Batalla salvaje: curupi nv4",
-      "where": "r_colonia_rosario (19,26)"
-    },
-    {
-      "t": "2026-11-02T00:13:41.046Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:15 \"¡Ñacurutú salvaje usó Placaje!\" anim dmg0:1",
-      "where": "r_colonia_rosario (19,26)"
-    },
-    {
-      "t": "2026-11-02T00:13:45.992Z",
-      "level": "info",
-      "msg": "Turno 2: ball | throw shakes \"¡Atrapaste a Ñacurutú!\" end",
-      "where": "r_colonia_rosario (19,26)"
-    },
-    {
-      "t": "2026-11-02T00:13:48.292Z",
-      "level": "info",
-      "msg": "Fin de batalla: caught",
-      "where": "r_colonia_rosario (19,26)"
-    },
-    {
-      "t": "2026-11-02T00:13:57.076Z",
-      "level": "info",
-      "msg": "Batalla salvaje: chimango nv4",
-      "where": "r_colonia_rosario (17,26)"
-    },
-    {
-      "t": "2026-11-02T00:14:02.321Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Ñacurutú usó Placaje!\" anim dmg1:3 \"¡Chimango salvaje usó Picotazo!\" anim dmg0:5 faint \"¡Ñacurutú se debilitó!\" needSwitch",
-      "where": "r_colonia_rosario (17,26)"
-    },
-    {
-      "t": "2026-11-02T00:14:06.522Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Carpincho usó Gruñido!\" anim stat \"¡Bajó el Ataque de Chimango salvaje!\" \"¡Chimango salvaje usó Picotazo!\" anim dmg0:2",
-      "where": "r_colonia_rosario (17,26)"
-    },
-    {
-      "t": "2026-11-02T00:14:09.736Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:15 faint \"¡Chimango salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (17,26)"
-    },
-    {
-      "t": "2026-11-02T00:14:12.321Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (17,26)"
-    },
-    {
-      "t": "2026-11-02T00:14:17.593Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "r_colonia_rosario (0,18)"
-    },
-    {
-      "t": "2026-11-02T00:14:25.925Z",
-      "level": "info",
-      "msg": "Entró a poli_colonia",
-      "where": "colonia (4,13)"
-    },
-    {
-      "t": "2026-11-02T00:14:30.356Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "poli_colonia (5,7)"
-    },
-    {
-      "t": "2026-11-02T00:17:56.812Z",
-      "level": "info",
-      "msg": "Entró a r_colonia_rosario",
-      "where": "colonia (43,16)"
-    },
-    {
-      "t": "2026-11-02T00:17:59.201Z",
-      "level": "info",
-      "msg": "Batalla salvaje: curupi nv4",
-      "where": "r_colonia_rosario (8,19)"
-    },
-    {
-      "t": "2026-11-02T00:18:02.314Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Ñacurutú salvaje usó Placaje!\" anim dmg0:3 \"¡Ñacurutú usó Placaje!\" anim dmg1:2",
-      "where": "r_colonia_rosario (8,19)"
-    },
-    {
-      "t": "2026-11-02T00:18:05.331Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú salvaje usó Placaje!\" anim dmg0:3 \"¡Ñacurutú usó Placaje!\" anim dmg1:4 \"¡Golpe crítico!\"",
-      "where": "r_colonia_rosario (8,19)"
-    },
     {
       "t": "2026-11-02T00:18:08.551Z",
       "level": "info",
@@ -2423,10 +2327,108 @@
       "where": "terminal_frb (5,7)"
     },
     {
-      "t": "2026-11-02T02:10:49.538Z",
+      "t": "2026-11-02T02:11:07.539Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
-      "where": "fraybentos (5,20)"
+      "where": "fraybentos (5,20)",
+      "count": 4
+    },
+    {
+      "t": "2026-11-02T02:11:08.657Z",
+      "level": "info",
+      "msg": "Entró a gym_frb",
+      "where": "fraybentos (26,14)"
+    },
+    {
+      "t": "2026-11-02T02:11:37.541Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "gym_frb (11,16)",
+      "count": 5
+    },
+    {
+      "t": "2026-11-02T02:11:38.722Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "gym_frb (13,19)"
+    },
+    {
+      "t": "2026-11-02T02:11:43.542Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "fraybentos (35,15)"
+    },
+    {
+      "t": "2026-11-02T02:11:45.181Z",
+      "level": "info",
+      "msg": "Batalla vs Recluta PP: yararita nv19, carabo nv20",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:11:50.356Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:26 \"No es muy eficaz…\" heal \"¡Yarará rival perdió energía!\" \"¡Yarará rival usó Mordisco!\" anim dmg0:7",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:11:53.807Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Ceibal usó Absorber!\" anim dmg1:11 \"No es muy eficaz…\" heal \"¡Yarará rival perdió energía!\" \"¡Yarará rival usó Ácido!\" anim dmg0:12 \"¡Es súper eficaz!\" faint \"¡Ceibal se debilitó!\" needSwitch",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:01.264Z",
+      "level": "info",
+      "msg": "Turno 3: move #1 | \"¡Yarará rival usó Ácido!\" anim dmg0:8 \"¡Golpe crítico!\" faint \"¡Lobo Marino se debilitó!\" needSwitch",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:09.645Z",
+      "level": "info",
+      "msg": "Turno 4: item | \"Usaste Alfajor.\" \"¡Ceibal se reanimó!\" \"¡Yarará rival usó Mordisco!\" anim dmg0:13",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:14.745Z",
+      "level": "info",
+      "msg": "Turno 5: move #2 | \"¡Yarará rival usó Mordisco!\" anim dmg0:13 \"¡Golondrina usó Descarga!\" anim dmg1:10 faint \"¡Yarará rival se debilitó!\" exp foeNext",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:29.797Z",
+      "level": "info",
+      "msg": "Turno 6: item | \"Usaste Mate.\" \"Ceibal tomó un mate y recuperó 20 PS.\" \"¡Cárabo rival usó Confusión!\" \"¡Golondrina esquivó el ataque!\"",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:35.263Z",
+      "level": "info",
+      "msg": "Turno 7: move #3 | \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:1 faint \"¡Golondrina se debilitó!\" needSwitch",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:39.370Z",
+      "level": "info",
+      "msg": "Turno 8: move #1 | \"¡Ceibal usó Hoja Afilada!\" anim dmg1:45 \"¡Golpe crítico!\" \"¡Cárabo rival usó Maquinación!\" anim stat \"¡Subió mucho el At. Esp. de Cárabo rival!\"",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:42.671Z",
+      "level": "info",
+      "msg": "Turno 9: move #1 | \"¡Ceibal usó Hoja Afilada!\" anim dmg1:16 faint \"¡Cárabo rival se debilitó!\" exp end",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:46.331Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-02T02:12:49.548Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "fraybentos (36,18)"
     }
   ]
 }
