@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:56:28.973Z",
+  "exported": "2026-11-02T01:57:28.769Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "villasoriano (19,8)",
+    "where": "r_villasoriano_fraybentos (59,22)",
     "party": [
       "hormiga nv18 49PS",
       "ceibal nv27 70PS",
@@ -13,21 +13,9 @@
       "lobomarino nv14 50PS"
     ],
     "badges": 2,
-    "playtime": 18667
+    "playtime": 18726
   },
   "entries": [
-    {
-      "t": "2026-11-01T15:44:28.298Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Carpinchal usó Placaje!\" anim dmg1:23 faint \"¡Tarántula rival se debilitó!\" exp end",
-      "where": "ferry_c4 (4,6)"
-    },
-    {
-      "t": "2026-11-01T15:44:39.836Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_c4 (4,6)"
-    },
     {
       "t": "2026-11-01T15:44:42.713Z",
       "level": "info",
@@ -2414,11 +2402,24 @@
       "where": "casa_villasoriano (5,7)"
     },
     {
-      "t": "2026-11-02T01:56:25.445Z",
+      "t": "2026-11-02T01:56:37.447Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
       "where": "villasoriano (20,8)",
-      "count": 3
+      "count": 4
+    },
+    {
+      "t": "2026-11-02T01:56:42.024Z",
+      "level": "info",
+      "msg": "Entró a r_villasoriano_fraybentos",
+      "where": "villasoriano (0,8)"
+    },
+    {
+      "t": "2026-11-02T01:57:25.452Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "r_villasoriano_fraybentos (59,22)",
+      "count": 6
     }
   ]
 }
