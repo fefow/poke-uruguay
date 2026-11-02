@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:52:17.355Z",
+  "exported": "2026-11-02T01:53:25.910Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "poli_mercedes (5,3)",
+    "where": "mercedes (8,8)",
     "party": [
       "hormiga nv18 49PS",
       "ceibal nv27 70PS",
@@ -13,27 +13,9 @@
       "lobomarino nv14 50PS"
     ],
     "badges": 2,
-    "playtime": 18509
+    "playtime": 18574
   },
   "entries": [
-    {
-      "t": "2026-11-01T15:43:58.396Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Carpinchal usó Placaje!\" \"¡Terogarra rival esquivó el ataque!\" \"¡Terogarra rival usó Picotazo!\" anim dmg0:5",
-      "where": "ferry_2 (19,2)"
-    },
-    {
-      "t": "2026-11-01T15:44:00.737Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Carpinchal usó Placaje!\" anim dmg1:9 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_2 (19,2)"
-    },
-    {
-      "t": "2026-11-01T15:44:05.029Z",
-      "level": "info",
-      "msg": "Turno 4: move #2 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:53 faint \"¡Criollo rival se debilitó!\" exp end",
-      "where": "ferry_2 (19,2)"
-    },
     {
       "t": "2026-11-01T15:44:07.467Z",
       "level": "info",
@@ -2417,6 +2399,25 @@
       "level": "info",
       "msg": "Entró a poli_mercedes",
       "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T01:52:19.410Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "poli_mercedes (5,5)"
+    },
+    {
+      "t": "2026-11-02T01:52:19.979Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T01:53:22.289Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "mercedes (12,20)",
+      "count": 6
     }
   ]
 }
