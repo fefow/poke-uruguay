@@ -1,45 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:01:17.218Z",
+  "exported": "2026-11-02T02:02:35.003Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_villasoriano_fraybentos (30,21)",
+    "where": "r_villasoriano_fraybentos (22,18)",
     "party": [
       "cortadora nv19 17PS",
       "ceibal nv27 61PS",
       "alacran nv16 0PS",
-      "lobomarino nv14 50PS"
+      "lobomarino nv14 50PS",
+      "nimbo nv17 13PS"
     ],
     "badges": 2,
-    "playtime": 18917
+    "playtime": 18958
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:07:55.453Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:10 \"¡Golpe crítico!\" faint \"¡Ñandú rival se debilitó!\" exp foeNext",
-      "where": "colonia (7,21)"
-    },
-    {
-      "t": "2026-11-02T00:08:01.999Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:19 \"¡Golpe crítico!\" \"¡Oruga rival usó Placaje!\" anim dmg0:4 \"¡Golpe crítico!\"",
-      "where": "colonia (7,21)"
-    },
-    {
-      "t": "2026-11-02T00:08:05.483Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Carpincho usó Placaje!\" anim dmg1:1 faint \"¡Oruga rival se debilitó!\" exp foeNext",
-      "where": "colonia (7,21)"
-    },
-    {
-      "t": "2026-11-02T00:08:09.854Z",
-      "level": "info",
-      "msg": "Turno 5: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:20 \"¡Es súper eficaz!\" faint \"¡Tuco rival se debilitó!\" exp end",
-      "where": "colonia (7,21)"
-    },
     {
       "t": "2026-11-02T00:08:12.852Z",
       "level": "info",
@@ -2421,6 +2398,30 @@
       "level": "info",
       "msg": "Batalla salvaje: nimbo nv17",
       "where": "r_villasoriano_fraybentos (30,21)"
+    },
+    {
+      "t": "2026-11-02T02:02:14.365Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:33 \"¡Golondrina salvaje usó Onda Trueno!\" anim statusAnim hud \"¡Cortadora está paralizado!\"",
+      "where": "r_villasoriano_fraybentos (30,21)"
+    },
+    {
+      "t": "2026-11-02T02:02:23.836Z",
+      "level": "info",
+      "msg": "Turno 2: ball | throw shakes \"¡Atrapaste a Golondrina!\" end",
+      "where": "r_villasoriano_fraybentos (30,21)"
+    },
+    {
+      "t": "2026-11-02T02:02:26.514Z",
+      "level": "info",
+      "msg": "Fin de batalla: caught",
+      "where": "r_villasoriano_fraybentos (30,21)"
+    },
+    {
+      "t": "2026-11-02T02:02:31.486Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "r_villasoriano_fraybentos (24,15)"
     }
   ]
 }
