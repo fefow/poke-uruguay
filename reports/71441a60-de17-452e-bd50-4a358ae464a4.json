@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:57:28.769Z",
+  "exported": "2026-11-02T01:58:34.757Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_villasoriano_fraybentos (59,22)",
+    "where": "r_villasoriano_fraybentos (45,21)",
     "party": [
       "hormiga nv18 49PS",
       "ceibal nv27 70PS",
@@ -13,7 +13,7 @@
       "lobomarino nv14 50PS"
     ],
     "badges": 2,
-    "playtime": 18726
+    "playtime": 18792
   },
   "entries": [
     {
@@ -2415,11 +2415,11 @@
       "where": "villasoriano (0,8)"
     },
     {
-      "t": "2026-11-02T01:57:25.452Z",
+      "t": "2026-11-02T01:58:31.461Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
       "where": "r_villasoriano_fraybentos (59,22)",
-      "count": 6
+      "count": 14
     }
   ]
 }
