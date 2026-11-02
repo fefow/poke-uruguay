@@ -1,76 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:32:41.335Z",
+  "exported": "2026-11-02T02:33:41.103Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "gym_frb (7,18)",
+    "where": "gym_frb (7,7)",
     "party": [
-      "cortadora nv20 64PS",
+      "cortadora nv21 5PS",
       "ceibal nv29 75PS",
       "alacran nv16 45PS",
       "lobomarino nv15 53PS",
       "cumulo nv18 55PS"
     ],
     "badges": 2,
-    "playtime": 19960
+    "playtime": 20020
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:19:54.050Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:18 faint \"¡Chimango salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (5,18)"
-    },
-    {
-      "t": "2026-11-02T00:19:56.039Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (5,18)"
-    },
-    {
-      "t": "2026-11-02T00:20:03.908Z",
-      "level": "info",
-      "msg": "Batalla salvaje: curupi nv4",
-      "where": "r_colonia_rosario (8,16)"
-    },
-    {
-      "t": "2026-11-02T00:20:07.594Z",
-      "level": "info",
-      "msg": "Turno 1: switch #1 | \"¡Ñacurutú, volvé!\" recall send \"¡Adelante, Carpincho!\" \"¡Ñacurutú salvaje usó Placaje!\" anim dmg0:1",
-      "where": "r_colonia_rosario (8,16)"
-    },
-    {
-      "t": "2026-11-02T00:20:11.642Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:14 \"¡Ñacurutú salvaje usó Placaje!\" anim dmg0:1",
-      "where": "r_colonia_rosario (8,16)"
-    },
-    {
-      "t": "2026-11-02T00:20:14.566Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Carpincho usó Placaje!\" anim dmg1:6 faint \"¡Ñacurutú salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (8,16)"
-    },
-    {
-      "t": "2026-11-02T00:20:18.470Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (8,16)"
-    },
-    {
-      "t": "2026-11-02T00:20:21.175Z",
-      "level": "info",
-      "msg": "Batalla salvaje: chimango nv3",
-      "where": "r_colonia_rosario (12,12)"
-    },
-    {
-      "t": "2026-11-02T00:20:24.173Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Picotazo!\" anim dmg1:8 \"¡Chimango salvaje usó Placaje!\" anim dmg0:4 \"¡Golpe crítico!\" faint \"¡Ñacurutú se debilitó!\" needSwitch",
-      "where": "r_colonia_rosario (12,12)"
-    },
     {
       "t": "2026-11-02T00:20:28.945Z",
       "level": "info",
@@ -2429,10 +2375,66 @@
       "where": "fraybentos (26,14)"
     },
     {
-      "t": "2026-11-02T02:32:37.662Z",
+      "t": "2026-11-02T02:32:49.662Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
-      "where": "gym_frb (13,17)"
+      "where": "gym_frb (13,17)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T02:32:51.454Z",
+      "level": "info",
+      "msg": "Batalla vs Dante: yararita nv18, carabo nv18",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:32:56.143Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Cortadora usó Colmillo Fuego!\" \"¡Yarará rival esquivó el ataque!\" \"¡Yarará rival usó Mordisco!\" anim dmg0:7",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:32:59.079Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Cortadora usó Rueda Fuego!\" anim dmg1:41 \"¡Yarará rival usó Ácido!\" anim dmg0:8",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:33:02.199Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Cortadora usó Ascuas!\" anim dmg1:3 faint \"¡Yarará rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:33:07.004Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:34 \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:23",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:33:10.453Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Cortadora usó Ascuas!\" anim dmg1:11 \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:24",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:33:13.625Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:9 faint \"¡Cárabo rival se debilitó!\" exp end",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:33:17.277Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_frb (4,2)"
+    },
+    {
+      "t": "2026-11-02T02:33:37.672Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "gym_frb (4,2)",
+      "count": 4
     }
   ]
 }
