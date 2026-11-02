@@ -125,20 +125,23 @@ export const CITY_SPECS = {
     fill: 16,
   },
   // Artigas: a mining town climbing a stony hill on a zigzag road, amethyst country.
+  // Artigas (64x42): a winding mountain road climbing through the hills, amethyst quarry scree (ν) in the south-east,
+  // a terraced square half-way up and barrios on the benches of the hill.
   artigas: {
     theme: 'sierra',
     spec: {
-      w: W, h: H, border: '#', road: '=', lamps: 10,
-      hills: [{ rect: [1, 1, 20, 6], ch: 'μ', density: 0.55 }, { rect: [26, 1, 17, 8], ch: 'μ', density: 0.6 }, { rect: [1, 24, 18, 5], ch: 'μ', density: 0.45 }],
-      paths: [[[1, 27], [14, 27], [14, 21], [30, 21], [30, 15], [8, 15], [8, 10], [26, 10], [26, 1]], [[36, 21], [36, 28]], [[30, 15], [42, 15]], [[41, 21], [30, 21]]],
-      fills: [{ rect: [30, 22, 12, 6], ch: 'ν' }],
-      groves: [{ rect: [2, 17, 5, 5], tree: '#', density: 0.5, lanes: 3 }],
-      scatter: [['ν', 10, 'away'], ['Ñ', 6, 'away'], ['R', 8, 'away']],
-      props: [['τ', 33, 24], ['τ', 34, 24], ['γ', 38, 25]],
-      animals: [{ sp: 'mulitin', n: 2, rect: [30, 22, 12, 6] }],
+      w: 64, h: 42, border: '#', road: '=', lamps: 14,
+      hills: [{ rect: [1, 1, 30, 8], ch: 'μ', density: 0.55 }, { rect: [38, 1, 25, 11], ch: 'μ', density: 0.6 }, { rect: [1, 34, 26, 7], ch: 'μ', density: 0.45 }],
+      paths: [[[1, 39], [20, 39], [20, 31], [44, 31], [44, 22], [12, 22], [12, 15], [38, 15], [38, 1]], [[54, 31], [54, 40]], [[44, 22], [62, 22]], [[62, 31], [44, 31]], [[28, 31], [28, 22]], [[12, 22], [4, 22]]],
+      plazas: [{ x: 22, y: 23, w: 10, h: 5, piece: 'fuente', benches: true }],
+      fills: [{ rect: [46, 32, 16, 9], ch: 'ν' }],
+      groves: [{ rect: [2, 24, 8, 8], tree: '#', density: 0.5, lanes: 3 }, { rect: [40, 3, 8, 6], tree: '#', density: 0.5, lanes: 3 }],
+      scatter: [['ν', 14, 'away'], ['Ñ', 10, 'away'], ['R', 12, 'away'], ['Ь', 3, 'road']],
+      props: [['τ', 50, 34], ['τ', 51, 34], ['τ', 55, 36], ['γ', 58, 35], ['γ', 59, 35]],
+      animals: [{ sp: 'mulitin', n: 3, rect: [46, 32, 16, 9] }],
     },
-    bld: [['poli', 'poli_artigas'], ['shop', 'shop_artigas'], ['house', 'casa_artigas'], ['houseG', 'casa_artigas2']],
-    fill: 8,
+    bld: [['poli', 'poli_artigas', [16, 18]], ['shop', 'shop_artigas', [30, 18]], ['house', 'casa_artigas', [24, 34]], ['houseG', 'casa_artigas2', [6, 26]]],
+    fill: 14,
   },
   // Rivera: twin plazas on the border with a line of boundary stones down the middle.
   // Rivera (64x42): the dry border runs down the middle (marker posts, 'ρ'); two squares face each other across it, the
