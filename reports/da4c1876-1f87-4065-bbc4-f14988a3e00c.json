@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T05:02:59.363Z",
-  "build": "445881cbd48470db",
+  "exported": "2026-11-02T21:28:36.109Z",
+  "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (26,22)",
+    "where": "poli_mercedes (5,3)",
     "party": [
       "tejubrasa nv23 61PS",
       "curupi nv29 85PS",
@@ -15,165 +15,9 @@
       "lechuza nv13 36PS"
     ],
     "badges": 1,
-    "playtime": 7237
+    "playtime": 7362
   },
   "entries": [
-    {
-      "t": "2026-11-02T03:54:38.159Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Mulita salvaje usó Ataque Arena!\" anim stat \"¡Bajó la Precisión de Ñacurutú!\"",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:40.772Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:37 faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:43.520Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:50.946Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv13",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:55.177Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Placaje!\" \"¡Ñacurutú esquivó el ataque!\"",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:54:57.856Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:43 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:02.303Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:32.593Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv15",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:36.485Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Placaje!\" anim dmg0:8",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:38.698Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:49 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:41.810Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:45.725Z",
-      "level": "info",
-      "msg": "Batalla salvaje: tuco nv14",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:50.099Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Tuco salvaje usó Bofetón Lodo!\" \"No afecta a Ñacurutú… ¡El ataque no tuvo ningún efecto!\"",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:52.359Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:39 faint \"¡Tuco salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:55.268Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:55:56.299Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv13",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:00.639Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Mulita salvaje usó Arañazo!\" anim dmg0:4",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:02.897Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:37 faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:05.802Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:10.212Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv13",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:13.848Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Barrida!\" anim dmg0:4 \"¡Golpe crítico!\" \"No es muy eficaz…\"",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:16.651Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:44 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:20.778Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:22.096Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv15",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:27.026Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Mulita salvaje usó Defensa Férrea!\" anim stat \"¡Subió mucho la Defensa de Mulita salvaje!\"",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:29.852Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Viento Cortante!\" anim dmg1:42 \"¡Golpe crítico!\" faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
     {
       "t": "2026-11-02T03:56:33.548Z",
       "level": "info",
@@ -2418,11 +2262,167 @@
       "where": "casa_mercedes2 (5,7)"
     },
     {
-      "t": "2026-11-02T05:02:55.873Z",
+      "t": "2026-11-02T15:28:38.631Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
       "where": "mercedes (37,20)",
-      "count": 7
+      "count": 9
+    },
+    {
+      "t": "2026-11-02T15:28:56.690Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-02T15:29:23.037Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T15:30:19.648Z",
+      "level": "info",
+      "msg": "Batalla vs Remero Gustavo: nandulin nv15, tuco nv16",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T15:30:25.437Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Ñandú rival usó Ataque Rápido!\" anim dmg0:7 \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:39",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T15:30:28.817Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:2 faint \"¡Ñandú rival se debilitó!\" exp foeNext",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:23:20.377Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejubrasa usó Ascuas!\" anim dmg1:38 \"¡Golpe crítico!\" statusAnim hud \"¡Tuco rival está quemado!\" \"¡Tuco rival usó Campo Arado!\" anim dmg0:16 \"¡Es súper eficaz!\" statusAnim dmg1:5 \"Tuco rival sufre por la quemadura.\"",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:23:25.975Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:1 faint \"¡Tuco rival se debilitó!\" exp end",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:23:28.652Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:23:30.280Z",
+      "level": "info",
+      "msg": "Batalla vs Remera Paula: hornerito nv16, oruga nv16, hormiga nv17",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:23:34.444Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:33 \"¡Hornero rival usó Ataque Ala!\" anim dmg0:11",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:23:37.372Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:7 faint \"¡Hornero rival se debilitó!\" exp foeNext",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:15.675Z",
+      "level": "info",
+      "msg": "Turno 3: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:41 \"¡Es súper eficaz!\" faint \"¡Oruga rival se debilitó!\" exp foeNext",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:21.916Z",
+      "level": "info",
+      "msg": "Turno 4: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:14 \"No es muy eficaz…\" \"¡Hormiga rival usó Colmillo Fuego!\" anim dmg0:3 \"No es muy eficaz…\" faint \"¡Tejubrasa se debilitó!\" needSwitch",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:28.862Z",
+      "level": "info",
+      "msg": "Turno 5: move #2 | \"¡Ñacurutú usó Premonición!\" anim dmg1:33 faint \"¡Hormiga rival se debilitó!\" exp end",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:31.481Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:32.770Z",
+      "level": "info",
+      "msg": "Batalla vs Comodoro Aldo: teruterito nv17, zorrigris nv18",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:39.687Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Ñacurutú usó Premonición!\" anim dmg1:41 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:47.592Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Ñacurutú usó Premonición!\" \"No afecta a Zorrigrís rival… ¡El ataque no tuvo ningún efecto!\" \"¡Zorrigrís rival usó Mordisco!\" anim dmg0:23 \"¡Es súper eficaz!\"",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:50.907Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Ñacurutú usó Premonición!\" \"No afecta a Zorrigrís rival… ¡El ataque no tuvo ningún efecto!\" \"¡Zorrigrís rival usó Finta!\" anim dmg0:22 \"¡Es súper eficaz!\"",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:27:55.506Z",
+      "level": "info",
+      "msg": "Turno 4: move #1 | \"¡Ñacurutú usó Confusión!\" \"No afecta a Zorrigrís rival… ¡El ataque no tuvo ningún efecto!\" \"¡Zorrigrís rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Ñacurutú!\"",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:28:04.123Z",
+      "level": "info",
+      "msg": "Turno 5: switch #2 | \"¡Ñacurutú, volvé!\" recall send \"¡Adelante, Yacaré!\" \"¡Zorrigrís rival usó Finta!\" anim dmg0:11",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:28:07.827Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Zorrigrís rival usó Finta!\" anim dmg0:11 \"¡Yacaré usó Hoja Afilada!\" anim dmg1:26",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:28:10.117Z",
+      "level": "info",
+      "msg": "Turno 7: move #0 | \"¡Zorrigrís rival usó Finta!\" anim dmg0:10 \"¡Yacaré usó Hoja Afilada!\" anim dmg1:18 faint \"¡Zorrigrís rival se debilitó!\" exp end",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:28:14.015Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "mercedes (19,20)"
+    },
+    {
+      "t": "2026-11-02T21:28:32.247Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (14,20)"
+    },
+    {
+      "t": "2026-11-02T21:28:33.440Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
     }
   ]
 }
