@@ -1,149 +1,23 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T22:05:49.243Z",
+  "exported": "2026-11-02T22:07:46.232Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (37,8)",
+    "where": "r_palmitas_mercedes (12,18)",
     "party": [
-      "tejubrasa nv23 61PS",
-      "curupi nv29 85PS",
+      "lobomarino nv14 39PS",
+      "curupi nv29 76PS",
       "cerro nv20 71PS",
-      "cascarudo nv11 36PS",
+      "tejubrasa nv23 61PS",
       "lechuza nv13 36PS",
-      "lobomarino nv13 48PS"
+      "cascarudo nv11 36PS"
     ],
     "badges": 1,
-    "playtime": 7510
+    "playtime": 7603
   },
   "entries": [
-    {
-      "t": "2026-11-02T03:56:42.030Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Picotazo!\" anim dmg0:10",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:45.880Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:47 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:50.628Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:15.677Z",
-      "level": "info",
-      "msg": "Batalla salvaje: tuco nv14",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:20.621Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Tuco salvaje usó Campo Arado!\" \"No afecta a Ñacurutú… ¡El ataque no tuvo ningún efecto!\"",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:23.585Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:37 \"¡Tuco salvaje usó Placaje!\" anim dmg0:8 \"¡Golpe crítico!\"",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:26.616Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:3 faint \"¡Tuco salvaje se debilitó!\" exp end",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:30.605Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:31.666Z",
-      "level": "info",
-      "msg": "Batalla salvaje: mulitin nv12",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:40.056Z",
-      "level": "info",
-      "msg": "Turno 1: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Mulita salvaje usó Ataque Arena!\" anim stat \"¡Bajó la Precisión de Ñacurutú!\"",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:44.474Z",
-      "level": "info",
-      "msg": "Turno 2: move #3 | \"¡Ñacurutú usó Hipnosis!\" anim statusAnim hud \"¡Mulita salvaje está dormido!\" \"Mulita salvaje está dormido.\" statusAnim",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:47.567Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:34 faint \"¡Mulita salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:50.383Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:52.055Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv13",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:57:59.209Z",
-      "level": "info",
-      "msg": "Turno 1: move #3 | \"¡Carpintero salvaje usó Picotazo!\" anim dmg0:8 \"¡Yacaré usó Hoja Afilada!\" anim dmg1:6 \"No es muy eficaz…\"",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:58:03.069Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpintero salvaje usó Barrida!\" anim dmg0:19 \"¡Es súper eficaz!\" \"¡Yacaré usó Lanzarrocas!\" anim dmg1:14",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:58:05.564Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Carpintero salvaje usó Golpe Karate!\" anim dmg0:21 \"¡Es súper eficaz!\" \"¡Yacaré usó Placaje!\" anim dmg1:7",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:58:10.541Z",
-      "level": "info",
-      "msg": "Turno 4: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Placaje!\" anim dmg0:6",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:58:14.159Z",
-      "level": "info",
-      "msg": "Turno 5: move #1 | \"¡Ñacurutú usó Confusión!\" anim dmg1:16 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:58:17.262Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T03:58:20.121Z",
-      "level": "info",
-      "msg": "Batalla salvaje: lechuza nv13",
-      "where": "palmitas (15,11)"
-    },
     {
       "t": "2026-11-02T03:58:24.324Z",
       "level": "info",
@@ -2424,6 +2298,133 @@
       "msg": "Autoguardado falló: Estado inválido: Equipo #6: Lobo Marino no puede existir con nivel 13",
       "where": "mercedes (16,21)",
       "count": 10
+    },
+    {
+      "t": "2026-11-02T22:06:02.464Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (18,10)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T22:06:06.863Z",
+      "level": "info",
+      "msg": "Entró a r_palmitas_mercedes",
+      "where": "mercedes (43,8)"
+    },
+    {
+      "t": "2026-11-02T22:06:08.288Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv13",
+      "where": "r_palmitas_mercedes (6,15)"
+    },
+    {
+      "t": "2026-11-02T22:06:13.289Z",
+      "level": "info",
+      "msg": "Turno 1: switch #1 | \"¡Lobo Marino, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Alacrán salvaje usó Placaje!\" anim dmg0:4",
+      "where": "r_palmitas_mercedes (6,15)"
+    },
+    {
+      "t": "2026-11-02T22:06:15.932Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:38 \"¡Es súper eficaz!\" faint \"¡Alacrán salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (6,15)"
+    },
+    {
+      "t": "2026-11-02T22:06:19.139Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (6,15)"
+    },
+    {
+      "t": "2026-11-02T22:06:19.852Z",
+      "level": "info",
+      "msg": "Batalla salvaje: luciernito nv14",
+      "where": "r_palmitas_mercedes (6,16)"
+    },
+    {
+      "t": "2026-11-02T22:06:25.113Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:10 \"No es muy eficaz…\" \"¡Luciérnaga salvaje usó Onda Trueno!\" anim statusAnim hud \"¡Lobo Marino está paralizado!\"",
+      "where": "r_palmitas_mercedes (6,16)"
+    },
+    {
+      "t": "2026-11-02T22:06:28.401Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Luciérnaga salvaje usó Onda Trueno!\" anim \"¡Pero no tuvo efecto!\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:17",
+      "where": "r_palmitas_mercedes (6,16)"
+    },
+    {
+      "t": "2026-11-02T22:06:31.452Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Luciérnaga salvaje usó Onda Trueno!\" anim \"¡Pero no tuvo efecto!\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:10 faint \"¡Luciérnaga salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (6,16)"
+    },
+    {
+      "t": "2026-11-02T22:06:35.364Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (6,16)"
+    },
+    {
+      "t": "2026-11-02T22:06:36.882Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv16",
+      "where": "r_palmitas_mercedes (11,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:41.132Z",
+      "level": "info",
+      "msg": "Turno 1: switch #1 | \"¡Lobo Marino, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Alacrán salvaje usó Placaje!\" anim dmg0:5",
+      "where": "r_palmitas_mercedes (11,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:43.807Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:44 \"¡Es súper eficaz!\" faint \"¡Alacrán salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (11,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:47.405Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (11,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:47.519Z",
+      "level": "info",
+      "msg": "Batalla salvaje: crisalida nv12",
+      "where": "r_palmitas_mercedes (12,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:50.700Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Crisálida salvaje usó Telaraña!\" anim dmg0:4 \"No es muy eficaz…\" stat \"¡Bajó la Velocidad de Lobo Marino!\" \"¡Lobo Marino está paralizado! No se puede mover.\" statusAnim",
+      "where": "r_palmitas_mercedes (12,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:54.203Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Crisálida salvaje usó Telaraña!\" anim dmg0:4 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:17",
+      "where": "r_palmitas_mercedes (12,18)"
+    },
+    {
+      "t": "2026-11-02T22:06:57.763Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Crisálida salvaje usó Placaje!\" anim dmg0:4 \"¡Lobo Marino usó Hidropulso!\" anim dmg1:19 \"¡Golpe crítico!\" faint \"¡Crisálida salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (12,18)"
+    },
+    {
+      "t": "2026-11-02T22:07:03.544Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (12,18)"
+    },
+    {
+      "t": "2026-11-02T22:07:42.566Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 14",
+      "where": "r_palmitas_mercedes (12,18)"
     }
   ]
 }
