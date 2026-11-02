@@ -148,16 +148,21 @@ function angloPlan(id = 'gym_frb'): GymPlan & { warps: any[] } {
   };
 }
 
-/** Quiroga (Salto, psíquico): a library whose rooms spiral inwards; the director sits at the very centre. */
+/**
+ * Quiroga (Salto, psíquico): the writer's library. Four long reading aisles, two tiles high, are split by shelf walls
+ * that each have a single one-tile gap, alternating right and left, so the way to the study goes back and forth. A
+ * trainer stands in front of the first two gaps, so there is no way past them without being seen.
+ */
 function quirogaPlan(): GymPlan {
-  const { g, rect, out } = blank();
-  for (const [a, b, c, d] of [[2, 17, 13, 18], [2, 2, 3, 18], [2, 2, 25, 3], [24, 2, 25, 14], [7, 13, 25, 14], [7, 6, 8, 14], [7, 6, 20, 7], [19, 6, 20, 10], [12, 9, 20, 10]]) rect(a, b, c, d, 'Y');
-  rect(12, 9, 14, 11, 'Y'); rect(13, 9, 13, 11, 'A');
-  g[19][13] = 'm'; g[19][12] = 'm'; g[18][12] = 'Y'; g[18][13] = 'Y';
-  g[0][13] = 'X'; g[0][14] = 'Z';
-  for (const [x, y] of [[12, 9], [12, 11], [15, 11]]) g[y][x] = 'N';
-  for (const [x, y] of [[5, 5], [22, 5], [5, 15], [26, 8]]) if (g[y][x] === 'x') g[y][x] = 'ϻ';
-  return { tiles: out(), leader: { x: 13, y: 10, dir: 'right' }, trainers: [{ x: 3, y: 8, dir: 'down' }, { x: 12, y: 13, dir: 'right' }], guide: { x: 6, y: 17 } };
+  const { g, rect, office, out } = blank();
+  office();
+  rect(1, 6, 26, 7, 'Y'); rect(1, 9, 26, 10, 'Y'); rect(1, 12, 26, 13, 'Y'); rect(1, 15, 26, 16, 'Y'); // aisles
+  rect(1, 8, 26, 8, 'ϻ'); rect(1, 11, 26, 11, 'ϻ'); rect(1, 14, 26, 14, 'ϻ');                           // shelves
+  g[8][24] = 'Y'; g[11][3] = 'Y'; g[14][24] = 'Y';                                                         // the gaps
+  rect(10, 17, 17, 18, 'Y'); g[19][13] = 'm'; g[19][14] = 'm';
+  for (const [x, y] of [[8, 6], [16, 6], [20, 7], [7, 10], [15, 9], [21, 10], [8, 13], [16, 12], [12, 16], [20, 15], [5, 16]]) g[y][x] = 'ϼ';     // reading desks
+  for (let x = 2; x < 10; x++) if (g[5][x] === 'x') g[5][x] = 'ϻ'; for (let x = 18; x < 26; x++) if (g[5][x] === 'x') g[5][x] = 'ϻ';
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 24, y: 12, dir: 'down' }, { x: 3, y: 9, dir: 'down' }], guide: { x: 11, y: 18 } };
 }
 
 /** Defensa (Rivera, lucha): an army training course; sandbags and dummies scattered over a long parade ground. */

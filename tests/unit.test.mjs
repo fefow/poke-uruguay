@@ -289,7 +289,7 @@ test('medallas: el N-ésimo gimnasio de la ruta da la medalla N y los equipos su
     const prev = Math.max(...rivalTeamFor('ceibito', s - 1).map((t) => t[1]));
     assert.ok(Math.max(...rivalTeamFor('ceibito', s).map((t) => t[1])) > prev, `el rival ${s} no es más fuerte que el anterior`);
   }
-  assert.equal(rivalTeamFor('ceibito', 1).length, 1);
+  assert.equal(rivalTeamFor('ceibito', 1).length, 2);
   assert.equal(fitSpecies('carpinchon', 10), 'carpinchito');
 });
 

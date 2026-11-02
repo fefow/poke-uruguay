@@ -324,6 +324,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   const prevRenderer = getRenderer();
   const prevMusic = currentTrack();
   engine = new BattleEngine({ party: S.party, foes, wild, trainer });
+  engine.noFlee = !!S.safari?.contest;
   logInfo(`Batalla ${wild ? 'salvaje' : `vs ${trainer?.name ?? 'entrenador'}`}: ${foes.map((f) => `${f.species} nv${f.level}`).join(', ')}`);
   Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeSX: 1, foeSY: 1, foeRot: 0, foeGlow: 0, plySX: 1, plySY: 1, plyRot: 0, plyGlow: 0, proj: null, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
   playMusic(music);
@@ -794,8 +795,10 @@ function expBar(c, lvl, exp, instant = false) {
 }
 
 async function awardExp(foe, leveled) {
-  for (const [c, amt] of engine.expShares(foe)) {
+  for (const [c, share] of engine.expShares(foe)) {
     if (c.level >= 100) continue;
+    // catch-up: beating something above your level pays more, so following the story keeps you near the trainers' levels
+    const amt = Math.floor(share * Math.min(1.6, Math.max(1, foe.level / c.level)));
     const shown = c === engine.p.c;
     let lvl = c.level;
     if (shown) expBar(c, lvl, c.exp, true);

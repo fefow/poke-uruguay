@@ -16,7 +16,7 @@ const LINE = {
 };
 
 // Level range of each rival fight, by where on the route it happens (see RIVAL_AT in maps.js).
-const RIVAL_MAPS = [null, 'fraybentos', 'ruta24', 'r_lascano_rocha', 'r_sarandi_durazno'];
+const RIVAL_MAPS = [null, 'fraybentos', 'ruta3', 'r_lascano_rocha', 'r_sarandi_durazno'];
 const rivalLevels = (stage) => {
   if (stage === 0) return null;
   if (stage === 5) { const a = gymAce('montevideo'); return [a - 1, a + 1]; }
@@ -28,7 +28,7 @@ export function rivalTeamFor(playerStarter, stage) {
   const line = LINE[COUNTER[playerStarter]];
   const team = [
     [[line[0], 5]],
-    [[line[0], 13]],
+    [[line[0], 13], ['zorrigris', 12]],
     [['teruterazo', 17], ['zorrigris', 18], [line[1], 20]],
     // Lascano (before Rocha)
     [['hornerazo', 35], ['zorromonte', 36], ['yacaron', 36], ['coatimundi', 37], [line[2], 38]],
@@ -539,10 +539,10 @@ export const SCRIPTS = {
     await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
-    if (res === 'win') await api.say(['Yo sigo hacia Paysandú. Nos vemos allá.'], { name: '{rival}' });
+    if (res === 'win') await api.say(['Yo sigo hacia Salto. Nos vemos allá.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
-      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Yo sigo hacia Paysandú. Nos vemos allá.'], { name: '{rival}' });
+      await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Yo sigo hacia Salto. Nos vemos allá.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
     await api.npcLeave('rival_mvd');
@@ -715,7 +715,7 @@ export const SCRIPTS = {
       return;
     }
     await api.say(L.intro, { name: L.name });
-    const res = await api.battle(L);
+    const res = await api.battle({ ...L, intro: null }); // the intro was just said
     if (res !== 'win') return;
     api.setFlag(L.badge);
     const home = STOPS.find((st) => st.gym === npc.leader);

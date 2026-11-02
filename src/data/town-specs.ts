@@ -99,7 +99,7 @@ export const CITY_SPECS = {
       w: 64, h: 42, border: '#', road: 'c', lamps: 14,
       water: [{ rect: [1, 1, 10, 40] }],
       fills: [{ rect: [11, 1, 4, 40], ch: 's' }],
-      paths: [[[1, 21], [62, 21]], [[32, 1], [32, 40]], [[17, 9], [44, 9]], [[17, 33], [50, 33]], [[20, 1], [20, 40]], [[56, 1], [56, 40]], [[44, 9], [44, 15], [62, 15]], [[50, 33], [50, 27], [62, 27]]],
+      paths: [[[1, 21], [62, 21]], [[32, 1], [32, 40]], [[17, 9], [44, 9]], [[17, 33], [50, 33]], [[20, 1], [20, 40]], [[56, 1], [56, 40]], [[44, 9], [44, 15], [62, 15]], [[50, 33], [50, 27], [62, 27]], [[17, 27], [3, 27]], [[8, 27], [8, 31]]],
       hills: [{ rect: [34, 2, 18, 6], ch: 'μ', density: 0.5 }],
       plazas: [{ x: 33, y: 22, w: 9, h: 5, piece: 'Γ', benches: true }, { x: 22, y: 10, w: 8, h: 4, piece: 'fuente', benches: true }],
       groves: [{ rect: [36, 28, 16, 4], tree: 'q', density: 0.5 }],
@@ -107,7 +107,7 @@ export const CITY_SPECS = {
       scatter: [['Ω', 8, 'road'], ['q', 12, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['poli', 'poli_pay', [24, 16]], ['shop', 'shop_pay', [38, 16]], ['houseO', 'casa_pay', [24, 26]], ['houseG', 'casa_pay2', [48, 26]], ['houseB', 'muelle_pay', [16, 24]]],
+    bld: [['poli', 'poli_pay', [24, 16]], ['shop', 'shop_pay', [38, 16]], ['houseO', 'casa_pay', [24, 26]], ['houseG', 'casa_pay2', [48, 26]], ['houseB', 'muelle_pay', [15, 24]]],
     fill: 16,
   },
   // Salto: a reservoir and dam wall in the north, thermal pools and orchards.
@@ -116,7 +116,7 @@ export const CITY_SPECS = {
   salto: {
     spec: {
       w: 64, h: 42, border: '#', road: 'c', lamps: 14,
-      water: [{ rect: [4, 2, 54, 5] }, { blob: [52, 28, 4, 3] }, { blob: [56, 33, 3, 2] }],
+      water: [{ rect: [4, 2, 54, 5] }, { blob: [50, 27, 5, 4] }, { blob: [49, 19, 6, 4] }, { blob: [54, 33, 4, 2] }],
       props: [...row('ρ', 3, 7, 56), ...row('ρ', 3, 1, 56)],
       paths: [[[1, 11], [62, 11]], [[22, 8], [22, 40]], [[44, 8], [44, 40]], [[4, 24], [60, 24]], [[10, 11], [10, 36]], [[32, 24], [32, 40]], [[4, 36], [44, 36]]],
       plazas: [{ x: 33, y: 12, w: 10, h: 5, piece: 'fuente', benches: true }],
@@ -124,7 +124,7 @@ export const CITY_SPECS = {
       scatter: [['Ω', 8, 'road'], ['ξ', 10, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['psiquico', 'gym_sal', [34, 19]], ['poli', 'poli_sal', [14, 14]], ['shop', 'shop_sal', [26, 14]], ['houseV', 'casa_sal', [14, 20]], ['houseB', 'radio_sal', [28, 28]], ['fabrica', 'represa_1', [50, 9], 2], ['house', 'casa_sal2', [36, 28]]],
+    bld: [['psiquico', 'gym_sal', [34, 19]], ['poli', 'poli_sal', [14, 14]], ['shop', 'shop_sal', [26, 14]], ['houseV', 'casa_sal', [14, 20]], ['houseB', 'radio_sal', [28, 28]], ['fabrica', 'represa_1', [56, 27], 2], ['house', 'casa_sal2', [36, 28]]],
     fill: 16,
   },
   // Artigas: a mining town climbing a stony hill on a zigzag road, amethyst country.

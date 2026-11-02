@@ -869,7 +869,7 @@ export function refGymOrder(mapId, maxLevel = 0) {
  */
 const RIVAL_AT = [
   ['r_rosario_sanjose', 'rival_bosque', 'rival_bosque'],
-  ['ruta24', 'rival_mvd', 'rival2'],
+  ['ruta3', 'rival_mvd', 'rival2'],
   ['r_lascano_rocha', 'rival_r5', 'rival5'],
   ['r_sarandi_durazno', 'rival_r24', 'rival6'],
 ];
