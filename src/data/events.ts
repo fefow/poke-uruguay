@@ -237,6 +237,30 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
   },
 };
 
+// ---------------------------------------------------------------- riddle masters in four cities (one prize each, once)
+Object.assign(EVENT_SCRIPTS, {
+  async ev_adivino(api, npc) {
+    const { tid, prize, qty } = npc as any;
+    const who = (npc as any).name ?? 'Adivino';
+    if (api.flag(`ev_adiv_${tid}`)) return api.say('Ya me ganaste mis tres acertijos. Se me acabaron los buenos.', { name: who });
+    await api.say(['Hago tres preguntas y no perdono ninguna.', 'Si respondés bien las tres seguidas, hay premio. Si fallás una, empezamos de nuevo.'], { name: who });
+    if (!(await api.ask('¿Te animás?', { name: who }))) return;
+    const start = [...tid].reduce((a, c) => a + c.charCodeAt(0), 0);
+    for (let k = 0; k < 3; k++) {
+      const [q, opts, ans] = RIDDLES[(start + k * 5) % RIDDLES.length];
+      const order = opts.map((_, i) => i).sort((a, b) => ((a * 7 + k + start) % 5) - ((b * 7 + k + start) % 5));
+      await api.say(`Pregunta ${k + 1}: ${q}`, { name: who, keep: true });
+      const r = await api.choose(order.map((i) => opts[i]), { cancel: false });
+      if (order[r] !== ans) return api.say('No es eso. Pensalo mejor y volvé a empezar.', { name: who });
+      api.sfx('confirm');
+    }
+    api.setFlag(`ev_adiv_${tid}`);
+    api.sfx('catch');
+    await api.say('Las tres. Hacía años que nadie me ganaba.', { name: who });
+    await api.give(prize, qty);
+  },
+});
+
 // ---------------------------------------------------------------- fishing derby (Paysandú, on the river)
 Object.assign(EVENT_SCRIPTS, {
   async ev_pesca(api) {
@@ -339,6 +363,11 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('salto', [trade('sal', 'gaviota', 'tatadios', 'sailor', 'Marinero retirado', 26, 20)]);
   put('tacuarembo', [trade('tac', 'oveja', 'zorrigris', 'boy', 'Peón', 28, 22)]);
   put('paysandu', [{ x: 30, y: 24, look: 'sailor', dir: 'down', name: 'Juez de pesca', script: 'ev_pesca' }]);
+  const adiv = (id, prize, qty, look, name, x, y) => ({ x, y, look, dir: 'down', name, script: 'ev_adivino', tid: id, prize, qty });
+  put('rivera', [adiv('riv', 'piedra_amatista', 1, 'oldman', 'Adivino de la frontera', 28, 30)]);
+  put('artigas', [adiv('art', 'piedra_agata', 1, 'maestra', 'Maestra de acertijos', 26, 18)]);
+  put('melo', [adiv('mel', 'ultraesfera', 3, 'gaucho', 'Cuentero', 20, 28)]);
+  put('minas', [adiv('min', 'piedra_basalto', 1, 'oldman', 'Sabio del cerro', 28, 28)]);
   const cic = OUTDOOR.ciclovia;
   if (cic) {
     const hh = cic.tiles.length;
