@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:47:16.874Z",
+  "exported": "2026-11-02T01:48:58.856Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (20,20)",
+    "where": "mercedes (12,15)",
     "party": [
       "hormiga nv17 47PS",
       "ceibal nv27 70PS",
@@ -13,27 +13,9 @@
       "lobomarino nv13 47PS"
     ],
     "badges": 2,
-    "playtime": 18288
+    "playtime": 18316
   },
   "entries": [
-    {
-      "t": "2026-11-01T05:50:28.821Z",
-      "level": "info",
-      "msg": "Turno 7: move #2 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:45 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_1 (5,6)"
-    },
-    {
-      "t": "2026-11-01T05:50:36.090Z",
-      "level": "info",
-      "msg": "Turno 8: move #1 | \"¡Carpinchal usó Hidropulso!\" anim dmg1:36 \"¡Carnero rival usó Patada Baja!\" anim dmg0:9",
-      "where": "ferry_1 (5,6)"
-    },
-    {
-      "t": "2026-11-01T05:50:38.673Z",
-      "level": "info",
-      "msg": "Turno 9: move #2 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:29 \"¡Carnero rival usó Griterío!\" anim dmg0:12",
-      "where": "ferry_1 (5,6)"
-    },
     {
       "t": "2026-11-01T05:50:41.695Z",
       "level": "info",
@@ -2417,6 +2399,24 @@
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 13",
       "where": "mercedes (20,20)"
+    },
+    {
+      "t": "2026-11-02T01:48:41.139Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T01:48:45.897Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T01:48:55.382Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (8,22)"
     }
   ]
 }
