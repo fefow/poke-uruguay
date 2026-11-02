@@ -1,47 +1,23 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T22:08:53.944Z",
+  "exported": "2026-11-02T22:09:53.800Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "poli_mercedes (5,3)",
+    "where": "mercedes (29,20)",
     "party": [
-      "curupi nv29 68PS",
-      "lobomarino nv14 32PS",
+      "curupi nv29 85PS",
       "cerro nv20 71PS",
       "tejubrasa nv23 61PS",
       "lechuza nv13 36PS",
-      "cascarudo nv11 36PS"
+      "cascarudo nv11 36PS",
+      "lobomarino nv14 51PS"
     ],
     "badges": 1,
-    "playtime": 7662
+    "playtime": 7704
   },
   "entries": [
-    {
-      "t": "2026-11-02T04:00:57.143Z",
-      "level": "info",
-      "msg": "Turno 5: move #0 | \"¡Tejubrasa usó Ascuas!\" anim dmg1:10 faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:00:59.882Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T04:01:01.337Z",
-      "level": "info",
-      "msg": "Batalla salvaje: tuco nv14",
-      "where": "palmitas (16,11)"
-    },
-    {
-      "t": "2026-11-02T04:01:06.509Z",
-      "level": "info",
-      "msg": "Turno 1: switch #1 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Tejubrasa!\" \"¡Tuco salvaje usó Bofetón Lodo!\" anim dmg0:8 \"¡Es súper eficaz!\" stat \"¡Bajó la Precisión de Tejubrasa!\"",
-      "where": "palmitas (16,11)"
-    },
     {
       "t": "2026-11-02T04:01:09.972Z",
       "level": "info",
@@ -2425,6 +2401,31 @@
       "level": "info",
       "msg": "Entró a poli_mercedes",
       "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T22:08:56.479Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #2: Lobo Marino no puede existir con nivel 14",
+      "where": "poli_mercedes (7,3)"
+    },
+    {
+      "t": "2026-11-02T22:09:44.482Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #6: Lobo Marino no puede existir con nivel 14",
+      "where": "poli_mercedes (9,2)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T22:09:45.094Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (6,7)"
+    },
+    {
+      "t": "2026-11-02T22:09:50.483Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #6: Lobo Marino no puede existir con nivel 14",
+      "where": "mercedes (33,11)"
     }
   ]
 }
