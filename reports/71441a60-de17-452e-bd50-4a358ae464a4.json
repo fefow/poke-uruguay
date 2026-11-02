@@ -1,52 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:23:48.387Z",
+  "exported": "2026-11-02T02:32:41.335Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "anglo_1 (13,18)",
+    "where": "gym_frb (7,18)",
     "party": [
-      "cortadora nv20 0PS",
+      "cortadora nv20 64PS",
       "ceibal nv29 75PS",
-      "alacran nv16 0PS",
+      "alacran nv16 45PS",
       "lobomarino nv15 53PS",
-      "cumulo nv18 25PS"
+      "cumulo nv18 55PS"
     ],
     "badges": 2,
-    "playtime": 19924
+    "playtime": 19960
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:19:35.555Z",
-      "level": "info",
-      "msg": "Turno 2: switch #1 | \"¡Ñacurutú, volvé!\" recall send \"¡Adelante, Carpincho!\" \"¡Chimango salvaje usó Placaje!\" anim dmg0:2",
-      "where": "r_colonia_rosario (8,18)"
-    },
-    {
-      "t": "2026-11-02T00:19:41.277Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:14 faint \"¡Chimango salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (8,18)"
-    },
-    {
-      "t": "2026-11-02T00:19:44.210Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (8,18)"
-    },
-    {
-      "t": "2026-11-02T00:19:45.524Z",
-      "level": "info",
-      "msg": "Batalla salvaje: chimango nv4",
-      "where": "r_colonia_rosario (5,18)"
-    },
-    {
-      "t": "2026-11-02T00:19:49.985Z",
-      "level": "info",
-      "msg": "Turno 1: switch #1 | \"¡Ñacurutú, volvé!\" recall send \"¡Adelante, Carpincho!\" \"¡Chimango salvaje usó Picotazo!\" anim dmg0:4",
-      "where": "r_colonia_rosario (5,18)"
-    },
     {
       "t": "2026-11-02T00:19:54.050Z",
       "level": "info",
@@ -2433,6 +2403,36 @@
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
       "where": "anglo_1 (13,18)",
       "count": 8
+    },
+    {
+      "t": "2026-11-02T02:32:25.760Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "anglo_1 (13,18)"
+    },
+    {
+      "t": "2026-11-02T02:32:29.632Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "fraybentos (17,20)"
+    },
+    {
+      "t": "2026-11-02T02:32:33.699Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)"
+    },
+    {
+      "t": "2026-11-02T02:32:37.140Z",
+      "level": "info",
+      "msg": "Entró a gym_frb",
+      "where": "fraybentos (26,14)"
+    },
+    {
+      "t": "2026-11-02T02:32:37.662Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "gym_frb (13,17)"
     }
   ]
 }
