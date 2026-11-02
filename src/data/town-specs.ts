@@ -159,20 +159,22 @@ export const CITY_SPECS = {
     fill: 14,
   },
   // Tacuarembó: gaucho country: red earth, pine plantations to the west, eucalyptus to the east, parrilla.
+  // Tacuarembó (64x42): red-earth city with eucalyptus forest to the north-west, the cattle fair field (fenced,
+  // criollo horses and sheep) in the north-east, a long avenue, the bike district and a cobbled square.
   tacuarembo: {
     theme: 'colorada',
     spec: {
-      w: W, h: H, border: 'Ñ', tree: 'Ñ', road: '=', lamps: 12,
-      groves: [{ rect: [2, 2, 14, 12], tree: 'Ñ', density: 0.9, lanes: 5 }, { rect: [30, 20, 12, 8], tree: 'Ö', density: 0.9, lanes: 4 }, { rect: [2, 20, 8, 8], tree: 'Ñ', lanes: 4 }],
-      paths: [[[1, 16], [42, 16]], [[20, 1], [20, 28]], [[20, 8], [38, 8]], [[28, 8], [28, 16]], [[8, 16], [8, 19]], [[34, 16], [34, 20]]],
-      plazas: [{ x: 21, y: 17, w: 7, h: 5, piece: 'Γ', benches: true }],
-      fills: [{ rect: [22, 9, 18, 5], ch: 'ζ' }],
-      props: [...fence([23, 9, 16, 5], { side: 's', at: 4 }), ['Θ', 18, 12], ['Ξ', 33, 10], ['Ξ', 35, 11]],
-      scatter: [['ö', 3, 'away'], ['Ω', 4, 'road']],
-      animals: [{ sp: 'criollo', n: 3, rect: [24, 10, 14, 3] }, { sp: 'oveja', n: 2, rect: [24, 10, 14, 3] }],
+      w: 64, h: 42, border: 'Ñ', tree: 'Ñ', road: '=', lamps: 16,
+      groves: [{ rect: [2, 2, 24, 16], tree: 'Ñ', density: 0.9, lanes: 5 }, { rect: [44, 28, 18, 12], tree: 'Ö', density: 0.9, lanes: 4 }, { rect: [2, 28, 12, 12], tree: 'Ñ', lanes: 4 }],
+      paths: [[[1, 24], [62, 24]], [[30, 1], [30, 40]], [[30, 12], [58, 12]], [[44, 12], [44, 24]], [[12, 24], [12, 30]], [[50, 24], [50, 30]], [[14, 34], [44, 34]], [[30, 34], [30, 40]]],
+      plazas: [{ x: 31, y: 25, w: 9, h: 6, piece: 'Γ', benches: true }, { x: 18, y: 25, w: 8, h: 5, piece: 'fuente', benches: true }],
+      fills: [{ rect: [32, 13, 28, 8], ch: 'ζ' }],
+      props: [...fence([33, 13, 26, 8], { side: 's', at: 6 }), ['Θ', 27, 18], ['Ξ', 50, 15], ['Ξ', 54, 17], ['Λ', 29, 23], ['Λ', 41, 23]],
+      scatter: [['ö', 8, 'away'], ['Ω', 6, 'road'], ['Ь', 3, 'road']],
+      animals: [{ sp: 'criollo', n: 4, rect: [34, 14, 24, 5] }, { sp: 'oveja', n: 3, rect: [34, 14, 24, 5] }],
     },
-    bld: [['planta', 'gym_tac', [24, 12]], ['poli', 'poli_tac'], ['shop', 'shop_tac'], ['houseG', 'casa_tac'], ['houseO', 'casa_tac2'], ['houseB', 'bici_tac'], ['houseV', 'parrilla_tac', [14, 18]]],
-    fill: 7,
+    bld: [['planta', 'gym_tac', [36, 16]], ['poli', 'poli_tac', [20, 20]], ['shop', 'shop_tac', [46, 28]], ['houseG', 'casa_tac', [8, 20]], ['houseO', 'casa_tac2', [54, 28]], ['houseB', 'bici_tac', [22, 28]], ['houseV', 'parrilla_tac', [16, 30]]],
+    fill: 14,
   },
   // Melo: laguna Merín and low hills; a diagonal staircase main street, ombú in the plaza.
   // Melo (64x42): a stepped avenue crossing the cuchilla from the south-west to the north-east, a plaza with ñandubay
