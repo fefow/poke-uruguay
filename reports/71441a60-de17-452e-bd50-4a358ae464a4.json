@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:53:25.910Z",
+  "exported": "2026-11-02T01:55:05.285Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (8,8)",
+    "where": "casa_villasoriano (1,3)",
     "party": [
       "hormiga nv18 49PS",
       "ceibal nv27 70PS",
@@ -13,27 +13,9 @@
       "lobomarino nv14 50PS"
     ],
     "badges": 2,
-    "playtime": 18574
+    "playtime": 18583
   },
   "entries": [
-    {
-      "t": "2026-11-01T15:44:07.467Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_2 (19,2)"
-    },
-    {
-      "t": "2026-11-01T15:44:10.526Z",
-      "level": "info",
-      "msg": "Entró a ferry_c4",
-      "where": "ferry_2 (18,1)"
-    },
-    {
-      "t": "2026-11-01T15:44:13.881Z",
-      "level": "info",
-      "msg": "Batalla vs Ada: teruterazo nv18, tarantula nv19",
-      "where": "ferry_c4 (4,6)"
-    },
     {
       "t": "2026-11-01T15:44:18.530Z",
       "level": "info",
@@ -2418,6 +2400,24 @@
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
       "where": "mercedes (12,20)",
       "count": 6
+    },
+    {
+      "t": "2026-11-02T01:54:58.789Z",
+      "level": "info",
+      "msg": "Entró a villasoriano",
+      "where": "mercedes (0,8)"
+    },
+    {
+      "t": "2026-11-02T01:55:01.434Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "villasoriano (19,8)"
+    },
+    {
+      "t": "2026-11-02T01:55:01.895Z",
+      "level": "info",
+      "msg": "Entró a casa_villasoriano",
+      "where": "villasoriano (20,8)"
     }
   ]
 }
