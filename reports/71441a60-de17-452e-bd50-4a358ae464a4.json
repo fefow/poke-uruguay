@@ -1,136 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:33:41.103Z",
+  "exported": "2026-11-02T02:35:23.682Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "gym_frb (7,7)",
+    "where": "fraybentos (26,14)",
     "party": [
-      "cortadora nv21 5PS",
+      "cortadora nv21 67PS",
       "ceibal nv29 75PS",
       "alacran nv16 45PS",
-      "lobomarino nv15 53PS",
+      "lobomarino nv16 55PS",
       "cumulo nv18 55PS"
     ],
-    "badges": 2,
-    "playtime": 20020
+    "badges": 3,
+    "playtime": 20120
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:20:28.945Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Carpincho usó Gruñido!\" anim stat \"¡Bajó el Ataque de Chimango salvaje!\" \"¡Chimango salvaje usó Picotazo!\" anim dmg0:2",
-      "where": "r_colonia_rosario (12,12)"
-    },
-    {
-      "t": "2026-11-02T00:20:32.128Z",
-      "level": "info",
-      "msg": "Turno 3: move #3 | \"¡Carpincho usó Burbuja!\" anim dmg1:8 faint \"¡Chimango salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (12,12)"
-    },
-    {
-      "t": "2026-11-02T00:20:34.652Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (12,12)"
-    },
-    {
-      "t": "2026-11-02T00:20:39.441Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "r_colonia_rosario (0,18)"
-    },
-    {
-      "t": "2026-11-02T00:20:48.106Z",
-      "level": "info",
-      "msg": "Entró a poli_colonia",
-      "where": "colonia (4,13)"
-    },
-    {
-      "t": "2026-11-02T00:20:51.973Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "poli_colonia (5,7)"
-    },
-    {
-      "t": "2026-11-02T00:22:17.055Z",
-      "level": "info",
-      "msg": "Entró a r_colonia_rosario",
-      "where": "colonia (43,16)"
-    },
-    {
-      "t": "2026-11-02T00:22:26.784Z",
-      "level": "info",
-      "msg": "Batalla salvaje: gaviota nv4",
-      "where": "r_colonia_rosario (26,27)"
-    },
-    {
-      "t": "2026-11-02T00:22:29.988Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Picotazo!\" anim dmg1:8 \"¡Gaviota salvaje usó Placaje!\" anim dmg0:2",
-      "where": "r_colonia_rosario (26,27)"
-    },
-    {
-      "t": "2026-11-02T00:22:32.748Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Ñacurutú usó Picotazo!\" anim dmg1:7 \"¡Gaviota salvaje usó Picotazo!\" anim dmg0:4",
-      "where": "r_colonia_rosario (26,27)"
-    },
-    {
-      "t": "2026-11-02T00:22:35.282Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Ñacurutú usó Picotazo!\" \"¡Gaviota salvaje esquivó el ataque!\" \"¡Gaviota salvaje usó Picotazo!\" anim dmg0:4",
-      "where": "r_colonia_rosario (26,27)"
-    },
-    {
-      "t": "2026-11-02T00:22:37.826Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Ñacurutú usó Placaje!\" anim dmg1:2 faint \"¡Gaviota salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (26,27)"
-    },
-    {
-      "t": "2026-11-02T00:22:40.017Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_colonia_rosario (26,27)"
-    },
-    {
-      "t": "2026-11-02T00:23:06.324Z",
-      "level": "info",
-      "msg": "Batalla salvaje: gaviota nv6",
-      "where": "r_colonia_rosario (38,6)"
-    },
-    {
-      "t": "2026-11-02T00:23:08.819Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Ñacurutú usó Placaje!\" anim dmg1:5 \"¡Gaviota salvaje usó Picotazo!\" anim dmg0:5",
-      "where": "r_colonia_rosario (38,6)"
-    },
-    {
-      "t": "2026-11-02T00:23:11.418Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Ñacurutú usó Picotazo!\" anim dmg1:8 \"¡Gaviota salvaje usó Placaje!\" anim dmg0:3",
-      "where": "r_colonia_rosario (38,6)"
-    },
-    {
-      "t": "2026-11-02T00:23:14.018Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Ñacurutú usó Picotazo!\" anim dmg1:8 \"¡Gaviota salvaje usó Placaje!\" anim dmg0:3",
-      "where": "r_colonia_rosario (38,6)"
-    },
-    {
-      "t": "2026-11-02T00:23:16.393Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Ñacurutú usó Placaje!\" \"¡Gaviota salvaje esquivó el ataque!\" \"¡Gaviota salvaje usó Picotazo!\" anim dmg0:5",
-      "where": "r_colonia_rosario (38,6)"
-    },
-    {
-      "t": "2026-11-02T00:23:18.744Z",
-      "level": "info",
-      "msg": "Turno 5: move #0 | \"¡Ñacurutú usó Placaje!\" anim dmg1:1 faint \"¡Gaviota salvaje se debilitó!\" exp end",
-      "where": "r_colonia_rosario (38,6)"
-    },
     {
       "t": "2026-11-02T00:23:20.973Z",
       "level": "info",
@@ -2430,11 +2316,125 @@
       "where": "gym_frb (4,2)"
     },
     {
-      "t": "2026-11-02T02:33:37.672Z",
+      "t": "2026-11-02T02:33:43.672Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
       "where": "gym_frb (4,2)",
-      "count": 4
+      "count": 5
+    },
+    {
+      "t": "2026-11-02T02:33:44.507Z",
+      "level": "info",
+      "msg": "Batalla vs Alma: zorrigris nv18, cururu nv21",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:33:48.616Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:44 faint \"¡Zorrigrís rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:33:56.650Z",
+      "level": "info",
+      "msg": "Turno 2: switch #1 | \"¡Cortadora, volvé!\" recall send \"¡Adelante, Ceibal!\" \"¡Cururú rival usó Hidropulso!\" anim dmg0:5 \"No es muy eficaz…\"",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:34:02.598Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:28 heal \"¡Cururú rival perdió energía!\" \"¡Cururú rival usó Dardo Venenoso!\" anim dmg0:26 \"¡Es súper eficaz!\"",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:34:05.487Z",
+      "level": "info",
+      "msg": "Turno 4: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:26 heal \"¡Cururú rival perdió energía!\" \"¡Cururú rival usó Dardo Venenoso!\" anim dmg0:25 \"¡Es súper eficaz!\" statusAnim hud \"¡Ceibal está envenenado!\" statusAnim dmg0:9 \"Ceibal sufre por el veneno.\"",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:34:09.948Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:15 heal \"¡Cururú rival perdió energía!\" faint \"¡Cururú rival se debilitó!\" exp end",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:34:13.494Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_frb (23,11)"
+    },
+    {
+      "t": "2026-11-02T02:34:25.677Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "gym_frb (21,10)"
+    },
+    {
+      "t": "2026-11-02T02:34:32.461Z",
+      "level": "info",
+      "msg": "Batalla vs Zoraida: yararita nv19, zorrigris nv21, yacarito nv22",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:34:37.669Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:46 faint \"¡Yarará rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:34:42.823Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:42 \"¡Zorrigrís rival usó Finta!\" anim dmg0:5 faint \"¡Cortadora se debilitó!\" needSwitch",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:34:48.042Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Zoraida usó Primer Mate!\" heal hud \"Zorrigrís rival tomó un mate y recuperó 42 PS.\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:16",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:34:50.216Z",
+      "level": "info",
+      "msg": "Turno 4: move #0 | \"¡Zorrigrís rival usó Mordisco!\" anim dmg0:8 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:19",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:34:52.638Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Zorrigrís rival usó Finta!\" anim dmg0:8 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:14 faint \"¡Zorrigrís rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:35:00.690Z",
+      "level": "info",
+      "msg": "Turno 6: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:41 \"¡Golpe crítico!\" \"¡Es súper eficaz!\" \"¡Yacaré rival usó Mordisco!\" anim dmg0:10 \"No es muy eficaz…\"",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:35:03.796Z",
+      "level": "info",
+      "msg": "Turno 7: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:16 \"¡Es súper eficaz!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:35:07.878Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-02T02:35:19.685Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 16",
+      "where": "gym_frb (13,17)"
+    },
+    {
+      "t": "2026-11-02T02:35:20.841Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "gym_frb (13,19)"
     }
   ]
 }
