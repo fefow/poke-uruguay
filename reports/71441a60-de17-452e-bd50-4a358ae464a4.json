@@ -1,148 +1,22 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T02:06:34.860Z",
+  "exported": "2026-11-02T02:08:47.054Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_villasoriano_fraybentos (30,20)",
+    "where": "r_villasoriano_fraybentos (6,20)",
     "party": [
-      "cortadora nv19 61PS",
-      "ceibal nv27 70PS",
-      "alacran nv16 45PS",
-      "lobomarino nv14 50PS",
-      "nimbo nv17 46PS"
+      "cortadora nv20 0PS",
+      "ceibal nv28 73PS",
+      "alacran nv16 0PS",
+      "lobomarino nv15 8PS",
+      "nimbo nv17 27PS"
     ],
     "badges": 2,
-    "playtime": 19165
+    "playtime": 19292
   },
   "entries": [
-    {
-      "t": "2026-11-02T00:10:44.497Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "ruta1 (13,17)"
-    },
-    {
-      "t": "2026-11-02T00:10:55.525Z",
-      "level": "info",
-      "msg": "Entró a r_colonia_rosario",
-      "where": "colonia (43,16)"
-    },
-    {
-      "t": "2026-11-02T00:10:58.965Z",
-      "level": "info",
-      "msg": "Batalla vs Gonzalo: oruga nv4, cerro nv6",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:04.238Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:13 \"¡Oruga rival usó Placaje!\" anim dmg0:2",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:07.752Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Carpincho usó Placaje!\" \"¡Oruga rival esquivó el ataque!\" \"¡Oruga rival usó Placaje!\" anim dmg0:2",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:09.942Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Carpincho usó Placaje!\" anim dmg1:4 faint \"¡Oruga rival se debilitó!\" exp foeNext",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:15.778Z",
-      "level": "info",
-      "msg": "Turno 4: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:8 \"¡Yacaré rival usó Látigo Cepa!\" anim dmg0:11 \"¡Es súper eficaz!\"",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:18.930Z",
-      "level": "info",
-      "msg": "Turno 5: move #0 | \"¡Carpincho usó Placaje!\" anim dmg1:3 \"No es muy eficaz…\" \"¡Yacaré rival usó Látigo Cepa!\" anim dmg0:10 \"¡Es súper eficaz!\"",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:24.292Z",
-      "level": "info",
-      "msg": "Turno 6: move #0 | \"¡Carpincho usó Placaje!\" anim dmg1:2 \"No es muy eficaz…\" \"¡Yacaré rival usó Látigo Cepa!\" anim dmg0:1 \"¡Es súper eficaz!\" faint \"¡Carpincho se debilitó!\" end",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:27.298Z",
-      "level": "info",
-      "msg": "Fin de batalla: lose",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:29.795Z",
-      "level": "info",
-      "msg": "Entró a casa_jugador",
-      "where": "r_colonia_rosario (6,19)"
-    },
-    {
-      "t": "2026-11-02T00:11:31.681Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "casa_jugador (4,7)"
-    },
-    {
-      "t": "2026-11-02T00:11:34.715Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "carmelo (25,8)"
-    },
-    {
-      "t": "2026-11-02T00:11:43.089Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "ruta1 (13,17)"
-    },
-    {
-      "t": "2026-11-02T00:11:51.497Z",
-      "level": "info",
-      "msg": "Entró a r_colonia_rosario",
-      "where": "colonia (43,16)"
-    },
-    {
-      "t": "2026-11-02T00:12:03.729Z",
-      "level": "info",
-      "msg": "Batalla vs Mariana: teruterito nv5, caudillo nv5",
-      "where": "r_colonia_rosario (10,17)"
-    },
-    {
-      "t": "2026-11-02T00:12:07.913Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:4 \"¡Carpincho usó Placaje!\" anim dmg1:8",
-      "where": "r_colonia_rosario (10,17)"
-    },
-    {
-      "t": "2026-11-02T00:12:10.550Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:11 faint \"¡Tero rival se debilitó!\" exp foeNext",
-      "where": "r_colonia_rosario (10,17)"
-    },
-    {
-      "t": "2026-11-02T00:12:14.976Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:11 \"¡Lobo de Crin rival usó Barrida!\" anim dmg0:6",
-      "where": "r_colonia_rosario (10,17)"
-    },
-    {
-      "t": "2026-11-02T00:12:17.510Z",
-      "level": "info",
-      "msg": "Turno 4: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:10 \"¡Lobo de Crin rival usó Placaje!\" anim dmg0:3",
-      "where": "r_colonia_rosario (10,17)"
-    },
-    {
-      "t": "2026-11-02T00:12:19.884Z",
-      "level": "info",
-      "msg": "Turno 5: move #2 | \"¡Carpincho usó Pistola Agua!\" anim dmg1:2 faint \"¡Lobo de Crin rival se debilitó!\" exp end",
-      "where": "r_colonia_rosario (10,17)"
-    },
     {
       "t": "2026-11-02T00:12:22.384Z",
       "level": "info",
@@ -2421,11 +2295,137 @@
       "where": "villasoriano (0,8)"
     },
     {
-      "t": "2026-11-02T02:06:31.509Z",
+      "t": "2026-11-02T02:06:37.510Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
       "where": "r_villasoriano_fraybentos (53,25)",
-      "count": 2
+      "count": 3
+    },
+    {
+      "t": "2026-11-02T02:06:41.003Z",
+      "level": "info",
+      "msg": "Batalla vs Bruno: luciernito nv18, cortadora nv20",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:06:49.274Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Cortadora usó Rueda Fuego!\" anim dmg1:42 \"¡Es súper eficaz!\" faint \"¡Luciérnaga rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:06:56.011Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Cortadora rival usó Colmillo Fuego!\" anim dmg0:27 \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:21",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:06:58.175Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Cortadora rival usó Picadura!\" anim dmg0:13 \"No es muy eficaz…\" \"¡Cortadora usó Ascuas!\" anim dmg1:10",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:07:03.028Z",
+      "level": "info",
+      "msg": "Turno 4: switch #3 | \"¡Cortadora, volvé!\" recall send \"¡Adelante, Lobo Marino!\" \"¡Cortadora rival usó Colmillo Fuego!\" anim dmg0:17 \"No es muy eficaz…\"",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:07:07.315Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Cortadora rival usó Colmillo Fuego!\" \"¡Lobo Marino esquivó el ataque!\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:22 \"¡Es súper eficaz!\"",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:07:09.583Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Cortadora rival usó Colmillo Fuego!\" anim dmg0:28 \"¡Golpe crítico!\" \"No es muy eficaz…\" statusAnim hud \"¡Lobo Marino está quemado!\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:10 \"¡Es súper eficaz!\" faint \"¡Cortadora rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:07:17.747Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-02T02:07:31.738Z",
+      "level": "info",
+      "msg": "Batalla vs Lucía: mulitin nv19, cerro nv19",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:07:38.377Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:24 \"¡Mulita rival usó Excavar!\" anim dmg0:17",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:07:41.543Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:25 faint \"¡Mulita rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:07:57.298Z",
+      "level": "info",
+      "msg": "Turno 3: item | \"Usaste Mate.\" heal hud \"Cortadora tomó un mate y recuperó 20 PS.\" \"¡Yacaré rival usó Avalancha!\" \"¡Cortadora esquivó el ataque!\"",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:04.444Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Cortadora usó Colmillo Fuego!\" anim dmg1:20 \"¡Yacaré rival usó Avalancha!\" anim dmg0:27 \"¡Es súper eficaz!\" faint \"¡Cortadora se debilitó!\" needSwitch",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:13.533Z",
+      "level": "info",
+      "msg": "Turno 5: move #3 | \"¡Yacaré rival usó Avalancha!\" \"¡Golondrina esquivó el ataque!\" \"¡Golondrina usó Onda Trueno!\" anim statusAnim hud \"¡Yacaré rival está paralizado!\"",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:17.650Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Golondrina usó Descarga!\" anim dmg1:3 \"No es muy eficaz…\" \"¡Yacaré rival usó Lanzarrocas!\" anim dmg0:19",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:22.554Z",
+      "level": "info",
+      "msg": "Turno 7: switch #2 | \"¡Golondrina, volvé!\" recall send \"¡Adelante, Alacrán!\" \"¡Yacaré rival usó Avalancha!\" anim dmg0:45 \"¡Es súper eficaz!\" faint \"¡Alacrán se debilitó!\" needSwitch",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:30.908Z",
+      "level": "info",
+      "msg": "Turno 8: move #0 | \"¡Ceibal usó Megaagotar!\" \"¡Yacaré rival esquivó el ataque!\" \"¡Yacaré rival usó Avalancha!\" anim dmg0:14",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:34.066Z",
+      "level": "info",
+      "msg": "Turno 9: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:24 heal \"¡Yacaré rival perdió energía!\" \"¡Yacaré rival usó Defensa Férrea!\" anim stat \"¡Subió mucho la Defensa de Yacaré rival!\"",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:37.526Z",
+      "level": "info",
+      "msg": "Turno 10: move #0 | \"¡Ceibal usó Megaagotar!\" anim dmg1:21 heal \"¡Yacaré rival perdió energía!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:42.433Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (10,26)"
+    },
+    {
+      "t": "2026-11-02T02:08:43.525Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 15",
+      "where": "r_villasoriano_fraybentos (10,26)"
     }
   ]
 }
