@@ -92,20 +92,23 @@ export const CITY_SPECS = {
     fill: 6, fillKinds: ['fabrica', 'houseB'],
   },
   // Paysandú: the Uruguay river to the west with a long bridge, a hill with the cathedral, stepped streets.
+  // Paysandú (64x42): the Uruguay river takes the whole west side with a sandy beach and the port jetties, the old
+  // town grid climbs east, a hill with the cathedral square to the north and the fairground to the south-east.
   paysandu: {
     spec: {
-      w: W, h: H, border: '#', road: 'c', lamps: 8,
-      water: [{ rect: [1, 1, 7, 28] }],
-      fills: [{ rect: [8, 1, 3, 28], ch: 's' }],
-      paths: [[[1, 14], [42, 14]], [[22, 1], [22, 28]], [[12, 6], [30, 6], [30, 10], [40, 10]], [[12, 22], [34, 22], [34, 18], [42, 18]], [[14, 1], [14, 28]], [[38, 1], [38, 28]]],
-      hills: [{ rect: [24, 2, 12, 5], ch: 'μ', density: 0.5 }],
-      plazas: [{ x: 23, y: 15, w: 7, h: 5, piece: 'Γ', benches: true }],
-      props: [['β', 9, 4], ['β', 9, 24], ['L', 12, 3], ['l', 12, 4]],
-      scatter: [['Ω', 5, 'road'], ['q', 8, 'away']],
+      w: 64, h: 42, border: '#', road: 'c', lamps: 14,
+      water: [{ rect: [1, 1, 10, 40] }],
+      fills: [{ rect: [11, 1, 4, 40], ch: 's' }],
+      paths: [[[1, 21], [62, 21]], [[32, 1], [32, 40]], [[17, 9], [44, 9]], [[17, 33], [50, 33]], [[20, 1], [20, 40]], [[56, 1], [56, 40]], [[44, 9], [44, 15], [62, 15]], [[50, 33], [50, 27], [62, 27]]],
+      hills: [{ rect: [34, 2, 18, 6], ch: 'μ', density: 0.5 }],
+      plazas: [{ x: 33, y: 22, w: 9, h: 5, piece: 'Γ', benches: true }, { x: 22, y: 10, w: 8, h: 4, piece: 'fuente', benches: true }],
+      groves: [{ rect: [36, 28, 16, 4], tree: 'q', density: 0.5 }],
+      props: [['β', 12, 6], ['β', 12, 12], ['β', 12, 30], ['β', 12, 36], ['L', 16, 5], ['l', 16, 6], ['Λ', 31, 20], ['Λ', 43, 20]],
+      scatter: [['Ω', 8, 'road'], ['q', 12, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['poli', 'poli_pay'], ['shop', 'shop_pay'], ['houseO', 'casa_pay'], ['houseG', 'casa_pay2'], ['houseB', 'muelle_pay', [11, 12]]],
-    fill: 10,
+    bld: [['poli', 'poli_pay', [24, 16]], ['shop', 'shop_pay', [38, 16]], ['houseO', 'casa_pay', [24, 26]], ['houseG', 'casa_pay2', [48, 26]], ['houseB', 'muelle_pay', [16, 24]]],
+    fill: 16,
   },
   // Salto: a reservoir and dam wall in the north, thermal pools and orchards.
   // Salto (64x42): the Uruguay river along the whole north side with a railed embankment, the dam works to the east,
