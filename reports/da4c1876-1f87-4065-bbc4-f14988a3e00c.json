@@ -1,96 +1,23 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T22:28:54.143Z",
+  "exported": "2026-11-02T22:29:59.935Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "r_palmitas_mercedes (11,16)",
+    "where": "mercedes (32,20)",
     "party": [
-      "lobomarino nv22 1PS",
-      "curupi nv29 75PS",
+      "lobomarino nv22 74PS",
+      "curupi nv29 85PS",
       "tejubrasa nv23 61PS",
       "lechuza nv13 36PS",
       "cascarudo nv11 36PS",
       "cerro nv20 71PS"
     ],
     "badges": 1,
-    "playtime": 8324
+    "playtime": 8363
   },
   "entries": [
-    {
-      "t": "2026-11-02T04:20:45.637Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:20:47.640Z",
-      "level": "info",
-      "msg": "Entró a trinidad",
-      "where": "palmitas (25,10)"
-    },
-    {
-      "t": "2026-11-02T04:20:49.010Z",
-      "level": "info",
-      "msg": "Entró a poli_trinidad",
-      "where": "trinidad (7,15)"
-    },
-    {
-      "t": "2026-11-02T04:20:52.586Z",
-      "level": "info",
-      "msg": "Entró a trinidad",
-      "where": "poli_trinidad (5,7)"
-    },
-    {
-      "t": "2026-11-02T04:26:26.623Z",
-      "level": "info",
-      "msg": "Entró a palmitas",
-      "where": "trinidad (0,15)",
-      "count": 2
-    },
-    {
-      "t": "2026-11-02T04:26:32.062Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv13",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:26:36.522Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Carpintero salvaje usó Placaje!\" anim dmg0:2 \"No es muy eficaz…\" \"¡Yacaré usó Hoja Afilada!\" anim dmg1:11 \"No es muy eficaz…\"",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:26:47.393Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Carpintero salvaje usó Picotazo!\" anim dmg0:7 \"¡Yacaré usó Hoja Afilada!\" anim dmg1:12 \"No es muy eficaz…\"",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:26:50.939Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Carpintero salvaje usó Barrida!\" anim dmg0:15 \"¡Es súper eficaz!\" \"¡Yacaré usó Látigo Cepa!\" anim dmg1:9 \"No es muy eficaz…\"",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:26:57.627Z",
-      "level": "info",
-      "msg": "Turno 4: switch #2 | \"¡Yacaré, volvé!\" recall send \"¡Adelante, Ñacurutú!\" \"¡Carpintero salvaje usó Placaje!\" anim dmg0:5",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:27:00.881Z",
-      "level": "info",
-      "msg": "Turno 5: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:12 \"¡Es súper eficaz!\" faint \"¡Carpintero salvaje se debilitó!\" exp end",
-      "where": "palmitas (14,11)"
-    },
-    {
-      "t": "2026-11-02T04:27:04.084Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (14,11)"
-    },
     {
       "t": "2026-11-02T04:27:39.720Z",
       "level": "info",
@@ -2429,6 +2356,79 @@
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
       "where": "r_palmitas_mercedes (11,16)"
+    },
+    {
+      "t": "2026-11-02T22:29:09.740Z",
+      "level": "info",
+      "msg": "Batalla salvaje: tucotuco nv15",
+      "where": "r_palmitas_mercedes (8,17)"
+    },
+    {
+      "t": "2026-11-02T22:29:12.955Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
+      "where": "r_palmitas_mercedes (8,17)"
+    },
+    {
+      "t": "2026-11-02T22:29:13.357Z",
+      "level": "info",
+      "msg": "Fin de batalla: run",
+      "where": "r_palmitas_mercedes (8,17)"
+    },
+    {
+      "t": "2026-11-02T22:29:14.620Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
+      "where": "r_palmitas_mercedes (3,16)"
+    },
+    {
+      "t": "2026-11-02T22:29:15.284Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv16",
+      "where": "r_palmitas_mercedes (1,14)"
+    },
+    {
+      "t": "2026-11-02T22:29:18.086Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
+      "where": "r_palmitas_mercedes (1,14)"
+    },
+    {
+      "t": "2026-11-02T22:29:18.495Z",
+      "level": "info",
+      "msg": "Fin de batalla: run",
+      "where": "r_palmitas_mercedes (1,14)"
+    },
+    {
+      "t": "2026-11-02T22:29:19.118Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "r_palmitas_mercedes (0,14)"
+    },
+    {
+      "t": "2026-11-02T22:29:20.622Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
+      "where": "mercedes (33,8)"
+    },
+    {
+      "t": "2026-11-02T22:29:32.533Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T22:29:37.541Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T22:29:56.624Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 22",
+      "where": "mercedes (16,20)",
+      "count": 3
     }
   ]
 }
