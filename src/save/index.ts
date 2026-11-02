@@ -3,7 +3,9 @@ import { LocalStorageProvider, SupabaseProvider } from './provider.ts';
 import { SAVE_CONFIG } from './config.ts';
 import { sign, verify, sha256Hex, canonical } from './integrity.ts';
 import { validateSave } from './validate.ts';
-import { SPECIES } from '../data/species.ts';
+import { SPECIES, MIN_LEVEL } from '../data/species.ts';
+import { fitDown } from '../data/levels.ts';
+import { legalMoves, calcStats } from '../game/creature.ts';
 import { MOVES } from '../data/moves.ts';
 import { ITEMS } from '../data/items.ts';
 import { MAPS } from '../data/maps.ts';
@@ -39,7 +41,22 @@ export async function listSaves() {
   return provider.list();
 }
 
+/** Creatures that an old build handed out above their stage (e.g. the Mercedes tournament gift) step back to the stage that fits their level. */
+export function repairCreatures(state) {
+  for (const c of [...(state?.party ?? []), ...(state?.box ?? [])]) {
+    if (c && SPECIES[c.species] && c.level < MIN_LEVEL[c.species]) {
+      c.species = fitDown(c.species, c.level);
+      const legal = legalMoves(c.species, c.level);
+      const keep = (c.moves ?? []).filter((m) => legal.has(m?.id));
+      if (!keep.length) { const id = [...legal][0] as string; keep.push({ id, pp: MOVES[id].pp }); }
+      c.moves = keep;
+      c.hp = Math.min(c.hp, calcStats(c).hp);
+    }
+  }
+}
+
 export async function saveGame(slot, state) {
+  repairCreatures(state);
   // Round-trip through validation so we never write something we would refuse to load.
   const plain = JSON.parse(JSON.stringify(state));
   const check = validateSave(plain);
@@ -73,6 +90,7 @@ export async function loadGame(slot) {
   if (!sigOk) {
     return { ok: false, reason: 'Esta partida fue modificada fuera del juego (firma inválida) y no se puede cargar.' };
   }
+  repairCreatures(env.data);
   const check = validateSave(env.data);
   if (!check.ok) return { ok: false, reason: 'La partida tiene datos imposibles y fue rechazada.', errors: check.errors };
   return { ok: true, state: check.data, outdated: env.build !== buildHash };

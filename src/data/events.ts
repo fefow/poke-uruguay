@@ -145,7 +145,7 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
     api.setFlag('ev_torneo');
     api.sfx('catch');
     await api.say(['¡Campeón del torneo relámpago!', 'El club te regala una criatura criada en la costanera.'], { name: who });
-    const key = SPECIES.lobomarino ? 'lobomarino' : 'nandulin';
+    const key = SPECIES.lobito ? 'lobito' : 'nandulin';
     api.giveCreature(key, Math.max(5, hi - 4));
     await api.say(`{player} recibió a ${SPECIES[key].name}.`);
     api.healParty({ silent: true });
