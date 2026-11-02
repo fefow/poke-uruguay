@@ -1,35 +1,23 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T21:28:36.109Z",
+  "exported": "2026-11-02T21:29:53.726Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "poli_mercedes (5,3)",
+    "where": "mercedes (32,14)",
     "party": [
       "tejubrasa nv23 61PS",
       "curupi nv29 85PS",
       "cerro nv20 71PS",
       "cascarudo nv11 36PS",
-      "flamenco nv7 27PS",
-      "lechuza nv13 36PS"
+      "lechuza nv13 36PS",
+      "lobomarino nv13 48PS"
     ],
     "badges": 1,
-    "playtime": 7362
+    "playtime": 7404
   },
   "entries": [
-    {
-      "t": "2026-11-02T03:56:33.548Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "palmitas (15,11)"
-    },
-    {
-      "t": "2026-11-02T03:56:37.932Z",
-      "level": "info",
-      "msg": "Batalla salvaje: carpintero nv14",
-      "where": "palmitas (16,11)"
-    },
     {
       "t": "2026-11-02T03:56:42.030Z",
       "level": "info",
@@ -2423,6 +2411,18 @@
       "level": "info",
       "msg": "Entró a poli_mercedes",
       "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T21:29:49.344Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T21:29:50.249Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #6: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (16,21)"
     }
   ]
 }
