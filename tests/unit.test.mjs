@@ -541,3 +541,17 @@ test('carrera de bicicletas: ida y vuelta dentro del límite da premio una sola 
   await SCRIPTS.ev_carrera_juez(api);
   assert.equal(given.length, n);
 });
+
+test('editor de mapas: un mapa agrandado desplaza a su gente y acepta más tamaño', async () => {
+  const { applyMapEdits, fitsGrown } = await import('../src/data/map-edits.ts');
+  const before = ['###', '#D#', '...'];
+  assert.ok(fitsGrown(before, ['#####', '#####', '##D##', '.....', '.....']));
+  assert.ok(!fitsGrown(before, ['##', '#D']), 'no se puede achicar');
+  assert.ok(!fitsGrown(before, ['#####', '#####', '#####', '.....']), 'cambia la cantidad de puertas');
+  const maps = { m: { tiles: [...before], npcs: [{ x: 1, y: 2, look: 'oldman' }], items: [{ x: 0, y: 2, item: 'mate', id: 'a' }], warps: [{ x: 2, y: 2, to: 'z', tx: 0, ty: 0 }] } };
+  applyMapEdits(maps, { m: { tiles: ['#####', '#####', '##D##', '.....', '.....'], shift: { x: 1, y: 1 } } });
+  assert.equal(maps.m.tiles.length, 5);
+  assert.deepEqual([maps.m.npcs[0].x, maps.m.npcs[0].y], [2, 3]);
+  assert.deepEqual([maps.m.items[0].x, maps.m.items[0].y], [1, 3]);
+  assert.deepEqual([maps.m.warps[0].x, maps.m.warps[0].y], [3, 3]);
+});

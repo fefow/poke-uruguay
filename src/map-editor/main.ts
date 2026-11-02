@@ -4,7 +4,7 @@
 // commits the file to GitHub (redeploys Pages).
 import { OUTDOOR, INTERIOR, MAPS, MAP_ORIGINALS } from '../data/maps.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
-import { fitsTiles, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
+import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
 import { tileCanvas, groundUnder, TILE_INFO, T } from '../gfx/tiles.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
@@ -38,18 +38,22 @@ const patchOf = (id) => (id in drafts ? drafts[id] : base[id]) ?? null;
 function working(id) {
   const o = MAP_ORIGINALS[id];
   const p: any = patchOf(id) ?? {};
-  const tiles = (Array.isArray(p.tiles) && fitsTiles(o.tiles, p.tiles) ? p.tiles : o.tiles).map((r) => [...r]);
-  const npcs: any[] = o.npcs.map((n) => {
+  const grown = Array.isArray(p.tiles) && fitsGrown(o.tiles, p.tiles);
+  const tiles = (grown ? p.tiles : o.tiles).map((r) => [...r]);
+  const shift = grown ? { x: p.shift?.x ?? 0, y: p.shift?.y ?? 0 } : { x: 0, y: 0 };
+  const npcs: any[] = o.npcs.map((n0) => {
+    const n = { ...n0, x: n0.x + shift.x, y: n0.y + shift.y };
     const q = p.npcs?.[n.key];
     return { ...n, text: n.text ? [...n.text] : null, ...(q && !q.remove ? { x: q.x ?? n.x, y: q.y ?? n.y, dir: q.dir ?? n.dir, text: q.text && n.text ? [...q.text] : n.text } : {}), removed: !!q?.remove };
   });
   for (const a of p.addNpcs ?? []) npcs.push({ key: null, kind: 'added', x: a.x, y: a.y, look: a.look, dir: a.dir ?? 'down', text: [...(a.text ?? ['…'])], wander: !!a.wander });
-  const items = o.items.map((it) => {
+  const items = o.items.map((it0) => {
+    const it = { ...it0, x: it0.x + shift.x, y: it0.y + shift.y };
     const q = p.items?.[it.id];
     return { ...it, ...(q && !q.remove ? { x: q.x ?? it.x, y: q.y ?? it.y } : {}), removed: !!q?.remove };
   });
   for (const a of p.addItems ?? []) items.push({ ...a, added: true });
-  return { tiles, npcs, items, weather: p.weather ?? 'random' };
+  return { tiles, npcs, items, weather: p.weather ?? 'random', shift };
 }
 
 /** The patch that turns the original into W, or null when nothing changed. */
@@ -57,10 +61,13 @@ function diff(id, W) {
   const o = MAP_ORIGINALS[id];
   const p: any = {};
   const rows = W.tiles.map((r) => r.join(''));
-  if (rows.some((r, y) => r !== o.tiles[y])) p.tiles = rows;
+  const sh = W.shift ?? { x: 0, y: 0 };
+  if (rows.length !== o.tiles.length || rows[0].length !== o.tiles[0].length || rows.some((r, y) => r !== o.tiles[y])) p.tiles = rows;
+  if (sh.x || sh.y) p.shift = { x: sh.x, y: sh.y };
   const npcs = {};
   W.npcs.filter((n) => n.key).forEach((n) => {
-    const was = o.npcs.find((x) => x.key === n.key);
+    const was0 = o.npcs.find((x) => x.key === n.key);
+    const was = { ...was0, x: was0.x + sh.x, y: was0.y + sh.y };
     if (n.removed) { npcs[n.key] = { remove: true }; return; }
     const q: any = {};
     if (n.x !== was.x || n.y !== was.y) Object.assign(q, { x: n.x, y: n.y });
@@ -73,7 +80,8 @@ function diff(id, W) {
   if (added.length) p.addNpcs = added;
   const items = {};
   W.items.filter((it) => !it.added).forEach((it) => {
-    const was = o.items.find((x) => x.id === it.id);
+    const was0 = o.items.find((x) => x.id === it.id);
+    const was = { ...was0, x: was0.x + sh.x, y: was0.y + sh.y };
     if (it.removed) items[it.id] = { remove: true };
     else if (it.x !== was.x || it.y !== was.y) items[it.id] = { x: it.x, y: it.y };
   });
@@ -137,11 +145,18 @@ const weatherSel = h('select', { class: 'ed-input', onchange: () => edit(() => {
   WEATHERS.map(([v, n]) => h('option', { value: v, text: n })));
 const addLook = h('select', { class: 'ed-input' }, Object.keys(LOOKS).filter((k) => !k.startsWith('leader_') && !k.startsWith('player') && k !== 'rival').map((k) => h('option', { value: k, text: k, selected: k === 'oldman' })));
 const addItemSel = h('select', { class: 'ed-input' }, ITEM_KEYS.map((k) => h('option', { value: k, text: ITEMS[k].name, selected: k === 'te_marcela' })));
+const sizeInfo = h('p', { class: 'ed-hint' });
+const growIn = (def = 0) => h('input', { class: 'ed-input', type: 'number', min: '0', max: '120', value: String(def), style: { width: '100%' } });
+const GROW: [string, string, HTMLInputElement][] = [['left', 'Izq.', growIn()], ['top', 'Arriba', growIn()], ['right', 'Der.', growIn()], ['bottom', 'Abajo', growIn()]];
 const right = h('aside', { class: 'me-right' },
   h('section', {}, h('h2', { text: 'Piezas' }), h('a', { class: 'ed-btn ed-mini is-primary', href: 'editor.html#nueva-pieza', target: '_blank', rel: 'noopener', title: 'Abre el editor de sprites para crear y dibujar una pieza nueva; después de guardarla aparece acá', text: '＋ Nueva pieza' }), current, tileSearch, palette),
   h('section', {}, h('h2', { text: 'Seleccionado' }), inspector),
   h('section', {}, h('h2', { text: 'Clima de la zona' }), weatherSel,
     h('p', { class: 'ed-hint', text: 'Aleatorio: despejado, lluvia, tormenta o niebla según el momento. En interiores no se nota.' })),
+  h('section', {}, h('h2', { text: 'Tamaño del mapa' }), sizeInfo,
+    h('div', { class: 'me-row' }, ...GROW.map(([k, label, inp]) => h('label', { class: 'me-field', style: { flex: '1' } }, label, inp))),
+    btn('Agrandar con la pieza elegida', () => growMap(), { title: 'Agrega filas y columnas nuevas rellenas con la pieza que tengas elegida; después pintás la forma que quieras' }),
+    h('p', { class: 'ed-hint', text: 'Máximo 200×200. Las filas nuevas se rellenan con la pieza elegida (por ejemplo árboles o pared para cerrar lo que no uses). Si agrandás por la izquierda o arriba, todo lo que hay en el mapa se corre. Ojo: algunos mapas se conectan con otros por coordenadas fijas, y agrandar por esos lados puede desalinear una entrada; en ese caso preferí agrandar por la derecha o abajo.' })),
   h('section', {}, h('h2', { text: 'Agregar' }),
     h('div', { class: 'me-row' }, addLook, btn('+ Persona', () => addNpc())),
     h('div', { class: 'me-row' }, addItemSel, btn('+ Objeto', () => addItem()))),
@@ -291,7 +306,7 @@ function draw() {
 }
 
 // ---------------------------------------------------------------- editing
-const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather });
+const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, shift: S.W.shift });
 function pushUndo() {
   S.undo.push(snap());
   if (S.undo.length > MAX_UNDO) S.undo.shift();
@@ -322,6 +337,7 @@ function edit(fn) {
   changed();
 }
 function changed() {
+  sizeInfo.textContent = `Ahora: ${S.W.tiles[0].length}×${S.W.tiles.length} casillas.`;
   const p = diff(S.id, S.W);
   const was = base[S.id] ?? null;
   if (JSON.stringify(p) === JSON.stringify(was)) delete drafts[S.id];
@@ -413,9 +429,32 @@ function addItem() {
   setTool('move');
   status('Objeto agregado en el centro: arrastralo con Mover a donde quieras.', 'ok');
 }
+/** Adds rows/columns on any side, filled with the chosen tile. Everything in the map keeps its place on the ground. */
+function growMap() {
+  const n = Object.fromEntries(GROW.map(([k, , inp]) => [k, Math.max(0, Math.min(120, Math.floor(+inp.value || 0)))]));
+  if (!n.left && !n.top && !n.right && !n.bottom) return status('Poné cuántas filas o columnas querés agregar.', 'warn');
+  const wid = S.W.tiles[0].length + n.left + n.right, hgt = S.W.tiles.length + n.top + n.bottom;
+  if (wid > 200 || hgt > 200) return status('El mapa no puede pasar de 200×200 casillas.', 'warn');
+  const ch = LOCKED.has(S.tile) ? '.' : S.tile;
+  edit(() => {
+    const W = S.W;
+    const old = W.tiles;
+    const blank = () => Array(wid).fill(ch);
+    const rows = [];
+    for (let y = 0; y < n.top; y++) rows.push(blank());
+    for (const r of old) rows.push([...Array(n.left).fill(ch), ...r, ...Array(n.right).fill(ch)]);
+    for (let y = 0; y < n.bottom; y++) rows.push(blank());
+    W.tiles = rows;
+    for (const o of [...W.npcs, ...W.items]) { o.x += n.left; o.y += n.top; }
+    W.shift = { x: (W.shift?.x ?? 0) + n.left, y: (W.shift?.y ?? 0) + n.top };
+    S.sel = null;
+  });
+  for (const [, , inp] of GROW) inp.value = '0';
+  status(`Mapa agrandado a ${S.W.tiles[0].length}×${S.W.tiles.length}. Ahora pintá la forma que quieras.`, 'ok');
+}
 function resetMap() {
   if (!patchOf(S.id)) return status('Este mapa no tiene cambios.');
-  edit(() => { const o = MAP_ORIGINALS[S.id]; S.W = { tiles: o.tiles.map((r) => [...r]), npcs: o.npcs.map((n) => ({ ...n, text: n.text ? [...n.text] : null, removed: false })), items: o.items.map((it) => ({ ...it, removed: false })), weather: 'random' }; S.sel = null; });
+  edit(() => { const o = MAP_ORIGINALS[S.id]; S.W = { tiles: o.tiles.map((r) => [...r]), npcs: o.npcs.map((n) => ({ ...n, text: n.text ? [...n.text] : null, removed: false })), items: o.items.map((it) => ({ ...it, removed: false })), weather: 'random', shift: { x: 0, y: 0 } }; S.sel = null; });
   status('Mapa vuelto al original. Si lo guardás, el juego también vuelve al original.', 'ok');
 }
 
@@ -547,6 +586,7 @@ function openMap(id) {
   renderInspector();
   draw();
   stage.scrollTo(0, 0);
+  sizeInfo.textContent = `Ahora: ${S.W.tiles[0].length}×${S.W.tiles.length} casillas.`;
   status(`${nameOf(id)}: ${S.W.tiles[0].length}×${S.W.tiles.length} casillas.`);
 }
 

@@ -1,5 +1,6 @@
 // Changes made in the map editor are stored per map as a small patch over the generated map:
-//   tiles     the whole tile grid (only when some tile changed; ignored if the size or the doors/signs no longer match)
+//   tiles     the whole tile grid (only when some tile changed; it may be bigger than the original; ignored if smaller or if the doors/signs no longer match)
+//   shift     { x, y } how many columns/rows were added on the left/top (everything moves by that; patch positions are in the new coordinates)
 //   npcs      { key: { x, y, dir, text } | { remove: true } } for people already in the map, by npcKey()
 //   addNpcs   [{ x, y, look, dir, text, wander }] new people (they only talk)
 //   items     { id: { x, y } | { remove: true } } for items already in the map
@@ -26,7 +27,15 @@ export function applyMapEdits(maps, edits) {
     const m = maps[id];
     if (!m || !e) continue;
     if (typeof e.weather === 'string') m.weather = e.weather;
-    if (Array.isArray(e.tiles) && fitsTiles(m.tiles, e.tiles)) m.tiles = [...e.tiles];
+    // A map grown on its left or top: everything in it moves by the same amount (the editor's patch uses the new coordinates)
+    const sx = Number.isInteger(e.shift?.x) ? e.shift.x : 0, sy = Number.isInteger(e.shift?.y) ? e.shift.y : 0;
+    const grown = Array.isArray(e.tiles) && fitsGrown(m.tiles, e.tiles);
+    if (grown && (sx || sy)) {
+      for (const n of m.npcs ?? []) { n.x += sx; n.y += sy; }
+      for (const it of m.items ?? []) { it.x += sx; it.y += sy; }
+      for (const w of m.warps ?? []) { w.x += sx; w.y += sy; }
+    }
+    if (grown) m.tiles = [...e.tiles];
     if (e.npcs || e.addNpcs) {
       const keys = npcKeys(m.npcs);
       m.npcs = (m.npcs ?? []).flatMap((n, i) => {
@@ -51,6 +60,13 @@ export function applyMapEdits(maps, edits) {
       for (const a of e.addItems ?? []) m.items.push({ x: a.x, y: a.y, item: a.item, id: a.id });
     }
   }
+}
+
+/** Same or bigger map (grown in the editor): rectangular, and the same number of doors and signs. */
+export function fitsGrown(before, after) {
+  return after.length >= before.length && after.length <= 200 && after.every((r) => typeof r === 'string' && r.length === after[0].length && r.length <= 200)
+    && after[0].length >= before[0].length
+    && count(after, 'D') === count(before, 'D') && count(after, 'S') === count(before, 'S');
 }
 
 /** Same size, and the same number of doors and signs (they are matched to their targets and texts in order). */
