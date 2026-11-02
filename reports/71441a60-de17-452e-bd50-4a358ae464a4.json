@@ -1,117 +1,21 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T01:51:05.069Z",
+  "exported": "2026-11-02T01:52:17.355Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (6,19)",
+    "where": "poli_mercedes (5,3)",
     "party": [
-      "hormiga nv18 13PS",
+      "hormiga nv18 49PS",
       "ceibal nv27 70PS",
-      "alacran nv16 0PS",
-      "lobomarino nv13 4PS"
+      "alacran nv16 45PS",
+      "lobomarino nv14 50PS"
     ],
     "badges": 2,
-    "playtime": 18438
+    "playtime": 18509
   },
   "entries": [
-    {
-      "t": "2026-11-01T15:42:58.037Z",
-      "level": "info",
-      "msg": "Entró a ferry_1",
-      "where": "ferry_2 (14,6)"
-    },
-    {
-      "t": "2026-11-01T15:43:00.173Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_1 (9,9)"
-    },
-    {
-      "t": "2026-11-01T15:43:02.825Z",
-      "level": "info",
-      "msg": "Batalla vs Don Aníbal: nandulin nv18, aguaraflama nv18",
-      "where": "ferry_2 (10,4)"
-    },
-    {
-      "t": "2026-11-01T15:43:06.624Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Carpinchal usó Placaje!\" anim dmg1:37 \"¡Ñandú rival usó Golpe Cuerpo!\" anim dmg0:10",
-      "where": "ferry_2 (10,4)"
-    },
-    {
-      "t": "2026-11-01T15:43:09.216Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:10 faint \"¡Ñandú rival se debilitó!\" exp foeNext",
-      "where": "ferry_2 (10,4)"
-    },
-    {
-      "t": "2026-11-01T15:43:13.984Z",
-      "level": "info",
-      "msg": "Turno 3: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:55 \"¡Es súper eficaz!\" faint \"¡Aguaraflama rival se debilitó!\" exp end",
-      "where": "ferry_2 (10,4)"
-    },
-    {
-      "t": "2026-11-01T15:43:16.832Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_2 (10,4)"
-    },
-    {
-      "t": "2026-11-01T15:43:22.912Z",
-      "level": "info",
-      "msg": "Entró a ferry_c1",
-      "where": "ferry_2 (3,1)"
-    },
-    {
-      "t": "2026-11-01T15:43:24.862Z",
-      "level": "info",
-      "msg": "Batalla vs Joven Tilo: teruterazo nv18, tarantula nv19",
-      "where": "ferry_c1 (4,5)"
-    },
-    {
-      "t": "2026-11-01T15:43:29.803Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Hidropulso!\" anim dmg1:52 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_c1 (4,5)"
-    },
-    {
-      "t": "2026-11-01T15:43:36.409Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:48 \"¡Tarántula rival usó Picadura!\" anim dmg0:10",
-      "where": "ferry_c1 (4,5)"
-    },
-    {
-      "t": "2026-11-01T15:43:38.908Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Carpinchal usó Placaje!\" anim dmg1:12 faint \"¡Tarántula rival se debilitó!\" exp end",
-      "where": "ferry_c1 (4,5)"
-    },
-    {
-      "t": "2026-11-01T15:43:41.411Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_c1 (4,5)"
-    },
-    {
-      "t": "2026-11-01T15:43:46.871Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_c1 (3,7)"
-    },
-    {
-      "t": "2026-11-01T15:43:51.405Z",
-      "level": "info",
-      "msg": "Batalla vs Azafata Lorena: teruterazo nv18, criollo nv18",
-      "where": "ferry_2 (19,2)"
-    },
-    {
-      "t": "2026-11-01T15:43:55.652Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Carpinchal usó Placaje!\" anim dmg1:44 \"¡Golpe crítico!\" \"¡Terogarra rival usó Griterío!\" anim dmg0:7",
-      "where": "ferry_2 (19,2)"
-    },
     {
       "t": "2026-11-01T15:43:58.396Z",
       "level": "info",
@@ -2412,10 +2316,107 @@
       "where": "villasoriano (27,8)"
     },
     {
-      "t": "2026-11-02T01:51:01.396Z",
+      "t": "2026-11-02T01:51:07.397Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 13",
-      "where": "mercedes (4,8)"
+      "where": "mercedes (4,8)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-02T01:51:08.692Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-02T01:51:12.463Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-02T01:51:13.401Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 13",
+      "where": "mercedes (12,19)"
+    },
+    {
+      "t": "2026-11-02T01:51:16.997Z",
+      "level": "info",
+      "msg": "Entró a villasoriano",
+      "where": "mercedes (0,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:18.990Z",
+      "level": "info",
+      "msg": "Batalla vs Néstor: crisalida nv16, curupi nv18",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:26.709Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Crisálida rival usó Picadura!\" anim dmg0:7 \"No es muy eficaz…\" \"¡Hormiga usó Colmillo Fuego!\" \"¡Crisálida rival esquivó el ataque!\"",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:29.568Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Crisálida rival usó Picadura!\" \"¡Hormiga esquivó el ataque!\" \"¡Hormiga usó Colmillo Fuego!\" anim dmg1:46 \"¡Es súper eficaz!\" faint \"¡Crisálida rival se debilitó!\" exp foeNext",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:35.794Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Ñacurutú rival usó Picotazo!\" anim dmg0:11 \"¡Hormiga usó Colmillo Fuego!\" anim dmg1:18",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:38.469Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Ñacurutú rival usó Confusión!\" anim dmg0:27 \"¡Hormiga usó Colmillo Fuego!\" anim dmg1:17 statusAnim hud \"¡Ñacurutú rival está quemado!\" statusAnim dmg1:7 \"Ñacurutú rival sufre por la quemadura.\"",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:47.082Z",
+      "level": "info",
+      "msg": "Turno 5: switch #2 | \"¡Hormiga, volvé!\" recall send \"¡Adelante, Alacrán!\" \"¡Ñacurutú rival usó Confusión!\" anim dmg0:30 statusAnim dmg1:7 \"Ñacurutú rival sufre por la quemadura.\"",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:51:54.527Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Ñacurutú rival usó Viento Cortante!\" anim dmg0:15 \"¡Es súper eficaz!\" faint \"¡Alacrán se debilitó!\" needSwitch statusAnim dmg1:7 \"Ñacurutú rival sufre por la quemadura.\"",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:52:02.550Z",
+      "level": "info",
+      "msg": "Turno 7: move #0 | \"¡Ñacurutú rival usó Confusión!\" anim dmg0:43 \"¡Es súper eficaz!\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:1 faint \"¡Ñacurutú rival se debilitó!\" exp end",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:52:07.608Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "villasoriano (21,8)"
+    },
+    {
+      "t": "2026-11-02T01:52:10.902Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "villasoriano (27,8)"
+    },
+    {
+      "t": "2026-11-02T01:52:13.410Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: Equipo #4: Lobo Marino no puede existir con nivel 14",
+      "where": "mercedes (6,17)"
+    },
+    {
+      "t": "2026-11-02T01:52:15.627Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
     }
   ]
 }
