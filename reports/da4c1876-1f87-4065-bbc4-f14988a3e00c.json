@@ -1,6 +1,6 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-02T04:44:32.799Z",
+  "exported": "2026-11-02T04:45:20.802Z",
   "build": "445881cbd48470db",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
@@ -15,7 +15,7 @@
       "lechuza nv13 36PS"
     ],
     "badges": 1,
-    "playtime": 7040
+    "playtime": 7088
   },
   "entries": [
     {
@@ -2414,10 +2414,11 @@
       "where": "mercedes (16,20)"
     },
     {
-      "t": "2026-11-02T04:44:29.291Z",
+      "t": "2026-11-02T04:45:17.295Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
-      "where": "poli_mercedes (5,3)"
+      "where": "poli_mercedes (5,3)",
+      "count": 2
     }
   ]
 }
