@@ -1,13 +1,13 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-03T00:13:11.431Z",
+  "exported": "2026-11-03T00:14:23.504Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "ferry_2 (7,3)",
+    "where": "ferry_2 (8,1)",
     "party": [
-      "curupi nv35 91PS",
+      "curupi nv36 84PS",
       "lobomarino nv27 89PS",
       "tejubrasa nv24 63PS",
       "lechuza nv13 36PS",
@@ -15,81 +15,9 @@
       "cerro nv20 71PS"
     ],
     "badges": 2,
-    "playtime": 9671
+    "playtime": 9743
   },
   "entries": [
-    {
-      "t": "2026-11-02T21:23:37.372Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:7 faint \"¡Hornero rival se debilitó!\" exp foeNext",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:15.675Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:41 \"¡Es súper eficaz!\" faint \"¡Oruga rival se debilitó!\" exp foeNext",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:21.916Z",
-      "level": "info",
-      "msg": "Turno 4: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:14 \"No es muy eficaz…\" \"¡Hormiga rival usó Colmillo Fuego!\" anim dmg0:3 \"No es muy eficaz…\" faint \"¡Tejubrasa se debilitó!\" needSwitch",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:28.862Z",
-      "level": "info",
-      "msg": "Turno 5: move #2 | \"¡Ñacurutú usó Premonición!\" anim dmg1:33 faint \"¡Hormiga rival se debilitó!\" exp end",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:31.481Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:32.770Z",
-      "level": "info",
-      "msg": "Batalla vs Comodoro Aldo: teruterito nv17, zorrigris nv18",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:39.687Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Ñacurutú usó Premonición!\" anim dmg1:41 faint \"¡Tero rival se debilitó!\" exp foeNext",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:47.592Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Ñacurutú usó Premonición!\" \"No afecta a Zorrigrís rival… ¡El ataque no tuvo ningún efecto!\" \"¡Zorrigrís rival usó Mordisco!\" anim dmg0:23 \"¡Es súper eficaz!\"",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:50.907Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Ñacurutú usó Premonición!\" \"No afecta a Zorrigrís rival… ¡El ataque no tuvo ningún efecto!\" \"¡Zorrigrís rival usó Finta!\" anim dmg0:22 \"¡Es súper eficaz!\"",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:27:55.506Z",
-      "level": "info",
-      "msg": "Turno 4: move #1 | \"¡Ñacurutú usó Confusión!\" \"No afecta a Zorrigrís rival… ¡El ataque no tuvo ningún efecto!\" \"¡Zorrigrís rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Ñacurutú!\"",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:28:04.123Z",
-      "level": "info",
-      "msg": "Turno 5: switch #2 | \"¡Ñacurutú, volvé!\" recall send \"¡Adelante, Yacaré!\" \"¡Zorrigrís rival usó Finta!\" anim dmg0:11",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:28:07.827Z",
-      "level": "info",
-      "msg": "Turno 6: move #0 | \"¡Zorrigrís rival usó Finta!\" anim dmg0:11 \"¡Yacaré usó Hoja Afilada!\" anim dmg1:26",
-      "where": "mercedes (19,20)"
-    },
     {
       "t": "2026-11-02T21:28:10.117Z",
       "level": "info",
@@ -2432,6 +2360,78 @@
       "level": "info",
       "msg": "Batalla vs Don Aníbal: nandulin nv18, aguaraflama nv18",
       "where": "ferry_2 (7,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:11.904Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:48 faint \"¡Ñandú rival se debilitó!\" exp foeNext",
+      "where": "ferry_2 (7,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:49.115Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:53 faint \"¡Aguaraflama rival se debilitó!\" exp end",
+      "where": "ferry_2 (7,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:51.798Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_2 (7,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:55.641Z",
+      "level": "info",
+      "msg": "Entró a ferry_c1",
+      "where": "ferry_2 (3,1)"
+    },
+    {
+      "t": "2026-11-03T00:13:55.943Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_c1 (4,6)"
+    },
+    {
+      "t": "2026-11-03T00:13:57.132Z",
+      "level": "info",
+      "msg": "Batalla vs Joven Tilo: teruterazo nv18, tarantula nv19",
+      "where": "ferry_c1 (4,5)"
+    },
+    {
+      "t": "2026-11-03T00:14:01.980Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Ataque Ala!\" anim dmg1:48 \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:10",
+      "where": "ferry_c1 (4,5)"
+    },
+    {
+      "t": "2026-11-03T00:14:04.266Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:3 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
+      "where": "ferry_c1 (4,5)"
+    },
+    {
+      "t": "2026-11-03T00:14:12.592Z",
+      "level": "info",
+      "msg": "Turno 3: move #1 | \"¡Ñacurutú usó Ataque Ala!\" anim dmg1:59 \"¡Es súper eficaz!\" faint \"¡Tarántula rival se debilitó!\" exp end",
+      "where": "ferry_c1 (4,5)"
+    },
+    {
+      "t": "2026-11-03T00:14:15.084Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_c1 (4,5)"
+    },
+    {
+      "t": "2026-11-03T00:14:19.558Z",
+      "level": "info",
+      "msg": "Entró a ferry_2",
+      "where": "ferry_c1 (4,7)"
+    },
+    {
+      "t": "2026-11-03T00:14:19.944Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_2 (4,1)"
     }
   ]
 }
