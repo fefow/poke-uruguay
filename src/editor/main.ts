@@ -226,6 +226,7 @@ const usedColors = h('div', { class: 'ed-palette' });
 const BASE_PALETTE = ['#16141e', '#ffffff', '#6cb4ee', '#2a6aae', '#f2c02a', '#e0263a', '#e8702a', '#5cae3c', '#2a6a2a', '#9a6a3c', '#6a3a1a', '#f2c8a0', '#c8ccd8', '#7a7a8a', '#8a4ac8', '#3fa8a0'];
 const basePalette = h('div', { class: 'ed-palette' }, BASE_PALETTE.map((c) => h('button', { type: 'button', class: 'ed-chip', style: { '--c': c }, title: c, onclick: () => pickColor([...hexToRgb(c), 255]) })));
 
+const sheetInput = h('input', { type: 'file', accept: 'image/png,image/webp', style: { display: 'none' }, onchange: () => { const f = sheetInput.files?.[0]; sheetInput.value = ''; if (f) importSheet(f).catch((e) => status('No se pudo leer la hoja: ' + e.message, 'error')); } });
 const importSize = h('select', { class: 'ed-input', title: 'Tamaño de la imagen importada dentro del lienzo' }, [['100', 'Importar al 100 %'], ['80', 'Importar al 80 %'], ['65', 'Importar al 65 %'], ['50', 'Importar al 50 %']].map(([v, t]) => h('option', { value: v, text: t })));
 importSize.value = '80';
 const importInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', style: { display: 'none' }, onchange: () => { const f = importInput.files?.[0]; importInput.value = ''; if (f) importImage(f).catch(() => status('No se pudo leer la imagen.', 'error')); } });
@@ -247,6 +248,7 @@ const right = h('aside', { class: 'ed-right' },
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('right') }, h('span', { text: 'Mover →' }), h('kbd', { text: '→' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Borrar todo el dibujo', onclick: () => transform('clear') }, h('span', { text: 'Vaciar' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Carga una imagen (PNG, JPG) ajustada al tamaño de este sprite; se quita el fondo liso', onclick: () => importInput.click() }, h('span', { text: 'Importar imagen' })), importSize, importInput,
+    h('button', { type: 'button', class: 'ed-tool', title: 'Para personajes: carga una hoja de caminata (cuadrícula de poses) y la reparte en las 12 imágenes del personaje', onclick: () => sheetInput.click() }, h('span', { text: 'Importar hoja (personaje)' })), sheetInput,
     h('button', { type: 'button', class: 'ed-tool', title: 'Achica el dibujo (o la zona seleccionada) un 20 %, apoyado donde estaba. Varias veces seguidas pierde detalle: mejor importar de nuevo con otro tamaño', onclick: () => resizeBy(0.8) }, h('span', { text: 'Achicar' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Agranda el dibujo (o la zona seleccionada) un 25 %', onclick: () => resizeBy(1.25) }, h('span', { text: 'Agrandar' })),
     h('button', { type: 'button', class: 'ed-tool is-danger', title: 'Volver al sprite que genera el juego', onclick: restore }, h('span', { text: 'Restaurar original' })),
@@ -747,6 +749,101 @@ function storeDraft(e, px) {
     else drafts[e.key] = enc;
   }
 }
+/** Images with no transparency get their flat background (the colour of the corners) removed by flooding from the borders. True if it changed anything. */
+function removeFlatBackground(id: ImageData): boolean {
+  const d = id.data, W = id.width, H = id.height;
+  if ((d as any).some((_, i) => i % 4 === 3 && d[i] < 250)) return false;
+  const corners = [0, (W - 1) * 4, (H - 1) * W * 4, ((H - 1) * W + W - 1) * 4];
+  const near = (i) => corners.some((c) => Math.abs(d[i] - d[c]) + Math.abs(d[i + 1] - d[c + 1]) + Math.abs(d[i + 2] - d[c + 2]) < 60);
+  const seen = new Uint8Array(W * H), st: number[] = [];
+  for (let x = 0; x < W; x++) st.push(x, (H - 1) * W + x);
+  for (let y = 0; y < H; y++) st.push(y * W, y * W + W - 1);
+  while (st.length) {
+    const q = st.pop()!;
+    if (seen[q]) continue;
+    seen[q] = 1;
+    if (!near(q * 4)) continue;
+    d[q * 4 + 3] = 0;
+    const x = q % W;
+    if (x > 0) st.push(q - 1);
+    if (x < W - 1) st.push(q + 1);
+    if (q >= W) st.push(q - W);
+    if (q < W * (H - 1)) st.push(q + W);
+  }
+  return true;
+}
+
+/** Walking sheet: a PNG with a grid of poses. The user says which row is which direction and which columns are the 3 steps. */
+async function importSheet(file: File) {
+  const g = S.group;
+  if (!g?.frames || S.entry.kind !== 'char') return status('Elegí un personaje primero.', 'warn');
+  const bmp = await createImageBitmap(file);
+  const W = bmp.width, H = bmp.height;
+  const src = blank(W, H), sg = src.getContext('2d', { willReadFrequently: true });
+  sg.drawImage(bmp, 0, 0);
+  const id = sg.getImageData(0, 0, W, H);
+  removeFlatBackground(id);
+  const guessCols = W % 4 === 0 ? 4 : W % 3 === 0 ? 3 : 1;
+  const guessRows = H % 4 === 0 ? 4 : H % 3 === 0 ? 3 : 1;
+  const num = (v, n = 4) => h('input', { type: 'number', class: 'ed-input', min: '1', max: '16', value: String(v), style: { width: '64px' } });
+  const cols = num(guessCols), rows = num(guessRows);
+  const dirRow = {}, stepCol = [];
+  const sel = (label, def, count) => { const x = h('select', { class: 'ed-input' }, [...Array(count)].map((_, i) => h('option', { value: String(i), text: `${i + 1}` }))); x.value = String(Math.min(def, count - 1)); return [label, x]; };
+  const rebuild = () => {
+    const nc = +cols.value || 1, nr = +rows.value || 1;
+    grid.replaceChildren(
+      ...[['down', 'Abajo', 0], ['up', 'Arriba', 1], ['left', 'Izquierda', 2], ['right', 'Derecha', 3]].map(([d, t, def]: any) => { const [, x] = sel(t, def, nr); dirRow[d] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Fila de «${t}»` }), x); }),
+      ...[1, 2, 3].map((n, i) => { const [, x] = sel(`Paso ${n}`, [0, 1, 2][i], nc); stepCol[i] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Columna del paso ${n} (1 = parado)` }), x); }));
+  };
+  const grid = h('div', { class: 'ed-sheet-grid' });
+  cols.addEventListener('change', rebuild); rows.addEventListener('change', rebuild);
+  rebuild();
+  const ok = h('button', { class: 'ed-btn is-primary', type: 'button', text: 'Importar' });
+  const no = h('button', { class: 'ed-btn', type: 'button', text: 'Cancelar' });
+  const preview = h('canvas', { width: W, height: H, style: { maxWidth: '100%', imageRendering: 'pixelated', background: 'repeating-conic-gradient(#3a3a44 0 25%, #2a2a32 0 50%) 0 0/12px 12px' } });
+  preview.getContext('2d').drawImage(src, 0, 0);
+  const box = h('div', { class: 'ed-modal' }, h('div', { class: 'ed-modal-card' },
+    h('h2', { text: 'Importar hoja de caminata' }), preview,
+    h('div', { class: 'ed-sheet-grid' }, h('label', { class: 'ed-field' }, h('span', { text: 'Columnas de la hoja' }), cols), h('label', { class: 'ed-field' }, h('span', { text: 'Filas de la hoja' }), rows)),
+    grid, h('div', { class: 'ed-modal-actions' }, no, ok)));
+  document.body.append(box);
+  const done = new Promise<boolean>((res) => { ok.addEventListener('click', () => res(true)); no.addEventListener('click', () => res(false)); });
+  const go = await done;
+  box.remove();
+  if (!go) return;
+  const nc = +cols.value || 1, nr = +rows.value || 1, cw = Math.floor(W / nc), chh = Math.floor(H / nr);
+  const cell = (r, c) => {
+    const x0 = c * cw, y0 = r * chh;
+    let a = cw, b = chh, e = -1, f = -1;
+    for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) if (id.data[((y0 + y) * W + x0 + x) * 4 + 3] > 20) { a = Math.min(a, x); e = Math.max(e, x); b = Math.min(b, y); f = Math.max(f, y); }
+    return e < 0 ? null : { x: x0 + a, y: y0 + b, w: e - a + 1, h: f - b + 1 };
+  };
+  const picks = [];
+  for (const d of ['down', 'up', 'left', 'right']) for (let i = 0; i < 3; i++) picks.push({ d, i, box: cell(+dirRow[d].value, +stepCol[i].value) });
+  const boxes = picks.map((p) => p.box).filter(Boolean) as any[];
+  if (!boxes.length) return status('La hoja no tiene dibujos en esas celdas.', 'warn');
+  const k = Math.min(16 / Math.max(...boxes.map((q) => q.w)), 17 / Math.max(...boxes.map((q) => q.h)), 1);
+  snapshot();
+  const keep = S.entry;
+  for (const p of picks) {
+    const fr = g.frames.find((q) => q.dir === p.d && q.frame === p.i);
+    if (!fr) continue;
+    const out = blank(16, 17), og = out.getContext('2d', { willReadFrequently: true });
+    if (p.box) {
+      const tw = Math.max(1, Math.round(p.box.w * k)), th = Math.max(1, Math.round(p.box.h * k));
+      og.imageSmoothingEnabled = k < 1;
+      og.drawImage(src, p.box.x, p.box.y, p.box.w, p.box.h, Math.floor((16 - tw) / 2), 17 - th, tw, th);
+    }
+    const px = og.getImageData(0, 0, 16, 17).data;
+    for (let i = 3; i < px.length; i += 4) px[i] = px[i] >= 128 ? 255 : 0;
+    storeDraft(fr, new Uint8ClampedArray(px));
+  }
+  persist(); refreshLive();
+  S.px = pixelsOf(keep);
+  drawAll(); refreshThumbs(); renderFrames(); markListDots();
+  status('Hoja importada: las 12 imágenes del personaje quedaron como borrador. Retocalas y guardá en el juego.', 'ok');
+}
+
 /** Puts an image (e.g. made with an AI pixel-art tool) into the current sprite: background removed, cropped, scaled to fit, bottom-centred. */
 async function importImage(file: File) {
   if (S.entry.tiles) return status('Importar imagen no está disponible para piezas de varios cuadros.', 'warn');
@@ -755,26 +852,7 @@ async function importImage(file: File) {
   const sg = src.getContext('2d', { willReadFrequently: true });
   sg.drawImage(bmp, 0, 0);
   const id = sg.getImageData(0, 0, bmp.width, bmp.height), d = id.data, W = bmp.width, H = bmp.height;
-  if (!(d as any).some((_, i) => i % 4 === 3 && d[i] < 250)) { // flat background: flood from the borders over the corner colour(s)
-    const corners = [0, (W - 1) * 4, (H - 1) * W * 4, ((H - 1) * W + W - 1) * 4];
-    const near = (i) => corners.some((c) => Math.abs(d[i] - d[c]) + Math.abs(d[i + 1] - d[c + 1]) + Math.abs(d[i + 2] - d[c + 2]) < 60);
-    const seen = new Uint8Array(W * H), st: number[] = [];
-    for (let x = 0; x < W; x++) st.push(x, (H - 1) * W + x);
-    for (let y = 0; y < H; y++) st.push(y * W, y * W + W - 1);
-    while (st.length) {
-      const q = st.pop()!;
-      if (seen[q]) continue;
-      seen[q] = 1;
-      if (!near(q * 4)) continue;
-      d[q * 4 + 3] = 0;
-      const x = q % W;
-      if (x > 0) st.push(q - 1);
-      if (x < W - 1) st.push(q + 1);
-      if (q >= W) st.push(q - W);
-      if (q < W * (H - 1)) st.push(q + W);
-    }
-    sg.putImageData(id, 0, 0);
-  }
+  if (removeFlatBackground(id)) sg.putImageData(id, 0, 0);
   let x0 = W, y0 = H, x1 = -1, y1 = -1;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 20) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
   if (x1 < 0) return status('La imagen está vacía o es toda del color del fondo.', 'warn');
