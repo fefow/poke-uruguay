@@ -1158,7 +1158,8 @@ function drawWorld(g, t) {
     if (!player && n.def.look === 'machine') { drawFogMachine(g, sx, sy, t); continue; }
     const look = player ? state().player.look : n.def.look;
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
-    const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : 0) : n.moving ? frameIdx : 0;
+    // Four poses per direction: contact (1 or 2) in the first half of a tile, then a passing pose (0 or 3, alternating).
+    const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : (p.step % 2 ? 3 : 0)) : n.moving ? frameIdx : 0;
     if (!player && typeof look === 'string' && look.startsWith('animal:')) {
       // creatures seen in the distance: they wander but cannot be fought or caught
       shadow(g, sx + 8, sy + 13, 6, 2.4);

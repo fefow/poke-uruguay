@@ -77,10 +77,10 @@ const CATS: any[] = [
     ],
   },
   {
-    id: 'char', make: 'char', name: 'Personajes', hint: '16×17, cuatro direcciones y tres pasos cada una.',
+    id: 'char', make: 'char', name: 'Personajes', hint: '16×17, cuatro direcciones y cuatro pasos cada una (1 y 2 apoyan un pie; 0 y 3 son el paso intermedio).',
     entries: () => [...Object.keys(LOOKS), ...newCustom.looks.map((l) => l.key)].map((look) => ({
       key: `char:${look}|down|0`, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)), sub: look, w: 16, h: 17, draw: () => charSprite(draftBase(look), 'down', 0), kind: 'char', look,
-      frames: DIRS.flatMap(([d]) => [0, 1, 2].map((f) => ({ key: `char:${look}|${d}|${f}`, dir: d, frame: f, w: 16, h: 17, draw: () => charSprite(draftBase(look), d, f), kind: 'char', look, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)) }))),
+      frames: DIRS.flatMap(([d]) => [0, 1, 2, 3].map((f) => ({ key: `char:${look}|${d}|${f}`, dir: d, frame: f, w: 16, h: 17, draw: () => charSprite(draftBase(look), d, f), kind: 'char', look, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)) }))),
     })),
   },
   {
@@ -139,6 +139,11 @@ function pixelsOf(e) {
   const o = live()[e.key];
   const px = o && o.w === e.w && o.h === e.h ? decodeSprite(o) : null;
   if (px) return px;
+  if (e.kind === 'char' && e.frame === 3) { // pose 4 is a copy of pose 1 until drawn
+    const z = live()[`char:${e.look}|${e.dir}|0`];
+    const zp = z && z.w === e.w && z.h === e.h ? decodeSprite(z) : null;
+    if (zp) return zp;
+  }
   return originalOf(e);
 }
 function originalOf(e) {
@@ -249,7 +254,7 @@ const right = h('aside', { class: 'ed-right' },
     h('button', { type: 'button', class: 'ed-tool', title: 'Mover todo 1 píxel (flechas)', onclick: () => transform('right') }, h('span', { text: 'Mover →' }), h('kbd', { text: '→' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Borrar todo el dibujo', onclick: () => transform('clear') }, h('span', { text: 'Vaciar' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Carga una imagen (PNG, JPG) ajustada al tamaño de este sprite; se quita el fondo liso', onclick: () => importInput.click() }, h('span', { text: 'Importar imagen' })), importSize, importInput,
-    h('button', { type: 'button', class: 'ed-tool', title: 'Para personajes: carga una hoja de caminata (cuadrícula de poses) y la reparte en las 12 imágenes del personaje', onclick: () => sheetInput.click() }, h('span', { text: 'Importar hoja (personaje)' })), sheetInput,
+    h('button', { type: 'button', class: 'ed-tool', title: 'Para personajes: carga una hoja de caminata (cuadrícula de poses) y la reparte en las 16 imágenes del personaje', onclick: () => sheetInput.click() }, h('span', { text: 'Importar hoja (personaje)' })), sheetInput,
     h('button', { type: 'button', class: 'ed-tool', title: 'Achica el dibujo (o la zona seleccionada) un 20 %, apoyado donde estaba. Varias veces seguidas pierde detalle: mejor importar de nuevo con otro tamaño', onclick: () => resizeBy(0.8) }, h('span', { text: 'Achicar' })),
     h('button', { type: 'button', class: 'ed-tool', title: 'Agranda el dibujo (o la zona seleccionada) un 25 %', onclick: () => resizeBy(1.25) }, h('span', { text: 'Agrandar' })),
     h('button', { type: 'button', class: 'ed-tool is-danger', title: 'Volver al sprite que genera el juego', onclick: restore }, h('span', { text: 'Restaurar original' })),
@@ -794,7 +799,7 @@ async function importSheet(file: File) {
     const nc = +cols.value || 1, nr = +rows.value || 1;
     grid.replaceChildren(
       ...[['down', 'Abajo', 0], ['up', 'Arriba', 1], ['left', 'Izquierda', 2], ['right', 'Derecha', 3]].map(([d, t, def]: any) => { const [, x] = sel(t, def, nr); dirRow[d] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Fila de «${t}»` }), x); }),
-      ...[1, 2, 3].map((n, i) => { const [, x] = sel(`Paso ${n}`, [0, 1, 2][i], nc); stepCol[i] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Columna del paso ${n} (1 = parado)` }), x); }));
+      ...[1, 2, 3, 4].map((n, i) => { const [, x] = sel(`Paso ${n}`, [0, 1, 2, 3][i], nc); stepCol[i] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Columna del paso ${n} (1 = parado)` }), x); }));
   };
   const grid = h('div', { class: 'ed-sheet-grid' });
   cols.addEventListener('change', rebuild); rows.addEventListener('change', rebuild);
@@ -820,7 +825,7 @@ async function importSheet(file: File) {
     return e < 0 ? null : { x: x0 + a, y: y0 + b, w: e - a + 1, h: f - b + 1 };
   };
   const picks = [];
-  for (const d of ['down', 'up', 'left', 'right']) for (let i = 0; i < 3; i++) picks.push({ d, i, box: cell(+dirRow[d].value, +stepCol[i].value) });
+  for (const d of ['down', 'up', 'left', 'right']) for (let i = 0; i < 4; i++) picks.push({ d, i, box: cell(+dirRow[d].value, +stepCol[i].value) });
   const boxes = picks.map((p) => p.box).filter(Boolean) as any[];
   if (!boxes.length) return status('La hoja no tiene dibujos en esas celdas.', 'warn');
   const k = Math.min(16 / Math.max(...boxes.map((q) => q.w)), 17 / Math.max(...boxes.map((q) => q.h)), 1);
@@ -842,7 +847,7 @@ async function importSheet(file: File) {
   persist(); refreshLive();
   S.px = pixelsOf(keep);
   drawAll(); refreshThumbs(); renderFrames(); markListDots();
-  status('Hoja importada: las 12 imágenes del personaje quedaron como borrador. Retocalas y guardá en el juego.', 'ok');
+  status('Hoja importada: las 16 imágenes del personaje quedaron como borrador. Retocalas y guardá en el juego.', 'ok');
 }
 
 /** Puts an image (e.g. made with an AI pixel-art tool) into the current sprite: background removed, cropped, scaled to fit, bottom-centred. */

@@ -104,7 +104,7 @@ async function boot() {
     ['Armando la montañita…', async (sub) => buildTileset(sub)],
     ['Dejando hinchar la yerba…', async (sub) => {
       const looks = Object.keys(LOOKS);
-      looks.forEach((l, i) => { for (const d of ['down', 'up', 'left', 'right']) for (const f of [0, 1, 2]) charSprite(l, d, f); sub((i + 1) / looks.length); });
+      looks.forEach((l, i) => { for (const d of ['down', 'up', 'left', 'right']) for (const f of [0, 1, 2, 3]) charSprite(l, d, f); sub((i + 1) / looks.length); });
     }],
     ['Cebando el primer mate…', async (sub) => {
       // chunked so the bar keeps moving

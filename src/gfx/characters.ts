@@ -404,7 +404,7 @@ function draw(g, rows, pal, ox, oy, flip) {
 /** dir: 'down'|'up'|'left'|'right'; frame: 0 stand, 1/2 steps */
 export function charSprite(look, dir, frame = 0) {
   const key = `${look}|${dir}|${frame}`;
-  const drawn = override(`char:${key}`, 16, 17);
+  const drawn = override(`char:${key}`, 16, 17) ?? (frame === 3 ? override(`char:${look}|${dir}|0`, 16, 17) : null); // pose 4 follows pose 1 until it is drawn
   if (drawn) return drawn;
   let c = cache.get(key);
   if (c) return c;
@@ -416,9 +416,9 @@ export function charSprite(look, dir, frame = 0) {
   const isP = look.startsWith('player');
   const fem = look === 'player_f';
   const body = isP ? (dir === 'down' ? (fem ? F_DOWN : P_DOWN) : dir === 'up' ? (fem ? F_UP : P_UP) : fem ? F_SIDE : P_SIDE) : dir === 'down' ? DOWN : dir === 'up' ? UP : SIDE;
-  const legs = LEGS[dir === 'left' || dir === 'right' ? 'side' : dir][frame];
+  const legs = LEGS[dir === 'left' || dir === 'right' ? 'side' : dir][frame === 3 ? 0 : frame]; // frame 3: second passing pose, same as the standing one until redrawn
   const flip = dir === 'left';
-  const bob = frame ? 0 : 1;
+  const bob = frame === 0 || frame === 3 ? 1 : 0;
   // soft shadow
   g.fillStyle = 'rgba(0,0,0,0.22)';
   g.fillRect(4, 15, 8, 2);
