@@ -1,13 +1,13 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-03T00:09:53.615Z",
+  "exported": "2026-11-03T00:10:59.242Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "anglo_1 (8,13)",
+    "where": "ferry_1 (6,9)",
     "party": [
-      "curupi nv34 68PS",
+      "curupi nv35 91PS",
       "lobomarino nv27 89PS",
       "tejubrasa nv24 63PS",
       "lechuza nv13 36PS",
@@ -15,89 +15,9 @@
       "cerro nv20 71PS"
     ],
     "badges": 2,
-    "playtime": 9542
+    "playtime": 9607
   },
   "entries": [
-    {
-      "t": "2026-11-02T04:46:36.062Z",
-      "level": "info",
-      "msg": "Entró a mercedes",
-      "where": "shop_mercedes (4,7)"
-    },
-    {
-      "t": "2026-11-02T04:46:47.305Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
-      "where": "mercedes (17,20)",
-      "count": 2
-    },
-    {
-      "t": "2026-11-02T04:46:47.976Z",
-      "level": "info",
-      "msg": "Entró a casa_mercedes",
-      "where": "mercedes (33,20)"
-    },
-    {
-      "t": "2026-11-02T04:46:53.306Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
-      "where": "casa_mercedes (2,7)"
-    },
-    {
-      "t": "2026-11-02T04:46:54.498Z",
-      "level": "info",
-      "msg": "Entró a mercedes",
-      "where": "casa_mercedes (4,7)"
-    },
-    {
-      "t": "2026-11-02T04:47:05.308Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
-      "where": "mercedes (26,23)"
-    },
-    {
-      "t": "2026-11-02T04:47:08.801Z",
-      "level": "info",
-      "msg": "Entró a casa_mercedes2",
-      "where": "mercedes (39,20)"
-    },
-    {
-      "t": "2026-11-02T04:47:11.308Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
-      "where": "casa_mercedes2 (5,5)"
-    },
-    {
-      "t": "2026-11-02T04:47:16.493Z",
-      "level": "info",
-      "msg": "Entró a mercedes",
-      "where": "casa_mercedes2 (5,7)"
-    },
-    {
-      "t": "2026-11-02T15:28:38.631Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Caja #1: Lobo Marino no puede existir con nivel 13",
-      "where": "mercedes (37,20)",
-      "count": 9
-    },
-    {
-      "t": "2026-11-02T15:28:56.690Z",
-      "level": "info",
-      "msg": "Entró a poli_mercedes",
-      "where": "title"
-    },
-    {
-      "t": "2026-11-02T15:29:23.037Z",
-      "level": "info",
-      "msg": "Entró a mercedes",
-      "where": "poli_mercedes (5,7)"
-    },
-    {
-      "t": "2026-11-02T15:30:19.648Z",
-      "level": "info",
-      "msg": "Batalla vs Remero Gustavo: nandulin nv15, tuco nv16",
-      "where": "mercedes (19,20)"
-    },
     {
       "t": "2026-11-02T15:30:25.437Z",
       "level": "info",
@@ -2426,10 +2346,91 @@
       "where": "anglo_1 (13,3)"
     },
     {
-      "t": "2026-11-03T00:09:49.925Z",
+      "t": "2026-11-03T00:09:55.923Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
-      "where": "anglo_1 (14,1)"
+      "where": "anglo_1 (14,1)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-03T00:09:57.821Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "anglo_1 (15,23)"
+    },
+    {
+      "t": "2026-11-03T00:10:13.924Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "fraybentos (27,17)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-03T00:10:15.389Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "fraybentos (17,20)"
+    },
+    {
+      "t": "2026-11-03T00:10:19.234Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)"
+    },
+    {
+      "t": "2026-11-03T00:10:25.926Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "fraybentos (14,20)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-03T00:10:28.424Z",
+      "level": "info",
+      "msg": "Entró a ferry_1",
+      "where": "fraybentos (3,26)"
+    },
+    {
+      "t": "2026-11-03T00:10:31.926Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_1 (11,3)"
+    },
+    {
+      "t": "2026-11-03T00:10:35.556Z",
+      "level": "info",
+      "msg": "Batalla vs Gimena: teruterito nv17, curupi nv18",
+      "where": "ferry_1 (20,5)"
+    },
+    {
+      "t": "2026-11-03T00:10:39.224Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:5 \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:42 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "ferry_1 (20,5)"
+    },
+    {
+      "t": "2026-11-03T00:10:47.137Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:48 \"¡Ñacurutú rival usó Confusión!\" anim dmg0:5 \"No es muy eficaz…\"",
+      "where": "ferry_1 (20,5)"
+    },
+    {
+      "t": "2026-11-03T00:10:49.881Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:7 \"¡Golpe crítico!\" faint \"¡Ñacurutú rival se debilitó!\" exp end",
+      "where": "ferry_1 (20,5)"
+    },
+    {
+      "t": "2026-11-03T00:10:52.597Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_1 (20,5)"
+    },
+    {
+      "t": "2026-11-03T00:10:55.927Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_1 (14,9)"
     }
   ]
 }
