@@ -361,11 +361,11 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('durazno', [trade('dur', 'tuco', 'coati', 'oldman', 'Coleccionista', 28, 16)]);
   put('melo', [trade('mel', 'garza', 'alacran', 'gaucho', 'Viajante', 34, 24)]);
   put('salto', [trade('sal', 'gaviota', 'tatadios', 'sailor', 'Marinero retirado', 26, 20)]);
-  put('paysandu', [trade('pay', 'pejerrey', 'cangrejo', 'sailor', 'Pescador del puerto', 22, 26)]);
+  put('paysandu', [trade('pay', 'pejerrey', 'cangrejo', 'sailor', 'Pescador del puerto', 44, 24)]);
   put('canelones', [trade('can', 'oruga', 'hormiga', 'maestra', 'Entomóloga', 26, 22)]);
   put('rocha', [trade('roc', 'chimango', 'comadreja', 'gaucho', 'Paisano', 26, 14)]);
   put('tacuarembo', [trade('tac', 'oveja', 'zorrigris', 'boy', 'Peón', 28, 22)]);
-  put('paysandu', [{ x: 30, y: 24, look: 'sailor', dir: 'down', name: 'Juez de pesca', script: 'ev_pesca' }, { x: 15, y: 26, look: 'oldman', dir: 'down', name: 'Pescador del muelle', script: 'gift_cana' }]);
+  put('paysandu', [{ x: 44, y: 16, look: 'sailor', dir: 'down', name: 'Juez de pesca', script: 'ev_pesca' }, { x: 44, y: 10, look: 'oldman', dir: 'down', name: 'Pescador del muelle', script: 'gift_cana' }]);
   const adiv = (id, prize, qty, look, name, x, y) => ({ x, y, look, dir: 'down', name, script: 'ev_adivino', tid: id, prize, qty });
   put('rivera', [adiv('riv', 'piedra_amatista', 1, 'oldman', 'Adivino de la frontera', 28, 30)]);
   put('artigas', [adiv('art', 'piedra_agata', 1, 'maestra', 'Maestra de acertijos', 26, 18)]);

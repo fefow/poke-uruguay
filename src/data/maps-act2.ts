@@ -8,11 +8,11 @@ import { parkTiles, PARK, CONTEST_CITY } from './events.ts';
 import { mapBand } from './route.ts';
 
 // ---------------------------------------------------------------- helpers
-const tr = (spot, look, id, name, cls, types, levels, [intro, lose, after], opts: any = {}) => ({
+export const tr = (spot, look, id, name, cls, types, levels, [intro, lose, after], opts: any = {}) => ({
   x: spot.x, y: spot.y, look, dir: opts.dir ?? spot.dir ?? 'down', sight: opts.sight ?? 4, ...(opts.cond ? { cond: opts.cond } : {}), ...(opts.gate ? { gate: true } : {}),
   trainer: TR(id, name, cls, opts.team ?? teamOf(types, levels, id), Math.round(levels[levels.length - 1] * 20), intro, lose, after, look),
 });
-const grunt = (spot, id, levels, intro, lose, after, opts: any = {}) => tr(spot, 'grunt', id, 'Recluta PP', 'Equipo PP', ['veneno', 'siniestro'], levels, [intro, lose, after], opts);
+export const grunt = (spot, id, levels, intro, lose, after, opts: any = {}) => tr(spot, 'grunt', id, 'Recluta PP', 'Equipo PP', ['veneno', 'siniestro'], levels, [intro, lose, after], opts);
 const npc = (x, y, look, text, extra = {}) => ({ x, y, look, text: [].concat(text), ...extra });
 const wander = (x, y, look, text) => npc(x, y, look, text, { wander: true });
 const house = (name, ...npcs) => room(HOUSE, { name, npcs });
@@ -78,7 +78,7 @@ const R3 = route({ seed: 'ruta3', w: 18, h: 48, axis: 'v', from: 9, to: 9, grass
 const PAY = city({
   seed: 'paysandu', w: 26, h: 18, sa: 6, sb: 13, road: 'c',
   a: [['houseO', 3, 'casa_pay'], ['poli', 10, 'poli_pay'], ['shop', 18, 'shop_pay']],
-  b: [['houseG', 6, 'casa_pay2'], ['houseB', 18, 'muelle_pay']],
+  b: [['houseG', 6, 'casa_pay2']],
   vroads: [14], nroads: [12], sroads: [14], decor: { '#': 8, q: 6, f: 10 },
   signs: [[16, 7]],
   exits: { n: 12, s: 14 },
@@ -336,7 +336,7 @@ export const ACT2_OUTDOOR: Record<string, MapDef> = {
     exits: { n: { to: 'ruta3' }, s: { to: 'ruta24' } },
     enc: { rate: 0.1, list: wildList(['normal', 'volador', 'tierra', 'agua'], 47, 49, 8, 'pay') },
     npcs: [
-      npc(20, 14, 'sailor', ['El muelle del puerto lo tomó el Equipo PP. Por ahí entra el material de las torres de niebla.', 'Si los echás, el capataz del puerto te lo va a agradecer.'], { dir: 'up', cond: (f) => !f.muelle_clear }),
+      npc(20, 14, 'sailor', ['El muelle largo del puerto lo tomó el Equipo PP. Por ahí entra el material de las torres de niebla.', 'Está tomado de punta a punta: para llegar al capataz hay que recorrerlo entero, y nadie te va a dejar pasar.'], { dir: 'up', cond: (f) => !f.muelle_clear }),
       npc(20, 14, 'sailor', ['El muelle volvió a trabajar con normalidad.'], { dir: 'up', cond: (f) => f.muelle_clear }),
       wander(8, 9, 'girl', ['El Puente Internacional une dos países. Yo lo crucé de chica.', 'Después de la niebla, todo se ve distinto.']),
       npc(18, 9, 'gaucho', ['Más al sur está Fray Bentos. Allí se construyó el frigorífico que cambió el mundo.', 'Hoy lo usan para otra cosa.'], { dir: 'down' }),
@@ -563,7 +563,6 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
   aduana_riv: eventRoom('aduana', 'Aduana de Rivera', 'ad', [[43, 44], [43, 44], [44, 45]], 'cop'),
   radio_sal: eventRoom('radio', 'Radio de Salto', 'ra', [[45, 46], [45, 46], [46, 47]], 'clerk'),
   refineria_dur: eventRoom('refineria', 'Depósito de la refinería', 're', [[47, 48], [48, 49], [48, 49]], 'clerk'),
-  muelle_pay: eventRoom('muelle', 'Muelle de Paysandú', 'mu', [[47, 48], [48, 49], [48, 49]], 'sailor'),
 
   // --- gyms
   gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_ancap', 'ancap', [

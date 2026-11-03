@@ -712,6 +712,7 @@ import { addRumors } from './rumors.ts';
 import { CUSTOM } from './custom-content.js';
 import { layoutGym } from './gym-layouts.ts';
 import { addFrayBentosStory } from './fraybentos.ts';
+import { addMuelleStory, clearPierFolk } from './muelle.ts';
 import { addCityEvents } from './events.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
@@ -787,7 +788,7 @@ export const ZONE_LEVELS = Object.fromEntries(CHAIN.map((id) => [id, mapBand(id)
  */
 const PLACES = {
   fraybentos: ['gym_frb', 'anglo_1', 'casa_frb_faro', 'ferry_1', 'ferry_2', 'ferry_c1', 'ferry_c2', 'ferry_c3', 'ferry_c4', 'ferry_c5', 'terminal_frb', 'ferry_3', 'ferry_cocina', 'ferry_bodega', 'ferry_deck', 'ferry_cap'],
-  paysandu: ['muelle_pay'],
+  paysandu: [],
   salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
   rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],
   tacuarembo: ['gym_tac', 'parrilla_tac', 'ciclovia'],
@@ -830,6 +831,7 @@ export function refGymOrder(mapId, maxLevel = 0) {
   return k < 0 ? GYM_STOPS.length : k + 1;
 }
 
+addMuelleStory(OUTDOOR.paysandu);
 (function retuneBuildings() {
   for (const [stop, ids] of Object.entries(PLACES)) {
     const [lo, hi] = stopBand(STOP_INDEX[stop]);
@@ -1419,5 +1421,6 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   // On the ferry every trainer notices the player from far away: the rooms are big and they must not be dodged.
   for (const [id, m] of Object.entries(INTERIOR) as [string, any][]) if (id.startsWith('ferry')) for (const n of m.npcs ?? []) if (n.trainer && !n.adjacent) n.sight = Math.max(n.sight ?? 3, 14);
   addCityEvents(OUTDOOR);
+  clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }
