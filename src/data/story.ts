@@ -405,22 +405,21 @@ export const SCRIPTS = {
   },
 
   async gift_ros(api) {
-    await api.say(['Pesqué en estos arroyos toda la vida.', 'Somos tres hermanos pescadores: uno vive en La Paloma, otro en Minas y el menor en Paysandú.', 'Cada uno te da una caña mejor, pero hay que ganársela con medallas.'], { name: 'Pescador retirado' });
+    await api.say(['Pesqué en estos arroyos toda la vida.', 'Somos tres hermanos pescadores: uno pesca en el muelle de Paysandú, otro vive en Minas y el menor tiene casa en Paysandú.', 'Cada uno te da una caña mejor, pero hay que ganársela con medallas.'], { name: 'Pescador retirado' });
   },
 
-  // Three rods, each handed out later in the story: Vieja (La Paloma), Buena (Minas), Súper (Paysandú).
+  // Three rods: Vieja (muelle de Paysandú), Buena (Minas), Súper (casa en Paysandú).
   async gift_cana(api) {
-    if (api.flag('got_cana')) return api.say('Parate frente al agua y apretá A. Con esta caña solo pican las criaturas más comunes. Mi hermano en Minas tiene una mejor.', { name: 'Pescador' });
-    if (api.badges() < 2) return api.say(['Soy pescador, como mis hermanos.', 'Todavía no te conozco. Volvé cuando tengas dos medallas y te presto una caña.'], { name: 'Pescador' });
-    await api.say(['Tantos años de pesca y todavía me sorprende el río.', 'Tomá esta caña vieja: con ella pican las criaturas más comunes, nada del otro mundo.'], { name: 'Pescador' });
+    if (api.flag('got_cana')) return api.say('Parate frente al agua y apretá A. Con esta caña solo pican las criaturas más comunes. Mi hermano en Minas tiene una mejor.', { name: 'Pescador del muelle' });
+    await api.say(['Hace años que pesco en este muelle y el río sigue sorprendiéndome.', 'Vi que andás de pueblo en pueblo sin una caña. Tomá esta: es vieja, pero sirve.'], { name: 'Pescador del muelle' });
     await api.give('cana_pescar', 1);
     api.setFlag('got_cana');
-    await api.say('Parate frente al agua y apretá el botón A. Con más medallas, mi hermano de Minas te dará una mejor.', { name: 'Pescador' });
+    await api.say('Parate frente al agua y apretá el botón A. Con esta caña solo pican las criaturas más comunes. Más adelante, mi hermano de Minas te dará una mejor.', { name: 'Pescador del muelle' });
   },
 
   async gift_cana2(api) {
     if (api.flag('got_cana2')) return api.say('Con la Caña Buena pican criaturas más grandes. La Súper Caña la tiene mi hermano menor, en Paysandú.', { name: 'Pescador' });
-    if (!api.flag('got_cana')) return api.say('Mi hermano de La Paloma tiene una caña para empezar. Pasá primero por ahí.', { name: 'Pescador' });
+    if (!api.flag('got_cana')) return api.say('En el muelle de Paysandú hay un pescador que regala una caña para empezar. Pasá primero por ahí.', { name: 'Pescador' });
     if (api.badges() < 3) return api.say(['Veo que ya sabés pescar.', 'Todavía te falta camino: volvé con tres medallas y te doy una caña buena.'], { name: 'Pescador' });
     await api.say(['Venís con tres medallas, y eso se nota en el trato con las criaturas.', 'Tomá: una caña buena, con mejor carnada.'], { name: 'Pescador' });
     await api.give('cana_buena', 1);
