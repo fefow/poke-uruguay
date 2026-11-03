@@ -1079,7 +1079,15 @@ async function saveToGitHub() {
       const cur = await fetch(`${url}?ref=main&t=${Date.now()}`, { headers, cache: 'no-store' });
       if (!cur.ok && cur.status !== 404) throw await ghError(cur);
       const meta = cur.ok ? await cur.json() : null;
-      const { text, result } = makeContent(meta ? b64decode(meta.content) : '');
+      // GitHub sends no content for files over 1 MB: read the raw file instead, and never go on with an empty read of a file that is not empty.
+      let current = meta ? b64decode(meta.content ?? '') : '';
+      if (meta && !current.trim() && meta.size > 0) {
+        const raw = await fetch(`${url}?ref=main&t=${Date.now()}`, { headers: { ...headers, Accept: 'application/vnd.github.raw+json' }, cache: 'no-store' });
+        if (!raw.ok) throw await ghError(raw);
+        current = await raw.text();
+        if (!current.trim()) throw new Error('No se pudo leer la copia actual de ' + file + ' en GitHub; no se guardó nada para no borrar tus dibujos.');
+      }
+      const { text, result } = makeContent(current);
       const body: any = { message, content: b64encode(text), branch: 'main' };
       if (meta) body.sha = meta.sha;
       const put = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body), cache: 'no-store' });
