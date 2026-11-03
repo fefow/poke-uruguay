@@ -11,7 +11,7 @@ import { T, TILE_INFO, tileCanvas, groundUnder } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.ts';
-import { CONTEST_CITY } from '../data/events.ts';
+import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
@@ -131,6 +131,7 @@ const gateFor = (id: string) => {
   }
   return SAFARI_GATE;
 };
+const fishLeft = () => ((state().contest as any)?.fish ? ((state().contest as any).until ?? 0) - Date.now() : 0);
 const safariLeft = () => (state().safari?.until ?? 0) - Date.now();
 // Park equipment goes back to the park when you leave.
 const safariStrip = () => { const S = state(); S.bag.safari_ball && delete S.bag.safari_ball; S.bag.cebo && delete S.bag.cebo; };
@@ -222,9 +223,28 @@ function safariClock() {
   }
 }
 
+/** Fishing contest countdown, shown while it runs. */
+function fishTimer() {
+  const C: any = state().contest;
+  let el = W_.fishTimerEl;
+  if (!C?.fish) { if (el) { el.remove(); W_.fishTimerEl = null; } return; }
+  const left = Math.max(0, C.until - Date.now());
+  if (!el || !el.isConnected) {
+    el = W_.fishTimerEl = h('div', { class: 'fish-timer' });
+    Object.assign(el.style, { position: 'fixed', top: '12px', right: '16px', padding: '8px 14px', background: 'rgba(10,30,50,.82)', color: '#fff', font: 'bold 22px monospace', borderRadius: '8px', zIndex: 20, pointerEvents: 'none' });
+    uiRoot().append(el);
+  }
+  const sec = Math.ceil(left / 1000);
+  const txt = left > 0 ? `🎣 ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : '🎣 ¡Tiempo! Volvé con el juez';
+  if (el.textContent !== txt) el.textContent = txt;
+  if (left > 0 && left <= 60000 && W_.fishWarned !== C.until) { W_.fishWarned = C.until; sfx('levelup'); toast('Concurso de pesca: queda 1 minuto.', 4000); }
+  if (left <= 0 && W_.fishOver !== C.until) { W_.fishOver = C.until; sfx('levelup'); toast('¡Tiempo! Volvé con el juez de pesca.', 6000); }
+}
+
 export function updateWorld(dt, now) {
   W_.anim += dt;
   if (W_.map.safari) safariClock();
+  fishTimer();
   const p = W_.player;
   // NPCs keep animating during scripts: trainers walking up to you or leaving the scene depend on it.
   for (const n of W_.npcs) updateNpc(n, now, dt);
@@ -764,6 +784,8 @@ async function fish() {
   if (!table) return say('Acá no parece haber nada que pescar.');
   const list = fishFor(table, rod);
   if (!state().party.some((c) => c.hp > 0)) return say('Tus criaturas están debilitadas. Mejor no arriesgarse.');
+  const contest = !!(state().contest as any)?.fish;
+  if (contest && fishLeft() <= 0) return say('Se terminó el tiempo del concurso. Llevale tu mejor pez al juez.');
   const pl = W_.player;
   const [dx, dy] = DIRS[pl.dir];
   const fs = (W_.fishing = { phase: 'cast', tx: pl.x + dx, ty: pl.y + dy, dx, dy, t0: null });
@@ -773,7 +795,7 @@ async function fish() {
     await say('Lanzaste la caña al agua…', { auto: 700 });
     to('wait');
     await wait(1100 + worldRng.int(0, 1500));
-    if (!worldRng.chance(0.75)) {
+    if (!worldRng.chance(contest ? 0.85 : 0.75)) {
       to('nothing');
       await wait(1100);
       W_.fishing = null;
@@ -787,6 +809,22 @@ async function fish() {
     W_.fishing = null;
   }
   const e = worldRng.weighted(list.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
+  if (contest) {
+    // Fishing contest: the catch goes straight to the box and is judged afterwards.
+    const S = state();
+    if (fishLeft() <= 0) return say('Llegó tarde: se acabó el tiempo y la línea quedó floja.');
+    const c = createCreature(e.sp, worldRng.int(e.lo, e.hi));
+    c.ot = S.player.id;
+    markCaught(c.species);
+    S.stats.caught++;
+    S.contest.uids.push(c.uid);
+    S.box.push(c);
+    sfx('catch');
+    await say(`¡Sacaste un ${SPECIES[c.species].name} de nivel ${c.level}! Vale ${contestScore(c)} puntos.`);
+    const left = Math.max(0, Math.ceil(fishLeft() / 1000));
+    toast(`Tiempo restante: ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`, 2500);
+    return;
+  }
   await wildBattle(e.sp, worldRng.int(e.lo, e.hi));
 }
 
@@ -1062,6 +1100,19 @@ export const api = {
     S.contest = null;
     S.safari = null;
     safariStrip();
+  },
+  /** Fishing contest: a countdown on the pier; catches go to the box and are judged afterwards. */
+  fishContestStart(minutes) { state().contest = { uids: [], fish: true, until: Date.now() + minutes * 60000 } as any; },
+  fishContestRunning: () => !!(state().contest as any)?.fish,
+  fishContestLeft: () => Math.max(0, fishLeft()),
+  fishContestEnd() { state().contest = null; },
+  fishContestFinish(keepUid) {
+    const S = state();
+    const ids = new Set(S.contest?.uids ?? []);
+    const pick = S.box.find((c) => c.uid === keepUid);
+    S.box = S.box.filter((c) => !ids.has(c.uid));
+    if (pick) { if (S.party.length < PARTY_MAX) S.party.push(pick); else S.box.push(pick); }
+    S.contest = null;
   },
   markSeen: (sp) => markSeen(sp),
   openShop: (stock) => openShop(stock),

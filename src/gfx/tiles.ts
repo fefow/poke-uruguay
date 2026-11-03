@@ -1556,13 +1556,19 @@ export function sitsInWater(tiles, x, y) {
 }
 
 /** Ground tiles an object may stand on, besides grass, and what they are called when counting neighbours. */
-const BASES = { s: 's', '=': '=', c: 'c', '_': '_', '?': '?', '0': '0', '-': '0', ':': '0', '/': '0', '`': '`' };
+const BASES = { s: 's', '=': '=', c: 'c', '_': '_', '?': '?', '0': '0', '-': '0', ':': '0', '/': '0', '`': '`', b: 'b' };
 /**
  * What an object tile stands on: '~' (water), a ground char ('s' sand, '=' path, 'c' cobbles, '_' pavement,
  * '0' asphalt, '`' ash) or false for the usual grass. Objects are drawn transparent over that ground, so the same
  * sprite works on grass, sand, a path, the shore of a lake...
  */
 export function groundUnder(tiles, x, y): string | boolean {
+  const ch0 = tiles[y][x];
+  if (TILE_INFO[ch0]?.over) { // an object on a boardwalk stands on planks, even at the edge of the pier
+    let planks = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx || dy) && tiles[y + dy]?.[x + dx] === 'b') planks++;
+    if (planks >= 3) return 'b';
+  }
   if (sitsInWater(tiles, x, y)) return '~';
   const ch = tiles[y][x];
   if (!TILE_INFO[ch]?.over) return false;

@@ -201,7 +201,7 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
         api.setFlag('ev_concurso');
         return api.say('No atrapaste nada, así que no hay nada que juzgar. Gracias por participar.', { name: who });
       }
-      const opts = mine.map((c) => `${c.name} Nv.${c.level} · ${contestScore(c)} pts`);
+      const opts = mine.map((c) => `${SPECIES[c.species].name} Nv.${c.level} · ${contestScore(c)} pts`);
       await api.say('Elegí la criatura que presentás. Es la que te quedás; las demás vuelven al parque.', { name: who, keep: true });
       const k = await api.choose(opts, { cancel: false });
       const pick = mine[k];
@@ -218,7 +218,7 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
       else if (place === 2) { await api.say('Segundo puesto. Muy bien.', { name: who }); await api.give('alfajor_triple', 1); await api.give('superesfera', 3); }
       else if (place === 3) { await api.say('Tercer puesto.', { name: who }); await api.give('mate_dulce', 3); }
       else { await api.say('Quedaste cuarto, pero participar suma. Una compensación.', { name: who }); await api.give('superesfera', 2); }
-      return api.say(`Quedate con ${pick.name}. Fue un placer.`, { name: who });
+      return api.say(`Quedate con ${SPECIES[pick.species].name}. Fue un placer.`, { name: who });
     }
     void entered;
     await api.say(['Concurso de captura del Parque de Canelones: una sola participación.', 'Te damos 20 balls del parque y 8 minutos. Atrapá criaturas dentro del parque; al final elegís una y los jueces la puntúan.', 'Se puntúa el nivel, lo rara que es, sus características y cuánta salud conserva al atraparla.'], { name: who });
@@ -266,38 +266,43 @@ Object.assign(EVENT_SCRIPTS, {
   async ev_pesca(api) {
     const who = 'Juez de pesca';
     if (api.flag('ev_pesca')) return api.say('El concurso de este año ya tiene ganador: vos. Gracias por participar.', { name: who });
-    if (!api.hasItem('cana_pescar') && !api.hasItem('cana_buena') && !api.hasItem('cana_super')) return api.say('Concurso de pesca del río. Hace falta una caña para anotarse.', { name: who });
-    await api.say(['Concurso de pesca del Uruguay: cinco lanzadas. Cuando pique, tenés que recoger rápido; cuanto antes recojas, más pesa lo que sacás.', 'El pique no avisa mucho. Mirá bien el agua.'], { name: who });
-    if (!(await api.ask('¿Te anotás?', { name: who }))) return;
-    let score = 0;
-    for (let i = 1; i <= 5; i++) {
-      await api.say(`Lanzada ${i} de 5…`, { name: who });
-      await api.wait(1300 + Math.floor(Math.random() * 2600));
-      api.sfx('encounter');
-      const t0 = Date.now();
-      await api.ask('¡Algo tira de la línea! ¿Recogés?', { name: who });
-      const ms = Date.now() - t0;
-      const pts = ms <= 1500 ? 3 : ms <= 2600 ? 2 : 1;
-      score += pts;
-      await api.say(pts === 3 ? 'Un dorado enorme, de más de dos kilos.' : pts === 2 ? 'Un buen pejerrey.' : 'Casi se escapa. Salió una mojarra.', { name: who });
+    const running = api.fishContestRunning();
+    if (!running) {
+      if (!api.hasItem('cana_pescar') && !api.hasItem('cana_buena') && !api.hasItem('cana_super')) return api.say('Concurso de pesca del río. Hace falta una caña para anotarse. El pescador de la playa regala una vieja.', { name: who });
+      await api.say(['Concurso de pesca del Uruguay: una sola participación, 5 minutos de reloj.', 'Pescá desde el muelle: parate frente al agua y apretá A. Cada pez que saques queda registrado.', 'Al final, o cuando quieras entregar, volvé conmigo y elegí el mejor. Se puntúa nivel, rareza, características y estado.', 'Lo que saques depende de tu caña: la vieja solo trae lo más común.'], { name: who });
+      if (!(await api.ask('¿Te anotás?', { name: who }))) return;
+      api.fishContestStart(5);
+      api.sfx('confirm');
+      return api.say('¡Empieza el reloj! Pescá todo lo que puedas.', { name: who });
     }
-    await api.say(`Puntaje final: ${score} de 15.`, { name: who });
-    if (score < 6) return api.say('No alcanza para el podio. Podés anotarte de nuevo cuando quieras.', { name: who });
+    const mine = api.contestCreatures();
+    const left = api.fishContestLeft();
+    if (left > 0) {
+      if (!mine.length) return api.say(`Te quedan ${Math.ceil(left / 1000)} segundos y todavía no sacaste nada. Parate frente al agua y apretá A.`, { name: who });
+      if (!(await api.ask(`Te quedan ${Math.ceil(left / 1000)} segundos. ¿Entregás ahora?`, { name: who }))) return;
+    } else await api.say('¡Tiempo! Veamos qué sacaste.', { name: who });
+    if (!mine.length) {
+      api.fishContestEnd();
+      return api.say('No sacaste nada, así que no hay nada que juzgar. Podés anotarte otra vez cuando quieras.', { name: who });
+    }
+    const opts = mine.map((c) => `${SPECIES[c.species].name} Nv.${c.level} · ${contestScore(c)} pts`);
+    await api.say('Elegí el pez que presentás. Es el que te quedás; los demás vuelven al río.', { name: who, keep: true });
+    const k = await api.choose(opts, { cancel: false });
+    const pick = mine[k];
+    const score = contestScore(pick);
+    const hi = topOf('paysandu');
+    const rivals = [['Tomás', hi * 3 + 120], ['Doña Elba', hi * 3 + 95], ['Roque', hi * 3 + 75]] as [string, number][];
+    const table = [...rivals, ['Vos', score] as [string, number]].sort((a, b) => b[1] - a[1]);
+    const place = table.findIndex(([n]) => n === 'Vos') + 1;
+    await api.say(['Resultados:', ...table.map(([n, p], i) => `${i + 1}.º ${n}: ${p} puntos`)], { name: who });
+    api.fishContestFinish(pick.uid);
     api.setFlag('ev_pesca');
     api.sfx('catch');
-    if (score >= 12) {
-      await api.say('Primer puesto. Es un récord para el río.', { name: who });
-      if (!api.hasItem('cana_super')) await api.give(api.hasItem('cana_buena') ? 'cana_super' : 'cana_buena', 1);
-      await api.give('ultraesfera', 3);
-    } else if (score >= 9) {
-      await api.say('Segundo puesto. Una pesca muy pareja.', { name: who });
-      await api.give('superesfera', 3);
-      await api.give('alfajor_triple', 1);
-    } else {
-      await api.say('Tercer puesto. Lo importante es participar.', { name: who });
-      await api.give('superesfera', 2);
-    }
+    await api.say(place === 1 ? '¡Primer puesto! Un récord para el río.' : `Quedaste ${place}.º, pero el premio es para todos los que presentan un buen pez.`, { name: who });
+    await api.say(`El premio: ${SPECIES[pick.species].name}, que ahora es tuyo, y una garrapiñada.`, { name: who });
+    await api.give('garrapinada', 1);
   },
+
 });
 
 // ---------------------------------------------------------------- bike race (Ciclovía de Tacuarembó)
@@ -365,7 +370,7 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
   put('canelones', [trade('can', 'oruga', 'hormiga', 'maestra', 'Entomóloga', 26, 22)]);
   put('rocha', [trade('roc', 'chimango', 'comadreja', 'gaucho', 'Paisano', 26, 14)]);
   put('tacuarembo', [trade('tac', 'oveja', 'zorrigris', 'boy', 'Peón', 28, 22)]);
-  put('paysandu', [{ x: 44, y: 16, look: 'sailor', dir: 'down', name: 'Juez de pesca', script: 'ev_pesca' }, { x: 44, y: 10, look: 'oldman', dir: 'down', name: 'Pescador del muelle', script: 'gift_cana' }]);
+  put('paysandu', [{ x: 44, y: 10, look: 'oldman', dir: 'down', name: 'Pescador del muelle', script: 'gift_cana' }]);
   const adiv = (id, prize, qty, look, name, x, y) => ({ x, y, look, dir: 'down', name, script: 'ev_adivino', tid: id, prize, qty });
   put('rivera', [adiv('riv', 'piedra_amatista', 1, 'oldman', 'Adivino de la frontera', 28, 30)]);
   put('artigas', [adiv('art', 'piedra_agata', 1, 'maestra', 'Maestra de acertijos', 26, 18)]);
