@@ -27,7 +27,7 @@ const CUSTOM_FILE = 'src/data/custom-content.js';
 const MAX_UNDO = 60;
 
 // ---------------------------------------------------------------- catalogue
-const DIRS = [['down', 'Abajo'], ['up', 'Arriba'], ['left', 'Izquierda'], ['right', 'Derecha']];
+const DIRS = [['down', 'Abajo'], ['left', 'Izquierda'], ['right', 'Derecha'], ['up', 'Arriba']];
 const MEDALS = ['Montevideo', 'Maldonado', 'Treinta y Tres', 'Durazno', 'Tacuarembó', 'Rivera', 'Salto', 'Fray Bentos'];
 const THEME_NAMES = { poli: 'Policlínica', gym_agua: 'Gimnasio Agua', gym_elec: 'Gimnasio Eléctrico', gym_roca: 'Gimnasio Roca' };
 const lookName = (k) => k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
@@ -798,7 +798,7 @@ async function importSheet(file: File) {
   const rebuild = () => {
     const nc = +cols.value || 1, nr = +rows.value || 1;
     grid.replaceChildren(
-      ...[['down', 'Abajo', 0], ['up', 'Arriba', 1], ['left', 'Izquierda', 2], ['right', 'Derecha', 3]].map(([d, t, def]: any) => { const [, x] = sel(t, def, nr); dirRow[d] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Fila de «${t}»` }), x); }),
+      ...[['down', 'Abajo', 0], ['left', 'Izquierda', 1], ['right', 'Derecha', 2], ['up', 'Arriba', 3]].map(([d, t, def]: any) => { const [, x] = sel(t, def, nr); dirRow[d] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Fila de «${t}»` }), x); }),
       ...[1, 2, 3, 4].map((n, i) => { const [, x] = sel(`Paso ${n}`, [0, 1, 2, 3][i], nc); stepCol[i] = x; return h('label', { class: 'ed-field' }, h('span', { text: `Columna del paso ${n} (1 = parado)` }), x); }));
   };
   const grid = h('div', { class: 'ed-sheet-grid' });
@@ -825,7 +825,7 @@ async function importSheet(file: File) {
     return e < 0 ? null : { x: x0 + a, y: y0 + b, w: e - a + 1, h: f - b + 1 };
   };
   const picks = [];
-  for (const d of ['down', 'up', 'left', 'right']) for (let i = 0; i < 4; i++) picks.push({ d, i, box: cell(+dirRow[d].value, +stepCol[i].value) });
+  for (const d of ['down', 'left', 'right', 'up']) for (let i = 0; i < 4; i++) picks.push({ d, i, box: cell(+dirRow[d].value, +stepCol[i].value) });
   const boxes = picks.map((p) => p.box).filter(Boolean) as any[];
   if (!boxes.length) return status('La hoja no tiene dibujos en esas celdas.', 'warn');
   const k = Math.min(16 / Math.max(...boxes.map((q) => q.w)), 17 / Math.max(...boxes.map((q) => q.h)), 1);
