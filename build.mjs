@@ -6,6 +6,7 @@ import { build } from 'esbuild';
 import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
 
 await mkdir('dist/styles', { recursive: true });
+await import('./tools/text-index.mjs'); // refreshes src/gen/text-index.js (every text line of the game)
 const result = await build({
   entryPoints: ['src/main.ts'],
   bundle: true,
@@ -70,6 +71,15 @@ const mapEditor = await build({
 await writeFile('dist/map-editor.js', mapEditor.outputFiles[0].text);
 await copyFile('styles/map-editor.css', 'dist/styles/map-editor.css');
 await writeFile('dist/map-editor.html', (await readFile('map-editor.html', 'utf8')).replace('src="src/map-editor/main.ts"', 'src="map-editor.js"'));
+
+// Text editor (texts.html): every dialogue line; writes src/data/text-overrides.js.
+const textEditor = await build({
+  entryPoints: ['src/text-editor/main.ts'], bundle: true, minify: true, format: 'esm', target: ['chrome120', 'firefox121', 'safari17'], write: false, legalComments: 'none',
+  define: { __QA__: process.env.QA ? 'true' : 'false' },
+});
+await writeFile('dist/text-editor.js', textEditor.outputFiles[0].text);
+await copyFile('styles/text-editor.css', 'dist/styles/text-editor.css');
+await writeFile('dist/texts.html', (await readFile('texts.html', 'utf8')).replace('src="src/text-editor/main.ts"', 'src="text-editor.js"'));
 
 // Single file: CSS + JS inlined, no external files except Google Fonts.
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];

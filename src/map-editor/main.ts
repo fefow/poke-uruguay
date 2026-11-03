@@ -116,6 +116,7 @@ const saveBtn = btn('Guardar en el juego', () => saveToGitHub(), { class: 'ed-bt
 const head = h('header', { class: 'ed-head' },
   h('div', { class: 'ed-brand' }, h('b', { text: 'Poke Uruguay' }), h('span', { text: 'Editor de mapas' })),
   h('a', { class: 'ed-btn ed-mini', href: 'editor.html', text: 'Editor de sprites' }),
+  h('a', { class: 'ed-btn ed-mini', href: 'texts.html', text: 'Editor de textos' }),
   pending,
   h('div', { class: 'ed-actions' }, undoBtn, redoBtn, resetBtn, btn('Descargar', () => download()), saveBtn));
 

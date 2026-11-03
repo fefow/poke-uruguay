@@ -1,6 +1,7 @@
 // DOM overlay UI: dialog box with typewriter, choice lists, panels, toasts.
 // All text goes through textContent (no innerHTML with dynamic strings).
 import { h, wait } from '../core/util.ts';
+import { TEXT_OVERRIDES } from '../data/text-overrides.js';
 import { input } from '../core/input.ts';
 import { sfx } from '../core/audio.ts';
 import { settings, state } from './state.ts';
@@ -60,7 +61,7 @@ const SPEEDS = { 1: 38, 2: 18, 3: 4 };
 export async function say(text, opts: { battle?: boolean; keep?: boolean; [k: string]: any } = {}) {
   const lines = Array.isArray(text) ? text : [text];
   for (let li = 0; li < lines.length; li++) {
-    const msg = fmt(lines[li]);
+    const msg = fmt(TEXT_OVERRIDES[lines[li]] ?? lines[li]);
     dialog.hidden = false;
     dialog.classList.toggle('is-battle', !!opts.battle);
     dialogName.hidden = !opts.name;
