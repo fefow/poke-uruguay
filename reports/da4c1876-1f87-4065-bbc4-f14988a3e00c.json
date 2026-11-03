@@ -1,11 +1,11 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-03T00:10:59.242Z",
+  "exported": "2026-11-03T00:13:11.431Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "ferry_1 (6,9)",
+    "where": "ferry_2 (7,3)",
     "party": [
       "curupi nv35 91PS",
       "lobomarino nv27 89PS",
@@ -15,51 +15,9 @@
       "cerro nv20 71PS"
     ],
     "badges": 2,
-    "playtime": 9607
+    "playtime": 9671
   },
   "entries": [
-    {
-      "t": "2026-11-02T15:30:25.437Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Ñandú rival usó Ataque Rápido!\" anim dmg0:7 \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:39",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T15:30:28.817Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:2 faint \"¡Ñandú rival se debilitó!\" exp foeNext",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:23:20.377Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Tejubrasa usó Ascuas!\" anim dmg1:38 \"¡Golpe crítico!\" statusAnim hud \"¡Tuco rival está quemado!\" \"¡Tuco rival usó Campo Arado!\" anim dmg0:16 \"¡Es súper eficaz!\" statusAnim dmg1:5 \"Tuco rival sufre por la quemadura.\"",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:23:25.975Z",
-      "level": "info",
-      "msg": "Turno 4: move #2 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:1 faint \"¡Tuco rival se debilitó!\" exp end",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:23:28.652Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:23:30.280Z",
-      "level": "info",
-      "msg": "Batalla vs Remera Paula: hornerito nv16, oruga nv16, hormiga nv17",
-      "where": "mercedes (19,20)"
-    },
-    {
-      "t": "2026-11-02T21:23:34.444Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:33 \"¡Hornero rival usó Ataque Ala!\" anim dmg0:11",
-      "where": "mercedes (19,20)"
-    },
     {
       "t": "2026-11-02T21:23:37.372Z",
       "level": "info",
@@ -2427,10 +2385,53 @@
       "where": "ferry_1 (20,5)"
     },
     {
-      "t": "2026-11-03T00:10:55.927Z",
+      "t": "2026-11-03T00:11:35.152Z",
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_1 (14,9)",
+      "count": 6
+    },
+    {
+      "t": "2026-11-03T00:12:49.949Z",
+      "level": "info",
+      "msg": "Entró a ferry_2",
       "where": "ferry_1 (14,9)"
+    },
+    {
+      "t": "2026-11-03T00:12:53.374Z",
+      "level": "info",
+      "msg": "Batalla vs Azafata Lorena: teruterazo nv18, criollo nv18",
+      "where": "ferry_2 (20,3)"
+    },
+    {
+      "t": "2026-11-03T00:12:56.792Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:51 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
+      "where": "ferry_2 (20,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:01.467Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Ñacurutú usó Pico Taladro!\" anim dmg1:52 faint \"¡Criollo rival se debilitó!\" exp end",
+      "where": "ferry_2 (20,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:03.716Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_2 (20,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:07.939Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_2 (11,3)"
+    },
+    {
+      "t": "2026-11-03T00:13:08.581Z",
+      "level": "info",
+      "msg": "Batalla vs Don Aníbal: nandulin nv18, aguaraflama nv18",
+      "where": "ferry_2 (7,3)"
     }
   ]
 }
