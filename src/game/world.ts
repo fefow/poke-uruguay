@@ -702,6 +702,7 @@ async function legendEncounter(L) {
 
 async function cutBush(x, y) {
   if (!hasItem('machete')) return say('Un zarzal espeso y espinoso. Con algo filoso se podría abrir paso.');
+  if (W_.map.id === 'fraybentos' && !flag(badgeOf('fraybentos'))) return say('Un zarzal espeso. Para usar el Machete hace falta la Medalla de Fray Bentos.');
   if (W_.map.id !== 'fraybentos' && !flag(badgeOf('salto'))) return say('Un zarzal espeso. El Machete no alcanza todavía: hace falta la Medalla Salto.');
   await say('Un zarzal espeso. Con el Machete se puede abrir paso.');
   if (!(await ask('¿Cortar el zarzal?'))) return;
@@ -1074,6 +1075,8 @@ export const api = {
     }
   },
   hallOfFame: () => import('./scenes.ts').then((m) => m.hallOfFame()),
+  /** Story cinematic by name (see game/cinematics.ts). */
+  cinematic: (name) => import('./cinematics.ts').then((m) => m.playStoryScene(name)),
   credits: async () => {
     const m = await import('./scenes.ts');
     await m.credits();

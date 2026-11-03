@@ -815,6 +815,9 @@ export const SCRIPTS = {
   /** A neutral worker kept inside the Anglo by the PP: returns his lost badge, gives the Buquebus ticket. */
   async obrero_anglo(api) {
     if (api.flag('got_ticket')) return api.say('Gracias por la credencial. Cuando salgas de este laberinto, subí al barco con el ticket.', { name: 'Operario' });
+    if (api.hasItem('credencial_anglo') && !api.flag('anglo_pp')) {
+      return api.say(['¡Esa es mi credencial! Pero con la jefa de la banda acá adentro no puedo despachar ningún pasaje.', 'Si ella se va, el ticket es tuyo. Quedate con la credencial hasta entonces.'], { name: 'Operario' });
+    }
     if (api.hasItem('credencial_anglo')) {
       await api.say('¡Esa es mi credencial! Estaba perdida en alguna de las cintas.', { name: 'Operario' });
       api.takeItem('credencial_anglo');
@@ -834,7 +837,7 @@ export const SCRIPTS = {
     api.takeItem('mate');
     api.sfx('heal');
     await api.say('{player} le dio el Mate al capitán. Poco a poco recupera el color.');
-    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá este machete: lo uso para abrir paso entre los zarzales del muelle viejo.', 'Se usa parándote frente al zarzal y apretando A. Los de la salida de Fray Bentos te los abre sin problema; en los caminos más al norte la guardia solo deja cortar a quien ganó la Medalla Salto.'], { name: 'Capitán' });
+    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá este machete: lo uso para abrir paso entre los zarzales del muelle viejo.', 'Se usa parándote frente al zarzal y apretando A. En Fray Bentos la guardia solo deja cortar a quien ganó la Medalla de este pueblo; en los caminos más al norte, a quien ganó la Medalla Salto.'], { name: 'Capitán' });
     await api.give('machete', 1);
     api.setFlag('got_machete');
     await api.say('También te dejo unas Pokeballs y unos panes que el barco no va a usar.', { name: 'Capitán' });
@@ -845,8 +848,9 @@ export const SCRIPTS = {
     api.setFlag('ferry_done');
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
     await api.warp('fraybentos', 3, 24, 'down');
-    await api.say('Desde el muelle mirás cómo el Buquebus "China Zorrilla" se aleja. No va a volver a este puerto.');
-    await api.say('Con el Machete ya podés abrir los zarzales de la salida norte de Fray Bentos, camino a Young.');
+    await api.cinematic('ship_leaves');
+    await api.say('El Buquebus "China Zorrilla" ya no se ve en el río. No va a volver a este puerto.');
+    await api.say('Con el Machete vas a poder abrir los zarzales de la salida norte de Fray Bentos cuando ganes la Medalla del gimnasio del pueblo.');
   },
 
   /** The Ánima of Melo's tower: the Sereno who still keeps watch. Calmed after a battle, it asks for the PP piece to be gone. */

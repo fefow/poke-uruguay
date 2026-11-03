@@ -1416,6 +1416,8 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
     for (const [tx, ty] of [[x, 0], [x - 1, 1], [x, 1], [x + 1, 1]]) if (fb.tiles[ty][tx] !== '#') put(tx, ty, '%');
   }
   addFrayBentosStory(fb);
+  // On the ferry every trainer notices the player from far away: the rooms are big and they must not be dodged.
+  for (const [id, m] of Object.entries(INTERIOR) as [string, any][]) if (id.startsWith('ferry')) for (const n of m.npcs ?? []) if (n.trainer && !n.adjacent) n.sight = Math.max(n.sight ?? 3, 14);
   addCityEvents(OUTDOOR);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }
