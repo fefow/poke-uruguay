@@ -1,71 +1,23 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-03T00:22:36.240Z",
+  "exported": "2026-11-03T00:23:35.334Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "ferry_cap (4,4)",
+    "where": "fraybentos (11,20)",
     "party": [
       "curupi nv42 120PS",
       "lobomarino nv27 89PS",
-      "tejubrasa nv25 37PS",
+      "tejubrasa nv25 65PS",
       "lechuza nv13 36PS",
       "cascarudo nv11 36PS",
       "cerro nv20 71PS"
     ],
     "badges": 2,
-    "playtime": 10235
+    "playtime": 10294
   },
   "entries": [
-    {
-      "t": "2026-11-02T22:23:39.084Z",
-      "level": "info",
-      "msg": "Batalla salvaje: luciernito nv14",
-      "where": "r_palmitas_mercedes (44,17)"
-    },
-    {
-      "t": "2026-11-02T22:23:43.278Z",
-      "level": "info",
-      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
-      "where": "r_palmitas_mercedes (44,17)"
-    },
-    {
-      "t": "2026-11-02T22:23:43.893Z",
-      "level": "info",
-      "msg": "Fin de batalla: run",
-      "where": "r_palmitas_mercedes (44,17)"
-    },
-    {
-      "t": "2026-11-02T22:23:44.584Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
-      "where": "r_palmitas_mercedes (44,17)"
-    },
-    {
-      "t": "2026-11-02T22:23:47.468Z",
-      "level": "info",
-      "msg": "Batalla salvaje: tucotuco nv15",
-      "where": "r_palmitas_mercedes (46,13)"
-    },
-    {
-      "t": "2026-11-02T22:23:50.540Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:27 \"¡Tucotuco salvaje usó Bofetón Lodo!\" anim dmg0:4 stat \"¡Bajó la Precisión de Lobo Marino!\"",
-      "where": "r_palmitas_mercedes (46,13)"
-    },
-    {
-      "t": "2026-11-02T22:23:53.903Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:21 faint \"¡Tucotuco salvaje se debilitó!\" exp end",
-      "where": "r_palmitas_mercedes (46,13)"
-    },
-    {
-      "t": "2026-11-02T22:23:56.273Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_palmitas_mercedes (46,13)"
-    },
     {
       "t": "2026-11-02T22:23:56.585Z",
       "level": "warn",
@@ -2432,6 +2384,55 @@
       "level": "info",
       "msg": "Entró a ferry_cap",
       "where": "ferry_deck (9,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:44.880Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "ferry_cap (4,4)"
+    },
+    {
+      "t": "2026-11-03T00:22:49.866Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "fraybentos (17,20)"
+    },
+    {
+      "t": "2026-11-03T00:22:53.735Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)"
+    },
+    {
+      "t": "2026-11-03T00:23:07.993Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "fraybentos (35,14)"
+    },
+    {
+      "t": "2026-11-03T00:23:08.499Z",
+      "level": "info",
+      "msg": "Entró a anglo_1",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-03T00:23:25.994Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "anglo_1 (13,12)",
+      "count": 3
+    },
+    {
+      "t": "2026-11-03T00:23:29.658Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "anglo_1 (15,23)"
+    },
+    {
+      "t": "2026-11-03T00:23:31.995Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "fraybentos (26,15)"
     }
   ]
 }
