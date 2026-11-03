@@ -1,155 +1,23 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-03T00:21:11.452Z",
+  "exported": "2026-11-03T00:22:36.240Z",
   "build": "7a47cb6bb14f559e",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
   "state": {
     "mode": "game",
-    "where": "ferry_bodega (2,6)",
+    "where": "ferry_cap (4,4)",
     "party": [
       "curupi nv42 120PS",
       "lobomarino nv27 89PS",
-      "tejubrasa nv24 63PS",
+      "tejubrasa nv25 37PS",
       "lechuza nv13 36PS",
       "cascarudo nv11 36PS",
       "cerro nv20 71PS"
     ],
     "badges": 2,
-    "playtime": 10151
+    "playtime": 10235
   },
   "entries": [
-    {
-      "t": "2026-11-02T22:22:14.305Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Aguaraflama rival usó Mordisco!\" anim dmg0:7 \"No es muy eficaz…\" \"¡Lobo Marino usó Hidropulso!\" anim dmg1:22 \"¡Es súper eficaz!\" faint \"¡Aguaraflama rival se debilitó!\" exp end",
-      "where": "r_palmitas_mercedes (37,10)"
-    },
-    {
-      "t": "2026-11-02T22:22:21.316Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_palmitas_mercedes (37,10)"
-    },
-    {
-      "t": "2026-11-02T22:22:23.041Z",
-      "level": "info",
-      "msg": "Batalla salvaje: tatu nv12",
-      "where": "r_palmitas_mercedes (37,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:26.922Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:39 \"¡Golpe crítico!\" faint \"¡Tatú salvaje se debilitó!\" exp end",
-      "where": "r_palmitas_mercedes (37,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:29.793Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_palmitas_mercedes (37,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:31.588Z",
-      "level": "info",
-      "msg": "Batalla vs Recluta PP: oruga nv15, aguaraflama nv15",
-      "where": "r_palmitas_mercedes (38,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:35.880Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Lobo Marino usó Hidropulso!\" anim dmg1:25 \"¡Oruga rival usó Picadura!\" anim dmg0:4 \"No es muy eficaz…\"",
-      "where": "r_palmitas_mercedes (38,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:38.706Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Lobo Marino usó Hidropulso!\" anim dmg1:16 faint \"¡Oruga rival se debilitó!\" exp foeNext",
-      "where": "r_palmitas_mercedes (38,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:44.950Z",
-      "level": "info",
-      "msg": "Turno 3: move #1 | \"¡Aguaraflama rival usó Mordisco!\" anim dmg0:7 \"No es muy eficaz…\" \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:47 \"¡Es súper eficaz!\" faint \"¡Aguaraflama rival se debilitó!\" exp end",
-      "where": "r_palmitas_mercedes (38,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:50.738Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_palmitas_mercedes (38,9)"
-    },
-    {
-      "t": "2026-11-02T22:22:53.628Z",
-      "level": "info",
-      "msg": "Batalla salvaje: luciernito nv13",
-      "where": "r_palmitas_mercedes (37,10)"
-    },
-    {
-      "t": "2026-11-02T22:22:58.386Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:28 \"¡Golpe crítico!\" \"No es muy eficaz…\" \"¡Luciérnaga salvaje usó Picadura!\" anim dmg0:3 \"No es muy eficaz…\"",
-      "where": "r_palmitas_mercedes (37,10)"
-    },
-    {
-      "t": "2026-11-02T22:23:02.757Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:5 \"No es muy eficaz…\" faint \"¡Luciérnaga salvaje se debilitó!\" exp end",
-      "where": "r_palmitas_mercedes (37,10)"
-    },
-    {
-      "t": "2026-11-02T22:23:05.405Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_palmitas_mercedes (37,10)"
-    },
-    {
-      "t": "2026-11-02T22:23:08.091Z",
-      "level": "info",
-      "msg": "Batalla salvaje: luciernito nv14",
-      "where": "r_palmitas_mercedes (43,11)"
-    },
-    {
-      "t": "2026-11-02T22:23:11.555Z",
-      "level": "info",
-      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
-      "where": "r_palmitas_mercedes (43,11)"
-    },
-    {
-      "t": "2026-11-02T22:23:11.982Z",
-      "level": "info",
-      "msg": "Fin de batalla: run",
-      "where": "r_palmitas_mercedes (43,11)"
-    },
-    {
-      "t": "2026-11-02T22:23:21.630Z",
-      "level": "info",
-      "msg": "Batalla salvaje: tucotuco nv13",
-      "where": "r_palmitas_mercedes (39,12)"
-    },
-    {
-      "t": "2026-11-02T22:23:25.083Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:24 \"¡Tucotuco salvaje usó Bofetón Lodo!\" anim dmg0:4 stat \"¡Bajó la Precisión de Lobo Marino!\"",
-      "where": "r_palmitas_mercedes (39,12)"
-    },
-    {
-      "t": "2026-11-02T22:23:28.971Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Lobo Marino usó Golpe Karate!\" anim dmg1:18 faint \"¡Tucotuco salvaje se debilitó!\" exp end",
-      "where": "r_palmitas_mercedes (39,12)"
-    },
-    {
-      "t": "2026-11-02T22:23:33.019Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "r_palmitas_mercedes (39,12)"
-    },
-    {
-      "t": "2026-11-02T22:23:38.585Z",
-      "level": "warn",
-      "msg": "Autoguardado falló: Estado inválido: Equipo #1: Lobo Marino no puede existir con nivel 20",
-      "where": "r_palmitas_mercedes (42,17)"
-    },
     {
       "t": "2026-11-02T22:23:39.084Z",
       "level": "info",
@@ -2432,6 +2300,138 @@
       "level": "warn",
       "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
       "where": "ferry_bodega (18,1)"
+    },
+    {
+      "t": "2026-11-03T00:21:13.442Z",
+      "level": "info",
+      "msg": "Entró a ferry_2",
+      "where": "ferry_bodega (11,9)"
+    },
+    {
+      "t": "2026-11-03T00:21:13.981Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_2 (1,3)"
+    },
+    {
+      "t": "2026-11-03T00:21:19.665Z",
+      "level": "info",
+      "msg": "Entró a ferry_3",
+      "where": "ferry_2 (27,4)"
+    },
+    {
+      "t": "2026-11-03T00:21:19.981Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_3 (10,10)"
+    },
+    {
+      "t": "2026-11-03T00:21:21.550Z",
+      "level": "info",
+      "msg": "Entró a ferry_deck",
+      "where": "ferry_3 (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:21:24.756Z",
+      "level": "info",
+      "msg": "Batalla vs Marinero Toribio: lobito nv21, caudillo nv21",
+      "where": "ferry_deck (8,5)"
+    },
+    {
+      "t": "2026-11-03T00:21:29.238Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Ataque Ala!\" anim dmg1:53 faint \"¡Lobo Fino rival se debilitó!\" exp foeNext",
+      "where": "ferry_deck (8,5)"
+    },
+    {
+      "t": "2026-11-03T00:21:34.749Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Ñacurutú usó Ataque Ala!\" anim dmg1:65 \"¡Es súper eficaz!\" faint \"¡Lobo de Crin rival se debilitó!\" exp end",
+      "where": "ferry_deck (8,5)"
+    },
+    {
+      "t": "2026-11-03T00:21:37.348Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_deck (8,5)"
+    },
+    {
+      "t": "2026-11-03T00:21:43.432Z",
+      "level": "info",
+      "msg": "Batalla vs Marinero Edmundo: lobito nv21, caudillo nv21",
+      "where": "ferry_deck (13,4)"
+    },
+    {
+      "t": "2026-11-03T00:21:47.618Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Ñacurutú usó Ataque Ala!\" anim dmg1:54 faint \"¡Lobo Fino rival se debilitó!\" exp foeNext",
+      "where": "ferry_deck (13,4)"
+    },
+    {
+      "t": "2026-11-03T00:21:53.180Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Ñacurutú usó Ataque Ala!\" anim dmg1:68 \"¡Es súper eficaz!\" faint \"¡Lobo de Crin rival se debilitó!\" exp end",
+      "where": "ferry_deck (13,4)"
+    },
+    {
+      "t": "2026-11-03T00:21:55.938Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_deck (13,4)"
+    },
+    {
+      "t": "2026-11-03T00:22:00.375Z",
+      "level": "info",
+      "msg": "Batalla vs {rival}: ceibal nv22, zorrigris nv20",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:07.821Z",
+      "level": "info",
+      "msg": "Turno 1: switch #2 | \"¡Ñacurutú, volvé!\" recall send \"¡Adelante, Tejubrasa!\" \"¡Ceibal rival usó Hoja Afilada!\" anim dmg0:9 \"No es muy eficaz…\"",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:11.245Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:44 \"¡Es súper eficaz!\" \"¡Ceibal rival usó Absorber!\" anim dmg0:4 \"No es muy eficaz…\" heal \"¡Tejubrasa perdió energía!\"",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:14.568Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejubrasa usó Ascuas!\" anim dmg1:18 \"¡Es súper eficaz!\" faint \"¡Ceibal rival se debilitó!\" exp foeNext",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:24.718Z",
+      "level": "info",
+      "msg": "Turno 4: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:36 \"¡Zorrigrís rival usó Finta!\" anim dmg0:15",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:27.699Z",
+      "level": "info",
+      "msg": "Turno 5: move #1 | \"¡Tejubrasa usó Rueda Fuego!\" anim dmg1:13 faint \"¡Zorrigrís rival se debilitó!\" exp end",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:29.937Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:31.986Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Estado inválido: el Frigorífico Anglo no pudo haberse completado",
+      "where": "ferry_deck (10,1)"
+    },
+    {
+      "t": "2026-11-03T00:22:32.760Z",
+      "level": "info",
+      "msg": "Entró a ferry_cap",
+      "where": "ferry_deck (9,1)"
     }
   ]
 }
