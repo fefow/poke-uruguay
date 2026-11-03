@@ -411,7 +411,7 @@ export const SCRIPTS = {
   // Three rods: Vieja (muelle de Paysandú), Buena (Minas), Súper (casa en Paysandú).
   async gift_cana(api) {
     if (api.flag('got_cana')) return api.say('Parate frente al agua y apretá A. Con esta caña solo pican las criaturas más comunes. Mi hermano en Minas tiene una mejor.', { name: 'Pescador del muelle' });
-    await api.say(['Hace años que pesco en este muelle y el río sigue sorprendiéndome.', 'Vi que andás de pueblo en pueblo sin una caña. Tomá esta: es vieja, pero sirve.'], { name: 'Pescador del muelle' });
+    await api.say(['¿Qué hacés, guri, todo tranquilo? ¿Te gusta la pesca?', '¿Por qué no te agarrás una de esas cañas viejas que tengo ahí de sobra?'], { name: 'Pescador del muelle' });
     await api.give('cana_pescar', 1);
     api.setFlag('got_cana');
     await api.say('Parate frente al agua y apretá el botón A. Con esta caña solo pican las criaturas más comunes. Más adelante, mi hermano de Minas te dará una mejor.', { name: 'Pescador del muelle' });
