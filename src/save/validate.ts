@@ -97,7 +97,6 @@ export function validateSave(d: any) {
   // Story order: every medal needs the previous one, and each PP hideout needs its medal.
   for (let i = 2; i <= 12; i++) if (flags[`badge${i}`] && !flags[`badge${i - 1}`]) e('medallas fuera de orden');
   const needs = [
-    ['anglo_pp', badgeOf('fraybentos'), 'el Frigorífico Anglo'],
     ['represa_clear', badgeOf('salto'), 'la Represa'],
     ['torre_clear', badgeOf('rivera'), 'la Torre de Niebla'],
     ['quebrada_clear', badgeOf('quebrada'), 'la Quebrada de los Cuervos'],
