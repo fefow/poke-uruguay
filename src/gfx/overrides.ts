@@ -2,9 +2,13 @@
 // Each generator asks override(key, w, h) first; keys are 'creature:<species>', 'char:<look>|<dir>|<frame>',
 // 'item:<key>', 'badge:<n>' and 'tile:<theme|><char><frame>'.
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
+import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
+
+/** The original art (new creature sprites) with the editor's later edits on top. */
+export const BASE_SPRITES = { ...SPRITE_ORIGINALS, ...SPRITE_OVERRIDES };
 import { decodeSprite } from './sprite-codec.ts';
 
-let table = SPRITE_OVERRIDES;
+let table = BASE_SPRITES;
 let bypass = 0;
 const decoded = new Map();
 

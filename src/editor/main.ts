@@ -13,6 +13,7 @@ import { itemCanvas } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
 import { tileCanvas, TILE_INFO, THEMES, T } from '../gfx/tiles.ts';
 import { generated, setOverrides } from '../gfx/overrides.ts';
+import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
 import { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } from '../gfx/sprite-codec.ts';
 import { h, clamp, safeStorage } from '../core/util.ts';
 import { devToken, isDev, unlockDev, checkToken, lockDev } from '../core/devauth.ts';
@@ -121,9 +122,10 @@ function persist() {
   try { store.setItem(DRAFTS_KEY, JSON.stringify(drafts)); } catch { status('No se pudo guardar el borrador en este navegador (sin espacio).', 'error'); }
 }
 function live() {
-  const out = { ...base };
+  const out = { ...SPRITE_ORIGINALS, ...base };
   for (const [k, v] of Object.entries(drafts)) {
     if (v) out[k] = v;
+    else if (SPRITE_ORIGINALS[k]) out[k] = SPRITE_ORIGINALS[k];
     else delete out[k];
   }
   return out;
@@ -141,6 +143,9 @@ function pixelsOf(e) {
 }
 function originalOf(e) {
   if (e.tiles) return groupPixels(e, originalOf);
+  const o = SPRITE_ORIGINALS[e.key];
+  const op = o && o.w === e.w && o.h === e.h ? decodeSprite(o) : null;
+  if (op) return op;
   const c = generated(e.draw);
   return c.getContext('2d').getImageData(0, 0, e.w, e.h).data.slice();
 }
