@@ -20,7 +20,7 @@ import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.ts';
-import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount } from './state.ts';
+import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
@@ -184,6 +184,7 @@ export function loadMap(id, x, y, dir = 'down') {
   if (m.indoor) W_.bike = false;
   else if (m.bikeOnly && hasItem('bici')) W_.bike = true;
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
+  W_.fol = null; // the companion reappears behind the player on the first step
   S.pos = { map: id, x, y, dir };
   refreshEntities();
   playMusic(musicFor(id, m));
@@ -1307,12 +1308,15 @@ function drawWorld(g, t) {
     g.drawImage(spr, W_.legend.x * T - cx - 8, W_.legend.y * T - cy - 18 + bob, 32, 32);
   }
   // entities sorted by y
-  const ents = W_.npcs.filter((n) => n.visible).map((n) => ({ n, pos: entityPos(n) }));
+  const ents: any[] = W_.npcs.filter((n) => n.visible).map((n) => ({ n, pos: entityPos(n) }));
   ents.push({ n: p, pos: ppos, player: true });
+  const fol = companion(p);
+  if (fol) ents.push(fol);
   ents.sort((a, b) => a.pos.y - b.pos.y);
   for (const { n, pos, player } of ents) {
     const sx = Math.round(pos.x - cx);
     const sy = Math.round(pos.y - cy);
+    if (n.companion) { drawCompanion(g, n, sx, sy, t); continue; }
     if (!player && n.def.look === null) continue;
     if (!player && n.def.look === 'ball') { drawBallIcon(g, sx + 8, sy + 6); continue; }
     if (!player && n.def.look === 'machine') { drawFogMachine(g, sx, sy, t); continue; }
@@ -1412,6 +1416,45 @@ function drawWorld(g, t) {
   if (m.dark && !m.indoor) drawMachineGlows(g, t, cx, cy, activeMachines());
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
+}
+
+/**
+ * Walking companion (like the handheld games of the DS era): the first healthy creature of the team follows one
+ * tile behind the player. Purely visual: it never blocks anyone. Hidden on the bike, in the canoe and after a jump.
+ */
+function companion(p) {
+  const S = state();
+  if (settings.companion === false || W_.bike || !p) return null;
+  const c = S.party.find((m) => m.hp > 0);
+  if (!c) return null;
+  // Follow the trail: when the player starts a step, the companion heads for the tile the player just left.
+  if (p.moving && p.from) {
+    const f = W_.fol;
+    if (!f || f.x !== p.from.x || f.y !== p.from.y) {
+      const near = f && Math.abs(f.x - p.from.x) + Math.abs(f.y - p.from.y) === 1;
+      W_.fol = { px: near ? f.x : p.from.x, py: near ? f.y : p.from.y, x: p.from.x, y: p.from.y, dir: p.dir };
+    }
+  }
+  const f = W_.fol;
+  if (!f) return null;
+  if (Math.abs(f.x - p.x) + Math.abs(f.y - p.y) !== 1 && !p.moving) return null;
+  if (tileAt(f.x, f.y) === '~' || tileAt(p.x, p.y) === '~') return null;
+  const k = p.moving ? Math.min(1, p.t / p.dur) : 1;
+  const pos = { x: (f.px + (f.x - f.px) * k) * T, y: (f.py + (f.y - f.py) * k) * T };
+  // face the player
+  const dx = p.x - f.x, dy = p.y - f.y;
+  const dir = dx > 0 ? 'right' : dx < 0 ? 'left' : dy < 0 ? 'up' : 'down';
+  return { n: { companion: true, species: c.species, dir, moving: p.moving && k < 1 }, pos };
+}
+
+function drawCompanion(g, n, sx, sy, t) {
+  shadow(g, sx + 8, sy + 13, 6, 2.4);
+  const hop = n.moving ? Math.round(Math.abs(Math.sin(t / 90)) * 2) : Math.round(Math.abs(Math.sin(t / 600)));
+  const spr = creatureSprite(n.species);
+  g.save();
+  if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(spr, 0, sy - 7 - hop, 24, 24); }
+  else g.drawImage(spr, sx - 4, sy - 7 - hop, 24, 24);
+  g.restore();
 }
 
 /** Wheels and frame under the rider. */

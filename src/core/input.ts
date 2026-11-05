@@ -48,6 +48,10 @@ export const input = {
       if (i >= 0) handlers.splice(i, 1);
     };
   },
+  /** Test builds only: drop every UI layer so a script can walk the overworld. */
+  resetForTests() {
+    handlers.length = 0;
+  },
   get busy() {
     return handlers.length > 0;
   },
