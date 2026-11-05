@@ -7,7 +7,7 @@ import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
-import { tileCanvas, groundUnder, tileVariant, setTerrainStyle, TILE_INFO, T, registerCustomTile } from '../gfx/tiles.ts';
+import { tileCanvas, groundUnder, tileVariant, drawBigObjects, setTerrainStyle, TILE_INFO, T, registerCustomTile } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -306,6 +306,7 @@ function draw() {
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
   for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundUnder(rows, x, y), tileVariant(rows, x, y)), x * T, y * T);
+  if (!m.theme) drawBigObjects(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0);
   for (const it of W.items) {
     if (it.removed) continue;
     drawItem(g, it.item, it.x * T, it.y * T - 1);

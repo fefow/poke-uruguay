@@ -1656,37 +1656,44 @@ export const terrainStyle = () => STYLE;
 
 /** Pack sprites per tile char; several entries are picked by map position for variety (weights add up to 100). */
 const PACK_GROUND: Record<string, [string, number][]> = {
-  '.': [['ter1', 90], ['ter15', 10]],
-  ',': [['ter2', 100]],
-  f: [['ter11', 50], ['ter12', 50]],
-  '=': [['ter4', 90], ['ter5', 10]],
-  s: [['ter10', 100]],
-  'ß': [['ter10', 100]],
-  'ν': [['ter5', 100]],
-  c: [['ter14', 100]],
-  '_': [['ter6', 100]],
-  b: [['ter13', 100]],
-  '~': [['ter8', 100]],
+  '.': [['g_grass', 94], ['g_flow', 6]],
+  ',': [['g_tall', 100]],
+  f: [['g_fl_red', 50], ['g_fl_pink', 50]],
+  '=': [['g_path', 100]],
+  s: [['g_sand', 100]],
+  'ß': [['g_sand', 100]],
+  'ν': [['g_cob', 100]],
+  c: [['g_cob', 100]],
+  '_': [['g_pave', 100]],
+  b: [['g_bridge', 100]],
+  '~': [['g_water', 100]],
 };
+/** Small scenery (16x16 sprite over the ground). */
 const PACK_OBJECT: Record<string, [string, number][]> = {
-  '#': [['obj0', 60], ['obj1', 20], ['obj11', 20]],
-  'ö': [['obj2', 100]],
-  q: [['obj3', 100]],
-  p: [['obj4', 100]],
   R: [['obj5', 70], ['obj6', 30]],
   'ξ': [['obj9', 100]],
   F: [['obj7', 100]],
-  'Ñ': [['obj10', 100]],
   'Ω': [['obj12', 100]],
   S: [['obj14', 100]],
+};
+/** Big scenery: 32x32 sprites standing on the tile, drawn over the tiles above and beside it (see drawBigObjects). */
+const PACK_BIG: Record<string, [string, number][]> = {
+  '#': [['big_tree', 45], ['big_tree2', 35], ['big_pine', 20]],
+  'ö': [['big_ombu', 100]],
+  q: [['big_ceibo', 100]],
+  p: [['big_palm', 100]],
+  'Ñ': [['big_pine', 100]],
+  'ñ': [['big_willow', 100]],
 };
 const packCanvases = new Map<string, HTMLCanvasElement>();
 function packCanvas(id: string) {
   let c = packCanvases.get(id);
   if (!c) {
     const px = decodeSprite(TILE_PACK[id]);
-    c = mk();
-    if (px) c.getContext('2d').putImageData(new ImageData(px, T, T), 0, 0);
+    const o = TILE_PACK[id];
+    c = document.createElement('canvas');
+    c.width = o.w; c.height = o.h;
+    if (px) c.getContext('2d').putImageData(new ImageData(px, o.w, o.h), 0, 0);
     packCanvases.set(id, c);
   }
   return c;
@@ -1705,7 +1712,16 @@ function drawPackGround(g, ch: string, v: number, frame: number) {
     if (o) g.drawImage(src, T - o, 0, o, T, T - o, 0, o, T);
   } else if (ch === 'b' && v === 1) {
     g.save(); g.translate(T, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0); g.restore();
-  } else g.drawImage(src, 0, 0);
+  } else if (ch === 'b' || ch === ',') g.drawImage(src, 0, 0);
+  else {
+    // mirrored copies break up the repetition of the texture
+    const f = Math.imul(v + 7, 2654435761) >>> 29;
+    g.save();
+    g.translate(f & 1 ? T : 0, f & 2 ? T : 0);
+    g.scale(f & 1 ? -1 : 1, f & 2 ? -1 : 1);
+    g.drawImage(src, 0, 0);
+    g.restore();
+  }
 }
 
 /**
@@ -1716,18 +1732,35 @@ export function tileVariant(tiles, x: number, y: number) {
   if (STYLE !== 'nuevo') return 0;
   const ch = tiles[y][x];
   if (ch === 'b') return tiles[y][x - 1] === 'b' || tiles[y][x + 1] === 'b' ? 1 : 0;
-  if (!PACK_GROUND[ch] && !PACK_OBJECT[ch]) return 0;
+  if (!PACK_GROUND[ch] && !PACK_OBJECT[ch] && !PACK_BIG[ch]) return 0;
   let h = Math.imul(x * 73856093 ^ y * 19349663, 0x9e3779b1);
   h ^= h >>> 15;
   return (h >>> 0) % 100;
+}
+
+/**
+ * "Nuevo" style: trees are 32x32 sprites that stand on their tile and overlap the tiles above and beside it,
+ * so a row of trees reads as one thick canopy. Call after the ground pass, rows top to bottom; x0..x1 / y0..y1
+ * is the visible range and (cx, cy) the camera in pixels.
+ */
+export function drawBigObjects(g, tiles, x0: number, y0: number, x1: number, y1: number, cx: number, cy: number) {
+  if (STYLE !== 'nuevo') return;
+  for (let y = y0; y <= Math.min(tiles.length - 1, y1 + 1); y++) {
+    const row = tiles[y];
+    for (let x = Math.max(0, x0 - 1); x <= Math.min(row.length - 1, x1 + 1); x++) {
+      const list = PACK_BIG[row[x]];
+      if (!list) continue;
+      g.drawImage(packCanvas(pickPack(list, tileVariant(tiles, x, y))), x * T - cx - 8, y * T - cy - 16);
+    }
+  }
 }
 
 function packTile(ch: string, frame: number, theme: string | null, under: string | boolean, v: number) {
   if (STYLE !== 'nuevo') return null;
   const set = theme ? THEMES[theme] : null;
   if (set?.[ch]) return null; // this map's theme draws its own version
-  const isGround = !!PACK_GROUND[ch], isObject = !!PACK_OBJECT[ch];
-  if (!isGround && !isObject) return null;
+  const isGround = !!PACK_GROUND[ch], isObject = !!PACK_OBJECT[ch], isBig = !!PACK_BIG[ch];
+  if (!isGround && !isObject && !isBig) return null;
   const onWater = under === true || under === '~';
   const f = TILE_INFO[ch]?.anim || onWater ? frame % 4 : 0;
   const base = typeof under === 'string' && under !== '~' ? under : null;
@@ -1743,7 +1776,7 @@ function packTile(ch: string, frame: number, theme: string | null, under: string
     else if (base && DRAW[base]) DRAW[base](g, new Rng(base.charCodeAt(0) * 97 + 13), 0);
     else if (set?.['.']) set['.'](g, new Rng(7), 0);
     else drawPackGround(g, '.', v, 0);
-    g.drawImage(packCanvas(pickPack(PACK_OBJECT[ch], v)), 0, 0);
+    if (!isBig) g.drawImage(packCanvas(pickPack(PACK_OBJECT[ch], v)), 0, 0);
   }
   cache.set(key, c);
   return c;
