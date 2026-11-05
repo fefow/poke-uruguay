@@ -1656,7 +1656,7 @@ export const terrainStyle = () => STYLE;
 
 /** Pack sprites per tile char; several entries are picked by map position for variety (weights add up to 100). */
 const PACK_GROUND: Record<string, [string, number][]> = {
-  '.': [['g_grass', 94], ['g_flow', 6]],
+  '.': [['g_grass', 70], ['g_flow', 30]],
   ',': [['g_tall', 100]],
   f: [['g_fl_red', 50], ['g_fl_pink', 50]],
   '=': [['g_path', 100]],
