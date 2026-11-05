@@ -1032,6 +1032,23 @@ async function handleCatch(foe) {
 }
 
 /** Standalone evolution animation (also used by Garrapiñada). */
+const whites = new Map();
+/** White copy of a sprite (same shape, flat white), for evolution and flash effects. */
+function whiteOf(spr) {
+  let c = whites.get(spr);
+  if (!c) {
+    c = document.createElement('canvas');
+    c.width = spr.width; c.height = spr.height;
+    const g = c.getContext('2d');
+    g.drawImage(spr, 0, 0);
+    g.globalCompositeOperation = 'source-atop';
+    g.fillStyle = '#fff';
+    g.fillRect(0, 0, c.width, c.height);
+    whites.set(spr, c);
+  }
+  return c;
+}
+
 export async function evolutionScene(c, forcedTo = null) {
   const from = c.species;
   const to = forcedTo ?? canEvolve(c);
@@ -1040,6 +1057,7 @@ export async function evolutionScene(c, forcedTo = null) {
   const prevMusic = currentTrack();
   let showing = from;
   let flashP = 0;
+  let glow = 0;
   setRenderer((g, t) => {
     g.fillStyle = '#101020';
     g.fillRect(0, 0, W, H);
@@ -1048,18 +1066,32 @@ export async function evolutionScene(c, forcedTo = null) {
       g.fillStyle = i % 2 ? '#f2e05c' : '#7ac8f0';
       g.fillRect(160 + Math.cos(a) * (60 + (i * 7) % 90), 110 + Math.sin(a) * (40 + (i * 5) % 60), 2, 2);
     }
+    // light rays behind the creature
+    g.save();
+    g.translate(160, 110);
+    g.rotate(t / 1500);
+    g.fillStyle = 'rgba(255,240,170,0.10)';
+    for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.beginPath(); g.moveTo(0, 0); g.lineTo(150, -9); g.lineTo(150, 9); g.fill(); }
+    g.restore();
     const spr = creatureSprite(showing);
-    g.drawImage(spr, 160 - SPRITE, 110 - SPRITE, SPRITE * 2, SPRITE * 2);
+    const lit = glow > 0 ? whiteOf(spr) : null;
+    // while evolving the creature turns into a pulsing white silhouette that swells and shrinks
+    const sz = SPRITE * 2 * (1 + glow * 0.08 * Math.sin(t / 70));
+    g.drawImage(spr, 160 - sz / 2, 110 - sz / 2 - 0, sz, sz);
+    if (lit) { g.globalAlpha = Math.min(1, glow * (0.55 + 0.45 * Math.sin(t / 90))); g.drawImage(lit, 160 - sz / 2, 110 - sz / 2, sz, sz); g.globalAlpha = 1; }
     if (flashP) { g.fillStyle = `rgba(255,255,255,${flashP})`; g.fillRect(0, 0, W, H); }
   });
   await say(`¿Qué? ¡${displayName(c)} está evolucionando!`);
   sfx('evolve');
   let cancelled = false;
   const pop = input.push((a) => { if (a === 'b') cancelled = true; });
+  glow = 1;
   for (let i = 0; i < 10 && !cancelled; i++) {
     showing = i % 2 ? to : from;
+    sfx('select');
     await wait(Math.max(80, 320 - i * 25));
   }
+  glow = 0;
   pop();
   if (cancelled) {
     showing = from;
