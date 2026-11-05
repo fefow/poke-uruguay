@@ -4,7 +4,7 @@ import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
 import { encounterList, waterTable } from '../data/encounters.ts';
-import { badgeOf } from '../data/route.ts';
+import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
 import { T, TILE_INFO, tileCanvas, groundUnder, tileVariant, drawBigObjects } from '../gfx/tiles.ts';
@@ -704,7 +704,28 @@ async function talkTo(n) {
   const d = n.def;
   if (d.trainer) return trainerTalk(n);
   if (d.script) return SCRIPTS[d.script](api, d);
-  if (d.text) return say(foggyHere() && !d.critter ? fogTalk(n) : d.text);
+  if (d.text) {
+    if (foggyHere() && !d.critter) return say(fogTalk(n));
+    const g = localGossip(d);
+    return say(g ? [...(Array.isArray(d.text) ? d.text : [d.text]), g] : d.text);
+  }
+}
+
+/** Townsfolk of a city whose gym the player has beaten, or everyone once the league is won, sometimes add a remark about it. */
+function localGossip(d) {
+  const m = W_.map;
+  if (m.indoor || d.critter || d.gate || d.trainer || d.script) return null;
+  if (((d.x * 5 + d.y * 11) % 3) !== 0) return null;
+  if (flag('champion')) {
+    const L = ['Dicen que alguien venció a la Liga entera. Con razón se vive más tranquilo.', 'Ahora el cielo está despejado. Ojalá dure.', 'Se habla del campeón en todos los almacenes del país.'];
+    return L[(d.x + d.y) % L.length];
+  }
+  const stop = (STOPS as any[]).find((st) => st.id === m.id && st.gym);
+  if (stop && flag(badgeOf(stop.id))) {
+    const L = ['Te vi ganar en el gimnasio. ¡Qué combate!', 'Andá y contale al resto: en este pueblo ya hay un domador de verdad.', 'Dicen que venciste a nuestro líder. Bien hecho, che.'];
+    return L[(d.x + d.y) % L.length];
+  }
+  return null;
 }
 
 const FOG_TALK = [
