@@ -465,3 +465,67 @@ export function stopMusic() {
 export function currentTrack() {
   return current?.resume ?? current?.name ?? null;
 }
+
+// ---- Ambience ------------------------------------------------------------
+// Looping filtered noise beds (rain, wind, surf) plus random one-shots (birds by day, crickets at night, cave drips,
+// thunder). The world calls setAmbience() about once a second with what is around the player.
+const beds = {};
+let ambTimer = null;
+let amb = { rain: 0, wind: 0, surf: 0, birds: 0, crickets: 0, drips: 0, thunder: 0 };
+let ambGain = null;
+
+function bed(name, type, freq, q) {
+  if (beds[name]) return beds[name];
+  if (!noiseBuf) noise(ctx.currentTime, 0.001, 0, sfxGain); // makes sure the shared noise exists
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuf;
+  src.loop = true;
+  const f = ctx.createBiquadFilter();
+  f.type = type;
+  f.frequency.value = freq;
+  f.Q.value = q;
+  const g = ctx.createGain();
+  g.gain.value = 0;
+  src.connect(f).connect(g).connect(ambGain);
+  src.start(0, Math.random());
+  beds[name] = { g, f };
+  return beds[name];
+}
+
+export function setAmbience(next = {}) {
+  amb = { rain: 0, wind: 0, surf: 0, birds: 0, crickets: 0, drips: 0, thunder: 0, ...next };
+  if (!ctx) return;
+  if (!ambGain) {
+    ambGain = ctx.createGain();
+    ambGain.connect(sfxGain);
+  }
+  const now = ctx.currentTime;
+  const set = (name, type, freq, q, level) => {
+    const b = bed(name, type, freq, q);
+    b.g.gain.cancelScheduledValues(now);
+    b.g.gain.setTargetAtTime(level, now, 0.8);
+  };
+  set('rain', 'highpass', 2200, 0.5, amb.rain * 0.22);
+  set('wind', 'bandpass', 500, 0.6, amb.wind * 0.35);
+  set('surf', 'lowpass', 900, 0.4, amb.surf * 0.3);
+  if (!ambTimer && (amb.birds || amb.crickets || amb.drips || amb.thunder)) ambTimer = setInterval(ambTick, 700);
+}
+
+function ambTick() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.02;
+  const r = Math.random();
+  if (amb.birds && r < 0.18 * amb.birds) {
+    const f = 2200 + Math.random() * 1800;
+    const n = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < n; i++) tone(f * (1 + (i % 2) * 0.12), t + i * 0.09, 0.07, { type: 'sine', vol: 0.18, slide: 500 });
+  }
+  if (amb.crickets && r < 0.45 * amb.crickets) {
+    for (let i = 0; i < 6; i++) tone(4300, t + i * 0.055, 0.03, { type: 'sine', vol: 0.07 });
+  }
+  if (amb.drips && r < 0.3 * amb.drips) tone(900 + Math.random() * 400, t, 0.12, { type: 'sine', vol: 0.15, slide: -500, out: ambGain ?? sfxGain });
+  if (amb.thunder && r < 0.07 * amb.thunder) {
+    noise(t, 1.4, 0.7, sfxGain, { hp: 0 });
+    tone(55, t, 1.2, { type: 'triangle', vol: 0.5, slide: -20 });
+  }
+}

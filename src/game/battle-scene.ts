@@ -10,7 +10,7 @@ import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
 import { vignette } from '../gfx/fx.ts';
 import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
 import { h, wait as baseWait, clamp } from '../core/util.ts';
-import { sfx, playMusic, currentTrack, lowHpAlarm, cry } from '../core/audio.ts';
+import { sfx, playMusic, currentTrack, lowHpAlarm, cry, setAmbience } from '../core/audio.ts';
 import { input, rumble } from '../core/input.ts';
 import { say, choose, ask, closeDialog, uiRoot, textInput, fmt } from './ui.ts';
 import { state, settings, earn, markSeen, markCaught, removeItem, PARTY_MAX } from './state.ts';
@@ -343,6 +343,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     music = isBoss(trainer) ? 'leader' : /^rival/.test(id) ? 'rival' : 'trainer';
   }
   playMusic(music);
+  setAmbience({});
   sfx('encounter');
   await introFlash(!trainer ? 'wild' : isBoss(trainer) || /^rival/.test(String(trainer.id ?? '')) ? 'boss' : 'trainer');
   setRenderer(drawBattle);

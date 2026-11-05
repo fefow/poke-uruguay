@@ -15,7 +15,7 @@ import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
-import { sfx, playMusic, jingle } from '../core/audio.ts';
+import { sfx, playMusic, jingle, setAmbience } from '../core/audio.ts';
 import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
@@ -242,8 +242,29 @@ function fishTimer() {
   if (left <= 0 && W_.fishOver !== C.until) { W_.fishOver = C.until; sfx('levelup'); toast('¡Tiempo! Volvé con el juez de pesca.', 6000); }
 }
 
+/** What the player should hear around them, from the map's weather, biome and the in-game clock. */
+function updateAmbience() {
+  const m = W_.map;
+  if (!m) return;
+  if (m.indoor) return setAmbience({});
+  if (m.theme === 'cueva') return setAmbience({ drips: 1, wind: 0.2 });
+  const wx = m.dark ? 'clear' : weatherAt(m.id, m.weather);
+  const night = nightLevel();
+  const next: any = { wind: 0.25 };
+  if (wx === 'rain') next.rain = 0.7;
+  if (wx === 'storm') { next.rain = 1; next.thunder = 1; next.wind = 0.8; }
+  if (wx === 'fog') next.wind = 0.4;
+  if (m.theme === 'arena' || m.bg === 'beach') next.surf = 0.8;
+  if (wx !== 'rain' && wx !== 'storm') {
+    if (night > 0.5) next.crickets = 1;
+    else next.birds = m.theme === 'arena' ? 0.3 : 1;
+  }
+  setAmbience(next);
+}
+
 export function updateWorld(dt, now) {
   W_.anim += dt;
+  if (now - (W_.ambAt ?? -1e9) > 1000) { W_.ambAt = now; updateAmbience(); }
   if (W_.map.safari) safariClock();
   fishTimer();
   const p = W_.player;
