@@ -193,6 +193,7 @@ export const JINGLES = {
   item: { bpm: 150, lead: 'C5 1 C5 1 C5 1 E5 1 G5 4 F5 2 A5 2 G5 6', bass: 'C3 4 F2 4 C3 8' },
   key: { bpm: 140, lead: 'G4 1 B4 1 D5 1 G5 3 E5 1 F#5 1 G5 2 D6 6', bass: 'G2 4 C3 2 D3 2 G2 6' },
   badge: { bpm: 132, lead: 'G4 2 C5 2 E5 2 G5 4 E5 2 G5 2 A5 2 B5 2 C6 8', bass: 'C3 4 E3 4 F2 4 G2 4 C3 6' },
+  heal: { bpm: 120, lead: 'E5 2 G5 2 C6 2 E6 2 D6 2 B5 2 G5 2 C6 6', bass: 'C3 4 G2 4 A2 4 F2 2 G2 2 C3 6' },
   creature: { bpm: 140, lead: 'E5 2 C5 2 G5 2 E5 2 A5 2 B5 2 C6 6', bass: 'C3 4 G2 4 A2 2 G2 2 C3 6' },
 };
 

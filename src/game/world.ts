@@ -10,7 +10,7 @@ import { ITEMS } from '../data/items.ts';
 import { T, TILE_INFO, tileCanvas, groundUnder, tileVariant, drawBigObjects } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
-import { W, H, setRenderer, text as ctext } from '../gfx/screen.ts';
+import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
 import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
@@ -1114,12 +1114,36 @@ export const api = {
   },
   rematchTeam,
   async healParty({ silent = false } = {}) {
-    for (const c of state().party) healCreature(c);
+    const party = state().party;
+    for (const c of party) healCreature(c);
     if (!silent) {
-      sfx('heal');
-      await fadeOut(250);
-      await wait(700);
-      await fadeIn(250);
+      // The classic healing machine: the screen dims, one ball per creature sits in a row and each lights up in turn.
+      const prev = getRenderer();
+      const t0 = performance.now();
+      const n = party.length;
+      setRenderer((g, t) => {
+        prev?.(g, t);
+        const age = performance.now() - t0;
+        g.fillStyle = `rgba(6,8,24,${Math.min(0.7, age / 300)})`;
+        g.fillRect(0, 0, W, H);
+        const x0 = W / 2 - (n - 1) * 13;
+        for (let i = 0; i < n; i++) {
+          const x = x0 + i * 26, y = H / 2;
+          drawBallIcon(g, x, y);
+          const lit = age - 500 - i * 260;
+          if (lit > 0) {
+            const a = Math.min(1, lit / 120) * (0.6 + 0.4 * Math.sin(age / 60));
+            g.fillStyle = `rgba(255,240,160,${a * 0.9})`;
+            g.beginPath(); g.arc(x, y, 7 + Math.sin(age / 90), 0, 7); g.fill();
+            drawBallIcon(g, x, y);
+          }
+        }
+      });
+      await wait(500);
+      const j = jingle('heal');
+      await wait(Math.max(900, n * 260 + 700));
+      setRenderer(prev);
+      await j;
     }
   },
   setLastHeal() {

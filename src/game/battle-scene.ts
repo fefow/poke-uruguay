@@ -424,6 +424,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
         await say(['¡No te quedan criaturas en condiciones de pelear!', '…', 'Todo se pone gris…'], { battle: true });
       }
     }
+    if (result === 'run') sfx('run');
     // Evolutions after battle
     if (result !== 'lose') {
       for (const c of S.party) if (leveled.has(c.uid) && canEvolve(c)) await evolutionScene(c);
