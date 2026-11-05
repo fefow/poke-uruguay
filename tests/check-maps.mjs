@@ -11,7 +11,7 @@ for (const [id, m] of Object.entries(MAPS)) {
   for (const n of m.npcs ?? []) {
     const t = at(n.x, n.y);
     if (t == null) bad(`${id} npc out of bounds ${n.x},${n.y}`);
-    else if (SOLID.has(t) && n.look !== 'ball' && n.look !== null) bad(`${id} npc on solid '${t}' at ${n.x},${n.y} (${n.look})`);
+    else if (SOLID.has(t) && !(t === '~' && n.look === 'swimmer') && !(t === 'λ' && n.blocker) && n.look !== 'ball' && n.look !== null) bad(`${id} npc on solid '${t}' at ${n.x},${n.y} (${n.look})`);
   }
   for (const it of m.items ?? []) { const t = at(it.x, it.y); if (t == null || SOLID.has(t)) bad(`${id} item on '${t}' at ${it.x},${it.y}`); }
   if (m.legend) { const t = at(m.legend.x, m.legend.y); if (t == null || SOLID.has(t)) bad(`${id} legend on '${t}'`); }
@@ -57,7 +57,7 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   }
   for (const [x, y, side] of starts) if (!seen.has(`${x},${y}`)) bad(`${id} exit ${side} tile ${x},${y} is cut off from the rest of the map`);
   m.tiles.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'D' && !seen.has(`${x},${y + 1}`)) bad(`${id} door at ${x},${y} has no reachable front tile`); }));
-  for (const n of m.npcs ?? []) if (n.look !== null && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
+  for (const n of m.npcs ?? []) if (n.look !== null && !n.blocker && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
   for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`)) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
 }
 console.log(problems ? `${problems} problem(s)` : 'maps OK');

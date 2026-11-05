@@ -272,6 +272,7 @@ const WALKABLE = new Set(['.', ',', '`', ';', 'f', 'c', '=', 's', 'b', 'i', 'Y',
 export function fitToMap(tiles, list, taken = new Set()) {
   const ok = (x, y, roadsToo) => { const t = tiles[y]?.[x]; return t !== undefined && WALKABLE.has(t) && (roadsToo || (t !== 'c' && t !== '=')); };
   for (const o of list) {
+    if (o.fixed) { taken.add(`${o.x},${o.y}`); continue; } // gate keepers stand exactly where the gate is
     let best = null;
     for (const roadsToo of [false, true]) {
       for (let d = 0; d < 8 && !best; d++) {

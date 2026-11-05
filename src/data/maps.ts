@@ -1424,3 +1424,29 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }
+
+import { addSwimmers } from './swimmers.ts';
+addSwimmers(MAPS, ['paysandu', 'fraybentos']);
+
+// A trainer's class decides how the person looks (a Ciclista is drawn as a cyclist, not as an old man), and the person
+// shown in battle is the one met in the world: same look, whatever was written when the trainer was built.
+const CLASS_LOOK: [RegExp, string[]][] = [
+  [/ciclista/i, ['ciclista']], [/camionero/i, ['camionero']], [/cartero|telegrafista|ferroviari/i, ['cartero']],
+  [/almacener|pulper/i, ['almacenero']], [/maitre|cociner/i, ['cocinero']], [/hincha|futbolista|finalista/i, ['hincha']],
+  [/surfista|bañista|guardavidas|nadador/i, ['swimmer']], [/^pescador/i, ['pescador']], [/marinero|navegante|tripulante|remero/i, ['sailor']],
+  [/estudiante|aprendiz|aspirante/i, ['estudiante']], [/bi[oó]log|naturalista|ornit[oó]log|entom[oó]log|espele|apicult|geólog|botánic/i, ['biologo']],
+  [/obrero|estibador|minero|electricista|operario|herrero|ingenier/i, ['obrero']], [/turista|viajero|azafata|caminante|campista|montañista/i, ['turista']],
+  [/maestra|docente|archivista/i, ['maestra']], [/cañera|sandiera|viñatera|alfarera|agrónoma|paisana|campesin/i, ['campesina']],
+  [/viñatero|colono|tambero|tropero|arriero|ganadero|esquilador|domador/i, ['gaucho']],
+];
+for (const m of Object.values(MAPS) as any[]) {
+  for (const n of m.npcs ?? []) {
+    if (!n.trainer || !n.look || n.look === 'ball') continue;
+    const cls: string = n.trainer.cls ?? '';
+    if (!/PP|Líder|Comandante|Capataz PP/.test(cls)) {
+      const rule = CLASS_LOOK.find(([re]) => re.test(cls));
+      if (rule && !rule[1].includes(n.look)) n.look = rule[1][0];
+    }
+    n.trainer.look = n.look;
+  }
+}

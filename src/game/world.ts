@@ -545,6 +545,7 @@ function onStep() {
 
 function sees(n) {
   const p = W_.player;
+  if (n.def.look === 'swimmer' && tileAt(p.x, p.y) !== '~') return false; // swimmers only challenge people who are on the water
   if (n.def.adjacent) { // only wakes up when the player stands right next to it, from any side
     const ax = p.x - n.x, ay = p.y - n.y;
     if (Math.abs(ax) + Math.abs(ay) !== 1) return false;
@@ -556,7 +557,7 @@ function sees(n) {
     const x = n.x + dx * i;
     const y = n.y + dy * i;
     if (x === p.x && y === p.y) return true;
-    if (solidAt(x, y, { ignorePlayer: true })) return false;
+    if (tileAt(x, y) !== '~' && solidAt(x, y, { ignorePlayer: true })) return false; // trainers see across open water
   }
   return false;
 }

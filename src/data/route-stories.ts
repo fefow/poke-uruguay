@@ -120,13 +120,17 @@ function narrowestCut(m, busy, from = 0.3, to = 0.7, maxCells = 4) {
     const cells = [];
     for (let b = 1; b < cross - 1; b++) {
       const [x, y] = long ? [a, b] : [b, a];
-      if (!solid(m.tiles[y][x]) && m.tiles[y][x] !== '~' && m.tiles[y][x] !== 'λ') cells.push([x, y]);
+      // water (the canoe) and ledges (jumping down) can be crossed too, so a closed gate must hold those tiles as well
+      if (!solid(m.tiles[y][x]) || m.tiles[y][x] === '~' || m.tiles[y][x] === 'λ') cells.push([x, y]);
     }
     if (!cells.length || cells.length > maxCells || cells.some(([x, y]) => busy.has(`${x},${y}`))) continue;
     if (!best || cells.length < best.length) best = cells;
   }
   return best;
 }
+
+/** Who stands on a closed gate: on open water it has to be a swimmer. */
+const blockLook = (m, x, y, look) => (m.tiles[y][x] === '~' ? 'swimmer' : look);
 
 /** A free walkable tile near the trail (not on it), at least two tiles away from every object. */
 function freeSpot(m, busy, prefer) {
@@ -152,7 +156,7 @@ export function addRouteStory(m, id) {
   const trainers = m.npcs.filter((n) => n.trainer);
 
   // toll keeper: blocks the narrowest cross-section until every trainer on the route is beaten
-  const cut = trainers.length > 1 ? narrowestCut(m, busy) : null;
+  const cut = trainers.length > 1 ? narrowestCut(m, busy, 0.3, 0.7, 10) : null;
   if (cut) {
     const [who, look, text] = st.gate;
     // whichever end the player enters from, only the trainers on that side must be beaten (never ones behind the gate)
@@ -162,7 +166,7 @@ export function addRouteStory(m, id) {
     const lo = trainers.filter((n) => at(n) < edge).map((n) => n.trainer.id);
     const hi = trainers.filter((n) => at(n) > edge).map((n) => n.trainer.id);
     const done = (f) => lo.every((t) => f[`tr_${t}`]) || hi.every((t) => f[`tr_${t}`]);
-    if (lo.length && hi.length) cut.forEach(([x, y]) => { m.npcs.push({ x, y, look, dir: 'down', blocker: true, name: who, text: [text, 'Todavía quedan entrenadores en el camino.'], cond: (f) => !done(f) }); busy.add(`${x},${y}`); });
+    if (lo.length && hi.length) cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: blockLook(m, x, y, look), dir: 'down', blocker: true, fixed: true, name: who, text: [text, 'Todavía quedan entrenadores en el camino.'], cond: (f) => !done(f) }); busy.add(`${x},${y}`); });
   }
 
   // lost item: points to the clearing with the hidden item
@@ -178,10 +182,10 @@ export function addRouteStory(m, id) {
   const mach = freeSpot(m, busy, 0.75);
   addLeverGate(m, id, busy);
   // riddle gate: a second obstacle earlier on the trail, opened by answering a riddle (never a battle)
-  const rcut = narrowestCut(m, busy, 0.12, 0.28);
+  const rcut = narrowestCut(m, busy, 0.12, 0.28, 10);
   if (rcut) {
     const flag = `rf_rid_${id}`.slice(0, 40);
-    rcut.forEach(([x, y]) => { m.npcs.push({ x, y, look: 'oldman', dir: 'down', blocker: true, name: 'Guardián del paso', script: 'route_riddle', riddleId: id, doneFlag: flag, text: 'El paso está cerrado. Un guardián pide una respuesta a quien quiera cruzar.', cond: (f) => !f[flag] }); busy.add(`${x},${y}`); });
+    rcut.forEach(([x, y]) => { m.npcs.push({ x, y, look: blockLook(m, x, y, 'oldman'), dir: 'down', blocker: true, fixed: true, name: 'Guardián del paso', script: 'route_riddle', riddleId: id, doneFlag: flag, text: 'El paso está cerrado. Un guardián pide una respuesta a quien quiera cruzar.', cond: (f) => !f[flag] }); busy.add(`${x},${y}`); });
   }
   if (mach) m.npcs.push({ x: mach[0], y: mach[1], look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', clue: st.fog, doneFlag: `rf_${id}` });
 }
@@ -264,7 +268,7 @@ const ORDERS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]
 export function addLeverGate(m, id, busy) {
   const w = m.tiles[0].length, h = m.tiles.length;
   if (Math.max(w, h) < 60) return;
-  const cut = narrowestCut(m, busy, 0.6, 0.9, 5);
+  const cut = narrowestCut(m, busy, 0.5, 0.92, 12);
   if (!cut) return;
   const long = w >= h;
   const gateAt = long ? cut[0][0] : cut[0][1];
@@ -287,7 +291,7 @@ export function addLeverGate(m, id, busy) {
   if (sides.some((l) => l.length < 4)) return;
   const done = `rf_gt_${id}`.slice(0, 40);
   const a = LEVERS[order[0]][1], c = LEVERS[order[2]][1];
-  cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: 'gaucho', dir: 'down', blocker: true, name: 'Tranquera', text: ['La tranquera está trabada con tres cerrojos.', 'Cada lado del camino tiene palancas que los mueven.'], cond: (f) => !f[done] }); taken.add(`${x},${y}`); });
+  cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: blockLook(m, x, y, 'gaucho'), dir: 'down', blocker: true, fixed: true, name: 'Tranquera', text: ['La tranquera está trabada con tres cerrojos.', 'Cada lado del camino tiene palancas que los mueven.'], cond: (f) => !f[done] }); taken.add(`${x},${y}`); });
   sides.forEach((list) => {
     LEVERS.forEach(([name], k) => { const [x, y] = list[k]; m.npcs.push({ x, y, look: 'machine', dir: 'down', name, script: 'route_palanca', routeId: id, lever: k, order, doneFlag: done }); taken.add(`${x},${y}`); });
     const [x, y] = list[3];
