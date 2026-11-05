@@ -60,5 +60,25 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   for (const n of m.npcs ?? []) if (n.look !== null && !n.blocker && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
   for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`)) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
 }
+// cross references: every script, track, item and species named by the data must exist
+import { readFileSync, readdirSync } from 'node:fs';
+import { SCRIPTS } from '../src/data/story.ts';
+import { TRACKS } from '../src/core/audio.ts';
+import { ITEMS } from '../src/data/items.ts';
+import { SPECIES } from '../src/data/species.ts';
+for (const [id, m] of Object.entries(MAPS)) {
+  if (m.music && !TRACKS[m.music]) bad(`${id} music '${m.music}' does not exist`);
+  for (const n of m.npcs ?? []) if (n.script && !SCRIPTS[n.script]) bad(`${id} npc script '${n.script}' does not exist`);
+  for (const it of m.items ?? []) if (!ITEMS[it.item]) bad(`${id} ground item '${it.item}' is not an item`);
+  for (const k of Object.keys(m.enc?.grass ?? {})) void k;
+}
+const sources = ['src/data', 'src/game'].flatMap((d) => readdirSync(d).filter((f) => f.endsWith('.ts')).map((f) => `${d}/${f}`));
+const cine = readFileSync('src/game/cinematics.ts', 'utf8');
+for (const f of sources) {
+  const src = readFileSync(f, 'utf8');
+  for (const [, name] of src.matchAll(/cinematic\('([a-z_0-9]+)'\)/g)) if (!new RegExp(`\\b${name}:`).test(cine)) bad(`${f}: cinematic '${name}' is not defined`);
+  for (const [, it] of src.matchAll(/api\.give\('([a-z_0-9]+)'/g)) if (!ITEMS[it]) bad(`${f}: api.give of unknown item '${it}'`);
+  for (const [, sp] of src.matchAll(/giveCreature\('([a-z_0-9]+)'/g)) if (!SPECIES[sp]) bad(`${f}: giveCreature of unknown species '${sp}'`);
+}
 console.log(problems ? `${problems} problem(s)` : 'maps OK');
 process.exit(problems ? 1 : 0);
