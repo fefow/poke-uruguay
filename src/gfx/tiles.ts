@@ -131,6 +131,8 @@ export const TILE_INFO = {
   'Ц': { name: 'piedritas', over: true },
   'Ш': { name: 'barril', solid: true, over: true },
   'Щ': { name: 'mojón de ruta', solid: true, over: true },
+  'Ѣ': { name: 'cabina de peaje', solid: true, over: true },
+  'Ѳ': { name: 'carril de peaje' },
   'Э': { name: 'cajón', solid: true, over: true },
   'Ю': { name: 'totoras', over: true },
   'Я': { name: 'girasoles', over: true },
@@ -821,6 +823,24 @@ const OVER = {
     px(g, 5, 6, '#c8302a', 6, 3); px(g, 5, 6, '#e0463a', 6, 1);
     px(g, 7, 10, '#3a4a6a', 2, 1); px(g, 6, 11, '#3a4a6a', 4, 1);
     px(g, 4, 14, '#7a766a', 8, 1);
+  },
+  // Toll booth: a small cabin with a striped roof and a window facing the lane
+  'Ѣ': (g) => {
+    px(g, 0, 0, '#5a5a62', 16, 16);
+    px(g, 0, 15, '#3a3a42', 16, 1);
+    px(g, 1, 3, '#e8e6de', 14, 11); px(g, 1, 3, '#c2beb0', 14, 1); px(g, 1, 13, '#a8a496', 14, 1);
+    px(g, 3, 6, '#7ab8d8', 10, 4); px(g, 3, 6, '#b8e0f0', 10, 1); px(g, 3, 9, '#5a98b8', 10, 1);
+    px(g, 0, 0, '#c8302a', 16, 3);
+    for (let x = 1; x < 16; x += 4) px(g, x, 0, '#f4f2ea', 2, 3);
+    px(g, 0, 3, '#7a1a16', 16, 1);
+  },
+  // Toll lane: asphalt with the barrier arm raised beside it
+  'Ѳ': (g) => {
+    px(g, 0, 0, '#6a6a72', 16, 16);
+    px(g, 0, 0, '#7a7a82', 16, 1); px(g, 0, 15, '#5a5a62', 16, 1);
+    px(g, 1, 4, '#f2c02a', 2, 8); px(g, 1, 4, '#3a3a42', 2, 1);
+    for (let k = 0; k < 4; k++) px(g, 3 + k * 3, 6, k % 2 ? '#f4f2ea' : '#c8302a', 3, 2);
+    for (let x = 2; x < 16; x += 4) px(g, x, 14, '#d8d4c0', 2, 1);
   },
   'Ш': (g) => {
     shade(g, 8, 14, 6, 1.4);

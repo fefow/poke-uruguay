@@ -797,6 +797,27 @@ export const SCRIPTS = {
     await api.give(E.mt, 1);
   },
 
+  /** Toll booth on a route (placed by toll.ts): $115 to go through; broke players are turned back, until the fourth try. */
+  async toll_booth(api, def) {
+    const id = def.tollId ?? 'peaje';
+    if (api.tollRecent(id)) return;
+    const price = 115;
+    await api.say(['PEAJE', `Tarifa: $${price}. Pase por la cabina.`], { name: 'Peaje' });
+    if (api.pay(price)) {
+      api.sfx('money');
+      await api.say(['Gracias. Buen viaje y cuidado con las criaturas en la ruta.'], { name: 'Peaje' });
+      api.tollPaid(id);
+      return;
+    }
+    if (api.tollTry(id) > 3) {
+      await api.say(['¿Otra vez sin plata? Bueno, ya van varias veces.', 'Está bien, por esta vez pasás. Pero lo vas a pagar con la patente, como todo en este país.'], { name: 'Peaje' });
+      api.tollPaid(id);
+      return;
+    }
+    await api.say(['No te alcanza para el peaje. Volvé cuando tengas $115.'], { name: 'Peaje' });
+    await api.stepBack();
+  },
+
   async event_owner(api, npc) {
     const E = EVENTS[npc.event];
     await api.say(['Gracias otra vez, {player}. Sin vos esto seguiría tomado.', 'Pasá cuando quieras.'], { name: 'Dueño' });

@@ -521,7 +521,7 @@ function onStep() {
   for (const tr of W_.map.triggers ?? []) {
     if (p.x >= tr.x && p.x < tr.x + tr.w && p.y >= tr.y && p.y < tr.y + tr.h && cond(tr.cond)) {
       const npc = W_.npcs.find((n) => n.def.script === tr.script);
-      return void runScript(() => SCRIPTS[tr.script](api, npc?.def ?? {}));
+      return void runScript(() => SCRIPTS[tr.script](api, npc?.def ?? tr));
     }
   }
   // Trainers that can see you
@@ -586,6 +586,8 @@ async function trainerSpotted(n) {
   await trainerTalk(n);
 }
 
+const tollPaidAt: Record<string, number> = {};
+const tollTries: Record<string, number> = {};
 const opposite = (d) => ({ up: 'down', down: 'up', left: 'right', right: 'left' })[d];
 
 function npcStep(n, dx, dy) {
@@ -1142,6 +1144,16 @@ export const api = {
     n.dir = Math.abs(ax) >= Math.abs(ay) ? (ax < 0 ? 'left' : 'right') : (ay < 0 ? 'up' : 'down');
     p.dir = opposite(n.dir);
     n.ox = n.x; n.oy = n.y;
+  },
+  /** Toll booths: paying lets the player through (and back) for a while; failed tries are counted for this session. */
+  tollRecent: (id) => (state().stats.steps - (tollPaidAt[id] ?? -9999)) < 150,
+  tollPaid(id) { tollPaidAt[id] = state().stats.steps; tollTries[id] = 0; },
+  tollTry(id) { tollTries[id] = (tollTries[id] ?? 0) + 1; return tollTries[id]; },
+  /** Sends the player back to the tile they just came from (fade, same map). */
+  async stepBack() {
+    const p = W_.player;
+    const to = p.from ?? { x: p.x, y: p.y };
+    await doWarp(W_.map.id, to.x, to.y, opposite(p.dir));
   },
   /** Moves the player to another map with a fade (used when the ferry sails). */
   warp: (map, x, y, dir = 'down') => doWarp(map, x, y, dir),
