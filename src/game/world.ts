@@ -7,7 +7,7 @@ import { encounterList, waterTable } from '../data/encounters.ts';
 import { badgeOf } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, groundUnder } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, groundUnder, tileVariant } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, text as ctext } from '../gfx/screen.ts';
@@ -1266,7 +1266,7 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y)), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y), tileVariant(W_.tiles, x, y)), x * T - cx, y * T - cy);
   }
   // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
   {

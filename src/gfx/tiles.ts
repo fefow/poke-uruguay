@@ -2,6 +2,8 @@
 import { CUSTOM } from '../data/custom-content.js';
 import { Rng } from '../core/rng.ts';
 import { override } from './overrides.ts';
+import { decodeSprite } from './sprite-codec.ts';
+import { TILE_PACK } from '../data/tile-pack.js';
 
 export const T = 16;
 
@@ -1639,7 +1641,113 @@ export function registerCustomTile(ch: string, name: string, solid = false) {
   (DRAW as any)[ch] = (g, r) => grass(g, r);
 }
 
-export function tileCanvas(ch, frame = 0, theme: string | null = null, under: string | boolean = false) {
+// ---- "Nuevo" terrain style: PixelLab tiles (src/data/tile-pack.js) ----------------------------
+// Ground tiles replace the whole square; scenery (trees, rocks, fences...) is a transparent sprite drawn
+// over whatever ground it stands on. Theme-specific art (caves, forests, sand towns...) is left as it was.
+// 'clasico' keeps the original art (hand drawings from the editor + the generated tiles).
+export type TerrainStyle = 'nuevo' | 'clasico';
+let STYLE: TerrainStyle = 'clasico';
+export function setTerrainStyle(s: TerrainStyle) {
+  if (s === STYLE) return;
+  STYLE = s;
+  cache.clear();
+}
+export const terrainStyle = () => STYLE;
+
+/** Pack sprites per tile char; several entries are picked by map position for variety (weights add up to 100). */
+const PACK_GROUND: Record<string, [string, number][]> = {
+  '.': [['ter0', 85], ['ter1', 15]],
+  ',': [['ter3', 100]],
+  f: [['ter12', 50], ['ter13', 50]],
+  '=': [['ter4', 85], ['ter5', 15]],
+  s: [['ter6', 100]],
+  'ß': [['ter7', 100]],
+  'ν': [['ter5', 100]],
+  c: [['ter10', 50], ['ter11', 50]],
+  b: [['ter14', 100]],
+  '~': [['ter8', 100]],
+};
+const PACK_OBJECT: Record<string, [string, number][]> = {
+  '#': [['obj0', 50], ['obj8', 30], ['obj4', 20]],
+  'ö': [['obj1', 40], ['obj9', 25], ['obj5', 20], ['obj13', 15]],
+  q: [['obj2', 40], ['obj6', 25], ['obj10', 20], ['obj14', 15]],
+  p: [['obj3', 100]],
+  R: [['obj7', 70], ['obj11', 30]],
+  'ξ': [['obj12', 100]],
+  F: [['obj15', 100]],
+};
+const packCanvases = new Map<string, HTMLCanvasElement>();
+function packCanvas(id: string) {
+  let c = packCanvases.get(id);
+  if (!c) {
+    const px = decodeSprite(TILE_PACK[id]);
+    c = mk();
+    if (px) c.getContext('2d').putImageData(new ImageData(px, T, T), 0, 0);
+    packCanvases.set(id, c);
+  }
+  return c;
+}
+function pickPack(list: [string, number][], v: number) {
+  let acc = 0;
+  for (const [id, w] of list) { acc += w; if (v % 100 < acc) return id; }
+  return list[0][0];
+}
+/** Draws a pack ground tile; water drifts sideways with the animation frame, a bridge turns with its direction. */
+function drawPackGround(g, ch: string, v: number, frame: number) {
+  const src = packCanvas(pickPack(PACK_GROUND[ch], v));
+  if (ch === '~') {
+    const o = (frame % 4) * 4;
+    g.drawImage(src, o, 0, T - o, T, 0, 0, T - o, T);
+    if (o) g.drawImage(src, T - o, 0, o, T, T - o, 0, o, T);
+  } else if (ch === 'b' && v === 1) {
+    g.save(); g.translate(T, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0); g.restore();
+  } else g.drawImage(src, 0, 0);
+}
+
+/**
+ * Small number that picks a tile's variant from its position (and the direction of a bridge).
+ * Pass it to tileCanvas; it only matters for the "Nuevo" terrain style.
+ */
+export function tileVariant(tiles, x: number, y: number) {
+  if (STYLE !== 'nuevo') return 0;
+  const ch = tiles[y][x];
+  if (ch === 'b') return tiles[y][x - 1] === 'b' || tiles[y][x + 1] === 'b' ? 1 : 0;
+  if (!PACK_GROUND[ch] && !PACK_OBJECT[ch]) return 0;
+  let h = Math.imul(x * 73856093 ^ y * 19349663, 0x9e3779b1);
+  h ^= h >>> 15;
+  return (h >>> 0) % 100;
+}
+
+function packTile(ch: string, frame: number, theme: string | null, under: string | boolean, v: number) {
+  if (STYLE !== 'nuevo') return null;
+  const set = theme ? THEMES[theme] : null;
+  if (set?.[ch]) return null; // this map's theme draws its own version
+  const isGround = !!PACK_GROUND[ch], isObject = !!PACK_OBJECT[ch];
+  if (!isGround && !isObject) return null;
+  const onWater = under === true || under === '~';
+  const f = TILE_INFO[ch]?.anim || onWater ? frame % 4 : 0;
+  const base = typeof under === 'string' && under !== '~' ? under : null;
+  const key = `pack|${theme ?? ''}|${onWater ? '~' : base ?? ''}|${ch}|${v}|${f}`;
+  let c = cache.get(key);
+  if (c) return c;
+  c = mk();
+  const g = c.getContext('2d');
+  if (isGround) drawPackGround(g, ch, v, f);
+  else {
+    if (onWater) drawPackGround(g, '~', 0, f);
+    else if (base && PACK_GROUND[base]) drawPackGround(g, base, base === 'b' ? 0 : v, 0);
+    else if (base && DRAW[base]) DRAW[base](g, new Rng(base.charCodeAt(0) * 97 + 13), 0);
+    else if (set?.['.']) set['.'](g, new Rng(7), 0);
+    else drawPackGround(g, '.', v, 0);
+    g.drawImage(packCanvas(pickPack(PACK_OBJECT[ch], v)), 0, 0);
+  }
+  cache.set(key, c);
+  return c;
+}
+
+export function tileCanvas(ch, frame = 0, theme: string | null = null, under: string | boolean = false, variant = 0) {
+  const packed = packTile(ch, frame, theme, under, variant);
+  if (packed) return packed;
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;
   const set = theme ? THEMES[theme] : null;
