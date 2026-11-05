@@ -719,8 +719,9 @@ export const SCRIPTS = {
     if (home) api.setFlag(openFlag(home.id)); // winning the medal opens the road to the next city
     api.healParty({ silent: true });
     await api.say('Tus criaturas quedaron recuperadas.');
-    api.sfx('levelup');
+    const fan = api.jingle('badge');
     await api.say(`¡{player} recibió la ${L.badgeName}!`);
+    await fan;
     await api.give(L.reward, L.rewardQty);
     await api.give(L.tm, 1);
     await api.say(['Tomá también esta MT. Enseña un movimiento nuevo a una criatura compatible.'], { name: L.name });

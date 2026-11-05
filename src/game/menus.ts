@@ -71,7 +71,7 @@ function suspend(el, fn) {
 // ---------------------------------------------------------------- PAUSE
 export async function openPauseMenu() {
   const S = state();
-  sfx('confirm');
+  sfx('menu');
   let flight = null;
   while (true) {
     const entries = [];
@@ -847,7 +847,7 @@ export async function openSave() {
     S.saveCount++;
     await saveGame(slot, S);
     S.slot = slot;
-    sfx('levelup');
+    sfx('save');
     await say(`{player} guardó la partida en la ranura ${slot}.`);
   } catch (err) {
     S.saveCount--;

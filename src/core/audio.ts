@@ -45,56 +45,152 @@ function applyVolumes() {
   sfxGain.gain.value = settings.sfx * 0.35;
 }
 
-function tone(f, start, dur, { type = 'square', vol = 1, slide = 0, out = sfxGain } = {}) {
+// Game Boy-style pulse channels: narrow duty cycles give the thin, bright lead the handheld had.
+const waves = new Map();
+function pulseWave(duty) {
+  if (waves.has(duty)) return waves.get(duty);
+  const n = 32;
+  const re = new Float32Array(n), im = new Float32Array(n);
+  for (let k = 1; k < n; k++) {
+    re[k] = Math.sin(2 * Math.PI * k * duty) / (k * Math.PI);
+    im[k] = (1 - Math.cos(2 * Math.PI * k * duty)) / (k * Math.PI);
+  }
+  const w = ctx.createPeriodicWave(re, im);
+  waves.set(duty, w);
+  return w;
+}
+
+function tone(f, start, dur, { type = 'square', duty = 0, vol = 1, slide = 0, vib = 0, out = sfxGain } = {}) {
   if (!ctx || !f) return;
   const o = ctx.createOscillator();
   const g = ctx.createGain();
-  o.type = type;
+  if (duty) o.setPeriodicWave(pulseWave(duty));
+  else o.type = type;
   o.frequency.setValueAtTime(f, start);
   if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), start + dur);
+  // Delayed vibrato on long notes, like the handheld composers did by hand.
+  if (vib && dur > 0.3) {
+    const lfo = ctx.createOscillator();
+    const depth = ctx.createGain();
+    lfo.frequency.value = 5.5;
+    depth.gain.setValueAtTime(0, start);
+    depth.gain.linearRampToValueAtTime(f * 0.012 * vib, start + Math.min(0.35, dur * 0.6));
+    lfo.connect(depth).connect(o.frequency);
+    lfo.start(start);
+    lfo.stop(start + dur + 0.02);
+  }
   g.gain.setValueAtTime(0.0001, start);
   g.gain.exponentialRampToValueAtTime(vol, start + 0.01);
+  // Hold most of the note, then release: a plucked decay sounds mushy at chiptune tempos.
+  if (dur > 0.12) g.gain.setValueAtTime(vol * 0.8, start + dur * 0.7);
   g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
   o.connect(g).connect(out);
   o.start(start);
   o.stop(start + dur + 0.02);
 }
 
-function noise(start, dur, vol = 0.6, out = sfxGain) {
+// One shared second of white noise: every drum hit and effect reads a slice of it instead of building a buffer.
+let noiseBuf = null;
+function noise(start, dur, vol = 0.6, out = sfxGain, { hp = 0 } = {}) {
   if (!ctx) return;
-  const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
-  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  if (!noiseBuf) {
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
   const src = ctx.createBufferSource();
   const g = ctx.createGain();
-  g.gain.value = vol;
-  src.buffer = buf;
-  src.connect(g).connect(out);
-  src.start(start);
+  src.buffer = noiseBuf;
+  g.gain.setValueAtTime(vol, start);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + Math.max(0.01, dur));
+  let node = src;
+  if (hp) {
+    const f = ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = hp;
+    node = src.connect(f);
+  }
+  node.connect(g).connect(out);
+  src.start(start, Math.random() * 0.5, dur + 0.02);
 }
 
+const P = (n, t, d, o = {}) => tone(freq(n), t, d, { duty: 0.25, vol: 0.55, ...o });
 const SFX = {
-  select: (t) => tone(880, t, 0.05, { vol: 0.4 }),
-  confirm: (t) => { tone(660, t, 0.06); tone(990, t + 0.06, 0.08); },
-  cancel: (t) => tone(330, t, 0.08, { slide: -120 }),
-  bump: (t) => tone(110, t, 0.08, { type: 'triangle' }),
-  hit: (t) => { noise(t, 0.12, 0.8); tone(180, t, 0.1, { slide: -100 }); },
-  super: (t) => { noise(t, 0.2, 1); tone(240, t, 0.18, { slide: -180 }); tone(480, t + 0.05, 0.12, { slide: -300 }); },
-  weak: (t) => { noise(t, 0.06, 0.4); tone(140, t, 0.06); },
-  faint: (t) => tone(500, t, 0.6, { slide: -460, type: 'sawtooth', vol: 0.5 }),
-  heal: (t) => ['C5', 'E5', 'G5', 'C6', 'G5', 'C6'].forEach((n, i) => tone(freq(n), t + i * 0.12, 0.14, { vol: 0.5 })),
-  levelup: (t) => ['G4', 'B4', 'D5', 'G5'].forEach((n, i) => tone(freq(n), t + i * 0.09, 0.12, { vol: 0.6 })),
-  catch: (t) => ['C5', 'G4', 'C5', 'E5', 'G5'].forEach((n, i) => tone(freq(n), t + i * 0.1, 0.12)),
-  shake: (t) => tone(220, t, 0.06, { type: 'triangle', slide: 60 }),
+  select: (t) => tone(1046, t, 0.04, { duty: 0.125, vol: 0.35 }),
+  confirm: (t) => { tone(784, t, 0.05, { duty: 0.25, vol: 0.5 }); tone(1175, t + 0.05, 0.08, { duty: 0.25, vol: 0.5 }); },
+  cancel: (t) => tone(392, t, 0.09, { duty: 0.5, slide: -150, vol: 0.5 }),
+  menu: (t) => { tone(1175, t, 0.04, { duty: 0.125, vol: 0.4 }); tone(1568, t + 0.04, 0.06, { duty: 0.125, vol: 0.4 }); },
+  bump: (t) => tone(98, t, 0.09, { duty: 0.5, vol: 0.6 }),
+  hit: (t) => { noise(t, 0.14, 0.8); tone(180, t, 0.1, { slide: -100, duty: 0.5 }); },
+  super: (t) => { noise(t, 0.24, 1); tone(240, t, 0.18, { slide: -180, duty: 0.5 }); tone(480, t + 0.05, 0.14, { slide: -300, duty: 0.25 }); },
+  weak: (t) => { noise(t, 0.07, 0.4, sfxGain, { hp: 1500 }); tone(140, t, 0.06, { duty: 0.125 }); },
+  crit: (t) => { noise(t, 0.3, 1); tone(880, t, 0.06, { duty: 0.125 }); tone(1320, t + 0.06, 0.12, { duty: 0.125 }); },
+  faint: (t) => tone(520, t, 0.7, { slide: -470, duty: 0.5, vol: 0.5 }),
+  heal: (t) => ['C5', 'E5', 'G5', 'C6', 'G5', 'C6'].forEach((n, i) => P(n, t + i * 0.12, 0.14)),
+  levelup: (t) => ['G4', 'B4', 'D5', 'G5'].forEach((n, i) => P(n, t + i * 0.09, 0.12, { vol: 0.6 })),
+  catch: (t) => ['C5', 'G4', 'C5', 'E5', 'G5'].forEach((n, i) => P(n, t + i * 0.1, 0.12)),
+  shake: (t) => { tone(220, t, 0.06, { type: 'triangle', slide: 60 }); noise(t, 0.04, 0.25, sfxGain, { hp: 3000 }); },
   throw: (t) => tone(300, t, 0.3, { slide: 600, type: 'triangle' }),
-  encounter: (t) => { for (let i = 0; i < 6; i++) tone(freq(['C5', 'D#5', 'G5'][i % 3]), t + i * 0.05, 0.05); },
-  door: (t) => { tone(200, t, 0.06); tone(150, t + 0.07, 0.08); },
-  stat_up: (t) => tone(400, t, 0.25, { slide: 500 }),
-  stat_down: (t) => tone(700, t, 0.25, { slide: -450 }),
-  money: (t) => { tone(1320, t, 0.05); tone(1760, t + 0.06, 0.12); },
-  evolve: (t) => ['C4', 'E4', 'G4', 'C5', 'E5', 'G5', 'C6'].forEach((n, i) => tone(freq(n), t + i * 0.1, 0.16, { type: 'triangle', vol: 0.8 })),
+  poof: (t) => { noise(t, 0.25, 0.6, sfxGain, { hp: 800 }); tone(600, t, 0.2, { slide: -400, duty: 0.125, vol: 0.3 }); },
+  encounter: (t) => { for (let i = 0; i < 8; i++) tone(freq(['C5', 'D#5', 'G5', 'C6'][i % 4]), t + i * 0.045, 0.05, { duty: 0.25 }); },
+  door: (t) => { noise(t, 0.05, 0.3, sfxGain, { hp: 600 }); tone(200, t, 0.06, { duty: 0.5 }); tone(150, t + 0.07, 0.08, { duty: 0.5 }); },
+  ledge: (t) => { tone(330, t, 0.16, { duty: 0.25, slide: 330, vol: 0.45 }); noise(t + 0.2, 0.06, 0.3, sfxGain, { hp: 400 }); },
+  grass: (t) => noise(t, 0.05, 0.12, sfxGain, { hp: 4000 }),
+  splash: (t) => { noise(t, 0.22, 0.45, sfxGain, { hp: 1200 }); tone(700, t, 0.12, { type: 'sine', slide: -350, vol: 0.25 }); },
+  boulder: (t) => { noise(t, 0.3, 0.7, sfxGain); tone(70, t, 0.3, { type: 'triangle', vol: 0.8 }); },
+  run: (t) => [0, 1, 2].forEach((i) => tone(600 - i * 120, t + i * 0.06, 0.06, { duty: 0.125, vol: 0.35 })),
+  expTick: (t) => tone(1760, t, 0.02, { duty: 0.125, vol: 0.18 }),
+  lowhp: (t) => { tone(1568, t, 0.07, { duty: 0.5, vol: 0.25 }); tone(1568, t + 0.12, 0.07, { duty: 0.5, vol: 0.25 }); },
+  save: (t) => ['E5', 'G5', 'C6'].forEach((n, i) => P(n, t + i * 0.08, 0.1, { duty: 0.125 })),
+  stat_up: (t) => tone(400, t, 0.25, { slide: 500, duty: 0.25 }),
+  stat_down: (t) => tone(700, t, 0.25, { slide: -450, duty: 0.25 }),
+  money: (t) => { tone(1320, t, 0.05, { duty: 0.125 }); tone(1760, t + 0.06, 0.14, { duty: 0.125 }); },
+  evolve: (t) => ['C4', 'E4', 'G4', 'C5', 'E5', 'G5', 'C6'].forEach((n, i) => P(n, t + i * 0.1, 0.16, { vol: 0.7 })),
 };
+
+// Short fanfares that pause the background track while they play, like receiving an item in the originals.
+const JINGLES = {
+  item: { bpm: 150, lead: 'C5 1 C5 1 C5 1 E5 1 G5 4 F5 2 A5 2 G5 6', bass: 'C3 4 F2 4 C3 8' },
+  key: { bpm: 140, lead: 'G4 1 B4 1 D5 1 G5 3 E5 1 F#5 1 G5 2 D6 6', bass: 'G2 4 C3 2 D3 2 G2 6' },
+  badge: { bpm: 132, lead: 'G4 2 C5 2 E5 2 G5 4 E5 2 G5 2 A5 2 B5 2 C6 8', bass: 'C3 4 E3 4 F2 4 G2 4 C3 6' },
+  creature: { bpm: 140, lead: 'E5 2 C5 2 G5 2 E5 2 A5 2 B5 2 C6 6', bass: 'C3 4 G2 4 A2 2 G2 2 C3 6' },
+};
+
+/** Plays a fanfare over a muted music track; resolves when it ends so scripts can wait for it. */
+export function jingle(name) {
+  const j = JINGLES[name];
+  if (!ctx || !j) return Promise.resolve();
+  const eighth = 60 / j.bpm / 2;
+  const t0 = ctx.currentTime + 0.03;
+  let t = t0;
+  for (const [n, d] of parseSeq(j.lead)) { tone(freq(n), t, d * eighth * 0.92, { duty: 0.25, vol: 0.55, vib: 1 }); tone(freq(n), t + eighth * 0.5, d * eighth * 0.8, { duty: 0.125, vol: 0.15 }); t += d * eighth; }
+  const end = t;
+  t = t0;
+  for (const [n, d] of parseSeq(j.bass)) { tone(freq(n), t, d * eighth * 0.85, { type: 'triangle', vol: 0.8 }); t += d * eighth; }
+  const len = end - t0;
+  if (musicGain) {
+    const g = musicGain.gain;
+    const base = settings.music * 0.18;
+    g.cancelScheduledValues(ctx.currentTime);
+    g.setValueAtTime(g.value, ctx.currentTime);
+    g.linearRampToValueAtTime(0.0001, t0);
+    g.setValueAtTime(0.0001, end + 0.1);
+    g.linearRampToValueAtTime(base, end + 0.6);
+  }
+  return new Promise((r) => setTimeout(r, len * 1000 + 150));
+}
+
+// Low-HP alarm: the classic double beep that loops while the active creature is in the red.
+let lowTimer = null;
+export function lowHpAlarm(on) {
+  if (on && !lowTimer) {
+    sfx('lowhp');
+    lowTimer = setInterval(() => sfx('lowhp'), 520);
+  } else if (!on && lowTimer) {
+    clearInterval(lowTimer);
+    lowTimer = null;
+  }
+}
 
 export function sfx(name) {
   if (!ctx || !SFX[name]) return;
@@ -225,8 +321,11 @@ export function playMusic(name) {
     while (state.next < ctx.currentTime + loopLen + 0.5) {
       let t = state.next;
       for (const [n, d] of lead) {
-        tone(freq(n), t, d * eighth * 0.9, { vol: 0.5, out: bus });
-        t += d * eighth;
+        const len = d * eighth;
+        tone(freq(n), t, len * 0.9, { duty: track.duty ?? 0.25, vol: 0.5, vib: 1, out: bus });
+        // Second pulse channel: a quiet echo of the lead a sixteenth behind, which thickens the tune.
+        if (n !== '-') tone(freq(n), t + eighth * 0.5, len * 0.75, { duty: 0.125, vol: 0.14, out: bus });
+        t += len;
       }
       t = state.next;
       const bassLen = bass.reduce((s, [, d]) => s + d, 0) * eighth;
@@ -242,8 +341,8 @@ export function playMusic(name) {
         const ch = track.drums[s % track.drums.length];
         const at = state.next + s * (eighth / 2);
         if (ch === 'k') tone(90, at, 0.09, { type: 'sine', vol: 0.9, slide: -50, out: bus });
-        else if (ch === 's') noise(at, 0.07, 0.35, bus);
-        else if (ch === 'h') noise(at, 0.02, 0.12, bus);
+        else if (ch === 's') noise(at, 0.08, 0.35, bus, { hp: 900 });
+        else if (ch === 'h') noise(at, 0.025, 0.12, bus, { hp: 5000 });
       }
       state.next += loopLen;
     }
@@ -256,9 +355,11 @@ export function playMusic(name) {
 export function stopMusic() {
   if (current?.timer) clearInterval(current.timer);
   if (current?.bus) {
-    current.bus.gain.setValueAtTime(0, ctx.currentTime);
+    // Short fade so a track change never clicks; notes already scheduled die with the bus.
     const bus = current.bus;
-    setTimeout(() => bus.disconnect(), 50);
+    bus.gain.setValueAtTime(bus.gain.value, ctx.currentTime);
+    bus.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+    setTimeout(() => bus.disconnect(), 160);
   }
   current = null;
 }

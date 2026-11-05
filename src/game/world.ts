@@ -15,7 +15,7 @@ import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
-import { sfx, playMusic } from '../core/audio.ts';
+import { sfx, playMusic, jingle } from '../core/audio.ts';
 import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
@@ -342,6 +342,7 @@ function tryMove(d) {
     p.t = 0;
     p.dur = WALK_MS * 1.7;
     p.step++;
+    sfx('ledge');
     return;
   }
   if (tileAt(nx, ny) === '\\') return void pushBoulder(dx, dy, nx, ny);
@@ -380,7 +381,7 @@ function pushBoulder(dx, dy, bx, by) {
   const tx = bx + dx, ty = by + dy;
   const ch = tileAt(tx, ty);
   if (ch == null || TILE_INFO[ch]?.solid || ch === '~' || solidAt(tx, ty)) return bump();
-  sfx('confirm');
+  sfx('boulder');
   const put = (x, y, c) => { W_.tiles[y] = W_.tiles[y].slice(0, x) + c + W_.tiles[y].slice(x + 1); };
   put(bx, by, '.');
   put(tx, ty, '\\');
@@ -507,6 +508,7 @@ function onStep() {
     S.repel--;
     if (S.repel === 0) runScript(() => say('El efecto del Repelente se terminó.'));
   }
+  if (TILE_INFO[ch]?.enc) sfx('grass');
   if (poisonTick()) return;
   // Route marker: walking right beside one saves the respawn point (it does not heal)
   if (!W_.map.indoor && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tileAt(p.x + dx, p.y + dy) === 'Щ')) {
@@ -744,9 +746,10 @@ async function trainerTalk(n) {
 async function pickItem(it) {
   setFlag(`it_${it.id}`);
   addItem(it.item, 1);
-  sfx('confirm');
   refreshEntities();
+  const j = jingle(ITEMS[it.item].pocket === 'key' ? 'key' : 'item');
   await say(`¡Obtuviste ${ITEMS[it.item].name}!`);
+  await j;
 }
 
 async function legendEncounter(L) {
@@ -924,13 +927,15 @@ export const api = {
   badges: () => badgeCount(),
   takeItem: (k, q = 1) => removeItem(k, q),
   sfx,
+  jingle,
   wait,
   starterKey: () => ['ceibito', 'tejuchispa', 'carpinchito'].find((k) => flag(`starter_${k}`)) ?? 'ceibito',
   typeNames: (k) => SPECIES[k].types.map((t) => TYPES[t].name).join('/'),
   async give(item, qty = 1) {
     addItem(item, qty);
-    sfx('confirm');
+    const j = jingle(ITEMS[item].pocket === 'key' ? 'key' : 'item');
     await say(`¡{player} recibió ${ITEMS[item].name}${qty > 1 ? ` ×${qty}` : ''}!`);
+    await j;
   },
   giveCreature(sp, lvl) {
     const S = state();

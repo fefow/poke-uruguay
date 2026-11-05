@@ -10,7 +10,7 @@ import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
 import { vignette } from '../gfx/fx.ts';
 import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
 import { h, wait as baseWait, clamp } from '../core/util.ts';
-import { sfx, playMusic, currentTrack } from '../core/audio.ts';
+import { sfx, playMusic, currentTrack, lowHpAlarm } from '../core/audio.ts';
 import { input, rumble } from '../core/input.ts';
 import { say, choose, ask, closeDialog, uiRoot, textInput, fmt } from './ui.ts';
 import { state, settings, earn, markSeen, markCaught, removeItem, PARTY_MAX } from './state.ts';
@@ -307,6 +307,8 @@ function setHud(which, c, { instant = false, hp = c?.hp } = {}) {
     exp.classList.toggle('no-anim', instant);
     exp.style.setProperty('--exp', c.level >= 100 ? 1 : clamp((c.exp - lo) / (hi - lo), 0, 1));
   }
+  // The low-HP alarm loops while the player's active creature is in the red.
+  if (which === 'ply') lowHpAlarm(hp > 0 && ratio <= 0.2);
   const caught = el.querySelector('.bhud-caught');
   if (caught) caught.hidden = !(engine?.wild && state().dex.caught.includes(c.species));
 }
@@ -410,6 +412,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     closeDialog();
     return result;
   } finally {
+    lowHpAlarm(false);
     hud.layer.remove();
     hud = null;
     engine = null;
@@ -561,7 +564,7 @@ async function play(events, leveled) {
         break;
       case 'damage': {
         const side = e.side === 0 ? 'ply' : 'foe';
-        sfx(e.eff > 1 ? 'super' : e.eff < 1 ? 'weak' : 'hit');
+        sfx(e.crit ? 'crit' : e.eff > 1 ? 'super' : e.eff < 1 ? 'weak' : 'hit');
         A[e.side === 0 ? 'plyFlash' : 'foeFlash'] = 1;
         if (settings.anims && e.amount > 0) burst(e.side, e.eff, e.crit, e.amount);
         rumble(e.eff > 1 ? 260 : 140, e.eff > 1 ? 0.9 : 0.4, e.side === 0 ? 0.6 : 0.2);
@@ -819,7 +822,7 @@ async function shakeAnim(n, caught) {
   } else {
     A.ball = null;
     A.foeVis = true;
-    sfx('cancel');
+    sfx('poof');
   }
 }
 
@@ -831,6 +834,8 @@ function expBar(c, lvl, exp, instant = false) {
   fill.classList.toggle('no-anim', instant);
   const lo = expForLevel(lvl), hi = expForLevel(lvl + 1);
   fill.style.setProperty('--exp', lvl >= 100 ? 1 : clamp((exp - lo) / (hi - lo), 0, 1));
+  // The bar fills with a fast ticking, like the handheld counting up the points.
+  if (!instant) for (let i = 0; i < 14; i++) setTimeout(() => sfx('expTick'), i * 50);
 }
 
 async function awardExp(foe, leveled) {
