@@ -1360,7 +1360,7 @@ function drawWorld(g, t) {
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y), tileVariant(W_.tiles, x, y)), x * T - cx, y * T - cy);
   }
   if (!m.theme) drawBigObjects(g, W_.tiles, x0, y0, x1, y1, cx, cy);
-  if (!m.indoor) drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy);
+  if (!m.indoor) { drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy); drawCastShadows(g, x0, y0, x1, y1, cx, cy); }
   // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
   {
     const lights = [];
@@ -1535,6 +1535,24 @@ function drawCompanion(g, n, sx, sy, t) {
   if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(spr, 0, sy - 7 - hop, 24, 24); }
   else g.drawImage(spr, sx - 4, sy - 7 - hop, 24, 24);
   g.restore();
+}
+
+const SHADOW_CASTERS = { '#': 7.5, q: 7.5, p: 6, R: 5 };
+/** Trees and rocks drop a soft shadow on the open ground right below them, which grounds them in the scene. */
+function drawCastShadows(g, x0, y0, x1, y1, cx, cy) {
+  const tiles = W_.tiles;
+  g.fillStyle = 'rgba(12,30,18,0.2)';
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const rx = SHADOW_CASTERS[tiles[y][x]];
+      if (!rx) continue;
+      const below = tiles[y + 1]?.[x];
+      if (below === undefined || TILE_INFO[below]?.solid || TILE_INFO[below]?.over) continue;
+      g.beginPath();
+      g.ellipse(x * T - cx + 9, (y + 1) * T - cy + 2, rx, 3, 0, 0, 7);
+      g.fill();
+    }
+  }
 }
 
 /** Soft white foam that laps along every shore (water next to land): drawn over the ground pass, under objects. */
