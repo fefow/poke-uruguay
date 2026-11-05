@@ -25,7 +25,7 @@ uniform sampler2D uTexture;
 uniform float uWarm;   // 0 = neutral, >0 warm light
 uniform float uVig;    // vignette strength
 uniform vec2 uTexel;   // 1 / source size
-uniform float uMode;   // 0 = normal, 1 = vivid colours, 2 = four-shade handheld green
+uniform float uMode;   // 0 = normal, 1 = vivid colours
 void main(){
   vec2 uv = vTextureCoord;
   vec3 c = texture(uTexture, uv).rgb;
@@ -36,13 +36,8 @@ void main(){
   // gentle contrast + saturation
   c = (c - 0.5) * 1.06 + 0.5;
   float l = dot(c, vec3(0.299, 0.587, 0.114));
-  c = mix(vec3(l), c, uMode > 0.5 && uMode < 1.5 ? 1.38 : 1.1);
-  if (uMode > 0.5 && uMode < 1.5) c = (c - 0.5) * 1.05 + 0.52;
-  if (uMode > 1.5) {
-    // The original handheld screen: four shades of green, picked by brightness.
-    float q = clamp(floor(l * 4.0 + 0.15), 0.0, 3.0);
-    c = q < 0.5 ? vec3(0.06, 0.22, 0.06) : q < 1.5 ? vec3(0.19, 0.38, 0.19) : q < 2.5 ? vec3(0.55, 0.67, 0.06) : vec3(0.61, 0.74, 0.06);
-  }
+  c = mix(vec3(l), c, uMode > 0.5 ? 1.38 : 1.1);
+  if (uMode > 0.5) c = (c - 0.5) * 1.05 + 0.52;
   c *= mix(vec3(1.0), vec3(1.06, 1.0, 0.9), uWarm);
   // vignette
   vec2 d = uv - 0.5;
@@ -135,9 +130,9 @@ export async function mountPixi(source, host) {
   }
 }
 
-/** Colour filter over the whole screen: 'normal', 'vivo' (more saturated) or 'gb' (four greens). */
+/** Colour filter over the whole screen: 'normal' or 'vivo' (more saturated, like a backlit handheld). */
 export function setPalette(p) {
-  paletteMode = p === 'vivo' ? 1 : p === 'gb' ? 2 : 0;
+  paletteMode = p === 'vivo' ? 1 : 0;
   if (live) live.uMode = paletteMode;
   // Without WebGL only the vivid look is possible, through a CSS filter on the 2D canvas.
   const scr = document.getElementById('screen');

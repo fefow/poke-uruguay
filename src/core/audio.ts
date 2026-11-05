@@ -24,8 +24,26 @@ export function initAudio() {
   master.connect(ctx.destination);
   musicGain = ctx.createGain();
   sfxGain = ctx.createGain();
-  musicGain.connect(master);
-  sfxGain.connect(master);
+  // Handheld-era (GBA/DS) colour: a soft low-pass takes the 8-bit edge off, and a short room echo gives depth.
+  const tone_ = ctx.createBiquadFilter();
+  tone_.type = 'lowpass';
+  tone_.frequency.value = 5200;
+  tone_.Q.value = 0.4;
+  tone_.connect(master);
+  musicGain.connect(tone_);
+  sfxGain.connect(tone_);
+  const echo = ctx.createDelay(0.5);
+  const fb = ctx.createGain();
+  const wet = ctx.createGain();
+  const damp = ctx.createBiquadFilter();
+  echo.delayTime.value = 0.11;
+  fb.gain.value = 0.28;
+  wet.gain.value = 0.22;
+  damp.type = 'lowpass';
+  damp.frequency.value = 2400;
+  tone_.connect(echo);
+  echo.connect(damp).connect(fb).connect(echo);
+  damp.connect(wet).connect(master);
   applyVolumes();
   // A track requested before audio was unlocked starts now.
   if (current && !current.timer) {
@@ -65,7 +83,7 @@ function tone(f, start, dur, { type = 'square', duty = 0, vol = 1, slide = 0, vi
   if (!ctx || !f) return;
   const o = ctx.createOscillator();
   const g = ctx.createGain();
-  if (duty) o.setPeriodicWave(pulseWave(duty));
+  if (duty) o.setPeriodicWave(pulseWave(Math.max(0.25, duty)));
   else o.type = type;
   o.frequency.setValueAtTime(f, start);
   if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), start + dur);
