@@ -1325,10 +1325,10 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
 const SHOP_TIERS = [
   [4, ['esfera', 'te_marcela', 'ruda', 'repelente']],
   [9, ['esfera', 'te_marcela', 'ruda', 'aloe', 'repelente', 'alfajor']],
-  [16, ['esfera', 'superesfera', 'te_marcela', 'mate', 'ruda', 'aloe', 'linimento', 'despertador', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa', 'repartir_exp']],
-  [24, ['superesfera', 'mate', 'ruda', 'aloe', 'linimento', 'despertador', 'alfajor', 'repelente', 'repelente_super', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'repartir_exp', 'banda_fuerza', 'chapa_acero']],
-  [30, ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'aloe', 'despertador', 'alfajor', 'torta_frita', 'repelente_super', 'refuerzo_precision', 'refuerzo_resistencia', 'repartir_exp', 'bombilla_plata', 'poncho_lluvia', 'alpargatas']],
-  [99, ['ultraesfera', 'mate_dulce', 'dulce_de_leche', 'aloe', 'despertador', 'torta_frita', 'chivito', 'repelente_max', 'concentracion', 'refuerzo_precision', 'repartir_exp', 'restos_asado', 'banda_fuerza', 'bombilla_plata']],
+  [16, ['esfera', 'superesfera', 'te_marcela', 'mate', 'ruda', 'aloe', 'linimento', 'despertador', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa']],
+  [24, ['superesfera', 'mate', 'ruda', 'aloe', 'linimento', 'despertador', 'alfajor', 'repelente', 'repelente_super', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad']],
+  [30, ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'aloe', 'despertador', 'alfajor', 'torta_frita', 'repelente_super', 'refuerzo_precision', 'refuerzo_resistencia']],
+  [99, ['ultraesfera', 'mate_dulce', 'dulce_de_leche', 'aloe', 'despertador', 'torta_frita', 'chivito', 'repelente_max', 'concentracion', 'refuerzo_precision']],
 ];
 for (const stop of STOPS) {
   if (stop.kind !== 'city') continue;
