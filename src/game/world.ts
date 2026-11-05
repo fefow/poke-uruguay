@@ -1347,6 +1347,7 @@ function drawWorld(g, t) {
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y), tileVariant(W_.tiles, x, y)), x * T - cx, y * T - cy);
   }
   if (!m.theme) drawBigObjects(g, W_.tiles, x0, y0, x1, y1, cx, cy);
+  if (!m.indoor) drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy);
   // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
   {
     const lights = [];
@@ -1521,6 +1522,27 @@ function drawCompanion(g, n, sx, sy, t) {
   if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(spr, 0, sy - 7 - hop, 24, 24); }
   else g.drawImage(spr, sx - 4, sy - 7 - hop, 24, 24);
   g.restore();
+}
+
+/** Soft white foam that laps along every shore (water next to land): drawn over the ground pass, under objects. */
+function drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy) {
+  const tiles = W_.tiles;
+  const isWater = (x, y) => tiles[y]?.[x] === '~' || groundUnder(tiles, x, y) === '~'; // boats and reeds in the water count as water
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (tiles[y][x] !== '~') continue;
+      const px = x * T - cx, py = y * T - cy;
+      const lap = 0.5 + 0.5 * Math.sin(t / 520 + x * 0.9 + y * 0.6);
+      const a = 0.28 + 0.34 * lap;
+      g.fillStyle = `rgba(255,255,255,${a})`;
+      const off = Math.round(lap); // the wave creeps 1px toward the water and back
+      // [dx, dy, edge rectangle] for each side that touches land
+      if (tiles[y - 1]?.[x] !== undefined && !isWater(x, y - 1)) for (let i = 1; i < T - 1; i += 3) g.fillRect(px + i, py + off, 2, 1);
+      if (tiles[y + 1]?.[x] !== undefined && !isWater(x, y + 1)) for (let i = 2; i < T - 1; i += 3) g.fillRect(px + i, py + T - 1 - off, 2, 1);
+      if (tiles[y]?.[x - 1] !== undefined && !isWater(x - 1, y)) for (let i = 1; i < T - 1; i += 3) g.fillRect(px + off, py + i, 1, 2);
+      if (tiles[y]?.[x + 1] !== undefined && !isWater(x + 1, y)) for (let i = 2; i < T - 1; i += 3) g.fillRect(px + T - 1 - off, py + i, 1, 2);
+    }
+  }
 }
 
 /** Wheels and frame under the rider. */
