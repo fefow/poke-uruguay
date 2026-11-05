@@ -7,7 +7,8 @@ import { ITEMS } from '../data/items.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
-import { vignette } from '../gfx/fx.ts';
+import { vignette, rain, weatherAt } from '../gfx/fx.ts';
+import { MAPS } from '../data/maps.ts';
 import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
 import { h, wait as baseWait, clamp } from '../core/util.ts';
 import { sfx, playMusic, currentTrack, lowHpAlarm, cry, setAmbience } from '../core/audio.ts';
@@ -169,6 +170,7 @@ function drawBattle(g, t) {
   g.restore();
   const tint = dayTint();
   if (tint && !NO_TINT.has(A.bg)) { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
+  if (A.weather === 'rain' || A.weather === 'storm') { rain(g, t); if (A.weather === 'storm') rain(g, t * 1.7); }
   vignette(g, 0.9);
   if (A.tint) { g.fillStyle = A.tint; g.fillRect(0, 0, W, H); }
 }
@@ -342,8 +344,13 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     const id = String(trainer.id ?? '');
     music = isBoss(trainer) ? 'leader' : /^rival/.test(id) ? 'rival' : 'trainer';
   }
+  // Outdoor weather carries into the fight: rain keeps falling over the battlefield.
+  {
+    const m = MAPS[S.pos?.map];
+    A.weather = m && !m.indoor && !m.dark && m.theme !== 'cueva' ? weatherAt(m.id, m.weather) : 'clear';
+  }
   playMusic(music);
-  setAmbience({});
+  setAmbience(A.weather === 'rain' || A.weather === 'storm' ? { rain: A.weather === 'storm' ? 1 : 0.7, thunder: A.weather === 'storm' ? 1 : 0 } : {});
   sfx('encounter');
   await introFlash(!trainer ? 'wild' : isBoss(trainer) || /^rival/.test(String(trainer.id ?? '')) ? 'boss' : 'trainer');
   setRenderer(drawBattle);
