@@ -1656,25 +1656,29 @@ export const terrainStyle = () => STYLE;
 
 /** Pack sprites per tile char; several entries are picked by map position for variety (weights add up to 100). */
 const PACK_GROUND: Record<string, [string, number][]> = {
-  '.': [['ter0', 85], ['ter1', 15]],
-  ',': [['ter3', 100]],
-  f: [['ter12', 50], ['ter13', 50]],
-  '=': [['ter4', 85], ['ter5', 15]],
-  s: [['ter6', 100]],
-  'ß': [['ter7', 100]],
+  '.': [['ter1', 90], ['ter15', 10]],
+  ',': [['ter2', 100]],
+  f: [['ter11', 50], ['ter12', 50]],
+  '=': [['ter4', 90], ['ter5', 10]],
+  s: [['ter10', 100]],
+  'ß': [['ter10', 100]],
   'ν': [['ter5', 100]],
-  c: [['ter10', 50], ['ter11', 50]],
-  b: [['ter14', 100]],
+  c: [['ter14', 100]],
+  '_': [['ter6', 100]],
+  b: [['ter13', 100]],
   '~': [['ter8', 100]],
 };
 const PACK_OBJECT: Record<string, [string, number][]> = {
-  '#': [['obj0', 50], ['obj8', 30], ['obj4', 20]],
-  'ö': [['obj1', 40], ['obj9', 25], ['obj5', 20], ['obj13', 15]],
-  q: [['obj2', 40], ['obj6', 25], ['obj10', 20], ['obj14', 15]],
-  p: [['obj3', 100]],
-  R: [['obj7', 70], ['obj11', 30]],
-  'ξ': [['obj12', 100]],
-  F: [['obj15', 100]],
+  '#': [['obj0', 60], ['obj1', 20], ['obj11', 20]],
+  'ö': [['obj2', 100]],
+  q: [['obj3', 100]],
+  p: [['obj4', 100]],
+  R: [['obj5', 70], ['obj6', 30]],
+  'ξ': [['obj9', 100]],
+  F: [['obj7', 100]],
+  'Ñ': [['obj10', 100]],
+  'Ω': [['obj12', 100]],
+  S: [['obj14', 100]],
 };
 const packCanvases = new Map<string, HTMLCanvasElement>();
 function packCanvas(id: string) {
