@@ -85,7 +85,7 @@ async function boot() {
   }
   mountPerf();
   setVolumes(settings);
-  setTerrainStyle(settings.terrain === 'clasico' ? 'clasico' : 'nuevo');
+  setTerrainStyle(settings.terrain === 'nuevo' ? 'nuevo' : 'clasico');
   requestAnimationFrame(frame);
 
   const bar = $('#loader-bar');

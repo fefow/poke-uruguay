@@ -20,7 +20,7 @@ const REPO = 'fefow/poke-uruguay';
 const FILE = 'src/data/map-overrides.js';
 const store = safeStorage();
 // same terrain style as the game (Opciones > Terreno), so the maps look as they will in play
-try { setTerrainStyle(JSON.parse(store.getItem('urumon:settings') || '{}').terrain === 'clasico' ? 'clasico' : 'nuevo'); } catch { setTerrainStyle('nuevo'); }
+try { setTerrainStyle(JSON.parse(store.getItem('urumon:settings') || '{}').terrain === 'nuevo' ? 'nuevo' : 'clasico'); } catch { setTerrainStyle('clasico'); }
 const DRAFTS_KEY = 'pokeuy:map-drafts';
 const MAX_UNDO = 80;
 const LOCKED = new Set(['D', 'S']); // doors and signs are matched to their targets and texts in order
