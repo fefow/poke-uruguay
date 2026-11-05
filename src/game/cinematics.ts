@@ -244,6 +244,7 @@ const SCENES: Record<string, { ms: number; draw: (g, t: number, p: number) => vo
   cabo_free: fogLifts({ ms: 7000, bird: false, lines: [[0, 'La niebla del cabo empieza a abrirse.'], [0.55, 'Después de tanto tiempo, el mar vuelve a verse.']] }),
   quebrada_free: fogLifts({ ms: 8000, bird: true, lines: [[0, 'Un viento helado baja de las sierras.'], [0.35, 'El Cardenal Azul se aleja hacia el sur.'], [0.8, 'La niebla de la Quebrada se disipa.']] }),
   torre_off: fogLifts({ ms: 7500, tower: true, lines: [[0, 'La baliza del transmisor parpadea… y se apaga.'], [0.5, 'La niebla de Rivera sube y desaparece.']] }),
+  fabrica_off: fogLifts({ ms: 7000, tower: true, lines: [[0, 'Las máquinas de la fábrica de Minas se detienen.'], [0.5, 'El humo gris se va con el viento.']] }),
   obs_free: fogLifts({ ms: 7000, lines: [[0, 'El registro de Tabárez queda en tus manos.'], [0.55, 'Desde el observatorio el cielo se ve limpio.']] }),
   anglo_free: fogLifts({ ms: 9500, tower: true, bird: true, lines: [[0, 'Las últimas máquinas de niebla se apagan.'], [0.35, 'El Cardenal Azul vuelve a volar sobre el Río.'], [0.75, 'El cielo del Uruguay vuelve a ser de todos.']] }),
   represa_on: damLights([[0, 'Las compuertas de la represa se abren.'], [0.5, 'En la ciudad, las luces se prenden una por una.']], 8000),

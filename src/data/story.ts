@@ -486,6 +486,7 @@ export const SCRIPTS = {
     if (res !== 'win') return;
     api.setFlag('pp_clear');
     api.setFlag('open_minas'); // Minas has no gym: beating Garúa is what opens the road west
+    await api.cinematic('fabrica_off');
     await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es del Dr. Díaz.', 'Dr. Díaz dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las doce medallas.', 'Llevate esto.'], { name: 'Garúa' });
     await api.give('mt_vendaval', 1);
     await api.say('En la oficina de Garúa encontrás una vianda con Restos de Asado, guardada para la guardia nocturna.');
