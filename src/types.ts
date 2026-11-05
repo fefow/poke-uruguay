@@ -17,6 +17,8 @@ export interface Creature {
   status: StatusId | null;
   moves: MoveSlot[];
   ot: string | null;
+  /** Equipped item key (an ITEMS entry of pocket 'held'). */
+  held?: string | null;
 }
 
 export interface Battler {

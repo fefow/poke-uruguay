@@ -25,6 +25,8 @@ export function makeBattler(c) {
 
 export function effStat(b, key) {
   let v = calcStats(b.c)[key] * stageMult(b.stages[key]);
+  const held = b.c.held ? ITEMS[b.c.held]?.held : null;
+  if (held?.stat === key) v *= held.mult;
   if (key === 'spe' && b.c.status === 'par') v *= 0.5;
   return Math.max(1, Math.floor(v));
 }
@@ -279,6 +281,12 @@ export class BattleEngine {
     for (const side of [0, 1]) {
       const b = side === 0 ? this.p : this.f;
       if (b.c.hp <= 0) continue;
+      const lo = b.c.held ? ITEMS[b.c.held]?.held?.leftovers : 0;
+      if (lo && b.c.hp < maxHp(b.c)) {
+        const got = Math.min(maxHp(b.c) - b.c.hp, Math.max(1, Math.floor(maxHp(b.c) * lo)));
+        b.c.hp += got;
+        ev.push({ t: 'text', msg: `${this.name(side)} recuperó salud con ${ITEMS[b.c.held].name}.` }, { t: 'hud', php: this.p.c.hp, fhp: this.f.c.hp });
+      }
       if (b.c.status === 'brn' || b.c.status === 'psn') {
         const d = Math.min(b.c.hp, Math.max(1, Math.floor(maxHp(b.c) / 8)));
         b.c.hp -= d;
@@ -482,8 +490,10 @@ export class BattleEngine {
 
   /** EXP shares: [[creature, amount]] for living participants. */
   expShares(foe) {
-    const living = this.party.filter((c) => c.hp > 0 && this.participants.has(c.uid));
+    let living = this.party.filter((c) => c.hp > 0 && this.participants.has(c.uid));
     if (!living.length) return [];
+    // Repartir Exp: carried by anybody on the team, the EXP goes to every conscious member of the team
+    if (this.party.some((c) => c.held && ITEMS[c.held]?.held?.shareExp)) living = this.party.filter((c) => c.hp > 0);
     const total = expYield(foe, !this.wild);
     const each = Math.max(1, Math.floor(total / living.length));
     return living.map((c) => [c, each]);

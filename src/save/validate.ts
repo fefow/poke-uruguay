@@ -68,6 +68,7 @@ export function validateCreature(c, errors, where) {
     status: c.status ?? null,
     moves: c.moves.map((m) => ({ id: m.id, pp: m.pp })),
     ot: Number.isInteger(c.ot) ? c.ot : null,
+    held: typeof c.held === 'string' && ITEMS[c.held]?.pocket === 'held' ? c.held : null,
   };
 }
 

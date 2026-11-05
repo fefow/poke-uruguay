@@ -31,6 +31,15 @@ const BASE_ITEMS = {
   piedra_amatista: { name: 'Piedra Amatista', pocket: 'items', price: 2100, stone: 'piedra_amatista', desc: 'Amatista de Artigas. Hace evolucionar a ciertas criaturas psíquicas y siniestras.' },
   piedra_basalto: { name: 'Piedra Basalto', pocket: 'items', price: 2100, stone: 'piedra_basalto', desc: 'Basalto de las canteras del norte. Hace evolucionar a ciertas criaturas de tierra y roca.' },
 
+  // Equipables: a creature holds one; they work only for that creature (or, Repartir Exp, for the whole team)
+  repartir_exp: { name: 'Repartir Exp', pocket: 'held', price: 6000, held: { shareExp: true }, desc: 'Si una criatura del equipo lo lleva, la EXP de cada combate se reparte entre todo el equipo, no solo entre quienes pelearon. Las del PC no cuentan.' },
+  banda_fuerza: { name: 'Banda de Fuerza', pocket: 'held', price: 4000, held: { stat: 'atk', mult: 1.1 }, desc: 'Equipada, sube un 10 % el Ataque de la criatura.' },
+  chapa_acero: { name: 'Chapa de Acero', pocket: 'held', price: 4000, held: { stat: 'def', mult: 1.1 }, desc: 'Equipada, sube un 10 % la Defensa de la criatura.' },
+  bombilla_plata: { name: 'Bombilla de Plata', pocket: 'held', price: 4000, held: { stat: 'spa', mult: 1.1 }, desc: 'Equipada, sube un 10 % el Ataque Especial de la criatura.' },
+  poncho_lluvia: { name: 'Poncho de Lluvia', pocket: 'held', price: 4000, held: { stat: 'spd', mult: 1.1 }, desc: 'Equipado, sube un 10 % la Defensa Especial de la criatura.' },
+  alpargatas: { name: 'Alpargatas Livianas', pocket: 'held', price: 4000, held: { stat: 'spe', mult: 1.1 }, desc: 'Equipadas, suben un 10 % la Velocidad de la criatura.' },
+  restos_asado: { name: 'Restos de Asado', pocket: 'held', price: 5000, held: { leftovers: 1 / 16 }, desc: 'Equipados, la criatura recupera 1/16 de sus PS al final de cada turno de combate.' },
+
   refuerzo_ataque: { name: 'Refuerzo de Ataque', pocket: 'items', price: 500, xstat: 'atk', desc: 'Solo en combate. Sube el Ataque de la criatura activa.' },
   refuerzo_defensa: { name: 'Refuerzo de Defensa', pocket: 'items', price: 550, xstat: 'def', desc: 'Solo en combate. Sube la Defensa de la criatura activa.' },
   refuerzo_especial: { name: 'Refuerzo Especial', pocket: 'items', price: 500, xstat: 'spa', desc: 'Solo en combate. Sube el Ataque Especial de la criatura activa.' },

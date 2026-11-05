@@ -199,9 +199,16 @@ export function openParty({ mode = 'field', active = -1, title, onUse, compat = 
         if (i === active) return say(`¡${displayName(c)} ya está en combate!`);
         return close(i);
       }
-      const r = await choose(['Datos', 'Mover', 'Cancelar'], { cls: 'menu-sub' });
+      const opts = ['Datos', 'Mover', ...(c.held ? ['Quitar objeto'] : []), 'Cancelar'];
+      const r = await choose(opts, { cls: 'menu-sub' });
       if (r === 0) await openSummary(i);
       else if (r === 1) { swapFrom = i; build(); makeNav(i); }
+      else if (c.held && r === 2) {
+        addItem(c.held, 1);
+        await say(`${displayName(c)} devolvió ${ITEMS[c.held].name} a la mochila.`);
+        c.held = null;
+        build(); makeNav(i);
+      }
     };
     makeNav(Math.max(0, mode === 'forced' ? S.party.findIndex((c) => c.hp > 0) : 0));
     return (a) => { if (!el.classList.contains('is-suspended')) nav(a); };
@@ -228,6 +235,7 @@ export function openSummary(index) {
             h('div', { class: 'chips' }, sp.types.map(typeChip)),
             h('p', { class: 'small', text: `Especie: ${sp.name}` }),
             h('p', { class: 'small', text: `EO: ${c.ot ?? S.player.id}` }),
+            h('p', { class: 'small', text: c.held ? `Objeto: ${ITEMS[c.held]?.name}` : 'Objeto: —' }),
             h('p', { class: 'small', text: next ? `EXP para Nv${c.level + 1}: ${next}` : 'Nivel máximo' }),
           ),
           h('div', { class: 'summary-stats' },
@@ -270,7 +278,7 @@ export function openSummary(index) {
 }
 
 // ---------------------------------------------------------------- BAG
-const POCKETS = [['items', 'Objetos'], ['balls', 'Pokeballs'], ['key', 'Clave']];
+const POCKETS = [['items', 'Objetos'], ['held', 'Equipables'], ['balls', 'Pokeballs'], ['key', 'Clave']];
 
 function itemUsable(key, c) {
   const it = ITEMS[key];
@@ -328,6 +336,7 @@ export function openBag({ mode = 'field', wild = false } = {}) {
           return close({ item: key });
         }
         if (it.repel) return say('¡No es momento de usar eso!');
+        if (it.held) return say('Se equipa fuera de combate.');
         if (it.tm || it.stone) return say('Mejor usala fuera de combate.');
         if (it.rareCandy) return say('Mejor usala fuera de combate.');
         if (it.xstat || it.bait || it.focus) {
@@ -361,6 +370,22 @@ export function openBag({ mode = 'field', wild = false } = {}) {
   });
 }
 
+/** Equip a held item on a team member (the one it replaces goes back to the bag). */
+async function equipHeld(key) {
+  const S = state();
+  const it = ITEMS[key];
+  const compat = (c) => (c.held === key ? { ok: false, label: 'Ya lo lleva' } : { ok: true, label: c.held ? `Cambia ${ITEMS[c.held]?.name ?? ''}` : 'Apto' });
+  const t = await openParty({ mode: 'item', title: `Equipar ${it.name}`, compat });
+  if (t < 0) return;
+  const c = S.party[t];
+  if (c.held === key) return say(`${displayName(c)} ya lleva ${it.name}.`);
+  removeItem(key, 1);
+  if (c.held) { addItem(c.held, 1); await say(`${displayName(c)} devolvió ${ITEMS[c.held].name} a la mochila.`); }
+  c.held = key;
+  sfx('confirm');
+  await say(`${displayName(c)} lleva ${it.name}.`);
+}
+
 async function useInField(key) {
   const S = state();
   const it = ITEMS[key];
@@ -371,6 +396,7 @@ async function useInField(key) {
     return say(toggleBike());
   }
   if (it.pocket === 'key') return say(it.desc);
+  if (it.held) return equipHeld(key);
   if (it.ball) return say('¡Las Pokeballs se usan en combate!');
   if (it.repel) {
     S.repel = it.repel;
