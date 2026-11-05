@@ -11,7 +11,7 @@ import { vignette, rain, weatherAt } from '../gfx/fx.ts';
 import { MAPS } from '../data/maps.ts';
 import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
 import { h, wait as baseWait, clamp } from '../core/util.ts';
-import { sfx, playMusic, currentTrack, lowHpAlarm, cry, setAmbience } from '../core/audio.ts';
+import { sfx, playMusic, currentTrack, lowHpAlarm, cry, setAmbience, jingle } from '../core/audio.ts';
 import { input, rumble } from '../core/input.ts';
 import { say, choose, ask, closeDialog, uiRoot, textInput, fmt } from './ui.ts';
 import { state, settings, earn, markSeen, markCaught, removeItem, PARTY_MAX } from './state.ts';
@@ -904,10 +904,11 @@ async function shakeAnim(n, caught) {
   }
   await wait(400);
   if (caught) {
-    sfx('catch');
+    const j = jingle('creature');
     A.tint = 'rgba(255,255,255,0.25)';
     await wait(300);
     A.tint = null;
+    await j;
   } else {
     A.ball = null;
     A.foeVis = true;
