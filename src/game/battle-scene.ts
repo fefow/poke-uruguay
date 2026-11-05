@@ -10,7 +10,7 @@ import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
 import { vignette } from '../gfx/fx.ts';
 import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
 import { h, wait as baseWait, clamp } from '../core/util.ts';
-import { sfx, playMusic, currentTrack, lowHpAlarm } from '../core/audio.ts';
+import { sfx, playMusic, currentTrack, lowHpAlarm, cry } from '../core/audio.ts';
 import { input, rumble } from '../core/input.ts';
 import { say, choose, ask, closeDialog, uiRoot, textInput, fmt } from './ui.ts';
 import { state, settings, earn, markSeen, markCaught, removeItem, PARTY_MAX } from './state.ts';
@@ -346,6 +346,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
       A.foe = foes[0].species;
       A.foeX = 160;
       await tween(650, (p) => (A.foeX = 160 * (1 - p)), easeOut);
+      creatureCry(foes[0]);
       markSeen(foes[0].species);
       setHud('foe', foes[0], { instant: true });
       await say(`¡Apareció un ${displayName(foes[0])} salvaje!`, { battle: true, auto: 1400 });
@@ -496,6 +497,13 @@ async function popIn(side) {
   A[`${side}Glow`] = 0;
 }
 
+/** Plays a creature's own cry; bigger creatures (higher base stats) sound lower. */
+function creatureCry(c, faint = false) {
+  const base = SPECIES[c.species]?.base ?? [];
+  const total = base.reduce((a, b) => a + b, 0) || 300;
+  cry(c.species, total / 250, { faint });
+}
+
 async function sendOutFoe(c) {
   A.foe = c.species;
   A.foeVis = false;
@@ -504,6 +512,7 @@ async function sendOutFoe(c) {
   await tween(250, (p) => (A.ball.y = 60 + p * 30));
   A.ball = null;
   A.foeVis = true;
+  creatureCry(c);
   await popIn('foe');
   markSeen(c.species);
   setHud('foe', c, { instant: true });
@@ -517,6 +526,7 @@ async function sendOutPlayer(c, at = null) {
   await tween(300, (p) => { A.ball.x = 30 + p * 54; A.ball.y = 110 + Math.sin(p * Math.PI) * -30 + p * 50; });
   A.ball = null;
   A.plyVis = true;
+  creatureCry(c);
   await popIn('ply');
   // `at` is the HP and status when the creature came out: attacks later in the same turn show up on their own.
   setHud('ply', at ? { ...c, status: at.status } : c, { instant: true, hp: at ? at.hp : c.hp });
@@ -648,6 +658,8 @@ async function play(events, leveled) {
         break;
       }
       case 'faint': {
+        { const fc = e.side === 0 ? engine.p.c : engine.f.c; if (fc) creatureCry(fc, true); }
+        await wait(250);
         sfx('faint');
         rumble(420, 0.7, 0.9);
         const sd = e.side === 0 ? 'ply' : 'foe';

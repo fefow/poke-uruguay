@@ -180,6 +180,33 @@ export function jingle(name) {
   return new Promise((r) => setTimeout(r, len * 1000 + 150));
 }
 
+/**
+ * Creature cry: every species gets its own short call, built from its key so it never changes.
+ * `size` (about 0.7 to 2.4, from base stats) lowers the pitch of big creatures; a fainting creature cries slower and lower.
+ */
+export function cry(key, size = 1, { faint = false } = {}) {
+  if (!ctx || !key) return;
+  let h = 2166136261;
+  for (const ch of key) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  const rnd = () => { h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const stretch = faint ? 1.6 : 1;
+  const base = (1400 / (0.6 + size)) * (faint ? 0.75 : 1);
+  const duty = [0.125, 0.25, 0.5][Math.floor(rnd() * 3)];
+  const segs = 2 + Math.floor(rnd() * 3);
+  const rough = rnd() < 0.35;
+  let t = ctx.currentTime + 0.01;
+  for (let i = 0; i < segs; i++) {
+    const d = (0.05 + rnd() * 0.12) * stretch;
+    const f = base * (0.7 + rnd() * 0.8);
+    const dir = faint ? -1 : rnd() < 0.5 ? -1 : 1;
+    tone(f, t, d, { duty, vol: 0.6, slide: dir * f * (0.2 + rnd() * 0.5) });
+    // A second voice a fifth apart makes the call less beepy.
+    if (rnd() < 0.5) tone(f * 1.5, t, d * 0.8, { duty: 0.125, vol: 0.2, slide: dir * f * 0.3 });
+    if (rough) noise(t, d, 0.25, sfxGain, { hp: f });
+    t += d * (0.8 + rnd() * 0.3);
+  }
+}
+
 // Low-HP alarm: the classic double beep that loops while the active creature is in the red.
 let lowTimer = null;
 export function lowHpAlarm(on) {

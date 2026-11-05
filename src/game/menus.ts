@@ -3,7 +3,7 @@
 import { setTerrainStyle } from '../gfx/tiles.ts';
 import { h, clamp, formatTime, pad, wait } from '../core/util.ts';
 import { keyName } from '../core/input.ts';
-import { sfx, setVolumes } from '../core/audio.ts';
+import { sfx, setVolumes, cry } from '../core/audio.ts';
 import { SPECIES, DEX_ORDER } from '../data/species.ts';
 import { MOVES } from '../data/moves.ts';
 import { ITEMS } from '../data/items.ts';
@@ -519,7 +519,7 @@ export function openDex() {
           h('i', { class: 'ball', 'aria-hidden': 'true' }));
       });
       list.replaceChildren(...rows);
-      nav = listNav(rows, { onCancel: () => close(), onPick: () => {}, onMove: show, start: Math.max(0, keys.indexOf(keepKey)) });
+      nav = listNav(rows, { onCancel: () => close(), onPick: (i) => { const k = keys[i]; if (k && seen.has(k)) cry(k, SPECIES[k].base.reduce((a, b) => a + b, 0) / 250); }, onMove: show, start: Math.max(0, keys.indexOf(keepKey)) });
       if (!rows.length) show(0);
     };
     const search = h('input', { type: 'search', class: 'dex-search', placeholder: 'Buscar por nombre, tipo o número  ( / )', autocomplete: 'off', spellcheck: 'false', oninput: () => rebuild() });
@@ -535,7 +535,7 @@ export function openDex() {
     };
     addEventListener('keydown', slash);
     rebuild();
-    el.append(head, h('div', { class: 'dex-filter' }, search, status), h('div', { class: 'dex-layout' }, left, list), h('footer', { class: 'panel-foot', text: `↑↓ recorrer · / buscar · ${keyName('b')} volver` }));
+    el.append(head, h('div', { class: 'dex-filter' }, search, status), h('div', { class: 'dex-layout' }, left, list), h('footer', { class: 'panel-foot', text: `↑↓ recorrer · ${keyName('a')} oír su grito · / buscar · ${keyName('b')} volver` }));
     return (a) => nav?.(a);
   });
 }
