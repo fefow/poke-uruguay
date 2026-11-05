@@ -4,7 +4,18 @@ import { mapBand } from './route.ts';
 
 const CAVE_TYPES = ['tierra', 'roca', 'veneno', 'bicho'];
 /** Which of a map's wild entries can appear in a given biome. */
-export function encounterList(m, biome: 'grass' | 'cave' | 'water') {
+const NIGHT_TYPES = ['siniestro', 'veneno', 'psiquico'];
+const DAY_TYPES = ['volador', 'planta', 'normal'];
+/**
+ * Day and night change who shows up: shadowy creatures come out after dark and are scarcer by day, birds and plants the
+ * other way round. `night` is 0 (day) to 1 (full night). Nothing disappears: only the odds shift, so every map keeps its list.
+ */
+function byClock(list: any[], night: number) {
+  if (!night) return list.map(([sp, lo, hi, w]) => [sp, lo, hi, (w ?? 1) * (SPECIES[sp].types.some((t) => NIGHT_TYPES.includes(t)) ? 0.5 : SPECIES[sp].types.some((t) => DAY_TYPES.includes(t)) ? 1.25 : 1)]);
+  return list.map(([sp, lo, hi, w]) => [sp, lo, hi, (w ?? 1) * (SPECIES[sp].types.some((t) => NIGHT_TYPES.includes(t)) ? 1 + 2 * night : SPECIES[sp].types.some((t) => DAY_TYPES.includes(t)) ? 1 - 0.5 * night : 1)]);
+}
+
+export function encounterList(m, biome: 'grass' | 'cave' | 'water', night = 0) {
   const isWater = (sp) => SPECIES[sp].types.includes('agua');
   const all: any[] = m.enc?.list ?? [];
   if (biome === 'water') return waterTable(m, 2);
@@ -13,7 +24,7 @@ export function encounterList(m, biome: 'grass' | 'cave' | 'water') {
     const cave = dry.filter(([sp]) => SPECIES[sp].types.some((t) => CAVE_TYPES.includes(t)));
     return cave.length ? cave : dry;
   }
-  return dry;
+  return byClock(dry, night);
 }
 
 const WATER_W = [24, 18, 15, 12, 10, 8, 7, 6];

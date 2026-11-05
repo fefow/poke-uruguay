@@ -570,3 +570,13 @@ test('every music track and jingle is made of valid notes and lengths', async ()
     if (t.drums) assert.match(t.drums, /^[ksh-]+$/, `${name}.drums`);
   }
 });
+
+test('night shifts wild odds toward shadowy creatures without removing anyone', async () => {
+  const { encounterList } = await import('../src/data/encounters.ts');
+  const m = { enc: { list: [['pombero', 5, 7, 10], ['yarara', 5, 7, 10], ['ceibito', 5, 7, 10]] } };
+  const w = (list, k) => list.find((e) => e[0] === k)[3];
+  const day = encounterList(m, 'grass', 0), night = encounterList(m, 'grass', 1);
+  assert.equal(day.length, night.length);
+  assert.ok(w(night, 'pombero') > w(day, 'pombero'));
+  assert.ok(w(night, 'ceibito') < w(day, 'ceibito'));
+});

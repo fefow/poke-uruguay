@@ -25,3 +25,8 @@ Objetivo: acercar el juego a la sensación de Pokémon de GBA/DS. Todo es opcion
 
 ## Para probar
 Build de prueba: https://claude.ai/artifact/2zfqDzHATgnsotgnGred7p
+
+## Más
+- Día y noche cambian las probabilidades de encuentros en pasto: de noche salen más Siniestro, Veneno y Psíquico, de día más Volador, Planta y Normal. Nadie desaparece de la lista de una zona.
+- Espuma animada en todas las orillas; vecinos quietos que miran alrededor y se giran hacia vos; sonidos de estados alterados.
+- Test de referencias cruzadas (`tests/check-maps.mjs`): scripts, músicas, objetos, especies y cinemáticas que se nombran tienen que existir.

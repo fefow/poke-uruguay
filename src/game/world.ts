@@ -565,7 +565,7 @@ function onStep() {
     const grass = !!TILE_INFO[ch]?.enc;
     const floor = cave && !surfing && !TILE_INFO[ch]?.solid;
     if (surfing || grass || floor) {
-      const pick = encounterList(W_.map, surfing ? 'water' : cave ? 'cave' : 'grass');
+      const pick = encounterList(W_.map, surfing ? 'water' : cave ? 'cave' : 'grass', W_.map.indoor ? 0 : nightLevel());
       const rate = surfing ? Math.max(0.1, base * 0.7) : floor && !grass ? Math.min(0.1, base) : base;
       if (pick.length && worldRng.chance(rate)) {
         const e = worldRng.weighted(pick.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
