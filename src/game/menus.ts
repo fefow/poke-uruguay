@@ -950,6 +950,7 @@ function clearDescToast() {
 // ---------------------------------------------------------------- PC
 export async function openPC() {
   const S = state();
+  sfx('pc');
   await say('Encendiste la computadora. Se conectó a la Caja de Criaturas.', { keep: true });
   while (true) {
     const r = await choose(['Retirar', 'Depositar', 'Apagar'], { cls: 'menu-sub' });

@@ -807,8 +807,10 @@ async function attackAnim(side, type, kind, name = '') {
     const [x1, y1] = at(side);
     const [x2, y2] = at(1 - side);
     const tgt = side === 0 ? 'foe' : 'ply';
+    sfx('charge');
     await tween(180, (p) => { A[`${me}Glow`] = p * 0.8; A[`${me}X`] = -dir * 5 * p; A[`${me}SX`] = 1 + 0.05 * p; }, easeOut);
     A[`${me}X`] = 0; A[`${me}SX`] = 1;
+    sfx(`fx_${style}`);
     await tween(FX_MS[style], (p) => {
       A.eff = { style, p, x1, y1: y1 - 10, x2, y2: y2 - 6, color };
       A[`${me}Glow`] = 0.8 * (1 - p);
@@ -840,6 +842,7 @@ async function attackAnim(side, type, kind, name = '') {
   if (kind === 'fis') {
     // wind-up, dash into the target, hold on impact, recover
     await tween(170, (p) => { A[`${me}X`] = -dir * 9 * p; A[`${me}SX`] = 1 + 0.06 * p; A[`${me}SY`] = 1 - 0.09 * p; }, easeOut);
+    sfx('dash');
     await tween(110, (p) => { A[`${me}X`] = dir * (-9 + 45 * p); A[`${me}SX`] = 1.06 - 0.12 * p; A[`${me}SY`] = 0.91 + 0.12 * p; }, easeIn);
     burst();
     await wait(90);
@@ -847,6 +850,7 @@ async function attackAnim(side, type, kind, name = '') {
     tween(300, (p) => { A[`${me}X`] = dir * 36 * (1 - p); A[`${me}SX`] = 0.94 + 0.06 * p; A[`${me}SY`] = 1.03 - 0.03 * p; }, easeInOut).then(() => { A[`${me}X`] = 0; A[`${me}SX`] = A[`${me}SY`] = 1; });
   } else if (kind === 'status') {
     // sway and glow on the user
+    sfx('aura');
     await tween(420, (p) => {
       A[`${me}X`] = Math.sin(p * Math.PI * 4) * 4 * (1 - p);
       A[`${me}Glow`] = Math.sin(p * Math.PI);
@@ -857,7 +861,9 @@ async function attackAnim(side, type, kind, name = '') {
     await wait(300);
   } else {
     // special: charge (grow and glow), launch an orb that travels, then burst on the target
+    sfx('charge');
     await tween(300, (p) => { A[`${me}Glow`] = p; A[`${me}SX`] = A[`${me}SY`] = 1 + 0.1 * p; A[`${me}X`] = -dir * 4 * p; }, easeOut);
+    sfx('orb');
     const [x1, y1] = at(side);
     const [x2, y2] = at(1 - side);
     await tween(300, (p) => { A.proj = { x1, y1: y1 - 10, x2, y2: y2 - 10, p, color }; A[`${me}X`] = -dir * 4 * (1 - p); A[`${me}SX`] = A[`${me}SY`] = 1.1 - 0.1 * p; A[`${me}Glow`] = 1 - p; }, easeIn);

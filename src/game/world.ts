@@ -508,6 +508,8 @@ function onStep() {
     S.repel--;
     if (S.repel === 0) runScript(() => say('El efecto del Repelente se terminó.'));
   }
+  // Getting into or out of the canoe splashes.
+  if (p.from && (ch === '~') !== (tileAt(p.from.x, p.from.y) === '~')) sfx('splash');
   if (TILE_INFO[ch]?.enc) { sfx('grass'); W_.rustle = { x: p.x, y: p.y, t0: null }; }
   if (poisonTick()) return;
   // Route marker: walking right beside one saves the respawn point (it does not heal)
@@ -771,7 +773,8 @@ async function cutBush(x, y) {
   if (W_.map.id !== 'fraybentos' && !flag(badgeOf('salto'))) return say('Un zarzal espeso. El Machete no alcanza todavía: hace falta la Medalla Salto.');
   await say('Un zarzal espeso. Con el Machete se puede abrir paso.');
   if (!(await ask('¿Cortar el zarzal?'))) return;
-  sfx('select');
+  sfx('cut');
+  W_.rustle = { x, y, t0: null };
   setFlag(`cl_${W_.map.id}_${x}_${y}`);
   W_.tiles[y] = W_.tiles[y].slice(0, x) + '.' + W_.tiles[y].slice(x + 1);
   await say('¡Despejaste el camino!');
@@ -788,6 +791,7 @@ export function toggleBike() {
     return 'Te bajaste de la bicicleta.';
   }
   W_.bike = true;
+  sfx('bell');
   return 'Te subiste a la bicicleta.';
 }
 
@@ -834,7 +838,7 @@ async function fish() {
   const fs = (W_.fishing = { phase: 'cast', tx: pl.x + dx, ty: pl.y + dy, dx, dy, t0: null });
   const to = (phase) => { fs.phase = phase; fs.t0 = null; };
   try {
-    sfx('select');
+    sfx('cast');
     await say('Lanzaste la caña al agua…', { auto: 700 });
     to('wait');
     await wait(1100 + worldRng.int(0, 1500));
@@ -845,7 +849,7 @@ async function fish() {
       return say('No picó nada. Probá de nuevo.');
     }
     to('bite');
-    sfx('encounter');
+    sfx('bite');
     await wait(650);
     await say('¡Algo picó!', { auto: 600 });
   } finally {
@@ -1331,6 +1335,14 @@ function drawWorld(g, t) {
     const hopK = player && p.moving && p.from && p.y - p.from.y === 2 ? Math.min(1, p.t / p.dur) : -1;
     const lift = hopK >= 0 ? Math.round(Math.sin(hopK * Math.PI) * 7) : 0;
     if (player && tileAt(p.x, p.y) === '~') {
+      // wake behind the canoe while paddling
+      if (p.moving) {
+        const [wx, wy] = DIRS[p.dir];
+        const k = (t / 260) % 1;
+        g.strokeStyle = `rgba(255,255,255,${0.6 * (1 - k)})`;
+        g.lineWidth = 1;
+        g.beginPath(); g.ellipse(sx + 8 - wx * (8 + k * 6), sy + 12 - wy * (6 + k * 5), 4 + k * 5, 2 + k * 2, 0, 0, 7); g.stroke();
+      }
       g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
       g.fillStyle = '#a87a4a'; g.beginPath(); g.ellipse(sx + 8, sy + 11, 8, 3, 0, 0, 7); g.fill();
     }
