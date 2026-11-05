@@ -652,6 +652,19 @@ function updateNpc(n, now, dt) {
     npcStep(n, px * sgn, py * sgn);
     return;
   }
+  // Townsfolk that stand still glance around now and then, and turn toward the player when they pass close by.
+  if (!n.def.wander && n.visible && !W_.scriptRunning && !input.busy && n.def.look && n.def.look !== 'ball' && n.def.look !== 'machine'
+      && !n.def.script && !n.def.trainer && !n.def.sight && !n.def.patrol && !n.def.gate && !n.def.blocker && !n.def.critter && !String(n.def.look).startsWith('animal:')) {
+    n.glanceAt ??= now + 1500 + worldRng.next() * 5000;
+    if (now >= n.glanceAt) {
+      n.glanceAt = now + 2500 + worldRng.next() * 6000;
+      const p = W_.player;
+      const near = Math.abs(p.x - n.x) + Math.abs(p.y - n.y) <= 3;
+      if (near && worldRng.chance(0.6)) n.dir = Math.abs(p.x - n.x) > Math.abs(p.y - n.y) ? (p.x > n.x ? 'right' : 'left') : (p.y > n.y ? 'down' : 'up');
+      else if (worldRng.chance(0.3)) n.dir = worldRng.pick(Object.keys(DIRS));
+    }
+    return;
+  }
   if (!n.def.wander || !n.visible || W_.scriptRunning || input.busy) return;
   if (now < n.wanderAt) return;
   n.wanderAt = now + 1500 + worldRng.next() * 3000;
