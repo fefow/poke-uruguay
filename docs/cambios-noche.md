@@ -30,3 +30,4 @@ Build de prueba: https://claude.ai/artifact/2zfqDzHATgnsotgnGred7p
 - Día y noche cambian las probabilidades de encuentros en pasto: de noche salen más Siniestro, Veneno y Psíquico, de día más Volador, Planta y Normal. Nadie desaparece de la lista de una zona.
 - Espuma animada en todas las orillas; vecinos quietos que miran alrededor y se giran hacia vos; sonidos de estados alterados.
 - Test de referencias cruzadas (`tests/check-maps.mjs`): scripts, músicas, objetos, especies y cinemáticas que se nombran tienen que existir.
+- Fanfarria al capturar, cinemática al apagar la fábrica de Minas, barra de PS que pulsa en peligro. Versión del título: v165.
