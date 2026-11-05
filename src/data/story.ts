@@ -240,7 +240,7 @@ const GATE_STORY = {
 
 export const EVENTS = {
   refineria: {
-    flag: 'refineria_clear', name: 'Capataz Ferreira', mt: 'mt_descarga', prize: 3800,
+    flag: 'refineria_clear', name: 'Capataz Ferreira', mt: 'mt_descarga', held: 'banda_fuerza', prize: 3800,
     team: [['yarara', 49], ['pavesa', 49], ['caudillo', 50], ['temblador', 51]],
     intro: ['De este depósito sale el combustible de la niebla. Cada tanque que cargamos tapa un departamento entero.', 'El Dr. Díaz necesita una última carga para Montevideo. No vas a ser vos quien la frene.'],
     lose: 'Se me fue la presión.',
@@ -248,7 +248,7 @@ export const EVENTS = {
     thanks: ['El depósito vuelve a ser de ANCAP. Gracias, {player}.', 'Candelaria te espera en el gimnasio. Y llevate esta MT, la usamos para las chispas de los motores.'],
   },
   parrilla: {
-    flag: 'parrilla_clear', name: 'Capataz Rondeau', mt: 'mt_parrillada', prize: 2800,
+    flag: 'parrilla_clear', name: 'Capataz Rondeau', mt: 'mt_parrillada', held: 'chapa_acero', prize: 2800,
     team: [['yarara', 40], ['cuervon', 40], ['pombero', 41], ['zorromonte', 42]],
     intro: ['Esta parrilla es ahora cuartel del Equipo PP. Sin asado, la gente no se junta; y sin gente, nadie nos molesta.', 'No te voy a dejar arruinar el plan.'],
     lose: 'Me quedé sin brasas.',
@@ -256,7 +256,7 @@ export const EVENTS = {
     thanks: ['La parrilla de la Patria Gaucha vuelve a abrir. Gracias, {player}.', 'Tomá esta MT: es la receta de mi abuelo, el fuego justo para cada corte.'],
   },
   aduana: {
-    flag: 'aduana_clear', name: 'Inspector Bianchi', mt: 'mt_punio_gaucho', prize: 3000,
+    flag: 'aduana_clear', name: 'Inspector Bianchi', mt: 'mt_punio_gaucho', held: 'alpargatas', prize: 3000,
     team: [['yarara', 44], ['vespertino', 44], ['pombero', 45], ['caudillo', 46]],
     intro: ['La aduana ahora es del Equipo PP. Todo lo que cruza la frontera pasa por nosotros.', 'Documentos, por favor. Y un combate.'],
     lose: 'Sin sello no se pasa… y yo perdí el mío.',
@@ -264,7 +264,7 @@ export const EVENTS = {
     thanks: ['La aduana de Rivera vuelve a funcionar. Gracias, {player}.', 'Tomá esta MT. La usan los pesadores de la frontera: puro puño y poco papel.'],
   },
   radio: {
-    flag: 'radio_clear', name: 'Locutora Cáceres', mt: 'mt_psiquico', prize: 3300,
+    flag: 'radio_clear', name: 'Locutora Cáceres', mt: 'mt_psiquico', held: 'bombilla_plata', prize: 3300,
     team: [['vespertino', 46], ['pombero', 46], ['caudillo', 47], ['temblador', 48]],
     intro: ['Esta radio ahora transmite lo que el Equipo PP quiere que se oiga. Nada de pronósticos reales.', 'Salí al aire sin permiso, y no pienso callarme.'],
     lose: 'Se cortó la transmisión…',
@@ -272,7 +272,7 @@ export const EVENTS = {
     thanks: ['La radio de Salto vuelve al aire. Gracias, {player}.', 'Tomá esta MT: con ella las ondas viajan directo a la mente de cualquiera.'],
   },
   muelle: {
-    flag: 'muelle_clear', opens: 'open_paysandu', name: 'Contramaestre Vidal', mt: 'mt_bomba_lodo', prize: 3600,
+    flag: 'muelle_clear', opens: 'open_paysandu', name: 'Contramaestre Vidal', mt: 'mt_bomba_lodo', held: 'poncho_lluvia', prize: 3600,
     team: [['cururu', 47], ['dorado', 48], ['patriarca', 49], ['temblador', 50]],
     intro: ['El muelle del puerto es nuestro. Por acá entra el material de las torres de niebla.', 'Quien quiera pasar, va a tener que hundirse primero.'],
     lose: 'Me hundí yo solo…',
@@ -488,6 +488,8 @@ export const SCRIPTS = {
     api.setFlag('open_minas'); // Minas has no gym: beating Garúa is what opens the road west
     await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es del Dr. Díaz.', 'Dr. Díaz dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las doce medallas.', 'Llevate esto.'], { name: 'Garúa' });
     await api.give('mt_vendaval', 1);
+    await api.say('En la oficina de Garúa encontrás una vianda con Restos de Asado, guardada para la guardia nocturna.');
+    await api.give('restos_asado', 1);
     await fogChoice(api, 'fog3', 'Vecino', ['Un vecino de Minas llega corriendo.', 'Gracias a esa fábrica, los viñedos de Canelones no se arruinan con el granizo. Muchos van a quedar sin protección.']);
     await api.say('Las máquinas de la fábrica se apagaron. Solo falta Dr. Díaz, en Montevideo.');
     await api.npcLeave('garua');
@@ -795,6 +797,7 @@ export const SCRIPTS = {
     await api.ownerArrives(npc.event);
     await api.say(E.thanks, { name: 'Dueño' });
     await api.give(E.mt, 1);
+    if (E.held) { await api.say('Además, entre las cosas del capataz había un objeto que sirve para equipar a una criatura.'); await api.give(E.held, 1); }
   },
 
   /** Toll booth on a route (placed by toll.ts): $115 to go through; broke players are turned back, until the fourth try. */
@@ -1007,6 +1010,8 @@ export const SCRIPTS = {
     api.setFlag('anglo_pp');
     await api.say(['Perdí. Pero el proyecto es más grande que este frigorífico.', 'Dr. Díaz tiene torres y una represa, y yo no soy la única que sigue sus órdenes.'], { name: 'Bruma' });
     await api.give('mate', 1);
+    await api.say('Entre las cosas de Bruma queda un objeto raro: un Repartir Exp, de los que el PP usaba para entrenar a su gente.');
+    await api.give('repartir_exp', 1);
     await api.say(['Tu celular vibra. Es el Maestro Tabárez:', '"{player}, tengo que decirte algo que callé demasiado tiempo.', 'Tu compañero nació en mi laboratorio durante el Proyecto Pampero. Guarda un eco del ciclo del viento, y por eso el PP te sigue.', 'Perdoname por no habértelo dicho en Carmelo. Cuidalo mucho."']);
     await fogChoice(api, 'fog1', 'Capataz', ['Un capataz del frigorífico te frena a la salida.', 'Con la niebla, el pueblo no sufre inundaciones desde hace dos años. Si la apagás, vuelve el río.']);
     await api.npcLeave('bruma_anglo');

@@ -86,8 +86,6 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
       await api.say(`${ok} de 3. Merecido. Tomá estos regalos del barrio.`, { name: who });
       await api.give('superesfera', 3);
       await api.give('mate_dulce', 2);
-      await api.say('Y esto es de la casa: un Repartir Exp. Quien lo lleve reparte la EXP con todo el equipo.', { name: who });
-      await api.give('repartir_exp', 1);
     } else {
       await api.say(`${ok} de 3. Volvé a pasear por el casco histórico y se te va a pegar algo. Tomá, por el intento.`, { name: who });
       await api.give('esfera', 3);
@@ -117,7 +115,6 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
       await api.say('Cantás mejor que lo que decís. Llevate esto de recuerdo.', { name: who });
       await api.give('mate_dulce', 3);
       await api.give('refuerzo_ataque', 2);
-      await api.give('alpargatas', 1);
     } else {
       await api.say('Todavía te falta cancha, pero hay que animarse. Tomá un mate.', { name: who });
       await api.give('mate', 2);
@@ -185,7 +182,6 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
     await api.say('Cavamos un buen rato. La caja estaba ahí, tal cual la describieron.', { name: who });
     await api.give('ultraesfera', 3);
     await api.give('alfajor_triple', 1);
-    await api.give('restos_asado', 1);
     const hi = topOf('rocha');
     const key = SPECIES.cangrejo ? 'cangrejo' : 'tuco';
     api.giveCreature(key, Math.max(5, hi - 6));
@@ -218,9 +214,9 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
       api.contestFinish(pick.uid);
       api.setFlag('ev_concurso');
       api.sfx('catch');
-      if (place === 1) { await api.say('¡Primer puesto!', { name: who }); await api.give('piedra_agata', 1); await api.give('ultraesfera', 2); await api.give('bombilla_plata', 1); }
-      else if (place === 2) { await api.say('Segundo puesto. Muy bien.', { name: who }); await api.give('alfajor_triple', 1); await api.give('superesfera', 3); await api.give('chapa_acero', 1); }
-      else if (place === 3) { await api.say('Tercer puesto.', { name: who }); await api.give('mate_dulce', 3); await api.give('poncho_lluvia', 1); }
+      if (place === 1) { await api.say('¡Primer puesto!', { name: who }); await api.give('piedra_agata', 1); await api.give('ultraesfera', 2); }
+      else if (place === 2) { await api.say('Segundo puesto. Muy bien.', { name: who }); await api.give('alfajor_triple', 1); await api.give('superesfera', 3); }
+      else if (place === 3) { await api.say('Tercer puesto.', { name: who }); await api.give('mate_dulce', 3); }
       else { await api.say('Quedaste cuarto, pero participar suma. Una compensación.', { name: who }); await api.give('superesfera', 2); }
       return api.say(`Quedate con ${SPECIES[pick.species].name}. Fue un placer.`, { name: who });
     }
@@ -324,7 +320,7 @@ Object.assign(EVENT_SCRIPTS, {
       if (ms > 24000) return api.say('Se te fue el tiempo. El límite es de 24 segundos. Podés largar de nuevo cuando quieras.', { name: who });
       api.setFlag('ev_carrera');
       api.sfx('catch');
-      if (ms <= 12500) { await api.say('Es un tiempo de campeonato. Medalla de oro.', { name: who }); await api.give('piedra_basalto', 1); await api.give('ultraesfera', 3); await api.give('banda_fuerza', 1); }
+      if (ms <= 12500) { await api.say('Es un tiempo de campeonato. Medalla de oro.', { name: who }); await api.give('piedra_basalto', 1); await api.give('ultraesfera', 3); }
       else if (ms <= 17000) { await api.say('Muy buen tiempo. Medalla de plata.', { name: who }); await api.give('alfajor_triple', 1); await api.give('ultraesfera', 2); }
       else { await api.say('Llegaste dentro del límite. Medalla de bronce.', { name: who }); await api.give('superesfera', 3); }
       return;
