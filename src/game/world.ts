@@ -575,6 +575,7 @@ function sees(n) {
 
 async function trainerSpotted(n) {
   sfx('encounter');
+  playMusic('spotted', { resume: musicFor(W_.map.id, W_.map) });
   W_.emote = { npc: n, until: performance.now() + 700 };
   await wait(700);
   W_.emote = null;
@@ -586,6 +587,7 @@ async function trainerSpotted(n) {
   }
   p.dir = opposite(n.dir);
   await trainerTalk(n);
+  playMusic(musicFor(W_.map.id, W_.map));
 }
 
 const tollPaidAt: Record<string, number> = {};

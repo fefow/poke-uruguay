@@ -555,3 +555,18 @@ test('editor de mapas: un mapa agrandado desplaza a su gente y acepta mÃ¡s tamaÃ
   assert.deepEqual([maps.m.items[0].x, maps.m.items[0].y], [1, 3]);
   assert.deepEqual([maps.m.warps[0].x, maps.m.warps[0].y], [3, 3]);
 });
+
+test('every music track and jingle is made of valid notes and lengths', async () => {
+  const { TRACKS, JINGLES } = await import('../src/core/audio.ts');
+  for (const [name, t] of Object.entries({ ...TRACKS, ...JINGLES })) {
+    for (const part of ['lead', 'bass']) {
+      const tok = t[part].trim().split(/\s+/);
+      assert.equal(tok.length % 2, 0, `${name}.${part}: notes and lengths come in pairs`);
+      for (let i = 0; i < tok.length; i += 2) {
+        assert.match(tok[i], /^(-|[A-G]#?\d)$/, `${name}.${part}: bad note ${tok[i]}`);
+        assert.ok(Number(tok[i + 1]) > 0, `${name}.${part}: bad length ${tok[i + 1]}`);
+      }
+    }
+    if (t.drums) assert.match(t.drums, /^[ksh-]+$/, `${name}.drums`);
+  }
+});

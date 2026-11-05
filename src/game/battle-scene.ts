@@ -318,6 +318,11 @@ function setBalls(party, show) {
 }
 
 // ---------------------------------------------------------------- RUN
+/** Gym leaders, the Alto Mando, the champion and the PP's top brass get the big entrance and the epic theme. */
+function isBoss(trainer) {
+  return !!trainer.badge || /Alto Mando|Campe|Admin\. PP|Comandante PP|Jefe PP|Fundador PP|Espíritu/.test(trainer.cls ?? '');
+}
+
 let engine = null;
 
 /**
@@ -332,9 +337,14 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   engine.noFlee = !!S.safari?.contest;
   logInfo(`Batalla ${wild ? 'salvaje' : `vs ${trainer?.name ?? 'entrenador'}`}: ${foes.map((f) => `${f.species} nv${f.level}`).join(', ')}`);
   Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeSX: 1, foeSY: 1, foeRot: 0, foeGlow: 0, plySX: 1, plySY: 1, plyRot: 0, plyGlow: 0, proj: null, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
+  // Each kind of opponent has its own theme: wild creatures, trainers, the rival, and leaders or bosses.
+  if (music === 'battle' && trainer) {
+    const id = String(trainer.id ?? '');
+    music = isBoss(trainer) ? 'leader' : /^rival/.test(id) ? 'rival' : 'trainer';
+  }
   playMusic(music);
   sfx('encounter');
-  await introFlash(!trainer ? 'wild' : trainer.badge || /^rival|^pp_boss|diaz/i.test(trainer.id ?? '') ? 'boss' : 'trainer');
+  await introFlash(!trainer ? 'wild' : isBoss(trainer) || /^rival/.test(String(trainer.id ?? '')) ? 'boss' : 'trainer');
   setRenderer(drawBattle);
   buildHud();
   hud.foe.hidden = hud.ply.hidden = true;

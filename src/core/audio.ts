@@ -3,7 +3,8 @@
 
 let ctx = null;
 let master, musicGain, sfxGain;
-let current = null; // { name, timer }
+let current = null; // { name, timer, resume }
+let pendingResume = null;
 const settings = { music: 0.5, sfx: 0.7 };
 
 const NOTE = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
@@ -149,7 +150,7 @@ const SFX = {
 };
 
 // Short fanfares that pause the background track while they play, like receiving an item in the originals.
-const JINGLES = {
+export const JINGLES = {
   item: { bpm: 150, lead: 'C5 1 C5 1 C5 1 E5 1 G5 4 F5 2 A5 2 G5 6', bass: 'C3 4 F2 4 C3 8' },
   key: { bpm: 140, lead: 'G4 1 B4 1 D5 1 G5 3 E5 1 F#5 1 G5 2 D6 6', bass: 'G2 4 C3 2 D3 2 G2 6' },
   badge: { bpm: 132, lead: 'G4 2 C5 2 E5 2 G5 4 E5 2 G5 2 A5 2 B5 2 C6 8', bass: 'C3 4 E3 4 F2 4 G2 4 C3 6' },
@@ -226,7 +227,7 @@ export function sfx(name) {
 
 // ---- Music -------------------------------------------------------------
 // Each track: bpm, lead [note, eighths], bass [note, eighths], drums pattern.
-const TRACKS = {
+export const TRACKS = {
   title: {
     bpm: 96,
     lead: 'E5 2 G5 2 A5 4 G5 2 E5 2 D5 4 C5 2 D5 2 E5 2 G5 2 E5 8 E5 2 G5 2 A5 4 C6 2 B5 2 A5 4 G5 2 E5 2 D5 2 C5 2 C5 8',
@@ -313,6 +314,33 @@ const TRACKS = {
     bass: 'C3 4 C3 4 E3 4 G2 4 F2 4 F2 4 G2 4 G2 4',
     drums: 'k-sk-hs-k-ss-hs-',
   },
+  // Trainer battles: a driving minor riff for regular trainers, a cocky one for the rival, an epic one for leaders and bosses.
+  trainer: {
+    bpm: 160,
+    lead: 'E5 1 F5 1 E5 1 D5 1 E5 2 B4 2 C5 2 D5 2 E5 4 G5 1 F5 1 E5 1 D5 1 C5 2 A4 2 B4 2 C5 2 D5 4 E5 1 F5 1 E5 1 D5 1 E5 2 B4 2 C5 2 E5 2 A5 4 G5 2 F5 2 E5 2 D5 2 C5 2 B4 2 C5 2 D5 2',
+    bass: 'E2 1 E3 1 E2 1 E3 1 E2 1 E3 1 E2 1 E3 1 C2 1 C3 1 C2 1 C3 1 D2 1 D3 1 D2 1 D3 1',
+    drums: 'k-hsk-hsk-hsk-ss',
+  },
+  leader: {
+    bpm: 172,
+    lead: 'A4 1 C5 1 E5 1 A5 1 G5 2 E5 2 F5 2 E5 2 D5 2 C5 2 D5 1 E5 1 F5 1 G5 1 A5 4 E5 4 A4 1 C5 1 E5 1 A5 1 B5 2 C6 2 B5 2 A5 2 G#5 2 E5 2 B4 2 D5 2 E5 8',
+    bass: 'A2 1 A2 1 A3 1 A2 1 F2 1 F2 1 F3 1 F2 1 G2 1 G2 1 G3 1 G2 1 E2 1 E2 1 E3 1 E2 1',
+    drums: 'k-sk-ks-k-sk-sss',
+  },
+  rival: {
+    bpm: 150,
+    lead: 'G4 1 B4 1 D5 2 G5 2 F#5 1 E5 1 D5 2 B4 2 C5 2 E5 2 G5 1 F#5 1 E5 2 D5 4 - 2 G4 1 B4 1 D5 2 G5 2 A5 1 B5 1 C6 2 B5 2 A5 2 F#5 2 D5 2 E5 1 F#5 1 G5 6 - 2',
+    bass: 'G2 2 G3 2 G2 2 G3 2 C3 2 C3 2 D3 2 D3 2',
+    drums: 'k-h-s-hkk-h-s-h-',
+  },
+  // A trainer's eyes meet yours: a short tense loop until the battle starts.
+  spotted: {
+    bpm: 140,
+    duty: 0.125,
+    lead: 'B4 1 D5 1 F5 1 B5 1 A5 2 F5 2 G5 1 E5 1 C5 2 D5 4 B4 1 D5 1 F5 1 B5 1 C6 2 A5 2 B5 1 G5 1 E5 2 F#5 4',
+    bass: 'B2 2 B2 2 G2 2 A2 2',
+    drums: 'k-h-k-h-k-h-ksss',
+  },
   credits: {
     bpm: 88,
     lead: 'G4 4 C5 4 E5 4 D5 2 C5 2 A4 4 C5 4 G4 8 F4 4 A4 4 C5 4 B4 2 A4 2 G4 4 B4 4 C5 8',
@@ -328,12 +356,15 @@ function parseSeq(str) {
   return out;
 }
 
-export function playMusic(name) {
+/** `resume`: the track this one interrupts (a short scene loop); currentTrack() keeps reporting it. */
+export function playMusic(name, { resume = null } = {}) {
   if (current?.name === name) return;
   stopMusic();
+  if (resume) pendingResume = resume;
   const track = TRACKS[name];
   if (!track || !ctx) {
-    current = { name, timer: null };
+    current = { name, timer: null, resume: pendingResume };
+    pendingResume = null;
     return;
   }
   const eighth = 60 / track.bpm / 2;
@@ -342,7 +373,8 @@ export function playMusic(name) {
   const loopLen = lead.reduce((s, [, d]) => s + d, 0) * eighth;
   const bus = ctx.createGain();
   bus.connect(musicGain);
-  const state = { name, timer: null, bus, next: ctx.currentTime + 0.05 };
+  const state = { name, timer: null, bus, next: ctx.currentTime + 0.05, resume: pendingResume };
+  pendingResume = null;
   const schedule = () => {
     // Schedule one loop ahead so timing stays tight even if the tab throttles.
     while (state.next < ctx.currentTime + loopLen + 0.5) {
@@ -392,5 +424,5 @@ export function stopMusic() {
 }
 
 export function currentTrack() {
-  return current?.name ?? null;
+  return current?.resume ?? current?.name ?? null;
 }
