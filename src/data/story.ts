@@ -735,6 +735,7 @@ export const SCRIPTS = {
     await api.say(['Llevate tu lámpara.', 'Igual es tarde: Garúa ya puso a funcionar la fábrica de Minas.', 'Y Dr. Díaz nos espera en Montevideo.'], { name: 'Bruma' });
     await api.give('lampara', 1);
     api.setFlag('cabo_clear');
+    await api.cinematic('cabo_free');
     await api.npcLeave('bruma');
     await api.say('Deberías devolverle la lámpara al farero. Está dentro del faro.');
   },
@@ -896,7 +897,7 @@ export const SCRIPTS = {
     api.setFlag('quebrada_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.say(['Un viento helado baja de las sierras.', 'Una silueta enorme, con alas de tormenta, cruza el cielo.', 'El Cardenal Azul se aleja hacia el sur. La niebla se disipa.'],);
+    await api.cinematic('quebrada_free');
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo al Dr. Díaz. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
     await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Seguí hacia la costa de Rocha: en el faro de Cabo Polonio falta una lámpara.', 'Y más adelante, en Minas, hay una fábrica abandonada que volvió a funcionar. Mirala con cuidado."']);
@@ -908,6 +909,7 @@ export const SCRIPTS = {
     await api.say(['{player}. Te estaba esperando en el camino.', 'Pasé por la Quebrada de los Cuervos. Estaba vacía: ni un cuervo, ni un nido.', 'Los datos que mandé al PP sirvieron para esto. Me usaron, y yo les creí.', 'No te pido perdón. Te pido un combate: necesito saber si todavía sirvo para algo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 3, 3200, null, 'Sos un rival duro. Muy duro.', null), { canLose: true });
     api.setFlag('rival5');
+    if (res === 'win') await api.cinematic('rival_dusk_1');
     if (res === 'win') await api.say(['Bien jugado. Yo voy a hablar con mi tío.', 'Nos vemos en el Centenario.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
@@ -922,6 +924,7 @@ export const SCRIPTS = {
     await api.say(['{player}. Hablé con mi tío. Fue socio del Dr. Díaz y nunca me lo dijo.', 'Ya no trabajo para nadie del PP: me di cuenta tarde de a quién le estaba creyendo.', 'No te pido ayuda, te pido que me veas pelear bien una vez. Falta Durazno y después la capital, y no pienso llegar segundo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 4, 5000, null, 'Me ganaste otra vez. Bien.', null), { canLose: true });
     api.setFlag('rival6');
+    if (res === 'win') await api.cinematic('rival_dusk_2');
     if (res === 'win') await api.say(['Andá vos. Yo te sigo de cerca.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
@@ -970,6 +973,7 @@ export const SCRIPTS = {
     api.setFlag('obs_clear');
     api.setFlag('obs_log');
     await api.flash();
+    await api.cinematic('obs_free');
     await api.say(['Tomá el registro. Está firmado por los dos: Tabárez y Dr. Díaz.', 'La última página la escribió Dr. Díaz: "El Cardenal Azul tiene un ciclo. Si lo interrumpo, la niebla es mía para siempre".', 'Por eso quiere capturarlo. No lo odia: lo necesita.'], { name: 'Almada' });
     await api.say(['Dejo el Equipo PP. Voy a llevarle esto a Tabárez en persona.', 'Y esta MT era del observatorio: se usaba para medir los temblores del cerro.'], { name: 'Almada' });
     await api.give('mt_terremoto', 1);
@@ -984,7 +988,7 @@ export const SCRIPTS = {
     api.setFlag('torre_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.say(['La luz del transmisor se apaga.', 'Afuera, la niebla se disipa y el sol vuelve a la ciudad.'], {});
+    await api.cinematic('torre_off');
     await api.say(['Perdí… otra vez.', 'Dr. Díaz no se va a quedar en el norte. Dicen que prepara algo grande en Montevideo.', 'Hacé lo que quieras. Brumario espera en la Quebrada de los Cuervos.'], { name: 'Bruma' });
     await api.give('pan_casero', 1);
     await api.npcLeave('bruma2');
@@ -997,7 +1001,7 @@ export const SCRIPTS = {
     api.setFlag('represa_clear');
     await api.flash();
     api.sfx('levelup');
-    await api.say(['Las turbinas vuelven a girar. En la ciudad, las luces se prenden una por una.'], {});
+    await api.cinematic('represa_on');
     await api.say(['Perdí. Pero esto es solo una pieza: Dr. Díaz tiene otra torre en Rivera, y mucho más que eso.', 'Yo vuelvo a mi fábrica de Minas. Si querés alcanzarme, tendrás que llegar hasta allá.'], { name: 'Garúa' });
     await api.give('pan_casero', 1);
     await fogChoice(api, 'fog2', 'Ingeniero', ['Un ingeniero de la Represa se acerca.', 'Estas turbinas también alimentan la red de niebla de media región. Si la cortamos, hay pueblos que pierden la protección contra el granizo.']);
@@ -1026,7 +1030,7 @@ export const SCRIPTS = {
     api.setFlag('anglo_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.say(['Las últimas máquinas de niebla se apagan. Desde el puerto se ve el Río de la Plata, limpio, hasta el horizonte.'], {});
+    await api.cinematic('anglo_free');
     await api.say(['Gané perdiendo… Ya no tengo equipo, ni dinero, ni torres.', 'Hacé lo que quieras. Pero el cielo nunca fue de nadie.'], { name: 'Dr. Díaz' });
     await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'Con las doce medallas y el Equipo PP disuelto, la Liga te espera en el Estadio Centenario.', 'Dr. Díaz fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude."']);
     await api.npcLeave('calima');
@@ -1090,6 +1094,7 @@ export const SCRIPTS = {
     await api.say(['Llegaste, {player}.', 'Desde Carmelo que te vengo siguiendo.', 'Esta es mi revancha. Voy con todo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 5, 8000, null, 'Sos mejor que yo. Lo admito.', null), { canLose: true });
     api.setFlag('rival4');
+    if (res === 'win') await api.cinematic('rival_dusk_final');
     if (res === 'win') await api.say(['Andá. El Campeón te espera arriba.', 'Y ganale. Si no, quedo mal yo también.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
@@ -1115,6 +1120,7 @@ export const SCRIPTS = {
     }
     await api.say(['Felicitaciones, {player}. Desde hoy sos el nuevo Campeón de la Liga Oriental.', 'Tu nombre va a quedar en el Salón de la Fama del Centenario.'], { name: 'Obdulio' });
     api.setFlag('champion');
+    await api.cinematic('champion_won');
     await api.hallOfFame();
     await api.credits();
     const fogs = ['fog1', 'fog2', 'fog3'].filter((f) => api.flag(f)).length;
