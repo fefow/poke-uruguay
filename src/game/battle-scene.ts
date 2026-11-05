@@ -671,6 +671,7 @@ async function play(events, leveled) {
         break;
       case 'statusAnim': {
         const col = { brn: '#ff6a2a', psn: '#b05ad0', par: '#f2e05c', slp: '#c8d0ff' }[e.status];
+        sfx(`st_${e.status}`);
         A.fx = { kind: 'status', color: col, x: e.side === 0 ? 84 : 236, y: e.side === 0 ? 140 : 70, start: performance.now(), dur: 500 };
         await wait(450);
         A.fx = null;
