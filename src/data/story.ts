@@ -284,13 +284,8 @@ export const EVENTS = {
 /** A town that lives off the fog asks the player to leave the machine on. The answer only colours the ending. */
 async function fogChoice(api, flag, who, lines) {
   await api.say(lines, { name: who });
-  const off = await api.ask('¿Apagás la máquina de todos modos?');
-  if (off) {
-    api.setFlag(flag);
-    await api.say(['Entiendo. Va a costar un año difícil.', 'Pero prefiero eso a vivir pidiendo permiso al cielo.'], { name: who });
-  } else {
-    await api.say(['Gracias. Por ahora seguimos como estamos.', 'Pero no me gusta depender de una máquina para tener sol.'], { name: who });
-  }
+  api.setFlag(flag);
+  await api.say(['La máquina se apagó. Cuesta aceptarlo, pero no hay vuelta atrás.', 'Con el tiempo nos vamos a acostumbrar. Gracias por frenarlos, {player}.'], { name: who });
 }
 
 export const SCRIPTS = {
@@ -342,6 +337,7 @@ export const SCRIPTS = {
         await api.give('uru_dex', 1);
         await api.give('esfera', 5);
         api.setFlag('dex');
+        api.setFlag(openFlag('colonia')); // the neighbour who held the Ruta 1 gate steps aside
       } else {
         await api.say(['Te pedí una carta del almacén de Colonia del Sacramento, siguiendo la Ruta 21.', 'Cuando la tengas, traémela y te doy la PokeDex.'], { name: 'Maestro Tabárez' });
       }
@@ -796,6 +792,7 @@ export const SCRIPTS = {
     await api.flash();
     await api.say(E.after, { name: E.name });
     await api.npcLeave(`boss_${npc.event}`);
+    await api.ownerArrives(npc.event);
     await api.say(E.thanks, { name: 'Dueño' });
     await api.give(E.mt, 1);
   },

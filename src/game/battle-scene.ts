@@ -8,6 +8,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
 import { vignette } from '../gfx/fx.ts';
+import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
 import { h, wait as baseWait, clamp } from '../core/util.ts';
 import { sfx, playMusic, currentTrack } from '../core/audio.ts';
 import { input, rumble } from '../core/input.ts';
@@ -109,6 +110,7 @@ const A: any = {
   playerTrainerX: 0, showPlayerTrainer: false,
   ball: null, // {x,y,shake}
   fx: null, // {type,color,x,y,t}
+  eff: null, // typed attack effect (battle-fx.ts)
   shakeScreen: 0,
   tint: null,
 };
@@ -160,6 +162,7 @@ function drawBattle(g, t) {
   if (A.foe && A.foeVis) drawCreature(g, creatureSprite(A.foe), 236, 106, SPRITE, 'foe', t, 0);
   if (A.ply && A.plyVis) drawCreature(g, creatureSprite(A.ply, { back: true }), 84, 184, SPRITE * 1.25, 'ply', t, 1);
   if (A.proj) drawProjectile(g, A.proj);
+  if (A.eff) drawEffect(g, A.eff);
   if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake);
   if (A.fx) drawFx(g, A.fx, t);
   drawBursts(g);
@@ -554,7 +557,7 @@ async function play(events, leveled) {
         break;
       case 'anim':
         A.lastType = e.move;
-        await attackAnim(e.side, e.move, e.kind);
+        await attackAnim(e.side, e.move, e.kind, e.name);
         break;
       case 'damage': {
         const side = e.side === 0 ? 'ply' : 'foe';
@@ -710,7 +713,7 @@ function hitReaction(sd, dir, eff) {
   if (eff > 1) tween(420, (p) => (A.shakeScreen = 4 * (1 - p)));
 }
 
-async function attackAnim(side, type, kind) {
+async function attackAnim(side, type, kind, name = '') {
   if (!settings.anims) return;
   const me = side === 0 ? 'ply' : 'foe';
   const dir = side === 0 ? 1 : -1;
@@ -722,6 +725,42 @@ async function attackAnim(side, type, kind) {
     A.fx = fx;
     setTimeout(() => { if (A.fx === fx) A.fx = null; }, 450);
   };
+  const style = pickStyle(type, kind, name);
+  if (style) {
+    // typed effect: a short charge by the user, then the effect plays out on the target
+    const [x1, y1] = at(side);
+    const [x2, y2] = at(1 - side);
+    const tgt = side === 0 ? 'foe' : 'ply';
+    await tween(180, (p) => { A[`${me}Glow`] = p * 0.8; A[`${me}X`] = -dir * 5 * p; A[`${me}SX`] = 1 + 0.05 * p; }, easeOut);
+    A[`${me}X`] = 0; A[`${me}SX`] = 1;
+    await tween(FX_MS[style], (p) => {
+      A.eff = { style, p, x1, y1: y1 - 10, x2, y2: y2 - 6, color };
+      A[`${me}Glow`] = 0.8 * (1 - p);
+      if (style === 'quake') {
+        // the ground shakes under the target and everything on screen trembles
+        A.shakeScreen = 4 * Math.sin(Math.min(1, p * 1.2) * Math.PI);
+        A[`${tgt}Y`] = Math.sin(p * 46) * 3 * (1 - p);
+        A[`${tgt}X`] = Math.sin(p * 31) * 2 * (1 - p);
+      } else if (style === 'wind') {
+        A[`${tgt}Rot`] = Math.sin(p * 22) * 0.16 * Math.sin(p * Math.PI);
+        A[`${tgt}X`] = Math.sin(p * 17) * 5 * Math.sin(p * Math.PI);
+      } else if (style === 'wave') {
+        const hit = p > 0.6 ? (p - 0.6) / 0.4 : 0;
+        A[`${tgt}X`] = (side === 0 ? 1 : -1) * 9 * Math.sin(hit * Math.PI);
+      } else if (style === 'bolt') {
+        A[`${tgt}Flash`] = p > 0.2 && p < 0.8 ? 1 : 0;
+        A[`${tgt}X`] = Math.sin(p * 60) * 2 * (1 - p);
+      } else if (style === 'rocks') {
+        A[`${tgt}SY`] = 1 - 0.06 * Math.max(0, Math.sin(Math.max(0, p - 0.3) * Math.PI * 1.4));
+      }
+    });
+    A.eff = null; A.shakeScreen = 0;
+    for (const k of ['X', 'Y', 'Rot', 'Flash']) A[`${tgt}${k}`] = 0;
+    A[`${tgt}SY`] = 1; A[`${me}Glow`] = 0;
+    burst();
+    await wait(80);
+    return;
+  }
   if (kind === 'fis') {
     // wind-up, dash into the target, hold on impact, recover
     await tween(170, (p) => { A[`${me}X`] = -dir * 9 * p; A[`${me}SX`] = 1 + 0.06 * p; A[`${me}SY`] = 1 - 0.09 * p; }, easeOut);
@@ -952,3 +991,6 @@ export async function evolutionScene(c, forcedTo = null) {
 export function wildCreature(species, level) {
   return createCreature(species, level);
 }
+
+/** QA hook: plays one attack animation in the open battle. */
+export const previewAttack = (side, type, kind, name) => attackAnim(side, type, kind, name);

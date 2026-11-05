@@ -3,7 +3,7 @@
 import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
-import { encounterList } from '../data/encounters.ts';
+import { encounterList, waterTable } from '../data/encounters.ts';
 import { badgeOf } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
@@ -651,7 +651,22 @@ async function talkTo(n) {
   const d = n.def;
   if (d.trainer) return trainerTalk(n);
   if (d.script) return SCRIPTS[d.script](api, d);
-  if (d.text) return say(d.text);
+  if (d.text) return say(foggyHere() && !d.critter ? fogTalk(n) : d.text);
+}
+
+const FOG_TALK = [
+  ['No se ve nada con esta niebla. Ni siquiera sé si es de día.', 'Alguien tiene que hacer algo contra la banda del PP.'],
+  ['Hace días que no veo el sol. Esa niebla no es natural.', 'Ya es hora de que alguien frene al Proyecto Pampero.'],
+  ['Salí a caminar y casi me caigo al río. No se ve a dos pasos.', 'Dicen que las máquinas del PP la hacen. Que alguien las apague.'],
+  ['Con esta niebla no me animo ni a cruzar la calle.', 'Alguien debería meterse con el PP, antes de que empeore.'],
+  ['Todo gris, todo húmedo. Así no se puede trabajar.', 'Quiero que alguien le haga frente a esa banda del PP.'],
+];
+const fogTalk = (n) => FOG_TALK[(n.def.x * 7 + n.def.y * 3) % FOG_TALK.length];
+/** The zone is under PP fog: a running machine here, or the Cabo Polonio / Quebrada fog that has not been cleared. */
+function foggyHere() {
+  const m = W_.map;
+  if (m.indoor || m.dark) return false;
+  return activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'));
 }
 
 // Tiles that give light to the WebGL layer: [dy = height of the glow inside the tile, radius in logical px, colour, strength].
@@ -780,9 +795,7 @@ export function fishFor(table, rod) {
 async function fish() {
   const rod = hasItem('cana_super') ? 3 : hasItem('cana_buena') ? 2 : hasItem('cana_pescar') ? 1 : 0;
   if (!rod) return say('El agua está turbia. Sin una caña, mejor no meterse.');
-  const table = W_.map.fish;
-  if (!table) return say('Acá no parece haber nada que pescar.');
-  const list = fishFor(table, rod);
+  const list = waterTable(W_.map, rod);
   if (!state().party.some((c) => c.hp > 0)) return say('Tus criaturas están debilitadas. Mejor no arriesgarse.');
   const contest = !!(state().contest as any)?.fish;
   if (contest && fishLeft() <= 0) return say('Se terminó el tiempo del concurso. Llevale tu mejor pez al juez.');
@@ -1060,6 +1073,51 @@ export const api = {
     n.gone = true;
     n.visible = false;
     await fadeIn(150);
+  },
+  /** After an event: the owner walks in from behind the player and stops beside them (never spawns on top of them). */
+  async ownerArrives(ev) {
+    const n = W_.npcs.find((o) => o.def.script === 'event_owner' && o.def.event === ev);
+    if (!n) return;
+    const p = W_.player;
+    n.gone = false;
+    n.visible = false;
+    const [bx, by] = DIRS[p.dir];
+    const near = [[-bx, -by], [-by, bx], [by, -bx], [bx, by]].map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).filter((c) => !solidAt(c.x, c.y, { self: n }));
+    const dest = near[0];
+    if (!dest) { n.x = n.ox = n.def.x; n.y = n.oy = n.def.y; n.visible = true; return; }
+    // breadth-first from the destination: the farthest free tile within 6 steps is where he comes from
+    const prev = new Map([[`${dest.x},${dest.y}`, null]]);
+    const dist = new Map([[`${dest.x},${dest.y}`, 0]]);
+    const q = [dest];
+    let far = dest;
+    while (q.length) {
+      const c = q.shift();
+      const d = dist.get(`${c.x},${c.y}`);
+      if (d > dist.get(`${far.x},${far.y}`)) far = c;
+      if (d >= 6) continue;
+      for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+        const nx = c.x + dx, ny = c.y + dy, k = `${nx},${ny}`;
+        if (dist.has(k) || (nx === p.x && ny === p.y) || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[k]) continue;
+        dist.set(k, d + 1);
+        prev.set(k, c);
+        q.push({ x: nx, y: ny });
+      }
+    }
+    n.x = far.x; n.y = far.y; n.moving = false;
+    n.visible = true;
+    await wait(250);
+    let c = far;
+    while (prev.get(`${c.x},${c.y}`)) {
+      const nx = prev.get(`${c.x},${c.y}`);
+      const dx = nx.x - c.x, dy = nx.y - c.y;
+      n.dir = dy < 0 ? 'up' : dy > 0 ? 'down' : dx < 0 ? 'left' : 'right';
+      await npcStep(n, dx, dy);
+      c = nx;
+    }
+    const ax = p.x - n.x, ay = p.y - n.y;
+    n.dir = Math.abs(ax) >= Math.abs(ay) ? (ax < 0 ? 'left' : 'right') : (ay < 0 ? 'up' : 'down');
+    p.dir = opposite(n.dir);
+    n.ox = n.x; n.oy = n.y;
   },
   /** Moves the player to another map with a fade (used when the ferry sails). */
   warp: (map, x, y, dir = 'down') => doWarp(map, x, y, dir),

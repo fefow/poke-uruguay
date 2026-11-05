@@ -3,6 +3,7 @@
 // its generated maps (see data/map-edits.js). Work in progress is kept in this browser; "Guardar en el juego"
 // commits the file to GitHub (redeploys Pages).
 import { OUTDOOR, INTERIOR, MAPS, MAP_ORIGINALS } from '../data/maps.ts';
+import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
@@ -182,7 +183,29 @@ function renderMapList() {
       class: `me-map ${id === S.id ? 'is-active' : ''}`, onclick: () => openMap(id), title: id,
     }, h('span', { text: nameOf(id) }), h('small', { text: id }), patchOf(id) ? h('i', { class: `me-dot ${id in drafts ? 'is-draft' : ''}`, title: id in drafts ? 'Cambios sin guardar' : 'Editado' }) : null))];
   };
-  mapList.replaceChildren(...group('Exteriores', Object.keys(OUTDOOR)), ...group('Interiores', Object.keys(INTERIOR)));
+  mapList.replaceChildren(...group('Exteriores (en orden de la historia)', storyOrder().outdoor), ...group('Interiores (por ciudad, en orden de la historia)', storyOrder().indoor));
+}
+
+/** Maps in the order the player meets them: the route from Carmelo to Montevideo, then whatever is left; interiors follow their city. */
+let ORDER = null;
+function storyOrder() {
+  if (ORDER) return ORDER;
+  const outdoor = [...new Set([...CHAIN, ...Object.keys(OUTDOOR)])].filter((id) => id in OUTDOOR);
+  const seen = new Set<string>();
+  const indoor: string[] = [];
+  const visit = (id: string) => {
+    for (const d of (MAPS[id] as any)?.doors ?? []) {
+      const to = typeof d === 'string' ? d : d?.to;
+      if (to && to in INTERIOR && !seen.has(to)) { seen.add(to); indoor.push(to); visit(to); }
+    }
+    for (const w of Object.values((MAPS[id] as any)?.doorWarps ?? {})) {
+      const to = (w as any)?.to;
+      if (to && to in INTERIOR && !seen.has(to)) { seen.add(to); indoor.push(to); visit(to); }
+    }
+  };
+  outdoor.forEach(visit);
+  for (const id of Object.keys(INTERIOR)) if (!seen.has(id)) indoor.push(id);
+  return (ORDER = { outdoor, indoor });
 }
 
 /** Pieces made in the sprite editor: deployed ones plus drafts waiting in this browser. */

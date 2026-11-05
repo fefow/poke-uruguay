@@ -91,6 +91,7 @@ export const TILE_INFO = {
   '`': { name: 'ceniza' },
   ';': { name: 'brasas', enc: true },
   '^': { name: 'magma', solid: true, anim: true },
+  '¤': { name: 'agua con valla', solid: true, anim: true },
   // big city (Montevideo): asphalt, sidewalks, promenade, high-rises and the Buquebus terminal
   '0': { name: 'asfalto' },
   '-': { name: 'asfalto con línea' },
@@ -292,6 +293,16 @@ const DRAW = {
       const x = r.int(1, 14), y = r.int(4, 14);
       px(g, x, y, '#a82a1a', 1, 3); px(g, x + 1, y + 1, '#e8672c', 1, 2); px(g, x - 1, y + 1, '#f2c02a', 1, 1);
     }
+  },
+  // Decorative water inside a town: a stone basin with a low fence. It is not '~', so no canoe and no fishing.
+  '¤': (g, r, frame) => {
+    DRAW['~'](g, r, frame);
+    px(g, 0, 0, '#cfcabc', T, 2); px(g, 0, T - 2, '#cfcabc', T, 2); px(g, 0, 0, '#cfcabc', 2, T); px(g, T - 2, 0, '#cfcabc', 2, T);
+    px(g, 2, 2, '#8d887a', T - 4, 1); px(g, 2, 2, '#8d887a', 1, T - 4);
+    px(g, 0, T - 1, '#5e5a4e', T, 1); px(g, T - 1, 0, '#5e5a4e', 1, T);
+    for (const [x, y] of [[0, 0], [T - 3, 0], [0, T - 3], [T - 3, T - 3]]) { px(g, x, y, '#6f6a5c', 3, 3); px(g, x + 1, y, '#a8a395', 1, 1); }
+    for (const x of [5, 8, 11]) { px(g, x, 0, '#7a7566', 1, 2); px(g, x, T - 2, '#7a7566', 1, 2); }
+    for (const y of [5, 8, 11]) { px(g, 0, y, '#7a7566', 2, 1); px(g, T - 2, y, '#7a7566', 2, 1); }
   },
   '^': (g, r, frame) => {
     px(g, 0, 0, '#9a2a14', T, T);

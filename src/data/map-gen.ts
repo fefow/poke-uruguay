@@ -86,7 +86,7 @@ export function city({ seed, w = 28, h = 20, base = '.', border = '#', road = 'c
   for (const [px, py, pw, ph] of plazas) {
     for (let y = py; y < py + ph; y++) for (let x = px; x < px + pw; x++) if (g[y]?.[x] !== undefined) g[y][x] = road;
     const fx = px + ((pw - 2) >> 1), fy = py + ((ph - 2) >> 1);
-    for (let y = fy; y < fy + 2; y++) for (let x = fx; x < fx + 2; x++) g[y][x] = '~';
+    for (let y = fy; y < fy + 2; y++) for (let x = fx; x < fx + 2; x++) g[y][x] = '¤';
   }
   // groves: a rectangle of trees with a clear lane through the middle
   for (const [gx, gy, gw, gh, ch = '#'] of groves) {

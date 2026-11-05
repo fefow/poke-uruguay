@@ -300,7 +300,7 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
       ] : []),
       ...(LOC_FOLK[id] ? locFolk(id, types, lo, hi) : []),
       ...(id === 'melo' ? [npc(0, 0, 'oldman', ['La torre vieja del Cabildo tiene luces de noche. Dicen que es el Sereno, que sigue de guardia.', 'Nadie se anima a subir.'], { dir: 'down' })] : []),
-      ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: GATE_LOOK[id] ?? 'cop', dir: 'right', script: 'town_gate', stop: id, id: `gate_${id}`, cond: (f) => !f[openFlag(id)] }] : []),
+      ...(isCity && !stop.gym ? [{ x: 0, y: 0, look: GATE_LOOK[id] ?? 'cop', dir: 'right', script: 'town_gate', stop: id, id: `gate_${id}`, cond: (f) => !f[openFlag(id)] && !(id === 'colonia' && f.dex) }] : []),
     ],
   };
   addFolk(m, id, isCity ? 7 : 4);

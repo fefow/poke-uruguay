@@ -190,7 +190,7 @@ export class BattleEngine {
     }
     const tName = this.name(1 - side);
     if (move.cat === 'est') {
-      ev.push({ t: 'anim', side, move: move.type, kind: 'status' });
+      ev.push({ t: 'anim', side, move: move.type, kind: 'status', name: move.name });
       this.#applyEffects(side, move, ev, true);
       return;
     }
@@ -199,7 +199,7 @@ export class BattleEngine {
       ev.push({ t: 'text', msg: `No afecta a ${tName}… ¡El ataque no tuvo ningún efecto!` });
       return;
     }
-    ev.push({ t: 'anim', side, move: move.type, kind: move.cat });
+    ev.push({ t: 'anim', side, move: move.type, kind: move.cat, name: move.name });
     const dealt = Math.min(target.c.hp, r.dmg);
     target.c.hp -= dealt;
     ev.push({ t: 'damage', side: 1 - side, amount: dealt, eff: r.eff, crit: r.crit, hp: target.c.hp });

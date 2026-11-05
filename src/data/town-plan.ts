@@ -61,7 +61,7 @@ export function planTown(spec, buildings, { seed = 'town', signs = 1, edges = []
   for (const pl of spec.plazas ?? []) {
     rect(g, [pl.x, pl.y, pl.w, pl.h], road);
     const cx = pl.x + ((pl.w - 1) >> 1), cy = pl.y + ((pl.h - 1) >> 1);
-    if (pl.piece === 'fuente') { for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) { g[cy + dy][cx + dx] = '~'; water.add(`${cx + dx},${cy + dy}`); } }
+    if (pl.piece === 'fuente') { for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) g[cy + dy][cx + dx] = '¤'; }
     else if (pl.piece) g[cy][cx] = pl.piece;
     if (pl.ring) for (const [dx, dy] of [[-2, -2], [2, -2], [-2, 2], [2, 2]]) { const x = cx + dx, y = cy + dy; if (g[y]?.[x] === road) g[y][x] = pl.ring; }
     if (pl.benches) for (const [dx, dy] of [[-2, 0], [3, 0]]) { const x = cx + dx, y = cy + dy; if (g[y]?.[x] === road) g[y][x] = 'Δ'; }
@@ -86,6 +86,27 @@ export function planTown(spec, buildings, { seed = 'town', signs = 1, edges = []
   }
   // bridges: a road tile laid over water becomes a bridge
   for (const key of water) { const [x, y] = key.split(',').map(Number); if (g[y][x] === road) g[y][x] = 'b'; }
+  // small ponds inside a town are decorative: a fenced basin (no canoe, no fishing); rivers and lakes stay water
+  {
+    const seenW = new Set<string>();
+    for (const key of water) {
+      if (seenW.has(key)) continue;
+      const comp: number[][] = [];
+      const st = [key.split(',').map(Number)];
+      seenW.add(key);
+      let bridged = false;
+      while (st.length) {
+        const [x, y] = st.pop();
+        comp.push([x, y]);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
+          if (g[ny]?.[nx] === 'b') bridged = true;
+          if (g[ny]?.[nx] === '~' && !seenW.has(k)) { seenW.add(k); st.push([nx, ny]); }
+        }
+      }
+      if (comp.length <= 14 && !bridged && comp.every(([x, y]) => x > 1 && y > 1 && x < w - 2 && y < h - 2)) for (const [x, y] of comp) g[y][x] = '¤';
+    }
+  }
   // open the map edges where roads leave
   const open = { n: () => { for (let x = 1; x < w - 1; x++) if (g[1][x] === road || g[1][x] === 'b') g[0][x] = road; }, s: () => { for (let x = 1; x < w - 1; x++) if (g[h - 2][x] === road || g[h - 2][x] === 'b') g[h - 1][x] = road; }, w: () => { for (let y = 1; y < h - 1; y++) if (g[y][1] === road || g[y][1] === 'b') g[y][0] = road; }, e: () => { for (let y = 1; y < h - 1; y++) if (g[y][w - 2] === road || g[y][w - 2] === 'b') g[y][w - 1] = road; } };
   for (const side of edges) open[side]?.();

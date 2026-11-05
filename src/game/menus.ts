@@ -31,8 +31,12 @@ function hpBar(c) {
 const typeChip = (t) => h('span', { class: 'type-chip', style: { '--type': TYPES[t].color }, text: TYPES[t].name });
 
 /** Simple vertical list navigation inside a panel. */
-function listNav(items, { onPick, onCancel, onMove, start = 0, cols = 1, extra }: { onPick?: any; onCancel?: any; onMove?: any; start?: number; cols?: number; extra?: any }) {
+function listNav(items, { onPick, onCancel, onMove, start = 0, cols = 1, extra, skip }: { onPick?: any; onCancel?: any; onMove?: any; start?: number; cols?: number; extra?: any; skip?: (i: number) => boolean }) {
   let idx = clamp(start, 0, Math.max(0, items.length - 1));
+  // rows the cursor must not stop on (creatures that cannot take the item); if every row is skipped nothing is
+  const skipping = skip && items.some((_, i) => !skip(i)) ? skip : null;
+  const settle = (i: number, step: number) => { let k = 0; while (skipping?.(i) && k++ < items.length) i = (i + step + items.length) % items.length; return i; };
+  idx = settle(idx, 1);
   const render = () => {
     items.forEach((el, i) => el.classList.toggle('is-active', i === idx));
     items[idx]?.scrollIntoView({ block: 'nearest' });
@@ -47,11 +51,11 @@ function listNav(items, { onPick, onCancel, onMove, start = 0, cols = 1, extra }
     // In a grid, up/down only move between rows when there is more than one row.
     if (a === 'up' || a === 'down') {
       if (cols > 1 && n <= cols) return;
-      idx = a === 'up' ? (idx - cols + n) % n : (idx + cols) % n;
+      idx = settle(a === 'up' ? (idx - cols + n) % n : (idx + cols) % n, a === 'up' ? -cols : cols);
       sfx('select'); render();
     }
-    else if (a === 'left' && cols > 1) { idx = (idx - 1 + n) % n; sfx('select'); render(); }
-    else if (a === 'right' && cols > 1) { idx = (idx + 1) % n; sfx('select'); render(); }
+    else if (a === 'left' && cols > 1) { idx = settle((idx - 1 + n) % n, -1); sfx('select'); render(); }
+    else if (a === 'right' && cols > 1) { idx = settle((idx + 1) % n, 1); sfx('select'); render(); }
     else if (a === 'a') onPick(idx);
     else if (a === 'b' || a === 'start') { sfx('cancel'); onCancel(); }
   };
@@ -166,6 +170,7 @@ export function openParty({ mode = 'field', active = -1, title, onUse, compat = 
       nav = listNav(rows, {
         start,
         cols: 3,
+        skip: compat ? (i) => !compat(S.party[i]).ok : undefined,
         onCancel: () => { if (mode === 'forced') return sfx('bump'); if (swapFrom != null) { swapFrom = null; build(); nav = makeNav(start); return; } close(-1); },
         onPick: (i) => suspend(el, () => pick(i)),
       });
@@ -332,9 +337,9 @@ export function openBag({ mode = 'field', wild = false } = {}) {
         const compat = (c) => {
     if (it.tm) {
       if (c.moves.some((m) => m.id === it.tm)) return { ok: false, label: 'Ya lo sabe' };
-      return tmCompatible(c.species, it.tm) ? { ok: true, label: '✓ Puede aprenderlo' } : { ok: false, label: '✗ No es compatible' };
+      return tmCompatible(c.species, it.tm) ? { ok: true, label: 'Apto' } : { ok: false, label: 'No apto' };
     }
-    return itemUsable(key, c) ? { ok: true, label: '✓ Compatible' } : { ok: false, label: '✗ No es compatible' };
+    return itemUsable(key, c) ? { ok: true, label: 'Apto' } : { ok: false, label: 'No apto' };
   };
   const t = await openParty({ mode: 'item', title: `Usar ${it.name}`, compat });
         if (t < 0) return;
@@ -396,9 +401,9 @@ async function useInField(key) {
   const compat = (c) => {
     if (it.tm) {
       if (c.moves.some((m) => m.id === it.tm)) return { ok: false, label: 'Ya lo sabe' };
-      return tmCompatible(c.species, it.tm) ? { ok: true, label: '✓ Puede aprenderlo' } : { ok: false, label: '✗ No es compatible' };
+      return tmCompatible(c.species, it.tm) ? { ok: true, label: 'Apto' } : { ok: false, label: 'No apto' };
     }
-    return itemUsable(key, c) ? { ok: true, label: '✓ Compatible' } : { ok: false, label: '✗ No es compatible' };
+    return itemUsable(key, c) ? { ok: true, label: 'Apto' } : { ok: false, label: 'No apto' };
   };
   const t = await openParty({ mode: 'item', title: `Usar ${it.name}`, compat });
   if (t < 0) return;
