@@ -1427,6 +1427,10 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
 
 import { addSwimmers } from './swimmers.ts';
 addSwimmers(MAPS, ['paysandu', 'fraybentos']);
+import { addCheckpoints } from './checkpoints.ts';
+addCheckpoints(OUTDOOR);
+import { aimRouteTrainers } from './route-folk.ts';
+aimRouteTrainers(OUTDOOR);
 
 // A trainer's class decides how the person looks (a Ciclista is drawn as a cyclist, not as an old man), and the person
 // shown in battle is the one met in the world: same look, whatever was written when the trainer was built.

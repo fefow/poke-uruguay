@@ -41,6 +41,8 @@ export interface GameState {
   dex: { seen: string[]; caught: string[] };
   stats: { playtime: number; steps: number; battlesWon: number; moneyEarned: number; moneySpent: number; caught: number };
   lastHeal: Pos;
+  /** Route marker last passed: where a blackout sends the player (party fully healed), until a Policlínica sets lastHeal again. */
+  checkpoint?: Pos | null;
   repel: number;
   daycare: any;
   criadero: { uid: string; steps: number }[];

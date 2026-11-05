@@ -130,6 +130,7 @@ export const TILE_INFO = {
   'Ф': { name: 'hongos', over: true },
   'Ц': { name: 'piedritas', over: true },
   'Ш': { name: 'barril', solid: true, over: true },
+  'Щ': { name: 'mojón de ruta', solid: true, over: true },
   'Э': { name: 'cajón', solid: true, over: true },
   'Ю': { name: 'totoras', over: true },
   'Я': { name: 'girasoles', over: true },
@@ -811,6 +812,15 @@ const OVER = {
     for (const [x, y, w, h] of [[3, 9, 4, 3], [8, 7, 5, 4], [10, 12, 3, 2], [2, 13, 3, 2]]) {
       px(g, x, y + h, 'rgba(0,0,0,0.18)', w, 1); px(g, x, y, '#8a8a92', w, h); px(g, x, y, '#b4b4bc', w - 1, 1); px(g, x + w - 1, y + 1, '#6a6a72', 1, h - 1);
     }
+  },
+  // Route marker: a white concrete post with a red band; passing next to it saves a respawn point (no healing).
+  'Щ': (g) => {
+    shade(g, 8, 14, 6, 1.4);
+    px(g, 5, 3, '#e8e6de', 6, 11); px(g, 5, 3, '#c2beb0', 1, 11); px(g, 10, 3, '#a8a496', 1, 11);
+    px(g, 4, 2, '#f4f2ea', 8, 2); px(g, 4, 4, '#a8a496', 8, 1);
+    px(g, 5, 6, '#c8302a', 6, 3); px(g, 5, 6, '#e0463a', 6, 1);
+    px(g, 7, 10, '#3a4a6a', 2, 1); px(g, 6, 11, '#3a4a6a', 4, 1);
+    px(g, 4, 14, '#7a766a', 8, 1);
   },
   'Ш': (g) => {
     shade(g, 8, 14, 6, 1.4);

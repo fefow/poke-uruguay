@@ -508,6 +508,15 @@ function onStep() {
     if (S.repel === 0) runScript(() => say('El efecto del Repelente se terminó.'));
   }
   if (poisonTick()) return;
+  // Route marker: walking right beside one saves the respawn point (it does not heal)
+  if (!W_.map.indoor && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tileAt(p.x + dx, p.y + dy) === 'Щ')) {
+    const cp = S.checkpoint;
+    if (!cp || cp.map !== W_.map.id || cp.x !== p.x || cp.y !== p.y) {
+      S.checkpoint = { map: W_.map.id, x: p.x, y: p.y };
+      sfx('confirm');
+      toast('Punto de control guardado. Si tus criaturas caen, volverás acá.', 3500);
+    }
+  }
   // Scripted triggers
   for (const tr of W_.map.triggers ?? []) {
     if (p.x >= tr.x && p.x < tr.x + tr.w && p.y >= tr.y && p.y < tr.y + tr.h && cond(tr.cond)) {
@@ -601,6 +610,18 @@ function updateNpc(n, now, dt) {
     }
     return;
   }
+  // Route trainers that pace along the trail: they keep facing it while they walk back and forth
+  if (n.def.patrol && n.visible && !W_.scriptRunning && !input.busy) {
+    if (now < n.wanderAt) return;
+    n.wanderAt = now + 1100 + worldRng.next() * 1900;
+    const [px, py, len] = n.def.patrol;
+    const sgn = n.pdir ?? 1;
+    const nx = n.x + px * sgn, ny = n.y + py * sgn;
+    const off = (nx - n.ox) * px + (ny - n.oy) * py;
+    if (Math.abs(off) > len || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[`${nx},${ny}`] || tileAt(nx, ny) === 'm') { n.pdir = -sgn; return; }
+    npcStep(n, px * sgn, py * sgn);
+    return;
+  }
   if (!n.def.wander || !n.visible || W_.scriptRunning || input.busy) return;
   if (now < n.wanderAt) return;
   n.wanderAt = now + 1500 + worldRng.next() * 3000;
@@ -633,6 +654,7 @@ function interact() {
     return void runScript(() => say(W_.map.signText[key].split('\n').join(' — ')));
   }
   if (tileAt(p.x + dx, p.y + dy) === 'B') return void runScript(() => say(worldRng.pick(BOOKS)));
+  if (tileAt(p.x + dx, p.y + dy) === 'Щ') return void runScript(() => say(['Un mojón de la ruta, con el kilómetro pintado en rojo.', 'Quien pasa a su lado queda anotado en el punto de control: si las criaturas caen, se despierta acá con la salud completa.', 'No se puede curar a nadie en este lugar. Para eso hace falta una Policlínica.']));
   if (tileAt(p.x + dx, p.y + dy) === 'P' && !n) return void runScript(() => openPC());
   if (tileAt(p.x + dx, p.y + dy) === '%') return void runScript(() => cutBush(p.x + dx, p.y + dy));
   if (tileAt(p.x + dx, p.y + dy) === '~') return void runScript(() => fish());
@@ -852,9 +874,9 @@ async function blackout() {
   const S = state();
   // Small penalty, comparable to a trainer prize: 10% of the money, capped by progress.
   const lost = loseMoney(Math.min(Math.floor(S.player.money / 10), 100 + 50 * badgeCount()));
-  await say([`Perdiste $${lost} en la confusión…`, '…', '¡Corriste a un lugar seguro para curar a tus criaturas!']);
+  await say([`Perdiste $${lost} en la confusión…`, '…', S.checkpoint ? 'Despertaste junto al último mojón de la ruta, con tus criaturas recuperadas.' : '¡Corriste a un lugar seguro para curar a tus criaturas!']);
   for (const c of S.party) healCreature(c);
-  const lh = S.lastHeal;
+  const lh = S.checkpoint ?? S.lastHeal;
   await fadeOut(300);
   loadMap(lh.map, lh.x, lh.y, 'up');
   await fadeIn(300);
@@ -1047,6 +1069,7 @@ export const api = {
   setLastHeal() {
     const p = W_.player;
     state().lastHeal = { map: W_.map.id, x: p.x, y: p.y };
+    state().checkpoint = null;
   },
   async battle(trainer, { canLose = false, music }: { canLose?: boolean; music?: string } = {}) {
     const foes = trainer.team.map(([sp, lvl]) => createCreature(sp, lvl));
