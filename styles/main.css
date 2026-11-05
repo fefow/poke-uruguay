@@ -1069,3 +1069,9 @@ body {
 .dex-search { flex: 1; min-width: 0; font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid oklch(1 0 0 / 0.25); background: oklch(0 0 0 / 0.25); color: inherit; }
 .dex-status { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid oklch(1 0 0 / 0.25); background: oklch(0 0 0 / 0.25); color: inherit; }
 .dex-search:focus, .dex-status:focus { outline: 2px solid oklch(0.8 0.15 85); }
+
+/* Low HP: the bar pulses so it reads as danger at a glance (handheld-style). */
+.hpbar-fill[data-level='low'] { animation: hp-danger 0.9s steps(2, jump-none) infinite; }
+@keyframes hp-danger { 50% { filter: brightness(1.45) saturate(1.3); } }
+@media (prefers-reduced-motion: reduce) { .hpbar-fill[data-level='low'] { animation: none; } }
+.bhud { transition: opacity 0.2s, transform 0.15s; }
