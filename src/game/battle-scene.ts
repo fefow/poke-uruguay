@@ -334,7 +334,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeSX: 1, foeSY: 1, foeRot: 0, foeGlow: 0, plySX: 1, plySY: 1, plyRot: 0, plyGlow: 0, proj: null, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
   playMusic(music);
   sfx('encounter');
-  await introFlash();
+  await introFlash(!trainer ? 'wild' : trainer.badge || /^rival|^pp_boss|diaz/i.test(trainer.id ?? '') ? 'boss' : 'trainer');
   setRenderer(drawBattle);
   buildHud();
   hud.foe.hidden = hud.ply.hidden = true;
@@ -421,13 +421,64 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   }
 }
 
-async function introFlash() {
+/**
+ * Battle transition like the handheld games: the screen blinks three times, then a wipe closes in to black.
+ * Wild creatures get horizontal blinds, trainers a spiral of blocks, leaders and bosses an iris that shrinks.
+ */
+async function introFlash(kind = 'wild') {
   const prev = getRenderer();
+  if (!settings.anims) {
+    setRenderer((g) => { g.fillStyle = '#000'; g.fillRect(0, 0, W, H); });
+    await wait(150);
+    return;
+  }
+  const t0 = performance.now();
   setRenderer((g, t) => {
     prev?.(g, t);
-    if (Math.floor(t / 80) % 2) { g.fillStyle = 'rgba(255,255,255,0.7)'; g.fillRect(0, 0, W, H); }
+    const k = Math.floor((t - t0) / 75);
+    if (k < 6 && k % 2 === 0) { g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillRect(0, 0, W, H); }
+    else if (k < 6) { g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(0, 0, W, H); }
   });
-  await wait(settings.anims ? 600 : 150);
+  await wait(450);
+  // The wipe draws over a frozen copy of the world, so nothing moves underneath it.
+  const snap = document.createElement('canvas');
+  snap.width = W; snap.height = H;
+  prev?.(snap.getContext('2d'), performance.now());
+  const cell = 30, cols = W / cell, rows = Math.ceil(H / cell);
+  const spiral = [];
+  {
+    let x0 = 0, y0 = 0, x1 = cols - 1, y1 = rows - 1;
+    while (x0 <= x1 && y0 <= y1) {
+      for (let x = x0; x <= x1; x++) spiral.push([x, y0]);
+      for (let y = y0 + 1; y <= y1; y++) spiral.push([x1, y]);
+      if (y0 < y1) for (let x = x1 - 1; x >= x0; x--) spiral.push([x, y1]);
+      if (x0 < x1) for (let y = y1 - 1; y > y0; y--) spiral.push([x0, y]);
+      x0++; y0++; x1--; y1--;
+    }
+  }
+  const w0 = performance.now(), dur = 620;
+  setRenderer((g) => {
+    const p = Math.min(1, (performance.now() - w0) / dur);
+    g.drawImage(snap, 0, 0);
+    g.fillStyle = '#000';
+    if (kind === 'boss') {
+      const R = Math.hypot(W, H) / 2 * (1 - p);
+      g.beginPath();
+      g.rect(0, 0, W, H);
+      g.arc(W / 2, H / 2, Math.max(0, R), 0, Math.PI * 2, true);
+      g.fill('evenodd');
+    } else if (kind === 'trainer') {
+      const n = Math.floor(p * spiral.length);
+      for (let i = 0; i < n; i++) g.fillRect(spiral[i][0] * cell, spiral[i][1] * cell, cell, cell);
+    } else {
+      const bands = 10, bh = Math.ceil(H / bands);
+      for (let i = 0; i < bands; i++) {
+        const w = Math.round(W * p);
+        g.fillRect(i % 2 ? W - w : 0, i * bh, w, bh);
+      }
+    }
+  });
+  await wait(dur + 40);
   setRenderer((g) => { g.fillStyle = '#000'; g.fillRect(0, 0, W, H); });
   await wait(120);
 }

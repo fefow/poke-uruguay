@@ -508,7 +508,7 @@ function onStep() {
     S.repel--;
     if (S.repel === 0) runScript(() => say('El efecto del Repelente se terminó.'));
   }
-  if (TILE_INFO[ch]?.enc) sfx('grass');
+  if (TILE_INFO[ch]?.enc) { sfx('grass'); W_.rustle = { x: p.x, y: p.y, t0: null }; }
   if (poisonTick()) return;
   // Route marker: walking right beside one saves the respawn point (it does not heal)
   if (!W_.map.indoor && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tileAt(p.x + dx, p.y + dy) === 'Щ')) {
@@ -1325,16 +1325,36 @@ function drawWorld(g, t) {
       continue;
     }
     shadow(g, sx + 8, sy + 13, 5.5, 2.2);
+    // Jumping down a ledge: the sprite arcs up while its shadow stays on the ground.
+    const hopK = player && p.moving && p.from && p.y - p.from.y === 2 ? Math.min(1, p.t / p.dur) : -1;
+    const lift = hopK >= 0 ? Math.round(Math.sin(hopK * Math.PI) * 7) : 0;
     if (player && tileAt(p.x, p.y) === '~') {
       g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
       g.fillStyle = '#a87a4a'; g.beginPath(); g.ellipse(sx + 8, sy + 11, 8, 3, 0, 0, 7); g.fill();
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
-    g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0));
-    // tall grass covers your feet
-    const tx = player ? p.x : n.x;
-    const ty = player ? p.y : n.y;
-    if (TILE_INFO[tileAt(tx, ty)]?.enc && !n.moving) g.drawImage(tileCanvas(','), 0, 10, 16, 6, sx, sy + 10, 16, 6);
+    g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);
+    // Tall grass covers your feet, also while walking through it: the tile you are mostly on decides.
+    const half = n.moving && n.from && n.t / n.dur < 0.5;
+    const tx = half ? n.from.x : n.x;
+    const ty = half ? n.from.y : n.y;
+    if (TILE_INFO[tileAt(tx, ty)]?.enc && lift === 0) {
+      const sway = n.moving ? 1 : 0;
+      g.drawImage(tileCanvas(','), 0, 10, 16, 6, sx, sy + 10 + sway, 16, 6 - sway);
+    }
+  }
+  // Leaves kicked up when stepping into tall grass.
+  if (W_.rustle) {
+    const age = t - (W_.rustle.t0 ??= t);
+    if (age > 360) W_.rustle = null;
+    else {
+      const q = age / 360;
+      const bx = W_.rustle.x * T - cx + 8, by = W_.rustle.y * T - cy + 10;
+      for (const [vx, vy, c] of [[-6, -7, '#3f9a3a'], [5, -8, '#6cc04a'], [-3, -10, '#2f7a2e'], [7, -5, '#8ad860']] as [number, number, string][]) {
+        g.fillStyle = c;
+        g.fillRect(Math.round(bx + vx * q), Math.round(by + vy * q + 10 * q * q), 2, 1);
+      }
+    }
   }
   if (W_.fishing) drawFishing(g, cx, cy, t);
   if (W_.emote) {
