@@ -11,6 +11,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
+import { UI_ICONS, uiIconCanvas } from '../gfx/ui-icons.ts';
 import { tileCanvas, TILE_INFO, THEMES, T, backgroundOf, tileWithoutGround } from '../gfx/tiles.ts';
 import { generated, setOverrides } from '../gfx/overrides.ts';
 import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
@@ -94,6 +95,10 @@ const CATS: any[] = [
   {
     id: 'badge', name: 'Medallas', hint: '16×16. Se ven en el carnet de entrenador.',
     entries: () => MEDALS.map((n, i) => ({ key: `badge:${i + 1}`, label: `Medalla ${n}`, sub: `#${i + 1}`, w: 16, h: 16, draw: () => badgeCanvas(i + 1), kind: 'item' })),
+  },
+  {
+    id: 'ui', name: 'Iconos de pantalla', hint: '16×16. Los iconos de medallas, dinero y lugar de la barra de arriba.',
+    entries: () => UI_ICONS.map((u) => ({ key: `ui:${u.key}`, label: u.name, sub: u.key, w: 16, h: 16, draw: () => uiIconCanvas(u.key), kind: 'item' })),
   },
   {
     id: 'tile', make: 'tile', name: 'Suelo y edificios', hint: '16×16. Las piezas se repiten para formar los mapas.',

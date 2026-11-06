@@ -8,6 +8,7 @@ import { creatureIcon } from '../gfx/creatures.ts';
 import { displayName, maxHp } from './creature.ts';
 import { fmt } from './ui.ts';
 import { charSprite } from '../gfx/characters.ts';
+import { uiIconUrl } from '../gfx/ui-icons.ts';
 
 let portrait, nameEl, card, mapBox, teamBox, teamBtn, lastFace = '';
 let teamOpen = true;
@@ -30,6 +31,11 @@ function icon(k) {
   const el = h('span', { class: 'tb-ico' });
   el.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">${ICON[k]}</svg>`;
   return el;
+}
+
+/** A 16x16 pixel icon (medals, money, place), drawn by the editor or by default. */
+function pixelIcon(key) {
+  return h('img', { class: 'tb-pix', src: uiIconUrl(key), alt: '', width: 32, height: 32 });
 }
 
 function button(key, tip, onClick) {
@@ -64,11 +70,11 @@ export function mountSidebar(stageEl, hs = {}) {
     h('div', { class: 'hud-card-main' },
       nameEl,
       h('div', { class: 'hud-card-top' },
-        h('span', { class: 'tb-chip', 'data-tip': 'Medallas' }, icon('medal'), medalEl),
-        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, icon('coin'), moneyEl))));
+        h('span', { class: 'tb-chip', 'data-tip': 'Medallas' }, pixelIcon('medallas'), medalEl),
+        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, pixelIcon('dinero'), moneyEl))));
   // minimap + place + tools (top right)
   mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
-    h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, icon('pin'), placeEl),
+    h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, pixelIcon('ubicacion'), placeEl),
     h('nav', { class: 'tb-tools' }, ...Object.values(btns)));
   // hotbar (bottom centre)
   teamEl = h('ol', { class: 'hud-team-list', 'aria-label': 'Equipo' });

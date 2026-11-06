@@ -2,10 +2,11 @@
 // note lists. No audio files to download. Starts on the first user gesture.
 
 let ctx = null;
-let master, musicGain, sfxGain, sfxMain, sfxBattle;
+let master, musicGain, sfxGain, sfxMain, sfxBattle, ambMain;
 let current = null; // { name, timer, resume }
 let pendingResume = null;
-const settings = { music: 0.5, sfx: 0.7 };
+// music / sfx: 0..1 sliders; battle: multiplier for battle effects and cries; ambient: rain, wind, surf, birds, thunder...
+const settings = { music: 0.5, sfx: 0.7, battle: 1, ambient: 0.25 };
 
 const NOTE = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
 function freq(n) {
@@ -25,6 +26,7 @@ export function initAudio() {
   musicGain = ctx.createGain();
   sfxMain = ctx.createGain();
   sfxBattle = ctx.createGain(); // battle effects and cries sit lower than the rest
+  ambMain = ctx.createGain(); // weather and ambience have their own volume
   sfxGain = sfxMain;
   // Handheld-era (GBA/DS) colour: a soft low-pass takes the 8-bit edge off, and a short room echo gives depth.
   const tone_ = ctx.createBiquadFilter();
@@ -35,6 +37,7 @@ export function initAudio() {
   musicGain.connect(tone_);
   sfxMain.connect(tone_);
   sfxBattle.connect(tone_);
+  ambMain.connect(tone_);
   const echo = ctx.createDelay(0.5);
   const fb = ctx.createGain();
   const wet = ctx.createGain();
@@ -56,16 +59,19 @@ export function initAudio() {
   }
 }
 
-export function setVolumes({ music, sfx }) {
+export function setVolumes({ music, sfx, battleVol, ambient }: { music?: number; sfx?: number; battleVol?: number; ambient?: number }) {
   if (music != null) settings.music = music;
   if (sfx != null) settings.sfx = sfx;
+  if (battleVol != null) settings.battle = battleVol;
+  if (ambient != null) settings.ambient = ambient;
   applyVolumes();
 }
 function applyVolumes() {
   if (!ctx) return;
   musicGain.gain.value = settings.music * 0.18;
   sfxMain.gain.value = settings.sfx * 0.35;
-  sfxBattle.gain.value = settings.sfx * 0.35 * 0.45;
+  sfxBattle.gain.value = settings.sfx * 0.35 * 0.45 * settings.battle;
+  ambMain.gain.value = settings.ambient * 0.35;
 }
 
 // Game Boy-style pulse channels: narrow duty cycles give the thin, bright lead the handheld had.
@@ -533,7 +539,7 @@ export function setAmbience(next = {}) {
   if (!ctx) return;
   if (!ambGain) {
     ambGain = ctx.createGain();
-    ambGain.connect(sfxGain);
+    ambGain.connect(ambMain);
   }
   const now = ctx.currentTime;
   const set = (name, type, freq, q, level) => {
@@ -554,14 +560,14 @@ function ambTick() {
   if (amb.birds && r < 0.18 * amb.birds) {
     const f = 2200 + Math.random() * 1800;
     const n = 2 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < n; i++) tone(f * (1 + (i % 2) * 0.12), t + i * 0.09, 0.07, { type: 'sine', vol: 0.18, slide: 500 });
+    for (let i = 0; i < n; i++) tone(f * (1 + (i % 2) * 0.12), t + i * 0.09, 0.07, { type: 'sine', vol: 0.18, slide: 500, out: ambGain });
   }
   if (amb.crickets && r < 0.45 * amb.crickets) {
-    for (let i = 0; i < 6; i++) tone(4300, t + i * 0.055, 0.03, { type: 'sine', vol: 0.07 });
+    for (let i = 0; i < 6; i++) tone(4300, t + i * 0.055, 0.03, { type: 'sine', vol: 0.07, out: ambGain });
   }
   if (amb.drips && r < 0.3 * amb.drips) tone(900 + Math.random() * 400, t, 0.12, { type: 'sine', vol: 0.15, slide: -500, out: ambGain ?? sfxGain });
   if (amb.thunder && r < 0.07 * amb.thunder) {
-    noise(t, 1.4, 0.7, sfxGain, { hp: 0 });
-    tone(55, t, 1.2, { type: 'triangle', vol: 0.5, slide: -20 });
+    noise(t, 1.4, 0.7, ambGain ?? sfxGain, { hp: 0 });
+    tone(55, t, 1.2, { type: 'triangle', vol: 0.5, slide: -20, out: ambGain ?? sfxGain });
   }
 }
