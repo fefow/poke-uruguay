@@ -83,7 +83,6 @@ export async function openPauseMenu() {
     if (isDev()) entries.push(['Desarrollo', async () => { const { openDevMenu } = await import('./devtools.ts'); flight = await openDevMenu(); }]);
     entries.push([S.player.name, openCard]);
     entries.push(['Guardar', openSave]);
-    entries.push(['Sonido', openSound]);
     entries.push(['Opciones', openOptions]);
     entries.push(['Volver', null]);
     const i = await choose(entries.map((e) => e[0]), { cls: 'menu-pause' });
@@ -830,6 +829,7 @@ export function openOptions() {
       { label: 'Velocidad del texto', hint: 'Qué tan rápido aparecen los diálogos.', get: () => ['Lenta', 'Normal', 'Rápida'][settings.textSpeed - 1], step: (d) => (settings.textSpeed = clamp(settings.textSpeed + d, 1, 3)) },
       { label: 'Sonido', hint: 'Panel para ajustar la música, los efectos, el combate y el clima.', get: () => 'Abrir', step: () => { openSound(); }, noArrows: true },
       { label: 'Animaciones de combate', hint: 'Sí: los ataques y golpes se animan en combate. No: el combate muestra los resultados al instante.', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
+      { label: 'Escala de pantalla', hint: 'Ajustada: llena la ventana. Píxeles exactos: usa solo tamaños enteros para que el pixel art se vea nítido (puede dejar bordes).', get: () => (settings.pixelPerfect ? 'Píxeles exactos' : 'Ajustada'), step: () => { settings.pixelPerfect = !settings.pixelPerfect; dispatchEvent(new Event('resize')); } },
       { label: 'Zoom del mapa', hint: 'Normal: se ve más del mapa. Cerca: el mapa se ve el doble de grande (los píxeles siguen enteros).', get: () => (settings.mapZoom >= 2 ? 'Cerca' : 'Normal'), step: () => (settings.mapZoom = settings.mapZoom >= 2 ? 1 : 2) },
       { label: 'Monitor de rendimiento', hint: 'Muestra FPS, tiempo de cuadro y ping arriba a la izquierda. También con F3.', get: () => (settings.perf ? 'Sí' : 'No'), step: async () => { (await import('../core/perf.ts')).togglePerf(); } },
       { label: 'Controles', hint: 'Muestra las teclas del juego.', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },
