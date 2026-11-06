@@ -652,7 +652,8 @@ async function walkNpcPath(n, goals: Set<string>) {
     const [cx, cy] = q[i];
     for (const [dx, dy] of Object.values(DIRS) as number[][]) {
       const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
-      if (prev.has(k) || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[k] || tileAt(nx, ny) === 'm') continue;
+      const exit = goals.has(k); // an exit tile (door mat) can be a destination but is never walked across on the way
+      if (prev.has(k) || solidAt(nx, ny, { self: n }) || (!exit && (W_.map.doorWarps?.[k] || tileAt(nx, ny) === 'm'))) continue;
       prev.set(k, `${cx},${cy}`);
       if (goals.has(k)) { end = k; break; }
       q.push([nx, ny]);
@@ -1251,6 +1252,20 @@ export const api = {
     if (ok) faceTile(n, t.x, t.y);
     return ok;
   },
+  /** The NPC walks to the nearest way out (door mat indoors, door tile outdoors), keeps facing it a moment and vanishes. */
+  async npcExit(key) {
+    const n = findNpc(key);
+    if (!n) return;
+    const goals = new Set<string>();
+    for (let y = 0; y < W_.tiles.length; y++) for (let x = 0; x < W_.tiles[y].length; x++) {
+      if ((W_.map.indoor && W_.tiles[y][x] === 'm') || W_.map.doorWarps?.[`${x},${y}`]) goals.add(`${x},${y}`);
+    }
+    await walkNpcPath(n, goals);
+    await wait(150);
+    sfx('door');
+    n.gone = true;
+    n.visible = false;
+  },
   /** Turns the NPC towards the player. */
   npcFacePlayer(key) {
     const n = findNpc(key);
@@ -1420,7 +1435,9 @@ function drawWorld(g, t) {
   const mh = m.h * T;
   // Interiors are zoomed so the room always covers the whole canvas (the camera scrolls the rest).
   // whole-number zoom only: a fractional one makes some art pixels 2 px wide and others 3 (eyes shrink, lines break)
-  const Z = m.indoor ? Math.min(3, Math.max(1, Math.round(Math.max(W / mw, H / mh)))) : 1;
+  // The "Zoom del mapa" option (1 normal, 2 close) also applies outdoors and never goes below what a room needs.
+  const userZ = Math.min(3, Math.max(1, Math.round(settings.mapZoom ?? 1)));
+  const Z = m.indoor ? Math.max(userZ, Math.min(3, Math.max(1, Math.round(Math.max(W / mw, H / mh))))) : userZ;
   const VW = W / Z;
   const VH = H / Z;
   // camera
@@ -1559,24 +1576,24 @@ function drawWorld(g, t) {
     // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
     const machines = activeMachines();
     if (machines.length && !m.dark) {
-      const px0 = ppos.x - cx + T / 2, py0 = ppos.y - cy + T / 2;
-      const gr = g.createRadialGradient(px0, py0, T * 1.2, px0, py0, T * 4);
+      const px0 = (ppos.x - cx + T / 2) * Z, py0 = (ppos.y - cy + T / 2) * Z;
+      const gr = g.createRadialGradient(px0, py0, T * 1.2 * Z, px0, py0, T * 4 * Z);
       gr.addColorStop(0, 'rgba(196,204,216,0.35)');
       gr.addColorStop(1, 'rgba(196,204,216,0.93)');
       g.fillStyle = gr; g.fillRect(0, 0, W, H);
       drawFog(g, t);
-      drawMachineGlows(g, t, cx, cy, machines);
+      g.save(); g.scale(Z, Z); drawMachineGlows(g, t, cx, cy, machines); g.restore();
     }
   }
   if (m.dark && !W_.lit) {
-    const px0 = ppos.x - cx + T / 2, py0 = ppos.y - cy + T / 2;
-    const gr = g.createRadialGradient(px0, py0, T * 1.3, px0, py0, T * 3.8);
+    const px0 = (ppos.x - cx + T / 2) * Z, py0 = (ppos.y - cy + T / 2) * Z;
+    const gr = g.createRadialGradient(px0, py0, T * 1.3 * Z, px0, py0, T * 3.8 * Z);
     gr.addColorStop(0, 'rgba(6,6,16,0)');
     gr.addColorStop(1, 'rgba(6,6,16,0.97)');
     g.fillStyle = gr;
     g.fillRect(0, 0, W, H);
   }
-  if (m.dark && !m.indoor) drawMachineGlows(g, t, cx, cy, activeMachines());
+  if (m.dark && !m.indoor) { g.save(); g.scale(Z, Z); drawMachineGlows(g, t, cx, cy, activeMachines()); g.restore(); }
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
 }
