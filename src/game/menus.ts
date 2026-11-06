@@ -772,7 +772,7 @@ export function openOptions() {
       { label: 'Música', hint: 'Volumen de la música, de 0 a 10.', get: () => `${Math.round(settings.music * 10)}`, step: (d) => (settings.music = clamp(Math.round((settings.music + d * 0.1) * 10) / 10, 0, 1)) },
       { label: 'Vol. de efectos', hint: 'Volumen de los efectos de sonido, de 0 a 10.', get: () => `${Math.round(settings.sfx * 10)}`, step: (d) => (settings.sfx = clamp(Math.round((settings.sfx + d * 0.1) * 10) / 10, 0, 1)) },
       { label: 'Animaciones de combate', hint: 'Sí: los ataques y golpes se animan en combate. No: el combate muestra los resultados al instante.', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
-      { label: 'Zoom del mapa', hint: 'Normal: se ve más del mapa. Cerca: el mapa se ve el doble de grande (los píxeles siguen enteros).', get: () => (settings.zoom >= 2 ? 'Cerca' : 'Normal'), step: () => (settings.zoom = settings.zoom >= 2 ? 1 : 2) },
+      { label: 'Zoom del mapa', hint: 'Normal: se ve más del mapa. Cerca: el mapa se ve el doble de grande (los píxeles siguen enteros).', get: () => (settings.mapZoom >= 2 ? 'Cerca' : 'Normal'), step: () => (settings.mapZoom = settings.mapZoom >= 2 ? 1 : 2) },
       { label: 'Monitor de rendimiento', hint: 'Muestra FPS, tiempo de cuadro y ping arriba a la izquierda. También con F3.', get: () => (settings.perf ? 'Sí' : 'No'), step: async () => { (await import('../core/perf.ts')).togglePerf(); } },
       { label: 'Controles', hint: 'Muestra las teclas del juego.', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },
     ];

@@ -1436,7 +1436,7 @@ function drawWorld(g, t) {
   // Interiors are zoomed so the room always covers the whole canvas (the camera scrolls the rest).
   // whole-number zoom only: a fractional one makes some art pixels 2 px wide and others 3 (eyes shrink, lines break)
   // The "Zoom del mapa" option (1 normal, 2 close) also applies outdoors and never goes below what a room needs.
-  const userZ = Math.min(3, Math.max(1, Math.round(settings.zoom ?? 1)));
+  const userZ = Math.min(3, Math.max(1, Math.round(settings.mapZoom ?? 1)));
   const Z = m.indoor ? Math.max(userZ, Math.min(3, Math.max(1, Math.round(Math.max(W / mw, H / mh))))) : userZ;
   const VW = W / Z;
   const VH = H / Z;
