@@ -24,9 +24,12 @@ const html = await readFile('index.html', 'utf8');
 await writeFile('dist/game.js', js);
 await copyFile('styles/main.css', 'dist/styles/main.css');
 for (const f of ['manifest.webmanifest', 'icon.svg']) await copyFile(f, `dist/${f}`);
-const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.ts'", "'./game.ts'").replace('__BUILD__', Date.now().toString(36));
+// Every deploy gets its own version tag: the pages ask for game.js?v=<tag>, so a browser never keeps the previous bundle.
+const BUILD = Date.now().toString(36);
+const bust = (h) => h.replace(/(src|href)="((?:styles\/)?[\w.-]+\.(?:js|css))"/g, `$1="$2?v=${BUILD}"`);
+const sw = (await readFile('sw.js', 'utf8')).replace("'./src/main.ts'", `'./game.js?v=${BUILD}'`).replace("'./styles/main.css'", `'./styles/main.css?v=${BUILD}'`).replace('__BUILD__', BUILD);
 await writeFile('dist/sw.js', sw);
-await writeFile('dist/index.html', html.replace('src="src/main.ts"', 'src="game.js"'));
+await writeFile('dist/index.html', bust(html.replace('src="src/main.ts"', 'src="game.js"')));
 
 // Visual sprite editor (editor.html): its own bundle; it writes src/data/sprite-overrides.js.
 const editor = await build({
@@ -42,7 +45,7 @@ const editorJs = editor.outputFiles[0].text;
 await writeFile('dist/editor.js', editorJs);
 await copyFile('styles/editor.css', 'dist/styles/editor.css');
 const editorHtml = await readFile('editor.html', 'utf8');
-await writeFile('dist/editor.html', editorHtml.replace('src="src/editor/main.ts"', 'src="editor.js"'));
+await writeFile('dist/editor.html', bust(editorHtml.replace('src="src/editor/main.ts"', 'src="editor.js"')));
 // Single-file editor (for an Artifact preview): CSS and JS inlined.
 const editorBody = editorHtml.split('<!--APP-->')[1].split('<!--/APP-->')[0];
 const editorCss = await readFile('styles/editor.css', 'utf8');
@@ -70,7 +73,7 @@ const mapEditor = await build({
 });
 await writeFile('dist/map-editor.js', mapEditor.outputFiles[0].text);
 await copyFile('styles/map-editor.css', 'dist/styles/map-editor.css');
-await writeFile('dist/map-editor.html', (await readFile('map-editor.html', 'utf8')).replace('src="src/map-editor/main.ts"', 'src="map-editor.js"'));
+await writeFile('dist/map-editor.html', bust((await readFile('map-editor.html', 'utf8')).replace('src="src/map-editor/main.ts"', 'src="map-editor.js"')));
 
 // Text editor (texts.html): every dialogue line; writes src/data/text-overrides.js.
 const textEditor = await build({
@@ -79,7 +82,7 @@ const textEditor = await build({
 });
 await writeFile('dist/text-editor.js', textEditor.outputFiles[0].text);
 await copyFile('styles/text-editor.css', 'dist/styles/text-editor.css');
-await writeFile('dist/texts.html', (await readFile('texts.html', 'utf8')).replace('src="src/text-editor/main.ts"', 'src="text-editor.js"'));
+await writeFile('dist/texts.html', bust((await readFile('texts.html', 'utf8')).replace('src="src/text-editor/main.ts"', 'src="text-editor.js"')));
 
 // Single file: CSS + JS inlined, no external files except Google Fonts.
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];
