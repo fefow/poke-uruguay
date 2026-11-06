@@ -25,6 +25,7 @@ import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canE
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
 import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
+import { uiIconCanvas } from '../gfx/ui-icons.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -110,7 +111,7 @@ function refreshEntities() {
   const m = W_.map;
   W_.npcs = (m.npcs ?? []).map((def, i) => {
     const prev = W_.npcs.find((n) => n.def === def);
-    return prev ?? { def, i, x: def.x, y: def.y, ox: def.x, oy: def.y, dir: def.dir ?? 'down', visible: true, moving: false, t: 0, from: null, wanderAt: performance.now() + 1000 + worldRng.next() * 3000 };
+    return prev ?? { def, i, x: def.x, y: def.y, ox: def.x, oy: def.y, dir: def.dir ?? 'down', visible: true, gone: !!def.arrive, moving: false, t: 0, from: null, wanderAt: performance.now() + 1000 + worldRng.next() * 3000 };
   });
   for (const n of W_.npcs) n.visible = cond(n.def.cond) && !n.gone && !(n.def.gate && n.def.trainer && flag(`tr_${n.def.trainer.id}`));
   W_.items = (m.items ?? []).filter((it) => !flag(`it_${it.id}`));
@@ -1291,6 +1292,73 @@ export const api = {
     n.visible = false;
     await fadeIn(150);
   },
+  /**
+   * Someone who was out of sight (an NPC with `arrive: true`) walks up to the player from up to `steps` tiles away,
+   * preferably from ahead of them, stops beside them and both face each other. Never pops in next to the player.
+   */
+  async npcApproach(key, steps = 9) {
+    const n = findNpc(key);
+    if (!n) return false;
+    const p = W_.player;
+    if (n.visible) { faceTile(n, p.x, p.y); p.dir = opposite(n.dir); return true; }
+    n.gone = false;
+    n.visible = false;
+    const [fx, fy] = DIRS[p.dir];
+    const free = (x, y) => !solidAt(x, y, { self: n }) && !W_.map.doorWarps?.[`${x},${y}`];
+    const dest = [[fx, fy], [-fy, fx], [fy, -fx], [-fx, -fy]].map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).find((c) => free(c.x, c.y));
+    if (!dest) { n.visible = true; faceTile(n, p.x, p.y); return true; }
+    // breadth-first from beside the player: the farthest free tile (ahead of the player first) is where they come from
+    const dist = new Map([[`${dest.x},${dest.y}`, 0]]);
+    const q = [dest];
+    let far = dest, farScore = -1;
+    while (q.length) {
+      const c = q.shift();
+      const d = dist.get(`${c.x},${c.y}`);
+      const ahead = (c.x - p.x) * fx + (c.y - p.y) * fy;
+      const score = d + (ahead > 0 ? 100 : 0);
+      if (score > farScore) { far = c; farScore = score; }
+      if (d >= steps) continue;
+      for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+        const nx = c.x + dx, ny = c.y + dy, k = `${nx},${ny}`;
+        if (dist.has(k) || (nx === p.x && ny === p.y) || !free(nx, ny)) continue;
+        dist.set(k, d + 1);
+        q.push({ x: nx, y: ny });
+      }
+    }
+    n.x = n.ox = far.x; n.y = n.oy = far.y; n.moving = false;
+    n.visible = true;
+    await wait(250);
+    await walkNpcPath(n, new Set([`${dest.x},${dest.y}`]));
+    faceTile(n, p.x, p.y);
+    p.dir = opposite(n.dir);
+    n.ox = n.x; n.oy = n.y;
+    return true;
+  },
+  /** The NPC walks away from the player along free ground (up to `steps` tiles) and is gone once out of the way. */
+  async npcWalkOff(key, steps = 16) {
+    const n = findNpc(key);
+    if (!n) return;
+    const p = W_.player;
+    const dist = new Map([[`${n.x},${n.y}`, 0]]);
+    const q = [{ x: n.x, y: n.y }];
+    let far = q[0], farD = 0;
+    while (q.length) {
+      const c = q.shift();
+      const d = dist.get(`${c.x},${c.y}`);
+      const away = Math.abs(c.x - p.x) + Math.abs(c.y - p.y);
+      if (away > farD) { far = c; farD = away; }
+      if (d >= steps) continue;
+      for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+        const nx = c.x + dx, ny = c.y + dy, k = `${nx},${ny}`;
+        if (dist.has(k) || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[k]) continue;
+        dist.set(k, d + 1);
+        q.push({ x: nx, y: ny });
+      }
+    }
+    await walkNpcPath(n, new Set([`${far.x},${far.y}`]));
+    n.gone = true;
+    n.visible = false;
+  },
   /** After an event: the owner walks in from behind the player and stops beside them (never spawns on top of them). */
   async ownerArrives(ev) {
     const n = W_.npcs.find((o) => o.def.script === 'event_owner' && o.def.event === ev);
@@ -1527,8 +1595,7 @@ function drawWorld(g, t) {
         g.lineWidth = 1;
         g.beginPath(); g.ellipse(sx + 8 - wx * (8 + k * 6), sy + 12 - wy * (6 + k * 5), 4 + k * 5, 2 + k * 2, 0, 0, 7); g.stroke();
       }
-      g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
-      g.fillStyle = '#a87a4a'; g.beginPath(); g.ellipse(sx + 8, sy + 11, 8, 3, 0, 0, 7); g.fill();
+      g.drawImage(uiIconCanvas('canoa_agua'), Math.round(sx - 4), Math.round(sy + 4)); // editable: 'ui:canoa_agua'
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
     g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);

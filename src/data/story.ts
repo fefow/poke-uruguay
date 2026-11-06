@@ -496,7 +496,7 @@ export const SCRIPTS = {
     if (res !== 'win') return;
     api.setFlag('pp_clear');
     api.setFlag('open_minas'); // Minas has no gym: beating Garúa is what opens the road west
-    await api.cinematic('fabrica_off');
+    await api.say(['Las máquinas de la fábrica se detienen una por una.', 'El humo gris se va con el viento.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es del Dr. Díaz.', 'Dr. Díaz dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las doce medallas.', 'Llevate esto.'], { name: 'Garúa' });
     await api.give('mt_vendaval', 1);
     await api.say('En la oficina de Garúa encontrás una vianda con Restos de Asado, guardada para la guardia nocturna.');
@@ -531,6 +531,7 @@ export const SCRIPTS = {
   // Bosque Grande, before San José: a short rematch with the starter alone, so the rival is present before the first gym.
   async rival_bosque(api) {
     if (api.flag('rival_bosque')) return;
+    await api.npcApproach('rival_bosque'); // walks up from the road ahead, never pops in
     await api.say(['¡{player}! Sabía que ibas a pasar por acá.', 'Ya tengo la PokeDex llena de apuntes. Vos recién arrancás.', 'Mi tío dice que en el litoral hay niebla rara. Yo voy a Trinidad por la medalla. Pero antes, una revancha.'], { name: '{rival}' });
     const [, hi] = mapBand('r_rosario_sanjose');
     const line = LINE[COUNTER[api.starterKey()]];
@@ -539,11 +540,12 @@ export const SCRIPTS = {
     api.setFlag('rival_bosque');
     if (res !== 'win') { api.healParty({ silent: true }); await api.say(['Te gané. Así es como se entrena.', 'Ya curé a tus criaturas: no quiero ganarte con ventaja.'], { name: '{rival}' }); }
     await api.say(['Nos vemos en Trinidad. Si llegás primero, no le ganes a Elena antes que yo.'], { name: '{rival}' });
-    await api.npcLeave('rival_bosque');
+    await api.npcWalkOff('rival_bosque');
   },
 
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
+    await api.npcApproach('rival_mvd'); // walks up from the road ahead, never pops in
     await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
@@ -553,7 +555,7 @@ export const SCRIPTS = {
       await api.say(['Esta vez gané yo. Entrená un poco más y volvé a intentarlo cuando quieras.', 'Yo sigo hacia Salto. Nos vemos allá.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
-    await api.npcLeave('rival_mvd');
+    await api.npcWalkOff('rival_mvd');
   },
 
   async nurse(api) {
@@ -745,7 +747,7 @@ export const SCRIPTS = {
     await api.say(['Llevate tu lámpara.', 'Igual es tarde: Garúa ya puso a funcionar la fábrica de Minas.', 'Y Dr. Díaz nos espera en Montevideo.'], { name: 'Bruma' });
     await api.give('lampara', 1);
     api.setFlag('cabo_clear');
-    await api.cinematic('cabo_free');
+    await api.say(['La niebla del cabo empieza a abrirse.', 'Después de tanto tiempo, el mar vuelve a verse.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.npcLeave('bruma');
     await api.say('Deberías devolverle la lámpara al farero. Está dentro del faro.');
   },
@@ -881,7 +883,6 @@ export const SCRIPTS = {
     api.setFlag('ferry_done');
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
     await api.warp('fraybentos', 3, 24, 'down');
-    await api.cinematic('ship_leaves');
     await api.say('El Buquebus "China Zorrilla" ya no se ve en el río. No va a volver a este puerto.');
     await api.say('Con el Machete vas a poder abrir los zarzales de la salida norte de Fray Bentos cuando ganes la Medalla del gimnasio del pueblo.');
   },
@@ -907,7 +908,7 @@ export const SCRIPTS = {
     api.setFlag('quebrada_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.cinematic('quebrada_free');
+    await api.say(['Un viento helado baja de las sierras.', 'Allá arriba, el Cardenal Azul se aleja hacia el sur, y la niebla de la Quebrada se disipa.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo al Dr. Díaz. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
     await api.npcLeave('brumario');
     await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Seguí hacia la costa de Rocha: en el faro de Cabo Polonio falta una lámpara.', 'Y más adelante, en Minas, hay una fábrica abandonada que volvió a funcionar. Mirala con cuidado."']);
@@ -916,32 +917,32 @@ export const SCRIPTS = {
 
   async rival_r5(api) {
     if (api.flag('rival5')) return;
+    await api.npcApproach('rival_r5'); // walks up from the road ahead, never pops in
     await api.say(['{player}. Te estaba esperando en el camino.', 'Pasé por la Quebrada de los Cuervos. Estaba vacía: ni un cuervo, ni un nido.', 'Los datos que mandé al PP sirvieron para esto. Me usaron, y yo les creí.', 'No te pido perdón. Te pido un combate: necesito saber si todavía sirvo para algo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 3, 3200, null, 'Sos un rival duro. Muy duro.', null), { canLose: true });
     api.setFlag('rival5');
-    if (res === 'win') await api.cinematic('rival_dusk_1');
     if (res === 'win') await api.say(['Bien jugado. Yo voy a hablar con mi tío.', 'Nos vemos en el Centenario.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
       await api.say(['Todavía te falta un poco. Entrená y seguí.', 'Yo voy a hablar con mi tío.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
-    await api.npcLeave('rival_r5');
+    await api.npcWalkOff('rival_r5');
   },
 
   async rival_r24(api) {
     if (api.flag('rival6')) return;
+    await api.npcApproach('rival_r24'); // walks up from the road ahead, never pops in
     await api.say(['{player}. Hablé con mi tío. Fue socio del Dr. Díaz y nunca me lo dijo.', 'Ya no trabajo para nadie del PP: me di cuenta tarde de a quién le estaba creyendo.', 'No te pido ayuda, te pido que me veas pelear bien una vez. Falta Durazno y después la capital, y no pienso llegar segundo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 4, 5000, null, 'Me ganaste otra vez. Bien.', null), { canLose: true });
     api.setFlag('rival6');
-    if (res === 'win') await api.cinematic('rival_dusk_2');
     if (res === 'win') await api.say(['Andá vos. Yo te sigo de cerca.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });
       await api.say(['Esta vez gané yo, pero la capital es cosa tuya. Andá.', 'En el Centenario nos vemos las caras.'], { name: '{rival}' });
       await api.say('Tus criaturas quedaron recuperadas.');
     }
-    await api.npcLeave('rival_r24');
+    await api.npcWalkOff('rival_r24');
   },
 
   async safari_clerk(api) {
@@ -983,7 +984,7 @@ export const SCRIPTS = {
     api.setFlag('obs_clear');
     api.setFlag('obs_log');
     await api.flash();
-    await api.cinematic('obs_free');
+    await api.say(['Desde el observatorio, el cielo se ve limpio.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Tomá el registro. Está firmado por los dos: Tabárez y Dr. Díaz.', 'La última página la escribió Dr. Díaz: "El Cardenal Azul tiene un ciclo. Si lo interrumpo, la niebla es mía para siempre".', 'Por eso quiere capturarlo. No lo odia: lo necesita.'], { name: 'Almada' });
     await api.say(['Dejo el Equipo PP. Voy a llevarle esto a Tabárez en persona.', 'Y esta MT era del observatorio: se usaba para medir los temblores del cerro.'], { name: 'Almada' });
     await api.give('mt_terremoto', 1);
@@ -998,7 +999,7 @@ export const SCRIPTS = {
     api.setFlag('torre_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.cinematic('torre_off');
+    await api.say(['La baliza del transmisor parpadea… y se apaga.', 'La niebla de Rivera sube y desaparece.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Perdí… otra vez.', 'Dr. Díaz no se va a quedar en el norte. Dicen que prepara algo grande en Montevideo.', 'Hacé lo que quieras. Brumario espera en la Quebrada de los Cuervos.'], { name: 'Bruma' });
     await api.give('pan_casero', 1);
     await api.npcLeave('bruma2');
@@ -1011,7 +1012,7 @@ export const SCRIPTS = {
     api.setFlag('represa_clear');
     await api.flash();
     api.sfx('levelup');
-    await api.cinematic('represa_on');
+    await api.say(['Las compuertas de la represa se abren.', 'En la ciudad, las luces se prenden una por una.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Perdí. Pero esto es solo una pieza: Dr. Díaz tiene otra torre en Rivera, y mucho más que eso.', 'Yo vuelvo a mi fábrica de Minas. Si querés alcanzarme, tendrás que llegar hasta allá.'], { name: 'Garúa' });
     await api.give('pan_casero', 1);
     await fogChoice(api, 'fog2', 'Ingeniero', ['Un ingeniero de la Represa se acerca.', 'Estas turbinas también alimentan la red de niebla de media región. Si la cortamos, hay pueblos que pierden la protección contra el granizo.']);
@@ -1040,7 +1041,7 @@ export const SCRIPTS = {
     api.setFlag('anglo_clear');
     await api.flash();
     api.sfx('evolve');
-    await api.cinematic('anglo_free');
+    await api.say(['Las últimas máquinas de niebla se apagan.', 'El Cardenal Azul vuelve a volar sobre el río. El cielo del Uruguay vuelve a ser de todos.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Gané perdiendo… Ya no tengo equipo, ni dinero, ni torres.', 'Hacé lo que quieras. Pero el cielo nunca fue de nadie.'], { name: 'Dr. Díaz' });
     await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'Con las doce medallas y el Equipo PP disuelto, la Liga te espera en el Estadio Centenario.', 'Dr. Díaz fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude."']);
     await api.npcLeave('calima');
@@ -1104,7 +1105,6 @@ export const SCRIPTS = {
     await api.say(['Llegaste, {player}.', 'Desde Carmelo que te vengo siguiendo.', 'Esta es mi revancha. Voy con todo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 5, 8000, null, 'Sos mejor que yo. Lo admito.', null), { canLose: true });
     api.setFlag('rival4');
-    if (res === 'win') await api.cinematic('rival_dusk_final');
     if (res === 'win') await api.say(['Andá. El Campeón te espera arriba.', 'Y ganale. Si no, quedo mal yo también.'], { name: '{rival}' });
     else {
       api.healParty({ silent: true });

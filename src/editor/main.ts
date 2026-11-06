@@ -97,8 +97,8 @@ const CATS: any[] = [
     entries: () => MEDALS.map((n, i) => ({ key: `badge:${i + 1}`, label: `Medalla ${n}`, sub: `#${i + 1}`, w: 16, h: 16, draw: () => badgeCanvas(i + 1), kind: 'item' })),
   },
   {
-    id: 'ui', name: 'Iconos de pantalla', hint: '16×16. Los iconos de medallas, dinero y lugar de la barra de arriba.',
-    entries: () => UI_ICONS.map((u) => ({ key: `ui:${u.key}`, label: u.name, sub: u.key, w: 16, h: 16, draw: () => uiIconCanvas(u.key), kind: 'item' })),
+    id: 'ui', name: 'Iconos de pantalla', hint: 'Iconos de medallas, dinero y lugar de la barra de arriba (16×16), Pokeballs que se tiran en combate (16×16) y la canoa en el agua (24×16, el personaje va encima).',
+    entries: () => UI_ICONS.map((u) => ({ key: `ui:${u.key}`, label: u.name, sub: `${u.key} · ${u.w}×${u.h}`, w: u.w, h: u.h, draw: () => uiIconCanvas(u.key), kind: 'item' })),
   },
   {
     id: 'tile', make: 'tile', name: 'Suelo y edificios', hint: '16×16. Las piezas se repiten para formar los mapas.',
