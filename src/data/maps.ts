@@ -881,9 +881,13 @@ for (const [mapId, script, flag] of RIVAL_AT) {
   const mid = Math.floor(rows[0].length / 2);
   let spot = null;
   for (let d = 0; d < mid && !spot; d++) for (const x of [mid + d, mid - d]) { const y = rows.findIndex((r) => r[x] === '='); if (y >= 0) { spot = { x, y }; break; } }
-  const npc = { ...(spot ?? { x: mid, y: 8 }), look: 'rival', dir: 'up', id: script, cond: (f) => !f[flag], script };
+  // Out of sight until the player walks a few steps into the route from either end: then the rival walks up to them.
+  const npc = { ...(spot ?? { x: mid, y: 8 }), look: 'rival', dir: 'up', id: script, cond: (f) => !f[flag], script, arrive: true };
   fitToMap(rows, [npc]);
   (m.npcs ??= []).push(npc);
+  const w = rows[0].length, h = rows.length, long = w >= h, k = 6;
+  const bands = long ? [{ x: k, y: 0, w: 1, h }, { x: w - 1 - k, y: 0, w: 1, h }] : [{ x: 0, y: k, w, h: 1 }, { x: 0, y: h - 1 - k, w, h: 1 }];
+  for (const b of bands) (m.triggers ??= []).push({ ...b, script, cond: (f) => !f[flag] });
 }
 
 // The founder of the Equipo PP waits by the Estadio Centenario once the player has the eighth medal and the factory in Minas is shut down.

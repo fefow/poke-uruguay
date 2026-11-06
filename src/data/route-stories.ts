@@ -2,6 +2,7 @@
 // trail until the trainers before it are beaten, (b) a person who lost something that sits in a grass clearing,
 // and (c) a fog machine of the PP with a clue. Text is per route so each walk has its own small story.
 import { TILE_INFO } from '../gfx/tiles.ts';
+import { STOPS } from './route.ts';
 
 const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 const solid = (c) => c === undefined || !!TILE_INFO[c]?.solid;
@@ -146,7 +147,14 @@ function freeSpot(m, busy, prefer) {
   return pts[idx];
 }
 
-const RIDDLE_FREE = new Set(['ruta1', 'r_colonia_rosario']); // no riddle gate on the first routes of the story
+/** Which end of the route's long axis the story enters from: 'lo' (west/north) or 'hi' (east/south). */
+function entryEnd(m, id): 'lo' | 'hi' {
+  const from = STOPS.find((st) => st.via?.includes(id))?.id ?? /^r_([a-z]+)_/.exec(id)?.[1];
+  const side = Object.entries((m.exits ?? {}) as Record<string, any>).find(([, e]) => e?.to === from)?.[0];
+  return side === 'e' || side === 's' ? 'hi' : 'lo';
+}
+
+const RIDDLE_FREE = new Set(['ruta1', 'r_colonia_rosario', 'ruta30']); // no riddle gate on the first routes of the story, nor on the short river route (its Surf river already closes it)
 
 /** Adds the toll keeper, the lost-item person and the fog machine to a guided route map. */
 export function addRouteStory(m, id) {
@@ -185,21 +193,28 @@ export function addRouteStory(m, id) {
   addLeverGate(m, id, busy);
   // riddle gate: a second obstacle earlier on the trail, opened by answering a riddle (never a battle)
   // The first routes (leaving Carmelo and Colonia) stay free: the story starts without obstacles.
-  const rcut = RIDDLE_FREE.has(id) ? null : narrowestCut(m, busy, 0.12, 0.28, 10);
+  // It sits near the end the player arrives from, and the old man waits on that same side of the animals.
+  const entry = entryEnd(m, id);
+  const rcut = RIDDLE_FREE.has(id) ? null : entry === 'lo' ? narrowestCut(m, busy, 0.12, 0.28, 10) : narrowestCut(m, busy, 0.72, 0.88, 10);
   if (rcut) {
     const flag = `rf_rid_${id}`.slice(0, 40);
-    // Animals fill the pass; one old man stands beside it and asks the riddle. Answering sends the animals away.
+    // One herd of a single kind fills the pass (the old man is driving it); one old man stands beside it, on the
+    // player's side, and asks the riddle. Answering sends the animals away.
     const herd = ['oveja', 'ternero', 'criollo', 'toro', 'carnero'];
     const seed = [...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 5);
-    rcut.forEach(([x, y], i) => {
-      m.npcs.push({ x, y, look: m.tiles[y][x] === '~' ? 'swimmer' : `animal:${herd[(seed + i) % herd.length]}`, dir: 'down', blocker: true, fixed: true, text: ['Los animales no se mueven del camino.'], cond: (f) => !f[flag] });
+    const kind = herd[seed % herd.length];
+    const long = m.tiles[0].length >= m.tiles.length;
+    const line = long ? rcut[0][0] : rcut[0][1];
+    const onEntrySide = (x, y) => (entry === 'lo' ? (long ? x : y) < line : (long ? x : y) > line);
+    rcut.forEach(([x, y]) => {
+      m.npcs.push({ x, y, look: m.tiles[y][x] === '~' ? 'swimmer' : `animal:${kind}`, dir: 'down', blocker: true, fixed: true, text: ['Los animales no se mueven del camino.'], cond: (f) => !f[flag] });
       busy.add(`${x},${y}`);
     });
     // spot for the old man: open grass within two tiles of the pass, off the trail
     let spotM: [number, number] | null = null, bestD = 9;
     for (const [cx, cy] of rcut) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       const x = cx + dx, y = cy + dy, d = Math.abs(dx) + Math.abs(dy);
-      if (!d || d >= bestD || m.tiles[y]?.[x] !== '.' || busy.has(`${x},${y}`) || rcut.some(([rx, ry]) => rx === x && ry === y)) continue;
+      if (!d || d >= bestD || !onEntrySide(x, y) || m.tiles[y]?.[x] !== '.' || busy.has(`${x},${y}`) || rcut.some(([rx, ry]) => rx === x && ry === y)) continue;
       if ([...busy].some((k) => { const [bx, by] = k.split(',').map(Number); return !rcut.some(([rx, ry]) => rx === bx && ry === by) && Math.abs(bx - x) + Math.abs(by - y) < 2; })) continue;
       spotM = [x, y]; bestD = d;
     }
