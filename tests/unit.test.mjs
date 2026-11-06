@@ -259,6 +259,16 @@ test('sprite codec round-trips pixels, alpha and big palettes', async () => {
   assert.deepEqual(parseOverridesSource(overridesSource({})), {});
 });
 
+test('tiles drawn with see-through parts keep their chosen ground', async () => {
+  const { encodeSprite, decodeSprite, spriteHasHoles, overridesSource, parseOverridesSource } = await import('../src/gfx/sprite-codec.ts');
+  const tree = { ...encodeSprite(new Uint8ClampedArray([20, 120, 40, 255, 0, 0, 0, 0]), 2, 1), bg: 's' };
+  assert.equal(spriteHasHoles(tree), true);
+  assert.equal(spriteHasHoles(encodeSprite(new Uint8ClampedArray([20, 120, 40, 255, 0, 0, 0, 255]), 2, 1)), false);
+  assert.equal(spriteHasHoles(encodeSprite(new Uint8ClampedArray([0, 0, 0, 46, 0, 0, 0, 255]), 2, 1)), true); // a soft shadow
+  assert.ok(decodeSprite(tree)); // the extra field does not get in the way
+  assert.deepEqual(parseOverridesSource(overridesSource({ 'tile:#0': tree }))['tile:#0'].bg, 's');
+});
+
 test('ruta: de Colonia se llega a Montevideo siguiendo las salidas, y cada ciudad bloquea el camino hacia adelante', async () => {
   const { OUTDOOR } = await import('../src/data/maps.ts');
   const { CHAIN, STOPS, STOP_INDEX, openFlag } = await import('../src/data/route.ts');

@@ -42,6 +42,12 @@ function parseColor(s) {
   return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16), n.length >= 8 ? parseInt(n.slice(6, 8), 16) : 255];
 }
 
+/** True when the sprite has see-through pixels (empty or semi-transparent), e.g. a tree drawn without its ground. */
+export function spriteHasHoles(o) {
+  if (!o || !Array.isArray(o.d) || !Array.isArray(o.p)) return false;
+  return o.d.some((r) => typeof r === 'string' && r.includes('.')) || o.p.some((c) => typeof c === 'string' && c.length > 7 && c.slice(7, 9).toLowerCase() !== 'ff');
+}
+
 /** Returns a Uint8ClampedArray of w*h*4 bytes, or null when the data is malformed. */
 export function decodeSprite(o) {
   if (!o || !Number.isInteger(o.w) || !Number.isInteger(o.h) || !Array.isArray(o.p) || !Array.isArray(o.d)) return null;
