@@ -7,7 +7,7 @@ import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
-import { tileCanvas, groundFor, tileVariant, drawBigObjects, setTerrainStyle, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
+import { tileCanvas, groundFor, tileVariant, drawBigObjects, drawBuildingTrim, setTerrainStyle, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -311,6 +311,7 @@ function draw() {
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
   for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme), tileVariant(rows, x, y)), x * T, y * T);
+  if (!m.indoor) drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme);
   if (!m.theme) drawBigObjects(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0);
   for (const it of W.items) {
     if (it.removed) continue;

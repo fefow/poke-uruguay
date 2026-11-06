@@ -250,6 +250,64 @@ function roof(g, base, dark, light) {
   px(g, 0, 0, light, T, 1);
 }
 
+// ---- buildings, in the style of the PixelLab references: bold dark outline, saturated colours, shingles
+// with a lit top and a shaded bottom, timber-framed plaster walls on a stone base, framed windows with
+// flower boxes. The outline around the whole building and the eave shadows come from drawBuildingTrim.
+export const OUTLINE = '#23162e';
+/** Shingle roof: rows of 8x4 shingles, each lit on top and shaded on its right and lower edge. pal = [light, base, mid, dark]. */
+function shingles(g, pal, seed = 0) {
+  const [li, ba, mi, dk] = pal;
+  px(g, 0, 0, ba, T, T);
+  for (let row = 0; row < 4; row++) {
+    const y = row * 4, off = row % 2 ? 4 : 0;
+    for (let x = off - 8; x < T; x += 8) {
+      px(g, x + 1, y, li, 5, 1); px(g, x + 1, y + 1, li, 1, 1); // lit top-left of the shingle
+      px(g, x + 5, y + 1, mi, 2, 2); // shaded right side
+      if (((x + 8) * 7 + row * 13 + seed) % 5 === 0) px(g, x + 2, y + 1, mi, 2, 1); // a worn shingle here and there
+      px(g, x + 7, y, mi, 1, 3); // joint
+      px(g, x + 1, y + 3, mi, 6, 1); px(g, x, y + 3, dk, 1, 1); px(g, x + 7, y + 3, dk, 1, 1); // rounded lower edge
+    }
+  }
+}
+const ROOF_PAL = {
+  r: ['#f58a68', '#d9472f', '#b0301f', '#721a1a'],
+  u: ['#8ecef4', '#5f97cb', '#3f74b8', '#28396b'],
+  g: ['#9ad888', '#63a35c', '#477d4a', '#2c5e3a'],
+  o: ['#f6bc6c', '#e0783a', '#c25a2e', '#8c3124'],
+  v: ['#d0a8f4', '#9c6cd8', '#7650b4', '#4a2a7a'],
+};
+const PLASTER = '#efe4c8', PLASTER_SH = '#d9c8a4', TIMBER = '#8a4e2c', TIMBER_LI = '#c0803e';
+const STONE = '#a49c8a', STONE_LI = '#c8c0ac', STONE_DK = '#6e6660';
+/** Stone base course along the bottom of a wall (rows 12-15). */
+function stoneBase(g) {
+  px(g, 0, 12, STONE, T, 4); px(g, 0, 12, STONE_DK, T, 1); px(g, 0, 13, STONE_LI, T, 1);
+  for (const [x, y] of [[3, 13], [10, 13], [6, 14], [13, 14]]) px(g, x, y, STONE_DK, 1, 2);
+  px(g, 0, 15, STONE_DK, T, 1);
+}
+/** Half-timbered plaster wall: beam under the eave, posts at both sides, stone base. */
+function plasterWall(g) {
+  px(g, 0, 0, PLASTER, T, 12);
+  px(g, 0, 0, TIMBER, T, 2); px(g, 0, 1, TIMBER_LI, T, 1);
+  px(g, 0, 2, TIMBER, 2, 10); px(g, 1, 2, TIMBER_LI, 1, 10);
+  px(g, 14, 2, TIMBER, 2, 10); px(g, 14, 2, TIMBER_LI, 1, 10);
+  px(g, 2, 2, PLASTER_SH, 12, 1); px(g, 12, 3, PLASTER_SH, 2, 9);
+  stoneBase(g);
+}
+/** A framed window with a glint and, if `box`, a flower box under it. Glass colours [glass, light, glint]. */
+function framedWindow(g, x, y, w, h, glass = ['#5aa8e8', '#9ad4f8', '#e6f6ff'], frame = '#b8843a', box = true) {
+  px(g, x, y, OUTLINE, w, h);
+  px(g, x + 1, y + 1, frame, w - 2, h - 2);
+  px(g, x + 2, y + 2, glass[0], w - 4, h - 4);
+  px(g, x + 2, y + 2, glass[1], w - 4, 1);
+  px(g, x + 3, y + 3, glass[2], 2, 1); px(g, x + 3, y + 4, glass[2], 1, 1);
+  px(g, x + (w >> 1), y + 2, frame, 1, h - 4); // mullion
+  if (box) {
+    px(g, x - 1, y + h, OUTLINE, w + 2, 3); px(g, x, y + h, '#a0502c', w, 2); px(g, x, y + h, '#c87040', w, 1);
+    for (let i = 0; i < w - 1; i += 2) px(g, x + i + 1, y + h - 1, ['#f0485a', '#ffd84a', '#ff8ad0'][(i >> 1) % 3], 1, 1);
+    for (let i = 0; i < w - 1; i += 2) px(g, x + i, y + h - 1, '#3a9a3a', 1, 1);
+  }
+}
+
 const DRAW = {
   '.': (g, r) => grass(g, r),
   ',': (g, r) => {
@@ -411,25 +469,26 @@ const DRAW = {
     px(g, 2, 3, '#8a5a2a', 12, 7); px(g, 3, 4, '#c8945a', 10, 5);
     px(g, 4, 5, '#6a4020', 8, 1); px(g, 4, 7, '#6a4020', 6, 1);
   },
-  H: (g) => {
-    px(g, 0, 0, '#f2e6c8', T, T);
-    for (let y = 3; y < T; y += 4) px(g, 0, y, '#dccca8', T, 1);
-    px(g, 0, 15, '#a89878', T, 1);
-  },
+  H: (g) => plasterWall(g),
   w: (g) => {
     DRAW.H(g);
-    px(g, 3, 4, '#5a4a3a', 10, 8); px(g, 4, 5, '#8ac8f0', 8, 6); px(g, 8, 5, '#5a4a3a', 1, 6); px(g, 4, 8, '#5a4a3a', 8, 1);
-    px(g, 4, 5, '#c8e8ff', 2, 1);
+    framedWindow(g, 3, 3, 10, 7);
   },
   D: (g) => {
     DRAW.H(g);
-    px(g, 3, 2, '#5a3a1a', 10, 14); px(g, 4, 3, '#8a5a2a', 8, 13); px(g, 10, 9, '#f2c02a', 1, 2);
+    px(g, 3, 2, OUTLINE, 10, 14);
+    px(g, 4, 3, '#6a3a1e', 8, 13); // frame
+    px(g, 5, 4, '#b8843a', 6, 11); px(g, 5, 4, '#d8a456', 6, 1); // wooden door, lit top
+    px(g, 5, 5, '#5aa8e8', 6, 2); px(g, 6, 5, '#e6f6ff', 1, 1); px(g, 8, 5, '#6a3a1e', 1, 2); // little window
+    px(g, 6, 8, '#8b652f', 1, 6); px(g, 9, 8, '#8b652f', 1, 6); px(g, 5, 8, '#8b652f', 6, 1); // panels
+    px(g, 10, 10, '#ffe46a', 1, 1); px(g, 10, 11, '#a87a1a', 1, 1); // knob
+    px(g, 2, 15, STONE_LI, 12, 1); px(g, 3, 14, OUTLINE, 10, 1); // doorstep
   },
-  r: (g) => roof(g, '#c8483a', '#8a2a20', '#e8685a'),
-  u: (g) => roof(g, '#3a7ad8', '#2a4a9a', '#6a9ae8'),
-  g: (g) => roof(g, '#4a9a4a', '#2a6a2a', '#6aba5a'),
-  o: (g) => roof(g, '#e8862a', '#a85a1a', '#f8a85a'),
-  v: (g) => roof(g, '#8a5ac8', '#5a3a8a', '#aa7ae8'),
+  r: (g) => shingles(g, ROOF_PAL.r, 1),
+  u: (g) => shingles(g, ROOF_PAL.u, 2),
+  g: (g) => shingles(g, ROOF_PAL.g, 3),
+  o: (g) => shingles(g, ROOF_PAL.o, 4),
+  v: (g) => shingles(g, ROOF_PAL.v, 5),
   W: (g) => {
     px(g, 0, 0, '#c8c4bc', T, T);
     px(g, 2, 2, '#4a6a8a', 5, 5); px(g, 9, 2, '#4a6a8a', 5, 5); px(g, 2, 9, '#4a6a8a', 5, 5); px(g, 9, 9, '#4a6a8a', 5, 5);
@@ -461,30 +520,37 @@ const DRAW = {
   },
   // ---- policlínicas y tiendas (iguales en todas las ciudades) ----
   C: (g) => {
-    px(g, 0, 0, '#3aa89a', T, T); px(g, 0, 0, '#d9f2ee', T, 2); px(g, 0, 15, '#1f6e64', T, 1);
-    for (let y = 4; y < 15; y += 4) px(g, 0, y, '#2a8a7e', T, 1);
+    shingles(g, ['#a6eee0', '#3eb4a4', '#2a9486', '#16615a'], 6);
+    px(g, 0, 7, '#f4fbfa', T, 2); px(g, 0, 9, '#16615a', T, 1); // white band round the roof
   },
   Q: (g) => {
     DRAW.C(g);
-    g.fillStyle = '#16615a'; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
-    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(8, 8, 6.4, 0, 7); g.fill();
-    px(g, 6, 3, '#e0263a', 4, 10); px(g, 3, 6, '#e0263a', 10, 4);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 8, 7, 0, 7); g.fill();
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(8, 8, 6, 0, 7); g.fill();
+    g.fillStyle = '#d8eeea'; g.beginPath(); g.arc(8.5, 8.5, 5.2, 0, Math.PI); g.fill();
+    px(g, 6, 3, OUTLINE, 4, 10); px(g, 3, 6, OUTLINE, 10, 4);
+    px(g, 7, 4, '#ef2e45', 2, 8); px(g, 4, 7, '#ef2e45', 8, 2); px(g, 7, 4, '#ff7a88', 1, 3);
   },
   I: (g) => {
-    px(g, 0, 0, '#f4f8f7', T, T); px(g, 0, 0, '#3aa89a', T, 2); px(g, 0, 13, '#cfe4e0', T, 3); px(g, 0, 12, '#3aa89a', T, 1);
-    px(g, 3, 4, '#2a8a7e', 10, 7); px(g, 4, 5, '#9ad8f0', 8, 5); px(g, 4, 5, '#d8f4ff', 8, 1); px(g, 7, 5, '#2a8a7e', 2, 5);
+    px(g, 0, 0, '#f4f8f7', T, 12); px(g, 0, 0, '#2a9486', T, 2); px(g, 0, 1, '#3eb4a4', T, 1);
+    px(g, 13, 2, '#d8e6e4', 3, 10);
+    px(g, 0, 12, '#b4cae0', T, 4); px(g, 0, 12, '#818d9f', T, 1); px(g, 0, 15, '#818d9f', T, 1); px(g, 5, 13, '#818d9f', 1, 2); px(g, 11, 13, '#818d9f', 1, 2);
+    framedWindow(g, 2, 3, 12, 8, ['#5aa8e8', '#9ad4f8', '#e6f6ff'], '#e6f0fa', false);
   },
   U: (g) => {
-    for (let x = 0; x < T; x += 4) { px(g, x, 0, '#d83a3a', 2, T); px(g, x + 2, 0, '#fbf2e2', 2, T); }
-    px(g, 0, 0, '#8a1a1a', T, 1); px(g, 0, 13, '#a82a2a', T, 3);
-    for (let x = 0; x < T; x += 4) { px(g, x + 1, 15, '#fbf2e2', 2, 1); }
+    for (let x = 0; x < T; x += 4) { px(g, x, 0, '#e2362e', 2, 13); px(g, x + 2, 0, '#fff6e6', 2, 13); px(g, x + 1, 0, '#b01e1e', 1, 13); px(g, x + 3, 0, '#e2d6c0', 1, 13); }
+    px(g, 0, 0, '#ff7a6a', T, 1); px(g, 0, 4, 'rgba(255,255,255,0.18)', T, 1);
+    // scalloped hem
+    for (let x = 0; x < T; x += 4) { px(g, x, 13, '#e2362e', 2, 2); px(g, x + 2, 13, '#fff6e6', 2, 2); px(g, x + 1, 15, OUTLINE, 2, 1); px(g, x, 14, OUTLINE, 1, 1); px(g, x + 3, 14, OUTLINE, 1, 1); }
+    px(g, 0, 12, '#8a1414', T, 1);
   },
   t: (g) => {
-    px(g, 0, 0, '#f2e2bc', T, T); px(g, 0, 12, '#a87a4a', T, 4); px(g, 0, 11, '#8a5a2a', T, 1);
-    px(g, 2, 2, '#5a3a1a', 12, 9); px(g, 3, 3, '#a8dcf0', 10, 7); px(g, 3, 3, '#e0f6ff', 10, 1);
-    px(g, 3, 7, '#8a5a2a', 10, 1);
-    for (const [x, col] of [[4, '#e0263a'], [6, '#f2c02a'], [8, '#4a9a3c'], [10, '#3f86e0']]) px(g, x, 5, col, 2, 2);
-    px(g, 4, 8, '#e8c070', 3, 2); px(g, 9, 8, '#c8a060', 3, 2);
+    px(g, 0, 0, '#f6e6c0', T, 12); px(g, 0, 0, '#c8a070', T, 1); px(g, 13, 1, '#e0cc9e', 3, 11);
+    stoneBase(g);
+    px(g, 1, 2, OUTLINE, 14, 10); px(g, 2, 3, '#7a4a24', 12, 8); px(g, 3, 4, '#a8dcf0', 10, 6); px(g, 3, 4, '#e6f6ff', 10, 1);
+    px(g, 3, 7, '#7a4a24', 10, 1); // shelf
+    for (const [x, col] of [[3, '#ef2e45'], [5, '#ffd84a'], [7, '#4aae3c'], [9, '#3f86e0'], [11, '#ff8a3a']]) { px(g, x, 5, col, 2, 2); px(g, x, 5, 'rgba(255,255,255,0.45)', 1, 1); }
+    px(g, 3, 8, '#e8c070', 3, 2); px(g, 8, 8, '#c8a060', 4, 2); px(g, 3, 8, '#fff0b8', 1, 1);
   },
   // ---- gym facades (outdoor) ----
   G: (g) => {
@@ -1073,11 +1139,16 @@ const EMBLEMS = {
   bicho: (g) => { disc(g, 8, 9, 4.2, '#d83a2a'); disc(g, 8, 4.8, 2.1, '#1a2a0a'); px(g, 7.5, 5, '#1a2a0a', 1, 8); disc(g, 6, 8, 0.9, '#1a2a0a'); disc(g, 10, 10, 0.9, '#1a2a0a'); disc(g, 6, 11, 0.8, '#1a2a0a'); },
   volador: (g) => { g.fillStyle = '#f4faff'; g.beginPath(); g.moveTo(3, 11.5); g.bezierCurveTo(4, 6, 9, 3.5, 13.5, 4); g.bezierCurveTo(12, 6, 11.5, 7, 12.5, 8); g.bezierCurveTo(10, 8.5, 9, 9.5, 9.5, 11); g.bezierCurveTo(7.5, 10.5, 5.5, 11.5, 3, 11.5); g.fill(); px(g, 5, 10, '#8ac8f0', 5, 1); },
 };
+/** Halfway between two #rrggbb colours. */
+function mix(a: string, b: string) {
+  const n = (c: string, i: number) => parseInt(c.slice(1 + i * 2, 3 + i * 2), 16);
+  return '#' + [0, 1, 2].map((i) => Math.round((n(a, i) + n(b, i)) / 2).toString(16).padStart(2, '0')).join('');
+}
 function gymFamily(ids, k) {
   const [R, F, E] = ids;
   DRAW[R] = (g) => {
-    px(g, 0, 0, k.roof, T, T); px(g, 0, 0, k.roofLight, T, 1); px(g, 0, 15, k.roofDark, T, 1);
-    for (let y = 3; y < 15; y += 4) for (let x = ((y - 3) / 4) % 2 ? 4 : 0; x < T; x += 8) { px(g, x, y, k.roofLight, 5, 1); px(g, x + 1, y + 1, k.roofDark, 3, 1); }
+    shingles(g, [k.roofLight, k.roof, mix(k.roof, k.roofDark), k.roofDark], R.charCodeAt(0));
+    px(g, 0, 0, k.rim, T, 1);
   };
   DRAW[F] = (g) => {
     px(g, 0, 0, k.wall, T, T); px(g, 0, 0, k.roofDark, T, 1);
@@ -1087,7 +1158,7 @@ function gymFamily(ids, k) {
   };
   DRAW[E] = (g) => {
     DRAW[R](g);
-    disc(g, 8, 8, 7.5, k.roofDark); disc(g, 8, 8, 6.2, k.rim); disc(g, 8, 8, 5, k.roof);
+    disc(g, 8, 8, 7.6, OUTLINE); disc(g, 8, 8, 6.6, k.rim); disc(g, 8, 8, 5.2, k.roofDark); disc(g, 8, 8, 4.8, k.roof);
     EMBLEMS[k.type](g);
   };
   TILE_INFO[R] = { name: `techo gimnasio ${k.type}`, solid: true };
@@ -1763,6 +1834,77 @@ export function drawBigObjects(g, tiles, x0: number, y0: number, x1: number, y1:
       const list = PACK_BIG[row[x]];
       if (!list) continue;
       g.drawImage(packCanvas(pickPack(list, tileVariant(tiles, x, y))), x * T - cx - 8, y * T - cy - 16);
+    }
+  }
+}
+
+// ---- building trim: the outline round each building, eave shadows and the shadow it casts on the ground ----
+const ROOF_NAMES = /^(techo|emblema|cruz policlínica|toldo tienda|azotea)/;
+const WALL_NAMES = /^(fachada|pared$|ventana$|puerta$|edificio|torre$|pilar$|tribuna$)/;
+let buildingKinds: Map<string, 'roof' | 'wall' | null> | null = null;
+/** 'roof', 'wall' or null for a tile character (worked out from the legend, so custom tiles never count). */
+function buildingKind(ch: string) {
+  if (!buildingKinds) buildingKinds = new Map();
+  let k = buildingKinds.get(ch);
+  if (k === undefined) {
+    const name = TILE_INFO[ch]?.name ?? '';
+    k = ROOF_NAMES.test(name) ? 'roof' : WALL_NAMES.test(name) ? 'wall' : null;
+    buildingKinds.set(ch, k);
+  }
+  return k;
+}
+
+/**
+ * Draws over the ground pass of an outdoor map: a dark outline where a building meets anything else, the
+ * shadow of the eaves on the wall under the roof, and a soft shadow on the ground below and to the right.
+ * Tiles redrawn in the editor are left as they are. x0..x1 / y0..y1 is the visible range, (cx, cy) the camera.
+ */
+export function drawBuildingTrim(g, tiles, x0: number, y0: number, x1: number, y1: number, cx: number, cy: number, theme: string | null = null) {
+  const set = theme ? THEMES[theme] : null;
+  const kind = (x: number, y: number) => {
+    const ch = tiles[y]?.[x];
+    if (ch === undefined || set?.[ch]) return null;
+    return buildingKind(ch);
+  };
+  const open = (x: number, y: number) => { const ch = tiles[y]?.[x]; return ch !== undefined && !kind(x, y) && !TILE_INFO[ch]?.solid; };
+  const edited = (ch: string) => !!override(`tile:${theme ? `${theme}|` : ''}${ch}0`, T, T) || !!override(`tile:${ch}0`, T, T);
+  // shadows first, so outlines sit on top of them
+  g.fillStyle = 'rgba(20,24,40,0.22)';
+  for (let y = Math.max(0, y0 - 1); y <= y1; y++) {
+    for (let x = Math.max(0, x0 - 1); x <= x1; x++) {
+      if (!kind(x, y)) continue;
+      const sx = x * T - cx, sy = y * T - cy;
+      if (open(x, y + 1)) g.fillRect(sx + 2, sy + T, T, 3);
+      if (open(x + 1, y)) g.fillRect(sx + T, sy + 3, 2, T - 3);
+    }
+  }
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const k = kind(x, y);
+      if (!k || edited(tiles[y][x])) continue;
+      const sx = x * T - cx, sy = y * T - cy;
+      const up = kind(x, y - 1), down = kind(x, y + 1), left = kind(x - 1, y), right = kind(x + 1, y);
+      if (k === 'roof') {
+        if (!up) { // ridge cap along the top of the roof
+          g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(sx, sy + 1, T, 2);
+          g.fillStyle = 'rgba(35,22,46,0.3)'; g.fillRect(sx, sy + 3, T, 1);
+        }
+        if (down === 'wall') { g.fillStyle = 'rgba(35,22,46,0.16)'; g.fillRect(sx, sy + 9, T, 7); } // the lower slope is in shade
+        if (!right) { g.fillStyle = 'rgba(35,22,46,0.22)'; g.fillRect(sx + 12, sy, 4, T); } // the side of the roof turns away
+        if (!left) { g.fillStyle = 'rgba(255,255,255,0.16)'; g.fillRect(sx + 1, sy, 2, T); }
+        if (down === 'wall') { // the eave: a dark lip on the roof and its shadow on the wall
+          g.fillStyle = OUTLINE; g.fillRect(sx, sy + T - 1, T, 1);
+          g.fillStyle = 'rgba(35,22,46,0.38)'; g.fillRect(sx, sy + T, T, 2);
+        }
+      }
+      g.fillStyle = OUTLINE;
+      if (!up) g.fillRect(sx, sy, T, 1);
+      if (!down) g.fillRect(sx, sy + T - 1, T, 1);
+      if (!left) g.fillRect(sx, sy, 1, T);
+      if (!right) g.fillRect(sx + T - 1, sy, 1, T);
+      // round the top corners of the roof
+      if (k === 'roof' && !up && !left) g.fillRect(sx + 1, sy + 1, 1, 1);
+      if (k === 'roof' && !up && !right) g.fillRect(sx + T - 2, sy + 1, 1, 1);
     }
   }
 }
