@@ -2,7 +2,7 @@
 // note lists. No audio files to download. Starts on the first user gesture.
 
 let ctx = null;
-let master, musicGain, sfxGain;
+let master, musicGain, sfxGain, sfxMain, sfxBattle;
 let current = null; // { name, timer, resume }
 let pendingResume = null;
 const settings = { music: 0.5, sfx: 0.7 };
@@ -23,7 +23,9 @@ export function initAudio() {
   master = ctx.createGain();
   master.connect(ctx.destination);
   musicGain = ctx.createGain();
-  sfxGain = ctx.createGain();
+  sfxMain = ctx.createGain();
+  sfxBattle = ctx.createGain(); // battle effects and cries sit lower than the rest
+  sfxGain = sfxMain;
   // Handheld-era (GBA/DS) colour: a soft low-pass takes the 8-bit edge off, and a short room echo gives depth.
   const tone_ = ctx.createBiquadFilter();
   tone_.type = 'lowpass';
@@ -31,7 +33,8 @@ export function initAudio() {
   tone_.Q.value = 0.4;
   tone_.connect(master);
   musicGain.connect(tone_);
-  sfxGain.connect(tone_);
+  sfxMain.connect(tone_);
+  sfxBattle.connect(tone_);
   const echo = ctx.createDelay(0.5);
   const fb = ctx.createGain();
   const wet = ctx.createGain();
@@ -61,7 +64,8 @@ export function setVolumes({ music, sfx }) {
 function applyVolumes() {
   if (!ctx) return;
   musicGain.gain.value = settings.music * 0.18;
-  sfxGain.gain.value = settings.sfx * 0.35;
+  sfxMain.gain.value = settings.sfx * 0.35;
+  sfxBattle.gain.value = settings.sfx * 0.35 * 0.45;
 }
 
 // Game Boy-style pulse channels: narrow duty cycles give the thin, bright lead the handheld had.
@@ -225,7 +229,15 @@ export function jingle(name) {
     g.setValueAtTime(0.0001, end + 0.1);
     g.linearRampToValueAtTime(base, end + 0.6);
   }
-  return new Promise((r) => setTimeout(r, len * 1000 + 150));
+  // A key press ends the wait early and brings the music back, so receiving an item never holds the player.
+  return skippableWait(len * 1000 + 150).then(() => {
+    if (musicGain && ctx.currentTime < end + 0.1) {
+      const g = musicGain.gain;
+      g.cancelScheduledValues(ctx.currentTime);
+      g.setValueAtTime(g.value, ctx.currentTime);
+      g.linearRampToValueAtTime(settings.music * 0.18, ctx.currentTime + 0.3);
+    }
+  });
 }
 
 /**
@@ -234,6 +246,10 @@ export function jingle(name) {
  */
 export function cry(key, size = 1, { faint = false } = {}) {
   if (!ctx || !key) return;
+  sfxGain = sfxBattle;
+  try { cryTones(key, size, faint); } finally { sfxGain = sfxMain; }
+}
+function cryTones(key, size, faint) {
   let h = 2166136261;
   for (const ch of key) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   const rnd = () => { h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
@@ -267,9 +283,21 @@ export function lowHpAlarm(on) {
   }
 }
 
+const BATTLE_SFX = /^(hit|super|weak|crit|faint|dash|charge|orb|aura|fx_|st_|cut|cast|bite|pc|stat_|encounter|poof|throw|shake)/;
 export function sfx(name) {
   if (!ctx || !SFX[name]) return;
-  SFX[name](ctx.currentTime + 0.001);
+  sfxGain = BATTLE_SFX.test(name) ? sfxBattle : sfxMain;
+  try { SFX[name](ctx.currentTime + 0.001); } finally { sfxGain = sfxMain; }
+}
+
+/** Resolves after `ms`, or as soon as the player presses a confirm/cancel key, so fanfare waits never hold the game up. */
+export function skippableWait(ms) {
+  return new Promise<void>((resolve) => {
+    const done = () => { clearTimeout(t); removeEventListener('keydown', onKey); resolve(); };
+    const onKey = (e) => { if (!e.repeat && /^(KeyZ|KeyX|KeyJ|KeyK|Enter|Space|Escape|Backspace)$/.test(e.code)) done(); };
+    const t = setTimeout(done, ms);
+    addEventListener('keydown', onKey);
+  });
 }
 
 // ---- Music -------------------------------------------------------------

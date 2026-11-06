@@ -7,7 +7,7 @@ import { encounterList, waterTable } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, tileVariant, drawBigObjects } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, groundUnder, groundFor } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
@@ -15,7 +15,7 @@ import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
-import { sfx, playMusic, jingle, setAmbience } from '../core/audio.ts';
+import { sfx, playMusic, jingle, setAmbience, skippableWait } from '../core/audio.ts';
 import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
@@ -1161,7 +1161,7 @@ export const api = {
       });
       await wait(500);
       const j = jingle('heal');
-      await wait(Math.max(900, n * 260 + 700));
+      await skippableWait(Math.max(900, n * 260 + 700));
       setRenderer(prev);
       await j;
     }
@@ -1364,9 +1364,8 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme), tileVariant(W_.tiles, x, y)), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme)), x * T - cx, y * T - cy);
   }
-  if (!m.theme) drawBigObjects(g, W_.tiles, x0, y0, x1, y1, cx, cy);
   if (!m.indoor) { drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy); drawCastShadows(g, x0, y0, x1, y1, cx, cy); }
   // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
   {
@@ -1404,7 +1403,8 @@ function drawWorld(g, t) {
     if (!player && n.def.look === null) continue;
     if (!player && n.def.look === 'ball') { drawBallIcon(g, sx + 8, sy + 6); continue; }
     if (!player && n.def.look === 'machine') { drawFogMachine(g, sx, sy, t); continue; }
-    const look = player ? state().player.look : n.def.look;
+    let look = player ? state().player.look : n.def.look;
+    if (look === 'swimmer' && tileAt(n.x, n.y) !== '~') look = 'turista'; // swimmers only show in the water
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
     // Four poses per direction: contact (1 or 2) in the first half of a tile, then a passing pose (0 or 3, alternating).
     const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : (p.step % 2 ? 3 : 0)) : n.moving ? frameIdx : 0;

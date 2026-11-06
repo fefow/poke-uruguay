@@ -1,7 +1,7 @@
 // Boot: loader -> title -> game loop.
 import { mountScreen, render, setAfterRender } from './gfx/screen.ts';
-import { mountPixi, renderPixi, setPalette } from './gfx/pixi-layer.ts';
-import { buildTileset, tileCanvas, setTerrainStyle } from './gfx/tiles.ts';
+import { mountPixi, renderPixi } from './gfx/pixi-layer.ts';
+import { buildTileset, tileCanvas } from './gfx/tiles.ts';
 import { validateSave } from './save/validate.ts';
 import { buildAllSprites, creatureSprite } from './gfx/creatures.ts';
 import { DEX_ORDER } from './data/species.ts';
@@ -86,8 +86,6 @@ async function boot() {
   }
   mountPerf();
   setVolumes(settings);
-  setTerrainStyle(settings.terrain === 'nuevo' ? 'nuevo' : 'clasico');
-  setPalette(settings.palette);
   requestAnimationFrame(frame);
 
   const bar = $('#loader-bar');
