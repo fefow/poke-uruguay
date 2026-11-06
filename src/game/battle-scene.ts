@@ -764,11 +764,21 @@ function burst(side, eff, crit, amount) {
   }
   A.pops = (A.pops ?? []).concat({ x, y: y - 14, text: `-${amount}`, c: crit ? '#ffe05a' : eff > 1 ? '#ff8a6a' : '#fff', t0: now });
 }
+/** Golden sparkles rising around a creature: level up, or a capture. `side` 0 = player, 1 = foe. */
+function sparkle(side, colors = ['#ffe05a', '#fff', '#7ac8f0']) {
+  const [x, y] = side === 0 ? [84, 150] : [236, 80];
+  const now = performance.now();
+  A.parts ??= [];
+  for (let i = 0; i < 28; i++) {
+    A.parts.push({ x: x + (Math.random() - 0.5) * 50, y: y + Math.random() * 20, vx: (Math.random() - 0.5) * 20, vy: -30 - Math.random() * 50, c: colors[i % colors.length], t0: now + i * 18, life: 700 + Math.random() * 300, s: i % 4 ? 1 : 2 });
+  }
+}
 function drawBursts(g) {
   const now = performance.now();
   if (A.parts?.length) {
     A.parts = A.parts.filter((p) => now - p.t0 < p.life);
     for (const p of A.parts) {
+      if (now < p.t0) continue; // delayed sparkles have not started yet
       const k = (now - p.t0) / 1000;
       g.globalAlpha = 1 - (now - p.t0) / p.life;
       g.fillStyle = p.c;
@@ -905,6 +915,7 @@ async function shakeAnim(n, caught) {
   await wait(400);
   if (caught) {
     const j = jingle('creature');
+    sparkle(1, ['#fff', '#ffe05a', '#ff9af0']);
     A.tint = 'rgba(255,255,255,0.25)';
     await wait(300);
     A.tint = null;
@@ -947,6 +958,7 @@ async function awardExp(foe, leveled) {
           await wait(950);
         }
         sfx('levelup');
+        if (shown) sparkle(0);
         lvl = ev.level;
         if (shown) {
           setHud('ply', c, { instant: true });
