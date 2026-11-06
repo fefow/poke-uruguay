@@ -2,7 +2,7 @@
 // icon buttons with tooltips. Hidden in battle and while a script runs.
 import { h } from '../core/util.ts';
 import { input } from '../core/input.ts';
-import { state, badgeCount, settings } from './state.ts';
+import { state, badgeCount } from './state.ts';
 import { MAPS } from '../data/maps.ts';
 import { creatureIcon } from '../gfx/creatures.ts';
 import { displayName, maxHp } from './creature.ts';
@@ -99,9 +99,7 @@ export function mountSidebar(stageEl, hs = {}) {
 function fit() {
   // 4% margin: the window never shows the game edge to edge, so browser bars and scrollbars cannot cut it
   const w = document.documentElement.clientWidth || innerWidth, h = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
-  let k = Math.min(w / 1920, h / 1080) * 0.96;
-  // "Píxeles exactos": the 480x270 canvas is shown at a whole-number multiple (1x, 2x, 3x, 4x), so every art pixel is the same size
-  if (settings.pixelPerfect && k >= 0.25) k = Math.floor(k * 4) / 4;
+  const k = Math.min(w / 1920, h / 1080) * 0.96;
   stage.style.setProperty('--k', k.toFixed(4));
 }
 
