@@ -135,7 +135,7 @@ const TRAINERS = [
   ['Baqueano', ['planta', 'tierra'], ['Conozco cada rincón de este camino.', 'Me ganaste de local.', 'Seguí derecho.']],
 ];
 
-const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'swimmer', 'ciclista', 'keeper', 'biologo', 'campesina', 'pescador', 'maestra', 'obrero', 'artesana', 'abuela', 'camionero', 'cartero', 'cocinero', 'murguero', 'hincha'];
+const HOUSE_LOOKS = ['boy', 'girl', 'gaucho', 'oldman', 'sailor', 'turista', 'ciclista', 'keeper', 'biologo', 'campesina', 'pescador', 'maestra', 'obrero', 'artesana', 'abuela', 'camionero', 'cartero', 'cocinero', 'murguero', 'hincha'];
 
 // Residents are not statues: the second one in a house always wanders, and about a third of the first ones do too.
 const houseFolk = (first, look2, text2) => {

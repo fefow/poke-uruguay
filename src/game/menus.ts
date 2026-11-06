@@ -1,7 +1,5 @@
 // Panels: pause menu, party, summary, bag, PokeDex, trainer card, options,
 // save, shop and PC storage.
-import { setTerrainStyle } from '../gfx/tiles.ts';
-import { setPalette } from '../gfx/pixi-layer.ts';
 import { h, clamp, formatTime, pad, wait } from '../core/util.ts';
 import { keyName } from '../core/input.ts';
 import { sfx, setVolumes, cry } from '../core/audio.ts';
@@ -773,8 +771,6 @@ export function openOptions() {
       { label: 'Velocidad del texto', hint: 'Qué tan rápido aparecen los diálogos.', get: () => ['Lenta', 'Normal', 'Rápida'][settings.textSpeed - 1], step: (d) => (settings.textSpeed = clamp(settings.textSpeed + d, 1, 3)) },
       { label: 'Música', hint: 'Volumen de la música, de 0 a 10.', get: () => `${Math.round(settings.music * 10)}`, step: (d) => (settings.music = clamp(Math.round((settings.music + d * 0.1) * 10) / 10, 0, 1)) },
       { label: 'Vol. de efectos', hint: 'Volumen de los efectos de sonido, de 0 a 10.', get: () => `${Math.round(settings.sfx * 10)}`, step: (d) => (settings.sfx = clamp(Math.round((settings.sfx + d * 0.1) * 10) / 10, 0, 1)) },
-      { label: 'Terreno', hint: 'Clásico: el dibujo original del juego. Nuevo: prueba con árboles grandes y suelo redibujado.', get: () => (settings.terrain === 'clasico' ? 'Clásico' : 'Nuevo'), step: () => { settings.terrain = settings.terrain === 'clasico' ? 'nuevo' : 'clasico'; setTerrainStyle(settings.terrain); } },
-      { label: 'Colores', hint: 'Normales: como fue dibujado. Vivos: colores más intensos, como una consola portátil con pantalla iluminada.', get: () => (settings.palette === 'vivo' ? 'Vivos' : 'Normales'), step: () => { settings.palette = settings.palette === 'vivo' ? 'normal' : 'vivo'; setPalette(settings.palette); } },
       { label: 'Animaciones de combate', hint: 'Sí: los ataques y golpes se animan en combate. No: el combate muestra los resultados al instante.', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
       { label: 'Monitor de rendimiento', hint: 'Muestra FPS, tiempo de cuadro y ping arriba a la izquierda. También con F3.', get: () => (settings.perf ? 'Sí' : 'No'), step: async () => { (await import('../core/perf.ts')).togglePerf(); } },
       { label: 'Controles', hint: 'Muestra las teclas del juego.', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },

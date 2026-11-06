@@ -1456,3 +1456,12 @@ for (const m of Object.values(MAPS) as any[]) {
     n.trainer.look = n.look;
   }
 }
+// The swimmer sprite is a person in the water: anyone standing on land or indoors (a beach-goer, a lifeguard, a
+// neighbour in a house) is drawn as a tourist instead, in the world and in battle.
+for (const m of Object.values(MAPS) as any[]) {
+  for (const n of m.npcs ?? []) {
+    if (n.look !== 'swimmer' || m.tiles?.[n.y]?.[n.x] === '~') continue;
+    n.look = 'turista';
+    if (n.trainer) n.trainer.look = 'turista';
+  }
+}
