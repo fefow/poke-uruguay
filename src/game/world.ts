@@ -7,7 +7,7 @@ import { encounterList, waterTable } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, groundUnder, tileVariant, drawBigObjects } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, tileVariant, drawBigObjects } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
@@ -1364,7 +1364,7 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundUnder(W_.tiles, x, y), tileVariant(W_.tiles, x, y)), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme), tileVariant(W_.tiles, x, y)), x * T - cx, y * T - cy);
   }
   if (!m.theme) drawBigObjects(g, W_.tiles, x0, y0, x1, y1, cx, cy);
   if (!m.indoor) { drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy); drawCastShadows(g, x0, y0, x1, y1, cx, cy); }

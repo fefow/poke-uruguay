@@ -11,7 +11,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
-import { tileCanvas, TILE_INFO, THEMES, T, TILE_BACKGROUNDS, backgroundOf, tileWithoutGround } from '../gfx/tiles.ts';
+import { tileCanvas, TILE_INFO, THEMES, T, backgroundOf, tileWithoutGround } from '../gfx/tiles.ts';
 import { generated, setOverrides } from '../gfx/overrides.ts';
 import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
 import { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } from '../gfx/sprite-codec.ts';
@@ -240,12 +240,10 @@ const sheetInput = h('input', { type: 'file', accept: 'image/png,image/webp', st
 const importSize = h('select', { class: 'ed-input', title: 'Tamaño de la imagen importada dentro del lienzo' }, [['100', 'Importar al 100 %'], ['80', 'Importar al 80 %'], ['65', 'Importar al 65 %'], ['50', 'Importar al 50 %']].map(([v, t]) => h('option', { value: v, text: t })));
 importSize.value = '80';
 const importInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', style: { display: 'none' }, onchange: () => { const f = importInput.files?.[0]; importInput.value = ''; if (f) importImage(f).catch(() => status('No se pudo leer la imagen.', 'error')); } });
-const bgSelect = h('select', { class: 'ed-input', title: 'Suelo que se ve detrás de lo transparente, acá y en el juego', onchange: () => setBg(bgSelect.value) });
 const bgSection = h('section', { hidden: true },
   h('h2', { text: 'Fondo de la pieza' }),
-  h('p', { class: 'ed-hint', text: 'Dibujá árboles, arbustos u objetos con fondo transparente: en el juego se ven sobre este suelo. "Automático" usa el suelo del mapa (pasto, o la arena, el camino o el agua donde esté la pieza).' }),
-  bgSelect,
-  h('div', { class: 'ed-tools' }, h('button', { type: 'button', class: 'ed-tool', title: 'Vuelve transparente el pasto (o el fondo elegido) que rodea al dibujo', onclick: () => removeBackground() }, h('span', { text: 'Quitar fondo' }))),
+  h('p', { class: 'ed-hint', text: 'Dibujá árboles, arbustos u objetos con fondo transparente (se ven sobre pasto acá). El suelo base de cada mapa se elige en el Editor de mapas, sección "Fondo base del mapa".' }),
+  h('div', { class: 'ed-tools' }, h('button', { type: 'button', class: 'ed-tool', title: 'Vuelve transparente el pasto que rodea al dibujo', onclick: () => removeBackground() }, h('span', { text: 'Quitar fondo' }))),
 );
 const prev1 = h('canvas', { class: 'ed-prev-1' });
 const prev3 = h('canvas', { class: 'ed-prev-3' });
@@ -486,7 +484,6 @@ function select(e, frame = null) {
   S.entry = frame ?? (e.frames ? e.frames[0] : e);
   delBtn.hidden = !customOf(e);
   bgSection.hidden = !isTileEntry(S.entry);
-  if (!bgSection.hidden) fillBgOptions();
   for (const li of list.children) li.classList.toggle('is-active', li._entry === e);
   S.px = pixelsOf(S.entry);
   S.undo = [];
@@ -1069,19 +1066,6 @@ function bgCanvasFor(e) {
   const g = c.getContext('2d');
   for (let y = 0; y < e.h; y += T) for (let x = 0; x < e.w; x += T) g.drawImage(tile, x, y);
   return c;
-}
-function fillBgOptions() {
-  const custom = (CUSTOM.tiles ?? []).filter((t) => !t.solid && t.ch in TILE_INFO).map((t) => [t.ch, `${t.name} (pieza nueva)`]);
-  const opts = [...TILE_BACKGROUNDS, ...custom];
-  if (bgSelect.options.length !== opts.length) bgSelect.replaceChildren(...opts.map(([v, t]) => h('option', { value: v, text: t })));
-  const cur = bgOf(S.entry);
-  bgSelect.value = opts.some(([v]) => v === cur) ? cur : 'auto';
-}
-function setBg(v) {
-  if (!isTileEntry(S.entry)) return;
-  for (const k of tileKeysOf(S.entry)) S.bg[k] = v;
-  commit();
-  status(v === 'auto' ? 'Fondo automático: en el juego se ve el suelo del mapa donde pongas la pieza.' : 'Fondo elegido. Lo transparente del dibujo se ve sobre ese suelo, también en el juego.');
 }
 /** Pixels of the generated art without its ground, or null when it is not known. */
 function barePixels(e) {

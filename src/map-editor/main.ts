@@ -7,7 +7,7 @@ import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
-import { tileCanvas, groundUnder, tileVariant, drawBigObjects, setTerrainStyle, TILE_INFO, T, registerCustomTile } from '../gfx/tiles.ts';
+import { tileCanvas, groundFor, tileVariant, drawBigObjects, setTerrainStyle, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -59,7 +59,7 @@ function working(id) {
     return { ...it, ...(q && !q.remove ? { x: q.x ?? it.x, y: q.y ?? it.y } : {}), removed: !!q?.remove };
   });
   for (const a of p.addItems ?? []) items.push({ ...a, added: true });
-  return { tiles, npcs, items, weather: p.weather ?? 'random', shift };
+  return { tiles, npcs, items, weather: p.weather ?? 'random', ground: p.ground ?? 'auto', shift };
 }
 
 /** The patch that turns the original into W, or null when nothing changed. */
@@ -95,6 +95,7 @@ function diff(id, W) {
   const addItems = W.items.filter((it) => it.added).map(({ x, y, item, id: iid }) => ({ x, y, item, id: iid }));
   if (addItems.length) p.addItems = addItems;
   if (W.weather && W.weather !== 'random') p.weather = W.weather;
+  if (W.ground && W.ground !== 'auto') p.ground = W.ground;
   return Object.keys(p).length ? p : null;
 }
 
@@ -150,6 +151,8 @@ const checks = h('div', { class: 'me-checks' });
 const WEATHERS: [string, string][] = [['random', 'Aleatorio (cambia solo)'], ['clear', 'Siempre despejado'], ['rain', 'Siempre lluvia'], ['storm', 'Siempre tormenta'], ['fog', 'Siempre niebla']];
 const weatherSel = h('select', { class: 'ed-input', onchange: () => edit(() => { S.W.weather = weatherSel.value; }) },
   WEATHERS.map(([v, n]) => h('option', { value: v, text: n })));
+const groundSel = h('select', { class: 'ed-input', title: 'Suelo que se ve detrás de árboles, arbustos y piezas con transparencia en este mapa', onchange: () => edit(() => { S.W.ground = groundSel.value; }) },
+  TILE_BACKGROUNDS.map(([v, n]) => h('option', { value: v, text: v === 'auto' ? 'Automático (pasto, o el suelo de al lado)' : n })));
 const addLook = h('select', { class: 'ed-input' }, Object.keys(LOOKS).filter((k) => !k.startsWith('leader_') && !k.startsWith('player') && k !== 'rival').map((k) => h('option', { value: k, text: k, selected: k === 'oldman' })));
 const addItemSel = h('select', { class: 'ed-input' }, ITEM_KEYS.map((k) => h('option', { value: k, text: ITEMS[k].name, selected: k === 'te_marcela' })));
 const sizeInfo = h('p', { class: 'ed-hint' });
@@ -160,6 +163,8 @@ const right = h('aside', { class: 'me-right' },
   h('section', {}, h('h2', { text: 'Seleccionado' }), inspector),
   h('section', {}, h('h2', { text: 'Clima de la zona' }), weatherSel,
     h('p', { class: 'ed-hint', text: 'Aleatorio: despejado, lluvia, tormenta o niebla según el momento. En interiores no se nota.' })),
+  h('section', {}, h('h2', { text: 'Fondo base del mapa' }), groundSel,
+    h('p', { class: 'ed-hint', text: 'El suelo que se ve detrás de árboles, arbustos, rocas y las piezas dibujadas con transparencia. Automático: pasto, o el suelo que tengan alrededor.' })),
   h('section', {}, h('h2', { text: 'Tamaño del mapa' }), sizeInfo,
     h('div', { class: 'me-row' }, ...GROW.map(([k, label, inp]) => h('label', { class: 'me-field', style: { flex: '1' } }, label, inp))),
     btn('Agrandar con la pieza elegida', () => growMap(), { title: 'Agrega filas y columnas nuevas rellenas con la pieza que tengas elegida; después pintás la forma que quieras' }),
@@ -305,7 +310,7 @@ function draw() {
   g.imageSmoothingEnabled = false;
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
-  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundUnder(rows, x, y), tileVariant(rows, x, y)), x * T, y * T);
+  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme), tileVariant(rows, x, y)), x * T, y * T);
   if (!m.theme) drawBigObjects(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0);
   for (const it of W.items) {
     if (it.removed) continue;
@@ -359,7 +364,7 @@ function draw() {
 }
 
 // ---------------------------------------------------------------- editing
-const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, shift: S.W.shift });
+const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift });
 function pushUndo() {
   S.undo.push(snap());
   if (S.undo.length > MAX_UNDO) S.undo.shift();
@@ -369,6 +374,7 @@ function restoreSnap(json) {
   const o = JSON.parse(json);
   S.W = o;
   weatherSel.value = o.weather ?? 'random';
+  groundSel.value = o.ground ?? 'auto';
   if (S.sel) S.sel = null;
 }
 function undo() {
@@ -507,7 +513,7 @@ function growMap() {
 }
 function resetMap() {
   if (!patchOf(S.id)) return status('Este mapa no tiene cambios.');
-  edit(() => { const o = MAP_ORIGINALS[S.id]; S.W = { tiles: o.tiles.map((r) => [...r]), npcs: o.npcs.map((n) => ({ ...n, text: n.text ? [...n.text] : null, removed: false })), items: o.items.map((it) => ({ ...it, removed: false })), weather: 'random', shift: { x: 0, y: 0 } }; S.sel = null; });
+  edit(() => { const o = MAP_ORIGINALS[S.id]; S.W = { tiles: o.tiles.map((r) => [...r]), npcs: o.npcs.map((n) => ({ ...n, text: n.text ? [...n.text] : null, removed: false })), items: o.items.map((it) => ({ ...it, removed: false })), weather: 'random', ground: 'auto', shift: { x: 0, y: 0 } }; S.sel = null; });
   status('Mapa vuelto al original. Si lo guardás, el juego también vuelve al original.', 'ok');
 }
 
@@ -632,6 +638,7 @@ function openMap(id) {
   undoBtn.disabled = redoBtn.disabled = true;
   try { store.setItem('pokeuy:map-last', id); } catch { /* storage blocked */ }
   weatherSel.value = S.W.weather ?? 'random';
+  groundSel.value = S.W.ground ?? 'auto';
   renderMapList();
   renderPalette();
   runChecks();

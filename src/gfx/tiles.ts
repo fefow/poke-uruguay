@@ -1627,6 +1627,18 @@ export function groundUnder(tiles, x, y): string | boolean {
   return best;
 }
 
+/**
+ * Like groundUnder, but a map can choose its own base ground (`ground` in the map editor: sand, path...).
+ * It only changes objects (trees, bushes, rocks...) and drawings with see-through parts; plain ground tiles stay as they are.
+ */
+export function groundFor(tiles, x: number, y: number, ground?: string | null, theme?: string | null): string | boolean {
+  const u = groundUnder(tiles, x, y);
+  if (u || theme || !ground || ground === 'auto' || !TILE_INFO[ground]) return u;
+  const ch = tiles[y][x];
+  if (TILE_INFO[ch]?.over || overrideHasHoles(`tile:${ch}0`)) return ground === '.' ? false : ground;
+  return u;
+}
+
 /** under: false (grass / theme floor), true or '~' (water) or a ground char from BASES (see groundUnder). */
 // Map pieces made in the sprite editor start as grass; the drawing comes from the overrides.
 for (const t of CUSTOM.tiles) {

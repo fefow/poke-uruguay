@@ -5,6 +5,7 @@
 //   addNpcs   [{ x, y, look, dir, text, wander }] new people (they only talk)
 //   items     { id: { x, y } | { remove: true } } for items already in the map
 //   addItems  [{ x, y, item, id }] new items on the ground
+//   ground    base ground behind trees, bushes and other see-through pieces ('.', 's', '=', ... absent = the map's own ground)
 //   weather   'clear' | 'rain' | 'storm' | 'fog' fixed weather for the zone (absent = random)
 // The game applies them after building every map (end of maps.js), so a generator change keeps the edits.
 
@@ -27,6 +28,7 @@ export function applyMapEdits(maps, edits) {
     const m = maps[id];
     if (!m || !e) continue;
     if (typeof e.weather === 'string') m.weather = e.weather;
+    if (typeof e.ground === 'string') m.ground = e.ground;
     // A map grown on its left or top: everything in it moves by the same amount (the editor's patch uses the new coordinates)
     const sx = Number.isInteger(e.shift?.x) ? e.shift.x : 0, sy = Number.isInteger(e.shift?.y) ? e.shift.y : 0;
     const grown = Array.isArray(e.tiles) && fitsGrown(m.tiles, e.tiles);
