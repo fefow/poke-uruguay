@@ -25,6 +25,7 @@ import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canE
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
 import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
+import { uiIconCanvas } from '../gfx/ui-icons.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -1527,8 +1528,7 @@ function drawWorld(g, t) {
         g.lineWidth = 1;
         g.beginPath(); g.ellipse(sx + 8 - wx * (8 + k * 6), sy + 12 - wy * (6 + k * 5), 4 + k * 5, 2 + k * 2, 0, 0, 7); g.stroke();
       }
-      g.fillStyle = '#5a3a1a'; g.beginPath(); g.ellipse(sx + 8, sy + 12, 9.5, 4, 0, 0, 7); g.fill();
-      g.fillStyle = '#a87a4a'; g.beginPath(); g.ellipse(sx + 8, sy + 11, 8, 3, 0, 0, 7); g.fill();
+      g.drawImage(uiIconCanvas('canoa_agua'), Math.round(sx - 4), Math.round(sy + 4)); // editable: 'ui:canoa_agua'
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
     g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);

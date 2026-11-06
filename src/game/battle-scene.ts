@@ -6,6 +6,7 @@ import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite } from '../gfx/characters.ts';
+import { uiIconCanvas } from '../gfx/ui-icons.ts';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
 import { vignette, rain, weatherAt } from '../gfx/fx.ts';
 import { MAPS } from '../data/maps.ts';
@@ -164,7 +165,7 @@ function drawBattle(g, t) {
   if (A.ply && A.plyVis) drawCreature(g, creatureSprite(A.ply, { back: true }), 84, 184, SPRITE, 'ply', t, 1);
   if (A.proj) drawProjectile(g, A.proj);
   if (A.eff) drawEffect(g, A.eff);
-  if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake);
+  if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake, A.ball.item);
   if (A.fx) drawFx(g, A.fx, t);
   drawBursts(g);
   g.restore();
@@ -207,15 +208,13 @@ function drawProjectile(g, pr) {
   g.restore();
 }
 
-function drawBall(g, x, y, shake = 0) {
+/** The thrown ball: the editor's drawing ('ui:captura_<ball>', by default the bag icon), tilted while it shakes. */
+function drawBall(g, x, y, shake = 0, item = 'esfera') {
   g.save();
+  g.imageSmoothingEnabled = false;
   g.translate(Math.round(x), Math.round(y));
   g.rotate(shake);
-  g.fillStyle = '#1a1a24'; g.beginPath(); g.arc(0, 0, 6, 0, 7); g.fill();
-  g.fillStyle = '#7ac8f0'; g.beginPath(); g.arc(0, 0, 5, Math.PI, 0); g.fill();
-  g.fillStyle = '#ffffff'; g.beginPath(); g.arc(0, 0, 5, 0, Math.PI); g.fill();
-  g.fillStyle = '#1a1a24'; g.fillRect(-5, -1, 10, 2);
-  g.fillStyle = '#f2c02a'; g.beginPath(); g.arc(0, 0, 2, 0, 7); g.fill();
+  g.drawImage(uiIconCanvas(`captura_${item}`), -8, -8);
   g.restore();
 }
 
@@ -730,7 +729,7 @@ async function play(events, leveled) {
         await sendOutPlayer(engine.party[e.index], e);
         break;
       case 'throw':
-        await throwAnim();
+        await throwAnim(e.item);
         break;
       case 'block':
         A.ball = null;
@@ -895,9 +894,9 @@ async function attackAnim(side, type, kind, name = '') {
   }
 }
 
-async function throwAnim() {
+async function throwAnim(item = 'esfera') {
   sfx('throw');
-  A.ball = { x: 40, y: 170, shake: 0 };
+  A.ball = { x: 40, y: 170, shake: 0, item: ITEMS[item]?.ball ? item : 'esfera' };
   await tween(500, (p) => { A.ball.x = 40 + p * 196; A.ball.y = 170 - Math.sin(p * Math.PI) * 100 - p * 100; A.ball.shake = p * 12; });
   A.ball.shake = 0;
   // creature gets sucked in

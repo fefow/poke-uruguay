@@ -10,7 +10,7 @@ import { fmt } from './ui.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { uiIconUrl } from '../gfx/ui-icons.ts';
 
-let portrait, nameEl, card, mapBox, teamBox, teamBtn, lastFace = '';
+let teamCount, portrait, nameEl, card, mapBox, teamBox, teamBtn, lastFace = '';
 let teamOpen = true;
 try { teamOpen = localStorage.getItem('hudTeam') !== '0'; } catch {}
 let stage, bar, placeEl, medalEl, moneyEl, teamEl, btns: Record<string, any> = {}, handlers: Record<string, any> = {}, sig = '', nextPoll = 0;
@@ -79,7 +79,8 @@ export function mountSidebar(stageEl, hs = {}) {
   // hotbar (bottom centre)
   teamEl = h('ol', { class: 'hud-team-list', 'aria-label': 'Equipo' });
   teamBtn = h('button', { type: 'button', class: 'hud-team-toggle', 'aria-expanded': String(teamOpen), 'data-tip': 'Mostrar u ocultar el equipo' },
-    h('span', { text: 'Tu equipo' }), h('span', { class: 'hud-caret', text: '▾' }));
+    h('span', { class: 'hud-team-title' }, icon('team'), h('span', { text: 'Tu equipo' }), teamCount = h('span', { class: 'hud-team-count' })),
+    h('span', { class: 'hud-caret', text: '▾' }));
   teamBtn.addEventListener('click', () => {
     teamOpen = !teamOpen;
     teamBox.classList.toggle('is-closed', !teamOpen);
@@ -87,7 +88,8 @@ export function mountSidebar(stageEl, hs = {}) {
     try { localStorage.setItem('hudTeam', teamOpen ? '1' : '0'); } catch {}
   });
   teamBox = h('section', { class: `hud-team${teamOpen ? '' : ' is-closed'}` }, teamBtn, teamEl);
-  bar = h('div', { class: 'hud' }, card, mapBox, teamBox);
+  // the player card and the team share one column, so the team list always starts right under the card
+  bar = h('div', { class: 'hud' }, h('div', { class: 'hud-left' }, card, teamBox), mapBox);
   stage.append(bar);
   fit();
   addEventListener('resize', fit);
@@ -134,6 +136,7 @@ export function updateSidebar(now, inGame) {
   placeEl.textContent = place;
   nameEl.textContent = S.player.name ?? '';
   medalEl.textContent = String(badgeCount());
+  teamCount.textContent = `${S.party.length}/6`;
   moneyEl.textContent = `$${S.player.money}`;
   teamEl.replaceChildren(...S.party.map((c) => {
     const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
