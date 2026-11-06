@@ -382,6 +382,7 @@ export const SCRIPTS = {
     api.setFlag('rival1');
     if (res === 'lose') await api.say(['Gané. Sigo siendo mejor.', 'Igual, tu criatura tiene potencial.'], { name: '{rival}' });
     else await api.say(['Fue suerte.', 'Voy a entrenar hasta superarte.'], { name: '{rival}' });
+    await api.npcExit('rival_lab'); // walks to the door and leaves
     api.healParty({ silent: true });
     await api.say(['Buen combate. Ya atendí a sus criaturas.',
       'Ahora, {player}: el país es grande. Hay doce Gimnasios, y el camino empieza acá, en Carmelo, y termina en Montevideo.',
