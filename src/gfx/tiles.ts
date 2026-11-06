@@ -1,7 +1,7 @@
 // Procedural 16x16 pixel tileset (no external images).
 import { CUSTOM } from '../data/custom-content.js';
 import { Rng } from '../core/rng.ts';
-import { override } from './overrides.ts';
+import { override, overrideEntry, overrideHasHoles, generated } from './overrides.ts';
 import { decodeSprite } from './sprite-codec.ts';
 import { TILE_PACK } from '../data/tile-pack.js';
 
@@ -1795,8 +1795,15 @@ export function tileCanvas(ch, frame = 0, theme: string | null = null, under: st
   const draw = set?.[ch] || null;
   const themed = draw || (ground && (DRAW[ch] || OVER[ch])) || onWater;
   const key = (themed ? `${theme}|` : '') + (onWater ? 'w|' : base ? `${base}|` : '') + ch + f;
-  const drawn = override(`tile:${key}`, T, T);
-  if (drawn) return drawn;
+  let dk = override(`tile:${key}`, T, T) ? `tile:${key}` : null;
+  // A drawing with see-through parts made for the plain tile also works on sand, a path, the water or a
+  // themed floor (unless the theme draws its own version of this tile).
+  if (!dk && !draw && key !== ch + f && overrideHasHoles(`tile:${ch}${f}`) && override(`tile:${ch}${f}`, T, T)) dk = `tile:${ch}${f}`;
+  if (dk) {
+    if (!overrideHasHoles(dk)) return override(dk, T, T);
+    const floor = typeof under === 'string' && under !== '~' && TILE_INFO[under] ? under : null;
+    return onBaseTile(dk, ch, frame, theme, onWater ? '~' : floor);
+  }
   let c = cache.get(key);
   if (!c) {
     c = mk();
@@ -1809,6 +1816,63 @@ export function tileCanvas(ch, frame = 0, theme: string | null = null, under: st
     } finally { GROUND = null; }
     cache.set(key, c);
   }
+  return c;
+}
+
+// ---- hand-drawn tiles with see-through parts (trees, bushes, objects drawn without their ground) ----
+/**
+ * Ground choices for a drawing with transparency (the editor's "Fondo"): 'auto' is the map's ground (grass,
+ * or sand / path / water when the tile stands on them), any other value is the tile drawn underneath.
+ */
+export const TILE_BACKGROUNDS: [string, string][] = [
+  ['auto', 'Automático (el suelo del mapa)'], ['.', 'Pasto'], [',', 'Pastizal'], ['f', 'Flores'], ['=', 'Camino'], ['s', 'Arena'],
+  ['c', 'Adoquines'], ['_', 'Vereda'], ['0', 'Asfalto'], ['`', 'Ceniza'], ['b', 'Puente'], ['~', 'Agua'],
+];
+const composedTiles = new WeakMap<HTMLCanvasElement, Map<string, HTMLCanvasElement>>();
+let composing = 0;
+/** The ground tile a drawing with transparency is drawn over: its chosen `bg`, else the map's ground. */
+export function backgroundOf(bg: string | undefined, floor: string | null = null) {
+  return bg && bg !== 'auto' && TILE_INFO[bg] ? bg : floor ?? '.';
+}
+function onBaseTile(dk: string, ch: string, frame: number, theme: string | null, floor: string | null) {
+  const drawn = override(dk, T, T);
+  const bgCh = backgroundOf(overrideEntry(dk)?.bg, floor);
+  const bf = TILE_INFO[bgCh]?.anim ? frame % 4 : 0;
+  let byKey = composedTiles.get(drawn);
+  if (!byKey) { byKey = new Map(); composedTiles.set(drawn, byKey); }
+  const k = `${theme ?? ''}|${bgCh}|${bf}`;
+  let c = byKey.get(k);
+  if (c) return c;
+  c = mk();
+  const g = c.getContext('2d');
+  // The ground itself may be a drawing; a tile drawn over itself (or a ground with holes) uses the generated art.
+  const ground = () => tileCanvas(bgCh, bf, theme);
+  composing++;
+  try { g.drawImage(bgCh === ch || composing > 1 ? generated(ground) : ground(), 0, 0); } finally { composing--; }
+  g.drawImage(drawn, 0, 0);
+  byKey.set(k, c);
+  return c;
+}
+
+/**
+ * The generated art of a tile without its ground (grass or the theme's floor stay empty), for the editor's
+ * "Quitar fondo". Tiles that paint their own ground (sand, paths...) come out whole.
+ */
+export function tileWithoutGround(ch: string, frame = 0, theme: string | null = null) {
+  const set = theme ? THEMES[theme] : null;
+  const draw = set?.[ch] || null;
+  const f = TILE_INFO[ch]?.anim ? frame % 4 : 0;
+  const c = mk();
+  const g = c.getContext('2d');
+  const scratch = mk().getContext('2d');
+  // the ground is still drawn (off-screen) so the random numbers, and so the shapes, match the original
+  const floor = set?.['.'] ?? ((gg, r) => speckle(gg, r, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14));
+  GROUND = (_g, r) => floor(scratch, r);
+  try {
+    const rng = new Rng(ch.charCodeAt(0) * 97 + 13);
+    if (!draw && !DRAW[ch] && OVER[ch]) OVER[ch](g, rng, f);
+    else (draw ?? DRAW[ch] ?? DRAW.O)(g, rng, f);
+  } finally { GROUND = null; }
   return c;
 }
 

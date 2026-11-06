@@ -6,7 +6,7 @@ import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
 
 /** The original art (new creature sprites) with the editor's later edits on top. */
 export const BASE_SPRITES = { ...SPRITE_ORIGINALS, ...SPRITE_OVERRIDES };
-import { decodeSprite } from './sprite-codec.ts';
+import { decodeSprite, spriteHasHoles } from './sprite-codec.ts';
 
 let table = BASE_SPRITES;
 let bypass = 0;
@@ -29,6 +29,20 @@ export function override(key, w, h) {
   if (!o || o.w !== w || o.h !== h) return null;
   if (!decoded.has(key)) decoded.set(key, toCanvas(o));
   return decoded.get(key);
+}
+
+/** The stored entry of an edited sprite (with extras such as a tile's `bg`), or null. */
+export function overrideEntry(key) {
+  if (bypass) return null;
+  return table[key] ?? null;
+}
+
+/** True when the edited sprite has see-through pixels (a tile drawn without its ground). */
+export function overrideHasHoles(key) {
+  if (bypass) return false;
+  const k = `${key}|holes`;
+  if (!decoded.has(k)) decoded.set(k, spriteHasHoles(table[key]));
+  return decoded.get(k);
 }
 
 /** Mirrored copy (creature back sprites). */

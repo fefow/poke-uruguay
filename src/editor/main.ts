@@ -11,7 +11,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
-import { tileCanvas, TILE_INFO, THEMES, T } from '../gfx/tiles.ts';
+import { tileCanvas, TILE_INFO, THEMES, T, TILE_BACKGROUNDS, backgroundOf, tileWithoutGround } from '../gfx/tiles.ts';
 import { generated, setOverrides } from '../gfx/overrides.ts';
 import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
 import { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } from '../gfx/sprite-codec.ts';
@@ -59,10 +59,10 @@ function tileEntries(skip: Set<string>) {
   return [
     ...Object.keys(TILE_INFO).filter((ch) => !skip.has(ch)).flatMap((ch) => {
       const n = TILE_INFO[ch].anim ? 4 : 1;
-      return Array.from({ length: n }, (_, f) => ({ key: `tile:${ch}${f}`, label: TILE_INFO[ch].name + (n > 1 ? ` (cuadro ${f + 1})` : ''), sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, f), kind: 'tile' }));
+      return Array.from({ length: n }, (_, f) => ({ key: `tile:${ch}${f}`, label: TILE_INFO[ch].name + (n > 1 ? ` (cuadro ${f + 1})` : ''), sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, f), bare: () => tileWithoutGround(ch, f), kind: 'tile' }));
     }),
     ...Object.entries(THEMES).flatMap(([theme, set]) => Object.keys(set).map((ch) => ({
-      key: `tile:${theme}|${ch}0`, label: `${TILE_INFO[ch]?.name ?? ch} · ${THEME_NAMES[theme] ?? theme}`, sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, 0, theme), kind: 'tile',
+      key: `tile:${theme}|${ch}0`, label: `${TILE_INFO[ch]?.name ?? ch} · ${THEME_NAMES[theme] ?? theme}`, sub: `"${ch}"`, w: T, h: T, draw: () => tileCanvas(ch, 0, theme), bare: () => tileWithoutGround(ch, 0, theme), kind: 'tile',
     }))),
   ];
 }
@@ -109,7 +109,7 @@ const CATS: any[] = [
           const tiles = ts.map((t) => ({ ch: t.ch, col: t.grp.i % cols, row: Math.floor(t.grp.i / cols) }));
           return { key: `tilegroup:${id}`, label: ts[0].name.replace(/_\d+$/, ''), sub: `${cols}×${rows} casillas · ${ts.some(unsaved) ? 'sin guardar' : 'guardada'}`, w: T * cols, h: T * rows, tiles, kind: 'tile', draw: () => composeTiles(tiles, cols, rows, (t) => tileCanvas(t.ch in TILE_INFO ? t.ch : '.', 0)) };
         }),
-        ...newCustom.tiles.filter((t) => !t.grp).map((t) => ({ key: `tile:${t.ch}0`, label: t.name, sub: t.saved ? 'nueva · guardada' : 'nueva · sin guardar', w: T, h: T, draw: () => tileCanvas('.', 0), kind: 'tile' })),
+        ...newCustom.tiles.filter((t) => !t.grp).map((t) => ({ key: `tile:${t.ch}0`, label: t.name, sub: t.saved ? 'nueva · guardada' : 'nueva · sin guardar', w: T, h: T, draw: () => tileCanvas('.', 0), bare: () => tileWithoutGround('.', 0), kind: 'tile' })),
         ...tileEntries(grouped),
       ];
     },
@@ -159,7 +159,7 @@ function originalOf(e) {
   return c.getContext('2d').getImageData(0, 0, e.w, e.h).data.slice();
 }
 /** The tile entry behind one square of a group painted together. */
-const subTile = (t) => ({ key: `tile:${t.ch}0`, w: T, h: T, draw: () => tileCanvas(t.ch in TILE_INFO ? t.ch : '.', 0) });
+const subTile = (t) => ({ key: `tile:${t.ch}0`, w: T, h: T, draw: () => tileCanvas(t.ch in TILE_INFO ? t.ch : '.', 0), bare: () => tileWithoutGround(t.ch in TILE_INFO ? t.ch : '.', 0) });
 /** Pixels of a whole group: each square comes from its own tile. */
 function groupPixels(e, one) {
   const W = e.w, out = new Uint8ClampedArray(W * e.h * 4);
@@ -176,7 +176,7 @@ const S = {
   cat: CATS[0], entries: [], filter: '', entry: null, group: null,
   px: null, undo: [], redo: [], tool: 'pencil', mirror: false, grid: true, showOriginal: false,
   color: [22, 20, 30, 255], zoom: 8, hover: null, painting: false as boolean | string,
-  sel: null, selAnchor: null, clip: null, pasteBlank: false, bulk: null, // selection, clipboard, last paste into several variants (undoable)
+  sel: null, selAnchor: null, clip: null, pasteBlank: false, bulk: null, bg: {} as Record<string, string>, // selection, clipboard, last paste into several variants (undoable)
 };
 
 // ---------------------------------------------------------------- DOM
@@ -240,6 +240,13 @@ const sheetInput = h('input', { type: 'file', accept: 'image/png,image/webp', st
 const importSize = h('select', { class: 'ed-input', title: 'Tamaño de la imagen importada dentro del lienzo' }, [['100', 'Importar al 100 %'], ['80', 'Importar al 80 %'], ['65', 'Importar al 65 %'], ['50', 'Importar al 50 %']].map(([v, t]) => h('option', { value: v, text: t })));
 importSize.value = '80';
 const importInput = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', style: { display: 'none' }, onchange: () => { const f = importInput.files?.[0]; importInput.value = ''; if (f) importImage(f).catch(() => status('No se pudo leer la imagen.', 'error')); } });
+const bgSelect = h('select', { class: 'ed-input', title: 'Suelo que se ve detrás de lo transparente, acá y en el juego', onchange: () => setBg(bgSelect.value) });
+const bgSection = h('section', { hidden: true },
+  h('h2', { text: 'Fondo de la pieza' }),
+  h('p', { class: 'ed-hint', text: 'Dibujá árboles, arbustos u objetos con fondo transparente: en el juego se ven sobre este suelo. "Automático" usa el suelo del mapa (pasto, o la arena, el camino o el agua donde esté la pieza).' }),
+  bgSelect,
+  h('div', { class: 'ed-tools' }, h('button', { type: 'button', class: 'ed-tool', title: 'Vuelve transparente el pasto (o el fondo elegido) que rodea al dibujo', onclick: () => removeBackground() }, h('span', { text: 'Quitar fondo' }))),
+);
 const prev1 = h('canvas', { class: 'ed-prev-1' });
 const prev3 = h('canvas', { class: 'ed-prev-3' });
 const scene = h('canvas', { class: 'ed-scene', width: 192, height: 112 });
@@ -263,6 +270,7 @@ const right = h('aside', { class: 'ed-right' },
     h('button', { type: 'button', class: 'ed-tool', title: 'Agranda el dibujo (o la zona seleccionada) un 25 %', onclick: () => resizeBy(1.25) }, h('span', { text: 'Agrandar' })),
     h('button', { type: 'button', class: 'ed-tool is-danger', title: 'Volver al sprite que genera el juego', onclick: restore }, h('span', { text: 'Restaurar original' })),
   )),
+  bgSection,
   h('section', {}, h('h2', { text: 'Color' }),
     h('div', { class: 'ed-colorrow' }, swatch, colorInput, h('label', { class: 'ed-alpha-wrap' }, 'Opacidad', alphaInput, alphaLabel)),
     h('h3', { text: 'Colores de este sprite' }), usedColors,
@@ -477,6 +485,8 @@ function select(e, frame = null) {
   S.group = e;
   S.entry = frame ?? (e.frames ? e.frames[0] : e);
   delBtn.hidden = !customOf(e);
+  bgSection.hidden = !isTileEntry(S.entry);
+  if (!bgSection.hidden) fillBgOptions();
   for (const li of list.children) li.classList.toggle('is-active', li._entry === e);
   S.px = pixelsOf(S.entry);
   S.undo = [];
@@ -520,6 +530,7 @@ function drawBoard() {
   g.clearRect(0, 0, board.width, board.height);
   g.imageSmoothingEnabled = false;
   const px = S.showOriginal ? originalOf(S.entry) : S.px;
+  if (isTileEntry(S.entry)) g.drawImage(bgCanvasFor(S.entry), 0, 0, w * z, hh * z);
   g.drawImage(canvasFromPixels(px, w, hh), 0, 0, w * z, hh * z);
   if (S.grid && z >= 6) {
     g.strokeStyle = 'rgba(255,255,255,0.08)';
@@ -553,7 +564,12 @@ function drawBoard() {
 
 function drawPreviews() {
   const { w, h: hh, kind } = S.entry;
-  const c = canvasFromPixels(S.px, w, hh);
+  let c = canvasFromPixels(S.px, w, hh);
+  if (isTileEntry(S.entry)) { // pieces are seen over their ground, as in the game
+    const b = bgCanvasFor(S.entry);
+    b.getContext('2d').drawImage(c, 0, 0);
+    c = b;
+  }
   for (const [cv, s] of [[prev1, 1], [prev3, 3]]) {
     cv.width = w * s;
     cv.height = hh * s;
@@ -754,7 +770,9 @@ function storeDraft(e, px) {
     if (base[e.key]) drafts[e.key] = null;
     else delete drafts[e.key];
   } else {
-    const enc = encodeSprite(px, e.w, e.h);
+    const enc: any = encodeSprite(px, e.w, e.h);
+    const bg = e.key.startsWith('tile:') ? bgOf(e) : 'auto';
+    if (bg !== 'auto') enc.bg = bg;
     if (JSON.stringify(enc) === JSON.stringify(base[e.key])) delete drafts[e.key];
     else drafts[e.key] = enc;
   }
@@ -1033,6 +1051,101 @@ function resizeBy(f: number) {
   commit();
 }
 
+// ---------------------------------------------------------------- ground behind map pieces
+const isTileEntry = (e) => !!e && (e.kind === 'tile' || !!e.key?.startsWith('tile:'));
+const tileKeysOf = (e) => (e.tiles ? e.tiles.map((t) => `tile:${t.ch}0`) : [e.key]);
+const themeOfKey = (k: string) => k.match(/^tile:([a-z_]{2,})\|/)?.[1] ?? null;
+/** The ground chosen for a piece: picked here, or saved with its drawing; 'auto' is the map's ground. */
+function bgOf(e) {
+  const k = tileKeysOf(e)[0];
+  return S.bg[k] ?? live()[k]?.bg ?? 'auto';
+}
+/** A canvas the size of the piece covered with its ground tile (the game's grass when 'auto'). */
+function bgCanvasFor(e) {
+  const tile = tileCanvas(backgroundOf(bgOf(e)), 0, themeOfKey(tileKeysOf(e)[0]));
+  const c = document.createElement('canvas');
+  c.width = e.w;
+  c.height = e.h;
+  const g = c.getContext('2d');
+  for (let y = 0; y < e.h; y += T) for (let x = 0; x < e.w; x += T) g.drawImage(tile, x, y);
+  return c;
+}
+function fillBgOptions() {
+  const custom = (CUSTOM.tiles ?? []).filter((t) => !t.solid && t.ch in TILE_INFO).map((t) => [t.ch, `${t.name} (pieza nueva)`]);
+  const opts = [...TILE_BACKGROUNDS, ...custom];
+  if (bgSelect.options.length !== opts.length) bgSelect.replaceChildren(...opts.map(([v, t]) => h('option', { value: v, text: t })));
+  const cur = bgOf(S.entry);
+  bgSelect.value = opts.some(([v]) => v === cur) ? cur : 'auto';
+}
+function setBg(v) {
+  if (!isTileEntry(S.entry)) return;
+  for (const k of tileKeysOf(S.entry)) S.bg[k] = v;
+  commit();
+  status(v === 'auto' ? 'Fondo automático: en el juego se ve el suelo del mapa donde pongas la pieza.' : 'Fondo elegido. Lo transparente del dibujo se ve sobre ese suelo, también en el juego.');
+}
+/** Pixels of the generated art without its ground, or null when it is not known. */
+function barePixels(e) {
+  if (e.tiles) {
+    const W = e.w, out = new Uint8ClampedArray(W * e.h * 4);
+    for (const t of e.tiles) {
+      const px = subTile(t).bare().getContext('2d').getImageData(0, 0, T, T).data;
+      for (let y = 0; y < T; y++) out.set(px.subarray(y * T * 4, (y + 1) * T * 4), ((t.row * T + y) * W + t.col * T) * 4);
+    }
+    return out;
+  }
+  return e.bare ? e.bare().getContext('2d').getImageData(0, 0, e.w, e.h).data : null;
+}
+/** Makes the ground around the drawing transparent, so the piece can stand on any ground in the game. */
+function removeBackground() {
+  const e = S.entry;
+  if (!isTileEntry(e)) return;
+  const W = e.w, H = e.h, n = W * H, px = S.px;
+  const orig = originalOf(e);
+  const bare = barePixels(e);
+  // colours that count as ground: the chosen ground and the grass (drawn and generated)
+  const cols = new Set<number>();
+  const addCols = (c) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; for (let i = 0; i < d.length; i += 4) if (d[i + 3] === 255) cols.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]); };
+  addCols(bgCanvasFor(e));
+  addCols(tileCanvas('.', 0));
+  addCols(generated(() => tileCanvas('.', 0)));
+  // 2: ground of the generated art (known exactly) · 3: a pixel with a ground colour
+  const kind = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    const j = i * 4;
+    if (px[j + 3] === 0) { kind[i] = 1; continue; }
+    const same = px[j] === orig[j] && px[j + 1] === orig[j + 1] && px[j + 2] === orig[j + 2] && px[j + 3] === orig[j + 3];
+    if (same && bare && bare[j + 3] < 255) kind[i] = 2;
+    else if (px[j + 3] === 255 && cols.has((px[j] << 16) | (px[j + 1] << 8) | px[j + 2])) kind[i] = 3;
+  }
+  // ground-coloured pixels only go when they touch the border through other ground (leaves inside a tree stay)
+  const reached = new Uint8Array(n);
+  const stack: number[] = [];
+  for (let x = 0; x < W; x++) stack.push(x, (H - 1) * W + x);
+  for (let y = 0; y < H; y++) stack.push(y * W, y * W + W - 1);
+  while (stack.length) {
+    const i = stack.pop();
+    if (reached[i] || !kind[i]) continue;
+    reached[i] = 1;
+    const x = i % W, y = (i / W) | 0;
+    if (x > 0) stack.push(i - 1);
+    if (x < W - 1) stack.push(i + 1);
+    if (y > 0) stack.push(i - W);
+    if (y < H - 1) stack.push(i + W);
+  }
+  const out = px.slice();
+  let changed = 0;
+  for (let i = 0; i < n; i++) {
+    const j = i * 4;
+    if (kind[i] === 2) { out.set(bare.subarray(j, j + 4), j); changed++; } // the generated shadow stays, see-through
+    else if (kind[i] === 3 && reached[i]) { out[j] = out[j + 1] = out[j + 2] = out[j + 3] = 0; changed++; }
+  }
+  if (!changed || sameBytes(out, px)) return status('No encontré fondo para quitar. Podés borrarlo con el Borrador (E) o el Balde con opacidad 0.');
+  snapshot();
+  S.px = out;
+  commit();
+  status('Fondo quitado: lo transparente se ve sobre el suelo elegido. Si se fue algo de más, Deshacer (Ctrl+Z).', 'ok');
+}
+
 function restore() {
   snapshot();
   S.px = originalOf(S.entry);
@@ -1084,7 +1197,7 @@ function syncPending() {
 }
 
 addEventListener('keydown', (ev) => {
-  if (ev.target instanceof HTMLInputElement) return;
+  if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLSelectElement) return;
   const k = ev.key.toLowerCase();
   if ((ev.ctrlKey || ev.metaKey) && k === 'z') { ev.preventDefault(); ev.shiftKey ? redo() : undo(); return; }
   if ((ev.ctrlKey || ev.metaKey) && k === 'y') { ev.preventDefault(); redo(); return; }
