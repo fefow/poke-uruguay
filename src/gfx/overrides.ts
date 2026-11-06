@@ -1,6 +1,6 @@
 // Hand-drawn sprites from the visual editor take precedence over the generated ones.
 // Each generator asks override(key, w, h) first; keys are 'creature:<species>', 'char:<look>|<dir>|<frame>',
-// 'item:<key>', 'badge:<n>' and 'tile:<theme|><char><frame>'.
+// 'item:<key>', 'badge:<n>', 'ui:<icon>' and 'tile:<theme|><char><frame>'.
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
 

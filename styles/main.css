@@ -1018,6 +1018,7 @@ body {
 .hud-lv { font-size: 14px; font-weight: 700; color: var(--sun); }
 .tb-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 10px; background: oklch(1 0 0 / 0.07); font-size: 17px; white-space: nowrap;
   & b { color: var(--sun); font-weight: 700; } }
+.tb-pix { width: 32px; height: 32px; image-rendering: pixelated; flex: none; }
 .tb-ico { display: grid; place-items: center; color: var(--celeste); }
 .tb-chip .tb-ico, .hud-place .tb-ico { color: var(--sun); }
 .tb-bar { display: block; width: 36px; height: 6px; border-radius: 3px; background: oklch(0.1 0.02 270);

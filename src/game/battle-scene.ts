@@ -153,15 +153,15 @@ function drawBattle(g, t) {
   // foe trainer
   if (A.foeTrainer) {
     const spr = charSprite(A.foeTrainer, 'down', 0);
-    g.drawImage(spr, 0, 0, 16, 17, 236 - 24 + A.trainerX, 104 - 66, 48, 51 * 1.3);
+    g.drawImage(spr, 0, 0, 16, 17, Math.round(236 - 24 + A.trainerX), 104 - 51, 48, 51); // 3x: whole-number scale keeps the pixels square
   }
   if (A.showPlayerTrainer) {
     const spr = charSprite(state().player.look, 'up', 0);
-    g.drawImage(spr, 0, 0, 16, 17, 60 + A.playerTrainerX, 180 - 70, 48, 68);
+    g.drawImage(spr, 0, 0, 16, 17, Math.round(60 + A.playerTrainerX), 180 - 51, 48, 51);
   }
   // creatures: breathing idle + per-side transform (offset, squash and stretch, rotation, glow)
   if (A.foe && A.foeVis) drawCreature(g, creatureSprite(A.foe), 236, 106, SPRITE, 'foe', t, 0);
-  if (A.ply && A.plyVis) drawCreature(g, creatureSprite(A.ply, { back: true }), 84, 184, SPRITE * 1.25, 'ply', t, 1);
+  if (A.ply && A.plyVis) drawCreature(g, creatureSprite(A.ply, { back: true }), 84, 184, SPRITE, 'ply', t, 1);
   if (A.proj) drawProjectile(g, A.proj);
   if (A.eff) drawEffect(g, A.eff);
   if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake);
@@ -180,9 +180,10 @@ function drawCreature(g, spr, cx, base, size, side, t, phase) {
   const flash = A[`${side}Flash`] && Math.floor(t / 60) % 2;
   g.save();
   g.globalAlpha = A[`${side}Alpha`];
-  g.translate(cx + A[`${side}X`], base + A[`${side}Y`] + Math.sin(t / 500 + phase) * 1.2);
+  // Idle breathing is a whole-pixel bob (a fractional scale or offset would make some art pixels wider than others).
+  g.translate(Math.round(cx + A[`${side}X`]), Math.round(base + A[`${side}Y`] + (breath > 0.35 ? -1 : 0)));
   g.rotate(A[`${side}Rot`]);
-  g.scale(A[`${side}SX`] * (1 - breath * 0.012), A[`${side}SY`] * (1 + breath * 0.025));
+  g.scale(A[`${side}SX`], A[`${side}SY`]);
   g.drawImage(spr, -size / 2, -size, size, size);
   const glow = A[`${side}Glow`];
   if (flash || glow) {

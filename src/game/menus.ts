@@ -678,52 +678,71 @@ export function openMap() {
     el.append(
       h('header', { class: 'panel-title' }, h('span', { text: 'Mapa' }), h('span', { text: here ? `Estás en: ${here.label}` : '' })),
       h('div', { class: 'map-body' }, wrap, info),
-      h('footer', { class: 'panel-foot', text: `←→↑↓ moverte por el mapa · ${keyName('b')} volver` }),
+      h('footer', { class: 'panel-foot', text: `←→↑↓ mover el cuadrado por el mapa · ${keyName('b')} volver` }),
     );
-    // Cursor graph: neighbours along the roads, picked by direction like the classic overworld map.
-    const nb = Object.fromEntries(PLACES.map((p) => [p.id, []]));
-    for (const [a, b] of LINKS) { nb[a].push(b); nb[b].push(a); }
-    const dirs = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
-    const dist = (id) => Math.hypot(pts[id][0] - here.at[0], pts[id][1] - here.at[1]);
-    let cur = !here ? PLACES[0].id : pts[here.id] ? here.id : PLACES.map((p) => p.id).sort((x, y) => dist(x) - dist(y))[0];
+    // Free cursor: it moves over the whole map in small steps; a place shows its information when the cursor is on it,
+    // anywhere else the department under it is described.
+    const STEP = 4, SNAP = 8;
+    const landPaths = [...wrap.querySelectorAll('.land path')] as SVGGeometryElement[];
+    let cx = here ? here.at[0] : pts[PLACES[0].id][0];
+    let cy = here ? here.at[1] : pts[PLACES[0].id][1];
     const cursor = wrap.querySelector('#map-cursor');
     const sel = wrap.querySelector('#map-sel');
     const q = (c) => info.querySelector(c);
+    const none = () => [h('span', { class: 'mi-none', text: '???' })];
     const show = () => {
-      const p = PLACES.find((o) => o.id === cur);
-      const dept = DEPARTMENTS.find((d) => d.id === PLACE_DEPT[cur]);
-      const biome = BIOMES[dept.biome];
-      const [x, y] = pts[cur];
-      cursor.setAttribute('transform', `translate(${x} ${y})`);
-      sel.setAttribute('d', reg.paths[dept.id] ?? '');
-      const seen = visited(cur);
-      q('.mi-name').textContent = seen ? p.name : '???';
-      q('.mi-kind').textContent = !seen ? '???' : p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial';
-      q('.mi-dept').textContent = seen ? dept.name : '???';
-      q('.mi-sw').style.background = seen ? biome.color : '#7c8290';
-      q('.mi-zname').textContent = seen ? biome.name : '???';
-      q('.mi-ztypes').replaceChildren(...(seen ? biome.types.map(chip) : [h('span', { class: 'mi-none', text: '???' })]));
-      const wt = wildTypes(cur);
-      q('.mi-wild').replaceChildren(...(!seen ? [h('span', { class: 'mi-none', text: '???' })] : wt.length ? wt.map(chip) : [h('span', { class: 'mi-none', text: 'Ninguna' })]));
-      q('.mi-note').textContent = seen ? `${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Sin visitar';
+      cursor.setAttribute('transform', `translate(${cx} ${cy})`);
+      // the nearest place, if the cursor is on it
+      let cur = null, bd = SNAP;
+      for (const p of PLACES) { const d = Math.hypot(pts[p.id][0] - cx, pts[p.id][1] - cy); if (d <= bd) { bd = d; cur = p.id; } }
+      const pt = new DOMPoint(cx, cy);
+      const di = landPaths.findIndex((el) => el.isPointInFill?.(pt));
+      const dept = cur ? DEPARTMENTS.find((d) => d.id === PLACE_DEPT[cur]) : di >= 0 ? DEPARTMENTS[di] : null;
+      sel.setAttribute('d', dept ? reg.paths[dept.id] ?? '' : '');
+      if (cur) {
+        const p = PLACES.find((o) => o.id === cur);
+        const biome = BIOMES[dept.biome];
+        const seen = visited(cur);
+        q('.mi-name').textContent = seen ? p.name : '???';
+        q('.mi-kind').textContent = !seen ? '???' : p.kind === 'city' ? 'Ciudad con gimnasio' : p.kind === 'loc' ? 'Localidad' : 'Lugar especial';
+        q('.mi-dept').textContent = seen ? dept.name : '???';
+        q('.mi-sw').style.background = seen ? biome.color : '#7c8290';
+        q('.mi-zname').textContent = seen ? biome.name : '???';
+        q('.mi-ztypes').replaceChildren(...(seen ? biome.types.map(chip) : none()));
+        const wt = wildTypes(cur);
+        q('.mi-wild').replaceChildren(...(!seen ? none() : wt.length ? wt.map(chip) : [h('span', { class: 'mi-none', text: 'Ninguna' })]));
+        q('.mi-note').textContent = seen ? `${p.note}${here?.id === cur ? ' · Estás acá' : ''}` : 'Sin visitar';
+      } else if (dept) {
+        const biome = BIOMES[dept.biome];
+        const seen = deptSeen(dept.id);
+        q('.mi-name').textContent = seen ? dept.name : '???';
+        q('.mi-kind').textContent = 'Departamento';
+        q('.mi-dept').textContent = seen ? dept.name : '???';
+        q('.mi-sw').style.background = seen ? biome.color : '#7c8290';
+        q('.mi-zname').textContent = seen ? biome.name : '???';
+        q('.mi-ztypes').replaceChildren(...(seen ? biome.types.map(chip) : none()));
+        q('.mi-wild').replaceChildren();
+        q('.mi-note').textContent = seen ? 'Moví el cuadrado sobre una localidad para ver sus datos.' : 'Todavía no visitaste este departamento.';
+      } else {
+        q('.mi-name').textContent = 'Fuera de Uruguay';
+        q('.mi-kind').textContent = 'Mar, río u otro país';
+        q('.mi-dept').textContent = '—';
+        q('.mi-sw').style.background = '#7c8290';
+        q('.mi-zname').textContent = '—';
+        q('.mi-ztypes').replaceChildren();
+        q('.mi-wild').replaceChildren();
+        q('.mi-note').textContent = '';
+      }
     };
     show();
+    const dirs = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
     return (a) => {
       if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); return; }
       const d = dirs[a];
       if (!d) return;
-      const [cx, cy] = pts[cur];
-      let best = null;
-      let bestScore = 0.35;
-      for (const id of nb[cur]) {
-        const [x, y] = pts[id];
-        const len = Math.hypot(x - cx, y - cy);
-        const score = ((x - cx) * d[0] + (y - cy) * d[1]) / len;
-        if (score > bestScore) { bestScore = score; best = id; }
-      }
-      if (!best) return void sfx('bump');
-      cur = best;
-      sfx('select');
+      const nx = Math.max(0, Math.min(VIEW.w, cx + d[0] * STEP)), ny = Math.max(0, Math.min(VIEW.h, cy + d[1] * STEP));
+      if (nx === cx && ny === cy) return void sfx('bump');
+      cx = nx; cy = ny;
       show();
     };
   });
@@ -764,13 +783,51 @@ export function openCard() {
   });
 }
 
+// ---------------------------------------------------------------- SOUND
+/** Sound panel: one slider per bus (music, effects, battle and cries, weather and ambience). */
+export function openSound() {
+  return panel('panel-options', (el, close) => {
+    const bar = (v) => '█'.repeat(Math.round(v * 10)) + '░'.repeat(10 - Math.round(v * 10));
+    const slider = (key, label, hint, test?: () => void): any => ({ label, hint, key, test, get: () => `${bar(settings[key])} ${Math.round(settings[key] * 10)}`, step: (d) => (settings[key] = clamp(Math.round((settings[key] + d * 0.1) * 10) / 10, 0, 1)) });
+    const rows: any[] = [
+      slider('music', 'Música', 'Volumen de la música de fondo.'),
+      slider('sfx', 'Efectos de sonido', 'Pasos, menús, objetos y los demás sonidos del mundo.', () => sfx('select')),
+      slider('battleVol', 'Combate y gritos', 'Golpes, ataques y gritos de las criaturas.', () => sfx('hit')),
+      slider('ambient', 'Clima y ambiente', 'Lluvia, viento, olas, pájaros y truenos. Si tapa el resto, bajalo.', () => sfx('select')),
+      { label: 'Restablecer', hint: 'Vuelve a los volúmenes que trae el juego.', get: () => 'Aplicar', noArrows: true, step: () => { Object.assign(settings, { music: 0.5, sfx: 0.7, battleVol: 1, ambient: 0.25 }); } },
+    ];
+    const items = rows.map((r) => h('li', {}, h('span', { text: r.label }), h('b', { text: '' })));
+    const refresh = () => rows.forEach((r, i) => (items[i].querySelector('b').textContent = r.noArrows ? `▶ ${r.get()}` : `◀ ${r.get()} ▶`));
+    refresh();
+    const hint = h('p', { class: 'bag-desc' });
+    el.append(h('header', { class: 'panel-title', text: 'Sonido' }), h('ul', { class: 'options-list' }, items), hint,
+      h('footer', { class: 'panel-foot', text: `←→ cambiar · ${keyName('b')} volver` }));
+    const leave = () => { saveSettings(); setVolumes(settings); close(); };
+    return listNav(items, {
+      onMove: (i) => (hint.textContent = rows[i].hint ?? ''),
+      onCancel: leave,
+      onPick: (i) => { if (rows[i].noArrows) { rows[i].step(0); setVolumes(settings); sfx('select'); refresh(); } },
+      extra: (a, i) => {
+        if (rows[i].noArrows) return false;
+        if (a === 'left' || a === 'right' || a === 'a') {
+          rows[i].step(a === 'left' ? -1 : 1);
+          setVolumes(settings);
+          (rows[i].test ?? (() => sfx('select')))();
+          refresh();
+          return true;
+        }
+        return false;
+      },
+    });
+  });
+}
+
 // ---------------------------------------------------------------- OPTIONS
 export function openOptions() {
   return panel('panel-options', (el, close) => {
     const rows = [
       { label: 'Velocidad del texto', hint: 'Qué tan rápido aparecen los diálogos.', get: () => ['Lenta', 'Normal', 'Rápida'][settings.textSpeed - 1], step: (d) => (settings.textSpeed = clamp(settings.textSpeed + d, 1, 3)) },
-      { label: 'Música', hint: 'Volumen de la música, de 0 a 10.', get: () => `${Math.round(settings.music * 10)}`, step: (d) => (settings.music = clamp(Math.round((settings.music + d * 0.1) * 10) / 10, 0, 1)) },
-      { label: 'Vol. de efectos', hint: 'Volumen de los efectos de sonido, de 0 a 10.', get: () => `${Math.round(settings.sfx * 10)}`, step: (d) => (settings.sfx = clamp(Math.round((settings.sfx + d * 0.1) * 10) / 10, 0, 1)) },
+      { label: 'Sonido', hint: 'Panel para ajustar la música, los efectos, el combate y el clima.', get: () => 'Abrir', step: () => { openSound(); }, noArrows: true },
       { label: 'Animaciones de combate', hint: 'Sí: los ataques y golpes se animan en combate. No: el combate muestra los resultados al instante.', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
       { label: 'Zoom del mapa', hint: 'Normal: se ve más del mapa. Cerca: el mapa se ve el doble de grande (los píxeles siguen enteros).', get: () => (settings.mapZoom >= 2 ? 'Cerca' : 'Normal'), step: () => (settings.mapZoom = settings.mapZoom >= 2 ? 1 : 2) },
       { label: 'Monitor de rendimiento', hint: 'Muestra FPS, tiempo de cuadro y ping arriba a la izquierda. También con F3.', get: () => (settings.perf ? 'Sí' : 'No'), step: async () => { (await import('../core/perf.ts')).togglePerf(); } },
