@@ -590,3 +590,10 @@ test('night shifts wild odds toward shadowy creatures without removing anyone', 
   assert.ok(w(night, 'pombero') > w(day, 'pombero'));
   assert.ok(w(night, 'ceibito') < w(day, 'ceibito'));
 });
+
+test('map editor: a map can choose the ground behind its trees and bushes', async () => {
+  const { applyMapEdits } = await import('../src/data/map-edits.ts');
+  const maps = { a: { tiles: ['..'], npcs: [], items: [] } };
+  applyMapEdits(maps, { a: { ground: 's' } });
+  assert.equal(maps.a.ground, 's');
+});
