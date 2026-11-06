@@ -364,11 +364,20 @@ export const SCRIPTS = {
     api.setFlag(`starter_${key}`);
     api.setFlag('starter_key');
     api.giveCreature(key, 5, { silent: true });
+    api.npcHide(key); // the Pokeball leaves the table
     api.sfx('catch');
     await api.say(`¡{player} recibió a ${sp.name}!`);
     const rk = COUNTER[key];
-    await api.say([`Entonces yo me quedo con ${SPECIES[rk].name}.`, 'Tiene desventaja contra el tuyo, pero no pienso ponértelo fácil.'], { name: '{rival}' });
-    await api.say(['{player}, probemos a nuestras criaturas.', 'Combatamos.'], { name: '{rival}' });
+    await api.say(`Entonces yo me quedo con ${SPECIES[rk].name}.`, { name: '{rival}' });
+    // {rival} walks to the table, takes the Pokeball he chose and only then turns to challenge the player
+    await api.npcWalkNextTo('rival_lab', rk);
+    await api.wait(250);
+    api.npcHide(rk);
+    api.sfx('catch');
+    await api.wait(600);
+    api.npcFacePlayer('rival_lab');
+    await api.wait(300);
+    await api.say(['Tiene desventaja contra el tuyo, pero no pienso ponértelo fácil.', '{player}, probemos a nuestras criaturas.', 'Combatamos.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 0, 100, null, 'Elegí mal.', null), { canLose: true });
     api.setFlag('rival1');
     if (res === 'lose') await api.say(['Gané. Sigo siendo mejor.', 'Igual, tu criatura tiene potencial.'], { name: '{rival}' });
@@ -720,9 +729,8 @@ export const SCRIPTS = {
     if (home) api.setFlag(openFlag(home.id)); // winning the medal opens the road to the next city
     api.healParty({ silent: true });
     await api.say('Tus criaturas quedaron recuperadas.');
-    const fan = api.jingle('badge');
+    api.jingle('badge');
     await api.say(`¡{player} recibió la ${L.badgeName}!`);
-    await fan;
     await api.give(L.reward, L.rewardQty);
     await api.give(L.tm, 1);
     await api.say(['Tomá también esta MT. Enseña un movimiento nuevo a una criatura compatible.'], { name: L.name });
