@@ -634,6 +634,41 @@ function npcStep(n, dx, dy) {
   });
 }
 
+function findNpc(key: string) {
+  return W_.npcs.find((o) => o.def.id === key || (o.def.script === 'starter' && o.def.species === key));
+}
+function faceTile(n, tx: number, ty: number) {
+  const ax = tx - n.x, ay = ty - n.y;
+  n.dir = Math.abs(ax) >= Math.abs(ay) ? (ax < 0 ? 'left' : 'right') : (ay < 0 ? 'up' : 'down');
+}
+/** Breadth-first walk of an NPC to the nearest of `goals` ("x,y" keys), facing each step. */
+async function walkNpcPath(n, goals: Set<string>) {
+  const start = `${n.x},${n.y}`;
+  if (goals.has(start)) return true;
+  const prev = new Map<string, string | null>([[start, null]]);
+  const q: [number, number][] = [[n.x, n.y]];
+  let end: string | null = null;
+  for (let i = 0; i < q.length && !end; i++) {
+    const [cx, cy] = q[i];
+    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+      if (prev.has(k) || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[k] || tileAt(nx, ny) === 'm') continue;
+      prev.set(k, `${cx},${cy}`);
+      if (goals.has(k)) { end = k; break; }
+      q.push([nx, ny]);
+    }
+  }
+  if (!end) return false;
+  const path: string[] = [];
+  for (let k: string | null = end; k && k !== start; k = prev.get(k) ?? null) path.unshift(k);
+  for (const k of path) {
+    const [nx, ny] = k.split(',').map(Number);
+    n.dir = ny < n.y ? 'up' : ny > n.y ? 'down' : nx < n.x ? 'left' : 'right';
+    await npcStep(n, nx - n.x, ny - n.y);
+  }
+  return true;
+}
+
 function updateNpc(n, now, dt) {
   if (n.moving) {
     n.t += dt;
@@ -814,9 +849,8 @@ async function pickItem(it) {
   setFlag(`it_${it.id}`);
   addItem(it.item, 1);
   refreshEntities();
-  const j = jingle(ITEMS[it.item].pocket === 'key' ? 'key' : 'item');
+  jingle(ITEMS[it.item].pocket === 'key' ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
   await say(`¡Obtuviste ${ITEMS[it.item].name}!`);
-  await j;
 }
 
 async function legendEncounter(L) {
@@ -1002,9 +1036,8 @@ export const api = {
   typeNames: (k) => SPECIES[k].types.map((t) => TYPES[t].name).join('/'),
   async give(item, qty = 1) {
     addItem(item, qty);
-    const j = jingle(ITEMS[item].pocket === 'key' ? 'key' : 'item');
+    jingle(ITEMS[item].pocket === 'key' ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
     await say(`¡{player} recibió ${ITEMS[item].name}${qty > 1 ? ` ×${qty}` : ''}!`);
-    await j;
   },
   giveCreature(sp, lvl) {
     const S = state();
@@ -1189,6 +1222,51 @@ export const api = {
   hideCreature() {
     W_.showCreature?.remove();
     W_.showCreature = null;
+  },
+  /**
+   * Scripted NPC movement, so events show people moving about the world instead of popping in and out.
+   * `key` is an NPC id, or the species of a starter ball.
+   */
+  npcHide(key) {
+    const n = findNpc(key);
+    if (!n) return;
+    n.gone = true;
+    n.visible = false;
+  },
+  /** Walks the NPC to the tile (x, y) along free ground, one step at a time. Returns false when there is no way. */
+  async npcWalkTo(key, x, y) {
+    const n = findNpc(key);
+    return !!n && (await walkNpcPath(n, new Set([`${x},${y}`])));
+  },
+  /** Walks the NPC to a free tile beside `target` (an NPC key) and turns to face it. */
+  async npcWalkNextTo(key, target) {
+    const n = findNpc(key), t = findNpc(target);
+    if (!n || !t) return false;
+    const goals = new Set<string>();
+    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const gx = t.x + dx, gy = t.y + dy;
+      if (!solidAt(gx, gy, { self: n }) && !W_.map.doorWarps?.[`${gx},${gy}`]) goals.add(`${gx},${gy}`);
+    }
+    const ok = await walkNpcPath(n, goals);
+    if (ok) faceTile(n, t.x, t.y);
+    return ok;
+  },
+  /** Turns the NPC towards the player. */
+  npcFacePlayer(key) {
+    const n = findNpc(key);
+    if (n) faceTile(n, W_.player.x, W_.player.y);
+  },
+  /** Someone who was off screen: appears on a map edge or door tile and walks to (x, y). */
+  async npcEnter(key, fromX, fromY, toX, toY) {
+    const n = findNpc(key);
+    if (!n) return false;
+    n.gone = false;
+    n.x = n.ox = fromX; n.y = n.oy = fromY; n.moving = false;
+    n.visible = true;
+    await wait(200);
+    const ok = await walkNpcPath(n, new Set([`${toX},${toY}`]));
+    n.ox = n.x; n.oy = n.y;
+    return ok;
   },
   async npcLeave(id) {
     const n = W_.npcs.find((o) => o.def.id === id);
