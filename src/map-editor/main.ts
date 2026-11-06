@@ -7,7 +7,7 @@ import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS } from '../data/items.ts';
-import { tileCanvas, groundFor, tileVariant, drawBigObjects, drawBuildingTrim, setTerrainStyle, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
+import { tileCanvas, groundFor, drawBuildingTrim, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -19,8 +19,6 @@ import { devToken, isDev, unlockDev, checkToken, lockDev } from '../core/devauth
 const REPO = 'fefow/poke-uruguay';
 const FILE = 'src/data/map-overrides.js';
 const store = safeStorage();
-// same terrain style as the game (Opciones > Terreno), so the maps look as they will in play
-try { setTerrainStyle(JSON.parse(store.getItem('urumon:settings') || '{}').terrain === 'nuevo' ? 'nuevo' : 'clasico'); } catch { setTerrainStyle('clasico'); }
 const DRAFTS_KEY = 'pokeuy:map-drafts';
 const MAX_UNDO = 80;
 const LOCKED = new Set(['D', 'S']); // doors and signs are matched to their targets and texts in order
@@ -310,9 +308,8 @@ function draw() {
   g.imageSmoothingEnabled = false;
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
-  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme), tileVariant(rows, x, y)), x * T, y * T);
+  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme)), x * T, y * T);
   if (!m.indoor) drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme);
-  if (!m.theme) drawBigObjects(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0);
   for (const it of W.items) {
     if (it.removed) continue;
     drawItem(g, it.item, it.x * T, it.y * T - 1);
