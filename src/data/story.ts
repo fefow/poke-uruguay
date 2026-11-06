@@ -1133,15 +1133,15 @@ export const SCRIPTS = {
   // A guard who asks a riddle before letting you through (placed on routes by addRouteStory).
   async route_riddle(api, npc) {
     const [q, opts, ans] = riddleFor(npc.riddleId);
-    if (api.flag(npc.doneFlag)) return api.say('Ya respondiste. Pasá nomás.', { name: npc.name });
-    await api.say([npc.text, q], { name: npc.name, keep: true });
+    if (api.flag(npc.doneFlag)) return api.say(['Los animales ya se fueron del camino.', 'Yo sigo con mi trabajo: alguien tiene que cuidar el paso.'], { name: npc.name });
+    await api.say(['Estos animales no se van a mover solos.', q], { name: npc.name, keep: true });
     // shuffled by the route so the right answer is not always the first
     const order = opts.map((_, i) => i).sort((a, b) => ((a * 7 + npc.riddleId.length) % 5) - ((b * 7 + npc.riddleId.length) % 5));
     const r = await api.choose(order.map((i) => opts[i]), { cancel: false });
     if (order[r] !== ans) return api.say('No es eso. Pensalo y volvé a intentar.', { name: npc.name });
     api.sfx('confirm');
     api.setFlag(npc.doneFlag);
-    await api.say('Correcto. Se abre el paso.', { name: npc.name });
+    await api.say('Correcto. Con eso alcanza: los animales se apartan del camino.', { name: npc.name });
   },
 
   // Lever gate: pull the three levers in the right order (see addLeverGate).

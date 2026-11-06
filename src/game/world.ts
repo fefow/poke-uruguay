@@ -24,7 +24,7 @@ import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSee
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
-import { drawGroundBall } from '../gfx/items.ts';
+import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -184,7 +184,6 @@ export function loadMap(id, x, y, dir = 'down') {
   if (m.indoor) W_.bike = false;
   else if (m.bikeOnly && hasItem('bici')) W_.bike = true;
   W_.player = { ...W_.player, x, y, dir, moving: false, from: null };
-  W_.fol = null; // the companion reappears behind the player on the first step
   S.pos = { map: id, x, y, dir };
   refreshEntities();
   playMusic(musicFor(id, m));
@@ -591,7 +590,7 @@ function sees(n) {
     n.dir = ax === 1 ? 'right' : ax === -1 ? 'left' : ay === 1 ? 'down' : 'up';
     return true;
   }
-  const [dx, dy] = DIRS[n.dir];
+  const [dx, dy] = DIRS[n.face ?? n.dir]; // patrolling trainers watch the trail even while stepping sideways
   for (let i = 1; i <= n.def.sight; i++) {
     const x = n.x + dx * i;
     const y = n.y + dy * i;
@@ -608,6 +607,7 @@ async function trainerSpotted(n) {
   await wait(700);
   W_.emote = null;
   // walk up to the player
+  if (n.face) n.dir = n.face;
   const [dx, dy] = DIRS[n.dir];
   const p = W_.player;
   while (Math.abs(p.x - n.x) + Math.abs(p.y - n.y) > 1) {
@@ -653,7 +653,10 @@ function updateNpc(n, now, dt) {
     const nx = n.x + px * sgn, ny = n.y + py * sgn;
     const off = (nx - n.ox) * px + (ny - n.oy) * py;
     if (Math.abs(off) > len || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[`${nx},${ny}`] || tileAt(nx, ny) === 'm') { n.pdir = -sgn; return; }
-    npcStep(n, px * sgn, py * sgn);
+    // The sprite shows the way it walks (not the way it watches), and goes back to watching the trail when it stops.
+    n.face ??= n.dir;
+    n.dir = px * sgn > 0 ? 'right' : px * sgn < 0 ? 'left' : py * sgn > 0 ? 'down' : 'up';
+    void npcStep(n, px * sgn, py * sgn).then(() => { n.dir = n.face; });
     return;
   }
   // Townsfolk that stand still glance around now and then, and turn toward the player when they pass close by.
@@ -1394,13 +1397,10 @@ function drawWorld(g, t) {
   // entities sorted by y
   const ents: any[] = W_.npcs.filter((n) => n.visible).map((n) => ({ n, pos: entityPos(n) }));
   ents.push({ n: p, pos: ppos, player: true });
-  const fol = companion(p);
-  if (fol) ents.push(fol);
   ents.sort((a, b) => a.pos.y - b.pos.y);
   for (const { n, pos, player } of ents) {
     const sx = Math.round(pos.x - cx);
     const sy = Math.round(pos.y - cy);
-    if (n.companion) { drawCompanion(g, n, sx, sy, t); continue; }
     if (!player && n.def.look === null) continue;
     if (!player && n.def.look === 'ball') { drawBallIcon(g, sx + 8, sy + 6); continue; }
     if (!player && n.def.look === 'machine') { drawFogMachine(g, sx, sy, t); continue; }
@@ -1500,45 +1500,6 @@ function drawWorld(g, t) {
   if (m.dark && !m.indoor) drawMachineGlows(g, t, cx, cy, activeMachines());
   vignette(g, m.indoor ? 0.7 : 1);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
-}
-
-/**
- * Walking companion (like the handheld games of the DS era): the first healthy creature of the team follows one
- * tile behind the player. Purely visual: it never blocks anyone. Hidden on the bike, in the canoe and after a jump.
- */
-function companion(p) {
-  const S = state();
-  if (settings.companion === false || W_.bike || !p) return null;
-  const c = S.party.find((m) => m.hp > 0);
-  if (!c) return null;
-  // Follow the trail: when the player starts a step, the companion heads for the tile the player just left.
-  if (p.moving && p.from) {
-    const f = W_.fol;
-    if (!f || f.x !== p.from.x || f.y !== p.from.y) {
-      const near = f && Math.abs(f.x - p.from.x) + Math.abs(f.y - p.from.y) === 1;
-      W_.fol = { px: near ? f.x : p.from.x, py: near ? f.y : p.from.y, x: p.from.x, y: p.from.y, dir: p.dir };
-    }
-  }
-  const f = W_.fol;
-  if (!f) return null;
-  if (Math.abs(f.x - p.x) + Math.abs(f.y - p.y) !== 1 && !p.moving) return null;
-  if (tileAt(f.x, f.y) === '~' || tileAt(p.x, p.y) === '~') return null;
-  const k = p.moving ? Math.min(1, p.t / p.dur) : 1;
-  const pos = { x: (f.px + (f.x - f.px) * k) * T, y: (f.py + (f.y - f.py) * k) * T };
-  // face the player
-  const dx = p.x - f.x, dy = p.y - f.y;
-  const dir = dx > 0 ? 'right' : dx < 0 ? 'left' : dy < 0 ? 'up' : 'down';
-  return { n: { companion: true, species: c.species, dir, moving: p.moving && k < 1 }, pos };
-}
-
-function drawCompanion(g, n, sx, sy, t) {
-  shadow(g, sx + 8, sy + 13, 6, 2.4);
-  const hop = n.moving ? Math.round(Math.abs(Math.sin(t / 90)) * 2) : Math.round(Math.abs(Math.sin(t / 600)));
-  const spr = creatureSprite(n.species);
-  g.save();
-  if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(spr, 0, sy - 7 - hop, 24, 24); }
-  else g.drawImage(spr, sx - 4, sy - 7 - hop, 24, 24);
-  g.restore();
 }
 
 const SHADOW_CASTERS = { '#': 7.5, q: 7.5, p: 6, R: 5 };
@@ -1708,12 +1669,7 @@ function drawFogMachine(g, sx, sy, t) {
   g.beginPath(); g.arc(sx + 8 + Math.sin(t / 300) * 2, sy + 2 - k * 7, 2.5 + k * 2.5, 0, 7); g.fill();
 }
 
-function drawBallIcon(g, x, y) {
-  g.fillStyle = '#1a1a24'; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill();
-  g.fillStyle = '#7ac8f0'; g.beginPath(); g.arc(x, y, 4, Math.PI, 0); g.fill();
-  g.fillStyle = '#fff'; g.beginPath(); g.arc(x, y, 4, 0, Math.PI); g.fill();
-  g.fillStyle = '#1a1a24'; g.fillRect(x - 4, y - 0.5, 8, 1);
-}
+function drawBallIcon(g, x, y) { drawPickBall(g, x, y); }
 
 export const worldState = W_;
 export { ctext };

@@ -146,6 +146,8 @@ function freeSpot(m, busy, prefer) {
   return pts[idx];
 }
 
+const RIDDLE_FREE = new Set(['ruta1', 'r_colonia_rosario']); // no riddle gate on the first routes of the story
+
 /** Adds the toll keeper, the lost-item person and the fog machine to a guided route map. */
 export function addRouteStory(m, id) {
   addParaje(m, id);
@@ -182,10 +184,33 @@ export function addRouteStory(m, id) {
   const mach = freeSpot(m, busy, 0.75);
   addLeverGate(m, id, busy);
   // riddle gate: a second obstacle earlier on the trail, opened by answering a riddle (never a battle)
-  const rcut = narrowestCut(m, busy, 0.12, 0.28, 10);
+  // The first routes (leaving Carmelo and Colonia) stay free: the story starts without obstacles.
+  const rcut = RIDDLE_FREE.has(id) ? null : narrowestCut(m, busy, 0.12, 0.28, 10);
   if (rcut) {
     const flag = `rf_rid_${id}`.slice(0, 40);
-    rcut.forEach(([x, y]) => { m.npcs.push({ x, y, look: blockLook(m, x, y, 'oldman'), dir: 'down', blocker: true, fixed: true, name: 'Guardián del paso', script: 'route_riddle', riddleId: id, doneFlag: flag, text: 'El paso está cerrado. Un guardián pide una respuesta a quien quiera cruzar.', cond: (f) => !f[flag] }); busy.add(`${x},${y}`); });
+    // Animals fill the pass; one old man stands beside it and asks the riddle. Answering sends the animals away.
+    const herd = ['oveja', 'ternero', 'criollo', 'toro', 'carnero'];
+    const seed = [...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 5);
+    rcut.forEach(([x, y], i) => {
+      m.npcs.push({ x, y, look: m.tiles[y][x] === '~' ? 'swimmer' : `animal:${herd[(seed + i) % herd.length]}`, dir: 'down', blocker: true, fixed: true, text: ['Los animales no se mueven del camino.'], cond: (f) => !f[flag] });
+      busy.add(`${x},${y}`);
+    });
+    // spot for the old man: open grass within two tiles of the pass, off the trail
+    let spotM: [number, number] | null = null, bestD = 9;
+    for (const [cx, cy] of rcut) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+      const x = cx + dx, y = cy + dy, d = Math.abs(dx) + Math.abs(dy);
+      if (!d || d >= bestD || m.tiles[y]?.[x] !== '.' || busy.has(`${x},${y}`) || rcut.some(([rx, ry]) => rx === x && ry === y)) continue;
+      if ([...busy].some((k) => { const [bx, by] = k.split(',').map(Number); return !rcut.some(([rx, ry]) => rx === bx && ry === by) && Math.abs(bx - x) + Math.abs(by - y) < 2; })) continue;
+      spotM = [x, y]; bestD = d;
+    }
+    if (spotM) {
+      const [ox, oy] = spotM, [tx, ty] = rcut[0];
+      const dir = Math.abs(tx - ox) >= Math.abs(ty - oy) ? (tx < ox ? 'left' : 'right') : (ty < oy ? 'up' : 'down');
+      m.npcs.push({ x: ox, y: oy, look: 'oldman', dir, fixed: true, name: 'Viejo del paso', script: 'route_riddle', riddleId: id, doneFlag: flag, text: 'Un viejo cuida el paso. Si alguien contesta bien su pregunta, los animales se apartan.' });
+      busy.add(`${ox},${oy}`);
+    } else {
+      rcut.forEach(([x, y]) => { const i = m.npcs.findIndex((n) => n.x === x && n.y === y && n.blocker && !n.script); if (i >= 0) m.npcs.splice(i, 1); }); // no room for him: leave the way open
+    }
   }
   if (mach) m.npcs.push({ x: mach[0], y: mach[1], look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', clue: st.fog, doneFlag: `rf_${id}` });
 }

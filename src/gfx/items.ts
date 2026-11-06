@@ -60,6 +60,14 @@ function disc3(g, col) {
 }
 
 const ART = {
+  // World props that are not inventory items (editable in the editor under "Objetos del mundo")
+  world_ground_ball: (g) => paintGroundBall(g, 0, 0),
+  world_pick_ball: (g) => {
+    g.fillStyle = '#1a1a24'; g.beginPath(); g.arc(8, 8, 5, 0, 7); g.fill();
+    g.fillStyle = '#7ac8f0'; g.beginPath(); g.arc(8, 8, 4, Math.PI, 0); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(8, 8, 4, 0, Math.PI); g.fill();
+    g.fillStyle = '#1a1a24'; g.fillRect(4, 7.5, 8, 1);
+  },
   esfera: (g) => ball(g, '#7ac8f0'),
   superesfera: (g) => ball(g, '#3a6ad8', '#9ac0ff'),
   ultraesfera: (g) => { ball(g, '#2a2a3a'); r(g, 3, 4, 3, 1, '#f2c02a'); r(g, 10, 4, 3, 1, '#f2c02a'); },
@@ -167,7 +175,7 @@ export function drawItem(g, key, x, y) {
 }
 
 /** Every item on the ground looks the same: a small ball, so nobody knows what it holds until they pick it up. */
-export function drawGroundBall(g, x, y) {
+function paintGroundBall(g, x, y) {
   const px = (dx, dy, w, h, c) => { g.fillStyle = c; g.fillRect(x + dx, y + dy, w, h); };
   px(5, 6, 6, 1, '#16141e'); px(4, 7, 8, 1, '#16141e'); px(3, 8, 10, 4, '#16141e'); px(4, 12, 8, 1, '#16141e'); px(5, 13, 6, 1, '#16141e');
   px(5, 7, 6, 1, '#e0263a'); px(4, 8, 8, 2, '#e0263a'); px(5, 8, 2, 1, '#f27a84');
@@ -175,3 +183,13 @@ export function drawGroundBall(g, x, y) {
   px(4, 11, 8, 1, '#f2f2f2'); px(5, 12, 6, 1, '#d8d8e0');
   px(7, 9, 2, 3, '#16141e'); px(7, 10, 2, 1, '#f2f2f2');
 }
+
+export function drawGroundBall(g, x, y) { g.drawImage(canvasFor('world_ground_ball'), x, y); }
+
+/** Small ball used for starter choices and the healing machine, centred on (x, y). */
+export function drawPickBall(g, x, y) { g.drawImage(canvasFor('world_pick_ball'), Math.round(x - 8), Math.round(y - 8)); }
+
+export const WORLD_PROPS = [
+  { key: 'world_ground_ball', name: 'Pokeball en el suelo' },
+  { key: 'world_pick_ball', name: 'Pokeball de elección y de curación' },
+];

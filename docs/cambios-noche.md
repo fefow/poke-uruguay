@@ -14,7 +14,7 @@ Objetivo: acercar el juego a la sensación de Pokémon de GBA/DS. Todo es opcion
 ## Visual
 - Transiciones de combate: persianas (salvajes), espiral (entrenadores), iris (líderes, jefes y rival).
 - Salto de cornisa con arco, hojas al pisar pasto, pasto que tapa los pies al caminar, estela detrás de la canoa.
-- Criatura acompañante que sigue al jugador (Opciones > Criatura acompañante).
+- (Criatura acompañante: quitada a pedido; haría falta un sprite animado por criatura.)
 - Máquina de curación con pokebolas que se encienden una a una.
 - Evolución con rayos de luz y silueta blanca que pulsa.
 - Opciones > Colores: Normales o Vivos.
@@ -33,3 +33,9 @@ Build de prueba: https://claude.ai/artifact/2zfqDzHATgnsotgnGred7p
 - Fanfarria al capturar, cinemática al apagar la fábrica de Minas, barra de PS que pulsa en peligro. Versión del título: v165.
 - Pasos que suenan distinto sobre puentes, arena y adoquines; chispas al subir de nivel y capturar.
 - Versión del título: v166 (cierre de la noche).
+
+## v167
+- Guardianes del paso: ahora son animales (vacas, ovejas, caballos) bloqueando el camino y un solo viejo que hace las preguntas; al acertar los animales desaparecen y el viejo sigue trabajando. No hay guardianes en Ruta 1 ni al salir de Carmelo.
+- Entrenadores que patrullan: el sprite ahora mira hacia donde caminan (arriba, abajo, izquierda, derecha) y vuelven a mirar el camino al parar.
+- Se quitó la criatura acompañante.
+- Editor: nueva pestaña "Objetos del mundo" con la Pokeball del suelo y la de elección de iniciales/máquina de curación.

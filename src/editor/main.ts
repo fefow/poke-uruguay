@@ -9,7 +9,7 @@ import { TYPES } from '../data/types.ts';
 import { OUTDOOR } from '../data/maps.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite, LOOKS } from '../gfx/characters.ts';
-import { itemCanvas } from '../gfx/items.ts';
+import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
 import { tileCanvas, TILE_INFO, THEMES, T } from '../gfx/tiles.ts';
 import { generated, setOverrides } from '../gfx/overrides.ts';
@@ -86,6 +86,10 @@ const CATS: any[] = [
   {
     id: 'item', name: 'Objetos', hint: '16×16. Se ven en la mochila, la tienda y el suelo.',
     entries: () => Object.keys(ITEMS).map((k) => ({ key: `item:${k}`, label: ITEMS[k].name, sub: k, w: 16, h: 16, draw: () => itemCanvas(k), kind: 'item' })),
+  },
+  {
+    id: 'props', name: 'Objetos del mundo', hint: '16×16. Pokeballs del suelo, de la elección de iniciales y de la máquina de curación.',
+    entries: () => WORLD_PROPS.map((w) => ({ key: `item:${w.key}`, label: w.name, sub: w.key, w: 16, h: 16, draw: () => itemCanvas(w.key), kind: 'item' })),
   },
   {
     id: 'badge', name: 'Medallas', hint: '16×16. Se ven en el carnet de entrenador.',
