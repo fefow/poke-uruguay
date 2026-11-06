@@ -31,3 +31,4 @@ Build de prueba: https://claude.ai/artifact/2zfqDzHATgnsotgnGred7p
 - Espuma animada en todas las orillas; vecinos quietos que miran alrededor y se giran hacia vos; sonidos de estados alterados.
 - Test de referencias cruzadas (`tests/check-maps.mjs`): scripts, músicas, objetos, especies y cinemáticas que se nombran tienen que existir.
 - Fanfarria al capturar, cinemática al apagar la fábrica de Minas, barra de PS que pulsa en peligro. Versión del título: v165.
+- Pasos que suenan distinto sobre puentes, arena y adoquines; chispas al subir de nivel y capturar.

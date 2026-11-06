@@ -532,6 +532,10 @@ function onStep() {
   }
   // Getting into or out of the canoe splashes.
   if (p.from && (ch === '~') !== (tileAt(p.from.x, p.from.y) === '~')) sfx('splash');
+  // Footsteps change with the ground: planks, sand and cobblestones each sound different (indoors: wood floors).
+  if (ch === 'b') sfx('step_wood');
+  else if (ch === 's') sfx('step_sand');
+  else if (ch === 'c') sfx('step_stone');
   if (TILE_INFO[ch]?.enc) { sfx('grass'); W_.rustle = { x: p.x, y: p.y, t0: null }; }
   if (poisonTick()) return;
   // Route marker: walking right beside one saves the respawn point (it does not heal)
