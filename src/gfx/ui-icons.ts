@@ -13,7 +13,8 @@ export const UI_ICONS: { key: string; name: string; w: number; h: number }[] = [
   { key: 'captura_ultraesfera', name: 'Ultraball en combate', w: 16, h: 16 },
   { key: 'captura_safari_ball', name: 'Safari Ball en combate', w: 16, h: 16 },
   { key: 'captura_esfera_celeste', name: 'Pokeball Celeste en combate', w: 16, h: 16 },
-  { key: 'canoa_agua', name: 'Canoa en el agua', w: 24, h: 16 },
+  { key: 'canoa_agua', name: 'Canoa en el agua (de costado, mirando a la derecha)', w: 24, h: 16 },
+  { key: 'canoa_agua_v', name: 'Canoa en el agua (de frente, mirando arriba)', w: 16, h: 24 },
 ];
 const SIZE = new Map(UI_ICONS.map((u) => [u.key, u]));
 
@@ -96,6 +97,44 @@ const DRAW: Record<string, () => HTMLCanvasElement> = {
   }),
 };
 
+/** The canvas turned a quarter counter-clockwise (a canoe pointing right ends up pointing up). */
+function turned(src: HTMLCanvasElement): HTMLCanvasElement {
+  const c = document.createElement('canvas');
+  c.width = src.height;
+  c.height = src.width;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.translate(0, src.width);
+  g.rotate(-Math.PI / 2);
+  g.drawImage(src, 0, 0);
+  return c;
+}
+
+let turnedFrom: HTMLCanvasElement | null = null, turnedCanoe: HTMLCanvasElement | null = null;
+const flips = new Map<string, HTMLCanvasElement>();
+/**
+ * The canoe under the player, turned to where they look: the side drawing for right (mirrored for left), the
+ * front drawing for up (upside down for down).
+ */
+export function canoeCanvas(dir: string): HTMLCanvasElement {
+  const side = dir === 'left' || dir === 'right';
+  const src = uiIconCanvas(side ? 'canoa_agua' : 'canoa_agua_v');
+  if (dir === 'right' || dir === 'up') return src;
+  const k = `${dir}|${src.width}x${src.height}`;
+  let c = flips.get(k);
+  if (!c || (c as any).src !== src) {
+    c = document.createElement('canvas');
+    c.width = src.width;
+    c.height = src.height;
+    const g = c.getContext('2d');
+    if (side) { g.translate(src.width, 0); g.scale(-1, 1); } else { g.translate(0, src.height); g.scale(1, -1); }
+    g.drawImage(src, 0, 0);
+    (c as any).src = src;
+    flips.set(k, c);
+  }
+  return c;
+}
+
 const cache = new Map<string, HTMLCanvasElement>();
 /** Canvas for an on-screen piece (the editor's drawing if there is one). Battle balls default to the bag icon. */
 export function uiIconCanvas(key: string): HTMLCanvasElement {
@@ -103,6 +142,11 @@ export function uiIconCanvas(key: string): HTMLCanvasElement {
   const drawn = override(`ui:${key}`, w, h);
   if (drawn) return drawn;
   if (key.startsWith('captura_')) return itemCanvas(key.slice(8));
+  if (key === 'canoa_agua_v') { // until drawn: the side canoe turned a quarter
+    const src = uiIconCanvas('canoa_agua');
+    if (turnedFrom !== src) { turnedFrom = src; turnedCanoe = turned(src); }
+    return turnedCanoe;
+  }
   if (!cache.has(key)) cache.set(key, DRAW[key]());
   return cache.get(key);
 }

@@ -25,7 +25,7 @@ import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canE
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
 import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
-import { uiIconCanvas } from '../gfx/ui-icons.ts';
+import { canoeCanvas } from '../gfx/ui-icons.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -1595,7 +1595,9 @@ function drawWorld(g, t) {
         g.lineWidth = 1;
         g.beginPath(); g.ellipse(sx + 8 - wx * (8 + k * 6), sy + 12 - wy * (6 + k * 5), 4 + k * 5, 2 + k * 2, 0, 0, 7); g.stroke();
       }
-      g.drawImage(uiIconCanvas('canoa_agua'), Math.round(sx - 4), Math.round(sy + 4)); // editable: 'ui:canoa_agua'
+      // editable: 'ui:canoa_agua' (side) and 'ui:canoa_agua_v' (front); it turns with the paddler
+      const side = p.dir === 'left' || p.dir === 'right';
+      g.drawImage(canoeCanvas(p.dir), Math.round(side ? sx - 4 : sx), Math.round(side ? sy + 4 : sy - 4));
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
     g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);
