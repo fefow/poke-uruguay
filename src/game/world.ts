@@ -3,7 +3,7 @@
 import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
-import { encounterList, waterTable } from '../data/encounters.ts';
+import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
@@ -115,7 +115,7 @@ function refreshEntities() {
   const m = W_.map;
   W_.npcs = (m.npcs ?? []).map((def, i) => {
     const prev = W_.npcs.find((n) => n.def === def);
-    return prev ?? { def, i, x: def.x, y: def.y, ox: def.x, oy: def.y, dir: def.dir ?? 'down', visible: true, gone: !!def.arrive, moving: false, t: 0, from: null, wanderAt: performance.now() + 1000 + worldRng.next() * 3000 };
+    return prev ?? { def, i, x: def.x, y: def.y, ox: def.x, oy: def.y, dir: def.dir ?? 'down', visible: true, gone: typeof def.arrive === 'function' ? !!def.arrive(flagsObj()) : !!def.arrive, moving: false, t: 0, from: null, wanderAt: performance.now() + 1000 + worldRng.next() * 3000 };
   });
   for (const n of W_.npcs) n.visible = cond(n.def.cond) && !n.gone && !(n.def.gate && n.def.trainer && flag(`tr_${n.def.trainer.id}`));
   W_.items = (m.items ?? []).filter((it) => !flag(`it_${it.id}`));
@@ -579,10 +579,11 @@ function onStep() {
     const cave = W_.map.theme === 'cueva';
     const surfing = ch === '~';
     const grass = !!TILE_INFO[ch]?.enc;
+    const biome = tileBiome(W_.map, tileAt, p.x, p.y);
     const floor = cave && !surfing && !TILE_INFO[ch]?.solid;
-    if (surfing || grass || floor) {
-      const pick = encounterList(W_.map, surfing ? 'water' : cave ? 'cave' : 'grass', W_.map.indoor ? 0 : nightLevel());
-      const rate = surfing ? Math.max(0.1, base * 0.7) : floor && !grass ? Math.min(0.1, base) : base;
+    if (biome && (surfing || grass || floor || biome === 'sand')) {
+      const pick = encounterList(W_.map, biome, W_.map.indoor ? 0 : nightLevel());
+      const rate = surfing ? Math.max(0.1, base * 0.7) : biome === 'sand' ? Math.min(0.08, base) : floor && !grass ? Math.min(0.1, base) : base;
       if (pick.length && worldRng.chance(rate)) {
         const e = worldRng.weighted(pick.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
         const lvl = worldRng.int(e.lo, e.hi);
@@ -681,6 +682,37 @@ async function walkNpcPath(n, goals: Set<string>) {
     await npcStep(n, nx - n.x, ny - n.y);
   }
   return true;
+}
+
+/** Places an out-of-sight NPC on the farthest free tile (within `steps`, ahead of `prefer` first) and walks it to (x, y). */
+async function walkIn(n, x: number, y: number, steps: number, prefer: number[] | null) {
+  const p = W_.player;
+  n.gone = false;
+  n.visible = false;
+  const free = (cx, cy) => !solidAt(cx, cy, { self: n }) && !W_.map.doorWarps?.[`${cx},${cy}`];
+  const start = { x, y };
+  const dist = new Map([[`${x},${y}`, 0]]);
+  const q = [start];
+  let far = start, farScore = -1;
+  while (q.length) {
+    const c = q.shift();
+    const d = dist.get(`${c.x},${c.y}`);
+    const ahead = prefer ? (c.x - p.x) * prefer[0] + (c.y - p.y) * prefer[1] : 0;
+    const score = d + (ahead > 0 ? 100 : 0) + (Math.abs(c.x - p.x) + Math.abs(c.y - p.y) < 3 ? -200 : 0);
+    if (score > farScore) { far = c; farScore = score; }
+    if (d >= steps) continue;
+    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const nx = c.x + dx, ny = c.y + dy, k = `${nx},${ny}`;
+      if (dist.has(k) || (nx === p.x && ny === p.y) || !free(nx, ny)) continue;
+      dist.set(k, d + 1);
+      q.push({ x: nx, y: ny });
+    }
+  }
+  n.x = n.ox = far.x; n.y = n.oy = far.y; n.moving = false;
+  n.visible = true;
+  await wait(250);
+  await walkNpcPath(n, new Set([`${x},${y}`]));
+  n.ox = n.x; n.oy = n.y;
 }
 
 function updateNpc(n, now, dt) {
@@ -1314,46 +1346,54 @@ export const api = {
     await fadeIn(150);
   },
   /**
-   * Someone who was out of sight (an NPC with `arrive: true`) walks up to the player from up to `steps` tiles away,
+   * Someone who was out of sight (an NPC with `arrive`) walks up to the player from up to `steps` tiles away,
    * preferably from ahead of them, stops beside them and both face each other. Never pops in next to the player.
    */
   async npcApproach(key, steps = 9) {
     const n = findNpc(key);
     if (!n) return false;
     const p = W_.player;
-    if (n.visible) { faceTile(n, p.x, p.y); p.dir = opposite(n.dir); return true; }
-    n.gone = false;
-    n.visible = false;
+    if (n.visible) return api.npcWalkToPlayer(key);
     const [fx, fy] = DIRS[p.dir];
     const free = (x, y) => !solidAt(x, y, { self: n }) && !W_.map.doorWarps?.[`${x},${y}`];
     const dest = [[fx, fy], [-fy, fx], [fy, -fx], [-fx, -fy]].map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).find((c) => free(c.x, c.y));
-    if (!dest) { n.visible = true; faceTile(n, p.x, p.y); return true; }
-    // breadth-first from beside the player: the farthest free tile (ahead of the player first) is where they come from
-    const dist = new Map([[`${dest.x},${dest.y}`, 0]]);
-    const q = [dest];
-    let far = dest, farScore = -1;
-    while (q.length) {
-      const c = q.shift();
-      const d = dist.get(`${c.x},${c.y}`);
-      const ahead = (c.x - p.x) * fx + (c.y - p.y) * fy;
-      const score = d + (ahead > 0 ? 100 : 0);
-      if (score > farScore) { far = c; farScore = score; }
-      if (d >= steps) continue;
-      for (const [dx, dy] of Object.values(DIRS) as number[][]) {
-        const nx = c.x + dx, ny = c.y + dy, k = `${nx},${ny}`;
-        if (dist.has(k) || (nx === p.x && ny === p.y) || !free(nx, ny)) continue;
-        dist.set(k, d + 1);
-        q.push({ x: nx, y: ny });
-      }
-    }
-    n.x = n.ox = far.x; n.y = n.oy = far.y; n.moving = false;
-    n.visible = true;
-    await wait(250);
-    await walkNpcPath(n, new Set([`${dest.x},${dest.y}`]));
+    if (!dest) { n.gone = false; n.visible = true; faceTile(n, p.x, p.y); return true; }
+    await walkIn(n, dest.x, dest.y, steps, [fx, fy]);
     faceTile(n, p.x, p.y);
     p.dir = opposite(n.dir);
-    n.ox = n.x; n.oy = n.y;
     return true;
+  },
+  /** Someone out of sight walks in to the tile (x, y), coming from the farthest reachable ground within `steps` tiles. */
+  async npcWalkIn(key, x, y, steps = 10) {
+    const n = findNpc(key);
+    if (!n) return false;
+    await walkIn(n, x, y, steps, null);
+    return true;
+  },
+  /** A visible NPC walks to a free tile beside the player and faces them. */
+  async npcWalkToPlayer(key) {
+    const n = findNpc(key);
+    if (!n) return false;
+    const p = W_.player;
+    const goals = new Set<string>();
+    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const gx = p.x + dx, gy = p.y + dy;
+      if (!solidAt(gx, gy, { self: n }) && !W_.map.doorWarps?.[`${gx},${gy}`]) goals.add(`${gx},${gy}`);
+    }
+    const ok = await walkNpcPath(n, goals);
+    faceTile(n, p.x, p.y);
+    n.ox = n.x; n.oy = n.y;
+    return ok;
+  },
+  /** The NPC turns to look at another NPC. */
+  npcFaceNpc(key, target) {
+    const n = findNpc(key), t = findNpc(target);
+    if (n && t) faceTile(n, t.x, t.y);
+  },
+  /** The player turns to look at an NPC. */
+  playerFaceNpc(key) {
+    const n = findNpc(key);
+    if (n) W_.player.dir = Math.abs(n.x - W_.player.x) >= Math.abs(n.y - W_.player.y) ? (n.x < W_.player.x ? 'left' : 'right') : (n.y < W_.player.y ? 'up' : 'down');
   },
   /** The NPC walks away from the player along free ground (up to `steps` tiles) and is gone once out of the way. */
   async npcWalkOff(key, steps = 16) {

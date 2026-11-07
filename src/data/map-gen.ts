@@ -31,9 +31,10 @@ const BLOCKS = {
   houseG: ['ggggg', 'ggggg', 'HwDwH'],
   houseO: ['ooooo', 'ooooo', 'HwDwH'],
   houseV: ['vvvvv', 'vvvvv', 'HwDwH'],
-  torre: ['zzz', 'zzz', 'zDz'],
+  torre: ['ѪѪѪ', 'zzz', 'zDz'],
+  guarida: ['ѭѫѭѭѭѫѭ', 'ѭѭѭѬѭѭѭ', 'ѮѮѮDѮѮѮ'],
   casino: ['vvvvvvv', 'vwvvvwv', 'vvvDvvv'],
-  terminal: ['WWWWWWW', 'WwWWWwW', 'WWWDWWW'],
+  terminal: ['ѱѱѴѱѴѱѱ', 'ѵѵѵѵѵѵѵ', 'ѵѵѵDѵѵѵ'],
   casaFaro: ['ggg', 'ggg', 'wDw'],
   fabrica: ['WWWWWWW', 'WWWWWWW', 'WWWDWWW'],
   agua: ['GGGGGGG', 'GGGaGGG', 'hhhDhhh'],
@@ -48,7 +49,7 @@ function put(g, x, y, pattern) {
   pattern.forEach((line, dy) => [...line].forEach((c, dx) => { if (g[y + dy]?.[x + dx] !== undefined) g[y + dy][x + dx] = c; }));
 }
 
-const SOLID_DECO = new Set('#qpRFSHwrugovWCQIUtDlLMzZ'.split(''));
+const SOLID_DECO = new Set('#qpRFSHwrugovWCQIUtDlLMzZѪѫѭѬѮѱѴѵҀҁ҂'.split(''));
 
 /**
  * City: border of trees, street A (row `sa`) with a row of buildings above it, optional street B
