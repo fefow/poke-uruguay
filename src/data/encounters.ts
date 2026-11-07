@@ -1,6 +1,52 @@
 import { SPECIES } from './species.ts';
 import { wildList } from './map-gen.ts';
-import { mapBand } from './route.ts';
+import { mapBand, STOPS } from './route.ts';
+
+/** Where a wild creature is found, by the ground the player stands on. 'grass' is every dry creature of the map. */
+export type Biome = 'grass' | 'plain' | 'forest' | 'sand' | 'volcanic' | 'cave' | 'water';
+const CITIES = new Set(STOPS.filter((st) => st.kind === 'city').map((st) => st.id));
+const FOREST_TYPES = ['planta', 'bicho', 'veneno', 'siniestro'];
+const PLAIN_TYPES = ['normal', 'volador', 'tierra', 'electrico', 'lucha'];
+const SAND_TYPES = ['tierra', 'roca', 'volador', 'bicho'];
+const VOLCANIC_TYPES = ['fuego', 'tierra', 'roca'];
+const NO_ZONES = new Set(['safari', 'parque_concurso']); // their long lists are one big park
+
+/**
+ * Which wild biome a tile belongs to, or null when nothing lives there.
+ * Tall grass is "llanura" (plain) unless trees crowd around it, then it is forest; embers are volcanic; sand holds
+ * its own creatures on routes and localities (never inside cities); water is for the canoe and the rod.
+ */
+export function tileBiome(m, at: (x: number, y: number) => string | null, x: number, y: number): Biome | null {
+  const ch = at(x, y);
+  if (ch === '~') return 'water';
+  if (m.theme === 'cueva') return ch && !['#', 'q', 'R', 'K', 'p'].includes(ch) ? 'cave' : null;
+  if (ch === ';') return 'volcanic';
+  if (ch === 's') return m.enc?.list?.length && !m.indoor && !CITIES.has(m.id) && !NO_ZONES.has(m.id) ? 'sand' : null;
+  if (ch !== ',') return null;
+  if (NO_ZONES.has(m.id)) return 'grass';
+  let trees = 0;
+  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const c = at(x + dx, y + dy); if (c === '#' || c === 'q') trees++; }
+  return trees >= 6 ? 'forest' : 'plain';
+}
+
+const zoneCache = new Map<string, any[]>();
+/** Entries of the map's own list with one of `types`, topped up with creatures of those types of the map's level band. */
+function zoneList(m, biome: 'sand' | 'volcanic', types: string[]) {
+  const key = `${m.id ?? ''}|${biome}`;
+  const hit = zoneCache.get(key);
+  if (hit) return hit;
+  const own = ((m.enc?.list ?? []) as any[]).filter(([sp]) => SPECIES[sp].types.some((t) => types.includes(t)) && !SPECIES[sp].types.includes('agua'));
+  const [lo, hi] = bandOf(m);
+  const out = [...own];
+  if (out.length < 4) {
+    for (const [k, a, b] of wildList(types, lo, hi, 6, `${biome}-${m.id}`)) {
+      if (out.length >= 4) break;
+      if (!out.some(([sp]) => sp === k) && !SPECIES[k].types.includes('agua')) out.push([k, a, b, 8]);
+    }
+  }
+  zoneCache.set(key, out);
+  return out;
+}
 
 const CAVE_TYPES = ['tierra', 'roca', 'veneno', 'bicho'];
 /** Which of a map's wild entries can appear in a given biome. */
@@ -15,11 +61,23 @@ function byClock(list: any[], night: number) {
   return list.map(([sp, lo, hi, w]) => [sp, lo, hi, (w ?? 1) * (SPECIES[sp].types.some((t) => NIGHT_TYPES.includes(t)) ? 1 + 2 * night : SPECIES[sp].types.some((t) => DAY_TYPES.includes(t)) ? 1 - 0.5 * night : 1)]);
 }
 
-export function encounterList(m, biome: 'grass' | 'cave' | 'water', night = 0) {
+export function encounterList(m, biome: Biome, night = 0) {
   const isWater = (sp) => SPECIES[sp].types.includes('agua');
   const all: any[] = m.enc?.list ?? [];
   if (biome === 'water') return waterTable(m, 2);
   const dry = all.filter(([sp]) => !isWater(sp));
+  if (biome === 'sand') return byClock(zoneList(m, 'sand', SAND_TYPES), night);
+  if (biome === 'volcanic') return byClock(zoneList(m, 'volcanic', VOLCANIC_TYPES), night);
+  if (biome === 'plain' || biome === 'forest') {
+    // Same creatures of the map, other odds: normal and flying kinds roam the open plain, plants and bugs hide in the
+    // trees. The ones that do not belong stay possible but rare, so nothing on the map's list becomes unobtainable.
+    const has = (sp, ts) => SPECIES[sp].types.some((t) => ts.includes(t));
+    return byClock(dry.map(([sp, lo, hi, w]) => {
+      const inForest = has(sp, FOREST_TYPES), inPlain = has(sp, PLAIN_TYPES);
+      const fit = biome === 'forest' ? (inForest ? 1.6 : 0.25) : inPlain || !inForest ? 1.3 : 0.2;
+      return [sp, lo, hi, (w ?? 1) * fit];
+    }), night);
+  }
   if (biome === 'cave') {
     const cave = dry.filter(([sp]) => SPECIES[sp].types.some((t) => CAVE_TYPES.includes(t)));
     return cave.length ? cave : dry;

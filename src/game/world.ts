@@ -3,7 +3,7 @@
 import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
-import { encounterList, waterTable } from '../data/encounters.ts';
+import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
@@ -579,10 +579,11 @@ function onStep() {
     const cave = W_.map.theme === 'cueva';
     const surfing = ch === '~';
     const grass = !!TILE_INFO[ch]?.enc;
+    const biome = tileBiome(W_.map, tileAt, p.x, p.y);
     const floor = cave && !surfing && !TILE_INFO[ch]?.solid;
-    if (surfing || grass || floor) {
-      const pick = encounterList(W_.map, surfing ? 'water' : cave ? 'cave' : 'grass', W_.map.indoor ? 0 : nightLevel());
-      const rate = surfing ? Math.max(0.1, base * 0.7) : floor && !grass ? Math.min(0.1, base) : base;
+    if (biome && (surfing || grass || floor || biome === 'sand')) {
+      const pick = encounterList(W_.map, biome, W_.map.indoor ? 0 : nightLevel());
+      const rate = surfing ? Math.max(0.1, base * 0.7) : biome === 'sand' ? Math.min(0.08, base) : floor && !grass ? Math.min(0.1, base) : base;
       if (pick.length && worldRng.chance(rate)) {
         const e = worldRng.weighted(pick.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
         const lvl = worldRng.int(e.lo, e.hi);
