@@ -2,7 +2,8 @@
 // note lists. No audio files to download. Starts on the first user gesture.
 
 let ctx = null;
-let master, musicGain, sfxGain, sfxMain, sfxBattle, ambMain;
+let master, musicGain, duckGain, sfxGain, sfxMain, sfxBattle, ambMain;
+let duckUntil = 0; // ctx time until which the music stays ducked under an effect
 let current = null; // { name, timer, resume }
 let pendingResume = null;
 // music / sfx: 0..1 sliders; battle: multiplier for battle effects and cries; ambient: rain, wind, surf, birds, thunder...
@@ -24,6 +25,7 @@ export function initAudio() {
   master = ctx.createGain();
   master.connect(ctx.destination);
   musicGain = ctx.createGain();
+  duckGain = ctx.createGain(); // lowers the music while a sound effect plays (separate from the volume slider)
   sfxMain = ctx.createGain();
   sfxBattle = ctx.createGain(); // battle effects and cries sit lower than the rest
   ambMain = ctx.createGain(); // weather and ambience have their own volume
@@ -34,7 +36,7 @@ export function initAudio() {
   tone_.frequency.value = 5200;
   tone_.Q.value = 0.4;
   tone_.connect(master);
-  musicGain.connect(tone_);
+  musicGain.connect(duckGain).connect(tone_);
   sfxMain.connect(tone_);
   sfxBattle.connect(tone_);
   ambMain.connect(tone_);
@@ -252,6 +254,7 @@ export function jingle(name) {
  */
 export function cry(key, size = 1, { faint = false } = {}) {
   if (!ctx || !key) return;
+  duck(faint ? 0.9 : 0.6);
   sfxGain = sfxBattle;
   try { cryTones(key, size, faint); } finally { sfxGain = sfxMain; }
 }
@@ -289,10 +292,29 @@ export function lowHpAlarm(on) {
   }
 }
 
+/**
+ * Music ducking: while a sound effect or cry plays the music drops to a fraction and comes back smoothly after it,
+ * so music, effect and cry never pile up at full volume. Footsteps and tiny UI blips do not duck.
+ */
+const NO_DUCK = /^(select|confirm|cancel|menu|bump|step_|grass|expTick|lowhp|run|dash|stat_)/;
+const DUCK_LEN: Record<string, number> = { faint: 0.8, heal: 0.8, evolve: 0.8, catch: 0.6, levelup: 0.45, encounter: 0.45, save: 0.35, fx_quake: 0.8, fx_wave: 0.7, fx_flame: 0.6, fx_shadow: 0.7, fx_swarm: 0.7, fx_rocks: 0.6, fx_bubbles: 0.6, st_slp: 0.75, st_brn: 0.45, boulder: 0.4 };
+function duck(len: number, depth = 0.4) {
+  if (!ctx || !duckGain) return;
+  const now = ctx.currentTime;
+  duckUntil = Math.max(duckUntil, now + len);
+  const g = duckGain.gain;
+  g.cancelScheduledValues(now);
+  g.setValueAtTime(g.value, now);
+  g.linearRampToValueAtTime(depth, now + 0.04);
+  g.setValueAtTime(depth, duckUntil);
+  g.linearRampToValueAtTime(1, duckUntil + 0.45);
+}
+
 const BATTLE_SFX = /^(hit|super|weak|crit|faint|dash|charge|orb|aura|fx_|st_|cut|cast|bite|pc|stat_|encounter|poof|throw|shake)/;
 export function sfx(name) {
   if (!ctx || !SFX[name]) return;
   sfxGain = BATTLE_SFX.test(name) ? sfxBattle : sfxMain;
+  if (!NO_DUCK.test(name)) duck(DUCK_LEN[name] ?? 0.35);
   try { SFX[name](ctx.currentTime + 0.001); } finally { sfxGain = sfxMain; }
 }
 

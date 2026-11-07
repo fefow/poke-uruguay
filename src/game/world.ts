@@ -25,7 +25,7 @@ import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canE
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
 import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
-import { uiIconCanvas } from '../gfx/ui-icons.ts';
+import { canoeCanvas } from '../gfx/ui-icons.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -95,11 +95,15 @@ function tileAt(x, y) {
   return (W_.tiles ?? m.tiles)[y][x];
 }
 
+let canoeGo = false; // true for the single step that boards the canoe
+let canoeStep: string | null = null; // direction to step onto the water once the question's script is over
 function solidAt(x, y, { ignorePlayer = false, self = null, player = false } = {}) {
   const ch = tileAt(x, y);
   if (ch == null) return true;
   // With the canoe, the player can sail on water.
-  if (TILE_INFO[ch]?.solid && !(player && ch === '~' && hasItem('canoa') && flag(badgeOf('rivera')))) return true;
+  // The canoe is only boarded on purpose (Z facing the water, then "Sí"); once afloat, the player keeps sailing on water.
+  const afloat = canoeGo || tileAt(W_.player.x, W_.player.y) === '~';
+  if (TILE_INFO[ch]?.solid && !(player && ch === '~' && afloat && hasItem('canoa') && flag(badgeOf('rivera')))) return true;
   if (W_.npcs.some((n) => n !== self && n.visible && n.x === x && n.y === y)) return true;
   if (W_.items.some((it) => it.x === x && it.y === y)) return true;
   if (W_.legend && W_.legend.x === x && W_.legend.y === y) return true;
@@ -283,6 +287,14 @@ export function updateWorld(dt, now) {
     return;
   }
   if (input.busy) return;
+  if (canoeStep) {
+    const d = canoeStep;
+    canoeStep = null;
+    input.clear(); // the Z that answered "Sí" must not also act on the water once afloat
+    canoeGo = true;
+    try { tryMove(d); } finally { canoeGo = false; }
+    return;
+  }
   let tapped = null;
   for (const a of input.take()) {
     if (a === 'start') return void runScript(() => openPauseMenu());
@@ -744,7 +756,16 @@ function interact() {
   if (tileAt(p.x + dx, p.y + dy) === 'Щ') return void runScript(() => say(['Un mojón de la ruta, con el kilómetro pintado en rojo.', 'Quien pasa a su lado queda anotado en el punto de control: si las criaturas caen, se despierta acá con la salud completa.', 'No se puede curar a nadie en este lugar. Para eso hace falta una Policlínica.']));
   if (tileAt(p.x + dx, p.y + dy) === 'P' && !n) return void runScript(() => openPC());
   if (tileAt(p.x + dx, p.y + dy) === '%') return void runScript(() => cutBush(p.x + dx, p.y + dy));
-  if (tileAt(p.x + dx, p.y + dy) === '~') return void runScript(() => fish());
+  if (tileAt(p.x + dx, p.y + dy) === '~') {
+    // On the shore with the canoe (and a current it can take): a small question instead of sailing off by walking.
+    if (tileAt(p.x, p.y) !== '~' && hasItem('canoa') && flag(badgeOf('rivera'))) {
+      return void runScript(async () => {
+        if (await ask('¿Querés usar la canoa?')) canoeStep = p.dir;
+        else if (hasItem('cana_pescar') || hasItem('cana_buena') || hasItem('cana_super')) await fish();
+      });
+    }
+    return void runScript(() => fish());
+  }
 }
 
 const BOOKS = [
@@ -1595,7 +1616,9 @@ function drawWorld(g, t) {
         g.lineWidth = 1;
         g.beginPath(); g.ellipse(sx + 8 - wx * (8 + k * 6), sy + 12 - wy * (6 + k * 5), 4 + k * 5, 2 + k * 2, 0, 0, 7); g.stroke();
       }
-      g.drawImage(uiIconCanvas('canoa_agua'), Math.round(sx - 4), Math.round(sy + 4)); // editable: 'ui:canoa_agua'
+      // editable: 'ui:canoa_agua' (side) and 'ui:canoa_agua_v' (front); it turns with the paddler
+      const side = p.dir === 'left' || p.dir === 'right';
+      g.drawImage(canoeCanvas(p.dir), Math.round(side ? sx - 4 : sx), Math.round(side ? sy + 4 : sy - 4));
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
     g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);
