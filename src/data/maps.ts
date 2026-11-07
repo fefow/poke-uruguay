@@ -242,13 +242,14 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
     signs: [],
     exits: { w: { to: 'paloma' } },
     warps: [{ x: 9, y: 4, to: 'faro_cabo', tx: 4, ty: 6 }],
+    triggers: [{ x: 5, y: 0, w: 1, h: 15, script: 'scene_cabo', cond: (f) => !f.cabo_clear && !f.ev_cabo_intro }],
     enc: { rate: 0.12, list: [['lobito', 17, 20, 30], ['tortugal', 18, 20, 12], ['mbigua', 17, 19, 20], ['cotorrayo', 17, 19, 18], ['tatu', 17, 19, 20], ['pejerrey', 18, 20, 10], ['hormiguero', 18, 20, 6], ['chimango', 18, 20, 10]] },
     fish: [['franciscana', 18, 20, 30], ['aguaviva', 18, 20, 40], ['anguila', 18, 20, 30]],
     npcs: [
-      { x: 2, y: 7, look: 'keeper', cond: (f) => !f.cabo_clear, text: ['El Equipo PP se llevó la lámpara del faro.', 'Sin luz, los barcos pueden chocar contra las rocas.'] },
+      { x: 2, y: 7, look: 'keeper', id: 'farero_cabo', cond: (f) => !f.cabo_clear, text: ['El Equipo PP se llevó la lámpara del faro.', 'Sin luz, los barcos pueden chocar contra las rocas.'] },
       { x: 12, y: 7, look: 'grunt', dir: 'left', sight: 4, cond: (f) => !f.cabo_clear, trainer: TR('cp_g1', 'Recluta PP', 'Equipo PP', [['zorrigris', 19], ['yararita', 19]], 380, 'Alto. El faro es nuestro.', 'No es posible.', 'La jefa Bruma no será tan fácil.', 'grunt') },
       { x: 18, y: 9, look: 'grunt', dir: 'up', sight: 3, cond: (f) => !f.cabo_clear, trainer: TR('cp_g2', 'Recluta PP', 'Equipo PP', [['cuervon', 20], ['mulitin', 19]], 380, 'Más niebla, menos luz.', 'Me superaste.', 'No tengo más que decir.', 'grunt') },
-      { x: 10, y: 4, look: 'bruma', dir: 'left', id: 'bruma', cond: (f) => !f.cabo_clear, script: 'bruma' },
+      { x: 10, y: 4, look: 'bruma', dir: 'left', id: 'bruma', cond: (f) => !f.cabo_clear, script: 'bruma', arrive: (f) => !f.ev_cabo_intro },
       { x: 20, y: 6, look: 'boy', text: ['Acá no hay red eléctrica ni calles asfaltadas.', 'Los lobos marinos descansan al sol sobre las rocas.'] },
       { x: 3, y: 11, look: 'girl', wander: true, text: ['Las dunas se mueven con el viento. El pueblo entero cambia cada año.'] },
     ],
@@ -599,7 +600,11 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     name: 'Fábrica: sala de máquinas',
     music: 'cave',
     exitTo: { map: 'pp_1', x: 11, y: 2 },
-    npcs: [{ x: 5, y: 3, look: 'garua', dir: 'down', cond: (f) => !f.pp_clear, script: 'garua' }],
+    npcs: [
+      { x: 5, y: 3, look: 'garua', dir: 'down', id: 'garua', cond: (f) => !f.pp_clear, script: 'garua' },
+      { x: 3, y: 6, look: 'obrero', dir: 'up', id: 'obrero_fab', arrive: true },
+    ],
+    triggers: [{ x: 0, y: 5, w: 12, h: 1, script: 'scene_garua', cond: (f) => !f.pp_clear && !f.ev_garua_intro }],
   }),
   shop_min: shop('Almacén de Minas', ['superesfera', 'ultraesfera', 'mate_dulce', 'dulce_de_leche', 'alfajor', 'torta_frita', 'chivito', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'piedra_agata', 'piedra_amatista', 'piedra_basalto', 'mt_parrillada', 'mt_tormenta_ceibo', 'mt_punio_gaucho']),
   casa_ros: room(HOUSE, {
@@ -898,6 +903,10 @@ for (const [mapId, script, flag] of RIVAL_AT) {
   const npc: any = { x: door.x, y: door.y + 2, look: 'calima', dir: 'up', id: 'calima', cond: (f) => f.badge12 && f.pp_clear && !f.anglo_clear, script: 'calima' };
   fitToMap(m.tiles, [npc]);
   m.npcs.push(npc);
+  // Tabárez shows up (walking) once Dr. Díaz has been beaten; he is hidden until the scene brings him in.
+  const tab: any = { x: door.x, y: door.y + 4, look: 'prof', dir: 'up', id: 'tabarez_mvd', arrive: true };
+  fitToMap(m.tiles, [tab]);
+  m.npcs.push(tab);
 })();
 
 // The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.

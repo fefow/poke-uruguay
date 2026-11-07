@@ -737,6 +737,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
         gr(4, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.'),
         { x: 16, y: 3, look: 'obrero', dir: 'left', script: 'obrero_anglo', cond: (f) => !f.ferry_done },
         { x: 13, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' },
+        { x: 14, y: 3, look: 'prof', dir: 'down', id: 'tabarez_anglo', arrive: true },
       ],
       items: [{ x: al[5].x, y: al[5].y, item: 'pan_casero', id: 'an_item1' }, { x: al[6].x, y: al[6].y, item: 'alfajor_triple', id: 'an_item2' }, { x: al[8].x, y: al[8].y, item: 'credencial_anglo', id: 'an_cred' }],
     });
