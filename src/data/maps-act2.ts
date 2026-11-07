@@ -90,7 +90,7 @@ const R24 = route({ seed: 'ruta24', w: 20, h: 26, axis: 'v', from: 10, to: 10, g
 const FRB = city({
   seed: 'fraybentos', sa: 6, sb: 15, road: 'c',
   a: [['house', 2, 'casa_frb'], ['siniestro', 8, 'gym_frb'], ['poli', 17, 'poli_frb'], ['shop', 23, 'shop_frb']],
-  b: [['houseB', 1], ['fabrica', 7, 'anglo_1'], ['houseG', 17, 'casa_frb2']],
+  b: [['houseB', 1], ['guarida', 7, 'anglo_1'], ['houseG', 17, 'casa_frb2']],
   vroads: [14], decor: { '#': 8, f: 8 },
   water: [[1, 17, 26, 1]],
   signs: [[6, 7], [26, 7]],

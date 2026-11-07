@@ -88,7 +88,7 @@ export const CITY_SPECS = {
       scatter: [['γ', 4, 'away'], ['τ', 4, 'road']],
       animals: [],
     },
-    bld: [['siniestro', 'gym_frb', [24, 10]], ['poli', 'poli_frb', [14, 17]], ['shop', 'shop_frb', [34, 17]], ['house', 'casa_frb'], ['houseG', 'casa_frb2'], ['fabrica', 'anglo_1', [30, 8]], ['terminal', 'terminal_frb', [4, 17]], ['casaFaro', 'casa_frb_faro', [24, 17]]],
+    bld: [['siniestro', 'gym_frb', [24, 10]], ['poli', 'poli_frb', [14, 17]], ['shop', 'shop_frb', [34, 17]], ['house', 'casa_frb'], ['houseG', 'casa_frb2'], ['guarida', 'anglo_1', [30, 8]], ['terminal', 'terminal_frb', [4, 17]], ['casaFaro', 'casa_frb_faro', [24, 17]]],
     fill: 6, fillKinds: ['fabrica', 'houseB'],
   },
   // Paysandú: the Uruguay river to the west with a long bridge, a hill with the cathedral, stepped streets.
@@ -268,7 +268,7 @@ export const CITY_SPECS = {
       props: [['Γ', 31, 8], ['Λ', 8, 18], ['Λ', 30, 21]],
       animals: [{ sp: 'gatomontes', n: 2, rect: [4, 10, 12, 5] }],
     },
-    bld: [['shop', 'shop_min', [22, 17]], ['house', 'casa_min', [8, 26]], ['fabrica', 'pp_1', [46, 7], 2]], thicket: 'pp_1',
+    bld: [['shop', 'shop_min', [22, 17]], ['house', 'casa_min', [8, 26]], ['guarida', 'pp_1', [46, 7], 2]], thicket: 'pp_1',
     fill: 14,
   },
   // Florida: the Piedra Alta monument plaza, windmills on the plain, a creek with willows.
