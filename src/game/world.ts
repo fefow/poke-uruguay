@@ -847,7 +847,7 @@ const fogTalk = (n) => FOG_TALK[(n.def.x * 7 + n.def.y * 3) % FOG_TALK.length];
 function foggyHere() {
   const m = W_.map;
   if (m.indoor || m.dark) return false;
-  return activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'));
+  return activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'));
 }
 
 // Tiles that give light to the WebGL layer: [dy = height of the glow inside the tile, radius in logical px, colour, strength].
@@ -1285,6 +1285,16 @@ export const api = {
     n.gone = true;
     n.visible = false;
   },
+  /** A creature shown on the map (look 'animal:…') takes off and flies out of sight, then is gone. */
+  async npcFlyOff(key, ms = 1800) {
+    const n = findNpc(key);
+    if (!n) return;
+    n.fly = { t0: performance.now(), ms };
+    await wait(ms);
+    n.fly = null;
+    n.gone = true;
+    n.visible = false;
+  },
   /** Walks the NPC to the tile (x, y) along free ground, one step at a time. Returns false when there is no way. */
   async npcWalkTo(key, x, y) {
     const n = findNpc(key);
@@ -1633,11 +1643,15 @@ function drawWorld(g, t) {
     const f = rowing ? 0 : player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : (p.step % 2 ? 3 : 0)) : n.moving ? frameIdx : 0;
     if (!player && typeof look === 'string' && look.startsWith('animal:')) {
       // creatures seen in the distance: they wander but cannot be fought or caught
-      shadow(g, sx + 8, sy + 13, 6, 2.4);
-      const hop = n.moving ? Math.abs(Math.sin(t / 90)) * 2 : 0;
+      // taking off (npcFlyOff): it climbs away to the north-east while its shadow fades on the ground
+      const fk = n.fly ? Math.min(1, (performance.now() - n.fly.t0) / n.fly.ms) : 0;
+      const flyX = Math.round(fk * 48), flyY = Math.round(fk * fk * 170);
+      shadow(g, sx + 8, sy + 13, 6 * (1 - fk), 2.4 * (1 - fk));
+      const hop = n.moving ? Math.abs(Math.sin(t / 90)) * 2 : n.fly ? Math.round(Math.abs(Math.sin(t / 70)) * 3) : 0;
       g.save();
-      if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), 0, sy - 7 - hop, 24, 24); }
-      else g.drawImage(creatureSprite(look.slice(7)), sx - 4, sy - 7 - hop, 24, 24);
+      if (fk) g.globalAlpha = 1 - fk * 0.7;
+      if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), -flyX, sy - 7 - hop - flyY, 24, 24); }
+      else g.drawImage(creatureSprite(look.slice(7)), sx - 4 + flyX, sy - 7 - hop - flyY, 24, 24);
       g.restore();
       continue;
     }
@@ -1700,7 +1714,7 @@ function drawWorld(g, t) {
       if (wx === 'storm') { rain(g, t * 1.7); lightning(g, t); }
       if (wx === 'fog') { drawFog(g, t); g.fillStyle = 'rgba(205,212,222,0.22)'; g.fillRect(0, 0, W, H); }
     }
-    if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
+    if ((m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'))) drawFog(g, t);
     // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
     const machines = activeMachines();
     if (machines.length && !m.dark) {

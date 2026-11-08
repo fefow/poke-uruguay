@@ -53,6 +53,7 @@ const BASE_ITEMS = {
 
   carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de Colonia del Sacramento guardaba para el Maestro Tabárez.' },
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
+  pluma_azul: { name: 'Pluma Azul', pocket: 'key', price: 0, desc: 'Una pluma que soltó el Cardenal Azul en la Quebrada de los Cuervos. Chispea con el viento del sur.' },
   lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
   mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
   cana_pescar: { name: 'Caña Vieja', pocket: 'key', price: 0, rod: 1, desc: 'Una caña simple. Parada frente al agua, apretá A: solo pican las criaturas más comunes y chicas.' },
