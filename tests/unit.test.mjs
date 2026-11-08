@@ -607,7 +607,8 @@ test('wild zones: plain, forest, sand and embers hold different creatures', asyn
   const at = (rows) => (x, y) => rows[y]?.[x] ?? null;
   assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(trees), 2, 2), 'forest');
   assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(['.....', '..,..', '.....']), 2, 1), 'plain');
-  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(['s']), 0, 0), 'sand');
+  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(['s~']), 0, 0), 'sand');
+  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(['s..']), 0, 0), null);
   assert.equal(tileBiome({ id: 'colonia', enc: m.enc }, at(['s']), 0, 0), null);
   assert.equal(tileBiome({ id: 'x', enc: m.enc }, at([';']), 0, 0), 'volcanic');
   // every sandy and volcanic map has creatures that never swim, in sensible kinds

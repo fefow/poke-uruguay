@@ -21,7 +21,12 @@ export function tileBiome(m, at: (x: number, y: number) => string | null, x: num
   if (ch === '~') return 'water';
   if (m.theme === 'cueva') return ch && !['#', 'q', 'R', 'K', 'p'].includes(ch) ? 'cave' : null;
   if (ch === ';') return 'volcanic';
-  if (ch === 's') return m.enc?.list?.length && !m.indoor && !CITIES.has(m.id) && !NO_ZONES.has(m.id) ? 'sand' : null;
+  if (ch === 's') {
+    if (!m.enc?.list?.length || m.indoor || CITIES.has(m.id) || NO_ZONES.has(m.id)) return null;
+    // only a real beach counts: sand with water within 3 tiles. Sand-coloured ground inland is just terrain.
+    for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (at(x + dx, y + dy) === '~') return 'sand';
+    return null;
+  }
   if (ch !== ',') return null;
   if (NO_ZONES.has(m.id)) return 'grass';
   let trees = 0;
