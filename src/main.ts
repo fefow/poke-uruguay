@@ -29,6 +29,7 @@ import { SAVE_CONFIG } from './save/config.ts';
 import { mountTouchPad } from './core/touchpad.ts';
 import { mountFullscreen } from './core/fullscreen.ts';
 import { mountPerf, perfTick } from './core/perf.ts';
+import { advanceClock } from './game/calendar.ts';
 
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
@@ -63,6 +64,7 @@ function frame(now) {
     updateWorld(dt, now);
     const S = state();
     if (S) S.stats.playtime += dt / 1000;
+    advanceClock(dt);
   }
   updateHud(now);
   updateSidebar(now, mode === 'game');

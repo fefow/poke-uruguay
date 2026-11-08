@@ -193,6 +193,7 @@ export function validateSave(d: any) {
       bag,
       flags,
       dex: { seen: [...new Set(seen)], caught: [...new Set(caught)] },
+      clock: Number.isFinite(d.clock) && d.clock >= 0 && d.clock < 1e9 ? d.clock : 8 * 60,
       stats: { playtime: st.playtime, steps: st.steps, battlesWon: st.battlesWon, moneyEarned: st.moneyEarned, moneySpent: st.moneySpent, caught: st.caught },
       lastHeal: { map: lh.map, x: lh.x | 0, y: lh.y | 0 },
       checkpoint: d.checkpoint && MAPS[d.checkpoint.map] && isInt(d.checkpoint.x, 0, MAPS[d.checkpoint.map].tiles[0].length - 1) && isInt(d.checkpoint.y, 0, MAPS[d.checkpoint.map].tiles.length - 1) ? { map: d.checkpoint.map, x: d.checkpoint.x, y: d.checkpoint.y } : null,

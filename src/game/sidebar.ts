@@ -9,10 +9,12 @@ import { displayName, maxHp } from './creature.ts';
 import { fmt } from './ui.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { uiIconUrl } from '../gfx/ui-icons.ts';
+import { fullText, shortText, isNight } from './calendar.ts';
 
 let teamCount, portrait, nameEl, card, mapBox, teamBox, teamBtn, lastFace = '';
 let teamOpen = true;
 try { teamOpen = localStorage.getItem('hudTeam') !== '0'; } catch {}
+let dateEl, dateShort, dateIco, dateSig = '';
 let stage, bar, placeEl, medalEl, moneyEl, teamEl, btns: Record<string, any> = {}, handlers: Record<string, any> = {}, sig = '', nextPoll = 0;
 
 const ICON = {
@@ -25,6 +27,8 @@ const ICON = {
   map: '<path d="M9 3l6 2 6-2v16l-6 2-6-2-6 2V5zm0 2v12l6 2V7z"/>',
   music: '<path d="M9 3v12.500A3.500 3.500 0 1 0 11 18.700V8h8V3z"/>',
   gear: '<path d="M10.300 2h3.400l.5 2.600 1.700.7 2.200-1.500 2.400 2.400-1.500 2.200.7 1.700 2.600.5v3.400l-2.600.5-.7 1.700 1.500 2.200-2.400 2.400-2.200-1.500-1.700.7-.5 2.600h-3.400l-.5-2.600-1.700-.7-2.200 1.500-2.400-2.400 1.500-2.200-.7-1.700L2 13.700v-3.400l2.600-.5.7-1.700-1.500-2.200 2.400-2.400 2.200 1.500 1.700-.7zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>',
+  sun: '<circle cx="12" cy="12" r="5"/><path d="M11 1h2v4h-2zm0 18h2v4h-2zM1 11h4v2H1zm18 0h4v2h-4zM4.200 5.600l1.400-1.400 2.800 2.800-1.400 1.400zm11.400 11.400l1.400-1.400 2.800 2.800-1.400 1.400zM4.200 18.400l2.800-2.800 1.400 1.400-2.800 2.800zM15.600 7l2.800-2.800 1.400 1.400-2.800 2.800z"/>',
+  moon: '<path d="M14.500 2.500a9.500 9.500 0 1 0 7 15A8 8 0 0 1 14.500 2.500z"/>',
   menu: '<path d="M3 5h18v2.500H3zm0 5.800h18v2.500H3zm0 5.800h18v2.500H3z"/>',
 };
 function icon(k) {
@@ -75,6 +79,7 @@ export function mountSidebar(stageEl, hs = {}) {
   // minimap + place + tools (top right)
   mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
     h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, pixelIcon('ubicacion'), placeEl),
+    h('div', { class: 'hud-date', 'data-tip': 'Día y hora en el juego' }, dateIco = h('span', { class: 'hud-date-ico' }), dateEl = h('span', { class: 'tb-date' }), dateShort = h('span', { class: 'tb-date-short' })),
     h('nav', { class: 'tb-tools' }, ...Object.values(btns)));
   // hotbar (bottom centre)
   teamEl = h('ol', { class: 'hud-team-list', 'aria-label': 'Equipo' });
@@ -130,6 +135,13 @@ export function updateSidebar(now, inGame) {
   btns.map.hidden = !S.bag.mapa_uruguay;
   teamBox.hidden = !S.party.length;
   drawFace(S.player.look);
+  const when = fullText(), night = isNight();
+  if (when + night !== dateSig) {
+    dateSig = when + night;
+    dateEl.textContent = when;
+    dateShort.textContent = shortText();
+    dateIco.replaceChildren(icon(night ? 'moon' : 'sun'));
+  }
   const place = fmt(MAPS[S.pos.map]?.name ?? '');
   const team = S.party.map((c) => `${c.species}${c.level}${c.hp}${c.status ?? ''}`).join(',');
   const next = [place, S.rivalName, S.player.name, S.player.money, badgeCount(), team].join('|');

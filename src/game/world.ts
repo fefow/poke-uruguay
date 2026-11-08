@@ -26,6 +26,7 @@ import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
 import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
 import { canoeCanvas } from '../gfx/ui-icons.ts';
+import { fullText, sleepUntil, capital, weekday, dateText } from './calendar.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -783,6 +784,7 @@ function interact() {
   }
   if (tileAt(p.x + dx, p.y + dy) === 'B') return void runScript(() => say(worldRng.pick(BOOKS)));
   if (tileAt(p.x + dx, p.y + dy) === 'Щ') return void runScript(() => say(['Un mojón de la ruta, con el kilómetro pintado en rojo.', 'Quien pasa a su lado queda anotado en el punto de control: si las criaturas caen, se despierta acá con la salud completa.', 'No se puede curar a nadie en este lugar. Para eso hace falta una Policlínica.']));
+  if (tileAt(p.x + dx, p.y + dy) === 'E') return void runScript(() => sleepInBed());
   if (tileAt(p.x + dx, p.y + dy) === 'P' && !n) return void runScript(() => openPC());
   if (tileAt(p.x + dx, p.y + dy) === '%') return void runScript(() => cutBush(p.x + dx, p.y + dy));
   if (tileAt(p.x + dx, p.y + dy) === '~') {
@@ -795,6 +797,19 @@ function interact() {
     }
     return void runScript(() => fish());
   }
+}
+
+/** Beds at home and in Policlínicas let the player sleep until 8:00 the next morning (to reach a weekday event). */
+async function sleepInBed() {
+  const own = W_.map.id === 'casa_jugador' || W_.map.theme === 'poli';
+  if (!own) return say('Es la cama de otra persona. Mejor no tocarla.');
+  await say(`Hoy es ${fullText()}.`);
+  if (!(await ask('¿Querés dormir hasta mañana?'))) return;
+  await fadeOut(450);
+  sleepUntil(8);
+  await wait(500);
+  await fadeIn(450);
+  await say(`Dormiste bien. Hoy es ${capital(weekday())} ${dateText()}.`);
 }
 
 const BOOKS = [

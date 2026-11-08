@@ -41,6 +41,8 @@ export interface GameState {
   bag: Record<string, number>;
   flags: Record<string, any>;
   dex: { seen: string[]; caught: string[] };
+  /** In-game minutes since day 0 (Monday 1 March) 00:00; see src/game/calendar.ts. */
+  clock?: number;
   stats: { playtime: number; steps: number; battlesWon: number; moneyEarned: number; moneySpent: number; caught: number };
   lastHeal: Pos;
   /** Route marker last passed: where a blackout sends the player (party fully healed), until a Policlínica sets lastHeal again. */
