@@ -1005,6 +1005,18 @@ export const SCRIPTS = {
     await api.warp(api.safariGate.map, api.safariGate.x, api.safariGate.y, 'down');
   },
 
+  // The egg: Tabárez's assistant walks up to the player outside the Trinidad gym after the first medal.
+  async huevo_ayudante(api) {
+    if (api.flag('got_huevo') || !api.flag('badge1')) return;
+    const who = 'Gonzalo';
+    await api.npcApproach('ayudante_huevo', 10);
+    await api.say(['¡{player}! Por fin te encuentro. Soy Gonzalo, el ayudante del Maestro Tabárez. Nos vimos en el laboratorio.', 'Felicitaciones por la medalla. El Maestro va a estar contento.'], { name: who });
+    await api.say(['Te traigo un encargo. Un estanciero de Palmitas encontró un huevo entre los pajonales y se lo mandó al Maestro.', 'Nadie supo decirnos de qué criatura es. El Maestro cree que los huevos nacen antes si viajan con criaturas fuertes, y quiere que lo lleves vos.'], { name: who });
+    await api.receiveEgg();
+    await api.say(['Cuidalo. Va a nacer cuando haya caminado un buen trecho con vos.', 'Cuando nazca, avisale al Maestro qué salió. Yo vuelvo a Carmelo.'], { name: who });
+    await api.npcWalkOff('ayudante_huevo');
+  },
+
   async criadero(api) {
     await api.criadero();
   },

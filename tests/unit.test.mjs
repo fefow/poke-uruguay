@@ -11,6 +11,7 @@ import { Rng } from '../src/core/rng.ts';
 import { validateSave } from '../src/save/validate.ts';
 import { canonical, sha256, hmacSha256 } from '../src/save/integrity.ts';
 import { newState } from '../src/game/state.ts';
+import { EGG } from '../src/data/egg.ts';
 
 const mon = (sp, lvl, seed = 1) => createCreature(sp, lvl, { rng: new Rng(seed) });
 
@@ -151,6 +152,30 @@ test('validation rejects edited stats/levels/moves/money/items', () => {
       assert.equal(r.ok, false, `case ${i} should be rejected`);
     }
   });
+});
+
+test('huevo: guardado válido, contador conservado y reglas de la historia', () => {
+  const s = goodSave();
+  s.flags.badge1 = true; s.flags.got_huevo = true;
+  s.bag.huevo = 1;
+  s.stats.steps = 500;
+  s.egg = { steps: 120 };
+  let r = validateSave(s);
+  assert.equal(r.ok, true, r.errors.join(', '));
+  assert.deepEqual(r.data.egg, { steps: 120 });
+  s.egg = { steps: 9999 }; // a counter from the future starts counting now
+  r = validateSave(s);
+  assert.deepEqual(r.data.egg, { steps: 500 });
+  const bad = [
+    (x) => { delete x.flags.got_huevo; },
+    (x) => { delete x.flags.badge1; },
+    (x) => { x.flags.huevo_nacio = true; },
+  ];
+  for (const f of bad) { const x = JSON.parse(JSON.stringify(s)); f(x); assert.equal(validateSave(x).ok, false); }
+  const born = goodSave();
+  born.flags.huevo_nacio = true;
+  assert.equal(validateSave(born).ok, false, 'no puede nacer sin haberlo recibido');
+  assert.equal(SPECIES[EGG.species] && !Object.values(SPECIES).some((o) => o.evo?.to === EGG.species), true, 'el huevo trae una criatura base');
 });
 
 test('canonical JSON is key-order independent', () => {

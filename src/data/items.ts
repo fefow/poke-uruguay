@@ -52,6 +52,7 @@ const BASE_ITEMS = {
   repelente: { name: 'Repelente', pocket: 'items', price: 350, repel: 100, desc: 'Evita criaturas salvajes débiles por 100 pasos.' },
 
   carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de Colonia del Sacramento guardaba para el Maestro Tabárez.' },
+  huevo: { name: 'Huevo', pocket: 'key', price: 0, desc: 'Un huevo que un estanciero de Palmitas le mandó al Maestro Tabárez. Nace solo, después de viajar un buen tiempo con él.' },
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
   lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
   mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
