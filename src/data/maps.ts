@@ -1482,3 +1482,11 @@ for (const m of Object.values(MAPS) as any[]) {
     if (n.trainer) n.trainer.look = 'turista';
   }
 }
+
+// One local in each city talks the way people talk there (border portuñol, the eastern "tú", country speech...).
+import { addRegionalSpeech } from './regional-speech.ts';
+addRegionalSpeech(OUTDOOR);
+
+// Plain, everyday Uruguayan first names for the trainers on the road (after the looks above are final: the name follows the person drawn).
+import { nameTrainers } from './trainer-names.ts';
+nameTrainers(MAPS);
