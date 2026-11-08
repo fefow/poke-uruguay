@@ -67,6 +67,9 @@ export const input = {
     });
   },
   press,
+  /** On-screen pad: hold and press an action as the keyboard would. */
+  hold(action: string) { held.add(action); press(action); },
+  release(action: string) { held.delete(action); },
 };
 
 addEventListener('keydown', (e) => {

@@ -86,7 +86,6 @@ export async function say(text, opts: { battle?: boolean; keep?: boolean; [k: st
     const delay = (SPEEDS[settings.textSpeed] ?? 18) / (input.held('run') ? 2 : 1);
     for (let i = 0; i < msg.length && !skip; i++) {
       dialogText.textContent = msg.slice(0, i + 1);
-      if (i % 2 === 0 && msg[i] !== ' ') sfx('select');
       await wait(delay);
     }
     dialogText.textContent = msg;

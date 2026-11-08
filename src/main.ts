@@ -26,6 +26,7 @@ import { MAPS } from './data/maps.ts';
 import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.ts';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.ts';
 import { SAVE_CONFIG } from './save/config.ts';
+import { mountTouchPad } from './core/touchpad.ts';
 import { mountFullscreen } from './core/fullscreen.ts';
 import { mountPerf, perfTick } from './core/perf.ts';
 
@@ -77,13 +78,8 @@ async function boot() {
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   mountFullscreen();
-  // The game needs a keyboard: touch-only devices get a notice instead of a game they cannot play.
-  if (matchMedia('(hover: none) and (pointer: coarse)').matches) {
-    document.body.append(h('div', { class: 'desktop-only' },
-      h('h1', { text: 'Poke Uruguay' }),
-      h('p', { text: 'Este juego se juega con teclado en una computadora.' }),
-      h('p', { text: 'Abrilo desde una PC o notebook.' })));
-  }
+  // Phones and tablets get an on-screen pad built like a handheld console (landscape); a hint asks to rotate in portrait.
+  mountTouchPad();
   mountPerf();
   setVolumes(settings);
   requestAnimationFrame(frame);

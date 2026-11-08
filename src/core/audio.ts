@@ -72,7 +72,7 @@ function applyVolumes() {
   if (!ctx) return;
   musicGain.gain.value = settings.music * 0.18;
   sfxMain.gain.value = settings.sfx * 0.35;
-  sfxBattle.gain.value = settings.sfx * 0.35 * 0.45 * settings.battle;
+  sfxBattle.gain.value = settings.sfx * 0.35 * 0.28 * settings.battle;
   ambMain.gain.value = settings.ambient * 0.35;
 }
 
@@ -157,7 +157,7 @@ const SFX = {
   weak: (t) => { noise(t, 0.07, 0.4, sfxGain, { hp: 1500 }); tone(140, t, 0.06, { duty: 0.125 }); },
   crit: (t) => { noise(t, 0.3, 1); tone(880, t, 0.06, { duty: 0.125 }); tone(1320, t + 0.06, 0.12, { duty: 0.125 }); },
   faint: (t) => tone(520, t, 0.7, { slide: -470, duty: 0.5, vol: 0.5 }),
-  heal: (t) => ['C5', 'E5', 'G5', 'C6', 'G5', 'C6'].forEach((n, i) => P(n, t + i * 0.12, 0.14)),
+  heal: (t) => ['C5', 'E5', 'G5', 'C6', 'G5', 'C6'].forEach((n, i) => P(n, t + i * 0.12, 0.14, { vol: 0.4 })),
   levelup: (t) => ['G4', 'B4', 'D5', 'G5'].forEach((n, i) => P(n, t + i * 0.09, 0.12, { vol: 0.6 })),
   catch: (t) => ['C5', 'G4', 'C5', 'E5', 'G5'].forEach((n, i) => P(n, t + i * 0.1, 0.12)),
   shake: (t) => { tone(220, t, 0.06, { type: 'triangle', slide: 60 }); noise(t, 0.04, 0.25, sfxGain, { hp: 3000 }); },
@@ -212,7 +212,7 @@ export const JINGLES = {
   item: { bpm: 150, lead: 'C5 1 C5 1 C5 1 E5 1 G5 4 F5 2 A5 2 G5 6', bass: 'C3 4 F2 4 C3 8' },
   key: { bpm: 140, lead: 'G4 1 B4 1 D5 1 G5 3 E5 1 F#5 1 G5 2 D6 6', bass: 'G2 4 C3 2 D3 2 G2 6' },
   badge: { bpm: 132, lead: 'G4 2 C5 2 E5 2 G5 4 E5 2 G5 2 A5 2 B5 2 C6 8', bass: 'C3 4 E3 4 F2 4 G2 4 C3 6' },
-  heal: { bpm: 120, lead: 'E5 2 G5 2 C6 2 E6 2 D6 2 B5 2 G5 2 C6 6', bass: 'C3 4 G2 4 A2 4 F2 2 G2 2 C3 6' },
+  heal: { v: 0.4, bpm: 120, lead: 'E5 2 G5 2 C6 2 E6 2 D6 2 B5 2 G5 2 C6 6', bass: 'C3 4 G2 4 A2 4 F2 2 G2 2 C3 6' },
   creature: { bpm: 140, lead: 'E5 2 C5 2 G5 2 E5 2 A5 2 B5 2 C6 6', bass: 'C3 4 G2 4 A2 2 G2 2 C3 6' },
 };
 
@@ -223,10 +223,10 @@ export function jingle(name) {
   const eighth = 60 / j.bpm / 2;
   const t0 = ctx.currentTime + 0.03;
   let t = t0;
-  for (const [n, d] of parseSeq(j.lead)) { tone(freq(n), t, d * eighth * 0.92, { duty: 0.25, vol: 0.55, vib: 1 }); tone(freq(n), t + eighth * 0.5, d * eighth * 0.8, { duty: 0.125, vol: 0.15 }); t += d * eighth; }
+  for (const [n, d] of parseSeq(j.lead)) { tone(freq(n), t, d * eighth * 0.92, { duty: 0.25, vol: 0.55 * (j.v ?? 0.8), vib: 1 }); tone(freq(n), t + eighth * 0.5, d * eighth * 0.8, { duty: 0.125, vol: 0.15 * (j.v ?? 0.8) }); t += d * eighth; }
   const end = t;
   t = t0;
-  for (const [n, d] of parseSeq(j.bass)) { tone(freq(n), t, d * eighth * 0.85, { type: 'triangle', vol: 0.8 }); t += d * eighth; }
+  for (const [n, d] of parseSeq(j.bass)) { tone(freq(n), t, d * eighth * 0.85, { type: 'triangle', vol: 0.8 * (j.v ?? 0.8) }); t += d * eighth; }
   const len = end - t0;
   if (musicGain) {
     const g = musicGain.gain;
@@ -311,11 +311,24 @@ function duck(len: number, depth = 0.4) {
 }
 
 const BATTLE_SFX = /^(hit|super|weak|crit|faint|dash|charge|orb|aura|fx_|st_|cut|cast|bite|pc|stat_|encounter|poof|throw|shake)/;
+// Big sounds queue one after another instead of landing together (end of a fight: faint, exp, level up, money...).
+// Each takes a slot of SLOT seconds; anything that would wait more than MAX_WAIT is dropped.
+let nextSlot = 0;
+const SLOT = 0.28, MAX_WAIT = 1.4;
+// In fights only the essentials sound (hit, super/weak, crit, faint, throw/shake/catch, level up, evolve, encounter);
+// wind-ups, move effects, status and stat blips, exp ticks and poofs are silent.
+const FIGHT_SILENT = /^(charge|orb|aura|dash|fx_|st_|stat_|expTick|poof)/;
 export function sfx(name) {
-  if (!ctx || !SFX[name]) return;
+  if (!ctx || !SFX[name] || FIGHT_SILENT.test(name)) return;
   sfxGain = BATTLE_SFX.test(name) ? sfxBattle : sfxMain;
-  if (!NO_DUCK.test(name)) duck(DUCK_LEN[name] ?? 0.35);
-  try { SFX[name](ctx.currentTime + 0.001); } finally { sfxGain = sfxMain; }
+  let at = ctx.currentTime + 0.001;
+  if (!NO_DUCK.test(name)) {
+    at = Math.max(at, nextSlot);
+    if (at - ctx.currentTime > MAX_WAIT) return;
+    nextSlot = at + SLOT;
+    duck(DUCK_LEN[name] ?? 0.35);
+  }
+  try { SFX[name](at); } finally { sfxGain = sfxMain; }
 }
 
 /** Resolves after `ms`, or as soon as the player presses a confirm/cancel key, so fanfare waits never hold the game up. */
@@ -579,15 +592,15 @@ function ambTick() {
   if (!ctx) return;
   const t = ctx.currentTime + 0.02;
   const r = Math.random();
-  if (amb.birds && r < 0.18 * amb.birds) {
+  if (amb.birds && r < 0.04 * amb.birds) {
     const f = 2200 + Math.random() * 1800;
     const n = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < n; i++) tone(f * (1 + (i % 2) * 0.12), t + i * 0.09, 0.07, { type: 'sine', vol: 0.18, slide: 500, out: ambGain });
   }
-  if (amb.crickets && r < 0.45 * amb.crickets) {
+  if (amb.crickets && r < 0.1 * amb.crickets) {
     for (let i = 0; i < 6; i++) tone(4300, t + i * 0.055, 0.03, { type: 'sine', vol: 0.07, out: ambGain });
   }
-  if (amb.drips && r < 0.3 * amb.drips) tone(900 + Math.random() * 400, t, 0.12, { type: 'sine', vol: 0.15, slide: -500, out: ambGain ?? sfxGain });
+  if (amb.drips && r < 0.06 * amb.drips) tone(900 + Math.random() * 400, t, 0.12, { type: 'sine', vol: 0.15, slide: -500, out: ambGain ?? sfxGain });
   if (amb.thunder && r < 0.07 * amb.thunder) {
     noise(t, 1.4, 0.7, ambGain ?? sfxGain, { hp: 0 });
     tone(55, t, 1.2, { type: 'triangle', vol: 0.5, slide: -20, out: ambGain ?? sfxGain });
