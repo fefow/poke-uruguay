@@ -449,6 +449,7 @@ const DRAW = {
     px(g, 2, 0, '#c8c8d2', 12, 2);
     px(g, 2, 14, '#c8c8d2', 12, 2);
     px(g, 3, 6, '#b8b8c4', 10, 1);
+    px(g, 2, 0, '#f2c02a', 12, 1); px(g, 2, 15, '#c8921a', 12, 1);
   },
   λ: (g, r) => {
     grass(g, r);
@@ -629,11 +630,10 @@ const DRAW = {
   },
   // ---- gym facades (outdoor) ----
   G: (g) => {
-    px(g, 0, 0, '#2a6ab0', T, T); px(g, 0, 0, '#7ac0f8', T, 1); px(g, 0, 15, '#143a68', T, 1);
-    for (let y = 3; y < 15; y += 4) for (let x = ((y - 3) / 4) % 2 ? 4 : 0; x < T; x += 8) { px(g, x, y, '#5a9ad8', 5, 1); px(g, x + 1, y + 1, '#1d4f8a', 3, 1); }
+    shingles(g, ['#8fd0f8', '#3f86d0', '#2a62a8', '#143a68'], 11); px(g, 0, 0, '#f2c02a', T, 1);
   },
   h: (g) => {
-    px(g, 0, 0, '#e8f2fa', T, T); px(g, 0, 0, '#1d4f8a', T, 1);
+    px(g, 0, 0, '#e8f2fa', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, '#1d4f8a', T, 2);
     px(g, 0, 1, '#bcd8ee', 3, 15); px(g, 0, 1, '#ffffff', 1, 15); px(g, 13, 1, '#bcd8ee', 3, 15); px(g, 15, 1, '#8fb4d4', 1, 15);
     px(g, 4, 3, '#1d4f8a', 8, 10); px(g, 5, 2, '#1d4f8a', 6, 1); px(g, 5, 3, '#3f9ae0', 6, 9); px(g, 5, 3, '#a8dcff', 6, 1); px(g, 5, 7, '#7ac0f8', 6, 1);
     px(g, 0, 14, '#8fb4d4', T, 2);
@@ -647,11 +647,11 @@ const DRAW = {
     g.fillStyle = '#7ac0f8'; g.fillRect(6, 9, 2, 2);
   },
   J: (g) => {
-    px(g, 0, 0, '#2c2d3a', T, T); px(g, 0, 0, '#5a5c70', T, 1); px(g, 0, 15, '#1a1a24', T, 1);
-    hazard(g, 11); px(g, 2, 3, '#5a5c70', 2, 2); px(g, 11, 3, '#5a5c70', 2, 2); px(g, 6, 6, '#3a3b4c', 4, 2);
+    shingles(g, ['#7a7c98', '#454656', '#34354a', '#1a1a24'], 12); px(g, 0, 0, '#f2c02a', T, 1);
+    px(g, 0, 11, '#f2c02a', T, 1); px(g, 0, 12, '#1a1a24', T, 1);
   },
   j: (g) => {
-    px(g, 0, 0, '#454656', T, T); px(g, 0, 0, '#f2c02a', T, 1);
+    px(g, 0, 0, '#454656', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, '#1a1a24', T, 2);
     px(g, 0, 1, '#2c2d3a', 3, 15); px(g, 13, 1, '#2c2d3a', 3, 15); px(g, 1, 3, '#f2c02a', 1, 9); px(g, 14, 3, '#f2c02a', 1, 9);
     px(g, 4, 3, '#1a1a24', 8, 9); px(g, 5, 4, '#5ae0ff', 6, 7); px(g, 5, 4, '#c8f8ff', 6, 1); px(g, 7, 4, '#23232e', 2, 7);
     hazard(g, 12);
@@ -664,12 +664,10 @@ const DRAW = {
     g.fillStyle = '#ffe44a'; g.beginPath(); g.moveTo(9.5, 3); g.lineTo(5, 8.6); g.lineTo(7.8, 8.6); g.lineTo(6.5, 13); g.lineTo(11.5, 7); g.lineTo(8.8, 7); g.closePath(); g.fill();
   },
   V: (g) => {
-    px(g, 0, 0, '#7a5a38', T, T); px(g, 0, 0, '#c49a4c', T, 1); px(g, 0, 15, '#4a3018', T, 1);
-    for (let y = 4; y < 15; y += 5) { px(g, 0, y, '#5a3e22', T, 1); for (let x = ((y - 4) / 5) % 2 ? 0 : 6; x < T; x += 12) px(g, x, y - 4, '#5a3e22', 1, 4); }
-    px(g, 2, 2, '#9a7848', 3, 1); px(g, 9, 7, '#9a7848', 4, 1);
+    shingles(g, ['#d8b070', '#a87a44', '#80582e', '#4a3018'], 13); px(g, 0, 0, '#f2c02a', T, 1);
   },
   y: (g) => {
-    px(g, 0, 0, '#cdb48a', T, T); px(g, 0, 0, '#7a5a38', T, 2);
+    px(g, 0, 0, '#cdb48a', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, '#4a3018', T, 2);
     px(g, 0, 7, '#a98f66', T, 1); px(g, 0, 14, '#a98f66', T, 2); px(g, 4, 2, '#a98f66', 1, 5); px(g, 11, 8, '#a98f66', 1, 6);
     px(g, 0, 2, '#a98f66', 3, 12); px(g, 13, 2, '#a98f66', 3, 12); px(g, 0, 2, '#e6d4ac', 1, 12);
     px(g, 5, 8, '#3a2814', 6, 5); px(g, 5, 8, '#1a1008', 6, 1);
@@ -1226,10 +1224,10 @@ function gymFamily(ids, k) {
     px(g, 0, 0, k.rim, T, 1);
   };
   DRAW[F] = (g) => {
-    px(g, 0, 0, k.wall, T, T); px(g, 0, 0, k.roofDark, T, 1);
-    px(g, 0, 1, k.wallDark, 3, 15); px(g, 13, 1, k.wallDark, 3, 15); px(g, 0, 1, k.wallLight, 1, 15);
-    px(g, 4, 3, k.trim, 8, 10); px(g, 5, 2, k.trim, 6, 1); px(g, 5, 3, k.door, 6, 9); px(g, 5, 3, k.doorLight, 6, 1); px(g, 5, 7, k.doorLight, 6, 1);
-    px(g, 0, 14, k.wallDark, T, 2);
+    px(g, 0, 0, k.wall, T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, k.roofDark, T, 2);
+    px(g, 0, 3, k.wallDark, 3, 13); px(g, 13, 3, k.wallDark, 3, 13); px(g, 0, 3, k.wallLight, 1, 13);
+    px(g, 4, 4, k.trim, 8, 10); px(g, 5, 3, k.trim, 6, 1); px(g, 5, 4, '#f2c02a', 6, 1); px(g, 5, 5, k.door, 6, 8); px(g, 5, 5, k.doorLight, 6, 1); px(g, 5, 8, k.doorLight, 6, 1);
+    px(g, 0, 14, k.wallDark, T, 2); px(g, 0, 14, '#f2c02a', T, 1);
   };
   DRAW[E] = (g) => {
     DRAW[R](g);
