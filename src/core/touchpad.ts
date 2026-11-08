@@ -64,4 +64,24 @@ export function mountTouchPad() {
   const rotate = el('div', 'gb-rotate');
   rotate.append(el('div', 'gb-rotate-icon', '⟳'), el('p', '', 'Girá el celular para jugar'), el('p', 'gb-rotate-sub', 'El juego se juega en horizontal, como una consola portátil.'));
   document.body.append(pad, rotate);
+
+  // iOS: no zoom by pinch or double tap, no long-press menus or text selection while playing
+  for (const t of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(t, (e) => e.preventDefault());
+  let lastTouch = 0;
+  document.addEventListener('touchend', (e) => { const now = Date.now(); if (now - lastTouch < 350) e.preventDefault(); lastTouch = now; }, { passive: false });
+
+  // Safari shows its bars and cannot go full screen: suggest installing it to the home screen (once)
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let seen = false;
+  try { seen = localStorage.getItem('pk_a2hs') === '1'; } catch { /* private mode */ }
+  if (ios && !(navigator as any).standalone && !seen) {
+    const tip = el('div', 'gb-tip');
+    tip.append(el('span', '', 'Para jugar a pantalla completa: Compartir → Agregar a pantalla de inicio.'));
+    const x = el('button', 'gb-tip-x', '✕') as HTMLButtonElement;
+    x.type = 'button';
+    x.addEventListener('click', () => { tip.remove(); try { localStorage.setItem('pk_a2hs', '1'); } catch { /* ignore */ } });
+    tip.append(x);
+    document.body.append(tip);
+    setTimeout(() => tip.remove(), 12000);
+  }
 }

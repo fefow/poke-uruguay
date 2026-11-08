@@ -23,7 +23,7 @@ const html = await readFile('index.html', 'utf8');
 
 await writeFile('dist/game.js', js);
 await copyFile('styles/main.css', 'dist/styles/main.css');
-for (const f of ['manifest.webmanifest', 'icon.svg']) await copyFile(f, `dist/${f}`);
+for (const f of ['manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-512.png']) await copyFile(f, `dist/${f}`);
 // Every deploy gets its own version tag: the pages ask for game.js?v=<tag>, so a browser never keeps the previous bundle.
 const BUILD = Date.now().toString(36);
 const bust = (h) => h.replace(/(src|href)="((?:styles\/)?[\w.-]+\.(?:js|css))"/g, `$1="$2?v=${BUILD}"`);
