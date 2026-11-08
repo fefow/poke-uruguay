@@ -38,12 +38,14 @@ function pixelIcon(key) {
   return h('img', { class: 'tb-pix', src: uiIconUrl(key), alt: '', width: 32, height: 32 });
 }
 
-function button(key, tip, onClick) {
-  const b = h('button', { type: 'button', class: 'tb-btn', 'data-tip': tip, 'aria-label': tip }, icon(key));
+function button(key, tip, onClick, label = tip) {
+  // the label only shows in the phone drop-down list, where the buttons are big rows with their name
+  const b = h('button', { type: 'button', class: 'tb-btn', 'data-tip': tip, 'aria-label': tip }, icon(key), h('span', { class: 'tb-label', text: label }));
   b.addEventListener('pointerdown', (e) => e.preventDefault()); // keep keyboard focus on the game
-  b.addEventListener('click', onClick);
+  b.addEventListener('click', (e) => { mapBox?.classList.remove('is-open'); moreBtn?.setAttribute('aria-expanded', 'false'); onClick(e); });
   return b;
 }
+let moreBtn;
 
 /** handlers: { menu, bag, party, dex, map, options } — each opens that screen. */
 export function mountSidebar(stageEl, hs = {}) {
@@ -57,11 +59,23 @@ export function mountSidebar(stageEl, hs = {}) {
     dex: button('dex', 'PokeDex', guard(() => handlers.dex?.())),
     party: button('team', 'Equipo', guard(() => handlers.party?.())),
     bag: button('bag', 'Mochila', guard(() => handlers.bag?.())),
-    map: button('map', 'Mapa de Uruguay (T)', guard(() => handlers.map?.())),
-    music: button('music', 'Música (N)', () => dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyN' }))),
-    options: button('gear', 'Ajustes (O)', guard(() => handlers.options?.())),
-    menu: button('menu', 'Menú (Enter)', guard(() => input.press('start'))),
+    map: button('map', 'Mapa de Uruguay (T)', guard(() => handlers.map?.()), 'Mapa'),
+    music: button('music', 'Música (N)', () => dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyN' })), 'Música'),
+    options: button('gear', 'Ajustes (O)', guard(() => handlers.options?.()), 'Ajustes'),
+    menu: button('menu', 'Menú (Enter)', guard(() => input.press('start')), 'Menú'),
   };
+  // Phones: the small shortcut icons fold into one big button that drops down a list of large rows.
+  moreBtn = h('button', { type: 'button', class: 'tb-more', 'aria-label': 'Atajos', 'aria-expanded': 'false' }, icon('menu'), h('span', { text: 'Atajos' }), h('span', { class: 'hud-caret', text: '▾' }));
+  moreBtn.addEventListener('pointerdown', (e) => e.preventDefault());
+  moreBtn.addEventListener('click', () => {
+    const open = !mapBox.classList.contains('is-open');
+    mapBox.classList.toggle('is-open', open);
+    moreBtn.setAttribute('aria-expanded', String(open));
+  });
+  // a tap anywhere else folds it back
+  addEventListener('pointerdown', (e) => {
+    if (mapBox?.classList.contains('is-open') && !mapBox.contains(e.target as Node)) { mapBox.classList.remove('is-open'); moreBtn.setAttribute('aria-expanded', 'false'); }
+  }, true);
   // player card (top left)
   portrait = h('canvas', { class: 'hud-face', width: 16, height: 16 });
   nameEl = h('b', { class: 'hud-name' });
@@ -75,6 +89,7 @@ export function mountSidebar(stageEl, hs = {}) {
   // minimap + place + tools (top right)
   mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
     h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, pixelIcon('ubicacion'), placeEl),
+    moreBtn,
     h('nav', { class: 'tb-tools' }, ...Object.values(btns)));
   // hotbar (bottom centre)
   teamEl = h('ol', { class: 'hud-team-list', 'aria-label': 'Equipo' });
@@ -120,6 +135,7 @@ export function updateSidebar(now, inGame) {
   if (!stage) return;
   const show = inGame && !document.querySelector('.bhud');
   stage.classList.toggle('is-game', show);
+  if (!show && mapBox?.classList.contains('is-open')) { mapBox.classList.remove('is-open'); moreBtn?.setAttribute('aria-expanded', 'false'); }
   bar.classList.toggle('is-busy', input.busy);
   if (now < nextPoll) return;
   nextPoll = now + 250;

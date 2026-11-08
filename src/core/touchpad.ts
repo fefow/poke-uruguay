@@ -5,6 +5,9 @@ import { input } from './input.ts';
 
 const TOUCH = '(hover: none) and (pointer: coarse)';
 
+/** True on phones and tablets (the on-screen pad is showing): hints talk about tapping instead of keys. */
+export const isTouch = () => document.body.classList.contains('gb');
+
 export function mountTouchPad() {
   if (!matchMedia(TOUCH).matches) return;
   document.body.classList.add('gb');
@@ -78,7 +81,10 @@ export function mountTouchPad() {
   // iOS: no zoom by pinch or double tap, no long-press menus or text selection while playing
   for (const t of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(t, (e) => e.preventDefault());
   let lastTouch = 0;
-  document.addEventListener('touchend', (e) => { const now = Date.now(); if (now - lastTouch < 350) e.preventDefault(); lastTouch = now; }, { passive: false });
+  document.addEventListener('touchend', (e) => {
+    // menu options, text boxes and buttons must take quick second taps (tap a move to see it, tap again to use it)
+    if ((e.target as Element)?.closest?.('.menu, .dialog, .panel, button, .menu-touchbar')) return;
+    const now = Date.now(); if (now - lastTouch < 350) e.preventDefault(); lastTouch = now; }, { passive: false });
 
   // Safari shows its bars and cannot go full screen: suggest installing it to the home screen (once)
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
