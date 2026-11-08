@@ -1,5 +1,5 @@
-// On-screen controls for phones and tablets, styled like a handheld console: a D-pad on the left, A and B on the
-// right, MENÚ and ×2 (run) on top. They drive the same actions as the keyboard (see input.ts). Landscape only:
+// On-screen controls for phones and tablets, styled like a handheld console: a D-pad on the left, Z and X (the same keys as on a computer) on the
+// right, floating over the full-screen game, MENÚ and ×2 (run) on top. They drive the same actions as the keyboard (see input.ts). Landscape only:
 // in portrait a hint asks to rotate. Desktop (a mouse or any hover device) never sees any of this.
 import { input } from './input.ts';
 
@@ -56,7 +56,7 @@ export function mountTouchPad() {
   left.append(lt, dpad);
   const right = el('div', 'gb-side gb-right');
   const rt = el('div', 'gb-top'); rt.append(button('gb-pill', '×2', 'run'));
-  const ab = el('div', 'gb-ab'); ab.append(button('gb-round gb-b', 'B', 'b'), button('gb-round gb-a', 'A', 'a'));
+  const ab = el('div', 'gb-ab'); ab.append(button('gb-round gb-b', 'X', 'b'), button('gb-round gb-a', 'Z', 'a'));
   right.append(rt, ab);
   const pad = el('div', 'gb-pad'); pad.append(left, right);
   pad.addEventListener('contextmenu', (e) => e.preventDefault());

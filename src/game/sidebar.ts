@@ -97,25 +97,13 @@ export function mountSidebar(stageEl, hs = {}) {
   new ResizeObserver(fit).observe(document.documentElement);
 }
 
-let probe: HTMLElement | null = null;
-/** Largest left/right safe-area inset (the notch of a phone held sideways), in px. */
-function safeInset() {
-  if (!probe) {
-    probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)';
-    document.body.append(probe);
-  }
-  const cs = getComputedStyle(probe);
-  return Math.max(parseFloat(cs.paddingLeft) || 0, parseFloat(cs.paddingRight) || 0);
-}
-
 /** Scale the fixed 1920x1080 stage to the window (letterboxed). */
 function fit() {
   // 4% margin: the window never shows the game edge to edge, so browser bars and scrollbars cannot cut it
   const w = document.documentElement.clientWidth || innerWidth, h = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
-  // handheld pad (touch devices): the two side columns belong to the controls, so the screen never sits under a thumb
-  const gb = document.body.classList.contains('gb'), side = gb && w >= 700 ? 124 + safeInset() : 0;
-  const k = gb ? Math.min((w - side * 2) / 1920, h / 1080) * 0.99 : Math.min(w / 1920, h / 1080) * 0.96;
+  // handheld pad (touch devices): the game fills the whole screen and the controls float over it
+  const gb = document.body.classList.contains('gb');
+  const k = gb ? Math.min(w / 1920, h / 1080) : Math.min(w / 1920, h / 1080) * 0.96;
   stage.style.setProperty('--k', k.toFixed(4));
 }
 
