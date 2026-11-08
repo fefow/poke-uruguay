@@ -654,3 +654,26 @@ test('favores entre pueblos: cada cadena se pide, se lleva y se cobra en orden',
     for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
   }
 });
+
+test('mini historias: especies, mapas, recompensas y marcas válidas, y cada una se puede completar', async () => {
+  const { MINI_STORIES, MS_SCRIPTS } = await import('../src/data/mini-stories.ts');
+  const { SPECIES } = await import('../src/data/species.ts');
+  const { ITEMS } = await import('../src/data/items.ts');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  assert.ok(MINI_STORIES.length >= 8);
+  for (const s of MINI_STORIES) {
+    assert.ok(OUTDOOR[s.map], `${s.id}: mapa ${s.map}`);
+    for (const sp of s.team ?? []) assert.ok(SPECIES[sp], `${s.id}: ${sp}`);
+    assert.ok(s.team || s.choice, `${s.id}: batalla o elección`);
+    for (const [k] of s.reward) assert.ok(ITEMS[k], `${s.id}: ${k}`);
+    const flags = {}, said = [];
+    const api = { flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async (t) => { said.push(t); }, sfx() {}, give: async () => {}, choose: async () => s.choice?.right, battle: async () => 'win' };
+    await MS_SCRIPTS.ms_foe(api, { msId: s.id, name: 'x', look: 'boy' });
+    assert.deepEqual(said.pop(), s.idle);
+    await MS_SCRIPTS.ms_local(api, { msId: s.id, name: 'l' });
+    await MS_SCRIPTS.ms_foe(api, { msId: s.id, name: 'x', look: 'boy' });
+    await MS_SCRIPTS.ms_local(api, { msId: s.id, name: 'l' });
+    assert.equal(flags[`ev_ms_${s.id}_2`], true, `${s.id} completa`);
+    for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
+  }
+});

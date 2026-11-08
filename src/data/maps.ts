@@ -720,6 +720,7 @@ import { addFrayBentosStory } from './fraybentos.ts';
 import { addMuelleStory, clearPierFolk } from './muelle.ts';
 import { addCityEvents } from './events.ts';
 import { addFavors } from './favors.ts';
+import { addMiniStories } from './mini-stories.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1436,6 +1437,7 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   for (const [id, m] of Object.entries(INTERIOR) as [string, any][]) if (id.startsWith('ferry')) for (const n of m.npcs ?? []) if (n.trainer && !n.adjacent) n.sight = Math.max(n.sight ?? 3, 14);
   addCityEvents(OUTDOOR);
   addFavors(OUTDOOR);
+  addMiniStories(OUTDOOR);
   clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }
