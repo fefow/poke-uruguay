@@ -97,7 +97,7 @@ export const LEADERS = {
     team: [['mulitin', 27], ['hornerazo', 28], ['tortugal', 28], ['mulitron', 30]], prize: 3200, badge: 'badge5', badgeName: 'Medalla Treinta y Tres', reward: 'ultraesfera', rewardQty: 5, tm: 'mt_avalancha',
     intro: ['Soy Juan Antonio Lavalleja. Con treinta y dos compañeros desembarqué en la Agraciada para liberar la Provincia Oriental.', 'Esta ciudad lleva el nombre de aquel grupo: los Treinta y Tres Orientales.', 'La piedra de estas sierras lo resiste todo. Veamos si vos también.'],
     lose: 'Hacía mucho que nadie me ganaba.',
-    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo PP subió a lo alto de la quebrada. Quiere capturar al Cardenal Azul.', 'Tenés que detenerlo.'],
+    after: ['La Medalla Treinta y Tres es tuya.', 'El jefe del Equipo PP subió a la Quebrada de los Cuervos, el valle al este de la ciudad. Quiere capturar al Cardenal Azul.', 'Tenés que detenerlo.'],
   },
   ancap: {
     order: 7, id: 'leader_ancap', name: 'Candelaria', cls: 'Presidenta de ANCAP', look: 'leader_ancap', ai: 'smart', items: ['mate_dulce'],
@@ -939,18 +939,49 @@ export const SCRIPTS = {
     await api.say('Desde la ventana de la torre, las Luces Malas de Cerro Largo se apagan una por una.');
   },
 
+  /** Halfway up the Quebrada de los Cuervos, Tabárez's assistant comes up the trail behind the player. */
+  async scene_qb_ayudante(api) {
+    api.setFlag('ev_qb_ayudante');
+    await api.say('Se oyen pasos apurados por el sendero.');
+    await api.npcApproach('ayudante_qb', 10);
+    await api.say(['¡{player}! Soy Martín, el ayudante del Maestro Tabárez. Nos vimos en el laboratorio de Carmelo.', 'El Maestro me mandó a medir el viento de la quebrada. Hace tres días que el aire está quieto, y eso acá no pasa nunca.'], { name: 'Martín' });
+    await api.say(['Cada tantos años el Cardenal Azul baja a esta quebrada a descansar, después de cruzar el país detrás del pampero.', 'El PP lo sabía. Rodearon el nido con máquinas: si la niebla no lo deja levantar vuelo, el viento no vuelve a soplar.'], { name: 'Martín' });
+    await api.say(['Tus criaturas están cansadas. Dejame darles una mano.'], { name: 'Martín' });
+    await api.healParty();
+    await api.say(['Yo voy a avisarle al Maestro. Viene en camino desde Carmelo.', 'Arriba no te puedo ayudar: con los reclutas del PP no tengo chance.'], { name: 'Martín' });
+    await api.npcWalkOff('ayudante_qb');
+  },
+
   async brumario(api) {
-    await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP en el este.', 'El Cardenal Azul limpia el cielo y disipa la niebla. Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
+    api.playerFaceNpc('brumario');
+    await api.say(['Así que vos sos el entrenador que molesta a mis reclutas.', 'Soy Brumario, jefe del Equipo PP en el este.', 'Mirá atrás mío. El Cardenal Azul limpia el cielo y disipa la niebla. Mientras esté acá, el pampero no sopla.', 'Si lo capturo, el país será nuestro: gris, quieto, sin viento.', 'Apartate de mi camino.'], { name: 'Brumario' });
     const res = await api.battle({ id: 'brumario', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: bossAt('quebrada', [['yarara', 32], ['zorromonte', 32], ['cuervon', 33], ['lobomarino', 34]], 1), prize: 3000, lose: 'No… el viento vuelve.', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
-    api.setFlag('quebrada_clear');
-    await api.flash();
-    api.sfx('evolve');
-    await api.say(['Un viento helado baja de las sierras.', 'Allá arriba, el Cardenal Azul se aleja hacia el sur, y la niebla de la Quebrada se disipa.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Perdí. Pero esto no se termina acá.', 'Yo sólo respondo al Dr. Díaz. Él nunca se ensucia las manos.', 'Si querés seguir, la fábrica de Minas es el próximo paso. Garúa la dirige.'], { name: 'Brumario' });
-    await api.npcLeave('brumario');
-    await api.say(['Tu celular vibra. Es un mensaje del Maestro Tabárez:', '"Me enteré de todo, {player}. Es un logro enorme, pero esto recién empieza.', 'Seguí hacia la costa de Rocha: en el faro de Cabo Polonio falta una lámpara.', 'Y más adelante, en Minas, hay una fábrica abandonada que volvió a funcionar. Mirala con cuidado."']);
-    await api.say(['Otro mensaje, un minuto después:', '"Proyecto Pampero… ese nombre es mío. Fue un estudio que hice con Dr. Díaz para predecir el clima con ayuda de las criaturas.', 'Se fue cuando me negué a venderlo. Si es él quien está detrás, esto también es cosa mía.', 'Nuestro laboratorio era el viejo Observatorio del Cerro, en Piriápolis. Si podés, pasá a ver qué quedó ahí."']);
+    await api.npcWalkOff('brumario');
+    // the machines go quiet one after the other and the bird breaks free
+    api.sfx('cancel');
+    api.npcHide('maq_qb1');
+    await api.say('Una de las máquinas tose y se apaga.');
+    api.sfx('cancel');
+    api.npcHide('maq_qb2');
+    await api.say(['La otra se queda sin humo.', 'El Cardenal Azul abre las alas. Te mira un momento, como si te conociera.']);
+    api.sfx('evolve');
+    await api.flash();
+    await api.npcFlyOff('cardenal_qb');
+    api.setFlag('quebrada_clear');
+    await api.say(['Un viento helado baja de las sierras.', 'El Cardenal Azul se aleja hacia el sur, y la niebla de la Quebrada se disipa.']); // seen in the world itself: only winning the Liga gets a full-screen scene
+    await api.say('Donde estaba el pájaro quedó una pluma azul que chispea.');
+    // Tabárez comes up the trail, walking: he has been on the road since Martín called him.
+    await api.npcApproach('tabarez_qb', 14);
+    await api.say(['Llegué tarde para verlo de cerca, pero lo vi irse. Hacía veinte años que no lo veía volar.', 'Martín me contó lo que hiciste en la subida. Gracias, {player}.'], { name: 'Maestro Tabárez' });
+    await api.say(['Te debo la historia completa.', 'El pampero no es solo un viento. Lo trae el Cardenal Azul: cuando cruza el país, el cielo se limpia y la niebla se va.', 'Con Díaz lo estudiamos años. Lo llamamos Proyecto Pampero: queríamos predecir el clima siguiendo su ciclo.'], { name: 'Maestro Tabárez' });
+    await api.say(['Díaz quiso venderlo. Si el Cardenal deja de volar, la niebla se queda, y la niebla se puede cobrar.', 'Me negué y se fue. Ahora sé hasta dónde estaba dispuesto a llegar.', 'En Fray Bentos te dije que tu compañero guarda un eco del ciclo del viento. Es el eco del Cardenal: nació en mi laboratorio el día que pasó volando sobre Carmelo.'], { name: 'Maestro Tabárez' });
+    await api.say(['Esa pluma la dejó para vos. Guardala.', 'Cuando el PP ya no exista, el Cardenal va a volver a descansar acá. Si la llevás, te va a reconocer.'], { name: 'Maestro Tabárez' });
+    await api.give('pluma_azul', 1);
+    api.setFlag('got_pluma');
+    await api.say(['Nuestro laboratorio era el viejo Observatorio del Cerro, en Piriápolis. Si pasás por ahí, fijate qué quedó.', 'Y seguí hacia la costa: en el faro de Cabo Polonio falta una lámpara, y en Minas hay una fábrica abandonada que volvió a funcionar.'], { name: 'Maestro Tabárez' });
+    await api.npcWalkOff('tabarez_qb');
   },
 
   async rival_r5(api) {
@@ -1090,7 +1121,7 @@ export const SCRIPTS = {
   },
 
   async calima(api) {
-    await api.say(['Así que sos vos.', 'Soy Dr. Díaz, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Pampero natural era un estorbo. Por eso quise capturarlo.', 'Tabárez nunca se animó a ir más lejos. Yo sí, y por eso hoy estoy acá.'], { name: 'Dr. Díaz' });
+    await api.say(['Así que sos vos.', 'Soy Dr. Díaz, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Cardenal Azul era un estorbo: cada vez que cruzaba el país, el pampero se llevaba mi niebla. Por eso quise encerrarlo en la Quebrada.', 'Tabárez nunca se animó a ir más lejos. Yo sí, y por eso hoy estoy acá.'], { name: 'Dr. Díaz' });
     await api.say(['Llegaste con las doce medallas. Se nota que no te asustan las torres.', 'Pero no vas a apagarme a mí.'], { name: 'Dr. Díaz' });
     const res = await api.battle({ id: 'calima', name: 'Dr. Díaz', cls: 'Fundador PP', look: 'calima', ai: 'smart', team: bossAt('montevideo', [['vespertino', 51], ['viudanegra', 52], ['tormenton', 53], ['yarara', 53], ['buho', 53], ['yacaron', 54]], 1), prize: 9000, lose: 'No… mi proyecto…', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'] });
     if (res !== 'win') return;

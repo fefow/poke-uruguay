@@ -183,7 +183,7 @@ const GYM_TRAINERS = {
   volador: [['Ismael', 'Aeromodelista', ['Mi planeador y yo somos uno.', 'Aterricé mal.', 'El maestro Boiso está arriba.']], ['Clara', 'Paracaidista', ['Un salto y listo.', 'Se me abrió tarde.', 'Seguí adelante.']]],
   bicho: [['Gabriel', 'Viñatero', ['Los bichos cuidan mis uvas.', 'Cosecha perdida.', 'Tomás te espera.']], ['Rosa', 'Apicultora', ['Cuidado con el aguijón.', 'Me picó la derrota.', 'Seguí, no te voy a frenar.']]],
 };
-const KEEP_TARGETS = new Set(['ciclovia', 'cabo']); // dead-end branches that keep their own exits
+const KEEP_TARGETS = new Set(['ciclovia', 'cabo', 'quebrada_cuervos']); // dead-end branches that keep their own exits
 export const ROUTE_OUTDOOR: Record<string, MapDef> = {};
 export const ROUTE_INTERIOR: Record<string, MapDef> = {};
 

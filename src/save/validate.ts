@@ -19,7 +19,7 @@ const LINES = {
 };
 const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'dex_quest', 'got_carta', 'rival1', 'rival2', 'rival3', 'rival4',
-  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
+  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'got_pluma', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'anima_clear', 'fog1', 'fog2', 'fog3', 'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_soga', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
   'rival5', 'rival6', 'rival_bosque', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
@@ -104,6 +104,7 @@ export function validateSave(d: any) {
     ['quebrada_clear', badgeOf('quebrada'), 'la Quebrada de los Cuervos'],
     ['cabo_clear', badgeOf('quebrada'), 'el faro de Cabo Polonio'],
     ['obs_clear', 'quebrada_clear', 'el Observatorio'],
+    ['got_pluma', 'quebrada_clear', 'la Pluma Azul'],
     ['pp_clear', badgeOf('punta'), 'la fábrica de Minas'],
     ['anglo_clear', 'badge12', 'Dr. Díaz'],
   ];
@@ -154,6 +155,7 @@ export function validateSave(d: any) {
     if (!isInt(q, 1, max)) { e(`cantidad inválida de ${it.name}`); continue; }
     bag[k] = q;
   }
+  if (bag.pluma_azul && !flags.got_pluma) e('Pluma Azul sin haberla recibido');
   if (bag.lampara && !(flags.cabo_clear && !flags.lamp_returned)) e('Lámpara del Faro imposible');
   if (bag.esfera_celeste) e('Pokeball Celeste no se puede obtener');
   if (bag.mapa_uruguay && !flags.got_mapa) e('Mapa de Uruguay sin haberlo recibido');

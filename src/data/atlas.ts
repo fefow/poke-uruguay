@@ -39,13 +39,14 @@ export const PLACES = deepFreeze([
     return { id: st.id, name: st.name, kind: st.kind, lon, lat, ...(color ? { color } : {}), ...(note ? { note } : {}) };
   }),
   { id: 'cabo', name: 'Cabo Polonio', kind: 'place', lon: -53.77, lat: -34.4, note: 'Faro' },
+  { id: 'quebrada_cuervos', name: 'Quebrada de los Cuervos', kind: 'place', lon: -54.45, lat: -32.93, note: 'Valle del arroyo Yerbal' },
 ]);
 
 // Mapas de ruta: se muestran entre los dos lugares que unen.
 export const ROUTES = deepFreeze(Object.fromEntries(STOPS.flatMap((st, i) => st.via.map((r) => [r, [st.id, STOPS[i + 1].id]]))));
 
 // Líneas que unen los lugares en orden de recorrido (la ruta completa, más el ramal a Cabo Polonio).
-export const LINKS = deepFreeze([...STOPS.slice(0, -1).map((st, i) => [st.id, STOPS[i + 1].id]), ['paloma', 'cabo']]);
+export const LINKS = deepFreeze([...STOPS.slice(0, -1).map((st, i) => [st.id, STOPS[i + 1].id]), ['paloma', 'cabo'], ['quebrada', 'quebrada_cuervos']]);
 
 export const VIEW = { w: 340, h: 250, lon0: -59.76, lon1: -52.04, lat0: -29.9, lat1: -35.2 };
 export const project = (lon, lat) => [
@@ -88,13 +89,13 @@ export const DEPARTMENTS = deepFreeze([
 ]);
 
 // Departamento de cada lugar del mapa.
-export const PLACE_DEPT = deepFreeze({ ...Object.fromEntries(STOPS.map((st) => [st.id, st.dept])), cabo: 'rocha' });
+export const PLACE_DEPT = deepFreeze({ ...Object.fromEntries(STOPS.map((st) => [st.id, st.dept])), cabo: 'rocha', quebrada_cuervos: 'treintaytres' });
 
 // Zona (bioma) de cada mapa con criaturas salvajes.
 const DEPT_BIOME = Object.fromEntries(DEPARTMENTS.map((d) => [d.id, d.biome]));
 const BASE_MAP_BIOME = {
   ruta1: ['campo'], rosario: ['playa'], interbalnearia: ['ciudad', 'playa'], piriapolis: ['playa'], punta: ['playa'], paloma: ['playa'], cabo: ['playa'],
-  ruta8: ['campo', 'ciudad'], minas: ['hielo', 'campo'], quebrada: ['campo', 'bosque'], durazno: ['magma'],
+  ruta8: ['campo', 'ciudad'], minas: ['hielo', 'campo'], quebrada: ['campo', 'bosque'], quebrada_cuervos: ['bosque', 'campo'], durazno: ['magma'],
   ruta5: ['campo', 'bosque'], tacuarembo: ['bosque'], ruta30: ['bosque'], rivera: ['bosque', 'ciudad'], ruta31: ['campo', 'bosque'], salto: ['campo', 'ciudad'],
   ruta3: ['campo'], paysandu: ['campo'], ruta24: ['campo'], fraybentos: ['ciudad', 'campo'],
 };
