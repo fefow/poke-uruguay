@@ -628,3 +628,29 @@ test('map editor: a map can choose the ground behind its trees and bushes', asyn
   applyMapEdits(maps, { a: { ground: 's' } });
   assert.equal(maps.a.ground, 's');
 });
+
+test('favores entre pueblos: cada cadena se pide, se lleva y se cobra en orden', async () => {
+  const { FAVORS, FAVOR_SCRIPTS } = await import('../src/data/favors.ts');
+  const { ITEMS } = await import('../src/data/items.ts');
+  assert.ok(FAVORS.length >= 12);
+  for (const c of FAVORS) {
+    const flags = {}, given = [], said = [];
+    const api = { flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async (t) => { said.push(t); }, sfx() {}, give: async (k, q) => { given.push([k, q]); } };
+    const npc = (role, name) => ({ name, fvId: c.id, fvRole: role });
+    // a middle person says nothing useful before the request, then the request is made
+    await FAVOR_SCRIPTS.fv(api, npc(1, 'mid'));
+    assert.deepEqual(said.pop(), c.idle);
+    await FAVOR_SCRIPTS.fv(api, npc(0, 'giver'));
+    assert.equal(flags[`ev_fv_${c.id}_0`], true);
+    assert.equal(given.length, 0);
+    // asking again before finishing only repeats the wait line
+    await FAVOR_SCRIPTS.fv(api, npc(0, 'giver'));
+    assert.deepEqual(said.pop(), c.wait);
+    for (let j = 1; j <= c.mids.length; j++) await FAVOR_SCRIPTS.fv(api, npc(j, 'mid'));
+    await FAVOR_SCRIPTS.fv(api, npc(0, 'giver'));
+    assert.equal(flags[`ev_fv_${c.id}_z`], true);
+    assert.deepEqual(given, c.reward);
+    for (const [k] of c.reward) assert.ok(ITEMS[k], `${c.id}: ${k} existe`);
+    for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
+  }
+});

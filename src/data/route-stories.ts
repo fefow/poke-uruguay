@@ -154,6 +154,41 @@ function entryEnd(m, id): 'lo' | 'hi' {
   return side === 'e' || side === 's' ? 'hi' : 'lo';
 }
 
+
+// Each route keeps only some of the obstacles so no two walks feel the same: g = trainers' toll gate, r = riddle herd,
+// l = lever gate, f = PP fog machine. (The lost-item person and the local legend are on every route.)
+const ROUTE_MIX: Record<string, string> = {
+  ruta1: 'g', r_colonia_rosario: 'gf', r_rosario_sanjose: 'r', r_ecilda_trinidad: 'lg', r_villasoriano_fraybentos: 'fr',
+  r_belen_artigas: 'g', r_baltasar_rivera: 'rl', r_tupambae_melo: 'f', r_cerrochato_quebrada: 'gl', r_lascano_rocha: 'r',
+  r_rocha_paloma: 'gf', r_casupa_florida: 'l', r_sarandi_durazno: 'gr', r_sanramon_canelones: 'f',
+  ruta8: 'g', ruta5: 'r', ruta30: '', ruta31: 'l', ruta3: 'g', ruta24: 'f',
+};
+const mixOf = (id: string) => ROUTE_MIX[id] ?? 'g';
+
+// A local with a story of this stretch of land; some leave a small gift the first time. [name, look, lines, gift?]
+const ROUTE_LEGENDS: Record<string, [string, string, string[], [string, number]?]> = {
+  ruta1: ['Don Eusebio', 'gaucho', ['Esta tranquera la levantó mi abuelo con postes de ñandubay. Todavía no se pudrió ni uno.', 'Dicen que antes del pueblo, acá pasaban las tropas de carretas rumbo a la costa.']],
+  r_colonia_rosario: ['Farero retirado', 'oldman', ['Desde esta curva se ve el faro. De niño contaba cuántas veces giraba la luz por noche.', 'En las noches sin viento, el río suena distinto.'], ['esfera', 2]],
+  r_rosario_sanjose: ['Hachero Anselmo', 'gaucho', ['Este monte era mucho más espeso. Los eucaliptos vinieron después, con los inmigrantes.', 'Si oís un golpe seco en la noche, no es un fantasma: es un ñandubay que se parte de viejo.']],
+  r_ecilda_trinidad: ['Carretera Dora', 'mom', ['Mi marido hacía carros. Hoy hacemos ruedas para turistas, pero me gusta oír el eje cantar.', 'En los días de calor, la sombra del único ombú de la ruta es el mejor negocio del lugar.'], ['mate', 2]],
+  r_villasoriano_fraybentos: ['Balsero Ismael', 'sailor', ['Antes de las lanchas había balsas con caballos. Mi bisabuelo cruzó a Soriano cuarenta años seguidos.', 'Cuando el río crece, la balsa se queda amarrada y los pájaros se meten en el pasto como en casa.']],
+  r_belen_artigas: ['Arrocero Julián', 'boy', ['Acá todo arroz es de frontera: un poco de acá, un poco de allá y el agua de ninguno.', 'Las garzas siguen al tractor como si fuera su dueño.'], ['mate_dulce', 2]],
+  r_baltasar_rivera: ['Vendedora de dulces', 'mom', ['Mi tía cruzaba a Brasil por el campo, con la canasta en la cabeza. Nunca perdió un dulce.', 'La frontera es una línea en un mapa; acá es el almuerzo de todos los días.']],
+  r_tupambae_melo: ['Alambrador Gerardo', 'gaucho', ['Cuatro hilos de alambre, tres varillas y una vida entera de cuchilla. Eso es mi trabajo.', 'En la loma se juntan nubes antes que en ningún lado. Mirá cómo vienen.']],
+  r_cerrochato_quebrada: ['Maestra Elba', 'maestra', ['Cerro Chato queda en tres departamentos al mismo tiempo. Los chicos aprenden la historia de todos.', 'Si ves una luz baja en la madrugada, es el arrocero revisando la compuerta.'], ['esfera', 3]],
+  r_lascano_rocha: ['Guardafauna Mirta', 'cop', ['Los bañados de acá alojan más aves que personas en todo el departamento.', 'No pises la orilla blanda: hay carpinchos que duermen el día entero y no les gusta el sobresalto.']],
+  r_rocha_paloma: ['Pescador Ariel', 'sailor', ['Cuando la laguna se abre al mar, el agua cambia de color. Mi hijo dice que es magia; yo digo que es sal.', 'Las gaviotas conocen los horarios de las lanchas mejor que yo.'], ['superesfera', 1]],
+  r_casupa_florida: ['Arriero Nicanor', 'gaucho', ['Este tramo lo marcaron las tropas hace más de cien años. El camino sigue donde las pezuñas lo dejaron.', 'Una tarde vi cruzar un ñandú con crías y paré el carro para dejarlos pasar.']],
+  r_sarandi_durazno: ['Herrero Telmo', 'oldman', ['Mi forja no apaga nunca del todo: dejo brasas para la madrugada.', 'Los rieles viejos se oyen a cuatro leguas cuando pasa el tren.']],
+  r_sanramon_canelones: ['Quintera Berta', 'mom', ['Acá el vino sale de mala gana y el tomate de buena. Es cuestión de suelos.', 'En diciembre, la ruta se llena de puestos de verdura. Se oye hasta el pregón.'], ['mate_dulce', 2]],
+  ruta8: ['Peón de estancia', 'gaucho', ['Pasé toda mi vida en este campo y todavía encuentro algún rincón que no conocía.', 'A las seis de la tarde, la luz en esta cuchilla es dorada. Lástima que dura poco.']],
+  ruta5: ['Gaucho viajero', 'gaucho', ['Siempre llevo yerba de más. En la ruta, alguien siempre necesita un mate.', 'Hay cosas que se aprenden caminando: dónde está el pozo, quién tiene perro, cuándo cambia el viento.'], ['mate', 3]],
+  ruta30: ['Pescador del arroyo', 'sailor', ['Este arroyo cambia de humor con las lluvias. Hoy está manso; mañana quién sabe.', 'En la orilla de enfrente hay un viejo sauce donde dejé mi primer anzuelo.']],
+  ruta31: ['Vecina del lugar', 'girl', ['Mi abuela contaba que de noche se oía un silbido largo en la sierra. Dicen que era el viento entre las piedras.', 'Hay un caminito de cabras que sube más rápido que la ruta, pero no se lo recomiendo a cualquiera.'], ['esfera', 2]],
+  ruta3: ['Camionero Hugo', 'sailor', ['Veinte años manejando por acá y todavía me sorprende el cielo en esta parte del país.', 'Cuando llueve fuerte, el agua baja por la ruta como arroyo. Hay que ir despacio.']],
+  ruta24: ['Estudiante de geología', 'boy', ['Estas piedras rojizas tienen más de quinientos millones de años. Es mucho para pisarlas sin saludar.', 'Las canteras de acá dieron granito para media ciudad.'], ['piedra_agata', 1]],
+};
+
 const RIDDLE_FREE = new Set(['ruta1', 'r_colonia_rosario', 'ruta30']); // no riddle gate on the first routes of the story, nor on the short river route (its Surf river already closes it)
 
 /** Adds the toll keeper, the lost-item person and the fog machine to a guided route map. */
@@ -166,7 +201,8 @@ export function addRouteStory(m, id) {
   const trainers = m.npcs.filter((n) => n.trainer);
 
   // toll keeper: blocks the narrowest cross-section until every trainer on the route is beaten
-  const cut = trainers.length > 1 ? narrowestCut(m, busy, 0.3, 0.7, 10) : null;
+  const mix = mixOf(id);
+  const cut = trainers.length > 1 && mix.includes('g') ? narrowestCut(m, busy, 0.3, 0.7, 10) : null;
   if (cut) {
     const [who, look, text] = st.gate;
     // whichever end the player enters from, only the trainers on that side must be beaten (never ones behind the gate)
@@ -190,12 +226,12 @@ export function addRouteStory(m, id) {
 
   // fog machine: a PP object with a clue about the business
   const mach = freeSpot(m, busy, 0.75);
-  addLeverGate(m, id, busy);
+  if (mix.includes('l')) addLeverGate(m, id, busy);
   // riddle gate: a second obstacle earlier on the trail, opened by answering a riddle (never a battle)
   // The first routes (leaving Carmelo and Colonia) stay free: the story starts without obstacles.
   // It sits near the end the player arrives from, and the old man waits on that same side of the animals.
   const entry = entryEnd(m, id);
-  const rcut = RIDDLE_FREE.has(id) ? null : entry === 'lo' ? narrowestCut(m, busy, 0.12, 0.28, 10) : narrowestCut(m, busy, 0.72, 0.88, 10);
+  const rcut = RIDDLE_FREE.has(id) || !mix.includes('r') ? null : entry === 'lo' ? narrowestCut(m, busy, 0.12, 0.28, 10) : narrowestCut(m, busy, 0.72, 0.88, 10);
   if (rcut) {
     const flag = `rf_rid_${id}`.slice(0, 40);
     // One herd of a single kind fills the pass (the old man is driving it); one old man stands beside it, on the
@@ -227,7 +263,14 @@ export function addRouteStory(m, id) {
       rcut.forEach(([x, y]) => { const i = m.npcs.findIndex((n) => n.x === x && n.y === y && n.blocker && !n.script); if (i >= 0) m.npcs.splice(i, 1); }); // no room for him: leave the way open
     }
   }
-  if (mach) m.npcs.push({ x: mach[0], y: mach[1], look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', clue: st.fog, doneFlag: `rf_${id}` });
+  // the local legend: a person with a story of this stretch of land, off the trail
+  const lg = ROUTE_LEGENDS[id];
+  const lspot = lg ? freeSpot(m, busy, 0.55) : null;
+  if (lg && lspot) {
+    m.npcs.push({ x: lspot[0], y: lspot[1], look: lg[1], dir: 'down', name: lg[0], script: 'route_legend', lines: lg[2], gift: lg[3] ?? null, doneFlag: `rq_leg_${id}`.slice(0, 40) });
+    busy.add(`${lspot[0]},${lspot[1]}`);
+  }
+  if (mach && mix.includes('f')) m.npcs.push({ x: mach[0], y: mach[1], look: 'machine', dir: 'down', name: 'Máquina de niebla', script: 'route_fog', clue: st.fog, doneFlag: `rf_${id}` });
 }
 
 

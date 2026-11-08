@@ -2,6 +2,7 @@
 // NPC that triggered it. Text uses Rioplatense Spanish ("vos"), in a sober tone aimed at adults.
 import { SPECIES } from './species.ts';
 import { EVENT_SCRIPTS, riddleFor } from './events.ts';
+import { FAVOR_SCRIPTS } from './favors.ts';
 import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from './route.ts';
 import { teamOf } from './map-gen.ts';
 import { bossTeam, rescaleTeam } from './levels.ts';
@@ -634,6 +635,16 @@ export const SCRIPTS = {
     await api.give(npc.reward);
   },
 
+  // A local with a story about the stretch of land; the first time, a small gift (when the route has one).
+  async route_legend(api, npc) {
+    await api.say(npc.lines, { name: npc.name });
+    if (npc.gift && !api.flag(npc.doneFlag)) {
+      api.setFlag(npc.doneFlag);
+      await api.say('Llevate esto para el camino.', { name: npc.name });
+      await api.give(npc.gift[0], npc.gift[1]);
+    }
+  },
+
   async route_fog(api, npc) {
     await api.say(npc.clue, { name: 'Máquina de niebla' });
     if (api.flag(npc.doneFlag)) return;
@@ -1222,6 +1233,7 @@ export const SCRIPTS = {
   },
 
   ...EVENT_SCRIPTS,
+  ...FAVOR_SCRIPTS,
 };
 
 // The late-game content was written for a longer climb: bring it down to the route's level curve.
