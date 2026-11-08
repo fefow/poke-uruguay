@@ -43,9 +43,14 @@ export function text(g, str, x, y, { color = '#fff', size = 8, align = 'left', s
 
 const START_HOUR = 8 + Math.random() * 8;
 const BOOT = typeof performance !== 'undefined' ? performance.now() : 0;
-const MS_PER_HOUR = 45000; // a full in-game day lasts 18 real minutes
+const MS_PER_HOUR = 45000; // title screen only: a full day lasts 18 real minutes
 /** In-game hour 0..24. */
+let clockSource: (() => number | null) | null = null;
+/** The calendar (src/game/calendar.ts) supplies the hour once a game is loaded. */
+export const setClockSource = (fn) => (clockSource = fn);
 export function skyHour(now = typeof performance !== 'undefined' ? performance.now() : 0) {
+  const h = clockSource?.();
+  if (h != null) return h;
   return (START_HOUR + (now - BOOT) / MS_PER_HOUR) % 24;
 }
 

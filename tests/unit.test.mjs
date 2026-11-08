@@ -691,3 +691,34 @@ test('mini historias: cadenas de pasos con personas en mapas reales, ítems clav
     for (const k of Object.keys(flags)) assert.match(k, /^(ev_[a-z0-9_]{1,40}|got_[a-z]+)$/);
   }
 });
+
+test('in-game calendar: weekdays, dates, sleeping and saving', async () => {
+  const cal = await import('../src/game/calendar.ts');
+  const { setState } = await import('../src/game/state.ts');
+  const s = newState({ name: 'Dusi', look: 'player_m' });
+  setState(s);
+  assert.equal(cal.weekday(), 'lunes');
+  assert.equal(cal.fullText(), 'Lunes 1 de marzo · 08:00');
+  cal.advanceClock(18 * 60000); // 18 real minutes = one in-game day
+  assert.equal(cal.fullText(), 'Martes 2 de marzo · 08:00');
+  assert.ok(cal.isDay('martes', 'jueves'));
+  assert.ok(!cal.isDay('miercoles'));
+  assert.equal(cal.shortText(), 'Mar 2 mar · 08:00');
+  s.clock = 22 * 60 + 24 * 60 * 30; // day 31, 22:00
+  assert.equal(cal.dateText(), '31 de marzo');
+  assert.ok(cal.isDay('miércoles'));
+  cal.sleepUntil(8);
+  assert.equal(cal.fullText(), 'Jueves 1 de abril · 08:00');
+  s.clock = cal.dayNumber() * 1440 + 3 * 60; // 3:00 at night: sleep until 8:00 the same day
+  const day = cal.dayNumber();
+  cal.sleepUntil(8);
+  assert.equal(cal.dayNumber(), day);
+  assert.equal(cal.timeText(), '08:00');
+  assert.equal(cal.daysSince(day - 2), 2);
+  // the clock is kept by save validation; old saves without it start on day 1 at 8:00
+  const g = goodSave();
+  g.clock = 5000;
+  assert.equal(validateSave(g).data.clock, 5000);
+  delete g.clock;
+  assert.equal(validateSave(g).data.clock, 480);
+});

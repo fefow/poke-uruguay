@@ -9,6 +9,7 @@ import { ITEMS } from '../data/items.ts';
 import { TYPES } from '../data/types.ts';
 import { creatureIcon, silhouette } from '../gfx/creatures.ts';
 import { panel, say, choose, ask, closeDialog, toast, fmt } from './ui.ts';
+import { capital, weekday, dateText, timeText, dayNumber } from './calendar.ts';
 import { state, settings, saveSettings, addItem, removeItem, spend, earn, hasItem, badgeCount, PARTY_MAX, markCaught } from './state.ts';
 import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gainExp, canEvolve, tmCompatible, stoneEvolution } from './creature.ts';
 import { applyItem, STATUS_SHORT } from './battle-engine.ts';
@@ -85,7 +86,7 @@ export async function openPauseMenu() {
     entries.push(['Guardar', openSave]);
     entries.push(['Opciones', openOptions]);
     entries.push(['Volver', null]);
-    const i = await choose(entries.map((e) => e[0]), { cls: 'menu-pause' });
+    const i = await choose(entries.map((e) => e[0]), { cls: 'menu-pause', title: `${capital(weekday())} ${dateText()}` });
     if (i < 0 || !entries[i][1]) return;
     await entries[i][1]();
     if (flight) {
@@ -768,6 +769,8 @@ export function openCard() {
           h('dt', { text: 'Nombre' }), h('dd', { text: S.player.name }),
           h('dt', { text: 'Dinero' }), h('dd', { text: `$${S.player.money.toLocaleString('es-UY')}` }),
           h('dt', { text: 'PokeDex' }), h('dd', { text: `${S.dex.caught.length} / ${DEX_ORDER.length}` }),
+          h('dt', { text: 'Hoy' }), h('dd', { text: `${capital(weekday())} ${dateText()}` }),
+          h('dt', { text: 'Hora' }), h('dd', { text: `${timeText()} · día ${dayNumber() + 1} de viaje` }),
           h('dt', { text: 'Tiempo' }), h('dd', { text: formatTime(S.stats.playtime) }),
           h('dt', { text: 'Victorias' }), h('dd', { text: String(S.stats.battlesWon) }),
           h('dt', { text: 'Inicio' }), h('dd', { text: new Date(S.created).toLocaleDateString('es-UY') }),
