@@ -8,6 +8,7 @@ export const UI_ICONS: { key: string; name: string; w: number; h: number }[] = [
   { key: 'medallas', name: 'Medallas', w: 16, h: 16 },
   { key: 'dinero', name: 'Dinero', w: 16, h: 16 },
   { key: 'ubicacion', name: 'Ubicación', w: 16, h: 16 },
+  { key: 'niebla', name: 'Medidor de Niebla', w: 16, h: 16 },
   { key: 'captura_esfera', name: 'Pokeball en combate', w: 16, h: 16 },
   { key: 'captura_superesfera', name: 'Superball en combate', w: 16, h: 16 },
   { key: 'captura_ultraesfera', name: 'Ultraball en combate', w: 16, h: 16 },
@@ -73,6 +74,32 @@ const DRAW: Record<string, () => HTMLCanvasElement> = {
       put(x, y, i > 1 ? (y >= 12 ? '#3e2610' : '#5a3a1a') : y <= 9 ? '#c8945a' : '#a87a4a');
     }
   }, 24),
+  niebla: () => make((put) => {
+    // grey fog cloud with a small dial in front: green, yellow and red bands and a needle
+    const rows = [
+      '................',
+      '....ooo.........',
+      '...occco.ooo....',
+      '..occcccoccco...',
+      '.occCCcccccccoo.',
+      '.occcccccccccco.',
+      '..oooooooooooo..',
+      '....oooooooo....',
+      '...oggyyyyrro...',
+      '..ogg..n...rro..',
+      '..og....n...ro..',
+      '..og.....n..ro..',
+      '..oooooooOoooo..',
+      '...owwwwwwwwo...',
+      '....oooooooo....',
+      '................',
+    ];
+    const pal = { o: INK, c: '#b8c0cc', C: '#e8ecf2', g: '#3aa04a', y: '#e8c21c', r: '#e0343c', n: INK, O: '#e0343c', w: '#f4f4f0', '.': '' };
+    rows.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch === '.' && y >= 9 && y <= 11 && x >= 3 && x <= 12) put(x, y, '#f4f4f0');
+      else if (pal[ch]) put(x, y, pal[ch]);
+    }));
+  }),
   ubicacion: () => make((put) => {
     const rows = [
       '................',

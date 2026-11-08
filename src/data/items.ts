@@ -71,6 +71,7 @@ const BASE_ITEMS = {
   llave_c2: { name: 'Llave del camarote 2', pocket: 'key', price: 0, desc: 'Llave de bronce con una chapita: "Camarote 2". Del Buquebus China Zorrilla.' },
   llave_bodega: { name: 'Llave de la bodega', pocket: 'key', price: 0, desc: 'Llave grande y oxidada. Abre la bodega del Buquebus China Zorrilla.' },
   llave_cubierta: { name: 'Llave de la cubierta', pocket: 'key', price: 0, desc: 'Llave de la puerta a la cubierta superior del Buquebus China Zorrilla.' },
+  medidor_niebla: { name: 'Medidor de Niebla', pocket: 'key', price: 0, desc: 'Aparato del laboratorio del Maestro Tabárez. Mide cuánta niebla del Equipo PP queda en el aire de Uruguay.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
   // Mini stories: things carried from one person to another along the way
