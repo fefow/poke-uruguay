@@ -1091,17 +1091,14 @@ body {
 .bhud { transition: opacity 0.2s, transform 0.15s; }
 
 /* ------------------------------------------------ handheld pad (touch devices only: body.gb) */
-body.gb {
-  background:
-    radial-gradient(90% 120% at 50% 40%, #5a4cab, transparent 75%),
-    linear-gradient(180deg, #4a3d96, #3a2f78);
-  overflow: hidden;
-}
+body.gb { background: #0b0a1a; overflow: hidden; }
 body.gb .app { position: relative; }
-body.gb .stage > .screen { box-shadow: 0 0 0 6px #1d1740, 0 0 0 10px #2d2562; border-radius: 6px; }
+body.gb .stage > .screen { border-radius: 0; }
 body.gb .fs-btn { display: none; }
 .gb-pad { position: fixed; inset: 0; z-index: 900; display: flex; justify-content: space-between; pointer-events: none; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); touch-action: none; }
-.gb-side { width: 124px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 14px 6px 22px; pointer-events: none; }
+.gb-side { width: 150px; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; align-items: center; padding: 14px 10px 18px; pointer-events: none; }
+.gb-pad .gb-btn, .gb-pad .gb-dpad { opacity: 0.55; }
+.gb-pad .gb-dpad.on-up, .gb-pad .gb-dpad.on-down, .gb-pad .gb-dpad.on-left, .gb-pad .gb-dpad.on-right, .gb-pad .gb-btn.is-down { opacity: 0.85; }
 .gb-pad .gb-btn, .gb-pad .gb-dpad { pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; }
 .gb-pill { padding: 8px 12px; border: 0; border-radius: 999px; background: #241e4e; color: #cfc8ff; font: 700 11px/1 var(--font-ui); letter-spacing: 1px; box-shadow: 0 2px 0 #120f2c; }
 .gb-pill.is-down { transform: translateY(2px); box-shadow: none; background: #3a3178; }
@@ -1128,7 +1125,16 @@ body.gb .fs-btn { display: none; }
   .gb-rotate p { margin: 0; font-size: 20px; font-weight: 700; }
   .gb-rotate .gb-rotate-sub { font-size: 14px; font-weight: 400; opacity: 0.8; }
 }
-@media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 96px; } .gb-dpad, .gb-ab { transform: scale(0.85); } }
+@media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 120px; } .gb-dpad, .gb-ab { transform: scale(0.85); } }
+/* mobile HUD: compact, bigger than the scaled-down desktop one, team list left to the menu */
+body.gb .hud-left { top: 12px; left: 12px; width: 280px; transform: scale(1.5); transform-origin: top left; }
+body.gb .hud-map { top: 12px; right: 12px; width: 280px; transform: scale(1.5); transform-origin: top right; }
+body.gb .hud-team { display: none; }
+body.gb .hud-face-wrap { width: 58px; height: 58px; } body.gb .hud-face { width: 48px; height: 48px; }
+body.gb .hud-name { font-size: 20px; }
+body.gb .hud-card { gap: 10px; padding: 8px 12px 8px 8px; }
+body.gb .hud-place { font-size: 17px; }
+body.gb .hud-map .tb-btn { width: 40px; height: 40px; }
 
 /* iOS: the page never scrolls or bounces behind the game, and nothing is selectable or opens a callout */
 body.gb { position: fixed; inset: 0; width: 100%; height: 100%; -webkit-touch-callout: none; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
