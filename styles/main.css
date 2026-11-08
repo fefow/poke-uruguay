@@ -1142,3 +1142,15 @@ body.gb * { -webkit-touch-callout: none; }
 .gb-tip { position: fixed; z-index: 1200; left: 50%; bottom: 8px; transform: translateX(-50%); max-width: min(520px, 62vw); display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 10px; background: #1d1740e6; color: #d9d3ff; font: 600 11px/1.3 var(--font-ui); text-align: center; }
 .gb-tip-x { border: 0; background: transparent; color: #f8d040; font-size: 14px; padding: 4px; }
 @media (orientation: portrait) { .gb-tip { display: none; } }
+
+/* mobile v189: smaller controls in the corners, x2 and MENÚ in free edge spots, pad steps aside while a menu or text is open */
+.gb-side { position: relative; width: 132px; padding: 10px 8px 12px; }
+.gb-dpad { transform: scale(0.8); transform-origin: bottom left; margin-right: auto; }
+.gb-ab { transform: scale(0.8); transform-origin: bottom right; margin-left: auto; }
+.gb-pad .gb-btn, .gb-pad .gb-dpad { opacity: 0.4; transition: opacity 0.15s; }
+.gb-top { position: absolute; top: 34%; left: 0; right: 0; display: flex; justify-content: center; }
+.gb-pill { min-width: 72px; min-height: 44px; font-size: 13px; border-radius: 22px; }
+.gb-pill.is-on { background: #f8d040; color: #2a2358; opacity: 0.9; }
+body.gb:has(.dialog:not([hidden]), .menu) .gb-dpad { opacity: 0.1; pointer-events: none; }
+body.gb:has(.dialog:not([hidden]), .menu) .gb-round { opacity: 0.3; }
+@media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 104px; } .gb-dpad, .gb-ab { transform: scale(0.7); } }

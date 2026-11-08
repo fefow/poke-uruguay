@@ -23,6 +23,16 @@ export function mountTouchPad() {
     return b;
   };
 
+  // x2 is a latch: one tap turns double speed on, the next one turns it off (no finger held on the screen)
+  const latch = (cls: string, label: string, action: string) => {
+    const b = el('button', `gb-btn ${cls}`, label) as HTMLButtonElement;
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Velocidad x2');
+    let on = false;
+    b.addEventListener('pointerdown', (e) => { e.preventDefault(); on = !on; b.classList.toggle('is-on', on); buzz(); on ? input.hold(action) : input.release(action); });
+    return b;
+  };
+
   // D-pad: one touch area; the direction follows the finger, also when it slides across the cross
   const dpad = el('div', 'gb-dpad');
   for (const d of ['up', 'down', 'left', 'right']) dpad.append(el('i', `gb-arrow ga-${d}`));
@@ -55,7 +65,7 @@ export function mountTouchPad() {
   const lt = el('div', 'gb-top'); lt.append(button('gb-pill', 'MENÚ', 'start'));
   left.append(lt, dpad);
   const right = el('div', 'gb-side gb-right');
-  const rt = el('div', 'gb-top'); rt.append(button('gb-pill', '×2', 'run'));
+  const rt = el('div', 'gb-top'); rt.append(latch('gb-pill gb-x2', '×2', 'run'));
   const ab = el('div', 'gb-ab'); ab.append(button('gb-round gb-b', 'X', 'b'), button('gb-round gb-a', 'Z', 'a'));
   right.append(rt, ab);
   const pad = el('div', 'gb-pad'); pad.append(left, right);
