@@ -101,7 +101,9 @@ export function mountSidebar(stageEl, hs = {}) {
 function fit() {
   // 4% margin: the window never shows the game edge to edge, so browser bars and scrollbars cannot cut it
   const w = document.documentElement.clientWidth || innerWidth, h = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight);
-  const k = Math.min(w / 1920, h / 1080) * 0.96;
+  // handheld pad (touch devices): the two side columns belong to the controls, so the screen never sits under a thumb
+  const gb = document.body.classList.contains('gb'), side = gb && w >= 700 ? 124 : 0;
+  const k = gb ? Math.min((w - side * 2) / 1920, h / 1080) * 0.99 : Math.min(w / 1920, h / 1080) * 0.96;
   stage.style.setProperty('--k', k.toFixed(4));
 }
 
