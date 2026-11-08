@@ -17,14 +17,15 @@ import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
 import { sfx, playMusic, jingle, setAmbience, skippableWait } from '../core/audio.ts';
 import { worldRng } from '../core/rng.ts';
-import { h, wait, clamp } from '../core/util.ts';
+import { h, wait, clamp, sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
-import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.ts';
+import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput } from './ui.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
-import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
+import { drawGroundBall, drawPickBall, itemIcon } from '../gfx/items.ts';
+import { EGG } from '../data/egg.ts';
 import { canoeCanvas } from '../gfx/ui-icons.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -547,6 +548,8 @@ function onStep() {
   // Footsteps and grass rustle are silent: too many sounds at once bothered the player.
   if (TILE_INFO[ch]?.enc) { W_.rustle = { x: p.x, y: p.y, t0: null }; }
   if (poisonTick()) return;
+  // The egg hatches by itself once the player has walked far enough with it.
+  if (S.egg && hasItem(EGG.item) && S.stats.steps - S.egg.steps >= EGG.steps) return void runScript(() => api.eggHatch());
   // Route marker: walking right beside one saves the respawn point (it does not heal)
   if (!W_.map.indoor && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tileAt(p.x + dx, p.y + dy) === 'Щ')) {
     const cp = S.checkpoint;
@@ -1098,6 +1101,40 @@ export const api = {
     if (S.party.length < PARTY_MAX) S.party.push(c);
     else S.box.push(c);
     return c;
+  },
+  /** The egg from Tabárez: goes in the bag and starts counting steps. */
+  async receiveEgg() {
+    const S = state();
+    setFlag('got_huevo');
+    S.egg = { steps: S.stats.steps };
+    await api.give(EGG.item);
+  },
+  /** The egg hatches: a short scene with the egg on screen, the creature joins the team (or the box) and may get a nickname. */
+  async eggHatch() {
+    const S = state();
+    await say('¿Eh? ¡El Huevo se está moviendo!');
+    const img = h('img', { class: 'creature-pop', src: itemIcon(EGG.item), alt: 'Huevo', width: 80, height: 80 });
+    uiRoot().append(img);
+    W_.showCreature = img;
+    for (let i = 0; i < 3; i++) {
+      img.style.rotate = '-8deg'; sfx('shake'); await wait(160);
+      img.style.rotate = '8deg'; await wait(160);
+      img.style.rotate = '0deg'; await wait(260);
+    }
+    removeItem(EGG.item, 1);
+    S.egg = null;
+    setFlag('huevo_nacio');
+    const c = api.giveCreature(EGG.species, EGG.level);
+    img.src = creatureIcon(EGG.species);
+    img.alt = SPECIES[EGG.species].name;
+    jingle('item');
+    await say(`¡Del Huevo nació un ${SPECIES[EGG.species].name}!`);
+    api.hideCreature();
+    if (await ask(`¿Querés ponerle un apodo a ${SPECIES[EGG.species].name}?`)) {
+      const nick = sanitizeName(await textInput('Apodo (máx. 10 letras)', ''), '');
+      if (nick) c.nickname = nick;
+    }
+    if (!S.party.includes(c)) await say(`${displayName(c)} fue enviado a la Caja de la Policlínica.`);
   },
   /** Trade: the player hands over a creature of species `want`; gets `offer` at the same level (OT: the player). Returns true if traded. */
   async tradeCreature(want, offer) {

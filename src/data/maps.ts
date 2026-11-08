@@ -520,7 +520,7 @@ const BASE_INTERIOR: Record<string, MapDef> = {
       { x: 4, y: 3, look: 'ball', species: 'ceibito', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 5, y: 3, look: 'ball', species: 'tejuchispa', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 6, y: 3, look: 'ball', species: 'carpinchito', cond: (f) => !f.has_starter, script: 'starter' },
-      { x: 9, y: 6, look: 'clerk', dir: 'left', text: ['Soy ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
+      { x: 9, y: 6, look: 'clerk', dir: 'left', name: 'Gonzalo', text: ['Soy Gonzalo, ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
       { x: 7, y: 1, look: 'rival', dir: 'down', id: 'rival_lab', cond: (f) => !f.rival1 },
     ],
   }),
@@ -1410,6 +1410,21 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);
+// The egg: after the first medal, Tabárez's assistant comes walking up to the player as they leave the Trinidad gym
+// (placed after the editor's patches so the gym door is where the player sees it).
+(function placeEggAssistant() {
+  const m = OUTDOOR.trinidad;
+  const k = (m?.doors ?? []).findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_trinidad');
+  if (k < 0) return;
+  let n = 0, door = null;
+  m.tiles.forEach((row, y) => [...row].forEach((ch, x) => { if (ch === 'D' && n++ === k) door = { x, y }; }));
+  if (!door) return;
+  const cond = (f) => f.badge1 && !f.got_huevo;
+  const npc: any = { x: door.x, y: door.y + 4, look: 'clerk', dir: 'up', id: 'ayudante_huevo', name: 'Gonzalo', arrive: true, cond, script: 'huevo_ayudante' };
+  fitToMap(m.tiles, [npc]);
+  m.npcs.push(npc);
+  (m.triggers ??= []).push({ x: door.x - 6, y: door.y + 1, w: 13, h: 2, script: 'huevo_ayudante', cond });
+})();
 // Trinidad gym: its trainers do not walk up to you, they only act when you pass right beside them
 for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.sight = 1; n.adjacent = true; }
 

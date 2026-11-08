@@ -19,6 +19,7 @@ import { charSprite } from '../gfx/characters.ts';
 import { itemIcon } from '../gfx/items.ts';
 import { badgeIcon } from '../gfx/badges.ts';
 import { badgeOf } from '../data/route.ts';
+import { EGG, eggHint } from '../data/egg.ts';
 import { isDev } from '../core/devauth.ts';
 import { SAVE_CONFIG } from '../save/config.ts';
 
@@ -391,6 +392,7 @@ async function useInField(key) {
   const it = ITEMS[key];
   if (key === 'uru_dex') return openDex();
   if (key === 'mapa_uruguay') return openMap();
+  if (key === EGG.item) return say(eggHint(EGG.steps - (S.stats.steps - (S.egg?.steps ?? S.stats.steps))));
   if (key === 'bici') {
     const { toggleBike } = await import('./world.ts');
     return say(toggleBike());
