@@ -1,188 +1,330 @@
-// Mini stories: each one is self-contained in a single town. Beginning (a local tells what happened), mission (the
-// person responsible stands in the same town and is dealt with by battle or by a choice) and ending (the local
-// thanks the player and pays). They never touch the PP plot. Flags: ev_ms_<id>_<0|1|2>.
-import { fitToMap } from './map-gen.ts';
-import { mapBand } from './route.ts';
-import { TR } from './map-kit.ts';
+// Mini stories: a chain of things to do in and around a city (sometimes farther away) that ends by unlocking something
+// the adventure needs: a key item that opens a way (Soga, Canoa, Bicicleta, Guantes) or a gym whose leader is away.
+// Each story has a beginning (someone tells what happened), a mission in several steps spread over nearby places, and an
+// ending. No riddles. People who block only describe the situation; the clues are partial and spread among several
+// people. Characters leave walking, never vanish in front of the player.
+//
+// Progress is a number per story, the "stage": flag ev_ms_<id>_<n> is set when stage n is reached. Steps that can be done
+// in any order are "parts" (ev_ms_<id>_p_<part>); when every part is done the story moves to the next stage.
+// A story whose prize the player already owns (older saves, or the debug jump) counts as finished.
+import { TILE_INFO } from '../gfx/tiles.ts';
+import { mapBand, badgeOf } from './route.ts';
 
-type Spot = { x: number; y: number; look: string; name: string };
+type Place = {
+  map: string;
+  near?: [number, number];      // the closest reachable free tile to this point
+  from?: string;                // or: on the way in from this neighbour map, `frac` of the walk across
+  frac?: number;
+  grass?: boolean;              // prefer tall grass (something lost in the pastizal)
+  door?: string;                // or: beside the door that leads to this interior
+  replace?: string;             // or: the person with this script in an interior takes the role
+};
+type Act = {
+  at: number;                   // stage at which this person moves the story on
+  part?: string;                // a step that can be done in any order with the other parts
+  say: string[];
+  fight?: string;               // a wild creature to beat first (level: top of the map's band)
+  fled?: string[];              // said when the fight was not won
+  take?: string[];              // key items handed over
+  give?: string;                // key item received
+  grant?: [string, string];     // the prize: [item, flag that says it was received]
+  then?: string[];              // said after giving or taking
+  leave?: boolean;              // walks away when done
+};
+type Person = {
+  key: string; at: Place; look: string; name?: string; dir?: string; animal?: boolean;
+  show?: [number, number?];     // visible while lo <= stage < hi
+  lines: [number, string[]][];  // what they say from a stage on (the last one that applies)
+  acts?: Act[];
+};
 type Story = {
-  id: string; map: string; local: Spot; foe: Spot;
-  start: string[];            // the local tells what happened and asks for help
-  wait: string[];             // while the mission is open
-  idle: string[];             // what the other person says before anybody asked the player
-  pre: string[];              // the other person, when confronted
-  team?: string[];            // battle: species, from a weaker to the strongest
-  choice?: { q: string; options: string[]; right: number; wrong: string[] }; // talk: no battle
-  lose: string; post: string[]; // after the foe is beaten / convinced
-  end: string[]; after: string[];
-  reward: [string, number][];
+  id: string; title: string; done: number; parts?: string[];
+  owned?: (f: Record<string, boolean>) => boolean; // the prize is already the player's
+  gym?: { map: string; to: string; deny: string[] }; // a gym door that stays closed until the story ends
+  people: Person[];
 };
 
 export const MINI_STORIES: Story[] = [
   {
-    id: 'muelle', map: 'colonia', local: { x: 16, y: 22, look: 'sailor', name: 'Pescador Anselmo' }, foe: { x: 34, y: 20, look: 'gaucho', name: 'Contrabandista de yerba' },
-    start: ['Desde la madrugada falta yerba en los almacenes de Colonia. Un tipo la saca en bolsas por el muelle, de noche, y la vende del otro lado del río.', 'No tengo cómo pararlo. Está por la zona del casco histórico, mirando para todos lados.'],
-    wait: ['Si no lo frenás, el mate va a salir caro hasta en las casas de los vecinos.'],
-    idle: ['No miro a nadie. Estoy esperando un barco, nada más.'],
-    pre: ['¿Quién te dijo? Con un par de bolsas no le hago daño a nadie.', 'Si querés pasar, primero tenés que pasarme a mí.'],
-    team: ['comadreja', 'cuervon', 'mulitin'], lose: 'Está bien, está bien. Devuelvo las bolsas.',
-    post: ['Las devuelvo mañana. No me hagas hablar más.'],
-    end: ['Las bolsas volvieron a los almacenes. Colonia vuelve a tomar mate como corresponde.', 'Tomá, esto lo juntamos entre los vecinos.'], after: ['Gracias a vos, el mate de la mañana sigue siendo el de siempre.'],
-    reward: [['superesfera', 2], ['mate_dulce', 2]],
+    id: 'soga', title: 'La soga del escalador', done: 5, owned: (f) => !!f.got_soga,
+    people: [
+      {
+        key: 'escalador', at: { map: 'casa_frb', replace: 'gift_soga' }, look: 'gaucho', name: 'Escalador',
+        lines: [[1, ['La soga quedó colgada en la boca de la cueva. Con este tobillo no vuelvo a buscarla.']], [5, ['En las cuevas, las cascadas esconden cornisas. Subí con la soga y fijate qué guardan.']]],
+        acts: [
+          { at: 0, say: ['Trepé cuanta pared hay entre Fray Bentos y Rivera. En la Cueva de Palmitas me torcí el tobillo y salí como pude.', 'La soga quedó colgada en la entrada. Sin ella no subo ni una escalera.'] },
+          {
+            at: 4, take: ['soga_mojada'], say: ['¡Mi soga! Está mojada y con olor a río, pero entera.'],
+            grant: ['soga', 'got_soga'], then: ['Yo ya no tengo fuerzas para más. Llevátela vos.', 'En las cuevas hay cascadas que caen sobre cornisas escondidas. Caminá contra la cascada y subís; para bajar, caminá hacia abajo desde la cornisa.'],
+          },
+        ],
+      },
+      {
+        key: 'pescadora', at: { map: 'villasoriano', near: [8, 10] }, look: 'girl', name: 'Pescadora',
+        lines: [[0, ['El río trae de todo. Hace unos días me encontré una soga de colores colgando de una piedra, río arriba.']], [2, ['Con la soga atada al bote no me animo a soltarla. Los cabos viejos se deshacen en la mano.']], [4, ['Los cabos nuevos aguantan cualquier correntada. Gracias.']]],
+        acts: [
+          { at: 1, say: ['¿Una soga de escalador? Sí, la tengo. La encontré colgando en la boca de una cueva.', 'Ahora es lo único que tengo para amarrar el bote: los cabos viejos se pudrieron con el agua.'] },
+          { at: 3, take: ['cabos'], say: ['¡Cabos nuevos! Con esto el bote queda firme.', 'Tomá la soga. Que vuelva a su dueño.'], give: 'soga_mojada' },
+        ],
+      },
+      {
+        key: 'encargado', at: { map: 'shop_mercedes', near: [3, 5] }, look: 'almacenero', name: 'Encargado del depósito',
+        lines: [[0, ['Ordeno el depósito. Hay de todo, hasta lo que nadie pide.']], [3, ['Si se termina el rollo, en un mes llega otro.']]],
+        acts: [{ at: 2, say: ['¿Cabos de amarre para una pescadora de Villa Soriano? Me quedan unos rollos en el fondo.', 'A la gente del río no se le cobra. Llevalos.'], give: 'cabos' }],
+      },
+      { key: 'vecina_frb', at: { map: 'fraybentos', near: [30, 14] }, look: 'mom', name: 'Vecina', show: [1, 5], lines: [[1, ['Al escalador lo vi volver rengo del lado de Palmitas, sin nada al hombro.', 'Lo que se pierde por allá, el río lo baja hasta Villa Soriano.']]] },
+      { key: 'vecino_vs', at: { map: 'villasoriano', near: [18, 6] }, look: 'oldman', name: 'Vecino', lines: [[0, ['Acá vivimos del río. Lo que no llega por agua, llega desde Mercedes.']], [2, ['Para los botes, todo se compra en Mercedes. El almacén tiene un depósito enorme.']]] },
+    ],
   },
   {
-    id: 'copa', map: 'mercedes', local: { x: 12, y: 22, look: 'oldman', name: 'Presidente del Club de Remo' }, foe: { x: 30, y: 14, look: 'sailor', name: 'Remero rival' },
-    start: ['Desapareció la copa de la regata del Club de Remo. La dejamos en la vitrina anoche y a la mañana no estaba.', 'Hay un remero de otro club que anda rondando por la costanera. No digo que haya sido él, pero preguntale.'],
-    wait: ['Sin la copa no hay regata. Hace cuarenta años que se hace.'],
-    idle: ['Vengo a mirar el río. Me relaja.'],
-    pre: ['¿La copa? Qué sé yo. Si la querés, ganámela.'],
-    team: ['garza', 'gaviota', 'anguila'], lose: 'Bueno, la escondí en el bote. Perdí.',
-    post: ['Está en el bote amarrado. Llevásela y que no se enojen conmigo.'],
-    end: ['La copa estaba exactamente donde dijo. Vamos a hacer la regata como siempre.', 'Tomá, un detalle del club.'], after: ['Esta copa va a durar otros cuarenta años. Gracias.'],
-    reward: [['ultraesfera', 1], ['superesfera', 2]],
+    id: 'quiroga', title: 'El cuaderno de Quiroga', done: 3, owned: (f) => !!f[badgeOf('salto')],
+    gym: { map: 'salto', to: 'gym_sal', deny: ['La puerta del gimnasio está cerrada.', 'Un cartel escrito a mano dice: "Salí a escribir. H. Q."'] },
+    people: [
+      {
+        key: 'quiroga', at: { map: 'guichon', near: [20, 8] }, look: 'leader_quiroga', name: 'Horacio Quiroga', show: [0, 3],
+        lines: [[1, ['Sin ese cuaderno no vuelvo. Ahí está el cuento entero, y no me lo acuerdo de memoria.']]],
+        acts: [
+          { at: 0, say: ['Vine a las termas a terminar un cuento, lejos del ruido de la ciudad.', 'En la ruta se levantó un viento de los que arrancan sombreros, y el cuaderno salió volando de la valija.'] },
+          { at: 2, take: ['cuaderno_quiroga'], say: ['¡El cuaderno! Mojado, pero se lee todo.', 'El gimnasio estuvo cerrado demasiado tiempo. Vuelvo a Salto ya mismo; te espero allá.'], leave: true },
+        ],
+      },
+      {
+        key: 'cuaderno', at: { map: 'ruta3', from: 'guichon', frac: 0.45, grass: true }, look: 'ball', show: [0, 2],
+        lines: [[0, ['Entre el pastizal hay un cuaderno empapado, lleno de letra apretada. En la tapa dice "H. Q.".', 'No es tuyo. Lo dejás donde estaba.']]],
+        acts: [{ at: 1, say: ['Entre el pastizal hay un cuaderno empapado, lleno de letra apretada. En la tapa dice "H. Q.".'], give: 'cuaderno_quiroga' }],
+      },
+      { key: 'gurisa', at: { map: 'ruta3', from: 'salto', frac: 0.3 }, look: 'girl', name: 'Caminante', lines: [[0, ['Hace unos días el viento soplaba tan fuerte que volaban hojas escritas sobre el pastizal.', 'Iban para el lado de las termas.']]] },
+      { key: 'vecino_sal', at: { map: 'salto', near: [22, 20] }, look: 'oldman', name: 'Vecino', lines: [[0, ['El escritor del gimnasio salió hacia el sur con una valija llena de papeles.']], [3, ['El escritor volvió y abrió el gimnasio. Dicen que terminó el cuento.']]] },
+      { key: 'vecina_sal', at: { map: 'salto', near: [44, 30] }, look: 'maestra', name: 'Maestra', lines: [[0, ['Quiroga dice que el agua caliente le aclara las ideas. Cuando se traba con un cuento, desaparece unos días.']]] },
+    ],
   },
   {
-    id: 'apagon', map: 'trinidad', local: { x: 10, y: 20, look: 'obrero', name: 'Electricista Raúl' }, foe: { x: 32, y: 18, look: 'obrero', name: 'Vecino enojado' },
-    start: ['Dos cuadras sin luz desde ayer. Alguien cortó un cable a propósito.', 'Hay un vecino que anda gritando por la plaza que le molestaba el zumbido. Hablá con él antes de que lo vuelva a hacer.'],
-    wait: ['Cada hora sin luz son heladeras que se descongelan.'],
-    idle: ['Hoy no tengo ganas de charlar.'],
-    pre: ['El zumbido de ese transformador me tenía loco. No me arrepiento.', 'Si querés que lo repare, tendrás que convencerme.'],
-    team: ['luciernito', 'cotorrayo', 'pararrayo'], lose: 'Está bien. Pido disculpas.',
-    post: ['Hoy mismo ayudo a repararlo. No lo vuelvo a hacer.'],
-    end: ['Volvió la luz y con ella el vecino, con una caja de herramientas. Dice que va a ayudar.', 'Tomá, por tu paciencia.'], after: ['Ahora el transformador suena menos, o me acostumbré.'],
-    reward: [['refuerzo_ataque', 2], ['mate', 2]],
+    id: 'canoa', title: 'La canoa del Cuareim', done: 3, parts: ['brea', 'remos'], owned: (f) => !!f.got_canoa,
+    people: [
+      {
+        key: 'pescador', at: { map: 'casa_artigas', replace: 'gift_surf' }, look: 'pescador', name: 'Pescador',
+        lines: [[1, ['Con el casco rajado se llena de agua en dos remadas. Y sin remos, ni hablar.']], [3, ['El Cuareim es manso, pero hay que respetarlo. La Canoa solo resiste con la Medalla Rivera.']]],
+        acts: [
+          { at: 0, say: ['Vivo a orillas del río desde que nací. Tengo una canoa para el Cuareim, pero no está para usarse.', 'La semana pasada el casco se rajó contra una piedra, y la correntada se llevó los remos.'] },
+          {
+            at: 2, take: ['brea', 'remos'], say: ['¡Brea de la buena y mis remos! Dame un rato.', '… Listo. El casco quedó como nuevo.'],
+            grant: ['canoa', 'got_canoa'], then: ['La canoa es tuya. Caminá hacia el agua y subís sola.', 'Ojo: las corrientes de más al este son fuertes. Hace falta la Medalla Rivera para animarse.'],
+          },
+        ],
+      },
+      {
+        key: 'carpintero', at: { map: 'baltasar', near: [20, 8] }, look: 'obrero', name: 'Carpintero de ribera',
+        lines: [[0, ['Calafateo cascos desde chico. Brea nunca me falta.']]],
+        acts: [{ at: 1, part: 'brea', say: ['¿Un casco rajado en Artigas? Eso se arregla con brea caliente.', 'Llevate este tarro. Que no se enfríe en el camino.'], give: 'brea' }],
+      },
+      {
+        key: 'remera', at: { map: 'belen', near: [8, 14] }, look: 'girl', name: 'Muchacha de la costa',
+        lines: [[0, ['Esta mañana la corriente trajo unos remos hasta la orilla. Los guardé por si aparece el dueño.']]],
+        acts: [{ at: 1, part: 'remos', say: ['¿Son de un pescador de Artigas? Tienen las iniciales talladas en el mango.', 'Llevaselos. Acá no los usa nadie.'], give: 'remos' }],
+      },
+      { key: 'vecino_art', at: { map: 'artigas', near: [20, 20] }, look: 'gaucho', name: 'Vecino', lines: [[0, ['Lo que se lleva el río aparece días después en la costa de Belén.']]] },
+      { key: 'vecina_art', at: { map: 'artigas', near: [40, 14] }, look: 'campesina', name: 'Vecina', lines: [[0, ['Los cascos de madera se tapan con brea. En Tranqueras hay carpinteros de ribera que la preparan.']]] },
+    ],
   },
   {
-    id: 'furtivo', map: 'paysandu', local: { x: 36, y: 12, look: 'cop', name: 'Guardafauna' }, foe: { x: 52, y: 26, look: 'sailor', name: 'Pescador furtivo' },
-    start: ['Alguien pesca de noche con red en una zona de veda, junto a la costanera. Si sigue, el río se queda sin dorados.', 'Anda por el puerto. No tengo pruebas, pero vos podés hablarle.'],
-    wait: ['Los peces no vuelven una vez que se van.'],
-    idle: ['Pesco con anzuelo, como todos. No me mires así.'],
-    pre: ['La red es mía y el río es de todos. ¿Quién te pone a vos de juez?'],
-    team: ['garza', 'tortugal', 'anguila'], lose: 'Bueno. Retiro la red.',
-    post: ['La saco hoy mismo. Y no se lo cuentes a nadie.'],
-    end: ['La red salió del río y el dorado vuelve a la orilla. Gracias en nombre de todos los pescadores.', 'Aceptá esto de la guardia.'], after: ['El río está más tranquilo ahora.'],
-    reward: [['superesfera', 3]],
+    id: 'bici', title: 'Las bicicletas que no llegan', done: 5, owned: (f) => !!f.got_bici,
+    people: [
+      {
+        key: 'duena', at: { map: 'bici_tac', replace: 'gift_tac' }, look: 'mom', name: 'Dueña',
+        lines: [[1, ['El local sin bicicletas parece un galpón. Ojalá aparezca ese camión.']], [5, ['Al norte de la ciudad empieza la Ciclovía. Solo se entra en bicicleta. Usala desde el menú.']]],
+        acts: [
+          { at: 0, say: ['Bienvenido a El Pedal. Hace veinte años que armo bicicletas para el norte.', 'El camión que trae las bicicletas desde Rivera tenía que llegar ayer, y no apareció. No tengo una sola para mostrar.'] },
+          {
+            at: 4, say: ['¡Llegó el camión! El chofer me contó lo que hiciste.', 'Esta quedó para vos: va cuatro veces más rápido que caminando.'],
+            grant: ['bici', 'got_bici'], then: ['Se usa desde el menú. Bajo techo no se puede, y en combate no cambia nada.', 'Al norte de la ciudad hay una Ciclovía. Solo se entra en bicicleta.'],
+          },
+        ],
+      },
+      {
+        key: 'camionero', at: { map: 'tranqueras', near: [10, 8] }, look: 'camionero', name: 'Camionero', show: [0, 4],
+        lines: [[0, ['Llevo bicicletas para Tacuarembó, y el camión no arranca.']], [2, ['Una correa así no la tiene cualquiera. Hace falta un taller grande.']]],
+        acts: [
+          { at: 1, say: ['¿Te manda la de El Pedal? Decile que no me olvidé de ella.', 'Se cortó la correa del motor justo al cruzar el paso. Una correa así no se consigue en un pueblo.'] },
+          { at: 3, take: ['correa'], say: ['¡La correa! Es justo la medida.', 'Listo, arranca. Me voy derecho a Tacuarembó, que la dueña debe estar furiosa.'], leave: true },
+        ],
+      },
+      {
+        key: 'mecanico', at: { map: 'rivera', near: [40, 24] }, look: 'obrero', name: 'Mecánico de la frontera',
+        lines: [[0, ['Arreglo camiones de los dos lados de la frontera. Repuestos tengo de todo.']]],
+        acts: [{ at: 2, say: ['¿Una correa para el camión de las bicicletas? Lo conozco, pasa todas las semanas.', 'Tomá, es la medida justa. Ya me la pagará cuando vuelva.'], give: 'correa' }],
+      },
+      { key: 'vecino_tac', at: { map: 'tacuarembo', near: [30, 20] }, look: 'gaucho', name: 'Vecino', lines: [[0, ['Los camiones que vienen de Rivera cruzan por el Paso del Río Tacuarembó.']]] },
+      { key: 'vecina_riv', at: { map: 'rivera', near: [24, 30] }, look: 'girl', name: 'Vecina', lines: [[0, ['El taller de la frontera tiene repuestos que no hay en ningún otro lado del país.']]] },
+    ],
   },
   {
-    id: 'termas', map: 'salto', local: { x: 36, y: 14, look: 'maestra', name: 'Administradora de las termas' }, foe: { x: 22, y: 30, look: 'clerk', name: 'Inspector' },
-    start: ['Las termas están cerradas desde ayer. Un inspector dice que no cumplimos una norma, pero nunca me mostró cuál.', 'Está por la zona de la costanera. Fijate qué quiere de verdad.'],
-    wait: ['Cada día cerrados son turistas que no vuelven.'],
-    idle: ['Cumplo con mi trabajo. Nada más.'],
-    pre: ['Hay normas. Yo solo las hago cumplir.', 'Aunque... la verdad es que me ofrecieron algo por cerrarlas. No sé por qué te cuento esto.'],
-    team: ['murcielago', 'flamenco'], lose: 'Está bien. Reabro.',
-    post: ['Voy a reabrir mañana temprano. Y no pienso volver a aceptar nada de nadie.'],
-    end: ['Las termas abrieron esta mañana, con fila hasta la plaza. Te debemos un baño y un regalo.'], after: ['Ahora hay más gente que nunca. Gracias.'],
-    reward: [['ultraesfera', 2]],
+    id: 'potro', title: 'El potro del domador', done: 3, owned: (f) => !!f.got_guantes,
+    people: [
+      {
+        key: 'domador', at: { map: 'casa_tac', replace: 'gift_fuerza' }, look: 'gaucho', name: 'Domador',
+        lines: [[1, ['Sin el moro no me puedo ir a la doma de Melo.']], [3, ['Con esos guantes movés lo que quieras. Pero la Medalla Tacuarembó es la que te da el derecho.']]],
+        acts: [
+          { at: 0, say: ['Domo potros hace años y no hay animal que me gane de fuerza. Salvo el moro.', 'Anoche rompió el palenque y salió al galope. Este es su cabestro: sin él no se deja tocar por nadie.'], give: 'cabestro' },
+          {
+            at: 2, say: ['¡Volvió el moro! Llegó solo al trote, con el cabestro puesto.', 'Tomá: estos guantes son los que uso para la doma. Con ellos podés empujar rocas pesadas, caminando contra ellas.'],
+            grant: ['guantes', 'got_guantes'], then: ['Solo te van a servir si ganás la Medalla Tacuarembó.'],
+          },
+        ],
+      },
+      {
+        key: 'potro', at: { map: 'r_tupambae_melo', from: 'tupambae', frac: 0.25 }, look: 'animal:alazan', animal: true, show: [0, 2],
+        lines: [[0, ['Un potro moro pasta tranquilo. Cuando te acercás, resopla y da un paso atrás.']]],
+        acts: [{ at: 1, take: ['cabestro'], say: ['El potro moro huele el cabestro y se queda quieto.', 'Le pasás el cabestro por la cabeza. Apenas lo soltás, sale al trote hacia Tacuarembó.'], leave: true }],
+      },
+      { key: 'moro', at: { map: 'tacuarembo', door: 'casa_tac' }, look: 'animal:alazan', animal: true, show: [2], lines: [[2, ['El potro moro come pasto junto a la casa del domador. Esta vez está bien atado.']]] },
+      { key: 'peon_tac', at: { map: 'tacuarembo', near: [44, 20] }, look: 'gaucho', name: 'Peón', lines: [[0, ['Anoche pasó un caballo al galope por la calle. Iba para el sur.']]] },
+      { key: 'vecina_tup', at: { map: 'tupambae', near: [14, 8] }, look: 'campesina', name: 'Vecina', show: [0, 2], lines: [[0, ['Algo se comió la mitad de mi huerta. Las huellas son de herradura y siguen hacia el camino a Melo.']]] },
+    ],
   },
   {
-    id: 'cuatrero', map: 'tacuarembo', local: { x: 34, y: 28, look: 'gaucho', name: 'Capataz de la tropilla' }, foe: { x: 20, y: 18, look: 'gaucho', name: 'Cuatrero' },
-    start: ['Faltan tres caballos de la tropilla desde la madrugada. Los vi irse por el camino de la feria.', 'Hay un forastero con un poncho que no pertenece a ningún establecimiento. Preguntale con respeto, pero firme.'],
-    wait: ['Esos caballos valen más que mi sueldo de un año.'],
-    idle: ['Estoy de paso. Quiero mirar la feria.'],
-    pre: ['¿Caballos? No sé nada de caballos.', 'Hasta que me ganes, no te digo nada.'],
-    team: ['alazan', 'boleador', 'caudillo'], lose: 'Los dejé en el corral del fondo. Perdí.',
-    post: ['Están atrás del galpón. No les hice nada.'],
-    end: ['Los tres caballos estaban en el corral del fondo, sanos. Con eso se paga cualquier malentendido.', 'Llevate esto de parte de la tropilla.'], after: ['Desde que volvieron, los caballos duermen en el establo.'],
-    reward: [['ultraesfera', 2], ['mate_dulce', 2]],
-  },
-  {
-    id: 'cerro_luz', map: 'melo', local: { x: 28, y: 30, look: 'oldman', name: 'Sereno del cerro' }, foe: { x: 40, y: 14, look: 'boy', name: 'Muchacho del cerro' },
-    start: ['Cada noche se ven luces en el cerro y la gente dice que son aparecidos. Yo creo que es un muchacho que sube con una linterna.', 'Hablá con él y averiguá qué busca. Con buenas maneras.'],
-    wait: ['Si es un chico, mejor que lo sepamos. Si no, también.'],
-    idle: ['Estoy mirando el paisaje. Nada más.'],
-    pre: ['Subo a mirar las estrellas. Me gusta el silencio de ahí arriba.', '¿Te animás a una pelea amistosa? Si ganás, te cuento todo.'],
-    team: ['curupi', 'pombero'], lose: 'Está bien, está bien. Te cuento.',
-    post: ['Armé un telescopio con latas y lentes viejos. La luz es de la linterna. No es ningún aparecido.'],
-    end: ['Era un telescopio hecho a mano. El muchacho nos va a dar charlas de astronomía en la plaza.', 'Tomá, un detalle del pueblo.'], after: ['Ahora los domingos se llena la plaza para mirar la luna.'],
-    reward: [['piedra_agata', 1], ['mate_dulce', 2]],
-  },
-  {
-    id: 'naufrago', map: 'rocha', local: { x: 10, y: 30, look: 'sailor', name: 'Viejo marino' }, foe: { x: 38, y: 28, look: 'obrero', name: 'Saqueador de naufragios' },
-    start: ['Un barco pesquero encalló anoche cerca de la barra. Alguien se está llevando las cajas de la bodega antes del amanecer.', 'Lo vi en la playa con una linterna. Hay que frenarlo antes de que desaparezca la carga.'],
-    wait: ['La carga era de gente que vive de la pesca. No es botín de nadie.'],
-    idle: ['Camino por la playa. Eso es todo.'],
-    pre: ['Lo que el mar deja, es de quien lo encuentra.', 'Probame que no.'],
-    team: ['tortugal', 'cangrejo', 'tatu'], lose: 'Bueno, bueno. Las cajas están en el galpón.',
-    post: ['En el galpón de atrás. Devolvélas, que no valen tanto.'],
-    end: ['La carga volvió a sus dueños. Hoy hay pescado fresco para todo el barrio.', 'Aceptá esto, de parte de los pescadores.'], after: ['El barco ya flota otra vez. Gracias.'],
-    reward: [['superesfera', 3]],
-  },
-  {
-    id: 'acertijo_florida', map: 'florida', local: { x: 40, y: 14, look: 'maestra', name: 'Maestra de la escuela 3' }, foe: { x: 28, y: 14, look: 'nino', name: 'Niño travieso' },
-    start: ['Un alumno escondió la llave del salón y dice que solo la devuelve si alguien contesta lo que él pregunta. Es muy testarudo.', 'Está en la plaza. Seguile el juego, que acá no se castiga a nadie.'],
-    wait: ['Los chicos no pueden entrar a clase. Y hace frío.'],
-    idle: ['Jugando. No molesto a nadie.'],
-    pre: ['Yo sé algo que ustedes no saben. A ver quién adivina.'],
-    choice: { q: '¿En qué año se declaró la independencia del Uruguay?', options: ['1825', '1811', '1930'], right: 0, wrong: ['No, pensá de nuevo. Pista: es el año de los Treinta y Tres.'] },
-    lose: '', post: ['¡Muy bien! La llave está debajo de la maceta. Qué aburrido, ganaste.'],
-    end: ['La llave volvió a la cerradura. Los chicos entraron todos juntos. Tomá, de parte del colegio.'], after: ['Ahora el niño pregunta cosas más difíciles, pero ya no esconde nada.'],
-    reward: [['superesfera', 2], ['mate', 3]],
-  },
-  {
-    id: 'bici_durazno', map: 'durazno', local: { x: 30, y: 28, look: 'ciclista', name: 'Ciclista del club' }, foe: { x: 46, y: 18, look: 'boy', name: 'Muchacho de la plaza' },
-    start: ['Alguien se llevó mi bicicleta de la puerta del club. Es la que usé en todas las carreras.', 'Hay un muchacho en la plaza que anda con una bici igual a la mía, pero no me animo a acusarlo.'],
-    wait: ['Esa bici tiene mi nombre grabado abajo del cuadro.'],
-    idle: ['Es mía. La compré con mis ahorros.'],
-    pre: ['Esta bici es mía. ¿Por qué te interesa tanto?'],
-    choice: { q: 'Para saber si es suya, ¿qué conviene mirar?', options: ['El número del cuadro', 'El color del manubrio', 'Si anda más rápido'], right: 0, wrong: ['Eso no demuestra nada. Pensá en algo que no se pueda cambiar.'] },
-    lose: '', post: ['Tenés razón. La encontré tirada y me la quedé. Qué vergüenza. Se la devuelvo.'],
-    end: ['Mi bici está de vuelta. El muchacho vino a pedir disculpas y hasta se ofreció a limpiarla.', 'Tomá, por tu ayuda.'], after: ['Desde entonces la dejo bien atada, por las dudas.'],
-    reward: [['ultraesfera', 1], ['alfajor_triple', 1]],
+    id: 'vendimia', title: 'La vendimia', done: 3, parts: ['e1', 'e2', 'e3'], owned: (f) => !!f[badgeOf('canelones')],
+    gym: { map: 'canelones', to: 'gym_canelones', deny: ['La puerta del gimnasio del INAVI está cerrada.', 'Una nota pegada en el vidrio dice: "Estoy en la vendimia. Tomás."'] },
+    people: [
+      {
+        key: 'tomas', at: { map: 'sanramon', near: [12, 8] }, look: 'leader_inavi', name: 'Tomás', show: [0, 3],
+        lines: [[1, ['Mientras los enjambres sigan en las parras, no me muevo de acá.']]],
+        acts: [
+          { at: 0, say: ['Soy Tomás, el del gimnasio de Canelones. Este año la vendimia viene mal.', 'Tres enjambres se instalaron en las parras de San Ramón. Si no se van, se pierde la cosecha entera.'] },
+          { at: 2, say: ['Las parras están libres. Ya se puede cosechar.', 'El gimnasio estuvo cerrado demasiado tiempo. Vuelvo a Canelones; te espero allá.'], leave: true },
+        ],
+      },
+      ...([['e1', 'sanramon', [6, 5], 'avispa'], ['e2', 'sanramon', [20, 11], 'camoati'], ['e3', 'r_sanramon_canelones', null, 'cortadora']] as [string, string, [number, number] | null, string][]).map(([part, map, near, sp]) => ({
+        key: part, at: near ? { map, near } : { map, from: 'sanramon', frac: 0.15 }, look: `animal:${sp}`, animal: true, part,
+        lines: [[0, ['Un enjambre zumba sobre las parras. Mejor no molestarlo sin motivo.']]] as [number, string[]][],
+        acts: [{ at: 1, part, fight: sp, say: ['Un enjambre zumba sobre las parras, comiéndose la uva.'], fled: ['El enjambre sigue sobre las parras.'], then: ['El enjambre se dispersa y las parras quedan tranquilas.'] }],
+      })),
+      { key: 'vecino_can', at: { map: 'canelones', near: [32, 24] }, look: 'oldman', name: 'Vecino', lines: [[0, ['Este año la uva se pierde en la planta. Dicen que hay plaga en los viñedos de San Ramón.']], [3, ['Tomás volvió de la vendimia. El gimnasio abrió otra vez.']]] },
+    ],
   },
 ];
 
+const stageFlag = (s: Story, n: number) => `ev_ms_${s.id}_${n}`;
+const partFlag = (s: Story, p: string) => `ev_ms_${s.id}_p_${p}`;
+/** How far the player got in a story (0 = nobody talked yet; s.done = finished). */
+export function stageOf(s: Story, has: (k: string) => boolean): number {
+  const f = new Proxy({}, { get: (_, k) => has(String(k)) }) as Record<string, boolean>;
+  if (s.owned?.(f)) return s.done;
+  for (let n = s.done; n > 0; n--) if (has(stageFlag(s, n))) return n;
+  return 0;
+}
+const byId = (id: string) => MINI_STORIES.find((m) => m.id === id)!;
+
 export const MS_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void>> = {
-  async ms_local(api, npc) {
-    const s = MINI_STORIES.find((m) => m.id === npc.msId)!;
-    const k = (i) => `ev_ms_${s.id}_${i}`;
-    if (api.flag(k(2))) return api.say(s.after, { name: npc.name });
-    if (api.flag(k(1))) {
-      await api.say(s.end, { name: npc.name });
-      api.setFlag(k(2));
-      api.sfx('catch');
-      for (const [item, q] of s.reward) await api.give(item, q);
+  async ms_step(api, npc) {
+    const s = byId(npc.ms);
+    const p = s.people.find((o) => o.key === npc.msKey)!;
+    const st = stageOf(s, (k) => api.flag(k));
+    const name = p.name ? { name: p.name } : {};
+    const act = (p.acts ?? []).find((a) => a.at === st && !(a.part && api.flag(partFlag(s, a.part))));
+    if (!act) {
+      const line = [...p.lines].reverse().find(([from]) => from <= st);
+      if (line) await api.say(line[1], name);
       return;
     }
-    if (api.flag(k(0))) return api.say(s.wait, { name: npc.name });
-    await api.say(s.start, { name: npc.name });
-    api.setFlag(k(0));
-  },
-  async ms_foe(api, npc) {
-    const s = MINI_STORIES.find((m) => m.id === npc.msId)!;
-    const k = (i) => `ev_ms_${s.id}_${i}`;
-    if (api.flag(k(1))) return api.say(s.post, { name: npc.name });
-    if (!api.flag(k(0))) return api.say(s.idle, { name: npc.name });
-    await api.say(s.pre, { name: npc.name });
-    if (s.choice) {
-      await api.say(s.choice.q, { name: npc.name, keep: true });
-      for (;;) {
-        const r = await api.choose(s.choice.options, { cancel: false });
-        if (r === s.choice.right) break;
-        await api.say(s.choice.wrong, { name: npc.name });
-        await api.say(s.choice.q, { name: npc.name, keep: true });
-      }
-    } else {
-      const [, hi] = mapBand(s.map);
-      const team = s.team!.map((sp, i, a) => [sp, Math.max(2, hi - (a.length - 1 - i))]);
-      const res = await api.battle(TR(`ms_${s.id}`, npc.name, 'Rival del pueblo', team, hi * 30, null, s.lose, null, npc.look), { canLose: true });
-      if (res !== 'win') return api.say('Volvé cuando tus criaturas estén listas.', { name: npc.name });
+    await api.say(act.say, name);
+    if (act.fight) {
+      const [, hi] = mapBand(npc.map) ?? [20, 24];
+      const res = await api.wildBattle(act.fight, hi);
+      if (res !== 'win' && res !== 'caught') { if (res !== 'lose' && act.fled) await api.say(act.fled); return; }
     }
-    api.setFlag(k(1));
-    await api.say(s.post, { name: npc.name });
+    for (const k of act.take ?? []) api.takeItem(k, 1);
+    if (act.give) await api.give(act.give, 1);
+    if (act.grant) { await api.give(act.grant[0], 1); api.setFlag(act.grant[1]); }
+    if (act.part) {
+      api.setFlag(partFlag(s, act.part));
+      if ((s.parts ?? []).every((q) => api.flag(partFlag(s, q)))) api.setFlag(stageFlag(s, st + 1));
+    } else api.setFlag(stageFlag(s, st + 1));
+    if (act.then) await api.say(act.then, name);
+    if (act.leave) await api.npcWalkOff(npc.id);
   },
 };
 
-export function addMiniStories(OUTDOOR: Record<string, any>) {
+// ---------------------------------------------------------------- placing people on the maps
+
+const solid = (c: string | undefined) => c === undefined || !!TILE_INFO[c]?.solid;
+const GROUND = new Set(['.', ',', '`', ';', 'f', 's', 'i', 'Y', 'A', 'c', '=', 'b']);
+const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+/** A free tile the player can reach, as close as possible to what `at` asks for. */
+function spot(m: any, at: Place): [number, number] | null {
+  const rows: string[] = m.tiles;
+  const h = rows.length, w = rows[0].length;
+  const tile = (x: number, y: number) => rows[y]?.[x];
+  const taken = new Set<string>([...(m.npcs ?? []), ...(m.items ?? [])].map((o) => `${o.x},${o.y}`));
+  const seeds: [number, number][] = [];
+  if (m.indoor) {
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (tile(x, y) === 'm') seeds.push([x, y]);
+  } else {
+    const sides = at.from ? Object.entries(m.exits ?? {}).filter(([, e]: any) => e.to === at.from).map(([k]) => k) : Object.keys(m.exits ?? {});
+    for (const side of sides) {
+      const cells = side === 'n' ? [...Array(w).keys()].map((x) => [x, 0]) : side === 's' ? [...Array(w).keys()].map((x) => [x, h - 1]) : side === 'w' ? [...Array(h).keys()].map((y) => [0, y]) : [...Array(h).keys()].map((y) => [w - 1, y]);
+      for (const [x, y] of cells) if (!solid(tile(x, y))) seeds.push([x, y]);
+    }
+  }
+  // walk the map from the way in
+  const dist = new Map<string, number>();
+  const q: [number, number][] = [];
+  for (const [x, y] of seeds) { dist.set(`${x},${y}`, 0); q.push([x, y]); }
+  while (q.length) {
+    const [x, y] = q.shift()!;
+    for (const [dx, dy] of D4) {
+      const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
+      if (dist.has(k) || solid(tile(nx, ny))) continue;
+      dist.set(k, dist.get(`${x},${y}`)! + 1);
+      q.push([nx, ny]);
+    }
+  }
+  const far = Math.max(0, ...dist.values());
+  let target = at.near;
+  if (at.door) {
+    const i = (m.doors ?? []).findIndex((d: any) => (typeof d === 'string' ? d : d.to) === at.door);
+    let n = -1;
+    for (let y = 0; y < h && !target; y++) for (let x = 0; x < w; x++) if (tile(x, y) === 'D' && ++n === i) { target = [x + 2, y + 2]; break; }
+  }
+  let best: [number, number] | null = null, bestScore = Infinity;
+  for (const [k, d] of dist) {
+    const [x, y] = k.split(',').map(Number);
+    const c = tile(x, y);
+    if (!GROUND.has(c) || taken.has(k) || x < 1 || y < 1 || x > w - 2 || y > h - 2) continue;
+    if (tile(x, y - 1) === 'D' || tile(x, y - 1) === 'm' || c === 'm') continue; // never in front of a door
+    if (D4.filter(([dx, dy]) => !solid(tile(x + dx, y + dy))).length < 3) continue; // never plugs a narrow pass
+    let score = target ? Math.abs(x - target[0]) + Math.abs(y - target[1]) : Math.abs(d - far * (at.frac ?? 0.5));
+    if (c === '=' || c === 'c') score += 2;
+    if (at.grass && c !== ',') score += 6;
+    if (score < bestScore) { best = [x, y]; bestScore = score; }
+  }
+  return best;
+}
+
+/** Puts every person of every story on its map, and closes the gyms whose leader is away. */
+export function addMiniStories(OUTDOOR: Record<string, any>, INTERIOR: Record<string, any>) {
+  const mapOf = (id: string) => OUTDOOR[id] ?? INTERIOR[id];
   for (const s of MINI_STORIES) {
-    const m = OUTDOOR[s.map];
-    if (!m) continue;
-    const list = [
-      { x: s.local.x, y: s.local.y, look: s.local.look, dir: 'down', name: s.local.name, script: 'ms_local', msId: s.id },
-      { x: s.foe.x, y: s.foe.y, look: s.foe.look, dir: 'down', name: s.foe.name, script: 'ms_foe', msId: s.id },
-    ];
-    const taken = new Set<string>((m.npcs ?? []).map((o) => `${o.x},${o.y}`));
-    fitToMap(m.tiles, list, taken);
-    (m.npcs ??= []).push(...list);
+    const has = (f: Record<string, boolean>) => (k: string) => !!f[k];
+    for (const p of s.people) {
+      const m = mapOf(p.at.map);
+      if (!m) continue;
+      const [lo, hi] = [p.show?.[0] ?? 0, p.show?.[1] ?? Infinity];
+      const partDone = (f) => !!(p as any).part && !!f[partFlag(s, (p as any).part)];
+      const cond = (f: Record<string, boolean>) => { const st = stageOf(s, has(f)); return st >= lo && st < hi && !partDone(f); };
+      const role = { script: 'ms_step', ms: s.id, msKey: p.key, id: `ms_${s.id}_${p.key}`, name: p.name, map: p.at.map };
+      if (p.at.replace) {
+        const n = (m.npcs ?? []).find((o) => o.script === p.at.replace);
+        if (n) { Object.assign(n, role, { text: undefined, cond: p.show ? cond : n.cond }); continue; }
+      }
+      const at = spot(m, p.at);
+      if (!at) continue;
+      (m.npcs ??= []).push({ x: at[0], y: at[1], look: p.look, dir: p.dir ?? 'down', ...role, cond, ...(p.animal ? { critter: true } : {}) });
+    }
+    if (s.gym) {
+      const m = OUTDOOR[s.gym.map];
+      const i = (m?.doors ?? []).findIndex((d) => (typeof d === 'string' ? d : d.to) === s.gym!.to);
+      if (i >= 0) m.doors[i] = { to: s.gym.to, req: (f: Record<string, boolean>) => stageOf(s, has(f)) >= s.done, deny: s.gym.deny };
+    }
   }
 }

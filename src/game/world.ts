@@ -1256,6 +1256,13 @@ export const api = {
     state().lastHeal = { map: W_.map.id, x: p.x, y: p.y };
     state().checkpoint = null;
   },
+  /** A wild creature met on purpose (a swarm in a story). Losing sends the party to rest as usual. Returns 'win', 'caught', 'run' or 'lose'. */
+  async wildBattle(sp, lvl) {
+    const c = createCreature(sp, lvl);
+    const res = await runBattle({ foes: [c], wild: true, bg: W_.map.bg, music: 'battle' });
+    if (res === 'lose') await blackout();
+    return res;
+  },
   async battle(trainer, { canLose = false, music }: { canLose?: boolean; music?: string } = {}) {
     const foes = trainer.team.map(([sp, lvl]) => createCreature(sp, lvl));
     const res = await runBattle({ foes, wild: false, trainer, bg: W_.map.bg, canLose, music });

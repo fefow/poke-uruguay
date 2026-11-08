@@ -445,26 +445,8 @@ export const SCRIPTS = {
     await api.say('Con ella pican todas las criaturas de la zona, incluso las más raras y fuertes.', { name: 'Pescador' });
   },
 
-  async gift_surf(api) {
-    if (api.flag('got_canoa')) return api.say('El Cuareim es manso, pero hay que respetarlo. La Canoa solo resiste con la Medalla Rivera.', { name: 'Pescador' });
-    await api.say(['Vivo a orillas del río desde que nací.', 'Te regalo esta canoa. Caminá hacia el agua y subís sola.', 'Ojo: las corrientes de más al este son fuertes. Hace falta la Medalla Rivera para animarse.'], { name: 'Pescador' });
-    await api.give('canoa', 1);
-    api.setFlag('got_canoa');
-  },
 
-  async gift_soga(api) {
-    if (api.flag('got_soga')) return api.say('En las cuevas, las cascadas esconden cornisas. Subí con la soga y fijate qué guardan.', { name: 'Escalador' });
-    await api.say(['Trepé cuanta pared hay entre Fray Bentos y Rivera, y ya no me quedan fuerzas para más.', 'Llevate mi soga. En las cuevas hay cascadas que caen sobre cornisas escondidas.', 'Caminá contra la cascada y subís; para bajar, caminá hacia abajo desde la cornisa.'], { name: 'Escalador' });
-    await api.give('soga', 1);
-    api.setFlag('got_soga');
-  },
 
-  async gift_fuerza(api) {
-    if (api.flag('got_guantes')) return api.say('Con esos guantes movés lo que quieras. Pero la Medalla Tacuarembó es la que te da el derecho.', { name: 'Domador' });
-    await api.say(['Domo potros hace años y no hay animal que me gane de fuerza.', 'Llevate estos guantes. Con ellos podés empujar rocas pesadas, caminando contra ellas.', 'Solo te van a servir si ganás la Medalla Tacuarembó.'], { name: 'Domador' });
-    await api.give('guantes', 1);
-    api.setFlag('got_guantes');
-  },
 
   async gift_pir(api) {
     if (!api.flag('gift_pir')) {
@@ -1115,14 +1097,6 @@ export const SCRIPTS = {
     await api.say(E.after, { name: E.name });
   },
 
-  async gift_tac(api) {
-    if (api.flag('got_bici')) return api.say('Al norte de la ciudad empieza la Ciclovía. Solo se entra en bicicleta. Usala desde el menú.', { name: 'Dueña' });
-    await api.say(['Bienvenido a El Pedal. Hace veinte años que armo bicicletas para el norte.', 'Esta quedó en el taller: era de mi hijo y ya no la usa. Llevatela, va cuatro veces más rápido que caminando.', 'Se usa desde el menú. Bajo techo no se puede, y en combate no cambia nada.'], { name: 'Dueña' });
-    await api.give('bici', 1);
-    api.setFlag('got_bici');
-    api.setFlag('gift_tac');
-    await api.say('Al norte de la ciudad hay una Ciclovía. Solo se entra en bicicleta.', { name: 'Dueña' });
-  },
 
   async gift_ciclovia(api) {
     if (api.flag('ciclo_done')) return api.say('Cada vez que bajo por la ciclovía me siento joven.', { name: 'Ciclista veterano' });
