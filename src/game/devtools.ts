@@ -48,7 +48,7 @@ function progressTo(k) {
   if (passed('artigas')) { set('got_canoa'); give('canoa'); }
   if (passed('rivera')) set('torre_clear');
   if (passed('tacuarembo')) { set('got_guantes'); give('guantes'); }
-  if (passed('quebrada')) set('quebrada_clear');
+  if (passed('quebrada')) { set('quebrada_clear', 'ev_qb_ayudante', 'got_pluma'); give('pluma_azul'); }
   if (passed('paloma')) { set('cabo_clear', 'lamp_returned', 'got_farol'); give('farol'); }
   if (passed('piriapolis')) set('obs_clear');
   if (passed('minas')) set('pp_clear');
