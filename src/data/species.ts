@@ -293,6 +293,20 @@ const REGULAR = BASE_LIST.filter((s: any) => !s.legendary);
 const OLD_LEGENDS = BASE_LIST.filter((s: any) => s.legendary);
 const LIST = [...REGULAR, ...buildLines(), ...OLD_LEGENDS, ...buildLegends(), ...buildCustom()].map((s, i) => ({ ...s, id: i + 1 }));
 
+// Most creatures have a single type; only these lines keep a second one, and each pairs sensibly
+// (no water-ground and the like, where one move would hit both weaknesses at once).
+const DUAL_LINES = new Set(['teruterito', 'mulitin', 'tuco', 'luciernito', 'yararita', 'cotorrayo', 'mbigua', 'gaviota', 'aguaraflama', 'yacarito', 'alacran', 'tarantula', 'murcielago', 'hormiga', 'cuervon', 'lechuza', 'benteve']);
+{
+  const byKey = new Map(LIST.map((s: any) => [s.key, s]));
+  const evolved = new Set(LIST.map((s: any) => s.evo?.to).filter(Boolean));
+  for (const root of LIST as any[]) {
+    if (evolved.has(root.key) || root.legendary || CUSTOM_KEYS.includes(root.key)) continue;
+    const chain: any[] = [];
+    for (let c: any = root; c; c = c.evo ? byKey.get(c.evo.to) : null) chain.push(c);
+    if (!DUAL_LINES.has(root.key)) for (const c of chain) c.types = [c.types[0]];
+  }
+}
+
 export const SPECIES: Record<string, Species> = deepFreeze(Object.fromEntries(LIST.map((s) => [s.key, s])));
 export const DEX_ORDER: string[] = deepFreeze(LIST.map((s) => s.key));
 export const STARTERS = deepFreeze(['ceibito', 'tejuchispa', 'carpinchito']);
