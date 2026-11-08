@@ -3,6 +3,7 @@
 import { SPECIES } from './species.ts';
 import { EVENT_SCRIPTS, riddleFor } from './events.ts';
 import { FAVOR_SCRIPTS } from './favors.ts';
+import { FIESTA_SCRIPTS } from './fiesta.ts';
 import { MS_SCRIPTS } from './mini-stories.ts';
 import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from './route.ts';
 import { teamOf } from './map-gen.ts';
@@ -1235,6 +1236,7 @@ export const SCRIPTS = {
 
   ...EVENT_SCRIPTS,
   ...FAVOR_SCRIPTS,
+  ...FIESTA_SCRIPTS,
   ...MS_SCRIPTS,
 };
 

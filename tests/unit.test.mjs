@@ -677,3 +677,29 @@ test('mini historias: especies, mapas, recompensas y marcas válidas, y cada una
     for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
   }
 });
+
+test('fiesta de la Patria Gaucha: dura dos días del reloj, arma el predio y se guarda bien', async () => {
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const { fiestaDay, fiestaUp, FIESTA_MAP } = await import('../src/data/fiesta.ts');
+  const { setState } = await import('../src/game/state.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
+  const m = OUTDOOR[FIESTA_MAP];
+  assert.ok(m.condTiles.length >= 20, 'decoración del predio');
+  for (const t of m.condTiles) { assert.ok(TILE_INFO[t.ch], `tile ${t.ch}`); assert.equal(m.tiles[t.y][t.x], '.', 'solo sobre pasto'); }
+  const games = m.npcs.filter((n) => String(n.script).startsWith('fg_'));
+  for (const s of ['fg_comision', 'fg_sortija', 'fg_jineteada', 'fg_taba', 'fg_folk']) assert.ok(games.some((n) => n.script === s), s);
+  for (const n of games) assert.ok(SCRIPTS[n.script], n.script);
+  assert.ok(SCRIPTS.fg_intro && m.triggers.some((t) => t.script === 'fg_intro'));
+  const S = newState({ name: 'Ana', look: 'player_f' });
+  setState(S);
+  assert.equal(fiestaDay(), 'antes'); assert.ok(fiestaUp());
+  S.fiesta = { t0: 100 }; S.stats.playtime = 100 + 10 * 45; assert.equal(fiestaDay(), 1);
+  S.stats.playtime = 100 + 30 * 45; assert.equal(fiestaDay(), 2);
+  S.stats.playtime = 100 + 49 * 45; assert.equal(fiestaDay(), 'fin'); assert.ok(!fiestaUp());
+  // the start time survives the save validation; an impossible one is dropped
+  const keep = (f) => validateSave({ ...JSON.parse(JSON.stringify(S)), fiesta: f }).data?.fiesta ?? null;
+  assert.deepEqual(keep({ t0: 100 }), { t0: 100 });
+  assert.equal(keep({ t0: 1e9 }), null);
+  assert.equal(keep(null), null);
+});

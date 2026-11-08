@@ -1154,3 +1154,34 @@ body.gb * { -webkit-touch-callout: none; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-dpad { opacity: 0.1; pointer-events: none; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-round { opacity: 0.3; }
 @media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 140px; } .gb-dpad { transform: scale(1); } .gb-ab { transform: scale(1.15); } }
+
+/* ---------------------------------------------------------------- fiesta minigames (game/minigames.ts) */
+.minigame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -55%;
+  z-index: 36;
+  width: min(72cqi, 92%);
+  padding: 2cqi 2.4cqi;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqi;
+  background: var(--paper);
+  border: var(--frame) solid var(--ink);
+  box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 4px var(--celeste);
+  border-radius: 1.4cqi;
+  touch-action: none;
+  user-select: none;
+}
+.minigame .minigame-canvas {
+  position: static;
+  inset: auto;
+  height: auto;
+  width: 100%;
+  aspect-ratio: 160 / 72;
+  image-rendering: pixelated;
+  border: 2px solid var(--ink);
+  border-radius: 0.6cqi;
+}
+.minigame-hint { font-size: 2.8cqi; color: var(--ink-soft); text-align: center; }
