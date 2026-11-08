@@ -1081,6 +1081,9 @@ export const SCRIPTS = {
     api.setFlag('anglo_pp');
     api.playerFaceNpc('tabarez_anglo');
     await api.say(['{player}, tengo que decirte algo que callé demasiado tiempo.', 'Tu compañero nació en mi laboratorio durante el Proyecto Pampero. Guarda un eco del ciclo del viento, y por eso el PP te sigue.', 'Perdoname por no habértelo dicho en Carmelo. Cuidalo mucho.'], { name: 'Maestro Tabárez' });
+    await api.say(['Una cosa más. Traje esto del laboratorio: un Medidor de Niebla.', 'Mide cuánta niebla del Equipo PP hay en el aire de todo el país. Hoy marca casi el máximo.', 'Cada planta del PP que cierres lo va a hacer bajar. Quiero verlo en cero.'], { name: 'Maestro Tabárez' });
+    api.setFlag('got_medidor');
+    await api.give('medidor_niebla', 1);
     await api.npcWalkOff('tabarez_anglo');
     await fogChoice(api, 'fog1', 'Capataz', ['Un capataz del frigorífico te frena a la salida.', 'Con la niebla, el pueblo no sufre inundaciones desde hace dos años. Si la apagás, vuelve el río.']);
   },

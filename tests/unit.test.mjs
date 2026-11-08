@@ -677,3 +677,22 @@ test('mini historias: especies, mapas, recompensas y marcas válidas, y cada una
     for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
   }
 });
+
+test('medidor de niebla: arranca en 100 %, baja con las plantas del PP y las máquinas, y el guardado lo acepta', async () => {
+  const { fogReading, PP_PLANTS, fogMachineFlags } = await import('../src/data/toxicity.ts');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  assert.equal(PP_PLANTS.reduce((n, p) => n + p[2], 0), 85, 'las plantas valen 85 puntos');
+  const machines = fogMachineFlags();
+  const onRoutes = Object.values(OUTDOOR).flatMap((m) => (m.npcs ?? []).filter((n) => n.script === 'route_fog').map((n) => n.doneFlag));
+  assert.ok(machines.length >= onRoutes.length && machines.length > 5, 'cuenta las máquinas sueltas');
+  assert.equal(fogReading({}).pct, 100);
+  const plants = Object.fromEntries(PP_PLANTS.map(([f]) => [f, true]));
+  assert.equal(fogReading(plants).pct, 15, 'solo quedan las máquinas sueltas');
+  assert.equal(fogReading({ ...plants, ...Object.fromEntries(machines.map((f) => [f, true])) }).pct, 0);
+  assert.ok(fogReading({ anglo_pp: true }).pct < 100);
+  const s = goodSave();
+  s.bag.medidor_niebla = 1;
+  assert.equal(validateSave(s).ok, false, 'sin haberlo recibido');
+  s.flags.got_medidor = true;
+  assert.equal(validateSave(s).ok, false, 'antes del Anglo');
+});

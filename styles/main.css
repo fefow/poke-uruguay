@@ -1021,6 +1021,18 @@ body {
 .hud-lv { font-size: 14px; font-weight: 700; color: var(--sun); }
 .tb-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 10px; background: oklch(1 0 0 / 0.07); font-size: 17px; white-space: nowrap;
   & b { color: var(--sun); font-weight: 700; } }
+/* Medidor de Niebla row on the player card: red while the PP fog is thick, green once it is gone */
+.tb-fog { width: 100%; box-sizing: border-box; border: 0; color: var(--paper); font: inherit; font-size: 16px; cursor: pointer; text-align: left;
+  &[hidden] { display: none; }
+  &:hover { background: var(--celeste-deep); }
+  & b { flex: none; }
+  & .tb-pix { width: 26px; height: 26px; } }
+.tb-fog-bar { flex: 1; min-width: 40px; height: 8px; border-radius: 4px; background: oklch(0.1 0.02 270); overflow: hidden;
+  &::after { content: ''; display: block; height: 100%; width: calc(var(--fog, 1) * 100%); border-radius: 4px; background: oklch(0.62 0.2 25); } }
+.tb-fog.is-mid .tb-fog-bar::after { background: oklch(0.8 0.16 85); }
+.tb-fog.is-low .tb-fog-bar::after { background: oklch(0.72 0.17 145); }
+.tb-fog.is-high b { color: oklch(0.75 0.17 25); }
+.tb-fog.is-clean b { color: oklch(0.8 0.17 145); }
 .tb-pix { width: 32px; height: 32px; image-rendering: pixelated; flex: none; }
 .tb-ico { display: grid; place-items: center; color: var(--celeste); }
 .tb-chip .tb-ico, .hud-place .tb-ico { color: var(--sun); }
@@ -1154,3 +1166,19 @@ body.gb * { -webkit-touch-callout: none; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-dpad { opacity: 0.1; pointer-events: none; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-round { opacity: 0.3; }
 @media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 140px; } .gb-dpad { transform: scale(1); } .gb-ab { transform: scale(1.15); } }
+
+/* Medidor de Niebla panel */
+.panel-fog { display: flex; flex-direction: column; gap: 1.6cqi; }
+.fog-meter { display: grid; gap: 1cqi; padding: 1.4cqi 2cqi; border-radius: 1cqi; background: oklch(0 0 0 / 0.04); color: var(--ink); }
+.fog-pct { display: flex; align-items: baseline; gap: 1.2cqi; & b { font-size: 5cqi; line-height: 1; color: oklch(0.55 0.2 28); } & span { font-size: 1.6cqi; opacity: .85; } }
+.panel-fog.is-mid .fog-pct b { color: oklch(0.6 0.14 70); }
+.panel-fog.is-low .fog-pct b, .panel-fog.is-clean .fog-pct b { color: oklch(0.52 0.15 145); }
+.fog-gauge { display: block; height: 1.4cqi; border-radius: 0.7cqi; background: oklch(0.85 0.01 270); overflow: hidden;
+  &::after { content: ''; display: block; height: 100%; width: calc(var(--fog) * 100%); border-radius: 0.7cqi; background: linear-gradient(90deg, oklch(0.72 0.17 145), oklch(0.82 0.16 85) 45%, oklch(0.62 0.2 25)); background-size: calc(100% / max(var(--fog), 0.01)) 100%; } }
+.fog-status { margin: 0; font-size: 1.6cqi; }
+.fog-lists { display: grid; grid-template-columns: 3fr 2fr; gap: 2cqi; min-height: 0; overflow: auto;
+  & h3 { margin: 0 0 0.8cqi; font-size: 1.7cqi; color: var(--celeste-deep); } }
+.fog-done { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5cqi;
+  & li { display: flex; justify-content: space-between; gap: 1cqi; padding: 0.5cqi 1cqi; border-radius: 0.6cqi; background: oklch(0 0 0 / 0.05); color: var(--ink); font-size: 1.5cqi; }
+  & b { color: oklch(0.5 0.15 145); } }
+.fog-none { margin: 0.6cqi 0 0; font-size: 1.5cqi; color: var(--ink-soft); }

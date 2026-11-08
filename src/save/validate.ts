@@ -23,7 +23,7 @@ const STORY_FLAGS = new Set([
   'anima_clear', 'fog1', 'fog2', 'fog3', 'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_soga', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
   'rival5', 'rival6', 'rival_bosque', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
-  'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'marta_lost', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'refineria_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
+  'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'marta_lost', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'refineria_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb', 'got_medidor',
 ]);
 const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|ev|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
 
@@ -168,6 +168,8 @@ export function validateSave(d: any) {
   if (bag.bici && !flags.got_bici) e('Bicicleta sin haberla recibido');
   if (bag.guantes && !flags.got_guantes) e('Guantes sin haberlos recibido');
   if (bag.farol && !flags.got_farol) e('Farol sin haberlo recibido');
+  if (bag.medidor_niebla && !flags.got_medidor) e('Medidor de Niebla sin haberlo recibido');
+  if (flags.got_medidor && !flags.anglo_pp) e('el Medidor de Niebla lo entrega Tabárez en el Anglo');
   if (bag.canoa && !flags.got_canoa) e('Canoa sin haberla recibido');
   if (!(d.safari && Number.isFinite(d.safari.until))) { delete bag.safari_ball; delete bag.cebo; }
   if (bag.silbato && !flags.got_vuelo) e('Silbato del Hornero sin haberlo recibido');
