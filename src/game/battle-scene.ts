@@ -20,6 +20,7 @@ import { createCreature, displayName, maxHp, expForLevel, gainExp, learnMove, ca
 import { openParty, openBag } from './menus.ts';
 import { sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
+import { isTouch } from '../core/touchpad.ts';
 
 const BG = {
   field: ['#9ad4f2', '#d8f0ff', '#78c850', '#5aa83c'],
@@ -385,6 +386,8 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     A.showPlayerTrainer = false;
     await sendOutPlayer(engine.p.c);
     await say(`¡Adelante, ${displayName(engine.p.c)}!`, { battle: true, auto: 900 });
+    Object.assign(tuto, { on: !!trainer && !S.flags?.rival1 && String(trainer.id ?? '') === 'rival_0', menu: false, moves: false, after: false });
+    if (tuto.on) await tutoIntro();
 
     // ---- main loop
     while (!engine.over) {
@@ -396,6 +399,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
       // Compact trace of the turn, so a report from the bug panel shows what the engine decided.
       logInfo(`Turno ${engine.turnNo}: ${action.type}${action.index != null ? ` #${action.index}` : ''} | ${ev.map((x) => (x.t === 'text' ? `"${x.msg}"` : x.t === 'damage' ? `dmg${x.side}:${x.amount}` : x.t)).join(' ')}`);
       await play(ev, leveled);
+      if (tuto.on && !tuto.after && !engine.over && action.type === 'move') { tuto.after = true; await tutoAfterTurn(); }
     }
 
     // ---- outcome
@@ -432,6 +436,7 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     closeDialog();
     return result;
   } finally {
+    tuto.on = false;
     lowHpAlarm(false);
     hud.layer.remove();
     hud = null;
@@ -559,12 +564,49 @@ function recordBattle(trainer) {
   if (S.battleLog.length > 20) S.battleLog.shift();
 }
 
+// ---------------------------------------------------------------- TUTORIAL
+// The first fight (against the rival, right after choosing the starter) teaches the controls: the professor's notes
+// sit at the top of the screen and say keys on a computer and taps on a phone or tablet.
+const tuto = { on: false, menu: false, moves: false, after: false };
+const PROF = 'Maestro Tabárez';
+
+function tutoTip(text) {
+  const tip = h('div', { class: 'tuto-tip', role: 'note' }, h('b', { class: 'tuto-who', text: PROF }), h('p', { text }));
+  uiRoot().append(tip);
+  return () => tip.remove();
+}
+
+async function tutoIntro() {
+  const t = isTouch();
+  await say([
+    'Es tu primer combate. Te voy a ir explicando cómo se pelea.',
+    t ? 'Para pasar los mensajes, tocá el cuadro de texto o el botón Z.' : 'Para pasar los mensajes, apretá Z o Enter.',
+    t ? 'Las opciones se eligen tocándolas directamente. Probá.' : 'Las opciones se eligen con las flechas: Z confirma y X vuelve atrás.',
+  ], { battle: true, name: PROF });
+}
+
+async function tutoAfterTurn() {
+  const t = isTouch();
+  await say([
+    'Así se ataca. Cuando los PS de la criatura rival llegan a cero, queda fuera de combate.',
+    'En «Mochila» se usan los Mates para curar y las Pokeballs para atrapar criaturas salvajes. «Equipo» cambia de criatura y «Huir» escapa de las salvajes.',
+    t ? 'El botón ×2 de arriba a la derecha acelera los combates y las caminatas. Ahora seguí vos.' : 'Mantené Espacio para que todo vaya el doble de rápido. Ahora seguí vos.',
+  ], { battle: true, name: PROF });
+}
+
 // ---------------------------------------------------------------- MENUS
 let lastAction = 0;
 async function chooseAction() {
   const c = engine.p.c;
   await say(`¿Qué va a hacer ${displayName(c)}?`, { battle: true, keep: true });
-  const pick = await choose(['Luchar', 'Mochila', 'Equipo', 'Huir'], { cancel: false, cls: 'menu-battle', cols: 2, start: 0 });
+  let untip = null;
+  if (tuto.on && !tuto.menu) {
+    tuto.menu = true;
+    untip = tutoTip(isTouch() ? 'Tocá «Luchar» para atacar.' : 'Elegí «Luchar» con las flechas y apretá Z para atacar.');
+  }
+  const first = untip ? [{ label: 'Luchar', cls: 'tuto-glow' }, 'Mochila', 'Equipo', 'Huir'] : ['Luchar', 'Mochila', 'Equipo', 'Huir'];
+  const pick = await choose(first, { cancel: false, cls: 'menu-battle', cols: 2, start: 0 });
+  untip?.();
   lastAction = pick;
   if (pick === 0) {
     const mv = await chooseMove(c);
@@ -624,7 +666,15 @@ async function chooseMove(c, { forgetting = false, incoming = null }: { forgetti
       h('p', { class: 'mi-desc', text: d.desc }),
     );
   };
-  const r = await choose(opts, { cls: 'menu-moves', onMove: show, cols: 2 });
+  let untip = null;
+  if (tuto.on && !tuto.moves && !forgetting) {
+    tuto.moves = true;
+    untip = tutoTip(isTouch()
+      ? 'Tocá un movimiento para ver su tipo y su poder, y tocalo otra vez para usarlo.'
+      : 'Con las flechas ves el tipo y el poder de cada movimiento. Z lo usa y X vuelve atrás.');
+  }
+  const r = await choose(opts, { cls: 'menu-moves', onMove: show, cols: 2, hint: isTouch() && !forgetting ? 'Tocá para ver · tocá otra vez para usar' : '' });
+  untip?.();
   info.remove();
   neu?.remove();
   return r;
