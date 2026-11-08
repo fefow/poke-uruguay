@@ -278,7 +278,7 @@ export function openSummary(index) {
 }
 
 // ---------------------------------------------------------------- BAG
-const POCKETS = [['items', 'Objetos'], ['held', 'Equipables'], ['balls', 'Pokeballs'], ['key', 'Clave']];
+const POCKETS = [['items', 'Objetos'], ['tm', 'MT'], ['held', 'Equipables'], ['balls', 'Pokeballs'], ['key', 'Clave']];
 
 function itemUsable(key, c) {
   const it = ITEMS[key];

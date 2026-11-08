@@ -579,15 +579,15 @@ function ambTick() {
   if (!ctx) return;
   const t = ctx.currentTime + 0.02;
   const r = Math.random();
-  if (amb.birds && r < 0.18 * amb.birds) {
+  if (amb.birds && r < 0.04 * amb.birds) {
     const f = 2200 + Math.random() * 1800;
     const n = 2 + Math.floor(Math.random() * 3);
     for (let i = 0; i < n; i++) tone(f * (1 + (i % 2) * 0.12), t + i * 0.09, 0.07, { type: 'sine', vol: 0.18, slide: 500, out: ambGain });
   }
-  if (amb.crickets && r < 0.45 * amb.crickets) {
+  if (amb.crickets && r < 0.1 * amb.crickets) {
     for (let i = 0; i < 6; i++) tone(4300, t + i * 0.055, 0.03, { type: 'sine', vol: 0.07, out: ambGain });
   }
-  if (amb.drips && r < 0.3 * amb.drips) tone(900 + Math.random() * 400, t, 0.12, { type: 'sine', vol: 0.15, slide: -500, out: ambGain ?? sfxGain });
+  if (amb.drips && r < 0.06 * amb.drips) tone(900 + Math.random() * 400, t, 0.12, { type: 'sine', vol: 0.15, slide: -500, out: ambGain ?? sfxGain });
   if (amb.thunder && r < 0.07 * amb.thunder) {
     noise(t, 1.4, 0.7, ambGain ?? sfxGain, { hp: 0 });
     tone(55, t, 1.2, { type: 'triangle', vol: 0.5, slide: -20, out: ambGain ?? sfxGain });

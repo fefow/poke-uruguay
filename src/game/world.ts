@@ -454,7 +454,7 @@ export function useFlash() {
 let bumpAt = 0;
 function bump() {
   const now = performance.now();
-  if (now - bumpAt > 300) { sfx('bump'); bumpAt = now; }
+  if (now - bumpAt > 300) bumpAt = now; // no bump sound
 }
 
 async function crossEdge(side, to) {
@@ -544,11 +544,8 @@ function onStep() {
   }
   // Getting into or out of the canoe splashes.
   if (p.from && (ch === '~') !== (tileAt(p.from.x, p.from.y) === '~')) sfx('splash');
-  // Footsteps change with the ground: planks, sand and cobblestones each sound different (indoors: wood floors).
-  if (ch === 'b') sfx('step_wood');
-  else if (ch === 's') sfx('step_sand');
-  else if (ch === 'c') sfx('step_stone');
-  if (TILE_INFO[ch]?.enc) { sfx('grass'); W_.rustle = { x: p.x, y: p.y, t0: null }; }
+  // Footsteps and grass rustle are silent: too many sounds at once bothered the player.
+  if (TILE_INFO[ch]?.enc) { W_.rustle = { x: p.x, y: p.y, t0: null }; }
   if (poisonTick()) return;
   // Route marker: walking right beside one saves the respawn point (it does not heal)
   if (!W_.map.indoor && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tileAt(p.x + dx, p.y + dy) === 'Щ')) {
@@ -1632,7 +1629,8 @@ function drawWorld(g, t) {
     if (look === 'swimmer' && tileAt(n.x, n.y) !== '~') look = 'turista'; // swimmers only show in the water
     const frameIdx = n.moving ? ((n.step ?? Math.floor(n.t / 100)) % 2) + 1 : 0;
     // Four poses per direction: contact (1 or 2) in the first half of a tile, then a passing pose (0 or 3, alternating).
-    const f = player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : (p.step % 2 ? 3 : 0)) : n.moving ? frameIdx : 0;
+    const rowing = !!player && tileAt(n.x, n.y) === '~'; // in the canoe the legs stay still: the player is rowing
+    const f = rowing ? 0 : player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : (p.step % 2 ? 3 : 0)) : n.moving ? frameIdx : 0;
     if (!player && typeof look === 'string' && look.startsWith('animal:')) {
       // creatures seen in the distance: they wander but cannot be fought or caught
       shadow(g, sx + 8, sy + 13, 6, 2.4);

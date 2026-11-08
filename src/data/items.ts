@@ -77,7 +77,7 @@ const BASE_ITEMS = {
 // el movimiento si comparte tipo con él o si es de tipo Normal (ver tmCompatible).
 export const TM_MOVES = ['terremoto', 'psiquico', 'triturar', 'descarga', 'parrillada', 'cascada', 'bomba_lodo', 'tormenta_ceibo', 'avalancha', 'zumbido', 'punio_gaucho', 'vendaval', 'fogon', 'megaagotar', 'garra_charrua', 'premonicion', 'sombra_nocturna', 'excavar', 'derribo', 'pico_taladro'];
 for (const m of TM_MOVES) {
-  BASE_ITEMS[`mt_${m}`] = { name: `MT ${MOVES[m].name}`, pocket: 'items', price: 3000, tm: m, desc: `Enseña ${MOVES[m].name} (${MOVES[m].power} de poder) a una criatura compatible. Se gasta al usarla.` };
+  BASE_ITEMS[`mt_${m}`] = { name: `MT ${MOVES[m].name}`, pocket: 'tm', price: 3000, tm: m, desc: `Enseña ${MOVES[m].name} (${MOVES[m].power} de poder) a una criatura compatible. Se gasta al usarla.` };
 }
 
 export const ITEMS: Record<string, Item> = deepFreeze(BASE_ITEMS);
