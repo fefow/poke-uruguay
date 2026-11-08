@@ -90,7 +90,7 @@ const R24 = route({ seed: 'ruta24', w: 20, h: 26, axis: 'v', from: 10, to: 10, g
 const FRB = city({
   seed: 'fraybentos', sa: 6, sb: 15, road: 'c',
   a: [['house', 2, 'casa_frb'], ['siniestro', 8, 'gym_frb'], ['poli', 17, 'poli_frb'], ['shop', 23, 'shop_frb']],
-  b: [['houseB', 1], ['fabrica', 7, 'anglo_1'], ['houseG', 17, 'casa_frb2']],
+  b: [['houseB', 1], ['guarida', 7, 'anglo_1'], ['houseG', 17, 'casa_frb2']],
   vroads: [14], decor: { '#': 8, f: 8 },
   water: [[1, 17, 26, 1]],
   signs: [[6, 7], [26, 7]],
@@ -737,6 +737,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
         gr(4, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.'),
         { x: 16, y: 3, look: 'obrero', dir: 'left', script: 'obrero_anglo', cond: (f) => !f.ferry_done },
         { x: 13, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' },
+        { x: 14, y: 3, look: 'prof', dir: 'down', id: 'tabarez_anglo', arrive: true },
       ],
       items: [{ x: al[5].x, y: al[5].y, item: 'pan_casero', id: 'an_item1' }, { x: al[6].x, y: al[6].y, item: 'alfajor_triple', id: 'an_item2' }, { x: al[8].x, y: al[8].y, item: 'credencial_anglo', id: 'an_cred' }],
     });

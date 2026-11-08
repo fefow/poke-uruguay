@@ -591,6 +591,36 @@ test('night shifts wild odds toward shadowy creatures without removing anyone', 
   assert.ok(w(night, 'ceibito') < w(day, 'ceibito'));
 });
 
+test('wild zones: plain, forest, sand and embers hold different creatures', async () => {
+  const { encounterList, tileBiome } = await import('../src/data/encounters.ts');
+  const { SPECIES } = await import('../src/data/species.ts');
+  const { MAPS } = await import('../src/data/maps.ts');
+  // plain favours normal kinds, forest favours plants and bugs; nobody on the map's list disappears
+  const m = { id: 'x', enc: { list: [['pombero', 5, 7, 10], ['yarara', 5, 7, 10], ['ceibito', 5, 7, 10], ['carpincho', 5, 7, 10]] } };
+  const w = (list, k) => list.find((e) => e[0] === k)?.[3] ?? 0;
+  const plain = encounterList(m, 'plain'), forest = encounterList(m, 'forest');
+  assert.equal(plain.length, forest.length);
+  const typed = (t) => m.enc.list.map((e) => e[0]).filter((k) => SPECIES[k].types.includes(t));
+  for (const k of typed('planta')) assert.ok(w(forest, k) > w(plain, k), `${k} should be likelier in the forest`);
+  // tile classification: crowded grass is forest, open grass is plain, sand only outside cities, embers are volcanic
+  const trees = ['#####', '#####', '##,##', '#####', '#####'];
+  const at = (rows) => (x, y) => rows[y]?.[x] ?? null;
+  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(trees), 2, 2), 'forest');
+  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(['.....', '..,..', '.....']), 2, 1), 'plain');
+  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at(['s']), 0, 0), 'sand');
+  assert.equal(tileBiome({ id: 'colonia', enc: m.enc }, at(['s']), 0, 0), null);
+  assert.equal(tileBiome({ id: 'x', enc: m.enc }, at([';']), 0, 0), 'volcanic');
+  // every sandy and volcanic map has creatures that never swim, in sensible kinds
+  for (const [id, map] of Object.entries(MAPS)) {
+    for (const [biome, ok] of [['sand', ['tierra', 'roca', 'volador', 'bicho']], ['volcanic', ['fuego', 'tierra', 'roca']]]) {
+      if (!map.enc?.list?.length || !map.tiles.join('').includes(biome === 'sand' ? 's' : ';')) continue;
+      const list = encounterList(map, biome);
+      if (!list.length) continue;
+      assert.ok(list.every(([sp]) => !SPECIES[sp].types.includes('agua') && SPECIES[sp].types.some((t) => ok.includes(t))), `${id}: ${biome} zone has strangers`);
+    }
+  }
+});
+
 test('map editor: a map can choose the ground behind its trees and bushes', async () => {
   const { applyMapEdits } = await import('../src/data/map-edits.ts');
   const maps = { a: { tiles: ['..'], npcs: [], items: [] } };

@@ -87,6 +87,17 @@ export const TILE_INFO = {
   y: { name: 'fachada gimnasio roca', solid: true },
   e: { name: 'emblema roca', solid: true },
   z: { name: 'torre', solid: true },
+  'Ѫ': { name: 'techo almenas torre', solid: true },
+  'ѫ': { name: 'techo guarida con chimenea', solid: true },
+  'ѭ': { name: 'techo guarida', solid: true },
+  'Ѭ': { name: 'emblema PP', solid: true },
+  'Ѯ': { name: 'fachada guarida', solid: true },
+  'ѱ': { name: 'techo cubierta ferry', solid: true },
+  'Ѵ': { name: 'techo chimenea ferry', solid: true },
+  'ѵ': { name: 'fachada casco ferry', solid: true },
+  'Ҁ': { name: 'techo estadio', solid: true },
+  'ҁ': { name: 'fachada estadio', solid: true },
+  '҂': { name: 'emblema estadio', solid: true },
   '%': { name: 'zarzal', solid: true },
   '\\': { name: 'roca de fuerza', solid: true },
   '`': { name: 'ceniza' },
@@ -438,6 +449,7 @@ const DRAW = {
     px(g, 2, 0, '#c8c8d2', 12, 2);
     px(g, 2, 14, '#c8c8d2', 12, 2);
     px(g, 3, 6, '#b8b8c4', 10, 1);
+    px(g, 2, 0, '#f2c02a', 12, 1); px(g, 2, 15, '#c8921a', 12, 1);
   },
   λ: (g, r) => {
     grass(g, r);
@@ -514,8 +526,73 @@ const DRAW = {
     px(g, 0, 0, '#3a7ad8', T, 2);
   },
   z: (g) => {
-    px(g, 0, 0, '#e8e4dc', T, T);
-    px(g, 5, 0, '#c8c4bc', 6, T); px(g, 6, 2, '#5a5a6a', 4, 3);
+    // dark stone tower wall with an arrow slit
+    px(g, 0, 0, '#5a5870', T, T); px(g, 0, 0, '#7a789a', T, 1); px(g, 0, 15, '#2e2c42', T, 1);
+    for (let y = 3; y < T; y += 4) { px(g, 0, y, '#4a4860', T, 1); for (let x = ((y - 3) / 4) % 2 ? 2 : 6; x < T; x += 8) px(g, x, y - 3, '#4a4860', 1, 3); }
+    px(g, 6, 3, OUTLINE, 4, 9); px(g, 7, 4, '#ffd76a', 2, 7); px(g, 7, 4, '#fff2b0', 2, 2);
+    px(g, 0, 0, '#2e2c42', 1, T); px(g, 15, 0, '#2e2c42', 1, T);
+  },
+  'Ѫ': (g) => {
+    // battlements: merlons over a shadowed gap, red pennant in the middle
+    px(g, 0, 0, '#2e2c42', T, T);
+    for (const x of [0, 6, 12]) { px(g, x, 0, '#7a789a', 4, 7); px(g, x, 0, '#a8a6c8', 4, 1); px(g, x + 3, 1, '#4a4860', 1, 6); }
+    px(g, 0, 7, '#5a5870', T, 9); px(g, 0, 7, '#a8a6c8', T, 1); px(g, 0, 8, '#3a3850', T, 1);
+    px(g, 7, 0, '#d8302e', 3, 4); px(g, 7, 0, '#ff7a6a', 3, 1);
+  },
+  'ѭ': (g) => {
+    px(g, 0, 0, '#3a2a3a', T, T);
+    for (let x = 0; x < T; x += 8) { g.fillStyle = '#5a3a52'; g.beginPath(); g.moveTo(x, 15); g.lineTo(x, 4); g.lineTo(x + 8, 15); g.fill(); px(g, x, 4, '#8a5a78', 1, 1); }
+    px(g, 0, 15, OUTLINE, T, 1); px(g, 0, 0, '#c8302e', T, 1);
+  },
+  'ѫ': (g) => {
+    DRAW['ѭ'](g);
+    px(g, 6, 0, OUTLINE, 6, 12); px(g, 7, 0, '#6a6a7a', 4, 11); px(g, 7, 0, '#9a9aaa', 1, 11); px(g, 6, 0, '#d8302e', 6, 2);
+    px(g, 8, 4, '#4a4a5a', 2, 1); px(g, 8, 7, '#4a4a5a', 2, 1);
+  },
+  'Ѭ': (g) => {
+    DRAW['ѭ'](g);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
+    g.fillStyle = '#d8302e'; g.beginPath(); g.arc(8, 8, 6.2, 0, 7); g.fill();
+    g.fillStyle = '#fff6e6'; g.beginPath(); g.arc(8, 8, 4.6, 0, 7); g.fill();
+    px(g, 6, 5, '#d8302e', 1, 7); px(g, 7, 5, '#d8302e', 3, 1); px(g, 9, 6, '#d8302e', 1, 2); px(g, 7, 8, '#d8302e', 3, 1);
+  },
+  'Ѯ': (g) => {
+    px(g, 0, 0, '#4a4a5c', T, T); px(g, 0, 0, '#7a7a8e', T, 1); px(g, 0, 15, '#22222e', T, 1);
+    for (let x = 3; x < T; x += 4) px(g, x, 1, '#3a3a4a', 1, 14);
+    px(g, 1, 4, OUTLINE, 14, 4); px(g, 2, 5, '#c82a2a', 3, 2); px(g, 6, 5, '#2a2a38', 8, 2); px(g, 2, 5, '#ff7a6a', 1, 1);
+    hazard(g, 11);
+  },
+  'ѱ': (g) => {
+    px(g, 0, 0, '#f4f8fc', T, T); px(g, 0, 0, '#ffffff', T, 1);
+    px(g, 0, 10, '#2a6ab0', T, 3); px(g, 0, 13, '#143a68', T, 3);
+    for (let x = 1; x < T; x += 5) px(g, x, 3, '#c8d8e8', 3, 4);
+  },
+  'Ѵ': (g) => {
+    DRAW['ѱ'](g);
+    px(g, 3, 0, OUTLINE, 10, 10); px(g, 4, 0, '#f2f2f6', 8, 9); px(g, 4, 2, '#e2362e', 8, 3); px(g, 4, 5, '#f2f2f6', 8, 1); px(g, 4, 0, '#23232e', 8, 2);
+  },
+  'ѵ': (g) => {
+    px(g, 0, 0, '#1d4f8a', T, T); px(g, 0, 0, '#e2362e', T, 2); px(g, 0, 2, '#ffffff', T, 1); px(g, 0, 15, '#0e2a50', T, 1);
+    for (const x of [2, 8]) { g.fillStyle = OUTLINE; g.beginPath(); g.arc(x + 2.5, 7, 3, 0, 7); g.fill(); g.fillStyle = '#9ad8f8'; g.beginPath(); g.arc(x + 2.5, 7, 2, 0, 7); g.fill(); px(g, x + 2, 5, '#e6f6ff', 1, 1); }
+  },
+  'Ҁ': (g) => {
+    // stadium roof: celeste ribs over a white membrane
+    px(g, 0, 0, '#e8f2fa', T, T); px(g, 0, 0, '#6cc8f0', T, 2); px(g, 0, 14, '#2a78b0', T, 2);
+    for (let x = 0; x < T; x += 5) { px(g, x, 2, '#6cc8f0', 1, 12); px(g, x + 1, 2, '#bce8fa', 1, 12); }
+    px(g, 0, 13, '#143a68', T, 1);
+  },
+  'ҁ': (g) => {
+    px(g, 0, 0, '#d8d4c8', T, T); px(g, 0, 0, '#f4f0e4', T, 1);
+    for (const x of [0, 6, 12]) { px(g, x, 1, '#f4f0e4', 3, 15); px(g, x + 2, 1, '#a8a498', 1, 15); }
+    px(g, 3, 4, '#143a68', 3, 8); px(g, 9, 4, '#143a68', 3, 8); px(g, 3, 4, '#6cc8f0', 3, 1); px(g, 9, 4, '#6cc8f0', 3, 1);
+    px(g, 0, 14, '#a8a498', T, 2);
+  },
+  '҂': (g) => {
+    DRAW['ҁ'](g);
+    g.fillStyle = '#143a68'; g.beginPath(); g.arc(8, 8, 7.5, 0, 7); g.fill();
+    g.fillStyle = '#f2c02a'; g.beginPath(); g.arc(8, 8, 6.2, 0, 7); g.fill();
+    g.fillStyle = '#6cc8f0'; g.beginPath(); g.arc(8, 8, 5, 0, 7); g.fill();
+    g.fillStyle = '#fff6c8'; g.beginPath(); g.moveTo(8, 3.5); g.lineTo(9.3, 6.8); g.lineTo(12.8, 7); g.lineTo(10, 9.2); g.lineTo(11, 12.6); g.lineTo(8, 10.6); g.lineTo(5, 12.6); g.lineTo(6, 9.2); g.lineTo(3.2, 7); g.lineTo(6.7, 6.8); g.fill();
   },
   // ---- policlínicas y tiendas (iguales en todas las ciudades) ----
   C: (g) => {
@@ -553,11 +630,10 @@ const DRAW = {
   },
   // ---- gym facades (outdoor) ----
   G: (g) => {
-    px(g, 0, 0, '#2a6ab0', T, T); px(g, 0, 0, '#7ac0f8', T, 1); px(g, 0, 15, '#143a68', T, 1);
-    for (let y = 3; y < 15; y += 4) for (let x = ((y - 3) / 4) % 2 ? 4 : 0; x < T; x += 8) { px(g, x, y, '#5a9ad8', 5, 1); px(g, x + 1, y + 1, '#1d4f8a', 3, 1); }
+    shingles(g, ['#8fd0f8', '#3f86d0', '#2a62a8', '#143a68'], 11); px(g, 0, 0, '#f2c02a', T, 1);
   },
   h: (g) => {
-    px(g, 0, 0, '#e8f2fa', T, T); px(g, 0, 0, '#1d4f8a', T, 1);
+    px(g, 0, 0, '#e8f2fa', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, '#1d4f8a', T, 2);
     px(g, 0, 1, '#bcd8ee', 3, 15); px(g, 0, 1, '#ffffff', 1, 15); px(g, 13, 1, '#bcd8ee', 3, 15); px(g, 15, 1, '#8fb4d4', 1, 15);
     px(g, 4, 3, '#1d4f8a', 8, 10); px(g, 5, 2, '#1d4f8a', 6, 1); px(g, 5, 3, '#3f9ae0', 6, 9); px(g, 5, 3, '#a8dcff', 6, 1); px(g, 5, 7, '#7ac0f8', 6, 1);
     px(g, 0, 14, '#8fb4d4', T, 2);
@@ -571,11 +647,11 @@ const DRAW = {
     g.fillStyle = '#7ac0f8'; g.fillRect(6, 9, 2, 2);
   },
   J: (g) => {
-    px(g, 0, 0, '#2c2d3a', T, T); px(g, 0, 0, '#5a5c70', T, 1); px(g, 0, 15, '#1a1a24', T, 1);
-    hazard(g, 11); px(g, 2, 3, '#5a5c70', 2, 2); px(g, 11, 3, '#5a5c70', 2, 2); px(g, 6, 6, '#3a3b4c', 4, 2);
+    shingles(g, ['#7a7c98', '#454656', '#34354a', '#1a1a24'], 12); px(g, 0, 0, '#f2c02a', T, 1);
+    px(g, 0, 11, '#f2c02a', T, 1); px(g, 0, 12, '#1a1a24', T, 1);
   },
   j: (g) => {
-    px(g, 0, 0, '#454656', T, T); px(g, 0, 0, '#f2c02a', T, 1);
+    px(g, 0, 0, '#454656', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, '#1a1a24', T, 2);
     px(g, 0, 1, '#2c2d3a', 3, 15); px(g, 13, 1, '#2c2d3a', 3, 15); px(g, 1, 3, '#f2c02a', 1, 9); px(g, 14, 3, '#f2c02a', 1, 9);
     px(g, 4, 3, '#1a1a24', 8, 9); px(g, 5, 4, '#5ae0ff', 6, 7); px(g, 5, 4, '#c8f8ff', 6, 1); px(g, 7, 4, '#23232e', 2, 7);
     hazard(g, 12);
@@ -588,12 +664,10 @@ const DRAW = {
     g.fillStyle = '#ffe44a'; g.beginPath(); g.moveTo(9.5, 3); g.lineTo(5, 8.6); g.lineTo(7.8, 8.6); g.lineTo(6.5, 13); g.lineTo(11.5, 7); g.lineTo(8.8, 7); g.closePath(); g.fill();
   },
   V: (g) => {
-    px(g, 0, 0, '#7a5a38', T, T); px(g, 0, 0, '#c49a4c', T, 1); px(g, 0, 15, '#4a3018', T, 1);
-    for (let y = 4; y < 15; y += 5) { px(g, 0, y, '#5a3e22', T, 1); for (let x = ((y - 4) / 5) % 2 ? 0 : 6; x < T; x += 12) px(g, x, y - 4, '#5a3e22', 1, 4); }
-    px(g, 2, 2, '#9a7848', 3, 1); px(g, 9, 7, '#9a7848', 4, 1);
+    shingles(g, ['#d8b070', '#a87a44', '#80582e', '#4a3018'], 13); px(g, 0, 0, '#f2c02a', T, 1);
   },
   y: (g) => {
-    px(g, 0, 0, '#cdb48a', T, T); px(g, 0, 0, '#7a5a38', T, 2);
+    px(g, 0, 0, '#cdb48a', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, '#4a3018', T, 2);
     px(g, 0, 7, '#a98f66', T, 1); px(g, 0, 14, '#a98f66', T, 2); px(g, 4, 2, '#a98f66', 1, 5); px(g, 11, 8, '#a98f66', 1, 6);
     px(g, 0, 2, '#a98f66', 3, 12); px(g, 13, 2, '#a98f66', 3, 12); px(g, 0, 2, '#e6d4ac', 1, 12);
     px(g, 5, 8, '#3a2814', 6, 5); px(g, 5, 8, '#1a1008', 6, 1);
@@ -1150,10 +1224,10 @@ function gymFamily(ids, k) {
     px(g, 0, 0, k.rim, T, 1);
   };
   DRAW[F] = (g) => {
-    px(g, 0, 0, k.wall, T, T); px(g, 0, 0, k.roofDark, T, 1);
-    px(g, 0, 1, k.wallDark, 3, 15); px(g, 13, 1, k.wallDark, 3, 15); px(g, 0, 1, k.wallLight, 1, 15);
-    px(g, 4, 3, k.trim, 8, 10); px(g, 5, 2, k.trim, 6, 1); px(g, 5, 3, k.door, 6, 9); px(g, 5, 3, k.doorLight, 6, 1); px(g, 5, 7, k.doorLight, 6, 1);
-    px(g, 0, 14, k.wallDark, T, 2);
+    px(g, 0, 0, k.wall, T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 1, k.roofDark, T, 2);
+    px(g, 0, 3, k.wallDark, 3, 13); px(g, 13, 3, k.wallDark, 3, 13); px(g, 0, 3, k.wallLight, 1, 13);
+    px(g, 4, 4, k.trim, 8, 10); px(g, 5, 3, k.trim, 6, 1); px(g, 5, 4, '#f2c02a', 6, 1); px(g, 5, 5, k.door, 6, 8); px(g, 5, 5, k.doorLight, 6, 1); px(g, 5, 8, k.doorLight, 6, 1);
+    px(g, 0, 14, k.wallDark, T, 2); px(g, 0, 14, '#f2c02a', T, 1);
   };
   DRAW[E] = (g) => {
     DRAW[R](g);

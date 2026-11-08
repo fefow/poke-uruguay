@@ -489,15 +489,32 @@ export const SCRIPTS = {
     api.setFlag('got_vuelo');
   },
 
+  /** Fábrica de Minas: an operator rushes in with bad news for Garúa, and sees you. */
+  async scene_garua(api) {
+    api.setFlag('ev_garua_intro');
+    await api.npcWalkIn('obrero_fab', 6, 3, 10);
+    api.npcFaceNpc('obrero_fab', 'garua');
+    await api.say(['¡Jefa! No contestan ni la torre de Rivera ni la Quebrada.', 'Dicen que anda un entrenador apagándolo todo, de a una.'], { name: 'Operario' });
+    api.npcFacePlayer('garua');
+    await api.say('Ya lo sé. Mirá detrás tuyo.', { name: 'Garúa' });
+    api.npcFacePlayer('obrero_fab');
+    await api.say('¡Es él!', { name: 'Operario' });
+    await api.say('Andá a avisar a la guardia del turno noche. De este me encargo yo.', { name: 'Garúa' });
+    await api.npcWalkOff('obrero_fab');
+    api.playerFaceNpc('garua');
+    await SCRIPTS.garua(api);
+  },
+
   async garua(api) {
     if (api.flag('pp_clear')) return api.say('Mi plan fracasó. Esta vez de verdad.', { name: 'Garúa' });
     await api.say(['Así que lograste llegar hasta acá. Otra vez.', 'Te dije que el plan de la Represa era un ensayo.', 'Brumario cayó y Bruma también, pero las máquinas siguen en pie. Con ellas, la niebla vuelve en cuestión de semanas.', 'Desde esta fábrica se va a gobernar el clima del país.'], { name: 'Garúa' });
     const res = await api.battle({ id: 'garua', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: bossAt('minas', [['yarara', 36], ['cuervon', 37], ['lobomarino', 37], ['pombero', 37], ['caudillo', 38]]), prize: 4500, lose: 'Se apagaron las máquinas…', items: ['mate_dulce', 'mate_dulce'] });
     if (res !== 'win') return;
+    await api.say('Está bien. Me rindo. Por ahora.', { name: 'Garúa' });
     api.setFlag('pp_clear');
     api.setFlag('open_minas'); // Minas has no gym: beating Garúa is what opens the road west
     await api.say(['Las máquinas de la fábrica se detienen una por una.', 'El humo gris se va con el viento.']); // seen in the world itself: only winning the Liga gets a full-screen scene
-    await api.say(['Está bien. Me rindo. Por ahora.', 'Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es del Dr. Díaz.', 'Dr. Díaz dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las doce medallas.', 'Llevate esto.'], { name: 'Garúa' });
+    await api.say(['Pero no soy quien manda. PP quiere decir Proyecto Pampero, y el proyecto es del Dr. Díaz.', 'Dr. Díaz dejó el Anglo hace tiempo. Hoy espera en Montevideo, en el puerto, a quien llegue con las doce medallas.', 'Llevate esto.'], { name: 'Garúa' });
     await api.give('mt_vendaval', 1);
     await api.say('En la oficina de Garúa encontrás una vianda con Restos de Asado, guardada para la guardia nocturna.');
     await api.give('restos_asado', 1);
@@ -740,15 +757,32 @@ export const SCRIPTS = {
     await api.say(L.after, { name: L.name });
   },
 
+  /** Cabo Polonio: the lighthouse keeper runs to you, then Bruma walks in and the two of them argue in front of you. */
+  async scene_cabo(api) {
+    api.setFlag('ev_cabo_intro');
+    await api.npcWalkToPlayer('farero_cabo');
+    await api.say(['¡Eh, vos! ¿Venís por el faro?', 'Una mujer vestida de gris subió a las rocas con mi lámpara. Desde entonces la luz no gira y los barcos ya no ven la costa.', 'Si alguien puede hacerla entrar en razón, sos vos. Fijate: ahí viene.'], { name: 'Farero' });
+    await api.npcWalkIn('bruma', 10, 4, 14);
+    api.npcFaceNpc('bruma', 'farero_cabo');
+    api.npcFacePlayer('farero_cabo');
+    await api.say(['¿Todavía llorando por la lámpara, viejo?', 'Sin esa luz nadie ve lo que hacemos en la costa. Y a mí me conviene así.'], { name: 'Bruma' });
+    await api.say('Esa lámpara guía a los pescadores desde antes de que vos nacieras. No es tuya.', { name: 'Farero' });
+    await api.say('Ahora es de nadie. Andate a tu faro, que acá hay cosas de adultos.', { name: 'Bruma' });
+    await api.npcWalkTo('farero_cabo', 2, 7);
+    api.npcFacePlayer('bruma');
+    api.playerFaceNpc('bruma');
+    await SCRIPTS.bruma(api);
+  },
+
   async bruma(api) {
     await api.say(['Otra vez vos.', 'Sin la lámpara del faro, la niebla cubre la costa y nadie ve lo que hacemos.', 'Esta vez no hay torre que te frene. Vas a tener que pasar por mí.'], { name: 'Bruma' });
     const res = await api.battle({ id: 'bruma', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('paloma', [['yararita', 22], ['zorrigris', 23], ['cuervon', 24]]), prize: 1500, lose: 'Imposible. Mi niebla…', items: ['mate'] });
     if (res !== 'win') return;
     await api.say(['Llevate tu lámpara.', 'Igual es tarde: Garúa ya puso a funcionar la fábrica de Minas.', 'Y Dr. Díaz nos espera en Montevideo.'], { name: 'Bruma' });
     await api.give('lampara', 1);
+    await api.npcWalkOff('bruma');
     api.setFlag('cabo_clear');
     await api.say(['La niebla del cabo empieza a abrirse.', 'Después de tanto tiempo, el mar vuelve a verse.']); // seen in the world itself: only winning the Liga gets a full-screen scene
-    await api.npcLeave('bruma');
     await api.say('Deberías devolverle la lámpara al farero. Está dentro del faro.');
   },
 
@@ -1023,14 +1057,20 @@ export const SCRIPTS = {
     await api.say(['Así que sos vos el que anda haciendo ruido en Fray Bentos.', 'Soy Bruma, administradora del Equipo PP.', 'Este frigorífico guarda las máquinas de niebla. Dr. Díaz las necesita funcionando.', 'Y vos tenés algo que él lleva años buscando: esa criatura que te acompaña guarda el eco del Cardenal Azul. Entregámela y nadie se lastima.'], { name: 'Bruma' });
     const res = await api.battle({ id: 'bruma_anglo', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('fraybentos', [['yararita', 8], ['zorrigris', 9], ['lechuza', 10]], -2), prize: 700, lose: 'No… las máquinas…', items: ['mate'] });
     if (res !== 'win') return;
-    api.setFlag('anglo_pp');
     await api.say(['Perdí. Pero el proyecto es más grande que este frigorífico.', 'Dr. Díaz tiene torres y una represa, y yo no soy la única que sigue sus órdenes.'], { name: 'Bruma' });
     await api.give('mate', 1);
     await api.say('Entre las cosas de Bruma queda un objeto raro: un Repartir Exp, de los que el PP usaba para entrenar a su gente.');
     await api.give('repartir_exp', 1);
-    await api.say(['Tu celular vibra. Es el Maestro Tabárez:', '"{player}, tengo que decirte algo que callé demasiado tiempo.', 'Tu compañero nació en mi laboratorio durante el Proyecto Pampero. Guarda un eco del ciclo del viento, y por eso el PP te sigue.', 'Perdoname por no habértelo dicho en Carmelo. Cuidalo mucho."']);
+    await api.npcApproach('tabarez_anglo', 14);
+    api.npcFaceNpc('bruma_anglo', 'tabarez_anglo');
+    await api.say(['Bruma. Sé para quién trabajás.', 'Decile a Dr. Díaz que esta vez voy a ir yo mismo.'], { name: 'Maestro Tabárez' });
+    await api.say('Maestro… Él dijo que usted no vendría.', { name: 'Bruma' });
+    await api.npcWalkOff('bruma_anglo');
+    api.setFlag('anglo_pp');
+    api.playerFaceNpc('tabarez_anglo');
+    await api.say(['{player}, tengo que decirte algo que callé demasiado tiempo.', 'Tu compañero nació en mi laboratorio durante el Proyecto Pampero. Guarda un eco del ciclo del viento, y por eso el PP te sigue.', 'Perdoname por no habértelo dicho en Carmelo. Cuidalo mucho.'], { name: 'Maestro Tabárez' });
+    await api.npcWalkOff('tabarez_anglo');
     await fogChoice(api, 'fog1', 'Capataz', ['Un capataz del frigorífico te frena a la salida.', 'Con la niebla, el pueblo no sufre inundaciones desde hace dos años. Si la apagás, vuelve el río.']);
-    await api.npcLeave('bruma_anglo');
   },
 
   async calima(api) {
@@ -1038,13 +1078,20 @@ export const SCRIPTS = {
     await api.say(['Llegaste con las doce medallas. Se nota que no te asustan las torres.', 'Pero no vas a apagarme a mí.'], { name: 'Dr. Díaz' });
     const res = await api.battle({ id: 'calima', name: 'Dr. Díaz', cls: 'Fundador PP', look: 'calima', ai: 'smart', team: bossAt('montevideo', [['vespertino', 51], ['viudanegra', 52], ['tormenton', 53], ['yarara', 53], ['buho', 53], ['yacaron', 54]], 1), prize: 9000, lose: 'No… mi proyecto…', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'] });
     if (res !== 'win') return;
-    api.setFlag('anglo_clear');
     await api.flash();
     api.sfx('evolve');
     await api.say(['Las últimas máquinas de niebla se apagan.', 'El Cardenal Azul vuelve a volar sobre el río. El cielo del Uruguay vuelve a ser de todos.']); // seen in the world itself: only winning the Liga gets a full-screen scene
     await api.say(['Gané perdiendo… Ya no tengo equipo, ni dinero, ni torres.', 'Hacé lo que quieras. Pero el cielo nunca fue de nadie.'], { name: 'Dr. Díaz' });
-    await api.say(['Tu celular vibra otra vez. Es el Maestro Tabárez:', '"Lo lograron, {player}. El Equipo PP está disuelto.', 'Con las doce medallas y el Equipo PP disuelto, la Liga te espera en el Estadio Centenario.', 'Dr. Díaz fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude."']);
-    await api.npcLeave('calima');
+    await api.npcApproach('tabarez_mvd', 14);
+    api.npcFaceNpc('calima', 'tabarez_mvd');
+    await api.say(['Díaz.', 'Llegué a tiempo para ver que no te quedó nada.'], { name: 'Maestro Tabárez' });
+    await api.say(['Tabárez. Siempre llegás cuando ya no hace falta.', 'Pero te lo dije en el Observatorio: el cielo no se queda quieto. Alguien lo iba a ordenar.'], { name: 'Dr. Díaz' });
+    await api.say('Ordenar no es vender. Eso nunca lo entendiste.', { name: 'Maestro Tabárez' });
+    await api.npcWalkOff('calima');
+    api.setFlag('anglo_clear');
+    api.playerFaceNpc('tabarez_mvd');
+    await api.say(['Lo lograron, {player}. El Equipo PP está disuelto.', 'Con las doce medallas y el Equipo PP disuelto, la Liga te espera en el Estadio Centenario.', 'Dr. Díaz fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude.'], { name: 'Maestro Tabárez' });
+    await api.npcWalkOff('tabarez_mvd');
   },
 
   async elite(api, npc) {
