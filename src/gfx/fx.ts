@@ -82,14 +82,17 @@ export function motes(g, t, { night = false } = {}) {
 const SESSION = Math.floor(Math.random() * 1e9);
 export type Weather = 'clear' | 'rain' | 'storm' | 'fog';
 const FIXED = new Set(['clear', 'rain', 'storm', 'fog']);
-/** Weather of a zone: fixed when the map editor set one, otherwise random per map and per 4-minute slot (about 60% clear, 18% rain, 6% storm, 16% fog). */
+let fogShare = 16;
+/** PP fog left in the country (Medidor de Niebla, 0..100): fog weather goes from 4 % of the slots when the air is clean to 24 % at full toxicity. */
+export function setFogLevel(pct: number) { fogShare = 4 + Math.round(Math.max(0, Math.min(100, pct)) / 5); }
+/** Weather of a zone: fixed when the map editor set one, otherwise random per map and per 4-minute slot (18% rain, 6% storm, 4-24% fog depending on the PP fog left, the rest clear). */
 export function weatherAt(mapId: string, fixed?: string | null, now = Date.now()): Weather {
   if (fixed && FIXED.has(fixed)) return fixed as Weather;
   const slot = Math.floor(now / 240000);
   let h = 2166136261;
   for (const c of `${SESSION}|${mapId}|${slot}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
   const r = (h >>> 0) % 100;
-  return r < 60 ? 'clear' : r < 78 ? 'rain' : r < 84 ? 'storm' : 'fog';
+  return r < 18 ? 'rain' : r < 24 ? 'storm' : r < 24 + fogShare ? 'fog' : 'clear';
 }
 
 /** Storm: a rare white flash with a short rumble tint. */

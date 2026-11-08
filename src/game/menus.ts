@@ -9,6 +9,7 @@ import { ITEMS } from '../data/items.ts';
 import { TYPES } from '../data/types.ts';
 import { creatureIcon, silhouette } from '../gfx/creatures.ts';
 import { panel, say, choose, ask, closeDialog, toast, fmt } from './ui.ts';
+import { capital, weekday, dateText, timeText, dayNumber } from './calendar.ts';
 import { state, settings, saveSettings, addItem, removeItem, spend, earn, hasItem, badgeCount, PARTY_MAX, markCaught } from './state.ts';
 import { displayName, maxHp, calcStats, expForLevel, STAT_KEYS, STAT_NAMES, gainExp, canEvolve, tmCompatible, stoneEvolution } from './creature.ts';
 import { applyItem, STATUS_SHORT } from './battle-engine.ts';
@@ -19,8 +20,10 @@ import { charSprite } from '../gfx/characters.ts';
 import { itemIcon } from '../gfx/items.ts';
 import { badgeIcon } from '../gfx/badges.ts';
 import { badgeOf } from '../data/route.ts';
+import { EGG, eggHint } from '../data/egg.ts';
 import { isDev } from '../core/devauth.ts';
 import { SAVE_CONFIG } from '../save/config.ts';
+import { fogReading, fogBand } from '../data/toxicity.ts';
 
 // ---------------------------------------------------------------- helpers
 function hpBar(c) {
@@ -78,6 +81,7 @@ export async function openPauseMenu() {
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
     if (hasItem('mapa_uruguay')) entries.push(['Mapa', openMap]);
+    if (hasItem('medidor_niebla')) entries.push(['Medidor', openFogMeter]);
     if (hasItem('farol')) entries.push(['Destello', async () => { const { useFlash } = await import('./world.ts'); await say(useFlash()); }]);
     if (hasItem('silbato')) entries.push(['Vuelo', async () => { flight = await pickFlight(); }]);
     if (isDev()) entries.push(['Desarrollo', async () => { const { openDevMenu } = await import('./devtools.ts'); flight = await openDevMenu(); }]);
@@ -85,7 +89,7 @@ export async function openPauseMenu() {
     entries.push(['Guardar', openSave]);
     entries.push(['Opciones', openOptions]);
     entries.push(['Volver', null]);
-    const i = await choose(entries.map((e) => e[0]), { cls: 'menu-pause' });
+    const i = await choose(entries.map((e) => e[0]), { cls: 'menu-pause', title: `${capital(weekday())} ${dateText()}` });
     if (i < 0 || !entries[i][1]) return;
     await entries[i][1]();
     if (flight) {
@@ -391,6 +395,8 @@ async function useInField(key) {
   const it = ITEMS[key];
   if (key === 'uru_dex') return openDex();
   if (key === 'mapa_uruguay') return openMap();
+  if (key === EGG.item) return say(eggHint(EGG.steps - (S.stats.steps - (S.egg?.steps ?? S.stats.steps))));
+  if (key === 'medidor_niebla') return openFogMeter();
   if (key === 'bici') {
     const { toggleBike } = await import('./world.ts');
     return say(toggleBike());
@@ -768,6 +774,8 @@ export function openCard() {
           h('dt', { text: 'Nombre' }), h('dd', { text: S.player.name }),
           h('dt', { text: 'Dinero' }), h('dd', { text: `$${S.player.money.toLocaleString('es-UY')}` }),
           h('dt', { text: 'PokeDex' }), h('dd', { text: `${S.dex.caught.length} / ${DEX_ORDER.length}` }),
+          h('dt', { text: 'Hoy' }), h('dd', { text: `${capital(weekday())} ${dateText()}` }),
+          h('dt', { text: 'Hora' }), h('dd', { text: `${timeText()} · día ${dayNumber() + 1} de viaje` }),
           h('dt', { text: 'Tiempo' }), h('dd', { text: formatTime(S.stats.playtime) }),
           h('dt', { text: 'Victorias' }), h('dd', { text: String(S.stats.battlesWon) }),
           h('dt', { text: 'Inicio' }), h('dd', { text: new Date(S.created).toLocaleDateString('es-UY') }),
@@ -777,6 +785,43 @@ export function openCard() {
       h('div', { class: 'card-medals-title', text: 'Medallas' }),
       h('ul', { class: 'badges' }, badges.map(([f, n, col, art]) => h('li', { class: S.flags[f] ? 'is-earned' : '', style: { '--badge': col }, title: n }, S.flags[f] ? h('img', { class: 'badge-img', src: badgeIcon(art), alt: `Medalla ${n}` }) : h('i', { class: 'badge-slot' }), h('span', { text: n })))),
       S.flags.champion ? h('p', { class: 'champion-line', text: '★ Campeón de la Liga Oriental ★' }) : '',
+      h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
+    );
+    return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };
+  });
+}
+
+// ---------------------------------------------------------------- FOG METER
+/**
+ * Medidor de Niebla: the PP fog left in Uruguay. Lists only the plants already closed (the rest stay unnamed, so it
+ * never tells the player where to go) and how many loose machines were switched off.
+ */
+export function openFogMeter() {
+  const S = state();
+  const R = fogReading(S.flags);
+  sfx('menu');
+  return panel(`panel-fog ${fogBand(R.pct)}`, (el, close) => {
+    const left = R.plantsTotal - R.plantsDone.length;
+    const status = R.pct === 0 ? 'El aire de Uruguay está limpio. No queda niebla del Equipo PP.'
+      : R.pct >= 70 ? 'La niebla del Equipo PP cubre buena parte del país.'
+      : R.pct >= 35 ? 'La niebla retrocede, pero todavía se siente en muchas zonas.'
+      : 'Queda poca niebla. El cielo vuelve a verse en casi todo el país.';
+    el.append(
+      h('header', { class: 'panel-title', text: 'Medidor de Niebla' }),
+      h('div', { class: 'fog-meter' },
+        h('div', { class: 'fog-pct' }, h('b', { text: `${R.pct}%` }), h('span', { text: 'de toxicidad en el aire' })),
+        h('span', { class: 'fog-gauge', style: { '--fog': (R.pct / 100).toFixed(2) }, role: 'img', 'aria-label': `${R.pct} por ciento` }),
+        h('p', { class: 'fog-status', text: status })),
+      h('div', { class: 'fog-lists' },
+        h('section', {},
+          h('h3', { text: `Plantas del PP cerradas: ${R.plantsDone.length} de ${R.plantsTotal}` }),
+          R.plantsDone.length
+            ? h('ul', { class: 'fog-done' }, R.plantsDone.map(([, name, w]) => h('li', {}, h('span', { text: name }), h('b', { text: `−${w}%` }))))
+            : h('p', { class: 'fog-none', text: 'Todavía no cerraste ninguna.' }),
+          left ? h('p', { class: 'fog-none', text: `Quedan ${left} plantas en algún lugar del país.` }) : ''),
+        h('section', {},
+          h('h3', { text: 'Máquinas de niebla sueltas' }),
+          h('p', { class: 'fog-none', text: `Apagaste ${R.machinesDone} de ${R.machinesTotal}. Cada una baja un poco la niebla de su zona.` }))),
       h('footer', { class: 'panel-foot', text: `${keyName('b')} volver` }),
     );
     return (a) => { if (a === 'a' || a === 'b' || a === 'start') { sfx('cancel'); close(); } };

@@ -19,11 +19,12 @@ const LINES = {
 };
 const STORY_FLAGS = new Set([
   'has_starter', 'starter_key', 'starter_ceibito', 'starter_tejuchispa', 'starter_carpinchito', 'met_prof', 'dex', 'dex_quest', 'got_carta', 'rival1', 'rival2', 'rival3', 'rival4',
-  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
+  'badge1', 'badge2', 'badge3', 'badge4', 'badge5', 'badge6', 'badge7', 'badge8', 'badge9', 'badge10', 'badge11', 'badge12', 'cabo_clear', 'lamp_returned', 'quebrada_clear', 'got_pluma', 'champion', 'got_map_gift', 'gift_r1', 'gift_garr',
   'anima_clear', 'fog1', 'fog2', 'fog3', 'caught_pamperon', 'caught_ballenaplata', 'caught_soldemayo', 'caught_yaguarete', 'caught_ombu',
   'got_mapa', 'got_cana', 'got_vuelo', 'got_guantes', 'got_farol', 'got_cana2', 'got_cana3', 'got_machete', 'got_soga', 'got_canoa', 'pp_clear', 'gift_ros', 'gift_pir', 'gift_pal', 'gift_min', 'gift_dur',
   'rival5', 'rival6', 'rival_bosque', 'torre_clear', 'represa_clear', 'anglo_pp', 'anglo_clear', 'elite1', 'elite2', 'elite3', 'elite4',
   'obs_clear', 'obs_log', 'got_bici', 'ciclo_done', 'got_ticket', 'ferry_done', 'marta_help', 'marta_lost', 'parrilla_clear', 'aduana_clear', 'radio_clear', 'muelle_clear', 'refineria_clear', 'ferry_bio', 'gift_tac', 'gift_riv', 'gift_sal', 'gift_pay', 'gift_frb',
+  'got_huevo', 'huevo_nacio', 'got_medidor',
 ]);
 const FLAG_PATTERN = /^(tr|it|v|cl|rq|rf|ev|rm[1-9]|open)_[a-z0-9_]{1,40}$/;
 
@@ -103,6 +104,7 @@ export function validateSave(d: any) {
     ['quebrada_clear', badgeOf('quebrada'), 'la Quebrada de los Cuervos'],
     ['cabo_clear', badgeOf('quebrada'), 'el faro de Cabo Polonio'],
     ['obs_clear', 'quebrada_clear', 'el Observatorio'],
+    ['got_pluma', 'quebrada_clear', 'la Pluma Azul'],
     ['pp_clear', badgeOf('punta'), 'la fábrica de Minas'],
     ['anglo_clear', 'badge12', 'Dr. Díaz'],
   ];
@@ -153,6 +155,7 @@ export function validateSave(d: any) {
     if (!isInt(q, 1, max)) { e(`cantidad inválida de ${it.name}`); continue; }
     bag[k] = q;
   }
+  if (bag.pluma_azul && !flags.got_pluma) e('Pluma Azul sin haberla recibido');
   if (bag.lampara && !(flags.cabo_clear && !flags.lamp_returned)) e('Lámpara del Faro imposible');
   if (bag.esfera_celeste) e('Pokeball Celeste no se puede obtener');
   if (bag.mapa_uruguay && !flags.got_mapa) e('Mapa de Uruguay sin haberlo recibido');
@@ -168,9 +171,14 @@ export function validateSave(d: any) {
   if (bag.bici && !flags.got_bici) e('Bicicleta sin haberla recibido');
   if (bag.guantes && !flags.got_guantes) e('Guantes sin haberlos recibido');
   if (bag.farol && !flags.got_farol) e('Farol sin haberlo recibido');
+  if (bag.medidor_niebla && !flags.got_medidor) e('Medidor de Niebla sin haberlo recibido');
+  if (flags.got_medidor && !flags.anglo_pp) e('el Medidor de Niebla lo entrega Tabárez en el Anglo');
   if (bag.canoa && !flags.got_canoa) e('Canoa sin haberla recibido');
   if (!(d.safari && Number.isFinite(d.safari.until))) { delete bag.safari_ball; delete bag.cebo; }
   if (bag.silbato && !flags.got_vuelo) e('Silbato del Hornero sin haberlo recibido');
+  if (bag.huevo && !(flags.got_huevo && !flags.huevo_nacio)) e('Huevo imposible');
+  if (flags.got_huevo && !flags.badge1) e('el Huevo se entrega después de la primera medalla');
+  if (flags.huevo_nacio && !flags.got_huevo) e('el Huevo no pudo haber nacido');
 
   // Dex
   const seen = (d.dex?.seen ?? []).filter((k) => SPECIES[k]);
@@ -193,6 +201,7 @@ export function validateSave(d: any) {
       bag,
       flags,
       dex: { seen: [...new Set(seen)], caught: [...new Set(caught)] },
+      clock: Number.isFinite(d.clock) && d.clock >= 0 && d.clock < 1e9 ? d.clock : 8 * 60,
       stats: { playtime: st.playtime, steps: st.steps, battlesWon: st.battlesWon, moneyEarned: st.moneyEarned, moneySpent: st.moneySpent, caught: st.caught },
       lastHeal: { map: lh.map, x: lh.x | 0, y: lh.y | 0 },
       checkpoint: d.checkpoint && MAPS[d.checkpoint.map] && isInt(d.checkpoint.x, 0, MAPS[d.checkpoint.map].tiles[0].length - 1) && isInt(d.checkpoint.y, 0, MAPS[d.checkpoint.map].tiles.length - 1) ? { map: d.checkpoint.map, x: d.checkpoint.x, y: d.checkpoint.y } : null,
@@ -200,6 +209,8 @@ export function validateSave(d: any) {
       safari: d.safari && Number.isFinite(d.safari.until) && d.safari.until <= Date.now() + 30 * 60000 ? { until: Math.floor(d.safari.until), ...(d.safari.contest ? { contest: true } : {}) } : null,
       contest: d.contest && Array.isArray(d.contest.uids) ? { uids: d.contest.uids.filter((u, k, a) => box.some((c) => c.uid === u) && a.indexOf(u) === k), ...(d.contest.fish ? { fish: true, until: Number.isFinite(d.contest.until) ? Math.floor(d.contest.until) : 0 } : {}) } : null,
       daycare: d.daycare && box.some((c) => c.uid === d.daycare.uid) && isInt(d.daycare.steps, 0, st.steps) ? { uid: d.daycare.uid, steps: d.daycare.steps } : null,
+      // Egg: counts steps from when it was received. A bag egg without a valid counter starts counting now.
+      egg: bag.huevo ? { steps: isInt(d.egg?.steps, 0, st.steps) ? d.egg.steps : st.steps } : null,
       criadero: Array.isArray(d.criadero) ? d.criadero.filter((e, k, a) => e && box.some((c) => c.uid === e.uid) && isInt(e.steps, 0, st.steps) && a.findIndex((x) => x?.uid === e.uid) === k).slice(0, 3).map((e) => ({ uid: e.uid, steps: e.steps })) : [],
       created: Number.isFinite(d.created) ? d.created : Date.now(),
       saveCount: isInt(d.saveCount, 0, 1e7) ? d.saveCount : 0,

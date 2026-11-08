@@ -1021,6 +1021,18 @@ body {
 .hud-lv { font-size: 14px; font-weight: 700; color: var(--sun); }
 .tb-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 10px; background: oklch(1 0 0 / 0.07); font-size: 17px; white-space: nowrap;
   & b { color: var(--sun); font-weight: 700; } }
+/* Medidor de Niebla row on the player card: red while the PP fog is thick, green once it is gone */
+.tb-fog { width: 100%; box-sizing: border-box; border: 0; color: var(--paper); font: inherit; font-size: 16px; cursor: pointer; text-align: left;
+  &[hidden] { display: none; }
+  &:hover { background: var(--celeste-deep); }
+  & b { flex: none; }
+  & .tb-pix { width: 26px; height: 26px; } }
+.tb-fog-bar { flex: 1; min-width: 40px; height: 8px; border-radius: 4px; background: oklch(0.1 0.02 270); overflow: hidden;
+  &::after { content: ''; display: block; height: 100%; width: calc(var(--fog, 1) * 100%); border-radius: 4px; background: oklch(0.62 0.2 25); } }
+.tb-fog.is-mid .tb-fog-bar::after { background: oklch(0.8 0.16 85); }
+.tb-fog.is-low .tb-fog-bar::after { background: oklch(0.72 0.17 145); }
+.tb-fog.is-high b { color: oklch(0.75 0.17 25); }
+.tb-fog.is-clean b { color: oklch(0.8 0.17 145); }
 .tb-pix { width: 32px; height: 32px; image-rendering: pixelated; flex: none; }
 .tb-ico { display: grid; place-items: center; color: var(--celeste); }
 .tb-chip .tb-ico, .hud-place .tb-ico { color: var(--sun); }
@@ -1154,3 +1166,57 @@ body.gb * { -webkit-touch-callout: none; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-dpad { opacity: 0.1; pointer-events: none; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-round { opacity: 0.3; }
 @media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 140px; } .gb-dpad { transform: scale(1); } .gb-ab { transform: scale(1.15); } }
+
+/* ------------------------------------------------ v191: touchable lists, phone shortcut drop-down, battle tutorial */
+.tb-more, .tb-label, .menu-touchbar { display: none; }
+/* phones: while a list is open the round buttons step aside completely (they used to cover the options under them);
+   options are tapped directly and cancelable lists carry their own "Volver" */
+body.gb:has(.menu) .gb-pad .gb-round, body.gb:has(.menu) .gb-pad .gb-dpad { opacity: 0; pointer-events: none; }
+body.gb .menu-list li { margin-block: 0.4cqi; background: oklch(0.97 0.015 235); box-shadow: inset 0 0 0 0.25cqi oklch(0.82 0.05 235), 0 0.45cqi 0 oklch(0.78 0.06 235); transition: translate 0.06s, box-shadow 0.06s; }
+body.gb .menu-list li.is-active { background: oklch(0.92 0.05 235); box-shadow: inset 0 0 0 0.35cqi var(--celeste-deep), 0 0.45cqi 0 oklch(0.6 0.1 235); }
+body.gb .menu-list li:active { translate: 0 0.4cqi; box-shadow: inset 0 0 0 0.35cqi var(--celeste-deep); }
+body.gb .menu-list li.is-disabled { background: oklch(0.94 0.005 270); }
+body.gb .menu-touchbar { position: absolute; z-index: 68; display: flex; align-items: center; justify-content: space-between; gap: 1.6cqi; box-sizing: border-box; pointer-events: none; }
+.menu-touchbar > * { pointer-events: auto; }
+.menu-back { min-height: 6cqi; padding: 0 3cqi; border: 0.35cqi solid var(--ink); border-radius: 3cqi; background: var(--paper); color: var(--ink); font: 700 3cqi/1 var(--font-ui); box-shadow: 0 0.5cqi 0 var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.menu-back:active { translate: 0 0.5cqi; box-shadow: none; }
+.menu-touch-hint { margin-left: auto; display: flex; align-items: center; gap: 1.2cqi; padding: 0.8cqi 2cqi; border-radius: 3cqi; background: oklch(0.2 0.06 270 / 0.88); color: var(--paper); font: 600 2.4cqi/1.2 var(--font-ui); pointer-events: none; }
+.tap-dot { position: relative; inline-size: 2.2cqi; block-size: 2.2cqi; border-radius: 50%; background: var(--sun); flex: none; }
+.tap-dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 0.3cqi solid var(--sun); animation: tap-ring 1.2s ease-out infinite; }
+@keyframes tap-ring { from { scale: 1; opacity: 1; } to { scale: 2.4; opacity: 0; } }
+
+/* battle tutorial (first fight): the professor's note at the top, and the option to pick glows */
+.tuto-tip { position: absolute; z-index: 69; top: 2cqi; left: 22cqi; right: 22cqi; padding: 1.6cqi 2.4cqi; border-radius: 1.4cqi; background: oklch(0.98 0.03 95); border: var(--frame) solid var(--ink); box-shadow: inset 0 0 0 2px oklch(0.98 0.03 95), inset 0 0 0 4px var(--sun), 0 1cqi 3cqi oklch(0 0 0 / 0.3); pointer-events: none;
+  & .tuto-who { display: block; font-family: var(--font-pixel); font-size: 2.2cqi; color: oklch(0.45 0.12 150); margin-bottom: 0.6cqi; }
+  & p { margin: 0; font-size: 3.2cqi; line-height: 1.25; text-wrap: pretty; }
+  @starting-style { opacity: 0; translate: 0 -1cqi; } transition: opacity 0.2s, translate 0.2s; }
+.menu-list li.tuto-glow { animation: tuto-glow 1s ease-in-out infinite; }
+@keyframes tuto-glow { 50% { box-shadow: inset 0 0 0 0.5cqi var(--sun), 0 0 2cqi var(--sun); background: oklch(0.95 0.08 95); } }
+
+/* phones: one big "Atajos" button folds the small shortcut icons into a drop-down of large named rows */
+body.gb .hud [data-tip]::after { display: none; }
+body.gb .tb-more { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 84px; padding: 0 18px; border: 2px solid oklch(1 0 0 / 0.3); border-radius: 16px; background: oklch(1 0 0 / 0.12); color: var(--paper); font: 700 28px var(--font-ui); -webkit-tap-highlight-color: transparent;
+  & .tb-ico { color: var(--sun); } & .hud-caret { margin-left: auto; transition: rotate 0.15s; } }
+body.gb .hud-map.is-open .tb-more { background: var(--celeste-deep); & .hud-caret { rotate: 180deg; } }
+body.gb .hud-map .tb-tools { display: none; }
+body.gb .hud-map.is-open .tb-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+body.gb .hud-map.is-open .tb-btn { width: 100%; height: 84px; display: flex; justify-content: flex-start; gap: 12px; padding: 0 14px; border-radius: 14px; font: 600 24px var(--font-ui); & svg { width: 30px; height: 30px; } }
+body.gb .hud-map.is-open .tb-btn:active { background: var(--celeste-deep); }
+body.gb .hud-map.is-open .tb-label { display: inline; }
+/* the open list sits over the right-hand buttons: they step aside until it folds */
+body.gb:has(.hud-map.is-open) .gb-pad .gb-right .gb-btn { opacity: 0; pointer-events: none; }
+/* Medidor de Niebla panel */
+.panel-fog { display: flex; flex-direction: column; gap: 1.6cqi; }
+.fog-meter { display: grid; gap: 1cqi; padding: 1.4cqi 2cqi; border-radius: 1cqi; background: oklch(0 0 0 / 0.04); color: var(--ink); }
+.fog-pct { display: flex; align-items: baseline; gap: 1.2cqi; & b { font-size: 5cqi; line-height: 1; color: oklch(0.55 0.2 28); } & span { font-size: 1.6cqi; opacity: .85; } }
+.panel-fog.is-mid .fog-pct b { color: oklch(0.6 0.14 70); }
+.panel-fog.is-low .fog-pct b, .panel-fog.is-clean .fog-pct b { color: oklch(0.52 0.15 145); }
+.fog-gauge { display: block; height: 1.4cqi; border-radius: 0.7cqi; background: oklch(0.85 0.01 270); overflow: hidden;
+  &::after { content: ''; display: block; height: 100%; width: calc(var(--fog) * 100%); border-radius: 0.7cqi; background: linear-gradient(90deg, oklch(0.72 0.17 145), oklch(0.82 0.16 85) 45%, oklch(0.62 0.2 25)); background-size: calc(100% / max(var(--fog), 0.01)) 100%; } }
+.fog-status { margin: 0; font-size: 1.6cqi; }
+.fog-lists { display: grid; grid-template-columns: 3fr 2fr; gap: 2cqi; min-height: 0; overflow: auto;
+  & h3 { margin: 0 0 0.8cqi; font-size: 1.7cqi; color: var(--celeste-deep); } }
+.fog-done { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5cqi;
+  & li { display: flex; justify-content: space-between; gap: 1cqi; padding: 0.5cqi 1cqi; border-radius: 0.6cqi; background: oklch(0 0 0 / 0.05); color: var(--ink); font-size: 1.5cqi; }
+  & b { color: oklch(0.5 0.15 145); } }
+.fog-none { margin: 0.6cqi 0 0; font-size: 1.5cqi; color: var(--ink-soft); }

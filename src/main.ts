@@ -17,7 +17,7 @@ import { SCRIPTS } from './data/story.ts';
 import { startTitle, newGameIntro, credits, slotCard, titleRenderer } from './game/scenes.ts';
 import * as menus from './game/menus.ts';
 import * as battle from './game/battle-scene.ts';
-import { openOptions, openMap, openBag, openParty, openDex } from './game/menus.ts';
+import { openOptions, openMap, openBag, openParty, openDex, openFogMeter } from './game/menus.ts';
 import { createCreature } from './game/creature.ts';
 import { mountHud, updateHud, flashSaved } from './game/hud.ts';
 import { mountSidebar, updateSidebar } from './game/sidebar.ts';
@@ -29,11 +29,12 @@ import { SAVE_CONFIG } from './save/config.ts';
 import { mountTouchPad } from './core/touchpad.ts';
 import { mountFullscreen } from './core/fullscreen.ts';
 import { mountPerf, perfTick } from './core/perf.ts';
+import { advanceClock } from './game/calendar.ts';
 
 const $ = (s) => document.querySelector(s);
 let mode = 'loading';
 /* global __QA__ */
-if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { MAPS, validateSave, tileCanvas, titleRenderer, keys: DEX_ORDER, pamperoFrame, creatureSprite, updateWorld, poisonTick, charSprite, newState, setState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), createCreature, addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
+if (typeof __QA__ !== 'undefined' && __QA__) window.__qa = { MAPS, validateSave, tileCanvas, titleRenderer, keys: DEX_ORDER, pamperoFrame, creatureSprite, updateWorld, poisonTick, charSprite, newState, setState, input, SCRIPTS, scriptApi, menus, battle, loadMap, worldState, state, runScript, say, setFlag: (k) => (state().flags[k] = true), createCreature, saveGame, addMon: (sp, lv) => state().party.push(createCreature(sp, lv)) };
 
 // ---------------------------------------------------------------- bug log
 installErrorCapture();
@@ -63,6 +64,7 @@ function frame(now) {
     updateWorld(dt, now);
     const S = state();
     if (S) S.stats.playtime += dt / 1000;
+    advanceClock(dt);
   }
   updateHud(now);
   updateSidebar(now, mode === 'game');
@@ -74,7 +76,7 @@ async function boot() {
   mountScreen($('#view'));
   if (await mountPixi($('#view'), $('#screen'))) setAfterRender(renderPixi);
   mountUI($('#ui'));
-  mountSidebar($('#stage'), { menu: null, bag: () => runScript(() => openBag({ mode: 'field' })), party: () => runScript(() => openParty({ mode: 'field' })), dex: () => runScript(() => openDex()), map: () => runScript(() => openMap()), options: () => runScript(() => openOptions()) });
+  mountSidebar($('#stage'), { menu: null, bag: () => runScript(() => openBag({ mode: 'field' })), party: () => runScript(() => openParty({ mode: 'field' })), dex: () => runScript(() => openDex()), map: () => runScript(() => openMap()), options: () => runScript(() => openOptions()), fog: () => runScript(() => openFogMeter()) });
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
   mountDebugPanel({ blockInput: () => input.push(() => {}), getBuild: getBuildHash });
   mountFullscreen();
@@ -194,6 +196,13 @@ async function continueGame(saves) {
   setState(res.state);
   state().slot = saves[i].slot;
   if (res.outdated) await say('Esta partida es de una versión anterior del juego. ¡Se adaptó sin problemas!');
+  // Saves that went past the Anglo before the Medidor de Niebla existed get it by mail from Tabárez.
+  const S = state();
+  if (S.flags.anglo_pp && !S.flags.got_medidor) {
+    S.flags.got_medidor = true;
+    S.bag.medidor_niebla = 1;
+    await say(['Llegó un paquete del Maestro Tabárez: un Medidor de Niebla.', 'Mide cuánta niebla del Equipo PP queda en Uruguay. Se ve en tu ficha, arriba a la izquierda.']);
+  }
   await enterGame();
   return true;
 }

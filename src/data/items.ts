@@ -52,7 +52,9 @@ const BASE_ITEMS = {
   repelente: { name: 'Repelente', pocket: 'items', price: 350, repel: 100, desc: 'Evita criaturas salvajes débiles por 100 pasos.' },
 
   carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de Colonia del Sacramento guardaba para el Maestro Tabárez.' },
+  huevo: { name: 'Huevo', pocket: 'key', price: 0, desc: 'Un huevo que un estanciero de Palmitas le mandó al Maestro Tabárez. Nace solo, después de viajar un buen tiempo con él.' },
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
+  pluma_azul: { name: 'Pluma Azul', pocket: 'key', price: 0, desc: 'Una pluma que soltó el Cardenal Azul en la Quebrada de los Cuervos. Chispea con el viento del sur.' },
   lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
   mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
   cana_pescar: { name: 'Caña Vieja', pocket: 'key', price: 0, rod: 1, desc: 'Una caña simple. Parada frente al agua, apretá A: solo pican las criaturas más comunes y chicas.' },
@@ -69,8 +71,17 @@ const BASE_ITEMS = {
   llave_c2: { name: 'Llave del camarote 2', pocket: 'key', price: 0, desc: 'Llave de bronce con una chapita: "Camarote 2". Del Buquebus China Zorrilla.' },
   llave_bodega: { name: 'Llave de la bodega', pocket: 'key', price: 0, desc: 'Llave grande y oxidada. Abre la bodega del Buquebus China Zorrilla.' },
   llave_cubierta: { name: 'Llave de la cubierta', pocket: 'key', price: 0, desc: 'Llave de la puerta a la cubierta superior del Buquebus China Zorrilla.' },
+  medidor_niebla: { name: 'Medidor de Niebla', pocket: 'key', price: 0, desc: 'Aparato del laboratorio del Maestro Tabárez. Mide cuánta niebla del Equipo PP queda en el aire de Uruguay.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
+  // Mini stories: things carried from one person to another along the way
+  soga_mojada: { name: 'Soga mojada', pocket: 'key', price: 0, desc: 'Una soga de escalador de colores, mojada y con olor a río. Su dueño la perdió en la Cueva de Palmitas.' },
+  cabos: { name: 'Cabos de amarre', pocket: 'key', price: 0, desc: 'Unos rollos de cabo nuevo del depósito del almacén de Mercedes, para amarrar un bote.' },
+  cuaderno_quiroga: { name: 'Cuaderno empapado', pocket: 'key', price: 0, desc: 'Un cuaderno lleno de letra apretada, con "H. Q." en la tapa. Se lo llevó el viento en la Ruta 3.' },
+  brea: { name: 'Tarro de brea', pocket: 'key', price: 0, desc: 'Brea caliente de un carpintero de ribera de Tranqueras. Sirve para tapar un casco rajado.' },
+  remos: { name: 'Remos', pocket: 'key', price: 0, desc: 'Un par de remos con iniciales talladas en el mango. Los trajo la corriente hasta Belén.' },
+  correa: { name: 'Correa de motor', pocket: 'key', price: 0, desc: 'Una correa nueva del taller de la frontera, en Rivera. Es la medida de un camión.' },
+  cabestro: { name: 'Cabestro', pocket: 'key', price: 0, desc: 'El cabestro del potro moro del domador de Tacuarembó. Sin él no se deja tocar por nadie.' },
 };
 
 // Máquinas de movimientos (MT): se consumen al usarse. Una criatura puede aprender

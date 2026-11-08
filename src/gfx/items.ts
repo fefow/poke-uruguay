@@ -114,8 +114,10 @@ const ART = {
   repelente_super: (g) => { r(g, 5, 1, 6, 2, INK); r(g, 6, 1, 4, 1, '#e0263a'); r(g, 4, 3, 8, 12, INK); r(g, 5, 4, 6, 10, '#d8c83a'); r(g, 5, 8, 6, 3, '#fff'); r(g, 7, 9, 2, 1, '#2a6a2a'); },
   repelente_max: (g) => { r(g, 5, 1, 6, 2, INK); r(g, 6, 1, 4, 1, '#e0263a'); r(g, 4, 3, 8, 12, INK); r(g, 5, 4, 6, 10, '#d84a3a'); r(g, 5, 8, 6, 3, '#fff'); r(g, 7, 9, 2, 1, '#2a6a2a'); },
   repelente: (g) => { r(g, 5, 1, 6, 2, INK); r(g, 6, 1, 4, 1, '#e0263a'); r(g, 4, 3, 8, 12, INK); r(g, 5, 4, 6, 10, '#4aa8d8'); r(g, 5, 8, 6, 3, '#fff'); r(g, 7, 9, 2, 1, '#2a6a2a'); r(g, 6, 4, 1, 9, '#ffffff66'); },
+  huevo: (g) => { g.fillStyle = INK; g.beginPath(); g.ellipse(8, 9, 5.5, 6.5, 0, 0, 7); g.fill(); g.fillStyle = '#f4ecd6'; g.beginPath(); g.ellipse(8, 9, 4.5, 5.5, 0, 0, 7); g.fill(); r(g, 5, 9, 2, 2, '#c89a5a'); r(g, 9, 6, 2, 1, '#c89a5a'); r(g, 9, 12, 2, 1, '#c89a5a'); r(g, 6, 5, 1, 2, '#ffffff'); },
   carta_tabarez: (g) => { r(g, 1, 3, 14, 10, INK); r(g, 2, 4, 12, 8, '#f6efd8'); r(g, 2, 4, 12, 1, '#e4d8b0'); r(g, 3, 5, 1, 1, INK); r(g, 4, 6, 1, 1, INK); r(g, 5, 7, 2, 1, INK); r(g, 9, 5, 1, 1, INK); r(g, 8, 6, 1, 1, INK); r(g, 7, 7, 1, 1, INK); disc(g, 8, 9, 1.5, '#d83a3a'); },
   uru_dex: (g) => { r(g, 2, 1, 12, 14, INK); r(g, 3, 2, 10, 12, '#d83a3a'); r(g, 4, 3, 8, 5, '#bfe8ff'); r(g, 4, 3, 8, 1, '#fff'); disc(g, 5, 11, 1.4, '#f2c02a'); r(g, 8, 10, 4, 1, INK); r(g, 8, 12, 4, 1, INK); },
+  pluma_azul: (g) => { for (let i = 0; i < 11; i++) r(g, 3 + i, 13 - i, 1, 1, INK); for (let i = 1; i < 10; i++) { r(g, 3 + i, 10 - i, 3, 3, INK); r(g, 4 + i, 10 - i, 2, 2, i % 3 ? '#3a7ad8' : '#8ac8f8'); } r(g, 12, 2, 2, 2, '#f8f0a0'); r(g, 3, 13, 2, 2, '#f2e05c'); },
   lampara: (g) => { r(g, 6, 1, 4, 2, INK); r(g, 4, 3, 8, 10, INK); r(g, 5, 4, 6, 8, '#fff2a8'); r(g, 7, 6, 2, 4, '#f2c02a'); r(g, 3, 13, 10, 2, INK); r(g, 4, 13, 8, 1, '#7a7a8a'); },
   mapa_uruguay: (g) => { r(g, 1, 2, 14, 12, INK); r(g, 2, 3, 12, 10, '#f0e0b0'); g.fillStyle = '#7aa850'; g.beginPath(); g.moveTo(5, 4); g.lineTo(11, 5); g.lineTo(12, 10); g.lineTo(7, 12); g.lineTo(4, 9); g.closePath(); g.fill(); r(g, 9, 9, 2, 2, '#e0263a'); },
   cana_buena: (g) => { for (let i = 0; i < 12; i++) r(g, 2 + i, 13 - i, 2, 2, INK); for (let i = 0; i < 12; i++) r(g, 3 + i, 13 - i, 1, 1, '#3a8a4a'); r(g, 13, 2, 1, 7, '#c8ccd8'); disc(g, 13.5, 11, 1.6, '#f2c02a'); },
@@ -136,6 +138,7 @@ const ART = {
   silbato: (g) => { r(g, 2, 6, 10, 6, INK); r(g, 3, 7, 8, 4, '#d8dce8'); r(g, 10, 4, 4, 3, INK); r(g, 11, 5, 2, 1, '#d8dce8'); r(g, 4, 8, 3, 1, '#f2c02a'); r(g, 3, 12, 1, 2, INK); r(g, 3, 14, 5, 1, INK); },
   guantes: (g) => { r(g, 3, 6, 10, 8, INK); r(g, 4, 7, 8, 6, '#a8703a'); r(g, 4, 3, 2, 4, INK); r(g, 7, 2, 2, 5, INK); r(g, 10, 3, 2, 4, INK); r(g, 4, 4, 1, 3, '#a8703a'); r(g, 7, 3, 1, 4, '#a8703a'); r(g, 10, 4, 1, 3, '#a8703a'); r(g, 5, 11, 6, 1, '#5a3a1a'); },
   farol: (g) => { r(g, 6, 1, 4, 2, INK); r(g, 3, 3, 10, 11, INK); r(g, 4, 4, 8, 9, '#f2c02a'); r(g, 6, 6, 4, 5, '#fff2a0'); r(g, 4, 8, 8, 1, INK); r(g, 5, 14, 6, 1, INK); },
+  medidor_niebla: (g) => { r(g, 3, 1, 10, 14, INK); r(g, 4, 2, 8, 12, '#5a6a7a'); r(g, 5, 3, 6, 5, '#d8f0d0'); r(g, 5, 7, 2, 1, '#3aa04a'); r(g, 7, 7, 2, 1, '#e8c21c'); r(g, 9, 7, 2, 1, '#e0263a'); r(g, 7, 4, 1, 3, INK); r(g, 8, 5, 1, 1, INK); r(g, 5, 10, 2, 2, '#e0263a'); r(g, 9, 10, 2, 2, '#c8ccd8'); r(g, 11, 0, 1, 2, INK); },
   boleto: (g) => { r(g, 1, 3, 14, 10, INK); r(g, 2, 4, 12, 8, '#7ac8f0'); r(g, 5, 4, 1, 8, '#fff'); r(g, 3, 6, 1, 4, '#fff'); r(g, 7, 6, 6, 1, '#16141e'); r(g, 7, 8, 5, 1, '#16141e'); r(g, 7, 10, 3, 1, '#16141e'); },
 };
 

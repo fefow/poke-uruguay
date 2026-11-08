@@ -19,10 +19,12 @@ export function newState({ name, look }) {
     bag: {},
     flags: {},
     dex: { seen: [], caught: [] },
+    clock: 8 * 60, // in-game minutes since Monday 1 March 00:00 (see calendar.ts)
     stats: { playtime: 0, steps: 0, battlesWon: 0, moneyEarned: 0, moneySpent: 0, caught: 0 },
     lastHeal: { map: 'casa_jugador', x: 6, y: 5 },
     repel: 0,
     daycare: null,
+    egg: null,
     criadero: [],
     safari: null,
     contest: null,

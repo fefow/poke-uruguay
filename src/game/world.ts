@@ -17,15 +17,17 @@ import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
 import { input } from '../core/input.ts';
 import { sfx, playMusic, jingle, setAmbience, skippableWait } from '../core/audio.ts';
 import { worldRng } from '../core/rng.ts';
-import { h, wait, clamp } from '../core/util.ts';
+import { h, wait, clamp, sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
-import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast } from './ui.ts';
+import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput } from './ui.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
 import { openPauseMenu, openShop, openPC, openParty } from './menus.ts';
-import { drawGroundBall, drawPickBall } from '../gfx/items.ts';
+import { drawGroundBall, drawPickBall, itemIcon } from '../gfx/items.ts';
+import { EGG } from '../data/egg.ts';
 import { canoeCanvas } from '../gfx/ui-icons.ts';
+import { fullText, sleepUntil, capital, weekday, dateText } from './calendar.ts';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const WALK_MS = 210;
@@ -547,6 +549,8 @@ function onStep() {
   // Footsteps and grass rustle are silent: too many sounds at once bothered the player.
   if (TILE_INFO[ch]?.enc) { W_.rustle = { x: p.x, y: p.y, t0: null }; }
   if (poisonTick()) return;
+  // The egg hatches by itself once the player has walked far enough with it.
+  if (S.egg && hasItem(EGG.item) && S.stats.steps - S.egg.steps >= EGG.steps) return void runScript(() => api.eggHatch());
   // Route marker: walking right beside one saves the respawn point (it does not heal)
   if (!W_.map.indoor && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => tileAt(p.x + dx, p.y + dy) === 'Щ')) {
     const cp = S.checkpoint;
@@ -783,6 +787,7 @@ function interact() {
   }
   if (tileAt(p.x + dx, p.y + dy) === 'B') return void runScript(() => say(worldRng.pick(BOOKS)));
   if (tileAt(p.x + dx, p.y + dy) === 'Щ') return void runScript(() => say(['Un mojón de la ruta, con el kilómetro pintado en rojo.', 'Quien pasa a su lado queda anotado en el punto de control: si las criaturas caen, se despierta acá con la salud completa.', 'No se puede curar a nadie en este lugar. Para eso hace falta una Policlínica.']));
+  if (tileAt(p.x + dx, p.y + dy) === 'E') return void runScript(() => sleepInBed());
   if (tileAt(p.x + dx, p.y + dy) === 'P' && !n) return void runScript(() => openPC());
   if (tileAt(p.x + dx, p.y + dy) === '%') return void runScript(() => cutBush(p.x + dx, p.y + dy));
   if (tileAt(p.x + dx, p.y + dy) === '~') {
@@ -795,6 +800,19 @@ function interact() {
     }
     return void runScript(() => fish());
   }
+}
+
+/** Beds at home and in Policlínicas let the player sleep until 8:00 the next morning (to reach a weekday event). */
+async function sleepInBed() {
+  const own = W_.map.id === 'casa_jugador' || W_.map.theme === 'poli';
+  if (!own) return say('Es la cama de otra persona. Mejor no tocarla.');
+  await say(`Hoy es ${fullText()}.`);
+  if (!(await ask('¿Querés dormir hasta mañana?'))) return;
+  await fadeOut(450);
+  sleepUntil(8);
+  await wait(500);
+  await fadeIn(450);
+  await say(`Dormiste bien. Hoy es ${capital(weekday())} ${dateText()}.`);
 }
 
 const BOOKS = [
@@ -847,7 +865,7 @@ const fogTalk = (n) => FOG_TALK[(n.def.x * 7 + n.def.y * 3) % FOG_TALK.length];
 function foggyHere() {
   const m = W_.map;
   if (m.indoor || m.dark) return false;
-  return activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'));
+  return activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'));
 }
 
 // Tiles that give light to the WebGL layer: [dy = height of the glow inside the tile, radius in logical px, colour, strength].
@@ -1099,6 +1117,40 @@ export const api = {
     else S.box.push(c);
     return c;
   },
+  /** The egg from Tabárez: goes in the bag and starts counting steps. */
+  async receiveEgg() {
+    const S = state();
+    setFlag('got_huevo');
+    S.egg = { steps: S.stats.steps };
+    await api.give(EGG.item);
+  },
+  /** The egg hatches: a short scene with the egg on screen, the creature joins the team (or the box) and may get a nickname. */
+  async eggHatch() {
+    const S = state();
+    await say('¿Eh? ¡El Huevo se está moviendo!');
+    const img = h('img', { class: 'creature-pop', src: itemIcon(EGG.item), alt: 'Huevo', width: 80, height: 80 });
+    uiRoot().append(img);
+    W_.showCreature = img;
+    for (let i = 0; i < 3; i++) {
+      img.style.rotate = '-8deg'; sfx('shake'); await wait(160);
+      img.style.rotate = '8deg'; await wait(160);
+      img.style.rotate = '0deg'; await wait(260);
+    }
+    removeItem(EGG.item, 1);
+    S.egg = null;
+    setFlag('huevo_nacio');
+    const c = api.giveCreature(EGG.species, EGG.level);
+    img.src = creatureIcon(EGG.species);
+    img.alt = SPECIES[EGG.species].name;
+    jingle('item');
+    await say(`¡Del Huevo nació un ${SPECIES[EGG.species].name}!`);
+    api.hideCreature();
+    if (await ask(`¿Querés ponerle un apodo a ${SPECIES[EGG.species].name}?`)) {
+      const nick = sanitizeName(await textInput('Apodo (máx. 10 letras)', ''), '');
+      if (nick) c.nickname = nick;
+    }
+    if (!S.party.includes(c)) await say(`${displayName(c)} fue enviado a la Caja de la Policlínica.`);
+  },
   /** Trade: the player hands over a creature of species `want`; gets `offer` at the same level (OT: the player). Returns true if traded. */
   async tradeCreature(want, offer) {
     const S = state();
@@ -1256,6 +1308,13 @@ export const api = {
     state().lastHeal = { map: W_.map.id, x: p.x, y: p.y };
     state().checkpoint = null;
   },
+  /** A wild creature met on purpose (a swarm in a story). Losing sends the party to rest as usual. Returns 'win', 'caught', 'run' or 'lose'. */
+  async wildBattle(sp, lvl) {
+    const c = createCreature(sp, lvl);
+    const res = await runBattle({ foes: [c], wild: true, bg: W_.map.bg, music: 'battle' });
+    if (res === 'lose') await blackout();
+    return res;
+  },
   async battle(trainer, { canLose = false, music }: { canLose?: boolean; music?: string } = {}) {
     const foes = trainer.team.map(([sp, lvl]) => createCreature(sp, lvl));
     const res = await runBattle({ foes, wild: false, trainer, bg: W_.map.bg, canLose, music });
@@ -1282,6 +1341,16 @@ export const api = {
   npcHide(key) {
     const n = findNpc(key);
     if (!n) return;
+    n.gone = true;
+    n.visible = false;
+  },
+  /** A creature shown on the map (look 'animal:…') takes off and flies out of sight, then is gone. */
+  async npcFlyOff(key, ms = 1800) {
+    const n = findNpc(key);
+    if (!n) return;
+    n.fly = { t0: performance.now(), ms };
+    await wait(ms);
+    n.fly = null;
     n.gone = true;
     n.visible = false;
   },
@@ -1633,11 +1702,15 @@ function drawWorld(g, t) {
     const f = rowing ? 0 : player && p.moving ? (p.t < p.dur / 2 ? (p.step % 2) + 1 : (p.step % 2 ? 3 : 0)) : n.moving ? frameIdx : 0;
     if (!player && typeof look === 'string' && look.startsWith('animal:')) {
       // creatures seen in the distance: they wander but cannot be fought or caught
-      shadow(g, sx + 8, sy + 13, 6, 2.4);
-      const hop = n.moving ? Math.abs(Math.sin(t / 90)) * 2 : 0;
+      // taking off (npcFlyOff): it climbs away to the north-east while its shadow fades on the ground
+      const fk = n.fly ? Math.min(1, (performance.now() - n.fly.t0) / n.fly.ms) : 0;
+      const flyX = Math.round(fk * 48), flyY = Math.round(fk * fk * 170);
+      shadow(g, sx + 8, sy + 13, 6 * (1 - fk), 2.4 * (1 - fk));
+      const hop = n.moving ? Math.abs(Math.sin(t / 90)) * 2 : n.fly ? Math.round(Math.abs(Math.sin(t / 70)) * 3) : 0;
       g.save();
-      if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), 0, sy - 7 - hop, 24, 24); }
-      else g.drawImage(creatureSprite(look.slice(7)), sx - 4, sy - 7 - hop, 24, 24);
+      if (fk) g.globalAlpha = 1 - fk * 0.7;
+      if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), -flyX, sy - 7 - hop - flyY, 24, 24); }
+      else g.drawImage(creatureSprite(look.slice(7)), sx - 4 + flyX, sy - 7 - hop - flyY, 24, 24);
       g.restore();
       continue;
     }
@@ -1700,7 +1773,7 @@ function drawWorld(g, t) {
       if (wx === 'storm') { rain(g, t * 1.7); lightning(g, t); }
       if (wx === 'fog') { drawFog(g, t); g.fillStyle = 'rgba(205,212,222,0.22)'; g.fillRect(0, 0, W, H); }
     }
-    if ((m.id === 'cabo' && !flag('cabo_clear')) || (m.id === 'quebrada' && !flag('quebrada_clear'))) drawFog(g, t);
+    if ((m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'))) drawFog(g, t);
     // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
     const machines = activeMachines();
     if (machines.length && !m.dark) {

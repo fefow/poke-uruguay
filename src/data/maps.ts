@@ -296,7 +296,7 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
   },
 
   quebrada: {
-    name: 'Quebrada de los Cuervos',
+    name: 'Treinta y Tres',
     music: 'route',
     bg: 'canyon',
     tiles: [
@@ -322,21 +322,87 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
       'KKKKKKKKKKKKK===KKKKKKKKKKKK',
     ],
     doors: ['casa_tyt', 'poli_tyt', 'gym_tyt', 'shop_tyt'],
-    signs: ['TREINTA Y TRES — QUEBRADA DE LOS CUERVOS\nPrimer Área Protegida del Uruguay. Cuidá la naturaleza.'],
-    exits: { s: { to: 'minas' } },
+    signs: ['TREINTA Y TRES\n→ Quebrada de los Cuervos, primer Área Protegida del Uruguay.'],
+    exits: {
+      s: { to: 'minas' },
+      // The real Quebrada de los Cuervos is a valley in the sierras outside the town (map quebrada_cuervos).
+      e: { to: 'quebrada_cuervos', req: (f) => !!f[badgeOf('quebrada')], deny: ['El camino a la Quebrada de los Cuervos está cerrado.', 'Hay gente de gris acampando en el valle. No dejan pasar a nadie.'] },
+    },
     enc: { rate: 0.13, list: [['cuervon', 26, 29, 25], ['mulitin', 26, 28, 15], ['picaflorin', 27, 29, 12], ['oruga', 27, 29, 15], ['butia', 26, 28, 13], ['gatomontes', 27, 29, 12], ['mulitron', 29, 30, 8], ['curupi', 27, 29, 6], ['sapo', 27, 29, 6], ['ciempies', 27, 29, 6]] },
     fish: [['camalote', 26, 29, 50], ['anguila', 26, 29, 40], ['pejerrey', 26, 28, 10]],
     npcs: [
-      { x: 12, y: 2, look: 'brumario', dir: 'down', id: 'brumario', cond: (f) => f[badgeOf('quebrada')] && !f.quebrada_clear, script: 'brumario' },
-      { x: 12, y: 2, look: 'grunt', dir: 'down', cond: (f) => !f[badgeOf('quebrada')], text: ['El jefe está ocupado. Volvé cuando seas un rival de verdad.'] },
-      { x: 10, y: 3, look: 'grunt', dir: 'right', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta PP', 'Equipo PP', [['zorromonte', 30], ['yararita', 29]], 600, 'El Cardenal Azul va a ser nuestro.', 'No.', 'El jefe Brumario es imparable.', 'grunt') },
-      { x: 15, y: 3, look: 'grunt', dir: 'left', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g2', 'Recluta PP', 'Equipo PP', [['cuervon', 30], ['mulitron', 30]], 600, 'Más niebla para todos.', 'Me superaste.', 'No tengo más que decir.', 'grunt') },
       { x: 7, y: 9, look: 'gaucho', dir: 'right', sight: 4, trainer: TR('qb_a', 'Doña Ofelia', 'Paisana', [['gatomontes', 28], ['venadalto', 29]], 560, 'En la Quebrada se combate con respeto.', 'Bien jugado.', 'Don Aparicio es duro como la piedra de la quebrada.', 'gaucho') },
       { x: 22, y: 9, look: 'boy', text: ['En el fondo de la quebrada hay un arroyo.', 'Los cuervos de cabeza roja vuelan en círculos por arriba.'] },
       { x: 4, y: 18, look: 'girl', wander: true, text: ['Treinta y Tres se llama así por los 33 Orientales.', 'Acá la historia está en cada rincón.'] },
     ],
     items: [{ x: 3, y: 2, item: 'ultraesfera', id: 'qb_item1' }],
-    legend: { x: 13, y: 1, species: 'pamperon', level: 50, flag: 'caught_pamperon', cond: (f) => f.champion, text: 'Un viento helado baja desde el cielo.' },
+  },
+  // The real Quebrada de los Cuervos: a valley between the sierras of Treinta y Tres with the arroyo Yerbal in the middle.
+  // Brumario climbs it to trap the Cardenal Azul; the road on to Lascano stays closed until the valley is clear.
+  quebrada_cuervos: {
+    name: 'Quebrada de los Cuervos',
+    music: 'route',
+    bg: 'canyon',
+    tiles: [
+      'KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK',
+      'KKKKKKKR.....,.....RKKKϠϠKKKKK',
+      'KKKKKK...............KK~~KKKKK',
+      'KKKKK...,,,......,,,..K~~KKKKK',
+      'KKKKK..R...........R..K~~KKKKK',
+      'KKKKKK......===.......K~~KKKKK',
+      'KKKKKKKKKKK...=..KKKKKK~~KKKKK',
+      'KKKKKKKKKKK...=..KKKKKK~~KKKKK',
+      'KKK......,,,..=..,,,..K~~KKKKK',
+      'KKK.R....,,,..=..,,,..K~~KKKKK',
+      'KKK.....=======.......K~~KKKKK',
+      'KKK.....=....R.....R..K~~KKKKK',
+      'KKKKK...=...KKKKKKKKKKK~~KKKKK',
+      'KKKKK...=...KKKKKKKKKKK~~KKKKK',
+      'KKK.,,,.=.,,,..........~~...KK',
+      'KKK.,,,.==============bbbb=.KK',
+      'KKK......,,,.....R.....~~.=.KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~.=,KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~,=,KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~,=,KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~.=.KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~.=.KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~R=.KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~.=,KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~,=,KK',
+      'KK.....,,,,......R.....~~.=.KK',
+      'KK.R...,,,,............~~.=.KK',
+      'KK.........,,,,....R...~~.=.KK',
+      'KK....R....,,,,........~~.=.KK',
+      'KK.....................~~.=.KK',
+      'KK....,,,..............~~.=.KK',
+      '======================bbbb=.KK',
+      'KK....,,,.....R........~~...KK',
+      'KK..........,,,,.......~~.R.KK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~KKKKK',
+      'KKKKKKKKKKKKKKKKKKKKKKK~~KKKKK',
+    ],
+    signs: [],
+    exits: { w: { to: 'quebrada' } },
+    triggers: [{ x: 25, y: 18, w: 3, h: 1, script: 'scene_qb_ayudante', cond: (f) => !f.ev_qb_ayudante && !f.quebrada_clear }],
+    enc: { rate: 0.13, list: [['cuervon', 35, 38, 30], ['gatomontes', 35, 38, 20], ['venadalto', 36, 39, 15], ['mulitron', 36, 39, 15]] },
+    fish: [['camalote', 35, 38, 50], ['anguila', 35, 38, 50]],
+    npcs: [
+      { x: 3, y: 30, look: 'biologo', dir: 'right', text: ['Por el fondo de la quebrada corre el arroyo Yerbal.', 'Los cuervos de cabeza roja hacen nido en los paredones. Este año casi no se ven.'] },
+      { x: 12, y: 29, look: 'girl', dir: 'down', sight: 3, trainer: TR('qb_av', 'Valeria', 'Observadora de aves', [['picaflorin', 36], ['cuervon', 37]], 700, 'Subo todos los años a contar cuervos. Hoy conté tres.', 'Me ganaste limpio.', 'Arriba se ve una luz azul entre la niebla. No sé qué es.', 'girl') },
+      { x: 21, y: 30, look: 'grunt', dir: 'down', sight: 2, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g1', 'Recluta PP', 'Equipo PP', [['zorromonte', 37], ['yararita', 36]], 740, 'El valle está cerrado. Órdenes de Brumario.', 'No.', 'Arriba ya tenemos lo que vinimos a buscar.', 'grunt') },
+      { x: 27, y: 20, look: 'grunt', dir: 'left', sight: 2, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g2', 'Recluta PP', 'Equipo PP', [['cuervon', 37], ['mulitron', 37]], 740, 'Más niebla para todos.', 'Me superaste.', 'Las máquinas no se apagan solas.', 'grunt') },
+      { x: 26, y: 16, look: 'biologo', dir: 'down', id: 'ayudante_qb', name: 'Martín', arrive: true, cond: (f) => !f.ev_qb_ayudante },
+      { x: 9, y: 13, look: 'grunt', dir: 'left', sight: 3, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g3', 'Recluta PP', 'Equipo PP', [['yarara', 38], ['cuervon', 37]], 760, 'Ese pájaro vale más que todo Treinta y Tres.', 'Qué problema.', 'Brumario no va a soltarlo.', 'grunt') },
+      { x: 15, y: 7, look: 'grunt', dir: 'left', sight: 2, cond: (f) => !f.quebrada_clear, trainer: TR('qb_g4', 'Recluta PP', 'Equipo PP', [['zorromonte', 38], ['yarara', 38]], 760, 'Nadie sube. El jefe está trabajando.', 'Informo que perdí.', 'Hacé lo que quieras, ya es tarde.', 'grunt') },
+      { x: 14, y: 3, look: 'brumario', dir: 'down', id: 'brumario', cond: (f) => !f.quebrada_clear, script: 'brumario' },
+      { x: 14, y: 1, look: 'animal:pamperon', dir: 'down', id: 'cardenal_qb', cond: (f) => !f.quebrada_clear, text: ['Un pájaro azul enorme, quieto entre dos máquinas.', 'La niebla le pesa en las alas. Chispea, pero no puede levantar vuelo.'] },
+      { x: 12, y: 2, look: 'machine', dir: 'down', id: 'maq_qb1', cond: (f) => !f.quebrada_clear, text: ['Una máquina de niebla del PP. Larga un humo gris hacia el pájaro.'] },
+      { x: 16, y: 2, look: 'machine', dir: 'down', id: 'maq_qb2', cond: (f) => !f.quebrada_clear, text: ['Una máquina de niebla del PP. Larga un humo gris hacia el pájaro.'] },
+      { x: 14, y: 8, look: 'prof', dir: 'up', id: 'tabarez_qb', arrive: true, cond: (f) => !f.quebrada_clear },
+    ],
+    items: [{ x: 3, y: 8, item: 'ultraesfera', id: 'qbc_item1' }, { x: 27, y: 32, item: 'mate_dulce', id: 'qbc_item2' }],
+    // After the Liga the Cardenal comes back to rest where it was freed; the feather Tabárez gave you is the sign.
+    legend: { x: 14, y: 1, species: 'pamperon', level: 50, flag: 'caught_pamperon', cond: (f) => f.champion && f.got_pluma, text: ['La Pluma Azul se pone tibia en tu bolsillo.', 'Un viento helado baja desde el cielo. El Cardenal Azul volvió a la quebrada.'] },
   },
   // ------------------------------------------------------------ localidades (sin gimnasio)
   rosario: {
@@ -520,7 +586,8 @@ const BASE_INTERIOR: Record<string, MapDef> = {
       { x: 4, y: 3, look: 'ball', species: 'ceibito', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 5, y: 3, look: 'ball', species: 'tejuchispa', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 6, y: 3, look: 'ball', species: 'carpinchito', cond: (f) => !f.has_starter, script: 'starter' },
-      { x: 9, y: 6, look: 'clerk', dir: 'left', text: ['Soy ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
+      { x: 9, y: 6, look: 'clerk', dir: 'left', name: 'Gonzalo', text: ['Soy Gonzalo, ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
+      { x: 2, y: 6, look: 'biologo', dir: 'right', name: 'Martín', text: ['Soy Martín, ayudante del Maestro Tabárez.', 'Medimos el viento del Río de la Plata. El Maestro dice que el pampero tiene un ciclo, como si alguien lo trajera.'] },
       { x: 7, y: 1, look: 'rival', dir: 'down', id: 'rival_lab', cond: (f) => !f.rival1 },
     ],
   }),
@@ -706,7 +773,7 @@ import { ACT2_OUTDOOR, ACT2_INTERIOR } from './maps-act2.ts';
 import { SPECIES } from './species.ts';
 import { MAP_BIOME, BIOMES } from './atlas.ts';
 import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
-import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf } from './route.ts';
+import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng } from './map-gen.ts';
 import { guideMap } from './guide.ts';
@@ -721,6 +788,7 @@ import { addMuelleStory, clearPierFolk } from './muelle.ts';
 import { addCityEvents } from './events.ts';
 import { addFavors } from './favors.ts';
 import { addMiniStories } from './mini-stories.ts';
+import { addAmistad } from './amistad.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -799,7 +867,7 @@ const PLACES = {
   salto: ['gym_sal', 'radio_sal', 'represa_1', 'represa_2'],
   rivera: ['gym_riv', 'aduana_riv', 'torre_1', 'torre_2', 'torre_3', 'safari'],
   tacuarembo: ['gym_tac', 'parrilla_tac', 'ciclovia'],
-  quebrada: ['gym_tyt'],
+  quebrada: ['gym_tyt', 'quebrada_cuervos'],
   paloma: ['cabo'],
   punta: ['gym_pde'],
   piriapolis: ['obs_1', 'obs_2', 'obs_3'],
@@ -914,7 +982,8 @@ for (const [mapId, script, flag] of RIVAL_AT) {
 // The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.
 Object.assign(INTERIOR.casa_florida.npcs[0], { script: 'gift_vuelo', text: undefined });
 
-// Gift NPCs for the field moves (the Canoa and the Guantes de Domador; the Machete comes from the Buquebus captain in Colonia).
+// The people who hand over the Canoa and the Guantes de Domador (the Machete comes from the Buquebus captain). What they
+// ask first is a mini story (mini-stories.ts), which takes over these two people by their script name.
 for (const [house, script] of [['casa_artigas', 'gift_surf'], ['casa_tac', 'gift_fuerza']]) {
   Object.assign(INTERIOR[house].npcs[0], { script, text: undefined });
 }
@@ -1216,6 +1285,13 @@ for (const caveId of ['r_palmitas_mercedes', 'r_piriapolis_minas']) {
   }
 }
 
+// Treinta y Tres: after the medal the road on to Lascano stays shut until the Quebrada de los Cuervos is clear,
+// because the PP fog comes down from the valley over the road.
+{
+  const m = OUTDOOR.quebrada;
+  const side = Object.keys(m.exits).find((k) => m.exits[k].to === 'lascano');
+  if (side) m.exits[side] = { ...m.exits[side], req: (f) => !!f[openFlag('quebrada')] && !!f.quebrada_clear, deny: ['El camino a Lascano está cerrado.', 'Desde la Quebrada de los Cuervos bajó una niebla espesa y tapó la ruta. No se ve ni la banquina.'] };
+}
 // A road that is closed has someone standing in it (a police officer, or PP once they are around) who says why.
 for (const [mapId, m] of Object.entries(OUTDOOR)) {
   for (const [side, ex] of Object.entries(m.exits ?? {})) {
@@ -1262,6 +1338,13 @@ for (const [mapId, m] of Object.entries(OUTDOOR)) {
   }
 }
 
+// The people who keep both roads of Treinta y Tres closed are park rangers of the Quebrada: they only say what they see.
+for (const n of OUTDOOR.quebrada.npcs ?? []) {
+  if (!n.blocker) continue;
+  const ex = Object.values(OUTDOOR.quebrada.exits).find((e: any) => e.deny && n.text === e.deny || (Array.isArray(n.text) && e.deny && n.text.includes(e.deny[1]))) as any;
+  if (!ex) continue;
+  Object.assign(n, { look: 'cop', name: 'Guardaparque', text: ex.deny });
+}
 // The gossip that explains, a little at a time, why the roads are closed.
 addRumors(OUTDOOR);
 
@@ -1410,6 +1493,21 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);
+// The egg: after the first medal, Tabárez's assistant comes walking up to the player as they leave the Trinidad gym
+// (placed after the editor's patches so the gym door is where the player sees it).
+(function placeEggAssistant() {
+  const m = OUTDOOR.trinidad;
+  const k = (m?.doors ?? []).findIndex((d) => (typeof d === 'string' ? d : d.to) === 'gym_trinidad');
+  if (k < 0) return;
+  let n = 0, door = null;
+  m.tiles.forEach((row, y) => [...row].forEach((ch, x) => { if (ch === 'D' && n++ === k) door = { x, y }; }));
+  if (!door) return;
+  const cond = (f) => f.badge1 && !f.got_huevo;
+  const npc: any = { x: door.x, y: door.y + 4, look: 'clerk', dir: 'up', id: 'ayudante_huevo', name: 'Gonzalo', arrive: true, cond, script: 'huevo_ayudante' };
+  fitToMap(m.tiles, [npc]);
+  m.npcs.push(npc);
+  (m.triggers ??= []).push({ x: door.x - 6, y: door.y + 1, w: 13, h: 2, script: 'huevo_ayudante', cond });
+})();
 // Trinidad gym: its trainers do not walk up to you, they only act when you pass right beside them
 for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.sight = 1; n.adjacent = true; }
 
@@ -1437,7 +1535,8 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   for (const [id, m] of Object.entries(INTERIOR) as [string, any][]) if (id.startsWith('ferry')) for (const n of m.npcs ?? []) if (n.trainer && !n.adjacent) n.sight = Math.max(n.sight ?? 3, 14);
   addCityEvents(OUTDOOR);
   addFavors(OUTDOOR);
-  addMiniStories(OUTDOOR);
+  addMiniStories(OUTDOOR, INTERIOR);
+  addAmistad(OUTDOOR);
   clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }
@@ -1482,3 +1581,11 @@ for (const m of Object.values(MAPS) as any[]) {
     if (n.trainer) n.trainer.look = 'turista';
   }
 }
+
+// One local in each city talks the way people talk there (border portuñol, the eastern "tú", country speech...).
+import { addRegionalSpeech } from './regional-speech.ts';
+addRegionalSpeech(OUTDOOR);
+
+// Plain, everyday Uruguayan first names for the trainers on the road (after the looks above are final: the name follows the person drawn).
+import { nameTrainers } from './trainer-names.ts';
+nameTrainers(MAPS);

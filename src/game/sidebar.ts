@@ -9,10 +9,13 @@ import { displayName, maxHp } from './creature.ts';
 import { fmt } from './ui.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { uiIconUrl } from '../gfx/ui-icons.ts';
+import { fogReading, fogBand } from '../data/toxicity.ts';
+import { setFogLevel } from '../gfx/fx.ts';
 
 let teamCount, portrait, nameEl, card, mapBox, teamBox, teamBtn, lastFace = '';
 let teamOpen = true;
 try { teamOpen = localStorage.getItem('hudTeam') !== '0'; } catch {}
+let fogChip, fogEl, fogBar;
 let stage, bar, placeEl, medalEl, moneyEl, teamEl, btns: Record<string, any> = {}, handlers: Record<string, any> = {}, sig = '', nextPoll = 0;
 
 const ICON = {
@@ -38,14 +41,16 @@ function pixelIcon(key) {
   return h('img', { class: 'tb-pix', src: uiIconUrl(key), alt: '', width: 32, height: 32 });
 }
 
-function button(key, tip, onClick) {
-  const b = h('button', { type: 'button', class: 'tb-btn', 'data-tip': tip, 'aria-label': tip }, icon(key));
+function button(key, tip, onClick, label = tip) {
+  // the label only shows in the phone drop-down list, where the buttons are big rows with their name
+  const b = h('button', { type: 'button', class: 'tb-btn', 'data-tip': tip, 'aria-label': tip }, icon(key), h('span', { class: 'tb-label', text: label }));
   b.addEventListener('pointerdown', (e) => e.preventDefault()); // keep keyboard focus on the game
-  b.addEventListener('click', onClick);
+  b.addEventListener('click', (e) => { mapBox?.classList.remove('is-open'); moreBtn?.setAttribute('aria-expanded', 'false'); onClick(e); });
   return b;
 }
+let moreBtn;
 
-/** handlers: { menu, bag, party, dex, map, options } — each opens that screen. */
+/** handlers: { menu, bag, party, dex, map, options, fog } — each opens that screen. */
 export function mountSidebar(stageEl, hs = {}) {
   stage = stageEl;
   handlers = hs;
@@ -57,11 +62,28 @@ export function mountSidebar(stageEl, hs = {}) {
     dex: button('dex', 'PokeDex', guard(() => handlers.dex?.())),
     party: button('team', 'Equipo', guard(() => handlers.party?.())),
     bag: button('bag', 'Mochila', guard(() => handlers.bag?.())),
-    map: button('map', 'Mapa de Uruguay (T)', guard(() => handlers.map?.())),
-    music: button('music', 'Música (N)', () => dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyN' }))),
-    options: button('gear', 'Ajustes (O)', guard(() => handlers.options?.())),
-    menu: button('menu', 'Menú (Enter)', guard(() => input.press('start'))),
+    map: button('map', 'Mapa de Uruguay (T)', guard(() => handlers.map?.()), 'Mapa'),
+    music: button('music', 'Música (N)', () => dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyN' })), 'Música'),
+    options: button('gear', 'Ajustes (O)', guard(() => handlers.options?.()), 'Ajustes'),
+    menu: button('menu', 'Menú (Enter)', guard(() => input.press('start')), 'Menú'),
   };
+  // Phones: the small shortcut icons fold into one big button that drops down a list of large rows.
+  moreBtn = h('button', { type: 'button', class: 'tb-more', 'aria-label': 'Atajos', 'aria-expanded': 'false' }, icon('menu'), h('span', { text: 'Atajos' }), h('span', { class: 'hud-caret', text: '▾' }));
+  moreBtn.addEventListener('pointerdown', (e) => e.preventDefault());
+  moreBtn.addEventListener('click', () => {
+    const open = !mapBox.classList.contains('is-open');
+    mapBox.classList.toggle('is-open', open);
+    moreBtn.setAttribute('aria-expanded', String(open));
+  });
+  // a tap anywhere else folds it back
+  addEventListener('pointerdown', (e) => {
+    if (mapBox?.classList.contains('is-open') && !mapBox.contains(e.target as Node)) { mapBox.classList.remove('is-open'); moreBtn.setAttribute('aria-expanded', 'false'); }
+  }, true);
+  // Medidor de Niebla: PP fog left in the country; tap or click opens its panel
+  fogEl = h('b');
+  fogChip = h('button', { type: 'button', class: 'tb-chip tb-fog', 'data-tip': 'Medidor de Niebla', 'aria-label': 'Medidor de Niebla', hidden: true }, pixelIcon('niebla'), fogEl, fogBar = h('span', { class: 'tb-fog-bar' }));
+  fogChip.addEventListener('pointerdown', (e) => e.preventDefault());
+  fogChip.addEventListener('click', guard(() => handlers.fog?.()));
   // player card (top left)
   portrait = h('canvas', { class: 'hud-face', width: 16, height: 16 });
   nameEl = h('b', { class: 'hud-name' });
@@ -71,10 +93,12 @@ export function mountSidebar(stageEl, hs = {}) {
       nameEl,
       h('div', { class: 'hud-card-top' },
         h('span', { class: 'tb-chip', 'data-tip': 'Medallas' }, pixelIcon('medallas'), medalEl),
-        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, pixelIcon('dinero'), moneyEl))));
+        h('span', { class: 'tb-chip', 'data-tip': 'Dinero' }, pixelIcon('dinero'), moneyEl)),
+      fogChip));
   // minimap + place + tools (top right)
   mapBox = h('section', { class: 'hud-map', 'aria-label': 'Minimapa' },
     h('div', { class: 'hud-place', 'data-tip': 'Lugar actual' }, pixelIcon('ubicacion'), placeEl),
+    moreBtn,
     h('nav', { class: 'tb-tools' }, ...Object.values(btns)));
   // hotbar (bottom centre)
   teamEl = h('ol', { class: 'hud-team-list', 'aria-label': 'Equipo' });
@@ -120,6 +144,7 @@ export function updateSidebar(now, inGame) {
   if (!stage) return;
   const show = inGame && !document.querySelector('.bhud');
   stage.classList.toggle('is-game', show);
+  if (!show && mapBox?.classList.contains('is-open')) { mapBox.classList.remove('is-open'); moreBtn?.setAttribute('aria-expanded', 'false'); }
   bar.classList.toggle('is-busy', input.busy);
   if (now < nextPoll) return;
   nextPoll = now + 250;
@@ -132,7 +157,10 @@ export function updateSidebar(now, inGame) {
   drawFace(S.player.look);
   const place = fmt(MAPS[S.pos.map]?.name ?? '');
   const team = S.party.map((c) => `${c.species}${c.level}${c.hp}${c.status ?? ''}`).join(',');
-  const next = [place, S.rivalName, S.player.name, S.player.money, badgeCount(), team].join('|');
+  const fog = fogReading(S.flags);
+  setFogLevel(fog.pct); // the weather follows the country's fog, whether or not the player has the device yet
+  const hasFog = !!S.bag.medidor_niebla;
+  const next = [place, S.rivalName, S.player.name, S.player.money, badgeCount(), team, hasFog, fog.pct].join('|');
   if (next === sig) return;
   sig = next;
   placeEl.textContent = place;
@@ -140,6 +168,10 @@ export function updateSidebar(now, inGame) {
   medalEl.textContent = String(badgeCount());
   teamCount.textContent = `${S.party.length}/6`;
   moneyEl.textContent = `$${S.player.money}`;
+  fogChip.hidden = !hasFog;
+  fogEl.textContent = `Niebla ${fog.pct}%`;
+  fogBar.style.setProperty('--fog', (fog.pct / 100).toFixed(2));
+  fogChip.className = `tb-chip tb-fog ${fogBand(fog.pct)}`;
   teamEl.replaceChildren(...S.party.map((c) => {
     const max = maxHp(c), pct = Math.max(0, Math.min(1, c.hp / max));
     return h('li', { class: c.hp <= 0 ? 'is-down' : '', 'data-tip': `${displayName(c)} · ${c.hp}/${max} PS${c.status ? ' · ' + c.status : ''}` },

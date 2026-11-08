@@ -6,6 +6,7 @@ import { input } from '../core/input.ts';
 import { sfx } from '../core/audio.ts';
 import { settings, state } from './state.ts';
 import { charSprite } from '../gfx/characters.ts';
+import { isTouch } from '../core/touchpad.ts';
 
 // Speaker looks so each voice gets its own face and tint in the dialog box.
 const FACES = {
@@ -40,7 +41,18 @@ export function mountUI(el) {
   dialogFace = h('canvas', { class: 'dialog-face', width: 16, height: 17, hidden: true, 'aria-hidden': 'true' });
   dialog = h('div', { class: 'dialog', hidden: true, role: 'status', 'aria-live': 'polite' }, dialogFace, dialogName, dialogText, dialogArrow);
   root.append(dialog);
+  // phones: tapping the text box moves the text on, like Z (not while a choice list is waiting under it)
+  dialog.addEventListener('pointerdown', (e) => {
+    if (root.querySelector('.menu, .panel')) return;
+    e.preventDefault();
+    input.press('a');
+  });
 }
+
+// Phones: the first menus carry a small "tap an option" label, so it is clear the list itself is touchable.
+let touchHints = 0;
+try { touchHints = Number(localStorage.getItem('pk_touchHints')) || 0; } catch { /* private mode */ }
+const TOUCH_HINT_TIMES = 12;
 
 export const uiRoot = () => root;
 
@@ -118,12 +130,18 @@ export function closeDialog() {
  * Vertical choice list. Returns chosen index, or -1 when cancelled with B.
  * options: array of strings or {label, disabled, hint}
  */
-export function choose(options, { cancel = true, cls = '', title = null, start = 0, onMove = null, cols = 1 } = {}) {
+export function choose(options, { cancel = true, cls = '', title = null, start = 0, onMove = null, cols = 1, hint = '' } = {}) {
   return new Promise<any>((resolve) => {
     const opts = options.map((o) => (typeof o === 'string' ? { label: o } : o));
     let idx = Math.min(start, opts.length - 1);
+    const touch = isTouch();
+    // With a detail view (moves), the first tap on a phone only selects, so its detail can be read; a second tap uses it.
+    const tap = (i) => {
+      if (touch && onMove && i !== idx) { idx = i; sfx('select'); render(); return; }
+      idx = i; render(); pick();
+    };
     const items = opts.map((o, i) =>
-      h('li', { class: o.disabled ? 'is-disabled' : '', role: 'option', onclick: () => { idx = i; render(); pick(); } },
+      h('li', { class: [o.disabled ? 'is-disabled' : '', o.cls ?? ''].join(' ').trim(), role: 'option', onclick: () => tap(i) },
         o.icon ? h('img', { class: 'item-icon', src: o.icon, alt: '' }) : null,
         o.content ?? h('span', { class: 'label', text: fmt(o.label) }),
         o.content ? null : o.hint ? h('span', { class: 'hint', text: o.hint }) : null),
@@ -131,14 +149,41 @@ export function choose(options, { cancel = true, cls = '', title = null, start =
     const list = h('ul', { class: 'menu-list', role: 'listbox' }, items);
     const box = h('div', { class: `menu ${cls}` }, title ? h('div', { class: 'menu-title', text: fmt(title) }) : null, list);
     root.append(box);
+    // Phones: a strip just outside the box with "Volver" (the X button hides while a list is open, it would cover it)
+    // and, the first times, a label saying the options are touchable.
+    let bar = null;
+    if (touch) {
+      const label = hint || (touchHints < TOUCH_HINT_TIMES ? 'Tocá una opción' : '');
+      if (label && !hint) { touchHints++; try { localStorage.setItem('pk_touchHints', String(touchHints)); } catch { /* ignore */ } }
+      const back = cancel ? h('button', { type: 'button', class: 'menu-back', text: '‹ Volver' }) : null;
+      back?.addEventListener('click', () => { sfx('cancel'); finish(-1); });
+      if (back || label) {
+        bar = h('div', { class: 'menu-touchbar' }, back, label ? h('span', { class: 'menu-touch-hint' }, h('i', { class: 'tap-dot', 'aria-hidden': 'true' }), h('span', { text: label })) : null);
+        root.append(bar);
+        // sits on top of the box, or under it when the box touches the top of the screen
+        const place = () => {
+          if (!bar.isConnected) return;
+          const above = box.offsetTop - bar.offsetHeight - 6;
+          bar.style.left = `${box.offsetLeft}px`;
+          bar.style.minWidth = `${box.offsetWidth}px`;
+          bar.style.top = `${above >= 0 ? above : box.offsetTop + box.offsetHeight + 6}px`;
+        };
+        place();
+        requestAnimationFrame(place);
+      }
+    }
     const render = () => {
       items.forEach((li, i) => li.classList.toggle('is-active', i === idx));
       items[idx]?.scrollIntoView({ block: 'nearest' });
       onMove?.(idx);
     };
+    let closed = false;
     const finish = (v) => {
+      if (closed) return;
+      closed = true;
       pop();
       box.remove();
+      bar?.remove();
       resolve(v);
     };
     const pick = () => {

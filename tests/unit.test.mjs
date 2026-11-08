@@ -11,6 +11,7 @@ import { Rng } from '../src/core/rng.ts';
 import { validateSave } from '../src/save/validate.ts';
 import { canonical, sha256, hmacSha256 } from '../src/save/integrity.ts';
 import { newState } from '../src/game/state.ts';
+import { EGG } from '../src/data/egg.ts';
 
 const mon = (sp, lvl, seed = 1) => createCreature(sp, lvl, { rng: new Rng(seed) });
 
@@ -151,6 +152,30 @@ test('validation rejects edited stats/levels/moves/money/items', () => {
       assert.equal(r.ok, false, `case ${i} should be rejected`);
     }
   });
+});
+
+test('huevo: guardado válido, contador conservado y reglas de la historia', () => {
+  const s = goodSave();
+  s.flags.badge1 = true; s.flags.got_huevo = true;
+  s.bag.huevo = 1;
+  s.stats.steps = 500;
+  s.egg = { steps: 120 };
+  let r = validateSave(s);
+  assert.equal(r.ok, true, r.errors.join(', '));
+  assert.deepEqual(r.data.egg, { steps: 120 });
+  s.egg = { steps: 9999 }; // a counter from the future starts counting now
+  r = validateSave(s);
+  assert.deepEqual(r.data.egg, { steps: 500 });
+  const bad = [
+    (x) => { delete x.flags.got_huevo; },
+    (x) => { delete x.flags.badge1; },
+    (x) => { x.flags.huevo_nacio = true; },
+  ];
+  for (const f of bad) { const x = JSON.parse(JSON.stringify(s)); f(x); assert.equal(validateSave(x).ok, false); }
+  const born = goodSave();
+  born.flags.huevo_nacio = true;
+  assert.equal(validateSave(born).ok, false, 'no puede nacer sin haberlo recibido');
+  assert.equal(SPECIES[EGG.species] && !Object.values(SPECIES).some((o) => o.evo?.to === EGG.species), true, 'el huevo trae una criatura base');
 });
 
 test('canonical JSON is key-order independent', () => {
@@ -314,10 +339,14 @@ test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstácul
   assert.ok(has('r_tupambae_melo', '\\'), 'falta la roca de Fuerza');
   assert.ok(OUTDOOR.r_piriapolis_minas.dark, 'falta el túnel oscuro de Destello');
   // the move is handed out in a city before the obstacle, and that script exists
-  for (const [house, city, block, script] of [['casa_artigas', 'artigas', 'ruta30', 'gift_surf'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'gift_fuerza']]) {
-    assert.equal(INTERIOR[house].npcs[0].script, script);
-    assert.ok(SCRIPTS[script]);
-    assert.ok(at(city) < at(block), `${script} debe darse antes de su obstáculo`);
+  // (through a mini story: every step of it happens before the obstacle, or on its near side)
+  const { MINI_STORIES } = await import('../src/data/mini-stories.ts');
+  for (const [house, city, block, ms] of [['casa_artigas', 'artigas', 'ruta30', 'canoa'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'potro']]) {
+    assert.equal(INTERIOR[house].npcs[0].script, 'ms_step');
+    assert.equal(INTERIOR[house].npcs[0].ms, ms);
+    assert.ok(SCRIPTS.ms_step);
+    assert.ok(at(city) < at(block), `${ms} debe darse antes de su obstáculo`);
+    for (const p of MINI_STORIES.find((m) => m.id === ms).people) if (at(p.at.map) >= 0) assert.ok(at(p.at.map) <= at(block), `${ms}/${p.key} antes del obstáculo`);
   }
   assert.ok(at('paloma') < at('r_piriapolis_minas'), 'el farol se da antes del túnel');
   // the Machete comes from the Buquebus captain in Fray Bentos, long before the thicket
@@ -655,25 +684,85 @@ test('favores entre pueblos: cada cadena se pide, se lleva y se cobra en orden',
   }
 });
 
-test('mini historias: especies, mapas, recompensas y marcas válidas, y cada una se puede completar', async () => {
-  const { MINI_STORIES, MS_SCRIPTS } = await import('../src/data/mini-stories.ts');
+test('mini historias: cadenas de pasos con personas en mapas reales, ítems clave y sin acertijos; cada una se completa', async () => {
+  const { MINI_STORIES, MS_SCRIPTS, stageOf } = await import('../src/data/mini-stories.ts');
   const { SPECIES } = await import('../src/data/species.ts');
   const { ITEMS } = await import('../src/data/items.ts');
-  const { OUTDOOR } = await import('../src/data/maps.ts');
-  assert.ok(MINI_STORIES.length >= 8);
+  const { MAPS } = await import('../src/data/maps.ts');
+  assert.ok(MINI_STORIES.length >= 6);
   for (const s of MINI_STORIES) {
-    assert.ok(OUTDOOR[s.map], `${s.id}: mapa ${s.map}`);
-    for (const sp of s.team ?? []) assert.ok(SPECIES[sp], `${s.id}: ${sp}`);
-    assert.ok(s.team || s.choice, `${s.id}: batalla o elección`);
-    for (const [k] of s.reward) assert.ok(ITEMS[k], `${s.id}: ${k}`);
-    const flags = {}, said = [];
-    const api = { flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async (t) => { said.push(t); }, sfx() {}, give: async () => {}, choose: async () => s.choice?.right, battle: async () => 'win' };
-    await MS_SCRIPTS.ms_foe(api, { msId: s.id, name: 'x', look: 'boy' });
-    assert.deepEqual(said.pop(), s.idle);
-    await MS_SCRIPTS.ms_local(api, { msId: s.id, name: 'l' });
-    await MS_SCRIPTS.ms_foe(api, { msId: s.id, name: 'x', look: 'boy' });
-    await MS_SCRIPTS.ms_local(api, { msId: s.id, name: 'l' });
-    assert.equal(flags[`ev_ms_${s.id}_2`], true, `${s.id} completa`);
-    for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
+    const flags = {}, bag = {};
+    const placed = s.people.map((p) => {
+      const n = (MAPS[p.at.map]?.npcs ?? []).find((o) => o.ms === s.id && o.msKey === p.key);
+      assert.ok(n, `${s.id}/${p.key}: está en ${p.at.map}`);
+      return [p, n];
+    });
+    const api = {
+      flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, sfx() {},
+      give: async (k) => { assert.ok(ITEMS[k], `${s.id}: ítem ${k}`); assert.equal(ITEMS[k].pocket, 'key', `${s.id}: ${k} es ítem clave`); bag[k] = 1; },
+      takeItem: (k) => { assert.ok(bag[k], `${s.id}: entrega ${k} sin tenerlo`); delete bag[k]; },
+      wildBattle: async (sp) => { assert.ok(SPECIES[sp], `${s.id}: especie ${sp}`); return 'win'; },
+      npcWalkOff: async () => {}, choose: async () => { throw new Error(`${s.id}: no hay elecciones ni acertijos`); },
+    };
+    const stage = () => stageOf(s, (k) => !!flags[k]);
+    for (let guard = 0; stage() < s.done && guard < 30; guard++) {
+      const st = stage();
+      const who = placed.find(([p]) => (p.acts ?? []).some((a) => a.at === st && !(a.part && flags[`ev_ms_${s.id}_p_${a.part}`])));
+      assert.ok(who, `${s.id}: alguien hace avanzar la etapa ${st}`);
+      await MS_SCRIPTS.ms_step(api, who[1]);
+    }
+    assert.equal(stage(), s.done, `${s.id} completa`);
+    assert.deepEqual(Object.keys(bag).filter((k) => !['soga', 'canoa', 'bici', 'guantes'].includes(k)), [], `${s.id}: no quedan encargos en la mochila`);
+    for (const k of Object.keys(flags)) assert.match(k, /^(ev_[a-z0-9_]{1,40}|got_[a-z]+)$/);
   }
+});
+
+test('in-game calendar: weekdays, dates, sleeping and saving', async () => {
+  const cal = await import('../src/game/calendar.ts');
+  const { setState } = await import('../src/game/state.ts');
+  const s = newState({ name: 'Dusi', look: 'player_m' });
+  setState(s);
+  assert.equal(cal.weekday(), 'lunes');
+  assert.equal(cal.fullText(), 'Lunes 1 de marzo · 08:00');
+  cal.advanceClock(18 * 60000); // 18 real minutes = one in-game day
+  assert.equal(cal.fullText(), 'Martes 2 de marzo · 08:00');
+  assert.ok(cal.isDay('martes', 'jueves'));
+  assert.ok(!cal.isDay('miercoles'));
+  assert.equal(cal.shortText(), 'Mar 2 mar · 08:00');
+  s.clock = 22 * 60 + 24 * 60 * 30; // day 31, 22:00
+  assert.equal(cal.dateText(), '31 de marzo');
+  assert.ok(cal.isDay('miércoles'));
+  cal.sleepUntil(8);
+  assert.equal(cal.fullText(), 'Jueves 1 de abril · 08:00');
+  s.clock = cal.dayNumber() * 1440 + 3 * 60; // 3:00 at night: sleep until 8:00 the same day
+  const day = cal.dayNumber();
+  cal.sleepUntil(8);
+  assert.equal(cal.dayNumber(), day);
+  assert.equal(cal.timeText(), '08:00');
+  assert.equal(cal.daysSince(day - 2), 2);
+  // the clock is kept by save validation; old saves without it start on day 1 at 8:00
+  const g = goodSave();
+  g.clock = 5000;
+  assert.equal(validateSave(g).data.clock, 5000);
+  delete g.clock;
+  assert.equal(validateSave(g).data.clock, 480);
+});
+
+test('medidor de niebla: arranca en 100 %, baja con las plantas del PP y las máquinas, y el guardado lo acepta', async () => {
+  const { fogReading, PP_PLANTS, fogMachineFlags } = await import('../src/data/toxicity.ts');
+  const { OUTDOOR } = await import('../src/data/maps.ts');
+  assert.equal(PP_PLANTS.reduce((n, p) => n + p[2], 0), 85, 'las plantas valen 85 puntos');
+  const machines = fogMachineFlags();
+  const onRoutes = Object.values(OUTDOOR).flatMap((m) => (m.npcs ?? []).filter((n) => n.script === 'route_fog').map((n) => n.doneFlag));
+  assert.ok(machines.length >= onRoutes.length && machines.length > 5, 'cuenta las máquinas sueltas');
+  assert.equal(fogReading({}).pct, 100);
+  const plants = Object.fromEntries(PP_PLANTS.map(([f]) => [f, true]));
+  assert.equal(fogReading(plants).pct, 15, 'solo quedan las máquinas sueltas');
+  assert.equal(fogReading({ ...plants, ...Object.fromEntries(machines.map((f) => [f, true])) }).pct, 0);
+  assert.ok(fogReading({ anglo_pp: true }).pct < 100);
+  const s = goodSave();
+  s.bag.medidor_niebla = 1;
+  assert.equal(validateSave(s).ok, false, 'sin haberlo recibido');
+  s.flags.got_medidor = true;
+  assert.equal(validateSave(s).ok, false, 'antes del Anglo');
 });
