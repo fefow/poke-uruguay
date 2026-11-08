@@ -4,6 +4,7 @@ import { SPECIES } from './species.ts';
 import { EVENT_SCRIPTS, riddleFor } from './events.ts';
 import { FAVOR_SCRIPTS } from './favors.ts';
 import { MS_SCRIPTS } from './mini-stories.ts';
+import { AMISTAD_SCRIPTS, metRamon, ramonGymIntro } from './amistad.ts';
 import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from './route.ts';
 import { teamOf } from './map-gen.ts';
 import { bossTeam, rescaleTeam } from './levels.ts';
@@ -724,7 +725,10 @@ export const SCRIPTS = {
     if (api.flag(L.badge)) {
       // A rematch opens every two gyms, so the leader has had time to train.
       const tier = api.gymRematchTier(L.order);
-      if (tier < 1 || api.flag(`rm${tier}_${L.id}`)) return api.say(L.after, { name: L.name });
+      if (tier < 1 || api.flag(`rm${tier}_${L.id}`)) {
+        if (npc.leader === 'mgap' && metRamon(api)) await api.say('¡{player}! ¿Cómo has estado? Siempre es bueno verte por acá.', { name: L.name });
+        return api.say(L.after, { name: L.name });
+      }
       await api.say(['Volviste. Estuve entrenando desde la última vez.', 'Esta vez no me contengo.'], { name: L.name });
       if (!(await api.ask('¿Aceptás la revancha?'))) return;
       const res = await api.battle({ ...L, intro: null, team: api.rematchTeam(L.team, tier), prize: Math.round(L.prize * (1 + tier * 0.8)) });
@@ -735,8 +739,9 @@ export const SCRIPTS = {
       await api.say('Buen combate. Volvé cuando hayas recorrido más camino.', { name: L.name });
       return;
     }
-    await api.say(L.intro, { name: L.name });
-    const res = await api.battle({ ...L, intro: null }); // the intro was just said
+    const friend = npc.leader === 'mgap' && metRamon(api); // Ramón already met the player out in the fields
+    await api.say(friend ? ramonGymIntro(api) : L.intro, { name: L.name });
+    const res = await api.battle({ ...L, intro: null, ...(friend ? { lose: 'El monte te eligió, amigo. Es tuyo el triunfo.' } : {}) }); // the intro was just said
     if (res !== 'win') return;
     api.setFlag(L.badge);
     const home = STOPS.find((st) => st.gym === npc.leader);
@@ -749,6 +754,11 @@ export const SCRIPTS = {
     await api.give(L.tm, 1);
     await api.say(['Tomá también esta MT. Enseña un movimiento nuevo a una criatura compatible.'], { name: L.name });
     await api.say(L.after, { name: L.name });
+    if (friend) {
+      await api.say(['Y te debía un mate. Lo prometido es deuda.'], { name: L.name });
+      await api.give('mate_dulce', 1);
+      await api.say('Cuando vuelvas a pasar por Tacuarembó, vení a contarme cómo te va.', { name: L.name });
+    }
   },
 
   /** Cabo Polonio: the lighthouse keeper runs to you, then Bruma walks in and the two of them argue in front of you. */
@@ -1210,6 +1220,7 @@ export const SCRIPTS = {
   ...EVENT_SCRIPTS,
   ...FAVOR_SCRIPTS,
   ...MS_SCRIPTS,
+  ...AMISTAD_SCRIPTS,
 };
 
 // The late-game content was written for a longer climb: bring it down to the route's level curve.
