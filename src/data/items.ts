@@ -71,6 +71,14 @@ const BASE_ITEMS = {
   llave_cubierta: { name: 'Llave de la cubierta', pocket: 'key', price: 0, desc: 'Llave de la puerta a la cubierta superior del Buquebus China Zorrilla.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
+  // Mini stories: things carried from one person to another along the way
+  soga_mojada: { name: 'Soga mojada', pocket: 'key', price: 0, desc: 'Una soga de escalador de colores, mojada y con olor a río. Su dueño la perdió en la Cueva de Palmitas.' },
+  cabos: { name: 'Cabos de amarre', pocket: 'key', price: 0, desc: 'Unos rollos de cabo nuevo del depósito del almacén de Mercedes, para amarrar un bote.' },
+  cuaderno_quiroga: { name: 'Cuaderno empapado', pocket: 'key', price: 0, desc: 'Un cuaderno lleno de letra apretada, con "H. Q." en la tapa. Se lo llevó el viento en la Ruta 3.' },
+  brea: { name: 'Tarro de brea', pocket: 'key', price: 0, desc: 'Brea caliente de un carpintero de ribera de Tranqueras. Sirve para tapar un casco rajado.' },
+  remos: { name: 'Remos', pocket: 'key', price: 0, desc: 'Un par de remos con iniciales talladas en el mango. Los trajo la corriente hasta Belén.' },
+  correa: { name: 'Correa de motor', pocket: 'key', price: 0, desc: 'Una correa nueva del taller de la frontera, en Rivera. Es la medida de un camión.' },
+  cabestro: { name: 'Cabestro', pocket: 'key', price: 0, desc: 'El cabestro del potro moro del domador de Tacuarembó. Sin él no se deja tocar por nadie.' },
 };
 
 // Máquinas de movimientos (MT): se consumen al usarse. Una criatura puede aprender

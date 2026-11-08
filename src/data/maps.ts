@@ -914,7 +914,8 @@ for (const [mapId, script, flag] of RIVAL_AT) {
 // The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.
 Object.assign(INTERIOR.casa_florida.npcs[0], { script: 'gift_vuelo', text: undefined });
 
-// Gift NPCs for the field moves (the Canoa and the Guantes de Domador; the Machete comes from the Buquebus captain in Colonia).
+// The people who hand over the Canoa and the Guantes de Domador (the Machete comes from the Buquebus captain). What they
+// ask first is a mini story (mini-stories.ts), which takes over these two people by their script name.
 for (const [house, script] of [['casa_artigas', 'gift_surf'], ['casa_tac', 'gift_fuerza']]) {
   Object.assign(INTERIOR[house].npcs[0], { script, text: undefined });
 }
@@ -1437,7 +1438,7 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   for (const [id, m] of Object.entries(INTERIOR) as [string, any][]) if (id.startsWith('ferry')) for (const n of m.npcs ?? []) if (n.trainer && !n.adjacent) n.sight = Math.max(n.sight ?? 3, 14);
   addCityEvents(OUTDOOR);
   addFavors(OUTDOOR);
-  addMiniStories(OUTDOOR);
+  addMiniStories(OUTDOOR, INTERIOR);
   clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }

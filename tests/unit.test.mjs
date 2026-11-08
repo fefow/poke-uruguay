@@ -314,10 +314,14 @@ test('MO: cada traba de la ruta tiene su fuente antes, su medalla y su obstácul
   assert.ok(has('r_tupambae_melo', '\\'), 'falta la roca de Fuerza');
   assert.ok(OUTDOOR.r_piriapolis_minas.dark, 'falta el túnel oscuro de Destello');
   // the move is handed out in a city before the obstacle, and that script exists
-  for (const [house, city, block, script] of [['casa_artigas', 'artigas', 'ruta30', 'gift_surf'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'gift_fuerza']]) {
-    assert.equal(INTERIOR[house].npcs[0].script, script);
-    assert.ok(SCRIPTS[script]);
-    assert.ok(at(city) < at(block), `${script} debe darse antes de su obstáculo`);
+  // (through a mini story: every step of it happens before the obstacle, or on its near side)
+  const { MINI_STORIES } = await import('../src/data/mini-stories.ts');
+  for (const [house, city, block, ms] of [['casa_artigas', 'artigas', 'ruta30', 'canoa'], ['casa_tac', 'tacuarembo', 'r_tupambae_melo', 'potro']]) {
+    assert.equal(INTERIOR[house].npcs[0].script, 'ms_step');
+    assert.equal(INTERIOR[house].npcs[0].ms, ms);
+    assert.ok(SCRIPTS.ms_step);
+    assert.ok(at(city) < at(block), `${ms} debe darse antes de su obstáculo`);
+    for (const p of MINI_STORIES.find((m) => m.id === ms).people) if (at(p.at.map) >= 0) assert.ok(at(p.at.map) <= at(block), `${ms}/${p.key} antes del obstáculo`);
   }
   assert.ok(at('paloma') < at('r_piriapolis_minas'), 'el farol se da antes del túnel');
   // the Machete comes from the Buquebus captain in Fray Bentos, long before the thicket
@@ -655,25 +659,35 @@ test('favores entre pueblos: cada cadena se pide, se lleva y se cobra en orden',
   }
 });
 
-test('mini historias: especies, mapas, recompensas y marcas válidas, y cada una se puede completar', async () => {
-  const { MINI_STORIES, MS_SCRIPTS } = await import('../src/data/mini-stories.ts');
+test('mini historias: cadenas de pasos con personas en mapas reales, ítems clave y sin acertijos; cada una se completa', async () => {
+  const { MINI_STORIES, MS_SCRIPTS, stageOf } = await import('../src/data/mini-stories.ts');
   const { SPECIES } = await import('../src/data/species.ts');
   const { ITEMS } = await import('../src/data/items.ts');
-  const { OUTDOOR } = await import('../src/data/maps.ts');
-  assert.ok(MINI_STORIES.length >= 8);
+  const { MAPS } = await import('../src/data/maps.ts');
+  assert.ok(MINI_STORIES.length >= 6);
   for (const s of MINI_STORIES) {
-    assert.ok(OUTDOOR[s.map], `${s.id}: mapa ${s.map}`);
-    for (const sp of s.team ?? []) assert.ok(SPECIES[sp], `${s.id}: ${sp}`);
-    assert.ok(s.team || s.choice, `${s.id}: batalla o elección`);
-    for (const [k] of s.reward) assert.ok(ITEMS[k], `${s.id}: ${k}`);
-    const flags = {}, said = [];
-    const api = { flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async (t) => { said.push(t); }, sfx() {}, give: async () => {}, choose: async () => s.choice?.right, battle: async () => 'win' };
-    await MS_SCRIPTS.ms_foe(api, { msId: s.id, name: 'x', look: 'boy' });
-    assert.deepEqual(said.pop(), s.idle);
-    await MS_SCRIPTS.ms_local(api, { msId: s.id, name: 'l' });
-    await MS_SCRIPTS.ms_foe(api, { msId: s.id, name: 'x', look: 'boy' });
-    await MS_SCRIPTS.ms_local(api, { msId: s.id, name: 'l' });
-    assert.equal(flags[`ev_ms_${s.id}_2`], true, `${s.id} completa`);
-    for (const k of Object.keys(flags)) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
+    const flags = {}, bag = {};
+    const placed = s.people.map((p) => {
+      const n = (MAPS[p.at.map]?.npcs ?? []).find((o) => o.ms === s.id && o.msKey === p.key);
+      assert.ok(n, `${s.id}/${p.key}: está en ${p.at.map}`);
+      return [p, n];
+    });
+    const api = {
+      flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, sfx() {},
+      give: async (k) => { assert.ok(ITEMS[k], `${s.id}: ítem ${k}`); assert.equal(ITEMS[k].pocket, 'key', `${s.id}: ${k} es ítem clave`); bag[k] = 1; },
+      takeItem: (k) => { assert.ok(bag[k], `${s.id}: entrega ${k} sin tenerlo`); delete bag[k]; },
+      wildBattle: async (sp) => { assert.ok(SPECIES[sp], `${s.id}: especie ${sp}`); return 'win'; },
+      npcWalkOff: async () => {}, choose: async () => { throw new Error(`${s.id}: no hay elecciones ni acertijos`); },
+    };
+    const stage = () => stageOf(s, (k) => !!flags[k]);
+    for (let guard = 0; stage() < s.done && guard < 30; guard++) {
+      const st = stage();
+      const who = placed.find(([p]) => (p.acts ?? []).some((a) => a.at === st && !(a.part && flags[`ev_ms_${s.id}_p_${a.part}`])));
+      assert.ok(who, `${s.id}: alguien hace avanzar la etapa ${st}`);
+      await MS_SCRIPTS.ms_step(api, who[1]);
+    }
+    assert.equal(stage(), s.done, `${s.id} completa`);
+    assert.deepEqual(Object.keys(bag).filter((k) => !['soga', 'canoa', 'bici', 'guantes'].includes(k)), [], `${s.id}: no quedan encargos en la mochila`);
+    for (const k of Object.keys(flags)) assert.match(k, /^(ev_[a-z0-9_]{1,40}|got_[a-z]+)$/);
   }
 });
