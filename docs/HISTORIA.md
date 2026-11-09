@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-09 (v199).
+> Última actualización: 2026-11-09 (v200).
 
 ## Dónde está cada cosa en el código
 
