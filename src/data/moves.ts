@@ -86,6 +86,11 @@ export const MOVES: Record<string, Move> = deepFreeze({
   golpe_karate: M('Golpe Karate', 'lucha', 'fis', 50, 100, 25, 'Golpe de canto. Golpe crítico fácil.', { crit: 1 }),
   patada_baja: M('Patada Baja', 'lucha', 'fis', 65, 100, 20, 'Patada de ñandú a las piernas.'),
   garra_charrua: M('Garra Charrúa', 'lucha', 'fis', 120, 100, 5, 'Coraje que nunca se rinde. Baja la Defensa propia.', { self: { def: -1, spd: -1 }, selfAlways: true }),
+  // Acero
+  facon: M('Facón', 'acero', 'fis', 70, 100, 25, 'Un corte limpio con hoja de facón.'),
+  yunque: M('Golpe de Yunque', 'acero', 'fis', 100, 90, 10, 'Un golpe de herrero que aplasta.'),
+  destello_chapa: M('Destello de Chapa', 'acero', 'esp', 65, 100, 20, 'Refleja la luz de una chapa pulida.'),
+  coraza_chapa: M('Coraza de Chapa', 'acero', 'est', 0, 100, 15, 'Se cubre de chapa. Sube mucho la Defensa.', { self: { def: 2 } }),
   // --- ampliación de la Dex ---
   colmillo_fuego: M('Colmillo Fuego', 'fuego', 'fis', 65, 95, 15, 'Muerde con las fauces al rojo. Puede quemar.', { status: 'brn', chance: 0.15 }),
   punio_trueno: M('Puño Trueno', 'electrico', 'fis', 75, 100, 15, 'Un puñetazo cargado de electricidad. Puede paralizar.', { status: 'par', chance: 0.15 }),

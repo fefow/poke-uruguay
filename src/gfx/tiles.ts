@@ -92,6 +92,26 @@ export const TILE_INFO = {
   'ѭ': { name: 'techo guarida', solid: true },
   'Ѭ': { name: 'emblema PP', solid: true },
   'Ѯ': { name: 'fachada guarida', solid: true },
+  'Ґ': { name: 'techo depósito', solid: true },
+  'ґ': { name: 'techo tanque depósito', solid: true },
+  'Ғ': { name: 'emblema depósito', solid: true },
+  'ғ': { name: 'fachada depósito', solid: true },
+  'Ҕ': { name: 'fachada depósito con respiradero', solid: true },
+  'ҕ': { name: 'techo parrilla', solid: true },
+  'Җ': { name: 'techo parrilla con chimenea', solid: true },
+  'җ': { name: 'emblema parrilla', solid: true },
+  'Ҙ': { name: 'fachada parrilla', solid: true },
+  'ҙ': { name: 'fachada parrilla con ventana', solid: true },
+  'Қ': { name: 'techo aduana', solid: true },
+  'қ': { name: 'techo aduana con bandera', solid: true },
+  'Ҝ': { name: 'emblema aduana', solid: true },
+  'ҝ': { name: 'fachada aduana', solid: true },
+  'Ҟ': { name: 'fachada aduana con ventana', solid: true },
+  'ҟ': { name: 'techo radio', solid: true },
+  'Ҡ': { name: 'techo radio con antena', solid: true },
+  'ҡ': { name: 'emblema radio', solid: true },
+  'Ң': { name: 'fachada radio', solid: true },
+  'ң': { name: 'fachada radio con ventana', solid: true },
   'ѱ': { name: 'techo cubierta ferry', solid: true },
   'Ѵ': { name: 'techo chimenea ferry', solid: true },
   'ѵ': { name: 'fachada casco ferry', solid: true },
@@ -822,6 +842,136 @@ const [BOLT_L, BOLT_R] = banner('bolt', (g) => {
   g.fillStyle = '#fff6a8'; g.fillRect(16, 3, 1, 3);
 });
 const hazard = (g, y) => { for (let x = -16; x < 32; x += 8) { g.fillStyle = '#f2c02a'; g.beginPath(); g.moveTo(x, y + 4); g.lineTo(x + 4, y); g.lineTo(x + 8, y); g.lineTo(x + 4, y + 4); g.fill(); } };
+
+// ---- Sites held by the PP (Depósito de la refinería, parrilla, aduana, radio): each building has its own look ----
+const SITE = { dep: ['Ґ', 'ґ', 'Ғ', 'ғ', 'Ҕ'], par: ['ҕ', 'Җ', 'җ', 'Ҙ', 'ҙ'], adu: ['Қ', 'қ', 'Ҝ', 'ҝ', 'Ҟ'], rad: ['ҟ', 'Ҡ', 'ҡ', 'Ң', 'ң'] };
+(() => {
+  const [dR, dT, dE, dW, dV] = SITE.dep;
+  // Depósito: a row of storage silos over a pipework roof, concrete wall with an orange band and vents
+  DRAW[dR] = (g) => {
+    px(g, 0, 0, '#3a424e', T, T); px(g, 0, 0, '#5a6472', T, 1);
+    px(g, 0, 4, '#c8d0d8', T, 2); px(g, 0, 4, '#ffffff', T, 1); px(g, 0, 6, '#6a7480', T, 1);
+    px(g, 4, 3, '#e8702a', 2, 4); px(g, 11, 3, '#e8702a', 2, 4);
+    hazard(g, 11);
+  };
+  DRAW[dT] = (g) => {
+    px(g, 0, 0, '#5a6472', T, T);
+    px(g, 1, 3, '#dfe8f0', 14, 13); px(g, 1, 3, '#a8b4c4', 14, 1);
+    px(g, 2, 0, '#f4f8fc', 12, 3); px(g, 4, 0, '#ffffff', 8, 1); px(g, 1, 2, '#c8d4e0', 14, 1);
+    px(g, 3, 3, '#ffffff', 2, 13); px(g, 11, 3, '#a8b4c4', 4, 13); px(g, 13, 3, '#7a8898', 2, 13);
+    px(g, 1, 6, '#e8702a', 14, 2); px(g, 1, 6, '#ffa050', 14, 1); px(g, 1, 11, '#e8702a', 14, 2); px(g, 1, 11, '#ffa050', 14, 1);
+    px(g, 1, 15, '#6a7480', 14, 1);
+  };
+  DRAW[dE] = (g) => {
+    DRAW[dR](g);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 8, 7.4, 0, 7); g.fill();
+    g.fillStyle = '#f2f2f6'; g.beginPath(); g.arc(8, 8, 6.2, 0, 7); g.fill();
+    g.fillStyle = '#e8702a'; g.beginPath(); g.moveTo(8, 2.5); g.bezierCurveTo(12, 6.5, 12.5, 9, 10.8, 11.4); g.bezierCurveTo(9.4, 13, 6.6, 13, 5.2, 11.4); g.bezierCurveTo(3.5, 9, 4.6, 7, 6, 6); g.bezierCurveTo(6.4, 7.6, 7.2, 7.6, 8, 2.5); g.fill();
+    g.fillStyle = '#ffd84a'; g.beginPath(); g.arc(8, 10.4, 1.9, 0, 7); g.fill();
+  };
+  DRAW[dW] = (g) => {
+    px(g, 0, 0, '#b8c0ca', T, 12); px(g, 0, 0, '#dfe6ee', T, 1);
+    px(g, 5, 1, '#9aa4b0', 1, 11); px(g, 10, 1, '#9aa4b0', 1, 11);
+    px(g, 0, 7, '#e8702a', T, 2); px(g, 0, 7, '#ffa050', T, 1);
+    px(g, 0, 12, '#6a7480', T, 4); px(g, 0, 12, '#a8b0bc', T, 1);
+    for (const x of [3, 9, 13]) px(g, x, 14, '#3a424e', 1, 2);
+  };
+  DRAW[dV] = (g) => {
+    DRAW[dW](g);
+    px(g, 2, 2, OUTLINE, 12, 5); for (let y = 3; y < 7; y += 2) px(g, 3, y, '#7a8898', 10, 1); px(g, 3, 4, '#3a424e', 10, 1);
+    px(g, 2, 9, '#f2c02a', 3, 3); px(g, 2, 9, '#2a2a30', 1, 3); px(g, 4, 9, '#2a2a30', 1, 3); // warning lamp
+  };
+
+  const [pR, pK, pE, pW, pV] = SITE.par;
+  // Parrilla: terracotta roof with a smoking chimney, a flame-and-grill sign, brick wall and arched windows under a striped awning
+  const parRoof = (g) => shingles(g, ['#f6a878', '#d8603a', '#b04426', '#74271a'], 7);
+  DRAW[pR] = parRoof;
+  DRAW[pK] = (g) => {
+    parRoof(g);
+    px(g, 9, 0, OUTLINE, 6, 11); px(g, 10, 0, '#b0452e', 4, 10); px(g, 10, 0, '#d8684a', 1, 10); px(g, 10, 3, '#e0c8a8', 4, 1); px(g, 10, 6, '#e0c8a8', 4, 1);
+    px(g, 9, 0, '#3a2018', 6, 2);
+    px(g, 11, 0, '#ff8a2a', 2, 1);
+  };
+  DRAW[pE] = (g) => {
+    parRoof(g);
+    px(g, 1, 2, OUTLINE, 14, 11); px(g, 2, 3, '#7a4a24', 12, 9); px(g, 2, 3, '#a8703a', 12, 1);
+    g.fillStyle = '#ff9a2a'; g.beginPath(); g.moveTo(8, 3.5); g.bezierCurveTo(10.6, 6, 10.8, 7.6, 9.6, 8.8); g.bezierCurveTo(8.8, 9.6, 7.2, 9.6, 6.4, 8.8); g.bezierCurveTo(5.2, 7.6, 5.8, 6.4, 6.4, 5.8); g.bezierCurveTo(6.8, 6.8, 7.2, 6.8, 8, 3.5); g.fill();
+    g.fillStyle = '#ffe44a'; g.beginPath(); g.arc(8, 8, 1.1, 0, 7); g.fill();
+    px(g, 3, 10, '#2a2a2a', 10, 1); for (const x of [4, 7, 10]) px(g, x, 9, '#2a2a2a', 1, 2);
+  };
+  DRAW[pW] = (g) => {
+    px(g, 0, 0, '#b0452e', T, 12);
+    for (let y = 0; y < 12; y += 3) { px(g, 0, y + 2, '#e0c8a8', T, 1); for (let x = (y / 3) % 2 ? 2 : 6; x < T; x += 8) px(g, x, y, '#e0c8a8', 1, 3); }
+    px(g, 0, 0, '#d8684a', T, 1);
+    px(g, 13, 1, '#8a3320', 3, 11);
+    px(g, 0, 12, STONE, T, 4); px(g, 0, 12, STONE_DK, T, 1); px(g, 0, 15, STONE_DK, T, 1);
+  };
+  DRAW[pV] = (g) => {
+    DRAW[pW](g);
+    px(g, 2, 1, OUTLINE, 12, 3); for (let x = 2; x < 14; x += 4) { px(g, x + 1, 1, '#e2362e', 2, 2); px(g, x + 3, 1, '#fff6e6', 2, 2); } // awning
+    px(g, 3, 4, OUTLINE, 10, 8); px(g, 4, 5, '#ffd870', 8, 6); px(g, 4, 5, '#fff2b8', 8, 1); px(g, 8, 5, '#a8703a', 1, 6); px(g, 5, 7, '#e08a2a', 2, 2); px(g, 9, 8, '#e08a2a', 2, 2);
+  };
+
+  const [aR, aF, aE, aW, aV] = SITE.adu;
+  // Aduana: slate roof with the flag on a pole, a customs shield, ashlar stone walls with barred windows
+  const aduRoof = (g) => shingles(g, ['#b8c8dc', '#7a8aa4', '#5a6a88', '#3a4660'], 8);
+  DRAW[aR] = aduRoof;
+  DRAW[aF] = (g) => {
+    aduRoof(g);
+    px(g, 7, 0, OUTLINE, 3, 12); px(g, 8, 0, '#d8d8e0', 1, 11);
+    px(g, 9, 1, OUTLINE, 7, 7); px(g, 10, 2, '#ffffff', 5, 5);
+    for (const y of [3, 5]) px(g, 10, y, '#3a74d8', 5, 1); px(g, 10, 2, '#f2c02a', 2, 2);
+  };
+  DRAW[aE] = (g) => {
+    aduRoof(g);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 8, 7.2, 0, 7); g.fill();
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(8, 8, 6, 0, 7); g.fill();
+    for (const y of [4, 7, 10]) px(g, 3, y, '#3a74d8', 10, 2);
+    g.fillStyle = '#f2c02a'; g.beginPath(); g.arc(8, 8, 3, 0, 7); g.fill(); g.fillStyle = '#c08a14'; g.beginPath(); g.arc(8, 8, 1.5, 0, 7); g.fill();
+  };
+  DRAW[aW] = (g) => {
+    px(g, 0, 0, '#cdc5b4', 16, 12); px(g, 0, 0, '#e6dfd0', T, 1);
+    for (const y of [4, 8]) px(g, 0, y, '#a89f8c', T, 1);
+    for (const [x, y] of [[5, 1], [11, 5], [3, 9]]) px(g, x, y, '#a89f8c', 1, 3);
+    stoneBase(g);
+  };
+  DRAW[aV] = (g) => {
+    DRAW[aW](g);
+    px(g, 3, 1, OUTLINE, 10, 10); px(g, 4, 2, '#4a6a8a', 8, 8); px(g, 4, 2, '#8ab0d0', 8, 1);
+    for (const x of [6, 8, 10]) px(g, x, 2, '#d8d8e0', 1, 8); px(g, 4, 5, '#d8d8e0', 8, 1);
+  };
+
+  const [rR, rA, rE, rW, rV] = SITE.rad;
+  // Radio: teal roof with a lattice mast and a red beacon, an "al aire" lamp, blue siding and speaker windows
+  const radRoof = (g) => shingles(g, ['#8ad8e0', '#3a9aa8', '#2a7888', '#16505e'], 9);
+  DRAW[rR] = radRoof;
+  DRAW[rA] = (g) => {
+    radRoof(g);
+    px(g, 7, 1, OUTLINE, 3, 14); px(g, 8, 1, '#d8d8e0', 1, 13);
+    for (let y = 4; y < 14; y += 3) { px(g, 5, y + 2, '#d8d8e0', 1, 1); px(g, 10, y + 2, '#d8d8e0', 1, 1); px(g, 6, y + 1, '#a8a8b8', 4, 1); }
+    px(g, 7, 0, '#ff3a3a', 3, 2); px(g, 6, 0, 'rgba(255,90,90,0.55)', 5, 1);
+    px(g, 3, 2, 'rgba(255,255,255,0.6)', 1, 3); px(g, 12, 2, 'rgba(255,255,255,0.6)', 1, 3);
+  };
+  DRAW[rE] = (g) => {
+    radRoof(g);
+    px(g, 1, 2, OUTLINE, 14, 11); px(g, 2, 3, '#2a1a2e', 12, 9); px(g, 2, 3, '#4a3a4e', 12, 1);
+    g.fillStyle = '#e2362e'; g.beginPath(); g.arc(5.5, 7.5, 2.6, 0, 7); g.fill(); g.fillStyle = '#ff8a8a'; g.beginPath(); g.arc(4.8, 6.8, 0.9, 0, 7); g.fill();
+    g.strokeStyle = '#ffd0d0'; g.lineWidth = 1; for (const r of [4, 6]) { g.beginPath(); g.arc(5.5, 7.5, r, -0.7, 0.7); g.stroke(); }
+    px(g, 10, 5, '#ffcfcf', 3, 1); px(g, 10, 7, '#ffcfcf', 4, 1); px(g, 10, 9, '#ffcfcf', 2, 1);
+  };
+  DRAW[rW] = (g) => {
+    px(g, 0, 0, '#8ea4c0', T, 12); px(g, 0, 0, '#b4c8e0', T, 1);
+    for (let y = 3; y < 12; y += 3) px(g, 0, y, '#6a82a4', T, 1);
+    px(g, 13, 1, '#7690b0', 3, 11);
+    px(g, 0, 12, '#4a5a74', T, 4); px(g, 0, 12, '#6a7a94', T, 1); px(g, 0, 15, OUTLINE, T, 1);
+  };
+  DRAW[rV] = (g) => {
+    DRAW[rW](g);
+    px(g, 2, 2, OUTLINE, 12, 9); px(g, 3, 3, '#2a3a54', 10, 7);
+    g.fillStyle = '#5a7aa8'; g.beginPath(); g.arc(8, 6.5, 2.6, 0, 7); g.fill(); g.fillStyle = '#2a3a54'; g.beginPath(); g.arc(8, 6.5, 1.2, 0, 7); g.fill();
+    px(g, 4, 4, '#8ab0e0', 1, 1); px(g, 11, 4, '#8ab0e0', 1, 1); px(g, 4, 9, '#8ab0e0', 1, 1); px(g, 11, 9, '#8ab0e0', 1, 1);
+  };
+})();
 const GYM_ELEC = {
   Y: (g) => { px(g, 0, 0, '#454656', T, T); px(g, 0, 15, '#2c2d3a', T, 1); px(g, 15, 0, '#2c2d3a', 1, T); px(g, 3, 3, '#5a5c70', 10, 1); px(g, 3, 3, '#5a5c70', 1, 6); px(g, 3, 8, '#f2c02a', 2, 1); },
   x: (g) => { px(g, 0, 0, '#2c2d3a', T, T); px(g, 0, 11, '#1a1a24', T, 5); hazard(g, 10); px(g, 3, 3, '#f2c02a', 1, 4); px(g, 8, 2, '#5ae0ff', 3, 1); px(g, 10, 3, '#5ae0ff', 1, 3); },

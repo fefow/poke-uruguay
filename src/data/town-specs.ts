@@ -126,7 +126,7 @@ export const CITY_SPECS = {
       scatter: [['Ω', 8, 'road'], ['ξ', 10, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['psiquico', 'gym_sal', [34, 19]], ['poli', 'poli_sal', [14, 14]], ['shop', 'shop_sal', [26, 14]], ['houseV', 'casa_sal', [14, 20]], ['houseB', 'radio_sal', [28, 28]], ['fabrica', 'represa_1', [56, 27], 2], ['house', 'casa_sal2', [36, 28]]],
+    bld: [['psiquico', 'gym_sal', [34, 19]], ['poli', 'poli_sal', [14, 14]], ['shop', 'shop_sal', [26, 14]], ['houseV', 'casa_sal', [14, 20]], ['radio', 'radio_sal', [28, 28]], ['fabrica', 'represa_1', [56, 27], 2], ['house', 'casa_sal2', [36, 28]]],
     fill: 16,
   },
   // Artigas: a mining town climbing a stony hill on a zigzag road, amethyst country.
@@ -160,7 +160,7 @@ export const CITY_SPECS = {
       scatter: [['Ω', 8, 'road'], ['#', 10, 'away'], ['Ь', 3, 'road']],
       animals: [],
     },
-    bld: [['lucha', 'gym_riv', [12, 14]], ['poli', 'poli_riv', [24, 4]], ['shop', 'shop_riv', [38, 4]], ['houseB', 'casa_riv', [8, 28]], ['house', 'aduana_riv', [26, 30]], ['houseG', 'safari_gate', [52, 14]], ['houseO', 'casa_riv2', [54, 28]], ['torre', 'torre_1', [44, 30]]],
+    bld: [['lucha', 'gym_riv', [12, 14]], ['poli', 'poli_riv', [24, 4]], ['shop', 'shop_riv', [38, 4]], ['houseB', 'casa_riv', [8, 28]], ['aduana', 'aduana_riv', [26, 30]], ['houseG', 'safari_gate', [52, 14]], ['houseO', 'casa_riv2', [54, 28]], ['torre', 'torre_1', [44, 30]]],
     fill: 14,
   },
   // Tacuarembó: gaucho country: red earth, pine plantations to the west, eucalyptus to the east, parrilla.
@@ -178,7 +178,7 @@ export const CITY_SPECS = {
       scatter: [['ö', 8, 'away'], ['Ω', 6, 'road'], ['Ь', 3, 'road']],
       animals: [{ sp: 'criollo', n: 4, rect: [34, 14, 24, 5] }, { sp: 'oveja', n: 3, rect: [34, 14, 24, 5] }],
     },
-    bld: [['planta', 'gym_tac', [36, 16]], ['poli', 'poli_tac', [20, 20]], ['shop', 'shop_tac', [46, 28]], ['houseG', 'casa_tac', [8, 20]], ['houseO', 'casa_tac2', [54, 28]], ['houseB', 'bici_tac', [22, 28]], ['houseV', 'parrilla_tac', [16, 30]]],
+    bld: [['planta', 'gym_tac', [36, 16]], ['poli', 'poli_tac', [20, 20]], ['shop', 'shop_tac', [46, 28]], ['houseG', 'casa_tac', [8, 20]], ['houseO', 'casa_tac2', [54, 28]], ['houseB', 'bici_tac', [22, 28]], ['parrilla', 'parrilla_tac', [16, 30]]],
     fill: 14,
   },
   // Melo: laguna Merín and low hills; a diagonal staircase main street, ombú in the plaza.
@@ -305,7 +305,7 @@ export const CITY_SPECS = {
       scatter: [[';', 50, 'away'], ['R', 24, 'away'], ['Ω', 5, 'road']],
       animals: [],
     },
-    bld: [['fuego', 'gym_dur', [34, 12]], ['poli', 'poli_dur', [22, 12]], ['shop', 'shop_dur', [44, 12]], ['house', 'casa_dur', [18, 21]], ['houseB', 'refineria_dur', [44, 33]]],
+    bld: [['fuego', 'gym_dur', [34, 12]], ['poli', 'poli_dur', [22, 12]], ['shop', 'shop_dur', [44, 12]], ['house', 'casa_dur', [18, 21]], ['refineria', 'refineria_dur', [44, 33]]],
     fill: 14,
   },
   // Canelones: vineyards in long rows around a plaza, windmills and the bodega.

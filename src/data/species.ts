@@ -225,7 +225,7 @@ const SLOTS = [[1, 45], [1, 45], [6, 50], [10, 58], [14, 66], [19, 78], [24, 90]
 const damaging = (type) => Object.entries(MOVES).filter(([, m]) => m.type === type && m.power > 0);
 const STATUS_BY_TYPE = {
   veneno: 'gas_venenoso', psiquico: 'hipnosis', bicho: 'disparo_demora', electrico: 'onda_trueno', planta: 'somnifero',
-  tierra: 'escudo_barro', roca: 'defensa_ferrea', siniestro: 'maquinacion', fuego: 'malicioso', agua: 'malicioso', volador: 'chirrido', lucha: 'candombe', normal: 'grunido',
+  tierra: 'escudo_barro', roca: 'defensa_ferrea', acero: 'coraza_chapa', siniestro: 'maquinacion', fuego: 'malicioso', agua: 'malicioso', volador: 'chirrido', lucha: 'candombe', normal: 'grunido',
 };
 const UTILITY = { a: 'candombe', s: 'meditacion', t: 'mate_amargo', f: 'candombe', b: 'mate_amargo' };
 
@@ -305,6 +305,16 @@ const DUAL_LINES = new Set(['teruterito', 'mulitin', 'tuco', 'luciernito', 'yara
     for (let c: any = root; c; c = c.evo ? byKey.get(c.evo.to) : null) chain.push(c);
     if (!DUAL_LINES.has(root.key)) for (const c of chain) c.types = [c.types[0]];
   }
+}
+
+// Acero: armored lines get the type (and its moves) here, at their evolved stage.
+const STEEL: Record<string, string[]> = { mulitron: ['acero', 'tierra'], cuchilla: ['acero'], tatucarreta: ['acero'], gliptodonte: ['acero'], escarabajon: ['acero'] };
+for (const s of LIST as any[]) {
+  const t = STEEL[s.key];
+  if (!t) continue;
+  s.types = t;
+  const lv = Math.max(1, (s.evo?.lvl ?? 20) - 2);
+  s.learn = [...s.learn, [Math.max(lv, 12), 'facon'], [Math.max(lv + 6, 24), 'coraza_chapa'], [Math.max(lv + 14, 36), 'yunque']].sort((a: any, b: any) => a[0] - b[0]);
 }
 
 export const SPECIES: Record<string, Species> = deepFreeze(Object.fromEntries(LIST.map((s) => [s.key, s])));

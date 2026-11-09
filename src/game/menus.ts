@@ -1,5 +1,6 @@
 // Panels: pause menu, party, summary, bag, PokeDex, trainer card, options,
 // save, shop and PC storage.
+import { natureOf, natureText } from '../data/natures.ts';
 import { h, clamp, formatTime, pad, wait } from '../core/util.ts';
 import { keyName } from '../core/input.ts';
 import { sfx, setVolumes, cry } from '../core/audio.ts';
@@ -81,7 +82,6 @@ export async function openPauseMenu() {
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
     if (hasItem('mapa_uruguay')) entries.push(['Mapa', openMap]);
-    if (hasItem('medidor_niebla')) entries.push(['Medidor', openFogMeter]);
     if (hasItem('farol')) entries.push(['Destello', async () => { const { useFlash } = await import('./world.ts'); await say(useFlash()); }]);
     if (hasItem('silbato')) entries.push(['Vuelo', async () => { flight = await pickFlight(); }]);
     if (isDev()) entries.push(['Desarrollo', async () => { const { openDevMenu } = await import('./devtools.ts'); flight = await openDevMenu(); }]);
@@ -238,6 +238,7 @@ export function openSummary(index) {
             h('img', { src: creatureIcon(c.species), alt: sp.name, width: 80, height: 80 }),
             h('div', { class: 'chips' }, sp.types.map(typeChip)),
             h('p', { class: 'small', text: `Especie: ${sp.name}` }),
+            h('p', { class: 'small', text: `Naturaleza: ${natureText(natureOf(c))}` }),
             h('p', { class: 'small', text: `EO: ${c.ot ?? S.player.id}` }),
             h('p', { class: 'small', text: c.held ? `Objeto: ${ITEMS[c.held]?.name}` : 'Objeto: —' }),
             h('p', { class: 'small', text: next ? `EXP para Nv${c.level + 1}: ${next}` : 'Nivel máximo' }),
