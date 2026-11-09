@@ -81,7 +81,6 @@ export async function openPauseMenu() {
     if (S.party.length) entries.push(['Equipo', () => openParty({ mode: 'field' })]);
     entries.push(['Mochila', () => openBag({ mode: 'field' })]);
     if (hasItem('mapa_uruguay')) entries.push(['Mapa', openMap]);
-    if (hasItem('medidor_niebla')) entries.push(['Medidor', openFogMeter]);
     if (hasItem('farol')) entries.push(['Destello', async () => { const { useFlash } = await import('./world.ts'); await say(useFlash()); }]);
     if (hasItem('silbato')) entries.push(['Vuelo', async () => { flight = await pickFlight(); }]);
     if (isDev()) entries.push(['Desarrollo', async () => { const { openDevMenu } = await import('./devtools.ts'); flight = await openDevMenu(); }]);

@@ -38,7 +38,7 @@ const R5 = route({ seed: 'ruta5', w: 30, h: 30, axis: 'v', from: 14, to: 9, gras
 const TAC = city({
   seed: 'tacuarembo', sa: 6, sb: 15,
   a: [['houseG', 2, 'casa_tac'], ['planta', 8, 'gym_tac'], ['poli', 17, 'poli_tac'], ['shop', 23, 'shop_tac']],
-  b: [['houseO', 4, 'casa_tac2'], ['houseB', 10, 'bici_tac'], ['houseV', 17, 'parrilla_tac']],
+  b: [['houseO', 4, 'casa_tac2'], ['houseB', 10, 'bici_tac'], ['parrilla', 17, 'parrilla_tac']],
   vroads: [14], nroads: [14], sroads: [14], decor: { '#': 14, q: 6, f: 14 },
   signs: [[26, 7], [7, 16]],
   exits: { w: 6, e: 6, s: 14, n: 14 },
@@ -53,7 +53,7 @@ const R30 = route({ seed: 'ruta30', w: 30, h: 14, axis: 'h', from: 6, to: 7, gra
 const RIV = city({
   seed: 'rivera', sa: 6, sb: 15,
   a: [['houseB', 2, 'casa_riv'], ['lucha', 8, 'gym_riv'], ['poli', 17, 'poli_riv'], ['shop', 23, 'shop_riv']],
-  b: [['house', 4, 'aduana_riv'], ['houseG', 9, 'safari_gate'], ['houseO', 17, 'casa_riv2'], ['torre', 23, 'torre_1']],
+  b: [['aduana', 4, 'aduana_riv'], ['houseG', 9, 'safari_gate'], ['houseO', 17, 'casa_riv2'], ['torre', 23, 'torre_1']],
   vroads: [14], decor: { '#': 8, q: 4, f: 10 },
   signs: [[26, 7], [14, 18]],
   exits: { w: 6 },
@@ -65,7 +65,7 @@ const R31 = route({ seed: 'ruta31', w: 44, h: 16, axis: 'h', from: 8, to: 6, gra
 const SAL = city({
   seed: 'salto', sa: 6, sb: 15,
   a: [['houseV', 3, 'casa_sal'], ['psiquico', 9, 'gym_sal'], ['poli', 18, 'poli_sal'], ['shop', 23, 'shop_sal']],
-  b: [['houseB', 3, 'radio_sal'], ['fabrica', 8, 'represa_1'], ['house', 18, 'casa_sal2']],
+  b: [['radio', 3, 'radio_sal'], ['fabrica', 8, 'represa_1'], ['house', 18, 'casa_sal2']],
   vroads: [15], sroads: [15], decor: { p: 8, f: 12, '#': 6 },
   water: [[1, 16, 8, 3], [20, 17, 6, 2]],
   signs: [[7, 7], [14, 18]],
