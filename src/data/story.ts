@@ -753,6 +753,11 @@ export const SCRIPTS = {
     await api.give(L.reward, L.rewardQty);
     await api.give(L.tm, 1);
     await api.say(['Tomá también esta MT. Enseña un movimiento nuevo a una criatura compatible.'], { name: L.name });
+    if (npc.leader === 'boiso' && !api.flag('got_vuelo')) {
+      await api.say(['Y esto es para quien vuela de verdad: el Silbato del Hornero.', 'Si silbás, un hornero te lleva volando a cualquier ciudad que ya conozcas. Se usa desde el menú, en Vuelo.'], { name: L.name });
+      await api.give('silbato', 1);
+      api.setFlag('got_vuelo');
+    }
     await api.say(L.after, { name: L.name });
     if (friend) {
       await api.say(['Y te debía un mate. Lo prometido es deuda.'], { name: L.name });
@@ -1123,25 +1128,82 @@ export const SCRIPTS = {
     await fogChoice(api, 'fog1', 'Capataz', ['Un capataz del frigorífico te frena a la salida.', 'Con la niebla, el pueblo no sufre inundaciones desde hace dos años. Si la apagás, vuelve el río.']);
   },
 
+  /** Torre del puerto, planta baja: Bruma guards the stairs for the last time. */
+  async sede_f1(api) {
+    if (api.flag('ev_sede_1')) return;
+    api.playerFaceNpc('sede_bruma');
+    await api.say(['Sabía que llegarías hasta acá. Te estuve esperando.', 'Ya no me importa la lámpara ni la torre de Rivera. Esta noche se termina todo.', 'El Dr. Díaz subió una máquina a la cúpula: la Máquina Pampero. Va a usar el eco del viento de tu compañero para llamar al Cardenal Azul.', 'Si el Cardenal vuelve y lo encierra, la niebla es nuestra para siempre. No voy a dejar que subas.'], { name: 'Bruma' });
+    const res = await api.battle({ id: 'bruma3', name: 'Bruma', cls: 'Admin. PP', look: 'bruma', ai: 'smart', team: bossAt('montevideo', [['yarara', 46], ['vespertino', 47], ['viudanegra', 48], ['zarigueya', 48], ['buho', 49]], -2), prize: 6000, lose: 'No… otra vez…', items: ['dulce_de_leche'] });
+    if (res !== 'win') return;
+    api.setFlag('ev_sede_1');
+    await api.say(['Perdí. Y me alegra, creo.', 'Nunca supe qué hacía con tantas máquinas. Dr. Díaz me dijo que era para proteger el clima.', 'Arriba están Brumario y Garúa. Ellos sí creen en él.'], { name: 'Bruma' });
+    await api.give('ultraesfera', 2);
+    await api.npcWalkOff('sede_bruma');
+  },
+
+  /** Torre del puerto, sala de máquinas: Brumario first, then Garúa. */
+  async sede_f2(api) {
+    if (api.flag('ev_sede_2')) return;
+    if (api.flag('ev_sede_2a')) return SCRIPTS.sede_f2b(api);
+    api.playerFaceNpc('sede_brumario');
+    await api.say(['Otra vez vos. En la Quebrada me ganaste con ayuda del viento.', 'Acá no hay viento. Hay máquinas, y todas son nuestras.', 'Dr. Díaz dice que el Cardenal es un animal, y que a un animal se lo encierra. Yo creo lo mismo.'], { name: 'Brumario' });
+    const res = await api.battle({ id: 'brumario2', name: 'Brumario', cls: 'Jefe PP', look: 'brumario', ai: 'smart', team: bossAt('montevideo', [['yarara', 47], ['zorromonte', 48], ['cuervon', 49], ['lobomarino', 49], ['caudillo', 50]], -2), prize: 6500, lose: 'Se acabó el aire.', items: ['dulce_de_leche'] });
+    if (res !== 'win') return;
+    api.setFlag('ev_sede_2a');
+    await api.say(['Perdí. Garúa, es tu turno.'], { name: 'Brumario' });
+    await api.npcWalkOff('sede_brumario');
+    await SCRIPTS.sede_f2b(api);
+  },
+
+  async sede_f2b(api) {
+    if (api.flag('ev_sede_2')) return;
+    if (!api.flag('ev_sede_2a')) return SCRIPTS.sede_f2(api);
+    api.playerFaceNpc('sede_garua');
+    await api.say(['Pasaste por Minas, por la Represa y por acá. Sos terco.', 'La Máquina Pampero necesita un eco de viento vivo. Tu compañero lo tiene, y Dr. Díaz lo sabe desde el primer día.', 'No te lo voy a entregar. Ni vos ni él van a subir a la cúpula.'], { name: 'Garúa' });
+    const res = await api.battle({ id: 'garua3', name: 'Garúa', cls: 'Comandante PP', look: 'garua', ai: 'smart', team: bossAt('montevideo', [['yarara', 48], ['lobomarino', 49], ['vespertino', 49], ['pombero', 50], ['caudillo', 50], ['temblador', 51]], -1), prize: 7000, lose: 'A oscuras otra vez…', items: ['dulce_de_leche', 'dulce_de_leche'] });
+    if (res !== 'win') return;
+    api.setFlag('ev_sede_2');
+    await api.say(['La Máquina Pampero no es lo que parece. Dr. Díaz no quiere vender niebla: quiere apagar el viento para siempre.', 'Lo supe tarde. Subí y detenelo.'], { name: 'Garúa' });
+    await api.give('mt_vendaval', 1);
+    await api.npcWalkOff('sede_garua');
+  },
+
+  /** Cúpula de la torre del puerto: Dr. Díaz, la Máquina Pampero, Facu, Tabárez y el Cardenal Azul. */
   async calima(api) {
-    await api.say(['Así que sos vos.', 'Soy Dr. Díaz, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Cardenal Azul era un estorbo: cada vez que cruzaba el país, el pampero se llevaba mi niebla. Por eso quise encerrarlo en la Quebrada.', 'Tabárez nunca se animó a ir más lejos. Yo sí, y por eso hoy estoy acá.'], { name: 'Dr. Díaz' });
+    api.playerFaceNpc('calima');
+    await api.say(['Así que sos vos.', 'Soy Dr. Díaz, fundador del Proyecto Pampero. Lo que ustedes llaman Equipo PP.', 'Mi idea es simple: el clima es un recurso. Con las torres, la niebla se vende por días, por zonas, por contrato.', 'El Cardenal Azul era un estorbo: cada vez que cruzaba el país, el pampero se llevaba mi niebla. En la Quebrada quise encerrarlo y me lo arruinaste.', 'Por eso esta máquina. Se alimenta del eco del viento que lleva tu compañero. Cuando lo llame, el Cardenal va a venir solo, y no va a volver a irse.'], { name: 'Dr. Díaz' });
+    // Facu climbs the stairs behind the player: he has been following the trail of the PP since the Quebrada.
+    await api.npcApproach('rival_sede', 6);
+    await api.say(['¡{player}! Subí detrás tuyo, por la escalera de atrás.', 'Todo lo que le mandé al PP lo usó para armar esa máquina. Yo no sabía para qué era.', 'Si hay alguien que puede pararlo sos vos. Yo me quedo atrás: esta pelea es tuya.'], { name: '{rival}' });
     await api.say(['Llegaste con las doce medallas. Se nota que no te asustan las torres.', 'Pero no vas a apagarme a mí.'], { name: 'Dr. Díaz' });
     const res = await api.battle({ id: 'calima', name: 'Dr. Díaz', cls: 'Fundador PP', look: 'calima', ai: 'smart', team: bossAt('montevideo', [['vespertino', 51], ['viudanegra', 52], ['tormenton', 53], ['yarara', 53], ['buho', 53], ['yacaron', 54]], 1), prize: 9000, lose: 'No… mi proyecto…', items: ['dulce_de_leche', 'dulce_de_leche', 'chivito'] });
     if (res !== 'win') return;
     await api.flash();
     api.sfx('evolve');
-    await api.say(['Las últimas máquinas de niebla se apagan.', 'El Cardenal Azul vuelve a volar sobre el río. El cielo del Uruguay vuelve a ser de todos.']); // seen in the world itself: only winning the Liga gets a full-screen scene
+    await api.say(['La Máquina Pampero tiembla. Las lámparas de la cúpula se apagan una por una.', 'Un viento limpio entra por las ventanas rotas.']);
+    // The Cardenal Azul comes in from the sky and the machine gives way.
+    await api.npcApproach('cardenal_sede', 5);
+    await api.say(['El Cardenal Azul baja a la cúpula. Mira la máquina, mira a tu compañero y abre las alas.', 'La Pluma Azul de tu mochila brilla con la misma luz.']);
+    api.sfx('evolve');
+    await api.flash();
+    await api.say(['La máquina se apaga del todo. En la antena, el humo gris se va con el viento.']);
+    await api.npcFlyOff('cardenal_sede');
+    await api.say(['Desde la cúpula se ve cómo el Cardenal Azul cruza el río, y detrás de él se limpia el cielo de Montevideo.']);
     await api.say(['Gané perdiendo… Ya no tengo equipo, ni dinero, ni torres.', 'Hacé lo que quieras. Pero el cielo nunca fue de nadie.'], { name: 'Dr. Díaz' });
-    await api.npcApproach('tabarez_mvd', 14);
-    api.npcFaceNpc('calima', 'tabarez_mvd');
+    await api.npcApproach('tabarez_sede', 6);
+    api.npcFaceNpc('calima', 'tabarez_sede');
     await api.say(['Díaz.', 'Llegué a tiempo para ver que no te quedó nada.'], { name: 'Maestro Tabárez' });
     await api.say(['Tabárez. Siempre llegás cuando ya no hace falta.', 'Pero te lo dije en el Observatorio: el cielo no se queda quieto. Alguien lo iba a ordenar.'], { name: 'Dr. Díaz' });
-    await api.say('Ordenar no es vender. Eso nunca lo entendiste.', { name: 'Maestro Tabárez' });
+    await api.say(['Ordenar no es vender. Eso nunca lo entendiste.', 'Hace veinte años firmamos juntos esa primera página del registro. Yo te creí un colega. Hoy te voy a acompañar a la comisaría: tenés mucho que contar.'], { name: 'Maestro Tabárez' });
+    await api.say('…Está bien.', { name: 'Dr. Díaz' });
     await api.npcWalkOff('calima');
     api.setFlag('anglo_clear');
-    api.playerFaceNpc('tabarez_mvd');
-    await api.say(['Lo lograron, {player}. El Equipo PP está disuelto.', 'Con las doce medallas y el Equipo PP disuelto, la Liga te espera en el Estadio Centenario.', 'Dr. Díaz fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude.'], { name: 'Maestro Tabárez' });
-    await api.npcWalkOff('tabarez_mvd');
+    api.playerFaceNpc('tabarez_sede');
+    await api.say(['Lo lograron, {player}. El Equipo PP está disuelto, y el Cardenal Azul vuelve a cruzar el país.', 'Con las doce medallas y el PP disuelto, la Liga te espera en el Estadio Centenario.', 'Dr. Díaz fue mi colega y no supe verlo venir. Gracias por corregir lo que yo no pude.'], { name: 'Maestro Tabárez' });
+    await api.say(['Y vos, sobrino, venite conmigo. Hablemos de lo que hiciste. Pero esta vez, juntos.'], { name: 'Maestro Tabárez' });
+    await api.say(['Perdón, tío. Voy a arreglarlo. Pero antes, {player}: nos vemos en el Centenario. Ahí sí, sin trampa.'], { name: '{rival}' });
+    await api.npcWalkOff('rival_sede');
+    await api.npcWalkOff('tabarez_sede');
   },
 
   async elite(api, npc) {

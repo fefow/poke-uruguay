@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-09 (v201).
+> Última actualización: 2026-11-09 (v202).
 
 ## Dónde está cada cosa en el código
 
@@ -69,10 +69,10 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 20. **Maldonado (Punta del Este). Gimnasio 8.** Lucía, OSE, **Agua**. Casino Peninsula (las fichas nunca vuelven a dinero).
 21. **Piriápolis** (localidad). **Observatorio del Cerro**: Almada (`obs_clear`, MT Terremoto).
 22. **Minas.** **Fábrica**: Garúa (`pp_clear`, MT Vendaval). Decisión de niebla `fog3`.
-23. **Casupá** (localidad) y **Florida. Gimnasio 9.** Juan M. Boiso Lanza, **Volador**. La medalla activa el Silbato del Hornero (Vuelo).
+23. **Casupá** (localidad) y **Florida. Gimnasio 9.** Juan M. Boiso Lanza, **Volador**. Tras la medalla Boiso regala el **Silbato del Hornero** (MO Vuelo, flag `got_vuelo`).
 24. **Sarandí Grande** (localidad) y **Durazno. Gimnasio 10.** Candelaria, ANCAP, **Fuego**: el gimnasio, los entrenadores y los salvajes de la zona volcánica son todos de Fuego. Cerrado hasta liberar el **Depósito de la refinería** (Ferreira, MT Descarga). Los edificios tomados por el PP tienen fachada propia.
 25. **San Ramón** (localidad) y **Canelones. Gimnasio 11.** Tomás, INAVI, **Bicho**. Concurso de Bichos; mini historia La vendimia (Tomás está en San Ramón, espantando tres enjambres, hasta que se despejan las parras). El gimnasio es un viñedo laberinto y hábitat de insectos (setos con uvas, flores y telarañas, colmenas, hongos gigantes, árboles); sus entrenadores usan solo criaturas de tipo Bicho.
-26. **Las Piedras** (localidad; la ruta hacia Montevideo es el Camino Maldonado, cueva de tres veteranos y guardia de la Liga) y **Montevideo. Gimnasio 12.** Sofía, UTE, **Eléctrico**, en el Palacio de la Luz. Dr. Díaz espera en el puerto.
+26. **Las Piedras** (localidad; la ruta hacia Montevideo es el Camino Maldonado, cueva de tres veteranos y guardia de la Liga) y **Montevideo. Gimnasio 12.** Sofía, UTE, **Eléctrico**, en el Palacio de la Luz. El puerto queda cerrado por la Torre del puerto del PP (ver Final).
 
 ### Buquebus China Zorrilla
 
@@ -80,7 +80,7 @@ El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Termi
 
 ### Final
 
-1. Con las 12 medallas, en Montevideo: **Dr. Díaz** (último jefe del PP). Tabárez llega y discute con él. Se apaga la niebla; flag `anglo_clear`. El Medidor baja a 0 %.
+1. Con las 12 medallas y la Fábrica de Minas liberada (`pp_clear`), en Montevideo se abre la **Torre del puerto** (sede del PP, 3 pisos: `sede_1`, `sede_2`, `sede_3` en `maps-act2.ts`). Piso 1: **Bruma** (flag `ev_sede_1`). Piso 2: **Brumario** y **Garúa** en dos tandas (`ev_sede_2a`, `ev_sede_2`). Cúpula: **Dr. Díaz**; aparecen caminando Facu, Tabárez y el Cardenal Azul, y se apaga la niebla (flag `anglo_clear`, el Medidor baja a 0 %). Hasta entonces el Estadio Centenario está cerrado y la gente de Montevideo lo explica.
 2. **Liga en el Estadio Centenario:** Estela (aire), Teófilo (roca y tierra), Dolores (veneno y bicho), Federico (lucha y normal), duelo final con Facu y el Campeón **Obdulio** (con revancha).
 3. Epílogo: semanas después, en Carmelo, se hablan de legendarias (viento helado en la Quebrada, un canto en Punta del Este). Quedan las legendarias, las revanchas y el Cardenal Azul.
 
@@ -102,6 +102,8 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
 
 ## Sistemas de apoyo a la historia
 
+- **Atracciones opcionales y su pista:** Mi Zoo (Safari, Rivera), Vuelo (Boiso, Florida), Concurso de Bichos (Canelones), Torre de las Ánimas (Melo), premios del Casino (Maldonado). Un vecino errante en cada ciudad lo comenta (`ATTRACTIONS` en `rumors.ts`).
+- **Mates:** Té Marcela 20 PS, Mate 50, Mate dulce 200, Dulce de leche restaura todo.
 - **Medallas:** doce, numeradas por orden de ruta (`badgeOf`). Habilitan MO: Corte/Machete, Surf/Canoa, Fuerza/Guantes, Destello/Farol, Vuelo/Silbato.
 - **MT:** solo como recompensa de misiones, eventos y líderes (nunca sueltas ni regalos de NPC).
 - **Equipables:** solo de jefes del PP, torres y grandes eventos; no se venden.

@@ -30,6 +30,22 @@ export const RUMORS: Record<string, [string, string]> = {
   canelones: ['Este año la vendimia se atrasó. Algo anda mal con el clima.', 'El del gimnasio no suelta ni una uva sin saber con quién trata. Con el paso pasa lo mismo.'],
 };
 
+/** Optional attractions and extras scattered across the route, mentioned by one more neighbour in nearby cities. */
+export const ATTRACTIONS: Record<string, [string, string]> = {
+  colonia: ['girl', 'Dicen que en Rivera hay un parque donde se pueden atrapar criaturas raras con unas pocas Pokeballs, sin gastar las tuyas.'],
+  trinidad: ['boy', 'Pasando Florida se acaba la llanura. Cuentan que allá el líder te regala un silbato para volar entre ciudades.'],
+  mercedes: ['oldman', 'Quien tenga tiempo, que pase por Melo: las luces de la torre no son un cuento y nadie sube por gusto.'],
+  paysandu: ['campesina', 'En Maldonado hay un casino con fichas. Dicen que los premios no se compran con plata.'],
+  salto: ['oldman', 'En Rivera hay un zoológico donde se paga la entrada y se prueba suerte por un rato con las criaturas del campo.'],
+  rivera: ['boy', 'En Canelones, un día por semana hacen el concurso de atrapar bichos. Te dan unas bolas y tenés un rato para elegir el mejor.'],
+  melo: ['girl', 'Los viejos dicen que las ánimas de la torre se calman con quien las trata con respeto.'],
+  rocha: ['campesina', 'En Florida, quien venza al aviador del gimnasio se va de ahí con las alas prestadas.'],
+  punta: ['boy', 'Del otro lado del casino hay premios que no se ven en ninguna tienda: criaturas raras para quien junta fichas.'],
+  florida: ['oldman', 'Mi abuelo contaba que el hornero de acá aprendió a llevar gente por el cielo. Hay que ganárselo.'],
+  canelones: ['girl', 'El parque de la entrada tiene una puerta que se abre cuando empieza el concurso de bichos.'],
+  montevideo: ['girl', 'La torre del puerto está cerrada y la antena de la cima no para de emitir. Nadie entiende de dónde sale tanta energía.'],
+};
+
 const LOOKS: [string, string][] = [['oldman', 'abuela'], ['boy', 'maestra'], ['campesina', 'hincha'], ['pescador', 'nino'], ['obrero', 'turista'], ['almacenero', 'estudiante'], ['artesana', 'ciclista'], ['cocinero', 'cartero']];
 
 /** Puts the two gossips of each city on its map (anywhere free on the ground, away from the roads). */
@@ -41,6 +57,15 @@ export function addRumors(OUTDOOR) {
     const W = m.tiles[0].length, H = m.tiles.length;
     const taken = new Set<string>([...(m.npcs ?? []), ...(m.items ?? [])].map((o) => `${o.x},${o.y}`));
     const folk = [{ x: Math.round(W * 0.3), y: Math.round(H * 0.55), look: la, dir: 'down', text: [a] }, { x: Math.round(W * 0.7), y: Math.round(H * 0.4), look: lb, dir: 'down', text: [b], wander: true }];
+    fitToMap(m.tiles, folk, taken);
+    (m.npcs ??= []).push(...(folk as any[]));
+  }
+  for (const [id, [look, text]] of Object.entries(ATTRACTIONS)) {
+    const m = OUTDOOR[id];
+    if (!m?.tiles) continue;
+    const W = m.tiles[0].length, H = m.tiles.length;
+    const taken = new Set<string>([...(m.npcs ?? []), ...(m.items ?? [])].map((o) => `${o.x},${o.y}`));
+    const folk = [{ x: Math.round(W * 0.5), y: Math.round(H * 0.7), look, dir: 'down', text: [text], wander: true }];
     fitToMap(m.tiles, folk, taken);
     (m.npcs ??= []).push(...(folk as any[]));
   }
