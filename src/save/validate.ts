@@ -1,6 +1,7 @@
 // Rule-based save validation. Rejects values the game could never produce,
 // whatever the signature says. The same rules are mirrored server-side in
 // supabase/ so the server can be the final authority later.
+import { NATURES } from '../data/natures.ts';
 import { badgeOf } from '../data/route.ts';
 import { SPECIES, MIN_LEVEL, STARTERS } from '../data/species.ts';
 import { MOVES } from '../data/moves.ts';
@@ -41,6 +42,7 @@ export function validateCreature(c, errors, where) {
   const hi = c.level >= MAX_LEVEL ? lo : expForLevel(c.level + 1) - 1;
   if (!isInt(c.exp, lo, hi)) e('EXP no coincide con el nivel');
   if (!Array.isArray(c.ivs) || c.ivs.length !== 6 || !c.ivs.every((v) => isInt(v, 0, 15))) e('IVs inválidos');
+  if (c.nature != null && !NATURES[c.nature]) e('naturaleza inválida');
   if (!STATUSES.has(c.status ?? null)) e('estado inválido');
   if (!Array.isArray(c.moves) || c.moves.length < 1 || c.moves.length > 4) e('cantidad de movimientos inválida');
   else {
@@ -65,6 +67,7 @@ export function validateCreature(c, errors, where) {
     level: c.level,
     exp: c.exp,
     ivs: [...c.ivs],
+    ...(c.nature ? { nature: c.nature } : {}),
     hp: c.hp,
     status: c.status ?? null,
     moves: c.moves.map((m) => ({ id: m.id, pp: m.pp })),

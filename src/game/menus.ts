@@ -1,5 +1,6 @@
 // Panels: pause menu, party, summary, bag, PokeDex, trainer card, options,
 // save, shop and PC storage.
+import { natureOf, natureText } from '../data/natures.ts';
 import { h, clamp, formatTime, pad, wait } from '../core/util.ts';
 import { keyName } from '../core/input.ts';
 import { sfx, setVolumes, cry } from '../core/audio.ts';
@@ -237,6 +238,7 @@ export function openSummary(index) {
             h('img', { src: creatureIcon(c.species), alt: sp.name, width: 80, height: 80 }),
             h('div', { class: 'chips' }, sp.types.map(typeChip)),
             h('p', { class: 'small', text: `Especie: ${sp.name}` }),
+            h('p', { class: 'small', text: `Naturaleza: ${natureText(natureOf(c))}` }),
             h('p', { class: 'small', text: `EO: ${c.ot ?? S.player.id}` }),
             h('p', { class: 'small', text: c.held ? `Objeto: ${ITEMS[c.held]?.name}` : 'Objeto: —' }),
             h('p', { class: 'small', text: next ? `EXP para Nv${c.level + 1}: ${next}` : 'Nivel máximo' }),

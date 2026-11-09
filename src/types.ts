@@ -13,6 +13,8 @@ export interface Creature {
   level: number;
   exp: number;
   ivs: number[];
+  /** Key of NATURES; old saves lack it and derive one from the uid. */
+  nature?: string;
   hp: number;
   status: StatusId | null;
   moves: MoveSlot[];

@@ -167,11 +167,11 @@ export const ACT2_OUTDOOR: Record<string, MapDef> = {
       e: { to: 'minas' },
       n: { to: 'ruta5', req: 'pp_clear', deny: ['Un camino de tierra sube hacia el norte.', 'Antes de seguir, hay que resolver lo de la fábrica de Minas: el Equipo PP sigue activo.'] },
     },
-    enc: { rate: 0.12, list: wildList(['fuego', 'tierra', 'roca'], 31, 34, 7, 'dur', ['pavesa', 'alacran', 'alazan', 'guijarro', 'geoda', 'arenisca']) },
+    enc: { rate: 0.12, list: wildList(['fuego'], 31, 34, 5, 'dur', ['pavesa', 'alazan', 'hormiga']) },
     npcs: [
       npc(7, 8, 'gaucho', ['Acá la gente trabaja con el fuego desde siempre.', 'El gimnasio es la sede de ANCAP en Durazno. Su presidenta, Candelaria, domina el fuego.'], { dir: 'right' }),
-      tr({ x: 7, y: 7, dir: 'right' }, 'gaucho', 'dur_a', 'Rodrigo', 'Herrero', ['fuego', 'tierra'], [32, 32], ['El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'Candelaria usa tipo Fuego. Llevá algo de Agua o de Roca.']),
-      tr({ x: 16, y: 8, dir: 'left' }, 'girl', 'dur_b', 'Camila', 'Geóloga', ['tierra', 'roca'], [32, 33], ['Estudio por qué el suelo guarda tanto calor.', 'Buen combate.', 'Los datos no cierran: el calor aumenta desde que llegó el Equipo PP.']),
+      tr({ x: 7, y: 7, dir: 'right' }, 'gaucho', 'dur_a', 'Rodrigo', 'Herrero', ['fuego'], [32, 32], ['El calor de acá forja criaturas duras.', 'Se enfrió la cosa.', 'En esta zona volcánica todo es de Fuego. Llevá algo de Agua o de Roca.']),
+      tr({ x: 16, y: 8, dir: 'left' }, 'girl', 'dur_b', 'Camila', 'Geóloga', ['fuego'], [32, 33], ['Estudio por qué el suelo guarda tanto calor.', 'Buen combate.', 'Los datos no cierran: el calor aumenta desde que llegó el Equipo PP.']),
       wander(12, 9, 'oldman', ['Hace décadas no llueve como antes. La ceniza lo cubre todo.', 'Las criaturas de fuego se sienten cómodas acá.']),
       npc(20, 8, 'boy', ['Cruzando el puente de hierro se llega al norte. Pero el camino está cortado por la gente de gris.'], { cond: (f) => !f.pp_clear }),
     ],
@@ -567,7 +567,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
   // --- gyms
   gym_dur: gym('Refinería de ANCAP (Durazno)', 'gym_fuego', 'leader_ancap', 'ancap', [
     tr({ x: 8, y: 6 }, 'gaucho', 'g4_a', 'Hernán', 'Herrero', ['fuego'], [32, 33], ['La fragua nunca se apaga.', 'Me quemé.', 'Candelaria es más dura que el hierro.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego', 'tierra'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria usa tipo Fuego.'], { dir: 'right' }),
+    tr({ x: 3, y: 9 }, 'girl', 'g4_b', 'Vero', 'Alfarera', ['fuego'], [33, 34], ['Mis piezas salen del horno hoy.', 'Se enfrió.', 'Candelaria usa tipo Fuego.'], { dir: 'right' }),
     npc(12, 17, 'oldman', ['Gimnasio de Durazno. La líder usa criaturas de tipo Fuego.', 'Las de Agua, Tierra y Roca le hacen frente.'], { dir: 'down' }),
   ]),
   gym_tac: gym('Ministerio de Ganadería (Tacuarembó)', 'gym_planta', 'leader_mgap', 'mgap', [

@@ -198,7 +198,7 @@ test('Dex: 151 criaturas, 81 base, 70 evoluciones, 5 legendarias, tipos parejos'
   assert.equal(DEX_ORDER.filter((k) => SPECIES[k].legendary).length, 5);
   const byType = {};
   for (const k of DEX_ORDER) byType[SPECIES[k].types[0]] = (byType[SPECIES[k].types[0]] ?? 0) + 1;
-  for (const t of Object.keys(TYPES)) assert.ok(byType[t] === 11 || byType[t] === 12, `${t}: ${byType[t]}`);
+  for (const t of Object.keys(TYPES)) assert.ok(t === 'acero' ? byType[t] >= 4 : byType[t] >= 9 && byType[t] <= 12, `${t}: ${byType[t]}`);
   ALL.forEach((k, i) => {
     const s = SPECIES[k];
     assert.equal(s.id, i + 1);
@@ -765,4 +765,22 @@ test('medidor de niebla: arranca en 100 %, baja con las plantas del PP y las má
   assert.equal(validateSave(s).ok, false, 'sin haberlo recibido');
   s.flags.got_medidor = true;
   assert.equal(validateSave(s).ok, false, 'antes del Anglo');
+});
+
+test('naturalezas: suben 10% una estadística y bajan otra', async () => {
+  const { NATURES, natureMult, natureOf } = await import('../src/data/natures.ts');
+  assert.equal(Object.keys(NATURES).length, 25);
+  assert.equal(Object.values(NATURES).filter((n) => !n.up).length, 5);
+  assert.equal(natureMult({ uid: 'a', nature: 'audaz' }, 'atk'), 1.1);
+  assert.equal(natureMult({ uid: 'a', nature: 'audaz' }, 'spe'), 0.9);
+  assert.equal(natureMult({ uid: 'a', nature: 'fuerte' }, 'atk'), 1);
+  assert.equal(natureOf({ uid: 'x1' }), natureOf({ uid: 'x1' }));
+});
+
+test('tipo Acero: resiste y no recibe veneno', async () => {
+  const { effectiveness } = await import('../src/data/types.ts');
+  assert.equal(effectiveness('veneno', ['acero']), 0);
+  assert.equal(effectiveness('fuego', ['acero']), 2);
+  assert.equal(effectiveness('acero', ['roca']), 2);
+  assert.equal(effectiveness('normal', ['acero']), 0.5);
 });

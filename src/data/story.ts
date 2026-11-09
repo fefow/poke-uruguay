@@ -101,7 +101,7 @@ export const LEADERS = {
   },
   ancap: {
     order: 7, id: 'leader_ancap', name: 'Candelaria', cls: 'Presidenta de ANCAP', look: 'leader_ancap', ai: 'smart', items: ['mate_dulce'],
-    team: [['corcel', 34], ['fatuo', 35], ['escorpio', 36], ['crinfuego', 37], ['luzmala', 39]], prize: 4200, badge: 'badge7', badgeName: 'Medalla Durazno', reward: 'ultraesfera', rewardQty: 5, need: ['refineria_clear', ['Ahora no puedo combatir. El Equipo PP tomó el depósito de la refinería, acá en Durazno.', 'Si ese combustible sale para Montevideo, la niebla va a tapar la capital. Sacalos y te espero.']], tm: 'mt_fogon',
+    team: [['corcel', 34], ['fogata', 35], ['cortadora', 36], ['crinfuego', 37], ['aguaraflama', 39]], prize: 4200, badge: 'badge7', badgeName: 'Medalla Durazno', reward: 'ultraesfera', rewardQty: 5, need: ['refineria_clear', ['Ahora no puedo combatir. El Equipo PP tomó el depósito de la refinería, acá en Durazno.', 'Si ese combustible sale para Montevideo, la niebla va a tapar la capital. Sacalos y te espero.']], tm: 'mt_fogon',
     intro: ['Bienvenido a Durazno. Soy Candelaria, presidenta de ANCAP.', 'Mi organismo refina los combustibles del país: el fuego es mi oficio.', 'Veamos si tus criaturas aguantan el calor.'],
     lose: 'Se apagó la llama. Buen combate.',
     after: ['La Medalla Durazno es tuya.', 'Falta poco: Canelones y, después, Montevideo.', 'Dicen que el fundador del Equipo PP espera en la capital.'],

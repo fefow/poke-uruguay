@@ -8,6 +8,7 @@ import { SPECIES } from '../data/species.ts';
 import { MOVES } from '../data/moves.ts';
 import { TM_MOVES } from '../data/items.ts';
 import { clamp } from '../core/util.ts';
+import { NATURE_KEYS, natureMult } from '../data/natures.ts';
 import { worldRng } from '../core/rng.ts';
 
 export const MAX_LEVEL = 100;
@@ -23,12 +24,12 @@ export function levelForExp(exp) {
   return lvl;
 }
 
-export function calcStats(c: { species: string; ivs: number[]; level: number }): Record<StatKey, number> {
+export function calcStats(c: { species: string; ivs: number[]; level: number; uid: number | string; nature?: string | null }): Record<StatKey, number> {
   const sp = SPECIES[c.species];
   const out = {} as Record<StatKey, number>;
   STAT_KEYS.forEach((k, i) => {
     const core = Math.floor(((2 * sp.base[i] + c.ivs[i]) * c.level) / 100);
-    out[k] = k === 'hp' ? core + c.level + 10 : core + 5;
+    out[k] = k === 'hp' ? core + c.level + 10 : Math.floor((core + 5) * natureMult(c, k));
   });
   return out;
 }
@@ -84,6 +85,7 @@ export function createCreature(speciesKey: string, level: number, { rng = worldR
     level,
     exp: expForLevel(level),
     ivs,
+    nature: NATURE_KEYS[rng.int(0, NATURE_KEYS.length - 1)],
     hp: 0,
     status: null,
     moves: (moves ?? defaultMoves(speciesKey, level)).map((id) => ({ id, pp: MOVES[id].pp })),
