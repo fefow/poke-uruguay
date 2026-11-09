@@ -570,7 +570,7 @@ export const SCRIPTS = {
   async camp_nurse(api) {
     await api.say(['Armé este puesto para los que van a la Liga. Todos llegan con las criaturas cansadas.', 'Dejame que las atienda.'], { name: 'Enfermera de campaña' });
     await api.healParty();
-    await api.say('Listo. Que la Calle Victoria te sea corta.', { name: 'Enfermera de campaña' });
+    await api.say('Listo. Que el Camino Maldonado te sea corto.', { name: 'Enfermera de campaña' });
   },
 
   async pc(api) {

@@ -378,13 +378,13 @@ test('ciudades: las 18 miden al menos como Montevideo y ninguna se repite; las l
   assert.ok(kinds.size >= 8, `pocas identidades distintas en las localidades: ${kinds.size}`);
 });
 
-test('historia nueva: Dr. Díaz, Torre de las Ánimas en Melo, Calle Victoria y decisiones de niebla', async () => {
+test('historia nueva: Dr. Díaz, Torre de las Ánimas en Melo, Camino Maldonado y decisiones de niebla', async () => {
   const { OUTDOOR, INTERIOR } = await import('../src/data/maps.ts');
   const { SCRIPTS } = await import('../src/data/story.ts');
   assert.ok(SCRIPTS.anima && SCRIPTS.keeper_colonia);
   assert.ok(OUTDOOR.melo.doors.some((d) => (d.to ?? d) === 'anima_1'), 'la torre está en Melo');
   for (const id of ['anima_1', 'anima_2', 'anima_3']) assert.ok(INTERIOR[id], id);
-  assert.equal(OUTDOOR.r_laspiedras_montevideo.name, 'Calle Victoria');
+  assert.equal(OUTDOOR.r_laspiedras_montevideo.name, 'Camino Maldonado');
   const src = (await import('node:fs')).readFileSync(new URL('../src/data/story.ts', import.meta.url), 'utf8');
   assert.ok(!/Calima/.test(src.replace(/id: 'calima'|look: 'calima'|async calima|npcLeave\('calima'\)/g, '')), 'queda un Calima en los textos');
 });

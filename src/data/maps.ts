@@ -1022,12 +1022,12 @@ function makeCave(m) {
   });
 }
 
-/** The last road before the capital becomes the "Calle Victoria": a cave full of veterans on the way to the Liga. */
+/** The last road before the capital becomes the "Camino Maldonado": a cave full of veterans on the way to the Liga. */
 function makeVictory(m) {
   m.theme = 'cueva';
   m.music = 'cave';
-  m.name = 'Calle Victoria';
-  m.signs = ['CALLE VICTORIA\nLas Piedras ←  ·  → Montevideo\nSolo siguen los entrenadores que ya ganaron muchas medallas.'].slice(0, m.signs?.length ?? 1);
+  m.name = 'Camino Maldonado';
+  m.signs = ['CAMINO MALDONADO\nLas Piedras ←  ·  → Montevideo\nSolo siguen los entrenadores que ya ganaron muchas medallas.'].slice(0, m.signs?.length ?? 1);
   const levels = m.enc.list.flatMap((e) => [e[1], e[2]]);
   const lo = Math.min(...levels), hi = Math.max(...levels);
   const fresh = wildList(['roca', 'lucha', 'siniestro', 'tierra'], lo, hi, 8, 'victoria');
@@ -1053,7 +1053,7 @@ mazeMap(OUTDOOR.r_laspiedras_montevideo, 'r_laspiedras_montevideo', { kind: 'cav
   const w = m.tiles[0].length;
   m.tiles.forEach((row, y) => {
     if (row[w - 1] !== '=') return;
-    m.npcs.push({ x: w - 1, y, look: 'cop', dir: 'left', blocker: true, name: 'Guardia de la Liga', text: ['Calle Victoria: solo pasa quien venció a los tres veteranos del camino.', 'Es la regla de la Liga. Todavía te falta alguno.'], cond: (f) => !ids.every((id) => f[`tr_${id}`]) });
+    m.npcs.push({ x: w - 1, y, look: 'cop', dir: 'left', blocker: true, name: 'Guardia de la Liga', text: ['Camino Maldonado: solo pasa quien venció a los tres veteranos del camino.', 'Es la regla de la Liga. Todavía te falta alguno.'], cond: (f) => !ids.every((id) => f[`tr_${id}`]) });
   });
 }
 
