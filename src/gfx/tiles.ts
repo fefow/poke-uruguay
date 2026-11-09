@@ -43,6 +43,11 @@ export const TILE_INFO = {
   Ϲ: { name: 'pasarela' },
   ϻ: { name: 'instalación', solid: true },
   ϼ: { name: 'equipo de la sala', solid: true },
+  'Ұ': { name: 'seto con uvas', solid: true },
+  'ұ': { name: 'seto con flores', solid: true },
+  'Ҳ': { name: 'seto con telaraña', solid: true },
+  'ҳ': { name: 'colmena', solid: true },
+  'Ҵ': { name: 'hongos gigantes', solid: true },
   Ϯ: { name: 'vitrina del museo', solid: true },
   ϯ: { name: 'busto del museo', solid: true },
   Ϫ: { name: 'puerta de camarote', solid: true },
@@ -1519,6 +1524,62 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
   }
 }
 
+
+// Instituto de Vitivinicultura (Canelones, bicho): a vineyard and insect habitat. Grass floor, trees for walls, hedges with
+// grapes, flowers and cobwebs, bee hives and giant mushrooms. All drawn on the bug gym theme.
+{
+  const t = (THEMES as any).gym_bicho;
+  const grass = (g, r) => {
+    px(g, 0, 0, '#74b038', T, T);
+    for (let i = 0; i < 14; i++) px(g, r.int(0, 15), r.int(0, 15), r.pick(['#62a02c', '#86c444', '#58922a']), r.int(1, 2), 1);
+    if (r.int(0, 3) === 0) { const x = r.int(1, 13), y = r.int(1, 13); px(g, x, y, r.pick(['#f6e64a', '#fff8f0', '#f08ab0']), 2, 2); px(g, x, y, '#f0a020', 1, 1); }
+  };
+  const leaves = (g, r, base, mid, light, n = 16) => {
+    px(g, 0, 0, base, T, T);
+    for (let i = 0; i < n; i++) { const x = r.int(0, 12), y = r.int(0, 12); px(g, x, y, mid, 4, 3); px(g, x + 1, y, light, 2, 1); }
+    px(g, 0, 14, '#10260a80', T, 2);
+  };
+  t.Y = grass;
+  t.x = (g, r) => { leaves(g, r, '#245016', '#3a7a24', '#7cc040', 20); px(g, 0, 11, '#183a0e', T, 5); px(g, 0, 10, '#8ac83a', T, 1); for (const x of [3, 11]) { px(g, x, 4, '#d8f060', 1, 1); } };
+  t.N = (g, r) => {
+    grass(g, r);
+    px(g, 6, 8, '#6a4524', 4, 7); px(g, 6, 8, '#8a5e34', 1, 7); px(g, 3, 14, '#00000040', 10, 2);
+    disc(g, 8, 6, 6.2, '#1f4a14'); disc(g, 8, 6, 5.4, '#357a22'); disc(g, 6, 5, 3, '#5ea636'); disc(g, 10, 4, 2, '#9ad448');
+    px(g, 11, 7, '#f0709a', 2, 2); px(g, 4, 8, '#f6e64a', 2, 2);
+  };
+  t.A = (g, r) => {
+    px(g, 0, 0, '#c9a266', T, T);
+    for (let i = 0; i < 10; i++) px(g, r.int(1, 13), r.int(0, 15), r.pick(['#b08a50', '#dcc088']), 2, 1);
+    px(g, 0, 0, '#74b038', 2, T); px(g, 14, 0, '#74b038', 2, T);
+    for (const [x, y, c] of [[1, 3, '#f0709a'], [14, 9, '#f6e64a'], [1, 11, '#fff8f0'], [14, 2, '#c070e0']] as [number, number, string][]) px(g, x, y, c, 1, 1);
+  };
+  const hedge = (g, r) => leaves(g, r, '#1f4a12', '#2f6a1a', '#58a02c', 12);
+  t['ϸ'] = (g, r) => { hedge(g, r); px(g, 0, 0, '#9ad448', T, 1); };
+  t['Ұ'] = (g, r) => { hedge(g, r); for (const [x, y] of [[3, 3], [9, 6], [5, 9]]) { for (let k = 0; k < 5; k++) disc(g, x + (k % 3) * 1.6, y + (k >> 1) * 1.7, 1.4, k % 2 ? '#7a2a9a' : '#5a1a7a'); px(g, x + 1, y - 1, '#c8a0e0', 1, 1); } px(g, 2, 1, '#2a6a1a', 3, 2); };
+  t['ұ'] = (g, r) => { hedge(g, r); for (const [x, y, c] of [[2, 3, '#f0709a'], [8, 2, '#fff8f0'], [11, 7, '#f6e64a'], [4, 9, '#c070e0'], [9, 11, '#f0709a']] as [number, number, string][]) { px(g, x, y, c, 3, 3); px(g, x + 1, y + 1, '#f0a020', 1, 1); } };
+  t['Ҳ'] = (g, r) => {
+    hedge(g, r);
+    for (let i = 0; i < 7; i++) { px(g, 1 + i * 2, 1 + (i % 2), '#f4f4f0', 1, 1); px(g, 1 + i * 2, 5, '#f4f4f0', 1, 1); }
+    px(g, 8, 0, '#f4f4f0', 1, 12); px(g, 2, 6, '#f4f4f0', 12, 1); px(g, 3, 3, '#f4f4f0', 1, 1); px(g, 12, 9, '#f4f4f0', 1, 1);
+    disc(g, 11, 11, 2.6, '#2a1a1a'); disc(g, 11, 11, 2.2, '#d82a2a'); px(g, 11, 9, '#2a1a1a', 1, 5); px(g, 10, 10, '#2a1a1a', 1, 1); px(g, 12, 12, '#2a1a1a', 1, 1);
+  };
+  t['ҳ'] = (g, r) => {
+    grass(g, r);
+    px(g, 3, 13, '#00000040', 11, 2);
+    px(g, 4, 11, '#6a4524', 2, 3); px(g, 11, 11, '#6a4524', 2, 3);
+    for (let k = 0; k < 4; k++) { px(g, 3 + k, 8 - k * 2 + 2, '#e8b830', 10 - k * 2, 3); px(g, 3 + k, 8 - k * 2 + 4, '#a87a18', 10 - k * 2, 1); }
+    px(g, 6, 5, '#7a4a10', 4, 3); px(g, 7, 6, '#2a1a08', 2, 1);
+    px(g, 12, 3, '#2a2a1a', 2, 1); px(g, 12, 3, '#f4d020', 1, 1); px(g, 1, 6, '#2a2a1a', 2, 1); px(g, 2, 6, '#f4d020', 1, 1);
+  };
+  t['Ҵ'] = (g, r) => {
+    grass(g, r);
+    px(g, 2, 13, '#00000040', 12, 2);
+    for (const [x, y, w, c] of [[2, 6, 6, '#d83a3a'], [9, 4, 5, '#e86a2a'], [6, 9, 4, '#c82a6a']] as [number, number, number, string][]) { px(g, x + (w >> 1) - 1, y + 3, '#f4ecd8', 2, 11 - y); disc(g, x + w / 2, y + 2, w / 2, c); px(g, x + 1, y + 1, '#fff8f0', 1, 1); px(g, x + w - 2, y + 2, '#fff8f0', 1, 1); }
+  };
+  t['ϼ'] = t['ҳ'];
+  t['ϻ'] = (g, r) => { t.x(g, r); px(g, 2, 2, '#6a4524', 12, 6); px(g, 2, 2, '#8a5e34', 12, 1); for (const x of [4, 8, 11]) px(g, x, 4, '#d8b070', 2, 2); };
+  t['Ϲ'] = t.A;
+}
 
 // Museo del Anglo (gym): display cases with old tins and a bust on a pedestal, on the dark gym floor.
 {

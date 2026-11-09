@@ -249,7 +249,11 @@ function inaviPlan(): GymPlan {
   const route: number[] = []; for (let k: number | undefined = key(...exit); k !== undefined; k = parent.get(k)) route.unshift(k);
   rect(ox + 3 * 3, 5, ox + 3 * 3 + 1, 5, 'Y');
   rect(10, 18, 17, 18, 'Y'); rect(ox + 3 * 3, 17, ox + 3 * 3 + 1, 18, 'Y'); g[19][ox + 9] = 'm'; g[19][ox + 10] = 'm';
-  for (const [x, y] of [[2, 18], [25, 18]]) g[y][x] = 'ϼ';
+  // insect habitat: hedges with grapes, flowers and cobwebs, bee hives and giant mushrooms (all solid, same as the hedge they replace)
+  const deco = rng('inavi-habitat');
+  for (let y = 6; y <= 17; y++) for (let x = 1; x <= 26; x++) if (g[y][x] === 'ϸ') { const d = deco(); g[y][x] = d < 0.14 ? 'Ұ' : d < 0.26 ? 'ұ' : d < 0.32 ? 'Ҳ' : d < 0.36 ? 'ҳ' : d < 0.4 ? 'Ҵ' : 'ϸ'; }
+  for (const [x, y] of [[2, 18], [25, 18]]) g[y][x] = 'ҳ';
+  for (const [x, y] of [[4, 2], [5, 3], [22, 2], [21, 3], [6, 1], [20, 1]]) g[y][x] = 'N';
   const spot = (n: number) => { const [i, j] = cell(route[Math.min(route.length - 1, Math.max(1, Math.floor((route.length * n))))]); return { x: ox + 3 * i, y: oy + 3 * j }; };
   const t1 = spot(0.35), t2 = spot(0.7);
   return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ ...t1, dir: 'down' }, { ...t2, dir: 'down' }], guide: { x: 13, y: 18 } };

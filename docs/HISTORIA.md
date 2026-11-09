@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-09 (v197).
+> Última actualización: 2026-11-09 (v198).
 
 ## Dónde está cada cosa en el código
 
@@ -71,7 +71,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 22. **Minas.** **Fábrica**: Garúa (`pp_clear`, MT Vendaval). Decisión de niebla `fog3`.
 23. **Casupá** (localidad) y **Florida. Gimnasio 9.** Juan M. Boiso Lanza, **Volador**. La medalla activa el Silbato del Hornero (Vuelo).
 24. **Sarandí Grande** (localidad) y **Durazno. Gimnasio 10.** Candelaria, ANCAP, **Fuego**: el gimnasio, los entrenadores y los salvajes de la zona volcánica son todos de Fuego. Cerrado hasta liberar el **Depósito de la refinería** (Ferreira, MT Descarga). Los edificios tomados por el PP tienen fachada propia.
-25. **San Ramón** (localidad) y **Canelones. Gimnasio 11.** Tomás, INAVI, **Bicho**. Concurso de Bichos; mini historia La vendimia.
+25. **San Ramón** (localidad) y **Canelones. Gimnasio 11.** Tomás, INAVI, **Bicho**. Concurso de Bichos; mini historia La vendimia (Tomás está en San Ramón, espantando tres enjambres, hasta que se despejan las parras). El gimnasio es un viñedo laberinto y hábitat de insectos (setos con uvas, flores y telarañas, colmenas, hongos gigantes, árboles); sus entrenadores usan solo criaturas de tipo Bicho.
 26. **Las Piedras** (localidad, Calle Victoria) y **Montevideo. Gimnasio 12.** Sofía, UTE, **Eléctrico**, en el Palacio de la Luz. Dr. Díaz espera en el puerto.
 
 ### Buquebus China Zorrilla
