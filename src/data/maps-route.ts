@@ -9,6 +9,8 @@ import { CITY_SPECS, LOC_ARCHETYPES, LOC_PLAN } from './town-specs.ts';
 import { STOPS, STOP_INDEX, CHAIN, mapBand, openFlag } from './route.ts';
 import { BIOMES, DEPARTMENTS, PLACES } from './atlas.ts';
 import { TILE_INFO } from '../gfx/tiles.ts';
+import { SPECIES, CUSTOM_KEYS } from './species.ts';
+import { fitSpecies } from './levels.ts';
 
 // Real road numbers of the legs (the map ids stay the same so saves keep working).
 // Localities: two local trainers and someone who has seen the PP pass by, so every stop of the trip has a fight and a clue.
@@ -183,6 +185,15 @@ const GYM_TRAINERS = {
   volador: [['Ismael', 'Aeromodelista', ['Mi planeador y yo somos uno.', 'Aterricé mal.', 'El maestro Boiso está arriba.']], ['Clara', 'Paracaidista', ['Un salto y listo.', 'Se me abrió tarde.', 'Seguí adelante.']]],
   bicho: [['Gabriel', 'Viñatero', ['Los bichos cuidan mis uvas.', 'Cosecha perdida.', 'Tomás te espera.']], ['Rosa', 'Apicultora', ['Cuidado con el aguijón.', 'Me picó la derrota.', 'Seguí, no te voy a frenar.']]],
 };
+const NOT_FOR_GYMS = new Set(['pamperon', 'ballenaplata', 'soldemayo', 'yaguarete', 'ombu', 'ceibito', 'ceibal', 'ceibarbol', 'tejuchispa', 'tejubrasa', 'tejufogon', 'carpinchito', 'carpincho', 'carpinchon']);
+/** A gym trainer's team: only creatures of the gym's type (primary type first), each at the evolution stage that suits its level. */
+function gymTeam(type, levels, seed) {
+  const r = rng(seed);
+  const all = Object.keys(SPECIES).filter((k) => !NOT_FOR_GYMS.has(k) && !CUSTOM_KEYS.includes(k) && SPECIES[k].types.includes(type));
+  const lines = [...new Set(all.map((k) => fitSpecies(k, 99)))].sort((a, b) => (SPECIES[b].types[0] === type ? 1 : 0) - (SPECIES[a].types[0] === type ? 1 : 0) || r() - 0.5);
+  if (!lines.length) return teamOf([type], levels, seed);
+  return levels.map((lv, i) => [fitSpecies(lines[i % lines.length], lv), lv]);
+}
 const KEEP_TARGETS = new Set(['ciclovia', 'cabo', 'quebrada_cuervos']); // dead-end branches that keep their own exits
 export const ROUTE_OUTDOOR: Record<string, MapDef> = {};
 export const ROUTE_INTERIOR: Record<string, MapDef> = {};
@@ -314,7 +325,7 @@ for (const [id, [kind, lines, place]] of Object.entries(NEW)) {
         { x: 5, y: 2, look: `leader_${stop.gym}`, dir: 'down', script: 'leader', leader: stop.gym },
         ...GYM_TRAINERS[gymType].map(([nm, cls, [intro, lose, after]], k) => {
           const spot = k ? { x: 3, y: 9, dir: 'right' } : { x: 8, y: 6, dir: 'left' };
-          return { ...spot, look: CLASS_LOOK[cls] ?? LOOKS[(i + k) % LOOKS.length], sight: 4, trainer: TR(`g_${id}_${k}`, nm, cls, teamOf([gymType], [lo2 + k, hi2], `g${id}${k}`), (hi2 + 2) * 20, intro, lose, after) };
+          return { ...spot, look: CLASS_LOOK[cls] ?? LOOKS[(i + k) % LOOKS.length], sight: 4, trainer: TR(`g_${id}_${k}`, nm, cls, gymTeam(gymType, [lo2 + k, hi2], `g${id}${k}`), (hi2 + 2) * 20, intro, lose, after) };
         }),
       ],
     });

@@ -18,6 +18,7 @@ const wander = (x, y, look, text) => npc(x, y, look, text, { wander: true });
 const house = (name, ...npcs) => room(HOUSE, { name, npcs });
 
 const FOREST = ['planta', 'bicho', 'veneno'];
+const SEDE_LV = mapBand('montevideo')[1] - 2;
 
 // ---------------------------------------------------------------- DURAZNO (gym 4, fire)
 const DUR = city({
@@ -702,6 +703,45 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     name: 'Torre de Niebla: cima', music: 'cave',
     exitTo: { map: 'torre_2', x: 11, y: 2 },
     npcs: [{ x: 5, y: 2, look: 'bruma', dir: 'down', id: 'bruma2', cond: (f) => !f.torre_clear, script: 'bruma2' }],
+  }),
+
+  // --- Torre del puerto (Montevideo): sede del Equipo PP, three floors. Bruma and then Brumario and Garúa guard the stairs; Dr. Díaz waits at the top.
+  sede_1: room(FLOOR_UP, {
+    name: 'Torre del puerto: planta baja', music: 'cave',
+    warps: [{ x: 11, y: 1, to: 'sede_2', tx: 5, ty: 7 }],
+    triggers: [{ x: 0, y: 1, w: 12, h: 1, script: 'sede_f1', cond: (f) => !f.ev_sede_1 }],
+    npcs: [
+      grunt({ x: 2, y: 4 }, 'sd_g1', [SEDE_LV - 4, SEDE_LV - 3], 'La torre es nuestra. El Dr. Díaz ya casi termina.', 'Qué mala suerte.', 'Arriba están los jefes.', { dir: 'right', sight: 4 }),
+      grunt({ x: 8, y: 6 }, 'sd_g2', [SEDE_LV - 4, SEDE_LV - 2], 'Los de la capital no se enteran de nada.', 'Estoy acabado.', 'Bruma te espera en la escalera.', { dir: 'left', sight: 4 }),
+      grunt({ x: 5, y: 2 }, 'sd_g3', [SEDE_LV - 3, SEDE_LV - 2], 'Esta es la última planta baja que vas a pisar.', 'Pasá, pasá.', 'Cada piso tiene a uno de los jefes.', { dir: 'down', sight: 3 }),
+      { x: 9, y: 2, look: 'bruma', dir: 'down', id: 'sede_bruma', cond: (f) => !f.ev_sede_1, script: 'sede_f1' },
+      npc(2, 7, 'biologo', ['La torre del puerto era un faro del siglo pasado.', 'Los de gris la tomaron hace meses y subieron una máquina enorme a la cúpula.'], { dir: 'right' }),
+    ],
+    items: [{ x: 1, y: 7, item: 'ultraesfera', id: 'sd_item1' }],
+  }),
+  sede_2: room(FLOOR_MID, {
+    name: 'Torre del puerto: sala de máquinas', music: 'cave',
+    exitTo: { map: 'sede_1', x: 11, y: 2 },
+    warps: [{ x: 0, y: 1, to: 'sede_3', tx: 5, ty: 6 }, { x: 11, y: 1, to: 'sede_3', tx: 5, ty: 6 }],
+    triggers: [{ x: 0, y: 1, w: 12, h: 1, script: 'sede_f2', cond: (f) => !f.ev_sede_2 }],
+    npcs: [
+      grunt({ x: 3, y: 5 }, 'sd_g4', [SEDE_LV - 3, SEDE_LV - 2], 'Las máquinas de niebla se prenden desde acá.', 'No era tan difícil.', 'Brumario y Garúa guardan la escalera.', { dir: 'right', sight: 4 }),
+      tr({ x: 9, y: 5, dir: 'left' }, 'clerk', 'sd_t1', 'Dra. Rivas', 'Técnica PP', ['electrico', 'psiquico'], [SEDE_LV - 3, SEDE_LV - 2], ['Yo calibré la Máquina Pampero.', 'Mis cálculos fallaron.', 'Necesita un eco del ciclo del viento. Tiene que ser de una criatura viva.'], { sight: 4 }),
+      { x: 3, y: 3, look: 'brumario', dir: 'right', id: 'sede_brumario', cond: (f) => !f.ev_sede_2a, script: 'sede_f2' },
+      { x: 8, y: 3, look: 'garua', dir: 'left', id: 'sede_garua', cond: (f) => !f.ev_sede_2, script: 'sede_f2b' },
+    ],
+    items: [{ x: 9, y: 6, item: 'alfajor_triple', id: 'sd_item2' }],
+  }),
+  sede_3: room(FLOOR_TOP, {
+    name: 'Torre del puerto: cúpula', music: 'cave',
+    exitTo: { map: 'sede_2', x: 11, y: 2 },
+    triggers: [{ x: 0, y: 3, w: 12, h: 1, script: 'calima', cond: (f) => !f.anglo_clear }],
+    npcs: [
+      { x: 5, y: 2, look: 'calima', dir: 'down', id: 'calima', cond: (f) => !f.anglo_clear, script: 'calima' },
+      { x: 1, y: 6, look: 'rival', dir: 'up', id: 'rival_sede', arrive: true },
+      { x: 10, y: 6, look: 'prof', dir: 'up', id: 'tabarez_sede', arrive: true },
+      { x: 9, y: 4, look: 'animal:pamperon', dir: 'down', id: 'cardenal_sede', arrive: true },
+    ],
   }),
 
   // --- Represa de Salto Grande: two floors, Garúa at the end

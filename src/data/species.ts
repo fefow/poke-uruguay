@@ -308,13 +308,30 @@ const DUAL_LINES = new Set(['teruterito', 'mulitin', 'tuco', 'luciernito', 'yara
 }
 
 // Acero: armored lines get the type (and its moves) here, at their evolved stage.
-const STEEL: Record<string, string[]> = { mulitron: ['acero', 'tierra'], cuchilla: ['acero'], tatucarreta: ['acero'], gliptodonte: ['acero'], escarabajon: ['acero'] };
+const STEEL: Record<string, string[]> = { mulitron: ['acero', 'tierra'], cuchilla: ['acero', 'volador'], tatucarreta: ['acero'], gliptodonte: ['acero'], escarabajon: ['acero', 'volador'] };
 for (const s of LIST as any[]) {
   const t = STEEL[s.key];
   if (!t) continue;
   s.types = t;
   const lv = Math.max(1, (s.evo?.lvl ?? 20) - 2);
   s.learn = [...s.learn, [Math.max(lv, 12), 'facon'], [Math.max(lv + 6, 24), 'coraza_chapa'], [Math.max(lv + 14, 36), 'yunque']].sort((a: any, b: any) => a[0] - b[0]);
+}
+
+// Alas: everything that flies is also Volador (so Terremoto cannot touch it). Lucerna carries three types on purpose.
+const WINGED: Record<string, string[]> = {
+  luciernito: ['bicho', 'electrico', 'volador'], luceron: ['bicho', 'electrico', 'volador'],
+  avispa: ['bicho', 'volador'], camoati: ['bicho', 'volador'], monarca: ['bicho', 'volador'],
+  tatadios: ['psiquico', 'volador'], mantis: ['psiquico', 'volador'],
+  pavesa: ['fuego', 'volador'], fogata: ['fuego', 'volador'],
+  nimbo: ['electrico', 'volador'], cumulo: ['electrico', 'volador'], tormenton: ['electrico', 'volador'], pararrayo: ['electrico', 'volador'],
+  pombero: ['psiquico', 'volador'], carpintero: ['lucha', 'volador'], tamborilero: ['lucha', 'volador'],
+  lechuza: ['siniestro', 'volador'], carabo: ['siniestro', 'volador'],
+};
+for (const s of LIST as any[]) {
+  const t = WINGED[s.key];
+  if (!t) continue;
+  s.types = t;
+  if (!s.learn.some(([, m]: any) => MOVES[m]?.type === 'volador')) s.learn = [...s.learn, [Math.max(14, (s.evo?.lvl ?? 20) - 4), 'ataque_ala']].sort((a: any, b: any) => a[0] - b[0]);
 }
 
 export const SPECIES: Record<string, Species> = deepFreeze(Object.fromEntries(LIST.map((s) => [s.key, s])));

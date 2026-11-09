@@ -301,6 +301,9 @@ function setHud(which, c, { instant = false, hp = c?.hp } = {}) {
   const fill = el.querySelector('.hpbar-fill');
   fill.classList.toggle('no-anim', instant);
   fill.style.setProperty('--hp', ratio);
+  // Commit an instant value before anything else touches the bar: otherwise a later animated update in the same frame
+  // would start from the previous creature's value (an empty bar that "fills" a moment after it came out).
+  if (instant) void fill.offsetWidth;
   fill.dataset.level = ratio > 0.5 ? 'good' : ratio > 0.2 ? 'mid' : 'low';
   const hpTxt = el.querySelector('.bhud-hp');
   if (hpTxt) hpTxt.textContent = `${Math.max(0, hp)}/${maxHp(c)}`;
@@ -598,6 +601,8 @@ async function tutoAfterTurn() {
 let lastAction = 0;
 async function chooseAction() {
   const c = engine.p.c;
+  // Whatever happened before (switches, send-outs, queued animations), the prompt always shows the real HP of both sides.
+  if (!hud.ply.hidden || !hud.foe.hidden) { setHud('ply', engine.p.c, { instant: true }); setHud('foe', engine.f.c, { instant: true }); }
   await say(`¿Qué va a hacer ${displayName(c)}?`, { battle: true, keep: true });
   let untip = null;
   if (tuto.on && !tuto.menu) {

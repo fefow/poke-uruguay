@@ -775,7 +775,7 @@ import { MAP_BIOME, BIOMES } from './atlas.ts';
 import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
 import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
-import { fitToMap, wildList, teamOf, rng } from './map-gen.ts';
+import { fitToMap, wildList, teamOf, rng, block } from './map-gen.ts';
 import { guideMap } from './guide.ts';
 import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
@@ -965,18 +965,22 @@ for (const [mapId, script, flag] of RIVAL_AT) {
   for (const b of bands) (m.triggers ??= []).push({ ...b, script, cond: (f) => !f[flag] });
 }
 
-// The founder of the Equipo PP waits by the Estadio Centenario once the player has the eighth medal and the factory in Minas is shut down.
-(function placeCalima() {
+// The Equipo PP's head office: a tall tower at the Montevideo port (Torre del puerto, interiors sede_1..3 in maps-act2.ts). It is
+// stamped onto the garden at the west of the city, after any hand edits, and its door is the last one in row-major order.
+(function placeSede() {
   const m = OUTDOOR.montevideo;
-  let door = null;
-  m.tiles.forEach((row, y) => { const x = row.indexOf('D'); if (!door && x >= 0) door = { x, y }; });
-  const npc: any = { x: door.x, y: door.y + 2, look: 'calima', dir: 'up', id: 'calima', cond: (f) => f.badge12 && f.pp_clear && !f.anglo_clear, script: 'calima' };
-  fitToMap(m.tiles, [npc]);
-  m.npcs.push(npc);
-  // Tabárez shows up (walking) once Dr. Díaz has been beaten; he is hidden until the scene brings him in.
-  const tab: any = { x: door.x, y: door.y + 4, look: 'prof', dir: 'up', id: 'tabarez_mvd', arrive: true };
-  fitToMap(m.tiles, [tab]);
-  m.npcs.push(tab);
+  const x0 = 5, y0 = 16;
+  const pat = block('radio');
+  pat.forEach((row, dy) => {
+    const r = [...m.tiles[y0 + dy]];
+    [...row].forEach((c, dx) => { r[x0 + dx] = c; });
+    m.tiles[y0 + dy] = r.join('');
+  });
+  for (const y of [y0 + 3]) { const r = [...m.tiles[y]]; r[x0 + 2] = '_'; m.tiles[y] = r.join(''); }
+  m.doors.push({ to: 'sede_1', req: (f) => f.badge12 && f.pp_clear, deny: ['La torre del puerto está cerrada con candado.', 'Hay gente de gris custodiando la puerta y la antena de la cima no para de emitir.'] });
+  // The Estadio stays shut until the head of the Equipo PP is beaten.
+  const est = m.doors[0];
+  if (est && typeof est !== 'string') est.deny = ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido al Dr. Díaz, el fundador del Equipo PP.', 'Dicen que se atrincheró en la torre del puerto, al oeste de la ciudad.'];
 })();
 
 // The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.
@@ -1022,12 +1026,12 @@ function makeCave(m) {
   });
 }
 
-/** The last road before the capital becomes the "Calle Victoria": a cave full of veterans on the way to the Liga. */
+/** The last road before the capital becomes the "Camino Maldonado": a cave full of veterans on the way to the Liga. */
 function makeVictory(m) {
   m.theme = 'cueva';
   m.music = 'cave';
-  m.name = 'Calle Victoria';
-  m.signs = ['CALLE VICTORIA\nLas Piedras ←  ·  → Montevideo\nSolo siguen los entrenadores que ya ganaron muchas medallas.'].slice(0, m.signs?.length ?? 1);
+  m.name = 'Camino Maldonado';
+  m.signs = ['CAMINO MALDONADO\nLas Piedras ←  ·  → Montevideo\nSolo siguen los entrenadores que ya ganaron muchas medallas.'].slice(0, m.signs?.length ?? 1);
   const levels = m.enc.list.flatMap((e) => [e[1], e[2]]);
   const lo = Math.min(...levels), hi = Math.max(...levels);
   const fresh = wildList(['roca', 'lucha', 'siniestro', 'tierra'], lo, hi, 8, 'victoria');
@@ -1053,7 +1057,7 @@ mazeMap(OUTDOOR.r_laspiedras_montevideo, 'r_laspiedras_montevideo', { kind: 'cav
   const w = m.tiles[0].length;
   m.tiles.forEach((row, y) => {
     if (row[w - 1] !== '=') return;
-    m.npcs.push({ x: w - 1, y, look: 'cop', dir: 'left', blocker: true, name: 'Guardia de la Liga', text: ['Calle Victoria: solo pasa quien venció a los tres veteranos del camino.', 'Es la regla de la Liga. Todavía te falta alguno.'], cond: (f) => !ids.every((id) => f[`tr_${id}`]) });
+    m.npcs.push({ x: w - 1, y, look: 'cop', dir: 'left', blocker: true, name: 'Guardia de la Liga', text: ['Camino Maldonado: solo pasa quien venció a los tres veteranos del camino.', 'Es la regla de la Liga. Todavía te falta alguno.'], cond: (f) => !ids.every((id) => f[`tr_${id}`]) });
   });
 }
 
