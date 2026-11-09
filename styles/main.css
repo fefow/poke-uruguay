@@ -1220,3 +1220,14 @@ body.gb:has(.hud-map.is-open) .gb-pad .gb-right .gb-btn { opacity: 0; pointer-ev
   & li { display: flex; justify-content: space-between; gap: 1cqi; padding: 0.5cqi 1cqi; border-radius: 0.6cqi; background: oklch(0 0 0 / 0.05); color: var(--ink); font-size: 1.5cqi; }
   & b { color: oklch(0.5 0.15 145); } }
 .fog-none { margin: 0.6cqi 0 0; font-size: 1.5cqi; color: var(--ink-soft); }
+
+/* Place-name sign: a wooden board like the ones that greet you in classic towns. */
+.map-banner {
+  background: linear-gradient(#d9a45c, #c08840);
+  border: 0.5cqi solid #6a4220;
+  box-shadow: inset 0 0 0 0.35cqi #e8c080, 0 0.5cqi 0 #4a2c14;
+  border-radius: 0.8cqi;
+  color: #fff6dc;
+  text-shadow: 0.25cqi 0.25cqi 0 #5a3414;
+  letter-spacing: 0.1cqi;
+}
