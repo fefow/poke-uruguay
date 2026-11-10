@@ -566,7 +566,7 @@ canvas.addEventListener('pointermove', (ev) => {
   if (S.painting && c && S.tool === 'paint') setTile(c.x, c.y, S.tile);
   if (S.drag && c && (c.x !== S.drag.ref.x || c.y !== S.drag.ref.y)) {
     if (S.drag.ref.look === 'swimmer' && S.W.tiles[c.y][c.x] !== '~') status('El nadador solo puede estar sobre agua.', 'warn');
-    else if (!SOLID(S.W.tiles[c.y][c.x]) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
+    else if ((S.drag.ref.look === 'swimmer' || !SOLID(S.W.tiles[c.y][c.x])) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
   }
   draw();
 });

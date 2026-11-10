@@ -477,7 +477,8 @@ async function crossEdge(side, to) {
   x = Math.min(x, m2.w - 1);
   y = Math.min(y, m2.h - 1);
   // find nearest walkable tile along the arrival edge
-  const walk = (cx, cy) => !TILE_INFO[m2.tiles[cy]?.[cx]]?.solid && m2.tiles[cy]?.[cx] != null;
+  const afloat = tileAt(p.x, p.y) === '~'; // a sailor arrives on the water of the next map
+  const walk = (cx, cy) => m2.tiles[cy]?.[cx] != null && (!TILE_INFO[m2.tiles[cy][cx]]?.solid || (afloat && m2.tiles[cy][cx] === '~'));
   if (!walk(x, y)) {
     for (let d = 1; d < 200; d++) {
       const cand = side === 'e' || side === 'w' ? [[x, y - d], [x, y + d]] : [[x - d, y], [x + d, y]];

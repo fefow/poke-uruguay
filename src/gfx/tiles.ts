@@ -38,6 +38,15 @@ export const TILE_INFO = {
   ϋ: { name: 'encomiendas', solid: true },
   ΐ: { name: 'cinta transportadora' },
   Ͽ: { name: 'ascensor', solid: true },
+  // Maldonado: Casapueblo (white stucco terraces), the lighthouse, and the sea route (reef rocks and buoys on water)
+  'ӟ': { name: 'fachada de Casapueblo', solid: true },
+  'Ӡ': { name: 'techo de Casapueblo', solid: true },
+  'ӡ': { name: 'fachada de Casapueblo (arco)', solid: true },
+  'Ӧ': { name: 'faro (base)', solid: true, over: true },
+  'ӧ': { name: 'faro (linterna)', solid: true, over: true },
+  'Ӥ': { name: 'arrecife', solid: true, anim: true },
+  'Ӣ': { name: 'boya', solid: true, anim: true },
+  'ӫ': { name: 'mar profundo', solid: true, anim: true },
   Ϡ: { name: 'cascada', solid: true, anim: true },
   ϸ: { name: 'piscina de la sala', solid: true },
   Ϲ: { name: 'pasarela' },
@@ -2430,3 +2439,64 @@ export function buildTileset(onProgress) {
   });
   for (const [theme, set] of Object.entries(THEMES)) for (const ch of Object.keys(set)) tileCanvas(ch, 0, theme);
 }
+
+// ---- Maldonado: Casapueblo, lighthouse and the sea route
+Object.assign(DRAW, {
+  // white stucco wall with a round porthole window and a cobalt trim
+  'ӟ': (g) => {
+    px(g, 0, 0, '#f6f2e8', T, T); px(g, 0, 0, '#ffffff', T, 2);
+    for (let y = 3; y < T; y += 5) px(g, 0, y, '#e6dfcf', T, 1);
+    blob(g, 8, 8, 4.6, 4.6, '#2a5aa8'); blob(g, 8, 8, 3.6, 3.6, '#6ab0e8'); blob(g, 7, 7, 1.6, 1.4, '#c4e4f8');
+    px(g, 0, T - 1, '#cfc7b2', T, 1);
+  },
+  // rolling white roof with terracotta tiles
+  'Ӡ': (g) => {
+    px(g, 0, 0, '#f2ece0', T, T);
+    for (const [x, w] of [[0, 6], [5, 6], [10, 6]]) { blob(g, x + w / 2, 6, w / 2 + 0.4, 5, '#ffffff'); blob(g, x + w / 2, 7, w / 2 - 0.4, 4, '#e8e0d0'); }
+    px(g, 0, 11, '#c8603a', T, 3); px(g, 0, 11, '#e07a4a', T, 1);
+    for (let x = 1; x < T; x += 3) px(g, x, 12, '#9a4426', 1, 2);
+    px(g, 0, 14, '#cfc7b2', T, 2);
+  },
+  // wall with a large arched door-like recess
+  'ӡ': (g) => {
+    px(g, 0, 0, '#f6f2e8', T, T); px(g, 0, 0, '#ffffff', T, 2);
+    px(g, 3, 5, '#2a5aa8', 10, 11); blob(g, 8, 6, 5, 3.6, '#2a5aa8');
+    px(g, 4, 6, '#3a2a1a', 8, 10); blob(g, 8, 6.5, 4, 3, '#3a2a1a');
+    px(g, 7, 8, '#5a3a22', 2, 8); px(g, 0, T - 1, '#cfc7b2', T, 1);
+  },
+  // lighthouse: striped tower base
+  'Ӧ': (g) => {
+    px(g, 4, 0, '#2a2a30', 8, T); px(g, 5, 0, '#f4f0e6', 6, T);
+    for (let y = 2; y < T; y += 8) px(g, 5, y, '#c8403a', 6, 4);
+    px(g, 5, 0, '#ffffff', 1, T); px(g, 10, 0, '#cfc7b2', 1, T);
+    px(g, 3, T - 2, '#2a2a30', 10, 2); px(g, 4, T - 2, '#8a8478', 8, 1);
+  },
+  // lighthouse: lamp room and cap
+  'ӧ': (g) => {
+    px(g, 4, 9, '#2a2a30', 8, 7); px(g, 5, 10, '#f4f0e6', 6, 6); px(g, 5, 10, '#ffffff', 1, 6);
+    px(g, 3, 8, '#2a2a30', 10, 2); px(g, 3, 8, '#6a6a78', 10, 1);
+    px(g, 5, 4, '#2a2a30', 6, 4); px(g, 6, 5, '#f8e860', 4, 2); px(g, 7, 5, '#ffffff', 1, 1);
+    px(g, 6, 2, '#2a2a30', 4, 2); px(g, 7, 1, '#2a2a30', 2, 1); px(g, 6, 2, '#c8403a', 4, 1);
+  },
+  // rock reef in the water: dark jagged rocks with foam at the base
+  'Ӥ': (g, r, f) => {
+    DRAW['~'](g, r, f);
+    blob(g, 6, 9.5, 5.4, 4.4, '#2a2630'); blob(g, 6, 9, 4.6, 3.6, '#6a6670'); blob(g, 5, 7.8, 2.6, 1.8, '#8e8a96');
+    blob(g, 11.5, 8.5, 3.6, 3.2, '#2a2630'); blob(g, 11.5, 8, 2.8, 2.4, '#5a5662'); blob(g, 11, 7, 1.4, 1, '#8e8a96');
+    const w = f % 2; px(g, 1 + w, 13, '#f4f8fc', 5, 1); px(g, 9 - w, 12, '#f4f8fc', 5, 1); px(g, 2, 14, '#dcecfa', 11 - w, 1);
+  },
+  // deep sea: darker water that cannot be sailed (marks the edges of the sea route)
+  'ӫ': (g, r, f) => {
+    px(g, 0, 0, '#245f9e', T, T);
+    for (let y = 3; y < T; y += 6) { const o = (f * 2 + y * 3) % 10; px(g, o + 1, y, '#3a7cc0', 4, 1); px(g, (o + 8) % T, y + 3, '#1c4e86', 3, 1); }
+  },
+  // channel buoy: red and white floating marker
+  'Ӣ': (g, r, f) => {
+    DRAW['~'](g, r, f);
+    const bob = f % 2;
+    px(g, 4, 12 + bob, '#dcecfa', 8, 1);
+    blob(g, 8, 9 + bob, 3.6, 4, '#1a1a22'); blob(g, 8, 9 + bob, 2.8, 3.2, '#e0263a');
+    px(g, 5, 9 + bob, '#f4f4f4', 6, 2); px(g, 6, 7 + bob, '#ff7a7a', 2, 1);
+    px(g, 7, 2 + bob, '#3a3a44', 2, 4); px(g, 7, 1 + bob, '#f8e860', 2, 2);
+  },
+});
