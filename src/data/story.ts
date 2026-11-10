@@ -89,7 +89,7 @@ export const LEADERS = {
   ose: {
     order: 6, id: 'leader_ose', name: 'Lucía', cls: 'Presidenta de OSE', look: 'leader_ose', ai: 'smart', items: ['mate'],
     team: [['lobito', 15], ['mbigua', 16], ['carpincho', 18]], prize: 2200, badge: 'badge6', badgeName: 'Medalla Maldonado', reward: 'superesfera', rewardQty: 2, tm: 'mt_cascada',
-    intro: ['Bienvenido a Punta del Este. Soy Lucía, presidenta de OSE.', 'Obras Sanitarias del Estado lleva el agua potable a cada casa del país, y la cuida como un tesoro.', 'Veamos si resistís la corriente.'],
+    intro: ['Bienvenido a Maldonado. Soy Lucía, presidenta de OSE.', 'Obras Sanitarias del Estado lleva el agua potable a cada casa del país, y la cuida como un tesoro.', 'Veamos si resistís la corriente.'],
     lose: 'Me superaste. Fue una derrota limpia.',
     after: ['La Medalla Maldonado es tuya.', 'Siguiendo hacia el interior, en Minas, una fábrica abandonada volvió a funcionar.', 'Garúa está detrás. Llevá el machete: hay zarzales.'],
   },
@@ -653,25 +653,9 @@ export const SCRIPTS = {
     api.sfx('confirm');
   },
 
+  // The machine is a mini game with no text (game/minigames.ts): the script only opens it.
   async casino_slots(api) {
-    const SYM = ['Mate', 'Mate', 'Mate', 'Mate', 'Mate', 'Ceibo', 'Ceibo', 'Ceibo', 'Ceibo', 'Sol', 'Sol', 'Siete'];
-    const PAY = { Mate: 4, Ceibo: 8, Sol: 40, Siete: 150 };
-    await api.say('Tragamonedas. Tres iguales pagan; Siete Siete Siete es el premio mayor.', { name: 'Máquina' });
-    for (;;) {
-      const have = api.countItem('ficha');
-      const r = await api.choose(['Apostar 1 ficha', 'Apostar 2 fichas', 'Apostar 3 fichas', 'Salir'], { cancel: true, title: `Fichas: ${have}` });
-      if (r < 0 || r > 2) return;
-      const bet = r + 1;
-      if (!api.hasItem('ficha', bet)) return api.say('No tenés fichas suficientes.', { name: 'Máquina' });
-      api.takeItem('ficha', bet);
-      const reels = [0, 0, 0].map(() => SYM[Math.floor(Math.random() * SYM.length)]);
-      api.sfx('confirm');
-      let win = 0;
-      if (reels[0] === reels[1] && reels[1] === reels[2]) win = PAY[reels[0]] * bet;
-      else if (reels[0] === 'Mate' && reels[1] === 'Mate') win = bet;
-      await api.say(`[ ${reels.join(' | ')} ]`, { name: 'Máquina' });
-      if (win) { await api.give('ficha', win); api.sfx('confirm'); await api.say(`¡Ganaste ${win} ficha${win > 1 ? 's' : ''}!`, { name: 'Máquina' }); }
-    }
+    await api.slots();
   },
 
   async casino_prizes(api) {
@@ -834,7 +818,7 @@ export const SCRIPTS = {
 
   async ferry_bio(api) {
     if (api.flag('ferry_bio')) return api.say('Cuando la ballena canta, hasta el motor del barco parece callarse.', { name: 'Biólogo' });
-    await api.say(['Soy biólogo marino. Viajo para estudiar a la criatura que canta frente a Punta del Este.', 'Mirá estas fotos: una ballena enorme, de color plata, que solo aparece en invierno.'], { name: 'Biólogo' });
+    await api.say(['Soy biólogo marino. Viajo para estudiar a la criatura que canta frente a Maldonado.', 'Mirá estas fotos: una ballena enorme, de color plata, que solo aparece en invierno.'], { name: 'Biólogo' });
     api.markSeen('ballenaplata');
     api.setFlag('ferry_bio');
     api.sfx('confirm');
@@ -1289,7 +1273,7 @@ export const SCRIPTS = {
     await api.say(fogs === 3 ? ['Las tres máquinas quedaron apagadas del todo. Un año difícil para el campo, pero el cielo volvió a ser de nadie.']
       : fogs === 0 ? ['Dejaste que algunas máquinas siguieran a cargo de los pueblos. El cielo sigue pidiendo permiso, pero nadie perdió la cosecha.']
         : ['Algunos pueblos pasaron un año difícil y otros siguen con la red de niebla. Nadie quedó del todo conforme, y todos entendieron por qué.']);
-    await api.say(['Algunas semanas después, en Carmelo.', 'Se habla de criaturas legendarias avistadas en el país:', 'un viento helado en la Quebrada, un canto en la costa de Punta del Este.', 'Tu aventura continúa.']);
+    await api.say(['Algunas semanas después, en Carmelo.', 'Se habla de criaturas legendarias avistadas en el país:', 'un viento helado en la Quebrada, un canto en la costa de Maldonado.', 'Tu aventura continúa.']);
   },
   // A guard who asks a riddle before letting you through (placed on routes by addRouteStory).
   async route_riddle(api, npc) {

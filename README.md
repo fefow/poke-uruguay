@@ -47,7 +47,7 @@ Copy `dist/` to any static host (nginx, Caddy…). Serve it over HTTPS so the of
 
 ### Content
 
-- 8 regions: Colonia, Ruta 1, Montevideo (Rambla, Palacio Salvo, Estadio Centenario), Ruta Interbalnearia, Punta del Este (La Mano), Cabo Polonio, Ruta 8, Treinta y Tres / Quebrada de los Cuervos. 17 interiors.
+- 8 regions: Colonia, Ruta 1, Montevideo (Rambla, Palacio Salvo, Estadio Centenario), Ruta Interbalnearia, Maldonado (La Mano), Cabo Polonio, Ruta 8, Treinta y Tres / Quebrada de los Cuervos. 17 interiors.
 - 42 creatures across 13 types, 3 starters (Ceibito, Tejuchispa, Carpinchito), evolutions, 60+ moves (Danza Candombe, Mate Amargo, Garra Charrúa, Rayo Pampero…).
 - Items with local flavor: Té de Marcela, Mate, Dulce de Leche, Chivito, Alfajor, Torta Frita, Garrapiñada.
 - Story: rival Facu, Maestro Tabárez, three gym leaders, Equipo PP (Bruma, Brumario, Garúa), Champion Obdulio, hall of fame, credits, post-game legendaries (Pamperón, Ballenaplata, Soldemayo).

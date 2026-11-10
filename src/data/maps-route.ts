@@ -160,7 +160,7 @@ const DEPT_FOLK = {
   cerrolargo: ['La Laguna Merín está cerca y de ahí viene medio mundo a pescar.', 'En el campo de Cerro Largo hay más ovejas que gente.', 'Melo es ciudad de frontera: cuando uno cruza, sigue todo igual pero con otro acento.'],
   treintaytres: ['Cerca de acá hay quebradas y cascadas en medio de las sierras.', 'Treinta y Tres se llama así por los Treinta y Tres Orientales, y a mucha honra.', 'Los arrozales se ven como espejos cuando los inundan.'],
   rocha: ['Rocha es de playas largas y desiertas, con dunas y lobos marinos.', 'En verano llega mucha gente de Argentina y Brasil. En invierno quedan los de acá.', 'Los pescadores salen antes del amanecer y vuelven con la red llena.'],
-  maldonado: ['Punta del Este tiene la Mano más fotografiada del país.', 'En la temporada los precios suben más que la marea.', 'Los lobos marinos de la isla se oyen desde el puerto.'],
+  maldonado: ['Maldonado tiene la Mano más fotografiada del país.', 'En la temporada los precios suben más que la marea.', 'Los lobos marinos de la isla se oyen desde el puerto.'],
   lavalleja: ['Las sierras de Minas están llenas de arroyos y cerros para trepar.', 'Acá se hace la mejor agua mineral del país.', 'En abril hay peregrinación al Cerro Verdún.'],
   florida: ['En Florida se firmó la independencia; acá la historia está en las calles.', 'La plaza tiene un monumento para cada fecha importante.', 'Los carnavales de los pueblos de al lado son ruidosos y alegres.'],
   durazno: ['El Río Negro cruza por el medio de Durazno y hace una isla en la ciudad.', 'Acá se realiza una fiesta nacional del folklore que no se la pierde nadie.', 'Durazno queda al centro del país: de acá todo está a la misma distancia.'],

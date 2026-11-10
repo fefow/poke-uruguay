@@ -166,12 +166,12 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
       '#~~~~~~~~~~~~~~~~~~~~~~~~~~#',
       '############################',
     ],
-    signs: ['RUTA INTERBALNEARIA\n← Montevideo   Punta del Este →\nAtlántida, Piriápolis y la costa de oro.'],
+    signs: ['RUTA INTERBALNEARIA\n← Montevideo   Maldonado →\nAtlántida, Piriápolis y la costa de oro.'],
     exits: { w: { to: 'montevideo' }, e: { to: 'piriapolis' } },
     enc: { rate: 0.12, list: [['cardo', 11, 13, 6], ['comadreja', 10, 13, 22], ['pejerrey', 10, 12, 8], ['mulitin', 10, 13, 18], ['teruterito', 11, 13, 15], ['benteve', 11, 13, 15], ['yararita', 10, 12, 14], ['venadito', 11, 13, 10], ['mbigua', 12, 13, 6], ['gaviota', 11, 13, 12], ['cangrejo', 11, 13, 10], ['oveja', 10, 12, 12], ['chimango', 12, 13, 6], ['nimbo', 11, 13, 6], ['lechuza', 11, 13, 6], ['pibe', 11, 13, 6], ['coati', 11, 13, 6]] },
     fish: [['pejerrey', 11, 13, 50], ['aguaviva', 11, 13, 30], ['anguila', 12, 13, 20]],
     npcs: [
-      { x: 8, y: 4, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('ib_a', 'Santi', 'Surfista', [['mbigua', 13], ['lobito', 13]], 260, 'Las olas en La Paloma están muy buenas, pero primero un combate.', 'Me revolcaron.', 'Andá a Punta del Este: ahí está el segundo gimnasio.', 'swimmer') },
+      { x: 8, y: 4, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('ib_a', 'Santi', 'Surfista', [['mbigua', 13], ['lobito', 13]], 260, 'Las olas en La Paloma están muy buenas, pero primero un combate.', 'Me revolcaron.', 'Andá a Maldonado: ahí está el segundo gimnasio.', 'swimmer') },
       { x: 16, y: 7, look: 'girl', dir: 'left', sight: 4, trainer: TR('ib_b', 'Valentina', 'Campista', [['butia', 12], ['benteve', 13]], 220, 'Acampé en Atlántida toda la semana.', 'Perdí.', 'Comprá Repelente si querés evitar a las criaturas de los pastizales.', 'girl') },
       { x: 24, y: 11, look: 'gaucho', dir: 'up', sight: 4, trainer: TR('ib_c', 'Don Rufino', 'Gaucho', [['mulitin', 13], ['nandulin', 13], ['zorrigris', 14]], 300, 'Nadie pasa sin enfrentarme primero.', 'Buen combate.', 'Contra la Mulita, nada mejor que el agua.', 'gaucho') },
       { x: 5, y: 13, look: 'boy', text: ['Esa niebla no es natural. Unos hombres de gris la generan con máquinas.', 'Se hacen llamar Equipo PP.'] },
@@ -180,7 +180,7 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
   },
 
   punta: {
-    name: 'Punta del Este',
+    name: 'Maldonado',
     music: 'town',
     bg: 'beach',
     tiles: [
@@ -203,7 +203,7 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
       '############################',
     ],
     doors: ['gym_pde', 'poli_pde', 'shop_pde'],
-    signs: ['PUNTA DEL ESTE\nPlaya Brava ↓ — Puerto ↘\n"Los Dedos" esperan en la arena.'],
+    signs: ['MALDONADO\nPlaya Brava ↓ — Puerto ↘\n"Los Dedos" esperan en la arena.'],
     exits: { w: { to: 'piriapolis' }, e: { to: 'paloma' } },
     enc: { rate: 0.1, list: [['mbigua', 14, 16, 30], ['benteve', 14, 16, 25], ['lobito', 14, 16, 15], ['cotorrayo', 15, 16, 15], ['teruterazo', 16, 17, 5], ['flamenco', 15, 17, 6], ['tarantula', 15, 17, 8], ['gaviota', 15, 17, 8], ['hormiguero', 14, 16, 8]] },
     fish: [['aguaviva', 15, 17, 40], ['pejerrey', 15, 17, 30], ['franciscana', 16, 17, 15], ['anguila', 15, 17, 15]],
@@ -472,7 +472,7 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
     npcs: [
       { x: 14, y: 9, look: 'swimmer', dir: 'down', sight: 3, trainer: TR('pir_a', 'Mauro', 'Guardavidas', [['gaviota', 13], ['aguaviva', 13]], 260, 'Estoy de guardia, pero un combate no le hace mal a nadie.', 'Buen combate.', 'Cuidado con las aguavivas: dejan ronchas.', 'swimmer') },
       { x: 10, y: 6, look: 'girl', dir: 'right', sight: 4, trainer: TR('pir_b', 'Elena', 'Turista', [['flamenco', 14]], 280, 'Vine a ver el atardecer y encontré un rival.', 'Qué lástima.', 'Dicen que en La Paloma las olas son excelentes.', 'girl') },
-      { x: 24, y: 4, look: 'oldman', wander: true, text: ['Desde la cima del cerro se ve toda la costa.', 'El mar acá es más calmo que en Punta del Este.'] },
+      { x: 24, y: 4, look: 'oldman', wander: true, text: ['Desde la cima del cerro se ve toda la costa.', 'El mar acá es más calmo que en Maldonado.'] },
       { x: 6, y: 9, look: 'boy', text: ['Mi abuelo dice que en el mar de Piriápolis se ven toninas en verano.'] },
     ],
     items: [{ x: 15, y: 2, item: 'superesfera', id: 'pir_item1' }],
@@ -696,9 +696,10 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     npcs: [{ x: 6, y: 3, look: 'gaucho', dir: 'left', script: 'gift_min' }, { x: 3, y: 5, look: 'oldman', dir: 'right', script: 'gift_cana2' }],
   }),
   poli_mvd: poli('Policlínica de Montevideo'),
-  poli_pde: poli('Policlínica de Punta del Este'),
-  casino_pde: room(['xxXxxxxXxx', 'BBiiiiiiBB', 'iiiiiiiiii', 'nnniiiinnn', 'iiiiiiiiii', 'iPiPiiPiPi', 'iiiiiiiiii', 'iiiimmiiii'], {
+  poli_pde: poli('Policlínica de Maldonado'),
+  casino_pde: room(['xXxXxxXxXx', 'BBiiiiiiBB', 'iiiiiiiiii', 'nnniTTinnn', 'iiiiiiiiii', 'iPiPiiPiPi', 'iiiiiiiiii', 'iiiimmiiii'], {
     name: 'Casino Peninsula',
+    theme: 'casino',
     npcs: [
       { x: 1, y: 2, look: 'clerk', dir: 'down', script: 'casino_cashier' },
       { x: 8, y: 2, look: 'clerk', dir: 'down', script: 'casino_prizes' },
@@ -708,7 +709,7 @@ const BASE_INTERIOR: Record<string, MapDef> = {
   }),
   poli_tyt: poli('Policlínica de Treinta y Tres'),
   shop_mvd: shop('Almacén de Montevideo', ['esfera', 'te_marcela', 'mate', 'ruda', 'linimento', 'aloe', 'despertador', 'repelente']),
-  shop_pde: shop('Almacén de Punta del Este', ['esfera', 'superesfera', 'te_marcela', 'mate', 'mate_dulce', 'ruda', 'linimento', 'aloe', 'despertador', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa']),
+  shop_pde: shop('Almacén de Maldonado', ['esfera', 'superesfera', 'te_marcela', 'mate', 'mate_dulce', 'ruda', 'linimento', 'aloe', 'despertador', 'alfajor', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa']),
   shop_tyt: shop('Almacén de Treinta y Tres', ['superesfera', 'ultraesfera', 'mate', 'mate_dulce', 'dulce_de_leche', 'chivito', 'alfajor', 'torta_frita', 'ruda', 'linimento', 'aloe', 'despertador', 'repelente', 'refuerzo_ataque', 'refuerzo_defensa', 'refuerzo_especial', 'refuerzo_velocidad', 'piedra_agata', 'piedra_amatista', 'piedra_basalto', 'mt_terremoto', 'mt_zumbido']),
   gym_mvd: room(GYM, {
     name: 'Palacio de la Luz (UTE)',
@@ -721,13 +722,13 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     ],
   }),
   gym_pde: room(GYM, {
-    name: 'Planta de OSE (Punta del Este)',
+    name: 'Planta de OSE (Maldonado)',
     theme: 'gym_agua',
     npcs: [
       { x: 5, y: 2, look: 'leader_ose', dir: 'down', script: 'leader', leader: 'ose' },
       { x: 8, y: 6, look: 'swimmer', dir: 'left', sight: 4, trainer: TR('g2_a', 'Bruno', 'Operario de OSE', [['lobito', 14], ['lobito', 14]], 340, 'Cuido que el agua llegue limpia a cada canilla.', 'Se me rompió la cañería.', 'Lucía conoce cada cañería del país.', 'swimmer') },
       { x: 3, y: 9, look: 'girl', dir: 'right', sight: 4, trainer: TR('g2_b', 'Romina', 'Técnica de OSE', [['mbigua', 15]], 360, 'Analizo el agua todos los días.', 'Perdí.', 'Las criaturas de tipo Planta o Eléctrico le hacen daño al agua.', 'girl') },
-      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Planta de OSE de Punta del Este.', 'Lucía usa tipo Agua. Planta y Eléctrico tienen ventaja.'] },
+      { x: 6, y: 10, look: 'oldman', dir: 'down', text: ['Planta de OSE de Maldonado.', 'Lucía usa tipo Agua. Planta y Eléctrico tienen ventaja.'] },
     ],
   }),
   gym_tyt: room(GYM, {

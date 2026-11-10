@@ -236,8 +236,8 @@ export const CITY_SPECS = {
     bld: [['poli', 'poli_rocha', [20, 16]], ['shop', 'shop_rocha', [44, 16]], ['house', 'casa_rocha', [8, 16]], ['houseG', 'casa_rocha2', [54, 16]]],
     fill: 14,
   },
-  // Maldonado / Punta del Este: a peninsula with the rambla, La Mano rising from the sand, the port with boats.
-  // Punta del Este (64x42): the peninsula. The Rambla runs along the beach, the marina with moored boats opens to the
+  // Maldonado: a peninsula with the rambla, La Mano rising from the sand, the port with boats.
+  // Maldonado (64x42): the peninsula. The Rambla runs along the beach, the marina with moored boats opens to the
   // north-east, the casino stands on the avenue and the water gym sits near the sea wall.
   punta: {
     theme: 'arena',
