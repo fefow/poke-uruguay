@@ -196,9 +196,27 @@ export function addMaldonado(outdoor: Record<string, any>, all: Record<string, a
   put(61, 26, 'ӧ'); put(61, 27, 'Ӧ');
   // parasols on the beach
   for (const [x, y] of [[12, 29], [24, 29], [26, 29], [40, 29], [42, 29], [46, 29], [11, 30], [28, 30], [44, 30]]) if (g[y][x] === 's') put(x, y, 'Ж');
-  // the mouth of the channel: a gap in the south wall flanked by buoys
-  for (let x = SEA_GAP[0]; x <= SEA_GAP[1]; x++) put(x, H - 1, '~');
-  for (const [x, y] of [[SEA_GAP[0] - 1, 36], [SEA_GAP[1] + 1, 36], [SEA_GAP[0] - 1, 33], [SEA_GAP[1] + 1, 33]]) if (g[y][x] === '~') put(x, y, 'Ӣ');
+  // The sea is closed: the south bay is deep water with rocks, except one marked route from the beach to the opening in
+  // the south wall (flanked by buoys). The marina keeps its boats but is fenced off from the shore by rocks.
+  const [g0, g1] = SEA_GAP, rr = rng('maldonado-mar');
+  for (let y = 31; y < H - 1; y++) for (let x = 1; x < g[0].length - 1; x++) {
+    if (g[y][x] !== '~') continue;
+    const inRoute = x >= g0 && x <= g1;
+    const flank = x === g0 - 1 || x === g1 + 1;
+    g[y][x] = inRoute ? '~' : y === 31 || flank || rr() < 0.14 ? REEF : DEEP;
+  }
+  for (let x = g0; x <= g1; x++) put(x, H - 1, '~');
+  for (const y of [33, 36, 39]) { put(g0, y, BUOY); put(g1, y, BUOY); }
+  const landy = (c: string | undefined) => c !== undefined && !['~', '#', 'β', REEF, DEEP, BUOY].includes(c);
+  for (let y = 1; y <= 16; y++) for (let x = 46; x < g[0].length - 1; x++) {
+    if (g[y][x] === '~' && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => landy(g[y + dy]?.[x + dx]))) g[y][x] = REEF;
+  }
+  // the swimmers of the bay wait in the route (two at least)
+  const swimmers = (m.npcs ?? []).filter((n: any) => n.look === 'swimmer').slice(0, 2);
+  m.npcs = (m.npcs ?? []).filter((n: any) => n.look !== 'swimmer');
+  const [lo0, hi0] = stopBand(STOP_INDEX.punta);
+  while (swimmers.length < 2) swimmers.push(tr({ x: 0, y: 0, dir: 'up' }, 'swimmer', `sw_punta_${swimmers.length}`, ['Ramiro', 'Camila'][swimmers.length], 'Nadador', ['agua'], [Math.max(2, hi0 - 2), hi0], LINES[swimmers.length], { dir: 'up', sight: 4 }));
+  swimmers.forEach((n: any, k: number) => { n.x = k ? 33 : 30; n.y = k ? 38 : 34; n.dir = 'up'; n.wander = false; (m.npcs as any[]).push(n); });
   // a sign on the beach and one at Casapueblo, spliced in reading order so each sign keeps its own text
   const signs: string[] = [...(m.signs ?? [])];
   const addSign = (x: number, y: number, text: string) => {

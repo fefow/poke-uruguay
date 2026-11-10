@@ -189,7 +189,7 @@ export function loadMap(id, x, y, dir = 'down') {
   for (const e of (m as any).flagTiles ?? []) if (S.flags[e.flag]) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
   // Scenery that is only there for a while (e.g. the Fiesta de la Patria Gaucha): m.condTiles = [{ cond, x, y, ch }]
   for (const e of (m as any).condTiles ?? []) if (e.cond()) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
-  if (changed) { W_.npcs = []; W_.lit = false; }
+  if (changed) { W_.npcs = []; W_.lit = hasItem('farol') && !!flag(badgeOf('punta')); } // the Farol lights dark maps by itself
   // The bicycle is never used indoors, and bike-only zones put you on it.
   if (m.indoor) W_.bike = false;
   else if (m.bikeOnly && hasItem('bici')) W_.bike = true;
