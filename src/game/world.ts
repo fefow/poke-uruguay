@@ -7,7 +7,7 @@ import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim, drawGroundEdges } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
@@ -1667,7 +1667,7 @@ function drawWorld(g, t) {
     const row = W_.tiles[y];
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme)), x * T - cx, y * T - cy);
   }
-  if (!m.indoor) drawBuildingTrim(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme);
+  if (!m.indoor) { drawGroundEdges(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme); drawBuildingTrim(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme); }
   if (!m.indoor) { drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy); drawCastShadows(g, x0, y0, x1, y1, cx, cy); }
   // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
   {
