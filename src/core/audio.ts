@@ -412,11 +412,13 @@ export const TRACKS = {
     bass: 'A2 2 A2 2 A2 2 A2 2 A2 2 A2 2 A2 2 A2 2 G2 2 G2 2 G2 2 G2 2 G2 2 G2 2 G2 2 G2 2',
     drums: 'k-s-k-s-kks-k-s-',
   },
+  // Casino lounge: slow, soft, jazzy chords (Cmaj7 Am7 Dm7 G7 Em7 A7 Dm7 G7) with a walking bass and light brushes.
   casino: {
-    bpm: 150,
-    lead: 'C5 1 E5 1 G5 1 E5 1 C5 1 E5 1 G5 1 C6 1 A5 1 F5 1 A5 1 C6 1 B5 1 G5 1 D5 1 G5 1',
-    bass: 'C3 2 G2 2 C3 2 G2 2 F2 2 C3 2 G2 2 G2 2',
-    drums: 'k-h-s-h-k-h-s-h-',
+    bpm: 84,
+    duty: 0.5,
+    lead: 'E5 3 D5 1 C5 2 G4 2 A4 3 C5 1 E5 4 F5 3 E5 1 D5 2 A4 2 D5 3 B4 1 G4 4 G5 3 E5 1 B4 2 D5 2 C#5 3 E5 1 A5 4 F5 3 D5 1 A4 4 B4 2 D5 2 C5 4',
+    bass: 'C3 2 E3 2 G3 2 E3 2 A2 2 C3 2 E3 2 C3 2 D3 2 F3 2 A3 2 F3 2 G2 2 B2 2 D3 2 B2 2 E2 2 G2 2 B2 2 G2 2 A2 2 C#3 2 E3 2 C#3 2 D3 2 F3 2 A3 2 F3 2 G2 2 B2 2 C3 4',
+    drums: 'k---h---k---h-h-',
   },
   ferry: {
     bpm: 108,

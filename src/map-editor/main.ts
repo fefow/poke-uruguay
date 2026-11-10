@@ -273,7 +273,7 @@ function renderInspector() {
   if (sel.type === 'npc') {
     rows.push(h('p', {}, h('b', { text: r.name ?? KIND_NAME[r.kind] }), ` · ${KIND_NAME[r.kind]} · casilla ${r.x},${r.y}`));
     if (r.kind === 'added') {
-      const look = h('select', { class: 'ed-input', onchange: () => edit(() => { r.look = look.value; }) },
+      const look = h('select', { class: 'ed-input', onchange: () => { if (look.value === 'swimmer' && S.W.tiles[r.y]?.[r.x] !== '~') { look.value = r.look; status('El nadador solo puede estar sobre agua: movelo al agua primero.', 'warn'); return; } edit(() => { r.look = look.value; }); } },
         Object.keys(LOOKS).map((k) => h('option', { value: k, text: k, selected: k === r.look })));
       rows.push(h('label', { class: 'me-field' }, 'Aspecto', look));
       const wander = h('input', { type: 'checkbox', checked: r.wander, onchange: () => edit(() => { r.wander = wander.checked; }) });
@@ -463,8 +463,23 @@ function freeSpot() {
   }
   return [cx, cy];
 }
+/** Closest free water tile to the centre of the map (swimmers can only stand on water), or null. */
+function waterSpot(): [number, number] | null {
+  const W = S.W;
+  const cy = Math.floor(W.tiles.length / 2), cx = Math.floor(W.tiles[0].length / 2);
+  for (let r = 0; r < Math.max(W.tiles.length, W.tiles[0].length); r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+    const x = cx + dx, y = cy + dy;
+    if (W.tiles[y]?.[x] === '~' && !occupied(x, y)) return [x, y];
+  }
+  return null;
+}
 function addNpc() {
-  const [x, y] = freeSpot();
+  let [x, y] = freeSpot();
+  if (addLook.value === 'swimmer') {
+    const w = waterSpot();
+    if (!w) { status('Este mapa no tiene agua: el nadador solo puede estar sobre agua.', 'warn'); return; }
+    [x, y] = w;
+  }
   edit(() => {
     const n = { key: null, kind: 'added', x, y, look: addLook.value, dir: 'down', text: ['Hola.'], wander: false };
     S.W.npcs.push(n);
@@ -550,7 +565,8 @@ canvas.addEventListener('pointermove', (ev) => {
   }
   if (S.painting && c && S.tool === 'paint') setTile(c.x, c.y, S.tile);
   if (S.drag && c && (c.x !== S.drag.ref.x || c.y !== S.drag.ref.y)) {
-    if (!SOLID(S.W.tiles[c.y][c.x]) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
+    if (S.drag.ref.look === 'swimmer' && S.W.tiles[c.y][c.x] !== '~') status('El nadador solo puede estar sobre agua.', 'warn');
+    else if (!SOLID(S.W.tiles[c.y][c.x]) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
   }
   draw();
 });
@@ -591,6 +607,7 @@ function runChecks() {
   const out = [];
   const npcs = W.npcs.filter((n) => !n.removed), items = W.items.filter((i) => !i.removed);
   for (const n of npcs) if (SOLID(at(n.x, n.y)) && n.look !== 'ball' && n.look !== null) out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} está parado sobre algo que no se pisa.` });
+  for (const n of npcs) if (n.look === 'swimmer' && at(n.x, n.y) !== '~') out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} es un nadador y está en tierra: tiene que estar sobre agua.` });
   for (const it of items) if (SOLID(at(it.x, it.y))) out.push({ x: it.x, y: it.y, msg: `${ITEMS[it.item]?.name ?? it.item} está sobre algo que no se pisa.` });
   const pass = (x, y) => { const t = at(x, y); return t !== undefined && (!SOLID(t) || t === '%' || t === '~' || t === '\\'); };
   let starts = [];

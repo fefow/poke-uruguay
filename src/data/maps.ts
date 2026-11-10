@@ -703,7 +703,9 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     npcs: [
       { x: 1, y: 2, look: 'clerk', dir: 'down', script: 'casino_cashier' },
       { x: 8, y: 2, look: 'clerk', dir: 'down', script: 'casino_prizes' },
-      ...[1, 3, 6, 8].map((x) => ({ x, y: 5, look: null, script: 'casino_slots' })),
+      ...[1, 3, 8].map((x) => ({ x, y: 5, look: null, script: 'casino_slots' })),
+      { x: 6, y: 5, look: null, text: ['La máquina está ocupada: el señor de al lado la está usando.'] },
+      { x: 6, y: 6, look: 'turista', dir: 'up', text: ['Tres líneas, las diagonales y un poco de suerte.', 'Hace rato que me debe un Siete. No me muevo de esta máquina.'] },
       { x: 4, y: 4, look: 'oldman', wander: true, text: ['Siete años sin ganar un Siete. Hoy es mi día.'] },
     ],
   }),

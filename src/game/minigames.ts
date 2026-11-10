@@ -234,40 +234,50 @@ function symbol(g: CanvasRenderingContext2D, k: Sym, cx: number, cy: number) {
   }
 }
 
+/** The five lines of the machine: for each reel, the row (0 top, 1 middle, 2 bottom) that counts. */
+const LINES: number[][] = [[1, 1, 1], [0, 0, 0], [2, 2, 2], [0, 1, 2], [2, 1, 0]];
+const LINE_STEPS = [1, 3, 5]; // 1 = the middle line, 3 = the three rows, 5 = the three rows and both diagonals
+
 /**
- * The tragamonedas, played inside the machine: A turns the reels and then stops them one by one, up and down change
- * the bet, B steps away. The result is decided when the reels start (so the prize table is fair) and the stops are
- * only for show. Nothing is written: lamps, reels and falling coins do the talking.
+ * The tragamonedas, played inside the machine: A turns the reels and then stops them one by one, up and down choose how
+ * many lines play (1, 3 or 5: the rows and both diagonals, a ficha per line), B steps away. The whole 3x3 window is
+ * drawn when the reels start, each line paying like a single line always did, so the odds stay fair; the stops are only
+ * for show. Nothing is written: lamps, reels and falling coins do the talking.
  */
 export function slots(wallet: { count(): number; take(n: number): void; give(n: number): void }): Promise<void> {
   return new Promise((resolve) => {
     const { box, g } = stage('', '', SW, SH);
-    type Reel = { pos: number; mode: 'idle' | 'spin' | 'stop'; target: number; speed: number; sym: Sym };
-    const reels: Reel[] = [0, 1, 2].map((i) => ({ pos: i * 3, mode: 'idle', target: 0, speed: 0, sym: STRIP[(i * 3) % STRIP.length] }));
+    type Reel = { pos: number; mode: 'idle' | 'spin' | 'stop'; target: number; speed: number; rows: Sym[]; pins: Map<number, Sym> };
+    const reels: Reel[] = [0, 1, 2].map((i) => ({ pos: i * 3, mode: 'idle', target: 0, speed: 0, rows: ['mate', 'mate', 'mate'], pins: new Map() }));
     let phase: 'ready' | 'spin' | 'result' = 'ready';
-    let bet = 1, t = 0, spinT = 0, resultT = 0, win = 0, shown = wallet.count(), noChips = 0, over = false, raf = 0, last = performance.now();
-    let hit: 'none' | 'two' | 'three' = 'none';
+    let nLines = 1, t = 0, spinT = 0, resultT = 0, win = 0, shown = wallet.count(), noChips = 0, over = false, raf = 0, last = performance.now();
+    let hit: 'none' | 'two' | 'three' = 'none', winning: number[] = [], jackpot = false;
     const coins: { x: number; y: number; vx: number; vy: number; life: number }[] = [];
     const RH = 22, CX = [44, 80, 116], CY = 59;
+    const rowY = (r: number) => CY + (r - 1) * RH;
     const wrap = (n: number) => ((n % STRIP.length) + STRIP.length) % STRIP.length;
     const finish = () => { if (over) return; over = true; cancelAnimationFrame(raf); pop(); box.remove(); resolve(); };
+    // the three symbols that stay on screen when a reel lands are pinned to their strip rows, so the next spin starts from what you saw
     const stopReel = (i: number) => {
       const r = reels[i];
       if (r.mode !== 'spin') return;
-      // land on the next strip row, at least four rows ahead, that shows the symbol of the result
-      let tg = Math.ceil(r.pos) + 4;
-      while (STRIP[wrap(tg)] !== r.sym) tg++;
-      r.target = tg; r.mode = 'stop';
+      r.target = Math.ceil(r.pos) + 4;
+      r.pins.set(r.target + 1, r.rows[0]); r.pins.set(r.target, r.rows[1]); r.pins.set(r.target - 1, r.rows[2]);
+      r.mode = 'stop';
     };
     const settle = () => {
-      const [a, b, c] = reels.map((r) => r.sym);
-      win = 0; hit = 'none';
-      if (a === b && b === c) { win = PAY[a] * bet; hit = 'three'; } else if (a === 'mate' && b === 'mate') { win = bet; hit = 'two'; }
+      win = 0; hit = 'none'; winning = []; jackpot = false;
+      LINES.slice(0, nLines).forEach((rowsOf, li) => {
+        const sy = rowsOf.map((row, c) => reels[c].rows[row]);
+        let w = 0;
+        if (sy[0] === sy[1] && sy[1] === sy[2]) { w = PAY[sy[0]]; hit = 'three'; if (sy[0] === 'siete') jackpot = true; } else if (sy[0] === 'mate' && sy[1] === 'mate') { w = 1; if (hit === 'none') hit = 'two'; }
+        if (w) { win += w; winning.push(li); }
+      });
       phase = 'result'; resultT = 0;
       if (win) {
         wallet.give(win);
-        for (let i = 0; i < Math.min(28, win * 2); i++) coins.push({ x: 80 + Math.random() * 20 - 10, y: 100, vx: (Math.random() - 0.5) * 70, vy: -60 - Math.random() * 70, life: 1.6 + Math.random() * 0.4 });
-        sfx(a === 'siete' && hit === 'three' ? 'bell' : 'money');
+        for (let i = 0; i < Math.min(34, win * 2); i++) coins.push({ x: 80 + Math.random() * 20 - 10, y: 100, vx: (Math.random() - 0.5) * 70, vy: -60 - Math.random() * 70, life: 1.6 + Math.random() * 0.4 });
+        sfx(jackpot ? 'bell' : 'money');
       }
     };
     const press = () => {
@@ -275,12 +285,11 @@ export function slots(wallet: { count(): number; take(n: number): void; give(n: 
       if (phase === 'ready') {
         const have = wallet.count();
         if (have < 1) { noChips = 0.8; sfx('bump'); return; }
-        bet = Math.min(bet, have);
-        wallet.take(bet);
+        while (nLines > have) nLines = LINE_STEPS[Math.max(0, LINE_STEPS.indexOf(nLines) - 1)];
+        wallet.take(nLines);
         sfx('confirm');
-        const res = [0, 1, 2].map(() => ODDS[Math.floor(Math.random() * ODDS.length)]);
-        reels.forEach((r, i) => { r.mode = 'spin'; r.sym = res[i]; r.speed = 16; });
-        phase = 'spin'; spinT = 0;
+        reels.forEach((r) => { r.rows = [0, 1, 2].map(() => ODDS[Math.floor(Math.random() * ODDS.length)]); r.mode = 'spin'; r.speed = 16; });
+        phase = 'spin'; spinT = 0; winning = []; hit = 'none'; win = 0;
       } else if (phase === 'spin') {
         const i = reels.findIndex((r) => r.mode === 'spin');
         if (i >= 0) { stopReel(i); sfx('select'); }
@@ -289,8 +298,8 @@ export function slots(wallet: { count(): number; take(n: number): void; give(n: 
     const pop = input.push((a) => {
       if (a === 'a') press();
       else if (a === 'b' && phase === 'ready') finish();
-      else if ((a === 'up' || a === 'right') && phase === 'ready' && bet < 3) { bet++; sfx('select'); }
-      else if ((a === 'down' || a === 'left') && phase === 'ready' && bet > 1) { bet--; sfx('select'); }
+      else if ((a === 'up' || a === 'right') && phase === 'ready' && nLines < 5) { nLines = LINE_STEPS[LINE_STEPS.indexOf(nLines) + 1]; sfx('select'); }
+      else if ((a === 'down' || a === 'left') && phase === 'ready' && nLines > 1) { nLines = LINE_STEPS[LINE_STEPS.indexOf(nLines) - 1]; sfx('select'); }
     });
     box.addEventListener('pointerdown', press);
 
@@ -302,63 +311,82 @@ export function slots(wallet: { count(): number; take(n: number): void; give(n: 
       rect(g, '#14081a', 12, 2, 136, 118); rect(g, '#7a1a30', 14, 4, 132, 114); rect(g, '#b02848', 14, 4, 132, 2); rect(g, '#b02848', 14, 4, 2, 114); rect(g, '#4a0a1c', 144, 4, 2, 114);
       rect(g, '#f2c02a', 18, 8, 124, 1); rect(g, '#c8921a', 18, 9, 124, 1);
       // marquee: bulbs chase along the top (faster on a win)
-      const speed = hit === 'three' ? 14 : phase === 'spin' ? 9 : 4;
+      const speed = jackpot ? 16 : hit === 'three' ? 12 : phase === 'spin' ? 9 : 4;
       for (let i = 0; i < 15; i++) {
-        const on = (Math.floor(t * speed) + i) % 3 === 0 || (phase === 'result' && hit !== 'none' && Math.floor(t * 8) % 2 === 0);
+        const on = (Math.floor(t * speed) + i) % 3 === 0 || (phase === 'result' && win > 0 && Math.floor(t * 8) % 2 === 0);
         rect(g, '#2a1a08', 20 + i * 8, 12, 5, 5); rect(g, on ? '#fff0a0' : '#8a6a20', 21 + i * 8, 13, 3, 3);
       }
-      // reel window
+      // reel window: three full rows
       rect(g, '#f2c02a', 29, 24, 102, 72); rect(g, '#14081a', 31, 26, 98, 68);
       for (let i = 0; i < 3; i++) {
         const cx = CX[i], r = reels[i];
-        rect(g, '#f4efe0', cx - 15, 28, 30, 64);
-        g.save(); g.beginPath(); g.rect(cx - 15, 28, 30, 64); g.clip();
+        rect(g, '#f4efe0', cx - 15, 26, 30, 66);
+        g.save(); g.beginPath(); g.rect(cx - 15, 26, 30, 66); g.clip();
         const base = Math.floor(r.pos);
         for (let j = base - 2; j <= base + 3; j++) {
           const yy = CY + (r.pos - j) * RH;
           g.globalAlpha = r.mode === 'spin' ? 0.8 : 1;
-          symbol(g, STRIP[wrap(j)], cx, yy);
+          symbol(g, r.pins.get(j) ?? STRIP[wrap(j)], cx, yy);
         }
         g.globalAlpha = 1;
-        // glass: shade top and bottom, a lit stripe on the left
-        g.fillStyle = 'rgba(20,8,26,0.34)'; g.fillRect(cx - 15, 28, 30, 13); g.fillRect(cx - 15, 79, 30, 13);
-        g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillRect(cx - 13, 28, 2, 64);
-        if (r.mode === 'spin') { g.fillStyle = 'rgba(255,255,255,0.18)'; for (let k = 0; k < 6; k++) g.fillRect(cx - 12 + ((k * 7) % 22), 28 + ((t * 300 + k * 23) % 64), 1, 6); }
+        g.fillStyle = 'rgba(40,20,50,0.18)'; g.fillRect(cx - 15, 47, 30, 1); g.fillRect(cx - 15, 69, 30, 1); // row separators
+        g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillRect(cx - 13, 26, 2, 66);
+        if (r.mode === 'spin') { g.fillStyle = 'rgba(255,255,255,0.18)'; for (let k = 0; k < 6; k++) g.fillRect(cx - 12 + ((k * 7) % 22), 26 + ((t * 300 + k * 23) % 66), 1, 6); }
         g.restore();
-        rect(g, '#14081a', cx + 15, 28, 2, 64);
+        rect(g, '#14081a', cx + 15, 26, 2, 66);
       }
-      // payline arrows, flashing when something was won
-      const flash = win && Math.floor(t * 6) % 2 === 0;
-      rect(g, flash ? '#fff0a0' : '#e0263a', 20, CY - 1, 8, 3); rect(g, flash ? '#fff0a0' : '#e0263a', 132, CY - 1, 8, 3);
-      g.fillStyle = flash ? '#fff0a0' : '#e0263a'; g.fillRect(28, CY - 2, 1, 5); g.fillRect(131, CY - 2, 1, 5);
-      if (hit !== 'none') for (let i = 0; i < (hit === 'three' ? 3 : 2); i++) { if (Math.floor(t * 6) % 2 === 0) { g.strokeStyle = '#fff0a0'; g.lineWidth = 1; g.strokeRect(CX[i] - 14.5, CY - 11.5, 29, 23); } }
+      // line markers on both sides: the ones in play are lit (rows on the left, diagonals' far ends on the right)
+      const n = nLines;
+      const flashOn = Math.floor(t * 6) % 2 === 0;
+      [0, 1, 2].forEach((li) => {
+        const row = LINES[li][0], on = li < (n >= 3 ? 3 : 1), won = winning.includes(li);
+        const c = won && flashOn ? '#fff0a0' : on ? '#e0263a' : '#5a2a38';
+        rect(g, c, 20, rowY(row) - 1, 8, 3); rect(g, c, 28, rowY(row) - 2, 1, 5);
+      });
+      [3, 4].forEach((li) => {
+        const on = n >= 5, won = winning.includes(li);
+        const c = won && flashOn ? '#fff0a0' : on ? '#e0263a' : '#5a2a38';
+        const row = LINES[li][2];
+        rect(g, c, 132, rowY(row) - 1, 8, 3); rect(g, c, 131, rowY(row) - 2, 1, 5);
+      });
+      // winning lines drawn through the cells that paid, blinking
+      if (phase === 'result' && flashOn) {
+        g.strokeStyle = '#fff0a0'; g.lineWidth = 2;
+        for (const li of winning) {
+          g.beginPath();
+          LINES[li].forEach((row, c) => { if (c === 0) g.moveTo(30, rowY(row)); g.lineTo(CX[c], rowY(row)); });
+          g.lineTo(130, rowY(LINES[li][2]));
+          g.stroke();
+          LINES[li].forEach((row, c) => { g.strokeStyle = '#e0263a'; g.lineWidth = 1; g.strokeRect(CX[c] - 13.5, rowY(row) - 9.5, 27, 19); g.strokeStyle = '#fff0a0'; g.lineWidth = 2; });
+        }
+      }
       // control panel
       rect(g, '#2a0a14', 20, 98, 120, 18); rect(g, '#4a1428', 20, 98, 120, 1);
-      // bet: three coins, lit up to the bet, with arrows
-      for (let i = 0; i < 3; i++) coin(g, 26 + i * 9, 103, i < bet);
-      rect(g, '#f2c02a', 29, 100, 3, 1); g.fillStyle = '#f2c02a';
-      if (phase === 'ready') { g.fillRect(52, 101, 1, 1); g.fillRect(51, 102, 3, 1); g.fillRect(50, 103, 5, 1); g.fillRect(50, 108, 5, 1); g.fillRect(51, 109, 3, 1); g.fillRect(52, 110, 1, 1); }
+      // lines in play: five coins, lit up to the count, with arrows
+      for (let i = 0; i < 5; i++) coin(g, 24 + i * 8, 103, i < n);
+      if (phase === 'ready') {
+        g.fillStyle = '#f2c02a';
+        g.fillRect(67, 101, 1, 1); g.fillRect(66, 102, 3, 1); g.fillRect(65, 103, 5, 1);
+        g.fillRect(65, 108, 5, 1); g.fillRect(66, 109, 3, 1); g.fillRect(67, 110, 1, 1);
+      }
       // chips in hand
       const bad = noChips > 0 && Math.floor(t * 12) % 2 === 0;
-      coin(g, 68, 103, !bad);
-      digits(g, shown, 78, 104, bad ? '#ff4a4a' : '#fff0a0');
+      coin(g, 76, 103, !bad);
+      digits(g, shown, 86, 104, bad ? '#ff4a4a' : '#fff0a0');
       // spin button
       const ready = phase === 'ready' || phase === 'spin';
       const glow = ready && Math.floor(t * 3) % 2 === 0;
       rect(g, '#14081a', 116, 100, 20, 14); rect(g, glow ? '#ff6a6a' : '#e0263a', 118, 102, 16, 10); rect(g, '#ffb0b0', 119, 103, 14, 2); rect(g, '#8a0a1a', 118, 110, 16, 2);
-      // tray and falling coins
       for (const c of coins) coin(g, c.x - 3, c.y - 3);
     };
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now; t += dt;
       noChips = Math.max(0, noChips - dt);
-      // the chips counter eases towards the real count
       const have = wallet.count();
       if (shown !== have) shown += Math.sign(have - shown) * Math.max(1, Math.floor(Math.abs(have - shown) / 8));
       if (phase === 'spin') {
         spinT += dt;
-        // the reels stop by themselves if A is left alone
         reels.forEach((r, i) => { if (r.mode === 'spin' && spinT > 1.3 + i * 0.7) stopReel(i); });
       }
       for (const r of reels) {
@@ -368,11 +396,12 @@ export function slots(wallet: { count(): number; take(n: number): void; give(n: 
           r.pos += Math.min(left, Math.max(2.5, left * 5) * dt);
           if (r.target - r.pos < 0.001) { r.pos = r.target; r.mode = 'idle'; sfx('bump'); }
         }
+        for (const k of r.pins.keys()) if (k < r.pos - 4) r.pins.delete(k);
       }
       if (phase === 'spin' && reels.every((r) => r.mode === 'idle')) settle();
       if (phase === 'result') {
         resultT += dt;
-        if (resultT > (win ? 2.2 : 0.45)) { phase = 'ready'; win = 0; hit = 'none'; }
+        if (resultT > (win ? 2.4 : 0.45)) { phase = 'ready'; win = 0; hit = 'none'; winning = []; jackpot = false; }
       }
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
