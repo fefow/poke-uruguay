@@ -359,7 +359,7 @@ const CREDITS = [
   ['Poke Uruguay', 'La tierra de los charrúas'],
   ['Una aventura por el Uruguay', ''],
   ['Diseño y programación', 'Hecho con Claude para Dusius'],
-  ['Lugares', 'Carmelo · Colonia · Montevideo · Punta del Este'],
+  ['Lugares', 'Carmelo · Colonia · Montevideo · Maldonado'],
   ['', 'Cabo Polonio · Ruta 8 · Quebrada de los Cuervos'],
   ['Criaturas', '42 especies originales'],
   ['', 'inspiradas en la fauna oriental'],

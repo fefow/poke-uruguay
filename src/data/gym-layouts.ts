@@ -61,7 +61,7 @@ function correoPlan() {
 }
 
 /**
- * OSE (Punta del Este), a water treatment plant 28x20: a big tank with a catwalk across it ('Ϲ'). The way to the
+ * OSE (Maldonado), a water treatment plant 28x20: a big tank with a catwalk across it ('Ϲ'). The way to the
  * director's office goes over the catwalk or around the tank by either side; valves and pipes crowd the walls.
  */
 function osePlan() {

@@ -20,7 +20,7 @@ import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp, sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput } from './ui.ts';
-import { sortija, jineteada } from './minigames.ts';
+import { sortija, jineteada, slots } from './minigames.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
@@ -1563,6 +1563,8 @@ export const api = {
   /** Fiesta games (game/minigames.ts). */
   sortija: () => sortija(),
   jineteada: (s) => jineteada(s),
+  /** Casino slot machine: plays inside the machine, with the player's fichas. */
+  slots: () => slots({ count: () => state().bag.ficha ?? 0, take: (n) => { removeItem('ficha', n); }, give: (n) => { addItem('ficha', n); } }),
   /** Buy safari time: the clock only runs inside the Safari map. */
   safariStart(minutes) {
     state().safari = { until: Date.now() + minutes * 60000 };

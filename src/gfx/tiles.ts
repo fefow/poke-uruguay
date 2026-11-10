@@ -1524,6 +1524,124 @@ gymFamily(['È', 'É', 'Ê'], { type: 'bicho', roof: '#5a8a1a', roofLight: '#9ac
 gymFamily(['Ì', 'Í', 'Î'], { type: 'volador', roof: '#4a88c8', roofLight: '#8ac8f0', roofDark: '#1a3a6a', rim: '#f4faff', wall: '#e0eef8', wallDark: '#a8c0d8', wallLight: '#ffffff', trim: '#1a3a6a', door: '#5a98d8', doorLight: '#f4faff', wallIn: '#2a5a9a', wallInLight: '#5a98d8', floorA: '#b8d8f0', floorB: '#88b0d8', accent: '#8ac8f0' });
 gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a5a78', roofDark: '#12121c', rim: '#c8506a', wall: '#585870', wallDark: '#3a3a4e', wallLight: '#7a7a94', trim: '#12121c', door: '#2a2a3a', doorLight: '#c8506a', wallIn: '#1e1e2c', wallInLight: '#3a3a52', floorA: '#2a2a34', floorB: '#3e3e4c', accent: '#c8506a' });
 
+// ---- Casino Peninsula: purple roof with a gold medallion, burgundy facade with a blinking sign, gold columns; inside, a red carpet room ----
+{
+  const GOLD = '#f2c02a', GOLD_LI = '#fff0a0', GOLD_DK = '#a87a1a', WINE = '#8a1a3a', WINE_DK = '#4a0a1c', WINE_LI = '#b02848';
+  const roofBase = (g) => {
+    shingles(g, ['#b27ae0', '#7a3aa8', '#5a2a88', '#2e1450'], 9);
+    px(g, 0, 0, GOLD, T, 1);
+  };
+  const wall = (g) => {
+    px(g, 0, 0, WINE, T, T);
+    for (let x = 0; x < T; x += 8) { px(g, x, 3, WINE_DK, 1, 9); px(g, x + 1, 3, WINE_LI, 1, 9); }
+    px(g, 0, 0, GOLD, T, 1); px(g, 0, 1, GOLD_DK, T, 1);
+    for (let x = 1; x < T; x += 4) { px(g, x, 2, '#2a0a14', 2, 2); px(g, x, 2, GOLD_LI, 2, 1); } // bulbs under the eave
+    px(g, 0, 12, GOLD_DK, T, 1); px(g, 0, 13, '#3a1020', T, 3); px(g, 0, 13, '#5a1a30', T, 1);
+  };
+  DRAW['Ӑ'] = (g) => {
+    roofBase(g);
+    for (let x = 1; x < T; x += 4) { px(g, x, 13, '#2a1404', 2, 2); px(g, x, 13, GOLD_LI, 2, 1); } // string of lights on the eave
+  };
+  DRAW['ӑ'] = (g, r, f) => {
+    roofBase(g);
+    disc(g, 8, 8, 7.6, OUTLINE); disc(g, 8, 8, 6.6, GOLD); disc(g, 7.4, 7.2, 5.4, GOLD_LI); disc(g, 8, 8, 4.8, '#c8102a'); disc(g, 8, 8, 4.2, '#e0263a');
+    ['11111', '00010', '00100', '00100', '01000'].forEach((row, ry) => [...row].forEach((v, rx) => { if (v === '1') px(g, 5 + rx, 5 + ry, '#fff6d0'); }));
+    const sparks = [[2, 2], [13, 3], [3, 12], [12, 12]]; // the medallion glints, one corner at a time
+    const [sx, sy] = sparks[f % 4]; px(g, sx, sy, '#ffffff'); px(g, sx - 1, sy, GOLD_LI); px(g, sx + 1, sy, GOLD_LI); px(g, sx, sy - 1, GOLD_LI); px(g, sx, sy + 1, GOLD_LI);
+  };
+  DRAW['Ӓ'] = (g) => wall(g);
+  DRAW['ӓ'] = (g) => {
+    wall(g);
+    px(g, 3, 4, OUTLINE, 10, 9); px(g, 4, 5, GOLD, 8, 8); px(g, 5, 6, '#ffd870', 6, 6); px(g, 5, 6, '#fff0b0', 6, 2);
+    px(g, 4, 5, OUTLINE, 1, 1); px(g, 11, 5, OUTLINE, 1, 1); // arched corners
+    px(g, 8, 6, GOLD, 1, 6); px(g, 5, 10, '#c8921a', 6, 1);
+    px(g, 7, 8, '#7a3a14', 2, 1); px(g, 6, 9, '#7a3a14', 1, 1); px(g, 9, 9, '#7a3a14', 1, 1); // a chandelier seen through the glass
+  };
+  DRAW['Ӕ'] = (g, r, f) => {
+    wall(g);
+    px(g, 0, 4, OUTLINE, T, 9); px(g, 1, 5, '#14081a', 14, 7);
+    for (let i = 0; i < 8; i++) { // chasing bulbs around the sign
+      const on = (i + f) % 2 === 0, c = on ? GOLD_LI : '#8a6a20';
+      px(g, 1 + i * 2, 5, c, 1, 1); px(g, 1 + i * 2, 11, c, 1, 1);
+    }
+    for (const [x, y] of [[1, 7], [1, 9], [14, 7], [14, 9]]) px(g, x, y, (x + y + f) % 2 ? GOLD_LI : '#8a6a20');
+    disc(g, 8, 8, 2.6, GOLD); disc(g, 8, 8, 1.6, GOLD_LI);
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; px(g, Math.round(8 + Math.cos(a) * 4), Math.round(8 + Math.sin(a) * 4), GOLD); }
+    px(g, 3, 7, '#e0263a', 2, 3); px(g, 11, 7, '#e0263a', 2, 3);
+  };
+  DRAW['ӕ'] = (g) => {
+    wall(g);
+    px(g, 0, 0, WINE, T, 13);
+    px(g, 2, 0, GOLD_DK, 12, 3); px(g, 2, 0, GOLD_LI, 12, 1); // capital
+    px(g, 4, 3, GOLD, 8, 10); px(g, 4, 3, GOLD_LI, 2, 10); px(g, 10, 3, GOLD_DK, 2, 10); px(g, 7, 3, GOLD_DK, 1, 10); // fluted shaft
+    px(g, 2, 13, GOLD_DK, 12, 3); px(g, 2, 13, GOLD_LI, 12, 1); // plinth
+    px(g, 2, 3, OUTLINE, 1, 0); px(g, 3, 3, OUTLINE, 1, 10); px(g, 12, 3, OUTLINE, 1, 10);
+  };
+  DRAW['ӗ'] = (g) => {
+    wall(g);
+    px(g, 2, 2, OUTLINE, 12, 12); px(g, 3, 3, GOLD, 10, 10); px(g, 4, 4, '#1a0a24', 8, 8);
+    px(g, 4, 10, GOLD_DK, 8, 2); for (const [x, y] of [[5, 9], [8, 9], [10, 9], [6, 8], [9, 8], [7, 7]]) { px(g, x, y, GOLD, 2, 2); px(g, x, y, GOLD_LI, 1, 1); }
+    px(g, 5, 5, '#ffffff'); px(g, 10, 6, '#ffffff');
+  };
+  const info: [string, string][] = [['Ӑ', 'techo casino'], ['ӑ', 'emblema casino'], ['Ӓ', 'fachada casino'], ['ӓ', 'fachada casino con ventana'], ['Ӕ', 'fachada casino con letrero'], ['ӕ', 'fachada casino con columna'], ['ӗ', 'fachada casino con vitrina']];
+  for (const [ch, name] of info) TILE_INFO[ch] = { name, solid: true, ...(ch === 'ӑ' || ch === 'Ӕ' ? { anim: true } : {}) };
+
+  // interior
+  const carpet = (g) => {
+    px(g, 0, 0, '#7a1230', T, T);
+    px(g, 7, 5, GOLD_DK, 2, 6); px(g, 5, 7, GOLD_DK, 6, 2); px(g, 6, 6, GOLD, 4, 4); px(g, 7, 7, '#7a1230', 2, 2); // diamond
+    for (const [x, y] of [[0, 0], [15, 0], [0, 15], [15, 15]]) px(g, x === 0 ? 0 : 14, y === 0 ? 0 : 14, GOLD_DK, 2, 2);
+    px(g, 0, 0, '#8e1a3a', T, 1); px(g, 0, 0, '#8e1a3a', 1, T);
+  };
+  const dado = (g) => { px(g, 0, 12, '#3a1020', T, 4); px(g, 0, 11, GOLD, T, 1); px(g, 0, 12, GOLD_DK, T, 1); };
+  const cwall = (g) => {
+    px(g, 0, 0, '#6a1230', T, T);
+    for (let x = 0; x < T; x += 8) { px(g, x + 3, 2, '#8a1a3a', 2, 3); px(g, x + 2, 5, '#8a1a3a', 4, 2); px(g, x + 3, 7, GOLD_DK, 2, 1); }
+    px(g, 0, 0, GOLD_DK, T, 1); dado(g);
+  };
+  (THEMES as any).casino = {
+    i: carpet,
+    x: cwall,
+    X: (g) => {
+      cwall(g);
+      px(g, 2, 0, GOLD_DK, 12, 11); px(g, 3, 1, '#14226a', 10, 9); px(g, 3, 1, '#2a3a9a', 10, 3);
+      px(g, 5, 3, '#fff0a0'); px(g, 10, 2, '#ffffff'); px(g, 8, 6, '#ffffff'); px(g, 11, 5, GOLD_LI, 2, 2); // a window onto the night
+      px(g, 3, 8, '#0a0a2a', 10, 2);
+    },
+    n: (g) => {
+      carpet(g);
+      px(g, 0, 2, '#3a1020', T, 13); px(g, 0, 2, '#f4ecd8', T, 4); px(g, 0, 2, '#ffffff', T, 1); px(g, 0, 6, GOLD, T, 1);
+      px(g, 0, 7, '#6a1028', T, 7); px(g, 3, 9, GOLD_DK, 10, 1); px(g, 3, 12, GOLD_DK, 10, 1);
+    },
+    P: (g) => {
+      carpet(g);
+      px(g, 1, 0, OUTLINE, 14, 16); px(g, 2, 1, '#c8283e', 12, 14); px(g, 2, 1, '#e8586a', 12, 1);
+      for (let i = 0; i < 5; i++) { px(g, 3 + i * 2 + (i > 1 ? 1 : 0) - 0, 2, i % 2 ? '#fff0a0' : GOLD_DK, 1, 1); } // marquee bulbs
+      px(g, 3, 4, OUTLINE, 10, 6); px(g, 4, 5, '#f4f0e0', 8, 4);
+      px(g, 4, 5, '#e0263a', 2, 4); px(g, 7, 5, GOLD, 2, 4); px(g, 10, 5, '#3aa84a', 2, 4); // the three reels
+      px(g, 3, 10, GOLD_DK, 10, 1); px(g, 4, 11, '#6a0a1c', 4, 2); px(g, 5, 11, '#ff6a6a', 2, 1); px(g, 10, 11, '#14081a', 2, 3); // button and coin slot
+      px(g, 2, 14, '#14081a', 12, 2); px(g, 14, 3, '#aeb4c4', 1, 5); px(g, 15, 2, '#e0263a', 1, 2); // tray and lever
+    },
+    B: (g) => {
+      px(g, 0, 0, '#2a0a1a', T, T); px(g, 0, 0, GOLD_DK, T, 1);
+      for (const y of [1, 6, 11]) { px(g, 0, y + 4, GOLD, T, 1); px(g, 0, y + 5, GOLD_DK, T, 1); }
+      const items: [number, number, string][] = [[2, 3, '#e0263a'], [6, 3, '#f4f4f4'], [10, 3, '#7a5ad8'], [3, 8, '#3aa84a'], [8, 8, '#ffc82a'], [12, 8, '#e0263a'], [2, 13, '#5ab0f0'], [7, 13, '#ffffff'], [11, 13, '#c88a3a']];
+      for (const [x, y, c] of items) { px(g, x, y, c, 3, 2); px(g, x, y, '#ffffff', 1, 1); }
+    },
+    T: (g) => {
+      carpet(g);
+      px(g, 0, 2, OUTLINE, T, 12); px(g, 0, 3, GOLD, T, 10); px(g, 0, 4, '#1f7a46', T, 8); px(g, 0, 4, '#2a9a5a', T, 1);
+      px(g, 3, 6, '#e0263a', 3, 3); px(g, 3, 6, '#ff9a9a', 3, 1); px(g, 9, 7, '#14081a', 3, 3); px(g, 9, 7, '#6a6a7a', 3, 1); px(g, 7, 9, '#f4f4f4', 2, 2);
+    },
+    N: (g) => {
+      carpet(g);
+      px(g, 4, 10, GOLD_DK, 8, 6); px(g, 4, 10, GOLD, 8, 2); px(g, 5, 10, GOLD_LI, 2, 1);
+      g.fillStyle = '#2a8a3a'; g.beginPath(); g.arc(8, 6, 5, 0, 7); g.fill(); g.fillStyle = '#4ac05a'; g.beginPath(); g.arc(7, 5, 3, 0, 7); g.fill();
+    },
+    m: (g) => { carpet(g); px(g, 1, 3, GOLD_DK, 14, 10); px(g, 2, 4, '#c8102a', 12, 8); px(g, 2, 4, '#e0263a', 12, 1); px(g, 3, 5, GOLD, 10, 1); px(g, 3, 10, GOLD, 10, 1); },
+  };
+}
+
 // Correo Uruguayo gym: pigeonhole shelves, parcel stacks and belts (all drawn on the plain gym floor).
 {
   const floorN = (g) => { px(g, 0, 0, '#d8d0bc', T, T); px(g, 0, 15, '#b8ae98', T, 1); px(g, 15, 0, '#b8ae98', 1, T); px(g, 3, 3, '#b8ae98', 2, 2); px(g, 10, 9, '#b8ae98', 3, 1); };
