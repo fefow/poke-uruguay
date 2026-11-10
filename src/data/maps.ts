@@ -789,6 +789,7 @@ import { addCityEvents } from './events.ts';
 import { addFavors } from './favors.ts';
 import { addMiniStories } from './mini-stories.ts';
 import { addAmistad } from './amistad.ts';
+import { addFiesta } from './fiesta.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -1541,6 +1542,7 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   addFavors(OUTDOOR);
   addMiniStories(OUTDOOR, INTERIOR);
   addAmistad(OUTDOOR);
+  addFiesta(OUTDOOR);
   clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }

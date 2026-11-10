@@ -198,6 +198,15 @@ export const TILE_INFO = {
   'β': { name: 'bote', solid: true, over: true },
   'γ': { name: 'contenedor', solid: true, over: true },
   'ψ': { name: 'tendedero', solid: true, over: true },
+  // Fiesta de la Patria Gaucha (Tacuarembó): only on the map while the fiesta lasts (see data/fiesta.ts)
+  'ϐ': { name: 'banderines', over: true },
+  'ϑ': { name: 'poste de banderines', solid: true, over: true },
+  'ϒ': { name: 'puesto de feria (rojo)', solid: true, over: true },
+  'ϓ': { name: 'puesto de feria (celeste)', solid: true, over: true },
+  'ϔ': { name: 'tablado', solid: true, over: true },
+  'ϕ': { name: 'poste de la sortija (izquierdo)', solid: true, over: true },
+  'Ϸ': { name: 'poste de la sortija (derecho)', solid: true, over: true },
+  'ϖ': { name: 'travesaño con sortija', over: true },
   'ζ': { name: 'pasto seco' },
   'η': { name: 'tierra colorada' },
   'ß': { name: 'duna' },
@@ -1333,7 +1342,60 @@ const OVER = {
     px(g, 1, 2, '#6a4020', 1, 13); px(g, 14, 2, '#6a4020', 1, 13); px(g, 1, 3, '#cfcfd6', 14, 1);
     px(g, 3, 4, '#f2f2f8', 4, 5); px(g, 9, 4, '#e86a6a', 4, 6); px(g, 4, 5, '#d8d8e8', 1, 3);
   },
+  // ---- Fiesta de la Patria Gaucha
+  'ϐ': (g) => { // a string of little flags across the tile, sagging in the middle
+    const sag = [2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 3, 3, 3, 2, 2];
+    for (let x = 0; x < T; x++) px(g, x, sag[x], '#3a2a1a');
+    const cols = ['#5aa8e8', '#f4f4f4', '#e0263a', '#f2c02a'];
+    for (let i = 0; i < 4; i++) {
+      const x0 = i * 4, y0 = sag[x0] + 1;
+      px(g, x0, y0, '#2a1a10', 4, 1);
+      px(g, x0, y0 + 1, cols[i], 3, 1); px(g, x0, y0 + 2, cols[i], 3, 1); px(g, x0 + 1, y0 + 3, cols[i], 1, 1);
+      px(g, x0 + 2, y0 + 1, 'rgba(0,0,0,0.18)', 1, 2);
+    }
+  },
+  'ϑ': (g) => { // the pole that holds the string of flags, with a little Uruguayan flag on top
+    shade(g, 8, 14, 3, 1);
+    px(g, 7, 2, '#2a1a10', 3, 13); px(g, 8, 2, '#8a5a2e', 1, 13); px(g, 7, 2, '#b88650', 1, 13);
+    px(g, 10, 1, '#2a1a10', 6, 6); px(g, 11, 2, '#f4f4f4', 4, 4); px(g, 11, 3, '#5aa8e8', 4, 1); px(g, 11, 5, '#5aa8e8', 4, 1); px(g, 11, 2, '#f2c02a', 1, 1);
+    px(g, 0, 3, '#3a2a1a', 7, 1); px(g, 10, 7, '#3a2a1a', 6, 1);
+  },
+  'ϒ': (g) => fairStall(g, '#e0263a', '#a8182a'),
+  'ϓ': (g) => fairStall(g, '#5aa8e8', '#2a6aae'),
+  'ϔ': (g) => { // wooden stage: planks on top, a skirt in the national colours at the front
+    px(g, 0, 2, '#2a1a10', T, 13);
+    px(g, 0, 3, '#b88650', T, 6); for (let x = 1; x < T; x += 4) px(g, x, 3, '#8a5a2e', 1, 6); px(g, 0, 3, '#d8a868', T, 1);
+    px(g, 0, 9, '#f4f4f4', T, 5); for (let x = 0; x < T; x += 4) px(g, x, 9, '#5aa8e8', 2, 5);
+    px(g, 0, 14, '#2a1a10', T, 1); px(g, 0, 9, '#2a1a10', T, 1);
+  },
+  'ϕ': (g) => sortijaPost(g, 1),
+  'Ϸ': (g) => sortijaPost(g, -1),
+  'ϖ': (g) => { // the crossbar with the ring (sortija) hanging from a ribbon
+    px(g, 0, 1, '#2a1a10', T, 3); px(g, 0, 2, '#9a6c40', T, 1);
+    px(g, 8, 4, '#e0263a', 1, 4);
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 2; g.beginPath(); g.arc(8.5, 10, 2.4, 0, 7); g.stroke();
+    g.strokeStyle = '#f2c02a'; g.lineWidth = 1; g.beginPath(); g.arc(8.5, 10, 2.4, 0, 7); g.stroke();
+    px(g, 6, 8, '#fff4b0', 1, 1);
+  },
 };
+/** A tall post of the sortija arch; the crossbar starts at the post and runs towards the middle (side 1: to the right). */
+function sortijaPost(g, side) {
+  shade(g, 8, 14, 3, 1);
+  px(g, 6, 1, '#2a1a10', 4, 14); px(g, 7, 1, '#8a5a2e', 2, 14); px(g, 7, 1, '#b88650', 1, 14);
+  const x0 = side > 0 ? 6 : 0, w = side > 0 ? T - 6 : 10;
+  px(g, x0, 1, '#2a1a10', w, 3); px(g, x0, 2, '#9a6c40', w, 1);
+  px(g, 5, 4, '#e0263a', 1, 4); px(g, 10, 4, '#5aa8e8', 1, 4);
+}
+/** A fair stall: striped awning on two posts over a wooden counter with goods. */
+function fairStall(g, a, dark) {
+  shade(g, 8, 15, 7, 1.2);
+  px(g, 1, 4, '#2a1a10', 2, 11); px(g, 13, 4, '#2a1a10', 2, 11); px(g, 2, 4, '#8a5a2e', 1, 11); px(g, 13, 4, '#8a5a2e', 1, 11);
+  px(g, 0, 1, '#2a1a10', T, 5);
+  for (let x = 1; x < T - 1; x += 2) px(g, x, 2, (x >> 1) % 2 ? '#f4f4f4' : a, 2, 3);
+  for (let x = 1; x < T - 1; x += 3) px(g, x, 5, dark, 2, 1);
+  px(g, 1, 9, '#2a1a10', 14, 6); px(g, 2, 10, '#b88650', 12, 4); px(g, 2, 10, '#d8a868', 12, 1);
+  px(g, 3, 8, '#c8802a', 2, 2); px(g, 6, 8, '#f2c02a', 2, 2); px(g, 9, 8, '#e8d8b0', 2, 2); px(g, 12, 8, '#c8802a', 1, 2);
+}
 // Ground variants: what '.' looks like on each kind of map (and the plain tiles that belong to it).
 const dryGrass = (g, r) => speckle(g, r, '#c8b868', ['#b8a858', '#d8c878', '#a89a4c'], 16);
 const sandGround = (g, r) => speckle(g, r, '#f0dca0', ['#e4cc8a', '#f8e8b4', '#d8bc78'], 12);

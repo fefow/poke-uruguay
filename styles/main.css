@@ -1220,3 +1220,34 @@ body.gb:has(.hud-map.is-open) .gb-pad .gb-right .gb-btn { opacity: 0; pointer-ev
   & li { display: flex; justify-content: space-between; gap: 1cqi; padding: 0.5cqi 1cqi; border-radius: 0.6cqi; background: oklch(0 0 0 / 0.05); color: var(--ink); font-size: 1.5cqi; }
   & b { color: oklch(0.5 0.15 145); } }
 .fog-none { margin: 0.6cqi 0 0; font-size: 1.5cqi; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- fiesta minigames (game/minigames.ts) */
+.minigame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -55%;
+  z-index: 36;
+  width: min(72cqi, 92%);
+  padding: 2cqi 2.4cqi;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqi;
+  background: var(--paper);
+  border: var(--frame) solid var(--ink);
+  box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 4px var(--celeste);
+  border-radius: 1.4cqi;
+  touch-action: none;
+  user-select: none;
+}
+.minigame .minigame-canvas {
+  position: static;
+  inset: auto;
+  height: auto;
+  width: 100%;
+  aspect-ratio: 160 / 72;
+  image-rendering: pixelated;
+  border: 2px solid var(--ink);
+  border-radius: 0.6cqi;
+}
+.minigame-hint { font-size: 2.8cqi; color: var(--ink-soft); text-align: center; }

@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-09 (v202).
+> Última actualización: 2026-11-10 (v203).
 
 ## Dónde está cada cosa en el código
 
@@ -61,7 +61,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 12. **Termas de Guaviyú** (localidad) y **Salto. Gimnasio 4.** Horacio Quiroga, **Psíquico**. Misión de la **Radio** (Cáceres, MT Psíquico) y la **Represa** (Garúa, flag `represa_clear`). Mini historia El cuaderno de Quiroga.
 13. **Belén** (localidad) y **Artigas.** Un minero pide echar a un recluta que se lleva geodas. Mini historia La canoa del Cuareim (Surf).
 14. **Tranqueras** (localidad) y **Rivera. Gimnasio 5.** Mariela, Ministra de Defensa, **Lucha**. Hay que apagar la **Torre de Niebla** (Bruma). Misión de la **Aduana** (Bianchi, MT Puño Gaucho). Mi Zoo (safari).
-15. **Paso del Río Tacuarembó** (localidad) y **Tacuarembó. Gimnasio 6.** Ramón, Ministro de Ganadería, **Planta**; lo conociste antes sin saber quién era (`amistad.ts`). Bicicleta y ciclovía. Misión de la **Parrilla** (Rondeau, MT Parrillada). Mini historia El potro del domador (Fuerza).
+15. **Paso del Río Tacuarembó** (localidad) y **Tacuarembó. Gimnasio 6.** Ramón, Ministro de Ganadería, **Planta**; lo conociste antes sin saber quién era (`amistad.ts`). Bicicleta y ciclovía. Misión de la **Parrilla** (Rondeau, MT Parrillada). Mini historia El potro del domador (Fuerza). **Fiesta de la Patria Gaucha** (`fiesta.ts`): empieza la primera vez que entrás al pueblo y dura dos días del reloj; el campo al noreste se vuelve predio con sortija, jineteada y taba (premios sin MT ni equipables) y regalo de un Criollo; al terminar el segundo día se desarma para siempre.
 16. **Tupambaé** (localidad) y **Melo.** En la **Torre de las Ánimas** el Ánima del Sereno (`anima_clear`, MT Triturar) abre el camino.
 17. **Arbolito** (localidad) y **Treinta y Tres. Gimnasio 7.** Juan A. Lavalleja, **Roca**. Al este está la **Quebrada de los Cuervos** (mapa propio, pide la medalla): el ayudante **Martín** sube detrás del jugador; **Brumario** custodia al Cardenal Azul; al vencerlo el Cardenal se va, Tabárez llega, cuenta la historia completa y entrega la **Pluma Azul** (`quebrada_clear`). El Cardenal se captura después de la Liga.
 18. **Lascano** (localidad) y **Rocha.** La laguna está cubierta de niebla; un recluta vigila el camino a La Paloma.
@@ -119,4 +119,3 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
 - Equilibrio de niveles y estadísticas.
 - Más contenido de historia y rutas con diseño verdaderamente único.
 - Contenido de Rivera por reubicar y localidades dentro de ciudades.
-- Fiesta de la Patria Gaucha (Tacuarembó), pendiente de integrar en main (PR #25).

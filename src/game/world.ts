@@ -20,6 +20,7 @@ import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp, sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput } from './ui.ts';
+import { sortija, jineteada } from './minigames.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
@@ -186,6 +187,8 @@ export function loadMap(id, x, y, dir = 'down') {
   });
   // Scenery that changes with the story (e.g. the Buquebus leaves for good): m.flagTiles = [{ flag, x, y, ch }]
   for (const e of (m as any).flagTiles ?? []) if (S.flags[e.flag]) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
+  // Scenery that is only there for a while (e.g. the Fiesta de la Patria Gaucha): m.condTiles = [{ cond, x, y, ch }]
+  for (const e of (m as any).condTiles ?? []) if (e.cond()) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
   if (changed) { W_.npcs = []; W_.lit = false; }
   // The bicycle is never used indoors, and bike-only zones put you on it.
   if (m.indoor) W_.bike = false;
@@ -196,6 +199,9 @@ export function loadMap(id, x, y, dir = 'down') {
   playMusic(musicFor(id, m));
   setRenderer(drawWorld);
   if (changed && !m.indoor) showBanner(fmt(m.name));
+  // A note about what is going on in town right now (e.g. the day of the fiesta)
+  const note = changed && !m.indoor ? (m as any).enterNote?.() : null;
+  if (note) setTimeout(() => toast(note, 3500), 2200);
 }
 
 function showBanner(name) {
@@ -1552,6 +1558,11 @@ export const api = {
     return { x: 2, y: 2 };
   },
   pay: (n) => spend(n),
+  /** Gives back money just paid (a void throw): undoes the spend so the money ledger still balances. */
+  refund(n) { const S = state(); S.player.money += n; S.stats.moneySpent = Math.max(0, S.stats.moneySpent - n); },
+  /** Fiesta games (game/minigames.ts). */
+  sortija: () => sortija(),
+  jineteada: (s) => jineteada(s),
   /** Buy safari time: the clock only runs inside the Safari map. */
   safariStart(minutes) {
     state().safari = { until: Date.now() + minutes * 60000 };

@@ -28,6 +28,7 @@ export function newState({ name, look }) {
     criadero: [],
     safari: null,
     contest: null,
+    fiesta: null, // Fiesta de la Patria Gaucha: { t0 } = playtime (s) when it started (data/fiesta.ts)
     created: Date.now(),
     saveCount: 0,
   };

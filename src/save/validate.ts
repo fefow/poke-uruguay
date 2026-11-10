@@ -211,6 +211,7 @@ export function validateSave(d: any) {
       repel: isInt(d.repel, 0, 100) ? d.repel : 0,
       safari: d.safari && Number.isFinite(d.safari.until) && d.safari.until <= Date.now() + 30 * 60000 ? { until: Math.floor(d.safari.until), ...(d.safari.contest ? { contest: true } : {}) } : null,
       contest: d.contest && Array.isArray(d.contest.uids) ? { uids: d.contest.uids.filter((u, k, a) => box.some((c) => c.uid === u) && a.indexOf(u) === k), ...(d.contest.fish ? { fish: true, until: Number.isFinite(d.contest.until) ? Math.floor(d.contest.until) : 0 } : {}) } : null,
+      fiesta: d.fiesta && Number.isFinite(d.fiesta.t0) && d.fiesta.t0 >= 0 && d.fiesta.t0 <= st.playtime ? { t0: d.fiesta.t0 } : null,
       daycare: d.daycare && box.some((c) => c.uid === d.daycare.uid) && isInt(d.daycare.steps, 0, st.steps) ? { uid: d.daycare.uid, steps: d.daycare.steps } : null,
       // Egg: counts steps from when it was received. A bag egg without a valid counter starts counting now.
       egg: bag.huevo ? { steps: isInt(d.egg?.steps, 0, st.steps) ? d.egg.steps : st.steps } : null,
