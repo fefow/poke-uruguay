@@ -1251,3 +1251,14 @@ body.gb:has(.hud-map.is-open) .gb-pad .gb-right .gb-btn { opacity: 0; pointer-ev
   border-radius: 0.6cqi;
 }
 .minigame-hint { font-size: 2.8cqi; color: var(--ink-soft); text-align: center; }
+
+/* Place-name sign: a wooden board like the ones that greet you in classic towns. */
+.map-banner {
+  background: linear-gradient(#d9a45c, #c08840);
+  border: 0.5cqi solid #6a4220;
+  box-shadow: inset 0 0 0 0.35cqi #e8c080, 0 0.5cqi 0 #4a2c14;
+  border-radius: 0.8cqi;
+  color: #fff6dc;
+  text-shadow: 0.25cqi 0.25cqi 0 #5a3414;
+  letter-spacing: 0.1cqi;
+}
