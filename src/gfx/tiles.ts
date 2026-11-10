@@ -1434,10 +1434,36 @@ function mix(a: string, b: string) {
   const n = (c: string, i: number) => parseInt(c.slice(1 + i * 2, 3 + i * 2), 16);
   return '#' + [0, 1, 2].map((i) => Math.round((n(a, i) + n(b, i)) / 2).toString(16).padStart(2, '0')).join('');
 }
+/** Each gym type gets its own roof pattern so the buildings read apart at a glance. A pattern returns 0 light, 1 base, 2 mid, 3 dark, 4 accent. */
+const GYM_ROOFS: Record<string, (x: number, y: number) => number> = {
+  // downward flame tips
+  fuego: (x, y) => { const r = y % 4, lx = (x + (Math.floor(y / 4) % 2 ? 4 : 0)) % 8, d = Math.abs(lx - 3.5); return d > 3.6 - r * 1.1 ? 3 : r === 0 ? 0 : r === 3 ? 2 : 1; },
+  // overlapping leaves with a centre vein
+  planta: (x, y) => { const row = Math.floor(y / 4), lx = (x + (row % 2 ? 4 : 0)) % 8, ly = y % 4, d = Math.abs(lx - 3.5) + Math.abs(ly - 1.5) * 1.2; return d > 4.4 ? 3 : lx === 3 && ly > 0 && ly < 3 ? 0 : d < 2.2 ? 1 : 2; },
+  // vertical clay-tile ribs
+  lucha: (x, y) => { const c = x % 4; return y % 8 === 7 ? 3 : c === 0 ? 0 : c === 3 ? 3 : c === 2 ? 2 : 1; },
+  // diamond lattice
+  psiquico: (x, y) => { const d = Math.abs((x % 8) - 3.5) + Math.abs((y % 8) - 3.5); return d > 5 ? 3 : d > 3.6 ? 2 : d < 1.6 ? 4 : d < 2.6 ? 0 : 1; },
+  // wooden planks
+  tierra: (x, y) => { const r = y % 4, row = Math.floor(y / 4), j = (x + (row % 2 ? 5 : 0)) % 12; return r === 3 ? 3 : r === 0 ? 0 : j === 0 ? 3 : r === 2 ? 2 : 1; },
+  // flat slate
+  normal: (x, y) => { const r = y % 4, row = Math.floor(y / 4), j = (x + (row % 2 ? 4 : 0)) % 8; return r === 3 ? 3 : j === 7 ? 2 : r === 0 ? 0 : 1; },
+  // bubbled shell cells
+  bicho: (x, y) => { const row = Math.floor(y / 4), lx = (x + (row % 2 ? 4 : 0)) % 8, d = Math.hypot(lx - 3.5, (y % 4 - 1.5) * 1.7); return d > 3.7 ? 3 : d < 1.4 ? 0 : d < 2.6 ? 1 : 2; },
+  // fish-scale feathers
+  volador: (x, y) => { const row = Math.floor(y / 4), lx = (x + (row % 2 ? 4 : 0)) % 8, r = y % 4, d = Math.abs(lx - 3.5); return r === 3 ? (d < 2 ? 3 : 2) : r === 0 ? (d < 3 ? 0 : 2) : d > 3 ? 2 : 1; },
+  // dark slate with glowing cracks
+  siniestro: (x, y) => { const r = y % 4, row = Math.floor(y / 4), j = (x + (row % 2 ? 4 : 0)) % 8; if ((x * 3 + y * 5) % 31 === 0 && r !== 3) return 4; return r === 3 ? 3 : j === 7 ? 2 : r === 0 ? 0 : 1; },
+};
+function gymRoof(g, pal: string[], accent: string, f: (x: number, y: number) => number) {
+  for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) px(g, x, y, f(x, y) === 4 ? accent : pal[f(x, y)], 1, 1);
+}
 function gymFamily(ids, k) {
   const [R, F, E] = ids;
   DRAW[R] = (g) => {
-    shingles(g, [k.roofLight, k.roof, mix(k.roof, k.roofDark), k.roofDark], R.charCodeAt(0));
+    const pal = [k.roofLight, k.roof, mix(k.roof, k.roofDark), k.roofDark];
+    if (GYM_ROOFS[k.type]) gymRoof(g, pal, k.rim, GYM_ROOFS[k.type]);
+    else shingles(g, pal, R.charCodeAt(0));
     px(g, 0, 0, k.rim, T, 1);
   };
   DRAW[F] = (g) => {
