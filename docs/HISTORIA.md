@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-10 (v209).
+> Última actualización: 2026-11-10 (v210).
 
 ## Dónde está cada cosa en el código
 
@@ -67,6 +67,8 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 18. **Lascano** (localidad) y **Rocha.** La laguna está cubierta de niebla; un recluta vigila el camino a La Paloma.
 19. **La Paloma** (localidad, Guardería) y **Cabo Polonio.** Bruma robó la lámpara del faro; al vencerla se devuelve y el farero da el **Farol** (Destello).
 20. **Maldonado. Gimnasio 8.** Lucía, OSE, **Agua**. Casino Peninsula (las fichas nunca vuelven a dinero; las tragamonedas son un minijuego sin texto dentro de la máquina, con 1, 3 o 5 líneas: filas y diagonales; música de salón suave).
+    - Identidad de la ciudad: Casapueblo (terrazas blancas con arcos, cartel) en la esquina noroeste, faro rojo y blanco en la punta este, sombrillas en la playa y vecinos que comentan Casapueblo, el faro, la Mano y los lobos marinos.
+    - **Canal de Gorriti (opcional, solo con la Canoa).** Un hueco en el muro sur de la ciudad (entre boyas rojas) abre un canal marcado de más de 240 casillas, con mar profundo y arrecifes a los lados, tres bancos de arena con objetos y nueve nadadores que suben de nivel hacia la isla. Un cartel en la playa y dos vecinos lo anuncian. Termina en **Isla Gorriti**: ruinas del Fortín de San Fernando, lobos marinos, dos entrenadores (Arqueólogo y Guardaparque), un guardaparque que cuenta del canto en el agua y tres objetos. La legendaria Ballenaplata sigue en Maldonado (post-campeón); la cueva de la isla queda para más adelante.
 21. **Piriápolis** (localidad). **Observatorio del Cerro**: Almada (`obs_clear`, MT Terremoto).
 22. **Minas.** **Fábrica**: Garúa (`pp_clear`, MT Vendaval). Decisión de niebla `fog3`.
 23. **Casupá** (localidad) y **Florida. Gimnasio 9.** Juan M. Boiso Lanza, **Volador**. Tras la medalla Boiso regala el **Silbato del Hornero** (MO Vuelo, flag `got_vuelo`).

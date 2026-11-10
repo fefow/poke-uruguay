@@ -803,6 +803,8 @@ export const OUTDOOR: Record<string, MapDef> = { ...BASE_OUTDOOR, ...ACT2_OUTDOO
 export const INTERIOR: Record<string, MapDef> = { ...BASE_INTERIOR, ...ACT2_INTERIOR, ...ROUTE_INTERIOR };
 rewire(OUTDOOR);
 export const MAPS: Record<string, MapDef> = { ...OUTDOOR, ...INTERIOR };
+import { addMaldonado } from './gorriti.ts';
+addMaldonado(OUTDOOR, MAPS);
 
 /**
  * Fewer species per zone so the 151 creatures spread over every map. Each wild table keeps its
@@ -1551,7 +1553,7 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
 }
 
 import { addSwimmers } from './swimmers.ts';
-addSwimmers(MAPS, ['paysandu', 'fraybentos']);
+addSwimmers(MAPS, ['paysandu', 'fraybentos', 'gorriti_mar', 'gorriti']);
 import { addTolls } from './toll.ts';
 addTolls(OUTDOOR);
 import { addCheckpoints } from './checkpoints.ts';
