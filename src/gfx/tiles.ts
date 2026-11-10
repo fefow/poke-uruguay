@@ -61,6 +61,7 @@ export const TILE_INFO = {
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
   ʎ: { name: 'escalera de desnivel' },
+  'ӝ': { name: 'pasto verde (siempre pasto, también en mapas de arena)' },
   k: { name: 'pared de roca', solid: true },
   F: { name: 'cerco', solid: true },
   S: { name: 'cartel', solid: true },
@@ -388,6 +389,8 @@ function ledgeFace(g, r) {
 
 const DRAW = {
   '.': (g, r) => grass(g, r),
+  // always green, whatever the map's ground theme is: grass patches inside a beach or dry map
+  'ӝ': (g, r) => speckle(g, r, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14),
   ',': (g, r) => {
     px(g, 0, 0, '#4a9a34', T, T);
     for (let i = 0; i < 9; i++) {
@@ -2177,7 +2180,7 @@ export function sitsInWater(tiles, x, y) {
 }
 
 /** Ground tiles an object may stand on, besides grass, and what they are called when counting neighbours. */
-const BASES = { s: 's', '=': '=', c: 'c', '_': '_', '?': '?', '0': '0', '-': '0', ':': '0', '/': '0', '`': '`', b: 'b' };
+const BASES = { 'ӝ': 'ӝ', s: 's', '=': '=', c: 'c', '_': '_', '?': '?', '0': '0', '-': '0', ':': '0', '/': '0', '`': '`', b: 'b' };
 /**
  * What an object tile stands on: '~' (water), a ground char ('s' sand, '=' path, 'c' cobbles, '_' pavement,
  * '0' asphalt, '`' ash) or false for the usual grass. Objects are drawn transparent over that ground, so the same
@@ -2331,7 +2334,7 @@ export function tileCanvas(ch, frame = 0, theme: string | null = null, under: st
   const set = theme ? THEMES[theme] : null;
   const f0 = info?.anim ? frame % 4 : 0;
   const onWater = under === true || under === '~';
-  const base = !set && typeof under === 'string' && under !== '~' && DRAW[under] ? under : null;
+  const base = (!set || under === 'ӝ') && typeof under === 'string' && under !== '~' && DRAW[under] ? under : null;
   const ground = onWater ? (g, r) => DRAW['~'](g, r, f0) : base ? (g, r) => DRAW[base](g, r, 0) : (set?.['.'] ?? null);
   const draw = set?.[ch] || null;
   const themed = draw || (ground && (DRAW[ch] || OVER[ch])) || onWater;
@@ -2377,7 +2380,9 @@ export function backgroundOf(bg: string | undefined, floor: string | null = null
 }
 function onBaseTile(dk: string, ch: string, frame: number, theme: string | null, floor: string | null) {
   const drawn = override(dk, T, T);
-  const bgCh = backgroundOf(overrideEntry(dk)?.bg, floor);
+  const bg = overrideEntry(dk)?.bg;
+  // an object in a patch of green grass stands on grass even in a sand-themed map (unless its drawing names another ground)
+  const bgCh = floor === 'ӝ' && (!bg || bg === 'auto' || bg === '.') ? 'ӝ' : backgroundOf(bg, floor);
   const bf = TILE_INFO[bgCh]?.anim ? frame % 4 : 0;
   let byKey = composedTiles.get(drawn);
   if (!byKey) { byKey = new Map(); composedTiles.set(drawn, byKey); }
