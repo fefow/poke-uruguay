@@ -60,6 +60,7 @@ export const TILE_INFO = {
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
+  ʎ: { name: 'escalera de desnivel' },
   k: { name: 'pared de roca', solid: true },
   F: { name: 'cerco', solid: true },
   S: { name: 'cartel', solid: true },
@@ -237,6 +238,28 @@ const px = (g, x, y, col, w = 1, h = 1) => {
   g.fillStyle = col;
   g.fillRect(x, y, w, h);
 };
+/** Crisp filled ellipse (no anti-aliasing), so trees and rocks keep hard pixel edges. */
+function blob(g, cx: number, cy: number, rx: number, ry: number, col: string) {
+  g.fillStyle = col;
+  for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) {
+    for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+      const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry;
+      if (dx * dx + dy * dy <= 1 && x >= 0 && x < T && y >= 0 && y < T) g.fillRect(x, y, 1, 1);
+    }
+  }
+}
+/** Round leafy crown with an outline, a lit upper-left, a shaded lower-right and leaf clumps. */
+function crown(g, pal: [string, string, string, string, string]) {
+  const [ol, dk, ba, li, hi] = pal;
+  blob(g, 8, 7.5, 7.9, 7.4, ol);
+  blob(g, 8, 7.5, 6.9, 6.4, dk);
+  blob(g, 7.2, 6.6, 6.0, 5.4, ba);
+  blob(g, 5.6, 4.6, 3.6, 2.8, li);
+  blob(g, 10.4, 8.4, 2.6, 2.0, li);
+  blob(g, 4.8, 3.8, 1.8, 1.2, hi);
+  px(g, 10, 4, hi, 2, 1); px(g, 3, 8, li, 2, 1);
+  px(g, 9, 11, dk, 4, 1); px(g, 5, 11, dk, 2, 1); // shade under the crown
+}
 
 function speckle(g, rng, base, dots, n) {
   px(g, 0, 0, base, T, T);
@@ -352,6 +375,17 @@ function framedWindow(g, x, y, w, h, glass = ['#5aa8e8', '#9ad4f8', '#e6f6ff'], 
   }
 }
 
+/** Rock face of a one-tile drop: grass lip, lit edge, stone blocks, dark underside and a shadow on the ground. */
+function ledgeFace(g, r) {
+  px(g, 0, 5, '#2a4a1e', T, 1);
+  px(g, 0, 6, '#8ad060', T, 1); // grass lip
+  px(g, 0, 7, '#e2b886', T, 1); px(g, 0, 8, '#c8986a', T, 3);
+  px(g, 0, 11, '#8a6038', T, 1); px(g, 0, 12, '#5a3a22', T, 1); px(g, 0, 13, '#3a2418', T, 1);
+  for (const x of [2, 7, 12]) { px(g, x, 8, '#9a7044', 1, 3); px(g, x + 2, 9, '#e2b886', 2, 1); }
+  for (let i = 0; i < 3; i++) px(g, r.int(1, 13), r.int(8, 10), '#a87a50', 2, 1);
+  g.fillStyle = 'rgba(20,30,20,0.3)'; g.fillRect(0, 14, T, 2);
+}
+
 const DRAW = {
   '.': (g, r) => grass(g, r),
   ',': (g, r) => {
@@ -428,16 +462,16 @@ const DRAW = {
   },
   '#': (g, r) => {
     grass(g, r);
-    px(g, 6, 11, '#6a4a2a', 4, 5);
-    g.fillStyle = '#2a6a2a'; g.beginPath(); g.arc(8, 7, 7, 0, 7); g.fill();
-    g.fillStyle = '#3a8a34'; g.beginPath(); g.arc(7, 6, 5, 0, 7); g.fill();
-    px(g, 4, 3, '#5aac44', 3, 2); px(g, 9, 5, '#5aac44', 2, 2);
+    g.fillStyle = 'rgba(20,40,20,0.28)'; g.fillRect(3, 14, 11, 2);
+    px(g, 6, 11, '#2a1a10', 5, 5); px(g, 7, 11, '#8a5a34', 3, 5); px(g, 7, 11, '#b07a48', 1, 5); px(g, 9, 12, '#5a3a20', 1, 4);
+    crown(g, ['#173f20', '#1f6a2c', '#35a03a', '#62c846', '#a4ec74']);
   },
   q: (g, r) => {
     grass(g, r);
-    px(g, 7, 9, '#6a4a2a', 3, 7);
-    g.fillStyle = '#2f7a3a'; g.beginPath(); g.arc(8, 7, 7, 0, 7); g.fill();
-    for (let i = 0; i < 9; i++) px(g, r.int(2, 13), r.int(1, 11), '#e0263a', 2, 1);
+    g.fillStyle = 'rgba(20,40,20,0.28)'; g.fillRect(3, 14, 11, 2);
+    px(g, 6, 11, '#2a1a10', 5, 5); px(g, 7, 11, '#7a4c2e', 3, 5); px(g, 7, 11, '#a8703e', 1, 5);
+    crown(g, ['#173f20', '#1f6a2c', '#2f9a3c', '#58bf48', '#98e070']);
+    for (const [x, y] of [[4, 4], [9, 3], [6, 7], [11, 7], [3, 9], [8, 10]]) { px(g, x, y, '#a8102a', 2, 2); px(g, x, y, '#f04a5a', 1, 1); px(g, x + 1, y + 1, '#ff9aa8', 1, 1); }
   },
   // Palm on grass (the sand background looked wrong on inland routes).
   p: (g, r) => {
@@ -485,18 +519,27 @@ const DRAW = {
     px(g, 3, 6, '#b8b8c4', 10, 1);
     px(g, 2, 0, '#f2c02a', 12, 1); px(g, 2, 15, '#c8921a', 12, 1);
   },
-  λ: (g, r) => {
-    grass(g, r);
-    px(g, 0, 8, '#3f7a52', T, 3);
-    px(g, 0, 7, '#c08a64', T, 2);
-    for (let x = 0; x < T; x += 4) px(g, x, 6, '#c08a64', 3, 1);
-    px(g, 0, 9, '#8a5a3e', T, 1);
-    px(g, 0, 11, '#2f5e40', T, 1);
+  λ: (g, r) => { grass(g, r); ledgeFace(g, r); },
+  ʎ: (g, r) => {
+    grass(g, r); ledgeFace(g, r);
+    // four wooden-edged stone steps cut into the face
+    px(g, 3, 5, '#3a2418', 10, 9);
+    for (let i = 0; i < 4; i++) {
+      const y = 6 + i * 2;
+      px(g, 4, y, '#ecd6a4', 8, 1); // tread, lit
+      px(g, 4, y + 1, i % 2 ? '#9a7248' : '#b88a58', 8, 1); // riser
+    }
+    px(g, 3, 13, '#3a2418', 10, 1);
   },
   K: (g, r) => {
-    px(g, 0, 0, '#8a6a4a', T, T);
-    for (let y = 0; y < T; y += 5) px(g, 0, y, '#6a4a30', T, 1);
-    for (let i = 0; i < 8; i++) px(g, r.int(0, 14), r.int(0, 14), r.pick(['#a8845a', '#5c3e26']), 2, 1);
+    px(g, 0, 0, '#a87a50', T, T);
+    for (let y = 0; y < T; y += 5) {
+      px(g, 0, y, y ? '#d0a070' : '#e2b886', T, 1); // lit top edge of each course
+      px(g, 0, y + 4, '#5a3a22', T, 1); // dark joint
+      const off = (y / 5) % 2 ? 4 : 0;
+      for (let x = off; x < T + 8; x += 8) { px(g, x - 1, y + 1, '#6e4a2c', 1, 3); px(g, x + 1, y + 1, '#c8986a', 3, 1); px(g, x + 5, y + 2, '#8a6038', 2, 2); }
+    }
+    for (let i = 0; i < 4; i++) px(g, r.int(0, 13), r.int(1, 13), '#7a5232', 2, 1);
   },
   k: (g, r) => rockWall(g, r, 'w', false),
   ϰ: (g, r) => rockWall(g, r, 'e', false),
@@ -2075,6 +2118,29 @@ const ROOF_NAMES = /^(techo|emblema|cruz policlínica|toldo tienda|azotea)/;
 const WALL_NAMES = /^(fachada|pared$|ventana$|puerta$|edificio|torre$|pilar$|tribuna$)/;
 let buildingKinds: Map<string, 'roof' | 'wall' | null> | null = null;
 /** 'roof', 'wall' or null for a tile character (worked out from the legend, so custom tiles never count). */
+const EDGE_NEIGHBOURS = new Set(['.', ',', 'f', '#', 'q', 'p', 'F', 'S', 'R', 'λ', 'ʎ', 'K']);
+/**
+ * Soft border where a dirt path meets grass, trees or rocks: a dark lip on the path's outer pixel and a lit
+ * line inside it, with rounded outer corners. Outdoor maps without a theme only; edited tiles are left alone.
+ */
+export function drawGroundEdges(g, tiles, x0: number, y0: number, x1: number, y1: number, cx: number, cy: number, theme: string | null = null) {
+  if (theme) return;
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (tiles[y]?.[x] !== '=' || override('tile:=0', T, T)) continue;
+      const edge = (dx: number, dy: number) => EDGE_NEIGHBOURS.has(tiles[y + dy]?.[x + dx]);
+      const n = edge(0, -1), s = edge(0, 1), w = edge(-1, 0), e = edge(1, 0);
+      if (!n && !s && !w && !e) continue;
+      const sx = x * T - cx, sy = y * T - cy;
+      const lip = '#b08a56', lit = '#f0dcae';
+      if (n) { g.fillStyle = lit; g.fillRect(sx, sy + 1, T, 1); g.fillStyle = lip; g.fillRect(sx, sy, T, 1); }
+      if (s) { g.fillStyle = lit; g.fillRect(sx, sy + T - 2, T, 1); g.fillStyle = lip; g.fillRect(sx, sy + T - 1, T, 1); }
+      if (w) { g.fillStyle = lit; g.fillRect(sx + 1, sy, 1, T); g.fillStyle = lip; g.fillRect(sx, sy, 1, T); }
+      if (e) { g.fillStyle = lit; g.fillRect(sx + T - 2, sy, 1, T); g.fillStyle = lip; g.fillRect(sx + T - 1, sy, 1, T); }
+    }
+  }
+}
+
 function buildingKind(ch: string) {
   if (!buildingKinds) buildingKinds = new Map();
   let k = buildingKinds.get(ch);

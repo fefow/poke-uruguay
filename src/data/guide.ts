@@ -164,7 +164,10 @@ export function guideMap(m, seed, opts: { width?: number; town?: boolean } = {})
     const saved = cells.map(([x, y]) => at(x, y));
     cells.forEach(([x, y]) => { rows[y][x] = 'λ'; });
     if (reach() < before - cells.length) cells.forEach(([x, y], i) => { rows[y][x] = saved[i]; });
-    else { cells.forEach(([x, y]) => guard.add(`${x},${y}`)); ledges++; before = reach(); }
+    else {
+      cells.forEach(([x, y]) => guard.add(`${x},${y}`)); ledges++; before = reach();
+      if (len >= 4) { const [sx, sy] = cells[Math.floor(len / 2)]; rows[sy][sx] = 'ʎ'; } // a flight of steps in the longer drops
+    }
   }
   m.tiles = rows.map((r) => r.join(''));
 }
