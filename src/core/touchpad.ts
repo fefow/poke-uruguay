@@ -44,21 +44,23 @@ export function mountTouchPad() {
   const stop = () => { clearTimeout(delay); clearInterval(repeat); };
   const setDir = (d: string | null) => {
     if (d === dir) return;
-    if (dir) { input.release(dir); dpad.classList.remove(`on-${dir}`); }
+    const old = dir;
     stop();
     dir = d;
+    if (d) { dpad.classList.add(`on-${d}`); buzz(); input.hold(d); } // the new direction is held before the old one lets go: no empty frame in between
+    if (old) { input.release(old); dpad.classList.remove(`on-${old}`); }
     if (!d) return;
-    dpad.classList.add(`on-${d}`);
-    buzz();
-    input.hold(d);
     // menus step on presses, so a held direction repeats like a key does
     delay = window.setTimeout(() => { repeat = window.setInterval(() => input.press(d), 130); }, 320);
   };
   const aim = (e: PointerEvent) => {
     const r = dpad.getBoundingClientRect();
     const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-    if (Math.hypot(dx, dy) < r.width * 0.1) return setDir(null);
-    setDir(Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'));
+    // the centre never lets go: crossing the cross from left to down keeps walking left until the finger is clearly on the other side
+    if (Math.hypot(dx, dy) < r.width * 0.06) return;
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    const horizontal = dir === 'left' || dir === 'right' ? ax * 1.25 > ay : dir ? ax > ay * 1.25 : ax > ay;
+    setDir(horizontal ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'up' : 'down'));
   };
   dpad.addEventListener('pointerdown', (e) => { e.preventDefault(); dpad.setPointerCapture?.(e.pointerId); aim(e); });
   dpad.addEventListener('pointermove', (e) => { if (e.buttons || e.pressure > 0) aim(e); });

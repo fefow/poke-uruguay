@@ -10,9 +10,8 @@ import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from
 import { teamOf } from './map-gen.ts';
 import { bossTeam, rescaleTeam } from './levels.ts';
 
-// The rival picks the creature the player's starter is strong against (like the modern games),
-// so the first fights are winnable without grinding.
-const COUNTER = { ceibito: 'carpinchito', tejuchispa: 'ceibito', carpinchito: 'tejuchispa' };
+// The rival picks the creature that is strong against the player's starter: Fuego -> Agua, Agua -> Planta, Planta -> Fuego.
+const COUNTER = { tejuchispa: 'carpinchito', carpinchito: 'ceibito', ceibito: 'tejuchispa' };
 const LINE = {
   ceibito: ['ceibito', 'ceibal', 'ceibarbol'],
   tejuchispa: ['tejuchispa', 'tejubrasa', 'tejufogon'],

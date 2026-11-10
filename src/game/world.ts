@@ -83,6 +83,7 @@ const W_: any = {
   emote: null,
   anim: 0,
   lastDirPress: 0,
+  stepEndAt: -1e9,
   bannerTimer: null,
   showCreature: null,
   flash: 0,
@@ -290,6 +291,7 @@ export function updateWorld(dt, now) {
     if (p.t >= p.dur) {
       p.moving = false;
       p.t = 0;
+      W_.stepEndAt = now;
       onStep();
     }
     return;
@@ -323,7 +325,8 @@ export function updateWorld(dt, now) {
   if (p.dir !== d) {
     p.dir = d;
     W_.lastDirPress = now;
-    return; // turn in place first, like the classics
+    // turn in place first, like the classics, but not while already walking: a change of direction mid-walk (left, then down) goes straight on
+    if (now - W_.stepEndAt > 140) return;
   }
   if (W_.lastDirPress && now - W_.lastDirPress < 70) return;
   tryMove(d);
