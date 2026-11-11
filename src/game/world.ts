@@ -1369,17 +1369,31 @@ export const api = {
     const n = findNpc(key);
     return !!n && (await walkNpcPath(n, new Set([`${x},${y}`])));
   },
-  /** Walks the NPC to a free tile beside `target` (an NPC key) and turns to face it. */
-  async npcWalkNextTo(key, target) {
+  /**
+   * Walks the NPC to a free tile beside `target` (an NPC key) and turns to face it.
+   * With `side` it only uses that side of the target (e.g. 'down' = the front of a table): the tile right there, or,
+   * when someone stands on it, the tiles beside it on the same row, and then it faces the target's row.
+   */
+  async npcWalkNextTo(key, target, side?: keyof typeof DIRS) {
     const n = findNpc(key), t = findNpc(target);
     if (!n || !t) return false;
+    const free = (gx: number, gy: number) => !solidAt(gx, gy, { self: n }) && !W_.map.doorWarps?.[`${gx},${gy}`];
     const goals = new Set<string>();
-    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
-      const gx = t.x + dx, gy = t.y + dy;
-      if (!solidAt(gx, gy, { self: n }) && !W_.map.doorWarps?.[`${gx},${gy}`]) goals.add(`${gx},${gy}`);
+    if (side) {
+      const [sx, sy] = DIRS[side];
+      const fx = t.x + sx, fy = t.y + sy;
+      if (free(fx, fy)) goals.add(`${fx},${fy}`);
+      else for (const d of [-1, 1]) {
+        const gx = fx + (sy ? d : 0), gy = fy + (sx ? d : 0);
+        if (free(gx, gy)) goals.add(`${gx},${gy}`);
+      }
+    } else {
+      for (const [dx, dy] of Object.values(DIRS) as number[][]) if (free(t.x + dx, t.y + dy)) goals.add(`${t.x + dx},${t.y + dy}`);
     }
     const ok = await walkNpcPath(n, goals);
-    if (ok) faceTile(n, t.x, t.y);
+    if (ok) {
+      if (side) { const [sx, sy] = DIRS[side]; faceTile(n, n.x - sx, n.y - sy); } else faceTile(n, t.x, t.y);
+    }
     return ok;
   },
   /** The NPC walks to the nearest way out (door mat indoors, door tile outdoors), keeps facing it a moment and vanishes. */
