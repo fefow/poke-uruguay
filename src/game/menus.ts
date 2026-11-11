@@ -3,6 +3,7 @@
 import { natureOf, natureText } from '../data/natures.ts';
 import { h, clamp, formatTime, pad, wait } from '../core/util.ts';
 import { keyName } from '../core/input.ts';
+import { isTouch } from '../core/touchpad.ts';
 import { sfx, setVolumes, cry } from '../core/audio.ts';
 import { SPECIES, DEX_ORDER } from '../data/species.ts';
 import { MOVES } from '../data/moves.ts';
@@ -304,11 +305,16 @@ export function openBag({ mode = 'field', wild = false } = {}) {
     const tabs = h('nav', { class: 'bag-tabs' });
     const list = h('ul', { class: 'bag-list' });
     const desc = h('p', { class: 'bag-desc' });
-    el.append(h('header', { class: 'panel-title', text: 'Mochila' }), tabs, list, desc, h('footer', { class: 'panel-foot', text: `←→ bolsillo · ${keyName('a')} usar · ${keyName('b')} volver` }));
+    el.append(h('header', { class: 'panel-title', text: 'Mochila' }), tabs, list, desc, h('footer', { class: 'panel-foot', text: isTouch() ? 'Tocá una pestaña para cambiar de bolsillo · tocá un objeto para usarlo' : `←→ bolsillo · ${keyName('a')} usar · ${keyName('b')} volver` }));
     let keys = [];
     let nav;
     const render = (start = 0) => {
-      tabs.replaceChildren(...POCKETS.map(([, n], i) => h('span', { class: i === pocket ? 'is-active' : '', text: n })));
+      tabs.replaceChildren(...POCKETS.map(([, n], i) => {
+        const tab = h('span', { class: i === pocket ? 'is-active' : '', text: n });
+        // tapping a tab switches pocket: on phones the pad can be hidden (a battle menu underneath) and ← → are out of reach
+        tab.addEventListener('click', () => { if (i === pocket || el.classList.contains('is-suspended')) return; pocket = i; sfx('select'); render(); });
+        return tab;
+      }));
       keys = Object.keys(S.bag).filter((k) => ITEMS[k]?.pocket === POCKETS[pocket][0]);
       const rows = keys.map((k) => h('li', {}, h('span', { class: 'item-name' }, h('img', { class: 'item-icon', src: itemIcon(k), alt: '' }), ITEMS[k].name), h('b', { text: ITEMS[k].pocket === 'key' ? '' : `×${S.bag[k]}` })));
       if (!rows.length) desc.textContent = 'No hay nada en este bolsillo.';

@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-10 (v211).
+> Última actualización: 2026-11-11 (v212).
 
 ## Dónde está cada cosa en el código
 
@@ -47,7 +47,7 @@ Notas de lectura: los campos `order` y `badge` dentro de `LEADERS` son heredados
 
 Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio cierran el camino con una persona (`GATE_STORY`) que se va cuando se cumple su condición.
 
-1. **Carmelo.** Inicio. Tu madre te manda con Tabárez. Hablás con él antes de elegir; elegís inicial entre tres Pokeballs y el rival toma la suya caminando.
+1. **Carmelo.** Inicio. Tu madre te manda con Tabárez. Hablás con él antes de elegir; elegís inicial entre tres Pokeballs y el rival toma la suya caminando y elige la que le gana a la tuya (Fuego → Agua, Agua → Planta, Planta → Fuego).
 2. **Colonia del Sacramento.** Hay que traerle a Tabárez la carta del almacén. A cambio: PokeDex y 5 Pokeballs. Una vecina cierra la Ruta 1 hasta tener la PokeDex.
 3. **Rosario** (localidad). Caña de pescar. En Bosque Grande hay una revancha corta con el rival.
 4. **San José de Mayo.** Un recluta del PP se lleva el alambre de la intendencia; se lo vence y se abre el camino.

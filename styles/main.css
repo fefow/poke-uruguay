@@ -1262,3 +1262,10 @@ body.gb:has(.hud-map.is-open) .gb-pad .gb-right .gb-btn { opacity: 0; pointer-ev
   text-shadow: 0.25cqi 0.25cqi 0 #5a3414;
   letter-spacing: 0.1cqi;
 }
+
+/* v204: bigger direction pad with a generous touch area around it (thumbs land beside the cross, not on it) */
+.gb-side { width: 196px; }
+.gb-dpad { transform: scale(1.5); }
+.gb-dpad::before { content: ''; position: absolute; inset: -22px; border-radius: 50%; }
+@media (max-width: 699px) and (orientation: landscape) { .gb-side { width: 176px; } .gb-dpad { transform: scale(1.3); } }
+body.gb .bag-tabs span { cursor: pointer; pointer-events: auto; padding: 1.4cqi 2.6cqi; touch-action: manipulation; }
