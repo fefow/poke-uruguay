@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-10 (v204).
+> Última actualización: 2026-11-11 (v212).
 
 ## Dónde está cada cosa en el código
 
@@ -66,7 +66,9 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 17. **Arbolito** (localidad) y **Treinta y Tres. Gimnasio 7.** Juan A. Lavalleja, **Roca**. Al este está la **Quebrada de los Cuervos** (mapa propio, pide la medalla): el ayudante **Martín** sube detrás del jugador; **Brumario** custodia al Cardenal Azul; al vencerlo el Cardenal se va, Tabárez llega, cuenta la historia completa y entrega la **Pluma Azul** (`quebrada_clear`). El Cardenal se captura después de la Liga.
 18. **Lascano** (localidad) y **Rocha.** La laguna está cubierta de niebla; un recluta vigila el camino a La Paloma.
 19. **La Paloma** (localidad, Guardería) y **Cabo Polonio.** Bruma robó la lámpara del faro; al vencerla se devuelve y el farero da el **Farol** (Destello).
-20. **Maldonado (Punta del Este). Gimnasio 8.** Lucía, OSE, **Agua**. Casino Peninsula (las fichas nunca vuelven a dinero).
+20. **Maldonado. Gimnasio 8.** Lucía, OSE, **Agua**. Casino Peninsula (las fichas nunca vuelven a dinero; las tragamonedas son un minijuego sin texto dentro de la máquina, con 1, 3 o 5 líneas: filas y diagonales; música de salón suave).
+    - Identidad de la ciudad: Casapueblo (terrazas blancas con arcos, cartel) en la esquina noroeste, faro rojo y blanco en la punta este, sombrillas en la playa y vecinos que comentan Casapueblo, el faro, la Mano y los lobos marinos.
+    - **Canal de Gorriti (opcional, solo con la Canoa).** El mar de Maldonado está cerrado con rocas y agua profunda: la única ruta navegable es un hueco en el muro sur de la ciudad (entre boyas rojas), que abre un canal marcado de más de 240 casillas, con mar profundo y arrecifes a los lados, tres bancos de arena con objetos y nueve nadadores que suben de nivel hacia la isla. Un cartel en la playa y dos vecinos lo anuncian. Termina en **Isla Gorriti**: ruinas del Fortín de San Fernando, lobos marinos, dos entrenadores (Arqueólogo y Guardaparque), un guardaparque que cuenta del canto en el agua y tres objetos. La legendaria Ballenaplata sigue en Maldonado (post-campeón); la cueva de la isla queda para más adelante.
 21. **Piriápolis** (localidad). **Observatorio del Cerro**: Almada (`obs_clear`, MT Terremoto).
 22. **Minas.** **Fábrica**: Garúa (`pp_clear`, MT Vendaval). Decisión de niebla `fog3`.
 23. **Casupá** (localidad) y **Florida. Gimnasio 9.** Juan M. Boiso Lanza, **Volador**. Tras la medalla Boiso regala el **Silbato del Hornero** (MO Vuelo, flag `got_vuelo`).
@@ -82,7 +84,7 @@ El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Termi
 
 1. Con las 12 medallas y la Fábrica de Minas liberada (`pp_clear`), en Montevideo se abre la **Torre del puerto** (sede del PP, 3 pisos: `sede_1`, `sede_2`, `sede_3` en `maps-act2.ts`). Piso 1: **Bruma** (flag `ev_sede_1`). Piso 2: **Brumario** y **Garúa** en dos tandas (`ev_sede_2a`, `ev_sede_2`). Cúpula: **Dr. Díaz**; aparecen caminando Facu, Tabárez y el Cardenal Azul, y se apaga la niebla (flag `anglo_clear`, el Medidor baja a 0 %). Hasta entonces el Estadio Centenario está cerrado y la gente de Montevideo lo explica.
 2. **Liga en el Estadio Centenario:** Estela (aire), Teófilo (roca y tierra), Dolores (veneno y bicho), Federico (lucha y normal), duelo final con Facu y el Campeón **Obdulio** (con revancha).
-3. Epílogo: semanas después, en Carmelo, se hablan de legendarias (viento helado en la Quebrada, un canto en Punta del Este). Quedan las legendarias, las revanchas y el Cardenal Azul.
+3. Epílogo: semanas después, en Carmelo, se hablan de legendarias (viento helado en la Quebrada, un canto en Maldonado). Quedan las legendarias, las revanchas y el Cardenal Azul.
 
 ## Misiones de edificios tomados por el PP
 

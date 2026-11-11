@@ -7,7 +7,7 @@ import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim, drawGroundEdges } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
@@ -20,7 +20,7 @@ import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp, sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
 import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput } from './ui.ts';
-import { sortija, jineteada } from './minigames.ts';
+import { sortija, jineteada, slots } from './minigames.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
 import { runBattle } from './battle-scene.ts';
@@ -190,7 +190,7 @@ export function loadMap(id, x, y, dir = 'down') {
   for (const e of (m as any).flagTiles ?? []) if (S.flags[e.flag]) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
   // Scenery that is only there for a while (e.g. the Fiesta de la Patria Gaucha): m.condTiles = [{ cond, x, y, ch }]
   for (const e of (m as any).condTiles ?? []) if (e.cond()) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
-  if (changed) { W_.npcs = []; W_.lit = false; }
+  if (changed) { W_.npcs = []; W_.lit = hasItem('farol') && !!flag(badgeOf('punta')); } // the Farol lights dark maps by itself
   // The bicycle is never used indoors, and bike-only zones put you on it.
   if (m.indoor) W_.bike = false;
   else if (m.bikeOnly && hasItem('bici')) W_.bike = true;
@@ -480,7 +480,8 @@ async function crossEdge(side, to) {
   x = Math.min(x, m2.w - 1);
   y = Math.min(y, m2.h - 1);
   // find nearest walkable tile along the arrival edge
-  const walk = (cx, cy) => !TILE_INFO[m2.tiles[cy]?.[cx]]?.solid && m2.tiles[cy]?.[cx] != null;
+  const afloat = tileAt(p.x, p.y) === '~'; // a sailor arrives on the water of the next map
+  const walk = (cx, cy) => m2.tiles[cy]?.[cx] != null && (!TILE_INFO[m2.tiles[cy][cx]]?.solid || (afloat && m2.tiles[cy][cx] === '~'));
   if (!walk(x, y)) {
     for (let d = 1; d < 200; d++) {
       const cand = side === 'e' || side === 'w' ? [[x, y - d], [x, y + d]] : [[x - d, y], [x + d, y]];
@@ -1566,6 +1567,8 @@ export const api = {
   /** Fiesta games (game/minigames.ts). */
   sortija: () => sortija(),
   jineteada: (s) => jineteada(s),
+  /** Casino slot machine: plays inside the machine, with the player's fichas. */
+  slots: () => slots({ count: () => state().bag.ficha ?? 0, take: (n) => { removeItem('ficha', n); }, give: (n) => { addItem('ficha', n); } }),
   /** Buy safari time: the clock only runs inside the Safari map. */
   safariStart(minutes) {
     state().safari = { until: Date.now() + minutes * 60000 };
@@ -1670,7 +1673,7 @@ function drawWorld(g, t) {
     const row = W_.tiles[y];
     for (let x = x0; x <= x1; x++) g.drawImage(tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme)), x * T - cx, y * T - cy);
   }
-  if (!m.indoor) drawBuildingTrim(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme);
+  if (!m.indoor) { drawGroundEdges(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme); drawBuildingTrim(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme); }
   if (!m.indoor) { drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy); drawCastShadows(g, x0, y0, x1, y1, cx, cy); }
   // light sources for the WebGL layer: street lamps, fires and (at night) lit windows
   {

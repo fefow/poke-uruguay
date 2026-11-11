@@ -202,7 +202,7 @@ const BASE_LIST = [
     null, { legendary: true }),
   S(41, 'ballenaplata', 'Ballenaplata', ['agua', 'psiquico'], [130, 85, 90, 110, 110, 60], 3, 270,
     [[1, 'hidropulso'], [1, 'confusion'], [40, 'ola_del_plata'], [48, 'canto_ballena'], [55, 'mate_amargo'], [62, 'meditacion']],
-    'La ballena franca austral que canta frente a Punta del Este. Su canto aplaca las tormentas.',
+    'La ballena franca austral que canta frente a Maldonado. Su canto aplaca las tormentas.',
     { plan: 'whale', c1: '#3a4a6a', c2: '#c8d0e0', c3: '#9adcff', feats: [], size: 1.02 },
     null, { legendary: true }),
   S(42, 'soldemayo', 'Soldemayo', ['fuego', 'psiquico'], [100, 100, 100, 100, 100, 100], 3, 270,

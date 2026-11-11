@@ -24,7 +24,7 @@ const RIDDLES: [string, string[], number][] = [
   ['¿Qué festividad se celebra con tambores y murgas entre enero y febrero?', ['El carnaval', 'La Vendimia', 'El Día del Patrimonio'], 0],
   ['El árbol de flor roja que es la flor nacional es...', ['El ombú', 'El tala', 'El ceibo'], 2],
   ['Si te llevás un termo bajo el brazo, seguro vas a...', ['Dormir', 'Tomar mate', 'Pescar'], 1],
-  ['El mar que baña Punta del Este y Rocha es el...', ['Mar Caribe', 'Océano Atlántico', 'Pacífico'], 1],
+  ['El mar que baña Maldonado y Rocha es el...', ['Mar Caribe', 'Océano Atlántico', 'Pacífico'], 1],
   ['La carne del asado criollo se cocina sobre brasas en la...', ['Parrilla', 'Olla', 'Plancha'], 0],
 ];
 
