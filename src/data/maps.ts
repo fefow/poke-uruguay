@@ -1553,7 +1553,7 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
 }
 
 import { addSwimmers } from './swimmers.ts';
-addSwimmers(MAPS, ['paysandu', 'fraybentos', 'gorriti_mar', 'gorriti']);
+addSwimmers(MAPS, ['paysandu', 'fraybentos', 'gorriti_mar', 'gorriti', 'punta']);
 import { addTolls } from './toll.ts';
 addTolls(OUTDOOR);
 import { addCheckpoints } from './checkpoints.ts';
