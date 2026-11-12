@@ -64,6 +64,41 @@ const O = (lo: number, hi: number) => hi; // readability: the top of a band
 const topOf = (id: string) => O(...(mapBand(id) as [number, number]));
 
 export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void>> = {
+  // Montevideo: the llamada of the Barrio Sur. The leader of the cuerda has the chico drum but is missing the repique (down
+  // on the beach) and the piano (in Parque Batlle). Each drummer, told that the cuerda is leaving, walks off and turns up
+  // beside the leader; with the three drums together the cuerda plays and the leader shares a prize.
+  async ev_candombe(api) {
+    const who = 'Director de la cuerda';
+    if (api.flag('ev_candombe')) return api.say('Cuando suenan los tres tambores juntos, se entera la ciudad entera. Gracias por juntar la cuerda.', { name: who });
+    if (!api.flag('ev_candombe_ok')) {
+      await api.say('Esta tarde sale la llamada desde acá, del Barrio Sur. Pero la cuerda está incompleta.', { name: who, keep: true });
+      await api.say('Yo tengo el chico. Me faltan el repique y el piano, y sin los tres tambores no hay candombe.', { name: who, keep: true });
+      await api.say('El del repique bajó a la playa a templar el cuero al sol. El del piano dijo algo del parque y no lo vi más. Si los cruzás, avisales que ya salimos.', { name: who });
+      api.setFlag('ev_candombe_ok');
+      return;
+    }
+    const rep = api.flag('ev_candombe_rep'), pia = api.flag('ev_candombe_pia');
+    if (!rep || !pia) return api.say(!rep && !pia ? 'Todavía faltan el repique y el piano. Uno en la playa, el otro por el parque.' : !rep ? 'El piano ya llegó. Falta el repique, que sigue en la playa.' : 'El repique ya llegó. Falta el piano, que anda por el parque.', { name: who });
+    await api.say('¡Ahora sí! Chico, repique y piano. Arrancamos.', { name: who });
+    api.sfx('candombe');
+    await api.say('La cuerda empieza a tocar. El ritmo rebota en las fachadas y los vecinos salen a los balcones a mirar.');
+    api.setFlag('ev_candombe');
+    api.sfx('catch');
+    await api.say('En el Barrio Sur, el que ayuda a la llamada come con la cuerda. Tomá, que el camino a la Liga es largo.', { name: who });
+    await api.give('chivito', 2);
+    await api.give('ultraesfera', 3);
+  },
+  async ev_candombe_tambor(api, npc) {
+    const part = npc?.tid === 'pia' ? 'pia' : 'rep';
+    const who = part === 'pia' ? 'Tamborilero del piano' : 'Tamborilero del repique';
+    if (!api.flag('ev_candombe_ok')) {
+      return api.say(part === 'pia' ? 'El piano es el tambor grande: marca el paso de toda la cuerda. Estoy esperando que me avisen la hora de salida.' : 'El cuero se templa al sol o con fuego. Acá en la playa sale solo, sin apuro.', { name: who });
+    }
+    await api.say(part === 'pia' ? '¿Que ya sale la llamada? Me quedé charlando y se me fue la hora.' : '¿Ya salen? El cuero quedó justo. Voy para allá.', { name: who, keep: true });
+    await api.say('Nos vemos en el Barrio Sur, al lado de la Rambla.', { name: who });
+    api.setFlag(`ev_candombe_${part}`);
+    if (npc?.id) await api.npcWalkOff(npc.id);
+  },
   // Colonia: a quiz about the old town from the lighthouse keeper's helper.
   async ev_quiz(api) {
     const who = 'Guía del casco histórico';
@@ -353,6 +388,21 @@ export function addCityEvents(OUTDOOR: Record<string, any>) {
     (m.npcs ??= []).push(...list);
   };
   put('colonia', [{ x: 20, y: 18, look: 'maestra', dir: 'down', name: 'Guía del casco histórico', script: 'ev_quiz' }]);
+  // the candombe cuerda of the Barrio Sur, south of Plaza Independencia, with its drums; the two missing drummers and,
+  // once each one has been told, the same drummer back beside the leader
+  const mvd = OUTDOOR.montevideo;
+  if (mvd) {
+    const rows = mvd.tiles.map((r) => [...r]);
+    for (const x of [23, 26]) if (rows[28]?.[x] === '_') rows[28][x] = 'Ԑ';
+    mvd.tiles = rows.map((r) => r.join(''));
+    put('montevideo', [{ x: 24, y: 28, look: 'murguero', dir: 'down', name: 'Director de la cuerda', script: 'ev_candombe' }]);
+    put('montevideo', [
+      { x: 47, y: 37, look: 'murguero', dir: 'down', name: 'Tamborilero del repique', script: 'ev_candombe_tambor', tid: 'rep', id: 'candombe_rep', cond: (f) => !f.ev_candombe_rep },
+      { x: 17, y: 10, look: 'murguero', dir: 'down', name: 'Tamborilero del piano', script: 'ev_candombe_tambor', tid: 'pia', id: 'candombe_pia', cond: (f) => !f.ev_candombe_pia },
+      { x: 25, y: 29, look: 'murguero', dir: 'up', name: 'Tamborilero del repique', text: ['El repique conversa con el chico y con el piano. Por eso se llama así: repica.'], cond: (f) => !!f.ev_candombe_rep },
+      { x: 23, y: 29, look: 'murguero', dir: 'up', name: 'Tamborilero del piano', text: ['Ya estamos todos. El piano manda el paso.'], cond: (f) => !!f.ev_candombe_pia },
+    ]);
+  }
   put('sanjose', [{ x: 22, y: 14, look: 'gaucho', dir: 'left', name: 'Payador', script: 'ev_payada' }]);
   put('mercedes', [{ x: 18, y: 20, look: 'clerk', dir: 'down', name: 'Organizador del torneo', script: 'ev_torneo' }]);
   put('rocha', [
