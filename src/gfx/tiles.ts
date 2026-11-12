@@ -236,6 +236,33 @@ export const TILE_INFO = {
   N: { name: 'maceta', solid: true },
   O: { name: 'vacío', solid: true },
   A: { name: 'alfombra' },
+  // house furniture, wall decorations, shop and clinic fittings (drawn in "house interiors" below)
+  'Ա': { name: 'sofá (izquierda)', solid: true },
+  'Բ': { name: 'sofá (derecha)', solid: true },
+  'Գ': { name: 'cocina con pava', solid: true },
+  'Դ': { name: 'mesada con pileta', solid: true },
+  'Ե': { name: 'heladera', solid: true },
+  'Զ': { name: 'ropero', solid: true },
+  'Է': { name: 'estufa a leña', solid: true, anim: true },
+  'Ը': { name: 'silla', solid: true },
+  'Թ': { name: 'mesa con mate', solid: true },
+  'Ժ': { name: 'alfombra tejida (izquierda)' },
+  'Ի': { name: 'alfombra tejida (derecha)' },
+  'Լ': { name: 'muro con cuadro', solid: true },
+  'Խ': { name: 'muro con reloj', solid: true },
+  'Ծ': { name: 'muro con repisa', solid: true },
+  'Կ': { name: 'mesita con radio', solid: true },
+  'Ղ': { name: 'lámpara de pie', solid: true },
+  'Ճ': { name: 'cómoda', solid: true },
+  'Ն': { name: 'góndola', solid: true },
+  'Շ': { name: 'heladera de bebidas', solid: true },
+  'Ո': { name: 'cajón de frutas', solid: true },
+  'Պ': { name: 'mostrador con caja', solid: true },
+  'Ջ': { name: 'bolsas de yerba', solid: true },
+  'Ռ': { name: 'banco de espera', solid: true },
+  'Ս': { name: 'camilla', solid: true },
+  'Վ': { name: 'muro con cartel', solid: true },
+  'Տ': { name: 'bidón de agua', solid: true },
 };
 
 function mk() {
@@ -277,6 +304,7 @@ function speckle(g, rng, base, dots, n) {
 }
 
 let GROUND = null; // the map theme's ground while a themed tile is drawn, so trees, rocks and signs sit on it
+let WALLP: ((g) => void) | null = null; // the room theme's wall while a themed tile is drawn, so pictures and clocks hang on it
 function grass(g, rng) {
   if (GROUND) GROUND(g, rng);
   else speckle(g, rng, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14);
@@ -396,7 +424,7 @@ function ledgeFace(g, r) {
   g.fillStyle = 'rgba(20,30,20,0.3)'; g.fillRect(0, 14, T, 2);
 }
 
-const DRAW = {
+const DRAW: Record<string, any> = {
   '.': (g, r) => grass(g, r),
   // always green, whatever the map's ground theme is: grass patches inside a beach or dry map
   'ӝ': (g, r) => speckle(g, r, '#78c850', ['#68b040', '#88d860', '#60a83c'], 14),
@@ -769,11 +797,6 @@ const DRAW = {
     g.fillStyle = '#a8a8a0'; g.beginPath(); g.moveTo(3.5, 12); g.lineTo(6.5, 6); g.lineTo(8.3, 8.4); g.lineTo(10, 4); g.lineTo(12.6, 12); g.closePath(); g.fill();
     g.fillStyle = '#d0d0c8'; g.fillRect(9, 4, 2, 2);
   },
-  i: (g, r) => {
-    px(g, 0, 0, '#c8945a', T, T);
-    for (let y = 0; y < T; y += 4) px(g, 0, y, '#a87a4a', T, 1);
-    px(g, r.int(0, 15), 1, '#a87a4a', 1, 3);
-  },
   Y: (g) => {
     px(g, 0, 0, '#d8d0c0', T, T);
     px(g, 0, 0, '#c8c0b0', 8, 8); px(g, 8, 8, '#c8c0b0', 8, 8);
@@ -781,34 +804,6 @@ const DRAW = {
   A: (g) => {
     px(g, 0, 0, '#c83a3a', T, T);
     px(g, 1, 0, '#f2c02a', 1, T); px(g, 14, 0, '#f2c02a', 1, T);
-  },
-  m: (g) => {
-    DRAW.i(g, new Rng(1));
-    px(g, 1, 3, '#3a6a3a', 14, 10); px(g, 2, 4, '#4a8a4a', 12, 8);
-  },
-  x: (g) => {
-    px(g, 0, 0, '#e6d8b8', T, T);
-    px(g, 0, 12, '#a87a4a', T, 4);
-    px(g, 0, 11, '#8a5a2a', T, 1);
-  },
-  X: (g) => {
-    DRAW.x(g);
-    px(g, 3, 2, '#5a4a3a', 10, 8); px(g, 4, 3, '#8ac8f0', 8, 6);
-  },
-  n: (g) => {
-    DRAW.i(g, new Rng(2));
-    px(g, 0, 2, '#8a5a2a', T, 12); px(g, 0, 2, '#c8945a', T, 3);
-  },
-  B: (g) => {
-    px(g, 0, 0, '#6a4020', T, T);
-    for (let y = 1; y < T; y += 5) {
-      px(g, 1, y, '#3a2010', 14, 4);
-      for (let x = 1; x < 15; x += 2) px(g, x, y, ['#c83a3a', '#3a7ad8', '#4a9a4a', '#f2c02a'][(x + y) % 4], 2, 4);
-    }
-  },
-  T: (g) => {
-    DRAW.i(g, new Rng(3));
-    px(g, 1, 3, '#8a5a2a', 14, 9); px(g, 1, 3, '#b07a44', 14, 3); px(g, 2, 12, '#5a3a1a', 2, 3); px(g, 12, 12, '#5a3a1a', 2, 3);
   },
   P: (g) => {
     px(g, 0, 0, '#e6d8b8', T, T);
@@ -818,11 +813,6 @@ const DRAW = {
   E: (g) => {
     DRAW.i(g, new Rng(4));
     px(g, 1, 1, '#6a4020', 14, 15); px(g, 2, 2, '#f2f2f2', 12, 4); px(g, 2, 6, '#3a7ad8', 12, 9);
-  },
-  N: (g) => {
-    DRAW.i(g, new Rng(5));
-    px(g, 5, 10, '#a8582a', 6, 5);
-    g.fillStyle = '#3a8a34'; g.beginPath(); g.arc(8, 7, 5, 0, 7); g.fill();
   },
   O: (g) => px(g, 0, 0, '#141018', T, T),
 };
@@ -1470,6 +1460,369 @@ export const THEMES = {
 };
 Object.assign(DRAW, GROUND_DRAW);
 
+// ---------------------------------------------------------------- house interiors
+// Floors, walls and furniture for houses, shops and clinics. Furniture is drawn over `floorUnder` and wall
+// decorations over `wallUnder`, so a room theme (see roomTheme) only changes the floor and the wallpaper and every
+// piece of furniture follows it. All pieces keep the bold outline and bright colours of the outdoor tiles.
+const SHADOW = 'rgba(35,22,46,0.22)';
+function planks(g, base: string, li: string, dk: string) {
+  px(g, 0, 0, base, T, T);
+  for (let y = 0; y < T; y += 4) {
+    px(g, 0, y, li, T, 1); px(g, 0, y + 3, dk, T, 1);
+    const j = (y >> 2) % 2 ? 5 : 13;
+    px(g, j, y, dk, 1, 3);
+    px(g, (j + 6) % T, y + 1, mix(base, dk), 3, 1);
+  }
+}
+/** Patterned cement tile, as in old Uruguayan houses: a rosette in the middle and quarter discs that join at the corners. */
+function baldosa(g, cream: string, red: string, green: string, grout: string) {
+  px(g, 0, 0, cream, T, T);
+  for (const [cx, cy] of [[0, 0], [16, 0], [0, 16], [16, 16]]) blob(g, cx, cy, 3, 3, green);
+  blob(g, 8, 8, 3.5, 3.5, red); blob(g, 8, 8, 1.6, 1.6, cream);
+  px(g, 0, 15, grout, T, 1); px(g, 15, 0, grout, 1, T);
+}
+function checker(g, a: string, b: string, aLi: string, bLi: string) {
+  for (let y = 0; y < T; y += 8) for (let x = 0; x < T; x += 8) {
+    const odd = ((x + y) >> 3) % 2;
+    px(g, x, y, odd ? b : a, 8, 8); px(g, x, y, odd ? bLi : aLi, 8, 1);
+  }
+}
+function parquet(g, base: string, li: string, dk: string) {
+  px(g, 0, 0, base, T, T);
+  for (let by = 0; by < 2; by++) for (let bx = 0; bx < 2; bx++) {
+    const x0 = bx * 8, y0 = by * 8;
+    for (let k = 0; k < 8; k += 2) { if ((bx + by) % 2) px(g, x0, y0 + k, li, 8, 1); else px(g, x0 + k, y0, li, 1, 8); }
+    px(g, x0, y0 + 7, dk, 8, 1); px(g, x0 + 7, y0, dk, 1, 8);
+  }
+}
+type WallPal = { paper: string; motif: (g) => void; crown: string; crownDk: string; wain: string; wainLi: string; wainDk: string };
+/** Wallpaper over a wooden or painted wainscot, with a moulding at the top and a dark skirting board. */
+function wallpaper(g, p: WallPal) {
+  px(g, 0, 0, p.paper, T, 11);
+  p.motif(g);
+  px(g, 0, 0, p.crown, T, 2); px(g, 0, 2, p.crownDk, T, 1);
+  px(g, 0, 10, p.wainDk, T, 1);
+  px(g, 0, 11, p.wain, T, 4); px(g, 0, 11, p.wainLi, T, 1);
+  for (const x of [3, 11]) { px(g, x, 12, p.wainDk, 1, 2); px(g, x + 1, 12, p.wainLi, 1, 2); }
+  px(g, 0, 14, p.wainDk, T, 1); px(g, 0, 15, OUTLINE, T, 1);
+}
+const flowers = (col: string, dot: string) => (g) => {
+  for (const [x, y] of [[3, 5], [11, 8]]) { px(g, x, y - 1, col); px(g, x - 1, y, col); px(g, x + 1, y, col); px(g, x, y + 1, col); px(g, x, y, dot); }
+};
+const stripes = (col: string, li: string) => (g) => { for (let x = 1; x < T; x += 4) { px(g, x, 3, col, 1, 7); px(g, x + 1, 3, li, 1, 7); } };
+const diamonds = (col: string) => (g) => { for (const [x, y] of [[4, 5], [12, 8]]) { px(g, x, y - 1, col); px(g, x - 1, y, col, 3, 1); px(g, x, y + 1, col); } };
+const leaves = (col: string, dk: string) => (g) => { for (const [x, y] of [[2, 4], [10, 7]]) { px(g, x, y, col, 2, 1); px(g, x + 1, y + 1, col, 2, 1); px(g, x + 3, y + 2, dk); } };
+const tiles2 = (col: string) => (g) => { for (let x = 0; x < T; x += 4) px(g, x, 3, col, 1, 7); px(g, 0, 6, col, T, 1); };
+
+/** Floor and wall of each room look. 'a' is the default one (rooms without a theme). */
+const ROOM_PAL: Record<string, { floor: (g) => void; wall: (g) => void; name: string }> = {
+  a: { name: 'Casa (crema)', floor: (g) => planks(g, '#d69a5a', '#eab676', '#a86c36'), wall: (g) => wallpaper(g, { paper: '#f7e7c4', motif: flowers('#eab27a', '#d0703a'), crown: '#fff6e0', crownDk: '#c8a878', wain: '#8a5430', wainLi: '#b07444', wainDk: '#5e3418' }) },
+  b: { name: 'Casa (celeste)', floor: (g) => planks(g, '#a8683c', '#c4844e', '#7a4424'), wall: (g) => wallpaper(g, { paper: '#cfe6f2', motif: stripes('#b4d4e8', '#e6f4fa'), crown: '#ffffff', crownDk: '#9ab8cc', wain: '#f2f2ee', wainLi: '#ffffff', wainDk: '#a8aeb8' }) },
+  c: { name: 'Casa (baldosas)', floor: (g) => baldosa(g, '#f2e6cc', '#d49a84', '#9cc4a4', '#ddcca8'), wall: (g) => wallpaper(g, { paper: '#f4d6cc', motif: diamonds('#e0a89a'), crown: '#fff0ea', crownDk: '#c89a8c', wain: '#7a2a34', wainLi: '#a84450', wainDk: '#4e1820' }) },
+  d: { name: 'Casa (verde)', floor: (g) => parquet(g, '#c88a50', '#e0a668', '#94602e'), wall: (g) => wallpaper(g, { paper: '#d4ecdc', motif: leaves('#9ccaa8', '#6aa07a'), crown: '#f4fff6', crownDk: '#90b49a', wain: '#3e7a5a', wainLi: '#5a9a76', wainDk: '#24503a' }) },
+  almacen: { name: 'Almacén', floor: (g) => checker(g, '#f6eedc', '#d6c8ae', '#ffffff', '#e4d8c0'), wall: (g) => wallpaper(g, { paper: '#f6eed6', motif: tiles2('#e6dcbc'), crown: '#ffffff', crownDk: '#c8b890', wain: '#3f9468', wainLi: '#6ac492', wainDk: '#246a44' }) },
+};
+const floorUnder = (g) => (GROUND ? GROUND(g, new Rng(1)) : ROOM_PAL.a.floor(g));
+const wallUnder = (g) => (WALLP ?? ROOM_PAL.a.wall)(g);
+/** A room theme: its own floor and wallpaper; furniture is drawn over them (hidden `floor` and `wall` painters). */
+function roomTheme(set: Record<string, any>, floor, wall) {
+  Object.defineProperty(set, 'floor', { value: floor, enumerable: false });
+  Object.defineProperty(set, 'wall', { value: wall, enumerable: false });
+  return set;
+}
+/** The room looks a house can get (picked per house in map-kit.ts). */
+export const HOUSE_THEMES = ['casa_b', 'casa_c', 'casa_d'];
+for (const k of ['b', 'c', 'd', 'almacen']) {
+  const p = ROOM_PAL[k];
+  (THEMES as any)[k === 'almacen' ? k : `casa_${k}`] = roomTheme({ i: p.floor, x: p.wall }, p.floor, p.wall);
+}
+roomTheme(THEMES.poli, clinicFloor, clinicWall);
+export const ROOM_THEME_NAMES = Object.fromEntries(['b', 'c', 'd', 'almacen'].map((k) => [k === 'almacen' ? k : `casa_${k}`, ROOM_PAL[k].name]));
+
+function sofaHalf(g, right: boolean) {
+  floorUnder(g);
+  g.save();
+  if (right) { g.translate(T, 0); g.scale(-1, 1); }
+  const [body, li, dk, back] = ['#3f7a5a', '#62a07c', '#2a5640', '#4e8a68'];
+  px(g, 1, 14, SHADOW, 15, 1);
+  px(g, 1, 2, OUTLINE, 15, 12);
+  px(g, 2, 3, back, 14, 5); px(g, 2, 3, li, 14, 1); px(g, 2, 7, dk, 14, 1);
+  px(g, 2, 8, body, 14, 4); px(g, 2, 8, li, 14, 1); px(g, 2, 12, dk, 14, 1);
+  px(g, 15, 8, dk, 1, 4); // seam between the two seat cushions
+  px(g, 1, 5, OUTLINE, 4, 9); px(g, 2, 6, body, 2, 7); px(g, 2, 6, li, 2, 1); px(g, 2, 12, dk, 2, 1);
+  px(g, 3, 14, '#4a2a14', 2, 1);
+  g.restore();
+  if (!right) { px(g, 6, 4, OUTLINE, 5, 5); px(g, 7, 5, '#f2c02a', 3, 3); px(g, 7, 5, '#fff2a0', 3, 1); }
+}
+function rugHalf(g, right: boolean) {
+  floorUnder(g);
+  g.save();
+  if (right) { g.translate(T, 0); g.scale(-1, 1); }
+  for (let y = 0; y < T; y += 2) px(g, 0, y, '#efe0c4', 2, 1); // fringe
+  px(g, 2, 0, '#9a2a3a', 14, T);
+  px(g, 3, 0, '#f2c02a', 1, T); px(g, 5, 0, '#efe0c4', 1, T);
+  for (let y = 0; y < T; y += 8) {
+    px(g, 7, y + 1, '#c84a4a', 5, 1); px(g, 7, y + 6, '#c84a4a', 5, 1);
+    for (let k = 0; k < 4; k++) px(g, 15 - k, y + 1 + k, '#efe0c4', k + 1, 1), px(g, 15 - k, y + 6 - k, '#efe0c4', k + 1, 1);
+    px(g, 14, y + 3, '#f2c02a', 2, 2);
+  }
+  g.restore();
+}
+function tableTop(g) {
+  floorUnder(g);
+  px(g, 0, 13, SHADOW, T, 1);
+  px(g, 0, 3, OUTLINE, T, 1);
+  px(g, 0, 4, '#c4864c', T, 6); px(g, 0, 4, '#e0a868', T, 1);
+  for (const [x, y] of [[2, 6], [9, 8], [12, 5]]) px(g, x, y, '#a86c38', 3, 1);
+  px(g, 0, 10, '#8a5430', T, 2); px(g, 0, 12, OUTLINE, T, 1);
+  for (const x of [2, 12]) { px(g, x, 13, OUTLINE, 3, 3); px(g, x + 1, 13, '#6a3a1c', 1, 2); }
+}
+function counterTop(g) {
+  floorUnder(g);
+  px(g, 0, 15, SHADOW, T, 1);
+  px(g, 0, 2, OUTLINE, T, 13);
+  px(g, 0, 3, '#d8a868', T, 3); px(g, 0, 3, '#f0c890', T, 1);
+  px(g, 0, 7, '#9a5a30', T, 7);
+  for (const x of [2, 9]) { px(g, x, 8, '#b07444', 5, 5); px(g, x, 8, '#c88a50', 5, 1); px(g, x, 12, '#7a4424', 5, 1); }
+}
+const BOOKS = ['#d8463a', '#3f86e0', '#f2c02a', '#4aae3c', '#8a4ad8', '#ff8a3a', '#efe0c4'];
+
+Object.assign(DRAW, {
+  i: (g) => floorUnder(g),
+  x: (g) => wallUnder(g),
+  X: (g) => {
+    wallUnder(g);
+    px(g, 2, 2, OUTLINE, 12, 9);
+    px(g, 3, 3, '#7ac8f0', 10, 7); px(g, 3, 3, '#b8e6fa', 10, 2);
+    px(g, 4, 4, '#ffffff', 3, 1); px(g, 10, 5, '#ffffff', 2, 1);
+    px(g, 3, 8, '#6ab84a', 10, 2); px(g, 3, 8, '#8ad86a', 10, 1);
+    px(g, 8, 3, '#f4f0e6', 1, 7); px(g, 3, 6, '#f4f0e6', 10, 1);
+    px(g, 1, 1, '#6a3a1c', 14, 1); // curtain rod
+    for (const x of [2, 11]) { // curtains tied back halfway down
+      px(g, x, 2, '#d8463a', 3, 5); px(g, x + (x < 8 ? 0 : 1), 7, '#d8463a', 2, 3);
+      px(g, x + 1, 2, '#a82a26', 1, 5); px(g, x, 2, '#f07a64', 3, 1); px(g, x, 7, '#f2c02a', 3, 1);
+    }
+    px(g, 1, 10, OUTLINE, 14, 1); px(g, 2, 10, '#fff6e0', 12, 1); // sill
+  },
+  m: (g) => {
+    floorUnder(g);
+    px(g, 0, 3, OUTLINE, T, 10);
+    px(g, 0, 4, '#b88a4a', T, 8);
+    px(g, 0, 5, '#8a5a2a', T, 1); px(g, 0, 10, '#8a5a2a', T, 1);
+    for (let x = 1; x < T; x += 3) px(g, x, 7, '#d8aa6a', 1, 2);
+  },
+  B: (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    px(g, 1, 0, OUTLINE, 14, 15); px(g, 2, 1, '#6a3a1c', 12, 13); px(g, 2, 1, '#a86c38', 12, 1);
+    let k = 0;
+    for (const sy of [2, 7, 11]) {
+      for (let x = 3; x < 13; k++) {
+        const w = k % 3 === 1 ? 2 : 1, h = 3 + ((k * 7) % 3 === 0 ? 0 : 1) - (sy === 11 ? 1 : 0);
+        px(g, x, sy + (4 - h), BOOKS[k % BOOKS.length], w, h); px(g, x, sy + (4 - h), 'rgba(255,255,255,0.35)', 1, 1);
+        x += w + (k % 5 === 4 ? 1 : 0);
+      }
+      px(g, 2, sy + 4, '#a86c38', 12, 1);
+    }
+  },
+  T: tableTop,
+  'Թ': (g) => {
+    tableTop(g);
+    blob(g, 4.5, 6.5, 2.4, 2.4, OUTLINE); blob(g, 4.5, 6.5, 1.5, 1.5, '#8a5a2a'); px(g, 4, 5, '#6aa83a', 2, 1); // mate
+    px(g, 5, 2, '#a8a8b8', 1, 4); px(g, 5, 2, '#e8e8f0', 1, 1); // bombilla
+    px(g, 9, 0, OUTLINE, 4, 10); px(g, 10, 2, '#c8ccd4', 2, 7); px(g, 10, 2, '#ffffff', 1, 5); px(g, 10, 1, '#2f6a4a', 2, 1); // termo
+    blob(g, 13.5, 7.5, 2, 1.4, OUTLINE); blob(g, 13.5, 7.5, 1.2, 0.8, '#ffffff'); px(g, 13, 7, '#e0a040', 2, 1); // bizcochos
+  },
+  'Ը': (g) => {
+    floorUnder(g);
+    px(g, 3, 15, SHADOW, 10, 1);
+    px(g, 4, 1, OUTLINE, 8, 7); px(g, 5, 2, '#a86c38', 6, 5); px(g, 5, 2, '#c88a50', 6, 1); px(g, 7, 3, '#7a4a24', 2, 4);
+    px(g, 3, 8, OUTLINE, 10, 5); px(g, 4, 9, '#c8463a', 8, 2); px(g, 4, 9, '#f07a64', 8, 1); px(g, 4, 11, '#7a4a24', 8, 1);
+    px(g, 4, 13, OUTLINE, 2, 2); px(g, 10, 13, OUTLINE, 2, 2);
+  },
+  'Ա': (g) => sofaHalf(g, false),
+  'Բ': (g) => sofaHalf(g, true),
+  'Ժ': (g) => rugHalf(g, false),
+  'Ի': (g) => rugHalf(g, true),
+  'Գ': (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    px(g, 1, 2, OUTLINE, 14, 13); px(g, 2, 3, '#f2f2ee', 12, 11); px(g, 2, 13, '#c8c8c4', 12, 1);
+    px(g, 2, 3, '#3a3a44', 12, 4);
+    blob(g, 5, 5, 2, 1.4, '#1a1a22'); px(g, 4, 5, '#ff7a2a', 2, 1);
+    blob(g, 10.5, 4, 2.8, 2.6, OUTLINE); blob(g, 10.5, 4, 1.9, 1.7, '#c8ccd4'); px(g, 9, 3, '#ffffff', 2, 1); // pava
+    px(g, 13, 3, OUTLINE, 2, 1); px(g, 9, 1, OUTLINE, 4, 1); px(g, 9, 1, OUTLINE, 1, 2); px(g, 12, 1, OUTLINE, 1, 2);
+    for (const x of [3, 6, 9, 12]) px(g, x, 7, OUTLINE, 1, 1);
+    px(g, 3, 8, OUTLINE, 10, 5); px(g, 4, 9, '#3a3a44', 8, 3); px(g, 4, 9, '#6a6a7a', 8, 1); px(g, 5, 10, '#ff9a4a', 2, 1);
+  },
+  'Դ': (g) => {
+    floorUnder(g);
+    px(g, 0, 15, SHADOW, T, 1);
+    px(g, 0, 2, OUTLINE, T, 13);
+    px(g, 0, 3, '#e8e8e4', T, 3); px(g, 0, 3, '#ffffff', T, 1);
+    px(g, 3, 3, OUTLINE, 9, 3); px(g, 4, 4, '#a8b8c4', 7, 1); px(g, 4, 4, '#d8e6ee', 2, 1);
+    px(g, 7, 0, '#c8ccd4', 1, 3); px(g, 7, 0, '#c8ccd4', 3, 1); px(g, 9, 0, '#8a94a4', 1, 2);
+    px(g, 0, 6, OUTLINE, T, 1);
+    px(g, 0, 7, '#b07444', T, 7); px(g, 0, 7, '#c88a50', T, 1); px(g, 7, 7, OUTLINE, 1, 7);
+    px(g, 5, 10, '#f2c02a', 1, 1); px(g, 9, 10, '#f2c02a', 1, 1);
+  },
+  'Ե': (g) => {
+    floorUnder(g);
+    px(g, 2, 15, SHADOW, 12, 1);
+    px(g, 2, 0, OUTLINE, 12, 15); px(g, 3, 1, '#f4f6f8', 10, 13); px(g, 3, 1, '#ffffff', 10, 1); px(g, 12, 1, '#c8d0d8', 1, 13);
+    px(g, 3, 5, OUTLINE, 10, 1);
+    px(g, 4, 2, '#8a94a4', 1, 2); px(g, 4, 7, '#8a94a4', 1, 4);
+    px(g, 8, 8, '#e0263a', 2, 2); px(g, 10, 10, '#3f86e0', 1, 2); px(g, 7, 11, '#f2c02a', 2, 1); px(g, 9, 2, '#4aae3c', 2, 1);
+  },
+  'Զ': (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    px(g, 1, 0, OUTLINE, 14, 15); px(g, 2, 1, '#9a5a30', 12, 13); px(g, 2, 1, '#c07a44', 12, 1); px(g, 2, 2, '#6a3a1c', 12, 1);
+    px(g, 7, 3, OUTLINE, 2, 11);
+    for (const x of [3, 9]) { px(g, x, 4, '#b06a3a', 4, 8); px(g, x, 4, '#c88a50', 4, 1); px(g, x, 11, '#7a4424', 4, 1); }
+    px(g, 6, 8, '#f2c02a', 1, 1); px(g, 9, 8, '#f2c02a', 1, 1);
+  },
+  'Է': (g, _r, f = 0) => {
+    floorUnder(g);
+    px(g, 3, 15, 'rgba(255,140,40,0.3)', 10, 1);
+    px(g, 6, 0, OUTLINE, 4, 5); px(g, 7, 0, '#4a4a56', 2, 5); px(g, 7, 0, '#6a6a7a', 1, 5);
+    px(g, 2, 4, OUTLINE, 12, 11); px(g, 3, 5, '#2e2e38', 10, 9); px(g, 3, 5, '#5a5a66', 10, 1);
+    px(g, 4, 7, OUTLINE, 8, 5); px(g, 5, 8, '#3a1a10', 6, 3);
+    for (let k = 0; k < 3; k++) {
+      const h = [2, 3, 1, 3][(f + k) % 4];
+      px(g, 5 + k * 2, 11 - h, '#ff8a2a', 2, h); px(g, 5 + k * 2, 11 - h, '#ffe44a', 1, 1);
+    }
+    px(g, 5, 10, '#6a3a1c', 6, 1);
+    px(g, 3, 14, OUTLINE, 2, 1); px(g, 11, 14, OUTLINE, 2, 1);
+  },
+  'Կ': (g) => {
+    floorUnder(g);
+    px(g, 2, 15, SHADOW, 12, 1);
+    px(g, 3, 1, OUTLINE, 10, 8); px(g, 4, 2, '#8a5430', 8, 6); px(g, 4, 2, '#b07444', 8, 1);
+    px(g, 5, 3, '#e8d8b0', 3, 4); px(g, 5, 4, '#c8b890', 3, 1); px(g, 5, 6, '#c8b890', 3, 1);
+    px(g, 9, 3, '#fff6c8', 2, 2); px(g, 9, 3, '#e0263a', 1, 1); px(g, 9, 6, '#2a1a10', 1, 1); px(g, 10, 6, '#2a1a10', 1, 1);
+    px(g, 1, 9, OUTLINE, 14, 3); px(g, 2, 10, '#c4864c', 12, 1);
+    px(g, 2, 12, OUTLINE, 2, 4); px(g, 12, 12, OUTLINE, 2, 4);
+  },
+  'Ղ': (g) => {
+    floorUnder(g);
+    px(g, 5, 15, SHADOW, 6, 1);
+    px(g, 5, 14, OUTLINE, 6, 1);
+    px(g, 7, 7, OUTLINE, 2, 7); px(g, 7, 7, '#c8a040', 1, 7);
+    px(g, 4, 1, OUTLINE, 8, 3); px(g, 3, 3, OUTLINE, 10, 4); px(g, 5, 2, '#f6e2a0', 6, 1); px(g, 4, 3, '#f6e2a0', 8, 3); px(g, 4, 3, '#fff6d0', 8, 1); px(g, 4, 5, '#d8b860', 8, 1);
+  },
+  'Ճ': (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    px(g, 1, 4, OUTLINE, 14, 11); px(g, 2, 5, '#a86c38', 12, 9); px(g, 2, 5, '#d0945a', 12, 1);
+    for (const y of [8, 11]) px(g, 2, y, OUTLINE, 12, 1);
+    for (const y of [6, 9, 12]) px(g, 7, y, '#f2c02a', 2, 1);
+    px(g, 3, 0, OUTLINE, 4, 5); px(g, 4, 1, '#9ad4f4', 2, 3); px(g, 4, 3, '#5aa848', 2, 1); // photo
+    px(g, 10, 1, OUTLINE, 3, 4); px(g, 11, 2, '#3f86e0', 1, 2); px(g, 11, 0, '#e0263a', 1, 1); // vase with a flower
+  },
+  N: (g) => {
+    floorUnder(g);
+    px(g, 4, 15, SHADOW, 8, 1);
+    blob(g, 8, 5.5, 6, 5.5, OUTLINE); blob(g, 8, 5.5, 5, 4.5, '#3a9a44');
+    blob(g, 6, 4, 2.2, 1.8, '#5ac85a'); blob(g, 10.5, 6.5, 1.8, 1.4, '#5ac85a'); px(g, 6, 3, '#9ae88a', 2, 1);
+    px(g, 3, 9, OUTLINE, 10, 2); px(g, 4, 9, '#d8744a', 8, 1);
+    px(g, 4, 11, OUTLINE, 8, 4); px(g, 5, 11, '#c8643a', 6, 3); px(g, 5, 11, '#e88a5a', 2, 3);
+  },
+  n: counterTop,
+  'Պ': (g) => {
+    counterTop(g);
+    px(g, 3, 0, OUTLINE, 9, 6); px(g, 4, 1, '#8a94a4', 7, 4); px(g, 4, 1, '#c8ccd4', 7, 1);
+    px(g, 5, 2, '#5ae0a0', 3, 1); for (const x of [5, 7, 9]) px(g, x, 4, '#f4f4f4', 1, 1);
+    px(g, 12, 1, OUTLINE, 3, 4); px(g, 13, 2, '#f0485a', 1, 1); px(g, 13, 3, '#ffd84a', 1, 1); // jar of caramelos
+  },
+  'Լ': (g) => {
+    wallUnder(g);
+    px(g, 7, 2, OUTLINE, 2, 1);
+    px(g, 2, 3, OUTLINE, 12, 8); px(g, 3, 4, '#d8a838', 10, 6); px(g, 3, 4, '#f6d870', 10, 1);
+    px(g, 4, 5, '#9ad4f4', 8, 2); px(g, 4, 7, '#5aa848', 8, 2); px(g, 4, 7, '#7ac85a', 4, 1);
+    px(g, 9, 6, '#6a4020', 1, 2); px(g, 8, 5, '#2f7a34', 3, 2); px(g, 5, 5, '#ffe44a', 1, 1); // an ombú in the field
+  },
+  'Խ': (g) => {
+    wallUnder(g);
+    blob(g, 8.5, 6.5, 5, 5, OUTLINE); blob(g, 8.5, 6.5, 4, 4, '#a8703c'); blob(g, 8.5, 6.5, 3, 3, '#fff6e0');
+    for (const [x, y] of [[8, 3], [8, 9], [5, 6], [11, 6]]) px(g, x, y, '#a8703c', 1, 1);
+    px(g, 8, 4, OUTLINE, 1, 3); px(g, 8, 6, OUTLINE, 2, 1); px(g, 8, 6, '#e0263a', 1, 1);
+  },
+  'Ծ': (g) => {
+    wallUnder(g);
+    blob(g, 5, 6, 2.2, 2.2, OUTLINE); blob(g, 5, 6, 1.4, 1.4, '#8a5a2a'); px(g, 6, 3, '#d8d8e0', 1, 3); // mate
+    px(g, 8, 2, OUTLINE, 3, 6); px(g, 9, 3, '#3a8a6a', 1, 4); // termo
+    blob(g, 12.5, 5.5, 2, 2.5, OUTLINE); blob(g, 12.5, 5.5, 1.2, 1.6, '#ffffff'); px(g, 12, 5, '#3f86e0', 1, 1); // plate
+    px(g, 2, 8, OUTLINE, 12, 2); px(g, 3, 8, '#b07444', 10, 1);
+    px(g, 4, 10, OUTLINE, 1, 1); px(g, 11, 10, OUTLINE, 1, 1);
+  },
+  'Ն': (g) => {
+    floorUnder(g);
+    px(g, 0, 15, SHADOW, T, 1);
+    px(g, 0, 0, OUTLINE, T, 15); px(g, 0, 1, '#d8dce4', T, 13);
+    for (const y of [5, 10]) { px(g, 0, y, '#8a94a4', T, 1); px(g, 0, y - 1, '#b8bec8', T, 1); }
+    for (const x of [1, 5, 9, 13]) { px(g, x, 1, OUTLINE, 3, 3); px(g, x, 1, x % 8 === 1 ? '#3a9a44' : '#4a7ad8', 3, 3); px(g, x, 2, '#f2c02a', 3, 1); } // yerba packs
+    for (const x of [1, 5, 9, 13]) { px(g, x, 6, '#8a4a1a', 2, 3); px(g, x, 6, '#f4f4f4', 2, 1); px(g, x + 2, 7, '#e0263a', 1, 2); } // dulce de leche and tomato
+    for (const x of [1, 4, 7, 10, 13]) { px(g, x, 11, ['#e0263a', '#f2c02a', '#4aae3c', '#3f86e0', '#ff8a3a'][x % 5], 2, 3); px(g, x, 11, '#ffffff', 1, 1); }
+    px(g, 0, 14, '#6a7480', T, 1);
+  },
+  'Շ': (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    px(g, 1, 0, OUTLINE, 14, 15); px(g, 2, 1, '#e8eef4', 12, 13); px(g, 2, 1, '#3f86e0', 12, 2);
+    px(g, 3, 3, '#a8dcf0', 10, 10);
+    for (const y of [4, 8]) {
+      for (const [x, c] of [[4, '#4aae3c'], [6, '#e0263a'], [8, '#f2c02a'], [10, '#8a4a1a']] as const) { px(g, x, y + 1, c, 1, 3); px(g, x, y, '#ffffff', 1, 1); }
+      px(g, 3, y + 4, '#8a94a4', 10, 1);
+    }
+    px(g, 4, 3, '#ffffff', 1, 9); px(g, 12, 5, OUTLINE, 1, 4);
+  },
+  'Ո': (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    for (const [x, y, c] of [[3, 6, '#ff9a2a'], [7, 5, '#ff9a2a'], [11, 6, '#ffd84a'], [5, 8, '#4aae3c'], [9, 8, '#e0263a']] as const) { blob(g, x + 0.5, y + 0.5, 2.5, 2.5, OUTLINE); blob(g, x + 0.5, y + 0.5, 1.6, 1.6, c); px(g, x - 1, y - 1, 'rgba(255,255,255,0.6)', 1, 1); }
+    px(g, 1, 9, OUTLINE, 14, 6); px(g, 2, 10, '#c8945a', 12, 4);
+    px(g, 2, 10, '#e0b070', 12, 1); px(g, 2, 12, '#a87a4a', 12, 1); px(g, 7, 10, '#a87a4a', 1, 4);
+  },
+  'Ջ': (g) => {
+    floorUnder(g);
+    px(g, 1, 15, SHADOW, 14, 1);
+    const sack = (x, y) => { px(g, x, y, OUTLINE, 7, 7); px(g, x + 1, y + 1, '#d8bc84', 5, 5); px(g, x + 1, y + 1, '#ecd6a8', 5, 1); px(g, x + 1, y + 3, '#3a9a44', 5, 1); px(g, x + 3, y - 1, OUTLINE, 1, 1); };
+    sack(1, 8); sack(8, 8); sack(4, 2);
+  },
+  'Ռ': (g) => {
+    floorUnder(g);
+    px(g, 0, 15, SHADOW, T, 1);
+    px(g, 0, 11, OUTLINE, T, 2); px(g, 0, 11, '#a8b0bc', T, 1);
+    for (const x of [1, 9]) {
+      px(g, x, 2, OUTLINE, 6, 10); px(g, x + 1, 3, '#3aa89a', 4, 4); px(g, x + 1, 3, '#7ad8c8', 4, 1);
+      px(g, x + 1, 8, '#2a8a7e', 4, 2); px(g, x + 1, 8, '#5ac0b0', 4, 1);
+    }
+    px(g, 3, 13, OUTLINE, 1, 2); px(g, 12, 13, OUTLINE, 1, 2);
+  },
+  'Ս': (g) => {
+    floorUnder(g);
+    px(g, 2, 15, SHADOW, 12, 1);
+    px(g, 2, 0, OUTLINE, 12, 15); px(g, 3, 1, '#ffffff', 10, 12);
+    px(g, 4, 1, OUTLINE, 8, 4); px(g, 5, 2, '#e6f4f8', 6, 2);
+    px(g, 3, 7, '#8ad0c0', 10, 6); px(g, 3, 7, '#c8f0e6', 10, 1); px(g, 3, 13, '#5aa898', 10, 1);
+    px(g, 3, 14, '#8a94a4', 2, 1); px(g, 11, 14, '#8a94a4', 2, 1);
+  },
+  'Տ': (g) => {
+    floorUnder(g);
+    px(g, 4, 15, SHADOW, 8, 1);
+    px(g, 4, 8, OUTLINE, 8, 7); px(g, 5, 9, '#f4f4f4', 6, 5); px(g, 5, 9, '#ffffff', 6, 1);
+    px(g, 6, 10, '#e0263a', 1, 2); px(g, 9, 10, '#3f86e0', 1, 2);
+    px(g, 5, 1, OUTLINE, 6, 8); px(g, 6, 2, '#7ac8f0', 4, 6); px(g, 6, 2, '#c8ecff', 1, 5); px(g, 7, 0, OUTLINE, 2, 1);
+  },
+  'Վ': (g) => {
+    wallUnder(g);
+    px(g, 3, 2, OUTLINE, 10, 9); px(g, 4, 3, '#ffffff', 8, 7); px(g, 4, 3, '#3a7ad8', 8, 2);
+    px(g, 7, 6, '#e0263a', 2, 3); px(g, 6, 7, '#e0263a', 4, 1);
+    px(g, 5, 9, '#8a94a4', 6, 1);
+  },
+});
+
 
 // ---- gym families for the later cities: roof, facade and emblem tiles plus an interior theme ----
 const disc = (g, cx, cy, r, col) => { g.fillStyle = col; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill(); };
@@ -1873,7 +2226,7 @@ DRAW['Ϫ'] = (g) => {
   const teak = (g, r) => { px(g, 0, 0, '#c4925a', T, T); for (let y = 0; y < T; y += 5) px(g, 0, y, '#8a6238', T, 1); px(g, 0, 1, '#d8a870', T, 1); px(g, r ? r.int(2, 13) : 6, 2, '#8a6238', 1, 3); };
   const steel = (g) => { px(g, 0, 0, '#eef3f7', T, T); px(g, 0, 11, '#2a5a9a', T, 2); px(g, 0, 13, '#c8d4de', T, 3); px(g, 0, 10, '#9aa8b8', T, 1); for (const x of [2, 7, 12]) px(g, x, 4, '#c0ccd8', 2, 1); };
   const on = (ch) => (g, r, f) => { const i0 = DRAW.i, x0 = DRAW.x; DRAW.i = teak; DRAW.x = steel; try { DRAW[ch](g, r, f); } finally { DRAW.i = i0; DRAW.x = x0; } };
-  const B_: any = (THEMES as any).barco = { i: teak, x: steel };
+  const B_: any = (THEMES as any).barco = roomTheme({ i: teak, x: steel }, (g) => teak(g, null), steel);
   for (const ch of ['T', 'n', 'm', 'E', 'N', 'B', 'P', 'X']) B_[ch] = on(ch);
   B_.X = (g) => { steel(g); px(g, 3, 1, '#8a96a4', 10, 10); px(g, 4, 2, '#2a3a5a', 8, 8); px(g, 5, 3, '#8ac8f0', 6, 6); px(g, 5, 3, '#d8f0ff', 6, 1); px(g, 3, 1, '#c8d4de', 10, 1); };
   B_.F = (g, r, f) => { DRAW['~'](g, r, f); px(g, 0, 7, '#f4f8fc', T, 2); px(g, 0, 9, '#9aa8b8', T, 1); for (const x of [1, 7, 13]) { px(g, x, 3, '#f4f8fc', 2, 10); px(g, x, 3, '#ffffff', 1, 10); } };
@@ -2026,6 +2379,173 @@ Object.assign(DRAW, {
     px(g, 4, 4, '#7a4a2a', 8, 1); px(g, 4, 6, '#7a4a2a', 6, 1);
   },
 };
+
+// ---- Montevideo landmarks: the Ciudadela gate and wall, Mercado del Puerto, Teatro Solís, Palacio Salvo, the
+// Torre de los Homenajes of the Estadio Centenario, the glass tower of the Palacio de la Luz, the Fortaleza del Cerro
+// and the candombe drums. Full tiles draw their own ground; the ones in OVER stand on whatever ground is around them.
+Object.assign(TILE_INFO, {
+  'Ԁ': { name: 'muralla de la Ciudadela', solid: true },
+  'ԁ': { name: 'puerta de la Ciudadela' },
+  'Ԃ': { name: 'techo Mercado del Puerto', solid: true },
+  'ԃ': { name: 'techo Mercado del Puerto con reloj', solid: true },
+  'Ԅ': { name: 'fachada Mercado del Puerto', solid: true },
+  'ԅ': { name: 'fachada Mercado del Puerto con portón', solid: true },
+  'Ԇ': { name: 'techo Teatro Solís', solid: true },
+  'ԇ': { name: 'techo Teatro Solís con frontón', solid: true },
+  'Ԉ': { name: 'fachada Teatro Solís', solid: true },
+  'ԉ': { name: 'cúpula del Palacio Salvo', solid: true },
+  'Ԋ': { name: 'aguja del Palacio Salvo', solid: true, over: true },
+  'ԋ': { name: 'fachada Palacio Salvo', solid: true },
+  'Ԍ': { name: 'fachada Palacio Salvo (ala)', solid: true },
+  'ԍ': { name: 'Torre de los Homenajes', solid: true, over: true },
+  'Ԏ': { name: 'fachada vidriada', solid: true },
+  'ԏ': { name: 'Fortaleza del Cerro', solid: true, over: true },
+  'Ԑ': { name: 'tamboril', solid: true, over: true },
+});
+const GRANITE = ['#d6c4a0', '#b8a47e', '#94805e', '#6a5a42'];
+/** Rows of dressed granite blocks (the wall of the old Ciudadela). */
+function granite(g, y0 = 0, y1 = T) {
+  const [li, ba, mi, dk] = GRANITE;
+  px(g, 0, y0, ba, T, y1 - y0);
+  for (let y = y0; y < y1; y += 4) {
+    const off = ((y - y0) / 4) % 2 ? 4 : 0;
+    px(g, 0, y + 3, mi, T, 1);
+    for (let x = off - 8; x < T; x += 8) { px(g, x + 7, y, mi, 1, 3); px(g, x + 1, y, li, 5, 1); px(g, x + 6, y + 1, dk, 1, 2); }
+  }
+}
+Object.assign(DRAW, {
+  'Ԁ': (g) => {
+    granite(g, 0, T);
+    px(g, 0, 0, '#efe2c2', T, 2); px(g, 0, 2, '#6a5a42', T, 1); // coping along the top of the wall
+    px(g, 0, 14, 'rgba(35,22,46,0.3)', T, 2);
+    px(g, 0, 0, OUTLINE, 1, T); px(g, 15, 0, OUTLINE, 1, T);
+  },
+  'ԁ': (g, r) => {
+    // the gate seen from the plaza: an arch through the wall onto the cobbles of the Ciudad Vieja
+    px(g, 0, 0, '#8a8478', T, T);
+    for (let i = 0; i < 10; i++) px(g, r.int(0, 14), r.int(8, 15), '#a29c90', 2, 1);
+    granite(g, 0, 5); px(g, 0, 0, '#efe2c2', T, 2); px(g, 0, 2, '#6a5a42', T, 1);
+    px(g, 0, 5, '#b8a47e', 3, 11); px(g, 13, 5, '#b8a47e', 3, 11); px(g, 2, 5, '#94805e', 1, 11); px(g, 13, 5, '#d6c4a0', 1, 11);
+    g.fillStyle = '#b8a47e'; g.beginPath(); g.moveTo(3, 5); g.lineTo(3, 8); g.quadraticCurveTo(8, 2, 13, 8); g.lineTo(13, 5); g.fill(); // the arch
+    px(g, 7, 3, '#efe2c2', 2, 2); px(g, 7, 5, '#6a5a42', 2, 1); // keystone
+    px(g, 3, 8, '#3a3440', 10, 3); px(g, 3, 11, '#6a6460', 10, 2); px(g, 3, 13, '#9a9488', 10, 3); // the passage: dark under the vault, cobbles beyond
+    for (const [x, y] of [[4, 14], [8, 13], [11, 14], [6, 12]]) px(g, x, y, '#b8b2a4', 2, 1);
+    px(g, 0, 0, OUTLINE, 1, T); px(g, 15, 0, OUTLINE, 1, T);
+  },
+  'Ԃ': (g) => {
+    // corrugated iron, painted oxide red, with a skylight along the ridge
+    px(g, 0, 0, '#a8462e', T, T);
+    for (let x = 0; x < T; x += 3) { px(g, x, 0, '#c8603e', 1, T); px(g, x + 2, 0, '#7c2e20', 1, T); }
+    px(g, 0, 6, OUTLINE, T, 4); px(g, 0, 7, '#8fd0e8', T, 2); px(g, 0, 7, '#d8f2fa', T, 1);
+    for (let x = 1; x < T; x += 4) px(g, x, 7, '#3a4a58', 1, 2);
+  },
+  'ԃ': (g) => {
+    DRAW['Ԃ'](g);
+    // the clock turret over the main entrance
+    px(g, 3, 1, OUTLINE, 10, 15); px(g, 4, 2, '#e8dcc0', 8, 13); px(g, 4, 1, '#3a6a5a', 8, 2); px(g, 5, 0, '#3a6a5a', 6, 1);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 8.5, 3.6, 0, 7); g.fill();
+    g.fillStyle = '#fffbe8'; g.beginPath(); g.arc(8, 8.5, 2.8, 0, 7); g.fill();
+    px(g, 8, 6, OUTLINE, 1, 3); px(g, 8, 8, OUTLINE, 2, 1);
+  },
+  'Ԅ': (g) => {
+    // brick base and green iron arches with glass
+    px(g, 0, 0, '#c0583a', T, T);
+    for (let y = 0; y < T; y += 3) { px(g, 0, y + 2, '#8a3a26', T, 1); for (let x = (y / 3) % 2 ? 0 : 3; x < T; x += 6) px(g, x, y, '#8a3a26', 1, 2); }
+    px(g, 2, 2, OUTLINE, 12, 11); px(g, 3, 3, '#2e6a52', 10, 9);
+    g.fillStyle = '#2e6a52'; g.beginPath(); g.arc(8, 4, 5, Math.PI, 0); g.fill();
+    px(g, 4, 4, '#7ac0d8', 8, 7); px(g, 4, 4, '#c8ecf8', 8, 1); px(g, 7, 4, '#2e6a52', 2, 7); px(g, 4, 7, '#2e6a52', 8, 1);
+    px(g, 0, 13, '#6e6660', T, 3); px(g, 0, 13, '#a49c8a', T, 1);
+  },
+  'ԅ': (g) => {
+    DRAW['Ԅ'](g);
+    // an open gate: the warm light of the grills inside
+    px(g, 3, 3, '#2e6a52', 10, 13); px(g, 4, 4, '#4a2a1a', 8, 12); px(g, 4, 8, '#f0a040', 8, 3); px(g, 5, 9, '#ffd070', 2, 1); px(g, 9, 9, '#ffd070', 2, 1);
+    for (let x = 4; x < 12; x += 2) px(g, x, 4, '#2e6a52', 1, 12);
+  },
+  'Ԇ': (g) => {
+    shingles(g, ['#a8d8c0', '#6aa890', '#4e8a74', '#2c5a4a'], 21); // copper gone green
+  },
+  'ԇ': (g) => {
+    DRAW['Ԇ'](g);
+    g.fillStyle = OUTLINE; g.beginPath(); g.moveTo(-1, 16); g.lineTo(8, 3); g.lineTo(17, 16); g.fill();
+    g.fillStyle = '#f2ead6'; g.beginPath(); g.moveTo(1, 15); g.lineTo(8, 5); g.lineTo(15, 15); g.fill();
+    px(g, 6, 11, '#c8b890', 4, 2); px(g, 7, 9, '#c8b890', 2, 2); // relief in the pediment
+  },
+  'Ԉ': (g) => {
+    // cream colonnade on a flight of steps
+    px(g, 0, 0, '#5a4a3a', T, 13);
+    px(g, 0, 0, '#f2ead6', T, 3); px(g, 0, 3, '#c8b890', T, 1);
+    for (const x of [1, 9]) { px(g, x, 4, '#f6f0e0', 5, 9); px(g, x + 4, 4, '#c8b890', 1, 9); px(g, x + 1, 4, '#ffffff', 1, 9); px(g, x - 1, 4, '#e8dcc0', 7, 1); }
+    px(g, 0, 13, '#d8ccb0', T, 1); px(g, 0, 14, '#b8a888', T, 1); px(g, 0, 15, '#98886a', T, 1);
+  },
+  'ԉ': (g) => {
+    // the crown of the Salvo: an octagonal lantern with arches over a balustrade
+    px(g, 0, 0, '#c9c5be', T, T); // sky over the pavement around the lantern
+    px(g, 2, 2, OUTLINE, 12, 14); px(g, 3, 3, '#ecdcb8', 10, 13);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 4, 6, Math.PI, 0); g.fill();
+    g.fillStyle = '#7a9a88'; g.beginPath(); g.arc(8, 4.5, 4.8, Math.PI, 0); g.fill();
+    px(g, 4, 1, '#a8c8b4', 2, 1);
+    for (const x of [4, 7, 10]) { px(g, x, 7, '#3a4a68', 2, 5); px(g, x, 7, '#7ab0e0', 2, 1); }
+    px(g, 3, 13, '#c8b48a', 10, 1); px(g, 3, 14, '#a8946a', 10, 2);
+  },
+  'ԋ': (g) => {
+    // cream stone with tall windows and wrought-iron balconies
+    px(g, 0, 0, '#ecdcb8', T, T);
+    px(g, 0, 0, '#d4c098', T, 1); px(g, 0, 7, '#c8b48a', T, 1);
+    for (const y of [1, 9]) for (const x of [2, 9]) {
+      px(g, x, y, '#2e4468', 5, 5); px(g, x + 1, y + 1, '#7ab0e0', 3, 2); px(g, x + 1, y + 1, '#c8e4f8', 1, 1);
+      px(g, x - 1, y + 5, '#4a3a3a', 7, 1); px(g, x, y + 4, '#4a3a3a', 1, 1); px(g, x + 2, y + 4, '#4a3a3a', 1, 1); px(g, x + 4, y + 4, '#4a3a3a', 1, 1);
+    }
+  },
+  'Ԍ': (g) => {
+    // the stepped side wing, a shade darker, with a pilaster
+    px(g, 0, 0, '#d8c69e', T, T);
+    px(g, 0, 0, '#c0ac84', T, 1);
+    px(g, 11, 0, '#ecdcb8', 3, T); px(g, 13, 0, '#b09c74', 1, T);
+    for (const y of [2, 10]) { px(g, 3, y, '#2e4468', 5, 4); px(g, 4, y + 1, '#7ab0e0', 3, 2); px(g, 2, y + 4, '#a8946a', 7, 1); }
+  },
+  'Ԏ': (g, r) => {
+    // a curtain of blue glass; some windows lit
+    px(g, 0, 0, '#1c3458', T, T);
+    for (let y = 0; y < T; y += 4) for (let x = 0; x < T; x += 4) {
+      px(g, x + 1, y + 1, r.int(0, 6) === 0 ? '#ffe070' : '#3a6aa8', 3, 3);
+      px(g, x + 1, y + 1, r.int(0, 2) ? '#6aa8e0' : '#4a88c8', 1, 1);
+    }
+    g.fillStyle = 'rgba(200,236,255,0.22)'; g.beginPath(); g.moveTo(0, 12); g.lineTo(12, 0); g.lineTo(16, 0); g.lineTo(0, 16); g.fill();
+  },
+});
+Object.assign(OVER, {
+  'Ԋ': (g) => {
+    // the spire and lighthouse of the Salvo
+    px(g, 5, 9, OUTLINE, 6, 7); px(g, 6, 10, '#ecdcb8', 4, 6); px(g, 6, 12, '#3a4a68', 4, 2);
+    px(g, 6, 4, OUTLINE, 4, 6); px(g, 7, 5, '#7a9a88', 2, 5);
+    px(g, 7, 0, OUTLINE, 2, 5); px(g, 7, 1, '#ffe060', 2, 2); px(g, 7, 1, '#fff6c0', 1, 1);
+  },
+  'ԍ': (g) => {
+    // the Torre de los Homenajes: a white shaft with a flag on top
+    shade(g, 8, 15, 4, 1);
+    px(g, 5, 4, OUTLINE, 6, 12); px(g, 6, 5, '#f4f2ec', 4, 11); px(g, 9, 5, '#c8c4bc', 1, 11);
+    for (let y = 7; y < 15; y += 3) px(g, 7, y, '#a8a49c', 1, 2);
+    px(g, 7, 0, OUTLINE, 1, 5); px(g, 8, 0, '#6cc8f0', 5, 1); px(g, 8, 1, '#ffffff', 5, 1); px(g, 8, 2, '#6cc8f0', 5, 1); px(g, 9, 1, '#f2c02a', 1, 1);
+  },
+  'ԏ': (g) => {
+    // the Fortaleza del Cerro: stone walls and the lighthouse on top of the hill
+    shade(g, 8, 15, 7, 1.2);
+    px(g, 1, 9, OUTLINE, 14, 7); px(g, 2, 10, '#b8a47e', 12, 6);
+    for (const x of [2, 6, 10]) px(g, x, 8, '#b8a47e', 2, 2);
+    px(g, 2, 13, '#94805e', 12, 1); px(g, 7, 12, '#3a2a1a', 2, 4);
+    px(g, 6, 2, OUTLINE, 4, 8); px(g, 7, 3, '#f4f2ec', 2, 7); px(g, 7, 5, '#d8302e', 2, 2);
+    px(g, 6, 0, OUTLINE, 4, 3); px(g, 7, 1, '#ffe060', 2, 1);
+  },
+  'Ԑ': (g) => {
+    // a candombe drum (tamboril) standing on its end, with its strap
+    shade(g, 8, 15, 5, 1.2);
+    px(g, 4, 3, OUTLINE, 8, 13); px(g, 5, 4, '#b06a34', 6, 11); px(g, 5, 4, '#d08a4a', 2, 11);
+    px(g, 5, 7, '#f2c02a', 6, 1); px(g, 5, 10, '#d83a2a', 6, 1); px(g, 5, 13, '#2a6ad8', 6, 1);
+    px(g, 4, 2, OUTLINE, 8, 2); px(g, 5, 2, '#f4ead0', 6, 1); // the leather head
+    px(g, 11, 5, '#4a2a1a', 1, 8);
+  },
+});
 
 // The cave between Piriápolis and Minas: stone floor, rubble where creatures hide, rock walls and crystals.
 const caveFloor = (g, r) => speckle(g, r, '#5a5560', ['#524d58', '#625d68', '#4a4650'], 14);
@@ -2344,7 +2864,7 @@ export function tileCanvas(ch, frame = 0, theme: string | null = null, under: st
   const f0 = info?.anim ? frame % 4 : 0;
   const onWater = under === true || under === '~';
   const base = (!set || under === 'ӝ') && typeof under === 'string' && under !== '~' && DRAW[under] ? under : null;
-  const ground = onWater ? (g, r) => DRAW['~'](g, r, f0) : base ? (g, r) => DRAW[base](g, r, 0) : (set?.['.'] ?? null);
+  const ground = onWater ? (g, r) => DRAW['~'](g, r, f0) : base ? (g, r) => DRAW[base](g, r, 0) : (set?.['.'] ?? set?.floor ?? null);
   const draw = set?.[ch] || null;
   const themed = draw || (ground && (DRAW[ch] || OVER[ch])) || onWater;
   const key = (themed ? `${theme}|` : '') + (onWater ? 'w|' : base ? `${base}|` : '') + ch + f;
@@ -2352,9 +2872,11 @@ export function tileCanvas(ch, frame = 0, theme: string | null = null, under: st
   // A drawing with see-through parts made for the plain tile also works on sand, a path, the water or a
   // themed floor (unless the theme draws its own version of this tile).
   if (!dk && !draw && key !== ch + f && overrideHasHoles(`tile:${ch}${f}`) && override(`tile:${ch}${f}`, T, T)) dk = `tile:${ch}${f}`;
+  // Room themes (house colours, clinics) keep the editor's drawing of a piece of furniture they do not redraw themselves.
+  if (!dk && !draw && set?.floor && override(`tile:${ch}${f}`, T, T)) dk = `tile:${ch}${f}`;
   if (dk) {
     if (!overrideHasHoles(dk)) return override(dk, T, T);
-    const floor = typeof under === 'string' && under !== '~' && TILE_INFO[under] ? under : null;
+    const floor = typeof under === 'string' && under !== '~' && TILE_INFO[under] ? under : set?.floor ? 'i' : null;
     return onBaseTile(dk, ch, frame, theme, onWater ? '~' : floor);
   }
   let c = cache.get(key);
@@ -2363,10 +2885,11 @@ export function tileCanvas(ch, frame = 0, theme: string | null = null, under: st
     const g = c.getContext('2d');
     const rng = new Rng(ch.charCodeAt(0) * 97 + 13);
     GROUND = ground;
+    WALLP = set?.wall ?? null;
     try {
       if (!draw && !DRAW[ch] && OVER[ch]) { grass(g, new Rng(7)); OVER[ch](g, rng, f); }
       else (draw ?? DRAW[ch] ?? DRAW.O)(g, rng, f);
-    } finally { GROUND = null; }
+    } finally { GROUND = null; WALLP = null; }
     cache.set(key, c);
   }
   return c;

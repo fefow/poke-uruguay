@@ -5,7 +5,7 @@
 
 
 import type { MapDef } from '../types.ts';
-import { TR, room, HOUSE, POLI, SHOP, GYM, nurse, pc, poli, shop } from './map-kit.ts';
+import { TR, room, HOUSE, POLI, SHOP, GYM, nurse, pc, poli, shop, furnishHouses } from './map-kit.ts';
 
 // ---------------------------------------------------------------- OUTDOORS
 const BASE_OUTDOOR: Record<string, MapDef> = {
@@ -84,61 +84,97 @@ const BASE_OUTDOOR: Record<string, MapDef> = {
     ],
   },
 
+  // Montevideo, the capital and the end of the trip (64x42). The road from Las Piedras comes in from the west through Parque
+  // Batlle onto Avenida Italia; the Bulevar Artigas runs down to the Rambla. North-west: Parque Batlle and the Estadio Centenario (the Liga). Centre: Plaza Independencia with the
+  // Artigas monument, the Palacio Salvo and the Teatro Solís, and the old wall of the Ciudadela with its gate into the Ciudad
+  // Vieja (cobbles, the Mercado del Puerto, Plaza Matriz, the port and, later, the tower of the Equipo PP). East: Avenida 18
+  // de Julio with the Shopping, the Policlínica and the Palacio de la Luz (gym). South: the Rambla and Playa Pocitos. Across
+  // the bay, the Cerro and its fortress.
   montevideo: {
     name: 'Montevideo',
     music: 'town',
     bg: 'city',
     theme: 'ciudad',
     tiles: [
-      '____________________0:0_____________________',
-      '__ZZZZZz__{{{{{{{{{_0:0___________ҀҀҀҀ_{{{{_',
-      '__ZZZZZz__]]]]]]]]]_0:0__JJJJJJJ__ҀҀҀҀ_]]]]_',
-      '__ZZZZZz__]]]]]]]]]_0:0__JJJdJJJ__ҁ҂҂ҁ_]]]]_',
-      '__ZZDZZz__]]]]]]]]]_0:0__jjjjjjj__ҁDҁҁ_]]]]_',
-      '__________]]]]]]]]]_0:0__jjjDjjj_______]]]]_',
-      '____________________///_____________________',
-      '_"_______"__"____S_|0:0|_________"______"___',
-      '000000000000000000/00000/0000000000000000000',
-      '------------------/-000-/-------------------',
-      '000000000000000000/00000/0000000000000000000',
-      '_"____________"____|0:0|________"______"____',
-      '___CCCCC_______{{{{_///__rrrrr_{{{{{{{{{{{{_',
-      '___CCQCC_UUUUU_]]]]_0:0__rrrrr_]]]]]]]]]]]]_',
-      '___IIDII_ttDtt_]]]]_0:0__HwDwH_]]]]]]]]]]]]_',
-      '_______________]]]]_0:0________]]]]]]]]]]]]_',
-      '___{{{{{{{{{{__]]]]_0:0________)))))))))))__',
-      '___]]]]]]]]]]__]]]]_0:0________))))<>)))))__',
-      '___]]]]]]]]]]_______0:0_"___"__(((((((((((__',
-      '___]]]]]]]]]]_______0:0________(((((((((((__',
-      '__"______"___"_____|0:0|_______(((((((((((__',
-      '--------------------000-------0(((((((((((__',
-      '0000000000000000000000000000000(((((((((((__',
-      '????????|???????|?????????|?????????????????',
-      '????????????S???????????????????????????????',
-      '[[[[[[[[}}[[[[[[[[[[[[[[[[[[[[[[[[[[[[}}[[[[',
-      '~~~~~~~~}}~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~',
-      '~~~~~~~~}}~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~',
-      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ"""""""""""""""""""""""""""""""""""""""""""',
+      'Ö..Ö...........=...Ö._{{{{{{_{{{{{{{_{{{{{{{{_{{{_{{{{{_{{{{{{_"',
+      'Ö.Ö......ԍ.....=.Ö..._]]]]]]_]]]]]]]_]]]]]]]]_]]]_]]]]]_]]]]]]_"',
+      'Ö....ZZҀҀҀҀҀZZ.=..Ö.._]]]]]]_]]]]]]]_]]]]]]]]_]]]_]]]]]_]]]]]]_"',
+      'ÖÖ...ZZҀҀҀҀҀZZ.=....._]]]]]]_]]]]]]]_]]]]]]]]_]]]_]]]]]_]]]]]]_"',
+      'Ö.S..ҁҁ҂ҁҁҁ҂ҁҁ.=.....___"_______"_______"____"___"__"_____"____"',
+      'Ö.Ö..ҁҁҁҁDҁҁҁҁ.=.....000000000000000000000000000000000000000000"',
+      '=====================------------------------------------------"',
+      'Ö.Ö.Δ.........Δ......000000000000000000000000000000000000000000"',
+      'Ö.................Ö.._______________0:0_______0:0_______0:0____"',
+      'ÖÖ.Ö.Ö.Ω.Γ.Ω.Ö..Ö....__ЙЙ_______Ԋ__Π0:0_______0:0_______0:0____"',
+      'Ö..................Ö.__________ԉԉԉ__0:0{{{{{{_0:0_{{{{{_0{{{{{_"',
+      '~~~~~~}ccccccccccccccԀ________ԌԋԋԋԌ_0:0]]]]]]С0:0_]]]]]_0]]]]]_"',
+      '~~~~~~}cԂԂԂԃԂԂԂcoooooԀԆԆԆԇԆԆԆ_ԌԋԋԋԌ_0:0]]]]]]_0:0_CCCCC_0]]]]]_"',
+      'μμμ~~~}γԂԂԂԂԂԂԂcHwwwHԀԈԈԈԈԈԈԈ_ԌԋԋԋԌ_0:0]]]]]]_0:0_CCQCC_0]]]]]_"',
+      'μμμ~~~}γԄԄԅԄԅԄԄccccccԀ________ԌԋDԋԌ_0:0{{{{{{{0:0_IIDII_0]]]]]_"',
+      'μμμ~~~}ccccccccccccccԀС___________С_0:0UUUUUUU0:0Π______0]]]]]_"',
+      'μԏμ~β~}cЗcЗccЗccuuuuuԀ|___________|_0:0tttDttt0:0_______0]]]]]_"',
+      'μμμ~~~}cccccccccuuuuuԀ_..._____...__0:0__"__"_0:0__"__"_0:0_"_С"',
+      'μμμ~~~}γccccccccHwDwHԀ_.p.Δ___Δ.p.__0:0000000000000000000:00000"',
+      'μμμ~~~}gggggcccccccccԀ_..._____...__0:0/-----/---/-----/0:0/---"',
+      'μμμ~~~}HwwwHcΣccccΣccԀ_____ΩΓΩ______0:0000000000000000000:00000"',
+      'μμμ~~~}cccccccc¤¤ccccԁ______________0:0_|__|__0:0_ԎԎԎԎԎ_0:0__|_"',
+      '~~~~~~}γcccccΔc¤¤cΔccԀ______________0:0{{{{{{_0:0_ԎԎԎԎԎ_0{{{{{_"',
+      '~~~β~~}rrrrrcccccccccԀ_..._____...__0:0]]]]]]_0:0JJJJJJJ0]]]]]_"',
+      '~~~~~~}HwwwHcΣccccΣccԀ_.p.Δ___Δ.p.__0:0]]]]]]_0:0ιJJdJJι0]]]]]_"',
+      'ѱѱѴѱѱ~}ccccccccccccccԀ_..._____...__0:0]]]]]]_0:0ιjιDιjι0]]]]]_"',
+      'ѵѵѵѵѵ~}cccccccccvvvvcԀ|___________|_0:0]]]]]]_0:0_______0]]]]]_"',
+      '~~~~~~}cccccccccHwwHcԀ______________0:0_______0:0_______0:0____"',
+      '~~~~β~}cccccccccccccc___"_Ь_"_Ь_"___0:0_______0:0_______0:0____"',
+      '~~~~~~000000000000000000000000000000000000000000000000000000000"',
+      '~~~~~~---------------------------------------/---/-------------"',
+      '~~~~~~000000000000000000000000000000000000000000000000000000000"',
+      '~~β~~~???|??????|??????|??????|??????|??????|??????|??????|????"',
+      '~~~~~~??????????????S??????????????????????????????????????????"',
+      '~~~~~~[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[sssssЖssssss}}ssssssЖss"',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssЖsssssЖsss}}sssЖsssss~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssssssssssss}}sssssssss~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}}~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
     ],
-    // Row-major order of the door tiles: Estadio, Palacio Salvo, Palacio de la Luz (gimnasio), Policlínica, tienda, casa.
+    // Row-major order of the door tiles: Estadio, Palacio Salvo, Policlínica, Shopping, casa, Palacio de la Luz (gimnasio).
+    // The tower of the Equipo PP is stamped later (placeSede) and its door is spliced in at its place.
     doors: [
       { to: 'liga_1', req: (f) => f.badge12 && f.anglo_clear, deny: ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido al Dr. Díaz, el fundador del Equipo PP.'] },
-      'palacio', 'gym_mvd', 'poli_mvd', 'shop_mvd', 'casa_mvd',
+      'palacio', 'poli_mvd', 'shop_mvd', 'casa_mvd', 'gym_mvd',
     ],
     fish: [['pejerrey', 8, 10, 55], ['aguaviva', 8, 10, 30], ['anguila', 9, 11, 15]],
     signs: [
-      'MONTEVIDEO\nCapital de la República. Plaza Independencia ↑   Rambla ↓',
-      'RAMBLA DE MONTEVIDEO\n22 km de costa para caminar con el mate bajo el brazo.',
+      'MONTEVIDEO\nCapital de la República.\n↓ Avenida 18 de Julio · Plaza Independencia · Rambla',
+      'RAMBLA DE MONTEVIDEO\n22 km de costa para caminar con el mate bajo el brazo.\n← Ciudad Vieja y puerto   Playa Pocitos →',
     ],
     exits: {
-      w: { to: 'rosario' },
+      w: { to: 'r_laspiedras_montevideo' },
     },
+    items: [{ x: 53, y: 40, item: 'superesfera', id: 'mvd_item1' }],
     npcs: [
-      { x: 16, y: 24, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
-      { x: 26, y: 6, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Sofía, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
-      { x: 37, y: 23, look: 'sailor', dir: 'up', text: ['La terminal del Buquebus está cerrada por reformas.', 'Los barcos a Buenos Aires salen desde Colonia del Sacramento.'] },
-      { x: 33, y: 5, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
+      { x: 3, y: 8, look: 'cop', dir: 'left', name: 'Policía de tránsito', text: ['Bienvenido a Montevideo.', 'Por la Avenida Italia llegás al Bulevar Artigas, que baja derecho hasta 18 de Julio y la Rambla. La Policlínica queda sobre 18 de Julio.'] },
+      { x: 8, y: 8, look: 'hincha', dir: 'up', name: 'Hincha', text: ['El Centenario se construyó para el primer Mundial, en 1930. Y la copa se quedó acá.', 'La torre de arriba es la Torre de los Homenajes.'] },
+      { x: 12, y: 9, look: 'hincha', wander: true, name: 'Hincha', text: ['Los días de clásico no se consigue lugar ni en el ómnibus.', 'Dicen que la Liga se juega adentro del estadio. Solo entran los que juntaron las doce medallas.'] },
+      { x: 3, y: 6, look: 'girl', wander: true, name: 'Corredora', text: ['Doy la vuelta al Parque Batlle todas las mañanas. Los eucaliptos dan sombra todo el año.'] },
+      { x: 33, y: 16, look: 'oldman', text: ['El Palacio Salvo fue el edificio más alto de Sudamérica.', 'Adentro trabaja gente que sabe mucho de criaturas.'] },
+      { x: 55, y: 27, look: 'boy', text: ['El gimnasio de Montevideo es el Palacio de la Luz, la sede de UTE.', 'La presidenta, Sofía, usa criaturas de tipo Eléctrico. Las de Tierra no reciben su electricidad.'] },
+      { x: 6, y: 22, look: 'sailor', dir: 'left', name: 'Marinero', text: ['Ese es el Buquebus de la carrera a Buenos Aires. La terminal de acá está cerrada por reformas.', 'Los barcos a Buenos Aires salen desde Colonia del Sacramento.'] },
+      { x: 31, y: 34, look: 'girl', wander: true, text: ['En la Rambla, la gente toma mate y mira el río.', 'El Río de la Plata es marrón por los sedimentos, aunque parezca un mar.'] },
+      { x: 14, y: 34, look: 'abuela', dir: 'down', name: 'Vecina', text: ['Todas las tardes bajo a la Rambla con el termo. El atardecer sobre el río no se paga.'] },
+      { x: 52, y: 39, look: 'pescador', dir: 'down', name: 'Pescador', text: ['Desde la punta del muelle salen pejerreyes cuando sopla del sur.', 'Con una buena caña, hasta una anguila.'] },
+      { x: 44, y: 36, look: 'turista', wander: true, name: 'Turista', text: ['En verano en la playa Pocitos no queda un metro libre. Hoy se puede caminar.'] },
+      { x: 40, y: 34, look: 'ciclista', wander: true, name: 'Ciclista', text: ['Pedaleo la Rambla de punta a punta. A la ida, viento a favor; a la vuelta, en contra. Siempre.'] },
+      { x: 24, y: 16, look: 'maestra', dir: 'up', name: 'Actriz', text: ['Esta noche hay función en el Teatro Solís. Tiene más de ciento cincuenta años y la sala se sigue llenando.'] },
+      { x: 28, y: 23, look: 'oldman', dir: 'up', name: 'Guía', text: ['Bajo el monumento a Artigas está su mausoleo. Hay guardia de honor día y noche.', 'La puerta de piedra del oeste es lo que queda de la Ciudadela, la muralla de la ciudad colonial.'] },
+      { x: 25, y: 22, look: 'turista', wander: true, name: 'Turista', text: ['Saqué cien fotos del Palacio Salvo y en ninguna entra entero.'] },
+      { x: 19, y: 16, look: 'artesana', dir: 'down', name: 'Artesana', text: ['Del otro lado de la puerta empieza la Ciudad Vieja. Los fines de semana la peatonal se llena de artesanos y músicos.'] },
+      { x: 11, y: 16, look: 'cocinero', dir: 'down', name: 'Parrillero', text: ['En el Mercado del Puerto la parrilla no se apaga nunca. Pasá con hambre.', 'Adentro no entra nadie más: está lleno desde el mediodía.'] },
+      { x: 14, y: 18, look: 'turista', dir: 'up', name: 'Turista', text: ['Pedí un chivito y me trajeron comida para tres.'] },
+      { x: 16, y: 25, look: 'nino', wander: true, name: 'Botija', text: ['La fuente de la Plaza Matriz tiene más monedas que agua.'] },
+      { x: 8, y: 19, look: 'obrero', dir: 'left', name: 'Estibador', text: ['Los contenedores bajan de los barcos y suben a los camiones. En el puerto no se para nunca.'] },
     ],
   },
 
@@ -570,13 +606,13 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     ],
   }),
   lab: room([
-    'xBBBxxXxxBBB',
-    'iiiiiiiiiiii',
+    'xBBBԽxXxԼBBB',
+    'ԵiiiiiiiiiՏՍ',
     'iiiiiiiiiiPi',
     'iiiiTTTiiiii',
     'iiiiiiiiiiii',
     'BBiiiiiiiiBB',
-    'iiiiiiiiiiii',
+    'Ղiiiiiiiiiii',
     'NiiiiiiiiiiN',
     'iiiiimmiiiii',
   ], {
@@ -603,7 +639,7 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     npcs: [{ x: 6, y: 3, look: 'gaucho', dir: 'left', text: ['Los Treinta y Tres Orientales cruzaron el río en 1825.', 'Coraje como ese se llama "garra charrúa".'] }],
   }),
   palacio: room([
-    'xxXxxxxxXxxx',
+    'xԼXxԼxxԼXxԼx',
     'BBBiiiiiiBBB',
     'iiiiiiiiiiii',
     'iiTTiiiiTTii',
@@ -621,11 +657,11 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     ],
   }),
   faro_cabo: room([
-    'xxxXXxxx',
+    'xԽxXXxԾx',
     'iiiiiiii',
-    'iiTTiiNi',
+    'ԷiԹTiiNi',
     'iiiiiiii',
-    'Niiiiiii',
+    'NiiiiiiԶ',
     'iiiiiiii',
     'iiiimmii',
   ], {
@@ -972,21 +1008,25 @@ for (const [mapId, script, flag] of RIVAL_AT) {
 }
 
 // The Equipo PP's head office: a tall tower at the Montevideo port (Torre del puerto, interiors sede_1..3 in maps-act2.ts). It is
-// stamped onto the garden at the west of the city, after any hand edits, and its door is the last one in row-major order.
+// stamped onto the cobbles of the Ciudad Vieja, beside the quay, after any hand edits; its door goes into the door list at its
+// row-major place.
 (function placeSede() {
   const m = OUTDOOR.montevideo;
-  const x0 = 5, y0 = 16;
+  const x0 = 9, y0 = 26;
+  const before = (x, y) => m.tiles.slice(0, y).join('').split('D').length - 1 + (m.tiles[y].slice(0, x).split('D').length - 1);
   const pat = block('radio');
   pat.forEach((row, dy) => {
     const r = [...m.tiles[y0 + dy]];
     [...row].forEach((c, dx) => { r[x0 + dx] = c; });
     m.tiles[y0 + dy] = r.join('');
   });
-  for (const y of [y0 + 3]) { const r = [...m.tiles[y]]; r[x0 + 2] = '_'; m.tiles[y] = r.join(''); }
-  m.doors.push({ to: 'sede_1', req: (f) => f.badge12 && f.pp_clear, deny: ['La torre del puerto está cerrada con candado.', 'Hay gente de gris custodiando la puerta y la antena de la cima no para de emitir.'] });
+  const dx = pat[pat.length - 1].indexOf('D'), dy = pat.length - 1;
+  const front = [...m.tiles[y0 + dy + 1]];
+  if (TILE_INFO[front[x0 + dx]]?.solid) { front[x0 + dx] = 'c'; m.tiles[y0 + dy + 1] = front.join(''); }
+  m.doors.splice(before(x0 + dx, y0 + dy), 0, { to: 'sede_1', req: (f) => f.badge12 && f.pp_clear, deny: ['La torre del puerto está cerrada con candado.', 'Hay gente de gris custodiando la puerta y la antena de la cima no para de emitir.'] });
   // The Estadio stays shut until the head of the Equipo PP is beaten.
-  const est = m.doors[0];
-  if (est && typeof est !== 'string') est.deny = ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido al Dr. Díaz, el fundador del Equipo PP.', 'Dicen que se atrincheró en la torre del puerto, al oeste de la ciudad.'];
+  const est = m.doors.find((d) => typeof d !== 'string' && d.to === 'liga_1');
+  if (est && typeof est !== 'string') est.deny = ['El Estadio Centenario está cerrado.', 'Solo entran quienes tengan las 12 medallas y hayan detenido al Dr. Díaz, el fundador del Equipo PP.', 'Dicen que se atrincheró en la torre del puerto, en la Ciudad Vieja.'];
 })();
 
 // The Silbato del Hornero (Vuelo) comes from Florida, the windy city of the route.
@@ -1154,6 +1194,7 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   g[0][4] = 'X'; g[0][19] = 'X';
   for (let x = 9; x <= 14; x++) g[2][x] = 'T';
   g[1][0] = 'N'; g[1][23] = 'N'; g[12][0] = 'N'; g[12][23] = 'N';
+  g[0][8] = 'Լ'; g[0][15] = 'Խ'; g[1][2] = 'Է'; g[1][20] = 'Գ'; g[1][21] = 'Դ'; g[1][22] = 'Ե'; g[2][10] = 'Թ'; // the breeders' kitchen
   const pens = [1, 9, 17];
   for (const px of pens) for (let y = 5; y <= 10; y++) for (let x = px; x <= px + 5; x++) g[y][x] = (y === 5 || y === 10 || x === px || x === px + 5) ? 'F' : '.';
   g[13][11] = 'm'; g[13][12] = 'm';
@@ -1180,6 +1221,7 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   for (let x = 10; x <= 14; x++) g[2][x] = 'T';
   for (let x = 6; x <= 9; x++) g[5][x] = 'T';
   g[1][0] = 'N'; g[1][15] = 'N'; g[8][0] = 'N'; g[8][15] = 'N';
+  g[0][7] = 'Խ'; g[0][8] = 'Լ';
   g[9][7] = 'm'; g[9][8] = 'm';
   INTERIOR.bici_tac = MAPS.bici_tac = room(g.map((r) => r.join('')), {
     name: 'Bicicletería El Pedal',
@@ -1215,7 +1257,10 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
     for (const x of [3, 7, 14, 18]) g[0][x] = 'X';
     g[0][10] = 'Ͽ'; g[0][11] = 'Ͽ';
     for (const x of [1, 2, 3, 4, 5, 6, 15, 16, 17, 18, 19, 20]) g[1][x] = 'B';
+    for (const x of [1, 2, 3, 4, 5, 6]) g[1][x] = 'Ն'; // the left store is a grocery: shelves of yerba, jars and tins
     for (const x of [2, 3, 4, 17, 18, 19]) g[3][x] = 'n';
+    g[3][2] = 'Պ'; g[3][19] = 'Պ';
+    for (const x of [6, 7, 14, 15]) g[12][x] = 'Ռ'; // benches for the ones who only look at shop windows
     for (const [x, y] of [[0, 1], [21, 1], [8, 6], [13, 6], [0, 12], [21, 12], [4, 9], [17, 9]]) g[y][x] = 'N';
     for (const x of [7, 8, 13, 14]) g[9][x] = 'T';
     g[13][10] = 'm'; g[13][11] = 'm';
@@ -1493,6 +1538,9 @@ const MO_BLOCKS = [
 // Scenery over open grass on routes and in localities (before the editor baseline below, so it is not an "edit").
 const LOCALITIES = new Set(STOPS.filter((st) => st.kind === 'loc').map((st) => st.id));
 scatterDecor(MAPS, (id) => id.startsWith('r_') || id.startsWith('ruta') || LOCALITIES.has(id));
+
+// Houses get their furniture once every resident is in place (the player wakes up at 6,5 in their own house).
+furnishHouses(INTERIOR, { casa_jugador: [[6, 5]] });
 
 export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m]) => {
   const keys = npcKeys(m.npcs);

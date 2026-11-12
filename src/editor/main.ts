@@ -12,7 +12,7 @@ import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
 import { UI_ICONS, uiIconCanvas } from '../gfx/ui-icons.ts';
-import { tileCanvas, TILE_INFO, THEMES, T, backgroundOf, tileWithoutGround } from '../gfx/tiles.ts';
+import { tileCanvas, TILE_INFO, THEMES, T, backgroundOf, tileWithoutGround, ROOM_THEME_NAMES } from '../gfx/tiles.ts';
 import { generated, setOverrides } from '../gfx/overrides.ts';
 import { SPRITE_ORIGINALS } from '../data/sprite-originals.js';
 import { encodeSprite, decodeSprite, overridesSource, parseOverridesSource } from '../gfx/sprite-codec.ts';
@@ -30,7 +30,7 @@ const MAX_UNDO = 60;
 // ---------------------------------------------------------------- catalogue
 const DIRS = [['down', 'Abajo'], ['left', 'Izquierda'], ['right', 'Derecha'], ['up', 'Arriba']];
 const MEDALS = ['Montevideo', 'Maldonado', 'Treinta y Tres', 'Durazno', 'Tacuarembó', 'Rivera', 'Salto', 'Fray Bentos'];
-const THEME_NAMES = { poli: 'Policlínica', gym_agua: 'Gimnasio Agua', gym_elec: 'Gimnasio Eléctrico', gym_roca: 'Gimnasio Roca' };
+const THEME_NAMES = { poli: 'Policlínica', gym_agua: 'Gimnasio Agua', gym_elec: 'Gimnasio Eléctrico', gym_roca: 'Gimnasio Roca', ...ROOM_THEME_NAMES };
 const lookName = (k) => k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
 // New content made here (creatures, looks, map pieces) waits in the browser until it is saved to the game.

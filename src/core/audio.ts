@@ -200,6 +200,14 @@ const SFX = {
   cast: (t) => { noise(t, 0.25, 0.3, sfxGain, { hp: 3000 }); noise(t + 0.4, 0.15, 0.35, sfxGain, { hp: 900 }); },
   bite: (t) => { tone(1568, t, 0.05, { duty: 0.25, vol: 0.5 }); tone(1568, t + 0.09, 0.05, { duty: 0.25, vol: 0.5 }); noise(t, 0.2, 0.4, sfxGain, { hp: 1200 }); },
   pc: (t) => ['C6', 'G5', 'E6', 'C6'].forEach((n, i) => tone(freq(n), t + i * 0.06, 0.06, { duty: 0.125, vol: 0.3 })),
+  // a bar of candombe: piano (low), repique (mid) and chico (high) over the hand claps of the "madera"
+  candombe: (t) => {
+    const b = 0.11;
+    [0, 3, 6, 8, 11, 14].forEach((i) => tone(82, t + i * b, 0.16, { type: 'triangle', vol: 0.75, slide: -18 }));
+    [2, 5, 7, 10, 13, 15].forEach((i) => { tone(196, t + i * b, 0.08, { type: 'triangle', vol: 0.5, slide: -40 }); noise(t + i * b, 0.05, 0.25, sfxGain, { hp: 900 }); });
+    for (let i = 1; i < 16; i += 2) tone(330, t + i * b, 0.04, { type: 'triangle', vol: 0.3 });
+    [4, 12].forEach((i) => noise(t + i * b, 0.03, 0.4, sfxGain, { hp: 2500 }));
+  },
   bell: (t) => { tone(2093, t, 0.25, { type: 'sine', vol: 0.4 }); tone(2093, t + 0.18, 0.35, { type: 'sine', vol: 0.35 }); },
   stat_up: (t) => tone(400, t, 0.25, { slide: 500, duty: 0.25 }),
   stat_down: (t) => tone(700, t, 0.25, { slide: -450, duty: 0.25 }),
