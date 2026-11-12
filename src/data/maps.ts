@@ -625,6 +625,9 @@ const BASE_INTERIOR: Record<string, MapDef> = {
       { x: 9, y: 6, look: 'clerk', dir: 'left', name: 'Gonzalo', text: ['Soy Gonzalo, ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
       { x: 2, y: 6, look: 'biologo', dir: 'right', name: 'Martín', text: ['Soy Martín, ayudante del Maestro Tabárez.', 'Medimos el viento del Río de la Plata. El Maestro dice que el pampero tiene un ciclo, como si alguien lo trajera.'] },
       { x: 7, y: 1, look: 'rival', dir: 'down', id: 'rival_lab', cond: (f) => !f.rival1 },
+      // Almada comes back to work with his old teacher once he leaves the PP; Facu helps his uncle after the Liga
+      { x: 8, y: 4, look: 'biologo', dir: 'left', name: 'Almada', cond: (f) => !!f.obs_clear, text: ['Soy Almada. Fui alumno del Maestro, me fui con Díaz y volví con el registro bajo el brazo.', 'El Maestro no me preguntó nada. Me señaló los instrumentos y dijo: "Hay viento para medir".', 'Si ves sierras donde de noche no canta ni un grillo, avisame. Tengo una medición que no logro explicar.'] },
+      { x: 3, y: 4, look: 'rival', dir: 'right', name: '{rival}', cond: (f) => !!f.champion, script: 'rival_lab_post' },
     ],
   }),
   casa_mvd: room(HOUSE, {
@@ -829,6 +832,7 @@ import { addFavors } from './favors.ts';
 import { addMiniStories } from './mini-stories.ts';
 import { addAmistad } from './amistad.ts';
 import { addFiesta } from './fiesta.ts';
+import { addLeyendas } from './leyendas.ts';
 import { SHIP_W, SHIP_H, shipChar } from '../gfx/tiles.ts';
 import { WALL_CAPS, TILE_INFO } from '../gfx/tiles.ts';
 import { MAP_OVERRIDES } from './map-overrides.js';
@@ -989,6 +993,7 @@ addMuelleStory(OUTDOOR.paysandu);
 const RIVAL_AT = [
   ['r_rosario_sanjose', 'rival_bosque', 'rival_bosque'],
   ['ruta3', 'rival_mvd', 'rival2'],
+  ['r_baltasar_rivera', 'rival_rivera', 'rival7'],
   ['r_lascano_rocha', 'rival_r5', 'rival5'],
   ['r_sarandi_durazno', 'rival_r24', 'rival6'],
 ];
@@ -1596,6 +1601,7 @@ for (const n of MAPS.gym_trinidad?.npcs ?? []) if (n.trainer && !n.leader) { n.s
   addMiniStories(OUTDOOR, INTERIOR);
   addAmistad(OUTDOOR);
   addFiesta(OUTDOOR);
+  addLeyendas(OUTDOOR);
   clearPierFolk(OUTDOOR.paysandu);
   (fb.npcs ??= []).push({ x: 3, y: 25, look: 'sailor', dir: 'down', blocker: true, name: 'Marinero del muelle', text: ['El Buquebus "China Zorrilla" zarpa pronto. Sin ticket no sube nadie.', 'Los pasajes los despachan en la empresa. Preguntá por el pueblo.'], cond: (f) => !f.got_ticket });
 }

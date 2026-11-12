@@ -689,9 +689,11 @@ test('mini historias: cadenas de pasos con personas en mapas reales, ítems clav
   const { SPECIES } = await import('../src/data/species.ts');
   const { ITEMS } = await import('../src/data/items.ts');
   const { MAPS } = await import('../src/data/maps.ts');
-  assert.ok(MINI_STORIES.length >= 6);
+  assert.ok(MINI_STORIES.length >= 9);
+  assert.equal(MINI_STORIES.filter((m) => m.festival).length, 3);
   for (const s of MINI_STORIES) {
     const flags = {}, bag = {};
+    const prizes = new Set(s.people.flatMap((p) => (p.acts ?? []).flatMap((x) => (x.prize ?? []).map(([k]) => k))));
     const placed = s.people.map((p) => {
       const n = (MAPS[p.at.map]?.npcs ?? []).find((o) => o.ms === s.id && o.msKey === p.key);
       assert.ok(n, `${s.id}/${p.key}: está en ${p.at.map}`);
@@ -699,7 +701,12 @@ test('mini historias: cadenas de pasos con personas en mapas reales, ítems clav
     });
     const api = {
       flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, sfx() {},
-      give: async (k) => { assert.ok(ITEMS[k], `${s.id}: ítem ${k}`); assert.equal(ITEMS[k].pocket, 'key', `${s.id}: ${k} es ítem clave`); bag[k] = 1; },
+      give: async (k) => {
+        assert.ok(ITEMS[k], `${s.id}: ítem ${k}`);
+        if (prizes.has(k)) { assert.ok(s.festival, `${s.id}: solo un festival premia con objetos comunes`); assert.notEqual(ITEMS[k].pocket, 'key'); assert.ok(!k.startsWith('mt_') && !ITEMS[k].held, `${s.id}: ${k} no es MT ni equipable`); return; }
+        assert.equal(ITEMS[k].pocket, 'key', `${s.id}: ${k} es ítem clave`); bag[k] = 1;
+      },
+      battle: async (t) => { assert.ok(t.team.length && t.team.every(([sp]) => SPECIES[sp]), `${s.id}: equipo de ${t.name}`); return 'win'; }, healParty() {},
       takeItem: (k) => { assert.ok(bag[k], `${s.id}: entrega ${k} sin tenerlo`); delete bag[k]; },
       wildBattle: async (sp) => { assert.ok(SPECIES[sp], `${s.id}: especie ${sp}`); return 'win'; },
       npcWalkOff: async () => {}, choose: async () => { throw new Error(`${s.id}: no hay elecciones ni acertijos`); },
@@ -809,4 +816,56 @@ test('fiesta de la Patria Gaucha: dura dos días del reloj, arma el predio y se 
   assert.deepEqual(keep({ t0: 100 }), { t0: 100 });
   assert.equal(keep({ t0: 1e9 }), null);
   assert.equal(keep(null), null);
+});
+
+test('las cinco leyendas: cada una tiene cuentero y lugar, Tabárez guía la búsqueda y cierra la historia', async () => {
+  const { LEYENDAS, tabarezTalk } = await import('../src/data/leyendas.ts');
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { SPECIES } = await import('../src/data/species.ts');
+  const { ITEMS } = await import('../src/data/items.ts');
+  assert.deepEqual(LEYENDAS.map((l) => l.key).sort(), Object.keys(SPECIES).filter((k) => SPECIES[k].legendary).sort());
+  const legends = Object.values(MAPS).filter((m) => m.legend).map((m) => m.legend);
+  for (const l of LEYENDAS) {
+    assert.ok(Object.values(MAPS).some((m) => (m.npcs ?? []).some((n) => n.script === 'ley_cuento' && n.ley === l.key)), `${l.key}: tiene cuentero`);
+    const L = legends.find((o) => o.species === l.key);
+    assert.ok(L, `${l.key}: aparece en algún mapa`);
+    assert.equal(L.flag, `caught_${l.key}`);
+    const f = { champion: true };
+    assert.ok(!L.cond(f) || l.needs.length === 0, `${l.key}: espera a las anteriores`);
+    for (const k of l.needs) f[k] = true;
+    assert.ok(L.cond(f), `${l.key}: aparece cuando se cumplen sus condiciones`);
+  }
+  // the whole chain with Tabárez: news before the Liga, then one legend after another, then the closing
+  const flags = { badge1: true }, got = [];
+  const api = { flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, ask: async () => true, give: async (k, n) => { assert.ok(ITEMS[k]); assert.ok(!k.startsWith('mt_') && !ITEMS[k].held); got.push([k, n]); } };
+  assert.equal(await tabarezTalk(api), true);
+  assert.equal(await tabarezTalk(api), false, 'no repite la misma noticia');
+  flags.champion = flags.got_pluma = true;
+  assert.equal(await tabarezTalk(api), true);
+  assert.ok(flags.ev_ley_intro);
+  for (const l of LEYENDAS) {
+    assert.equal(await tabarezTalk(api), true, `${l.key}: da una pista`);
+    assert.equal(got.length, LEYENDAS.indexOf(l));
+    flags[`caught_${l.key}`] = true;
+    await tabarezTalk(api);
+    assert.equal(got.length >= LEYENDAS.indexOf(l) + 1, true);
+  }
+  assert.ok(flags.ev_ley_fin);
+  for (const k of Object.keys(flags)) if (k.startsWith('ev_')) assert.match(k, /^ev_[a-z0-9_]{1,40}$/);
+});
+
+test('historia: Facu aparece antes de Rivera, Olivera es el recluta de las tres ciudades y los ex PP vuelven al final', async () => {
+  const { OUTDOOR, INTERIOR } = await import('../src/data/maps.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const r = OUTDOOR.r_baltasar_rivera.npcs.find((n) => n.script === 'rival_rivera');
+  assert.ok(r && r.arrive && !r.cond({ rival7: true }) && r.cond({}));
+  assert.ok(SCRIPTS.rival_rivera && SCRIPTS.rival_lab_post && SCRIPTS.ley_cuento);
+  for (const [map, name] of [['rocha', 'Olivera'], ['cabo', 'Bruma'], ['minas', 'Garúa']]) {
+    const n = OUTDOOR[map].npcs.find((o) => o.name === name && o.text);
+    assert.ok(n, `${name} vuelve a ${map}`);
+    assert.ok(!n.cond({}) && n.cond({ anglo_clear: true }));
+  }
+  const lab = Object.values(INTERIOR).find((m) => (m.npcs ?? []).some((n) => n.script === 'prof'));
+  assert.ok(lab.npcs.some((n) => n.name === 'Almada' && n.cond({ obs_clear: true }) && !n.cond({})));
+  assert.ok(lab.npcs.some((n) => n.script === 'rival_lab_post' && n.cond({ champion: true }) && !n.cond({})));
 });
