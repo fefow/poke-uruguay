@@ -269,13 +269,14 @@ export function teamOf(types: any, levels: number[], seed: number | string = 1) 
   });
 }
 
-const WALKABLE = new Set(['.', ',', '`', ';', 'f', 'c', '=', 's', 'b', 'i', 'Y', 'A']);
+const WALKABLE = new Set(['.', ',', '`', ';', 'f', 'c', '=', 's', 'b', 'i', 'Y', 'A', '_', '?', '}', '0', '-', ':']);
+const ROADS = new Set(['c', '=', '0', '-', ':']); // people placed by code keep off the streets when they can
 /**
  * Moves NPCs and items that were placed by eye onto the nearest free walkable tile
  * (prefers grass over roads), so generated layouts never need hand-tuned coordinates.
  */
 export function fitToMap(tiles, list, taken = new Set()) {
-  const ok = (x, y, roadsToo) => { const t = tiles[y]?.[x]; return t !== undefined && WALKABLE.has(t) && (roadsToo || (t !== 'c' && t !== '=')); };
+  const ok = (x, y, roadsToo) => { const t = tiles[y]?.[x]; return t !== undefined && WALKABLE.has(t) && (roadsToo || !ROADS.has(t)); };
   for (const o of list) {
     if (o.fixed) { taken.add(`${o.x},${o.y}`); continue; } // gate keepers stand exactly where the gate is
     let best = null;

@@ -2380,6 +2380,173 @@ Object.assign(DRAW, {
   },
 };
 
+// ---- Montevideo landmarks: the Ciudadela gate and wall, Mercado del Puerto, Teatro Solís, Palacio Salvo, the
+// Torre de los Homenajes of the Estadio Centenario, the glass tower of the Palacio de la Luz, the Fortaleza del Cerro
+// and the candombe drums. Full tiles draw their own ground; the ones in OVER stand on whatever ground is around them.
+Object.assign(TILE_INFO, {
+  'Ԁ': { name: 'muralla de la Ciudadela', solid: true },
+  'ԁ': { name: 'puerta de la Ciudadela' },
+  'Ԃ': { name: 'techo Mercado del Puerto', solid: true },
+  'ԃ': { name: 'techo Mercado del Puerto con reloj', solid: true },
+  'Ԅ': { name: 'fachada Mercado del Puerto', solid: true },
+  'ԅ': { name: 'fachada Mercado del Puerto con portón', solid: true },
+  'Ԇ': { name: 'techo Teatro Solís', solid: true },
+  'ԇ': { name: 'techo Teatro Solís con frontón', solid: true },
+  'Ԉ': { name: 'fachada Teatro Solís', solid: true },
+  'ԉ': { name: 'cúpula del Palacio Salvo', solid: true },
+  'Ԋ': { name: 'aguja del Palacio Salvo', solid: true, over: true },
+  'ԋ': { name: 'fachada Palacio Salvo', solid: true },
+  'Ԍ': { name: 'fachada Palacio Salvo (ala)', solid: true },
+  'ԍ': { name: 'Torre de los Homenajes', solid: true, over: true },
+  'Ԏ': { name: 'fachada vidriada', solid: true },
+  'ԏ': { name: 'Fortaleza del Cerro', solid: true, over: true },
+  'Ԑ': { name: 'tamboril', solid: true, over: true },
+});
+const GRANITE = ['#d6c4a0', '#b8a47e', '#94805e', '#6a5a42'];
+/** Rows of dressed granite blocks (the wall of the old Ciudadela). */
+function granite(g, y0 = 0, y1 = T) {
+  const [li, ba, mi, dk] = GRANITE;
+  px(g, 0, y0, ba, T, y1 - y0);
+  for (let y = y0; y < y1; y += 4) {
+    const off = ((y - y0) / 4) % 2 ? 4 : 0;
+    px(g, 0, y + 3, mi, T, 1);
+    for (let x = off - 8; x < T; x += 8) { px(g, x + 7, y, mi, 1, 3); px(g, x + 1, y, li, 5, 1); px(g, x + 6, y + 1, dk, 1, 2); }
+  }
+}
+Object.assign(DRAW, {
+  'Ԁ': (g) => {
+    granite(g, 0, T);
+    px(g, 0, 0, '#efe2c2', T, 2); px(g, 0, 2, '#6a5a42', T, 1); // coping along the top of the wall
+    px(g, 0, 14, 'rgba(35,22,46,0.3)', T, 2);
+    px(g, 0, 0, OUTLINE, 1, T); px(g, 15, 0, OUTLINE, 1, T);
+  },
+  'ԁ': (g, r) => {
+    // the gate seen from the plaza: an arch through the wall onto the cobbles of the Ciudad Vieja
+    px(g, 0, 0, '#8a8478', T, T);
+    for (let i = 0; i < 10; i++) px(g, r.int(0, 14), r.int(8, 15), '#a29c90', 2, 1);
+    granite(g, 0, 5); px(g, 0, 0, '#efe2c2', T, 2); px(g, 0, 2, '#6a5a42', T, 1);
+    px(g, 0, 5, '#b8a47e', 3, 11); px(g, 13, 5, '#b8a47e', 3, 11); px(g, 2, 5, '#94805e', 1, 11); px(g, 13, 5, '#d6c4a0', 1, 11);
+    g.fillStyle = '#b8a47e'; g.beginPath(); g.moveTo(3, 5); g.lineTo(3, 8); g.quadraticCurveTo(8, 2, 13, 8); g.lineTo(13, 5); g.fill(); // the arch
+    px(g, 7, 3, '#efe2c2', 2, 2); px(g, 7, 5, '#6a5a42', 2, 1); // keystone
+    px(g, 3, 8, '#3a3440', 10, 3); px(g, 3, 11, '#6a6460', 10, 2); px(g, 3, 13, '#9a9488', 10, 3); // the passage: dark under the vault, cobbles beyond
+    for (const [x, y] of [[4, 14], [8, 13], [11, 14], [6, 12]]) px(g, x, y, '#b8b2a4', 2, 1);
+    px(g, 0, 0, OUTLINE, 1, T); px(g, 15, 0, OUTLINE, 1, T);
+  },
+  'Ԃ': (g) => {
+    // corrugated iron, painted oxide red, with a skylight along the ridge
+    px(g, 0, 0, '#a8462e', T, T);
+    for (let x = 0; x < T; x += 3) { px(g, x, 0, '#c8603e', 1, T); px(g, x + 2, 0, '#7c2e20', 1, T); }
+    px(g, 0, 6, OUTLINE, T, 4); px(g, 0, 7, '#8fd0e8', T, 2); px(g, 0, 7, '#d8f2fa', T, 1);
+    for (let x = 1; x < T; x += 4) px(g, x, 7, '#3a4a58', 1, 2);
+  },
+  'ԃ': (g) => {
+    DRAW['Ԃ'](g);
+    // the clock turret over the main entrance
+    px(g, 3, 1, OUTLINE, 10, 15); px(g, 4, 2, '#e8dcc0', 8, 13); px(g, 4, 1, '#3a6a5a', 8, 2); px(g, 5, 0, '#3a6a5a', 6, 1);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 8.5, 3.6, 0, 7); g.fill();
+    g.fillStyle = '#fffbe8'; g.beginPath(); g.arc(8, 8.5, 2.8, 0, 7); g.fill();
+    px(g, 8, 6, OUTLINE, 1, 3); px(g, 8, 8, OUTLINE, 2, 1);
+  },
+  'Ԅ': (g) => {
+    // brick base and green iron arches with glass
+    px(g, 0, 0, '#c0583a', T, T);
+    for (let y = 0; y < T; y += 3) { px(g, 0, y + 2, '#8a3a26', T, 1); for (let x = (y / 3) % 2 ? 0 : 3; x < T; x += 6) px(g, x, y, '#8a3a26', 1, 2); }
+    px(g, 2, 2, OUTLINE, 12, 11); px(g, 3, 3, '#2e6a52', 10, 9);
+    g.fillStyle = '#2e6a52'; g.beginPath(); g.arc(8, 4, 5, Math.PI, 0); g.fill();
+    px(g, 4, 4, '#7ac0d8', 8, 7); px(g, 4, 4, '#c8ecf8', 8, 1); px(g, 7, 4, '#2e6a52', 2, 7); px(g, 4, 7, '#2e6a52', 8, 1);
+    px(g, 0, 13, '#6e6660', T, 3); px(g, 0, 13, '#a49c8a', T, 1);
+  },
+  'ԅ': (g) => {
+    DRAW['Ԅ'](g);
+    // an open gate: the warm light of the grills inside
+    px(g, 3, 3, '#2e6a52', 10, 13); px(g, 4, 4, '#4a2a1a', 8, 12); px(g, 4, 8, '#f0a040', 8, 3); px(g, 5, 9, '#ffd070', 2, 1); px(g, 9, 9, '#ffd070', 2, 1);
+    for (let x = 4; x < 12; x += 2) px(g, x, 4, '#2e6a52', 1, 12);
+  },
+  'Ԇ': (g) => {
+    shingles(g, ['#a8d8c0', '#6aa890', '#4e8a74', '#2c5a4a'], 21); // copper gone green
+  },
+  'ԇ': (g) => {
+    DRAW['Ԇ'](g);
+    g.fillStyle = OUTLINE; g.beginPath(); g.moveTo(-1, 16); g.lineTo(8, 3); g.lineTo(17, 16); g.fill();
+    g.fillStyle = '#f2ead6'; g.beginPath(); g.moveTo(1, 15); g.lineTo(8, 5); g.lineTo(15, 15); g.fill();
+    px(g, 6, 11, '#c8b890', 4, 2); px(g, 7, 9, '#c8b890', 2, 2); // relief in the pediment
+  },
+  'Ԉ': (g) => {
+    // cream colonnade on a flight of steps
+    px(g, 0, 0, '#5a4a3a', T, 13);
+    px(g, 0, 0, '#f2ead6', T, 3); px(g, 0, 3, '#c8b890', T, 1);
+    for (const x of [1, 9]) { px(g, x, 4, '#f6f0e0', 5, 9); px(g, x + 4, 4, '#c8b890', 1, 9); px(g, x + 1, 4, '#ffffff', 1, 9); px(g, x - 1, 4, '#e8dcc0', 7, 1); }
+    px(g, 0, 13, '#d8ccb0', T, 1); px(g, 0, 14, '#b8a888', T, 1); px(g, 0, 15, '#98886a', T, 1);
+  },
+  'ԉ': (g) => {
+    // the crown of the Salvo: an octagonal lantern with arches over a balustrade
+    px(g, 0, 0, '#c9c5be', T, T); // sky over the pavement around the lantern
+    px(g, 2, 2, OUTLINE, 12, 14); px(g, 3, 3, '#ecdcb8', 10, 13);
+    g.fillStyle = OUTLINE; g.beginPath(); g.arc(8, 4, 6, Math.PI, 0); g.fill();
+    g.fillStyle = '#7a9a88'; g.beginPath(); g.arc(8, 4.5, 4.8, Math.PI, 0); g.fill();
+    px(g, 4, 1, '#a8c8b4', 2, 1);
+    for (const x of [4, 7, 10]) { px(g, x, 7, '#3a4a68', 2, 5); px(g, x, 7, '#7ab0e0', 2, 1); }
+    px(g, 3, 13, '#c8b48a', 10, 1); px(g, 3, 14, '#a8946a', 10, 2);
+  },
+  'ԋ': (g) => {
+    // cream stone with tall windows and wrought-iron balconies
+    px(g, 0, 0, '#ecdcb8', T, T);
+    px(g, 0, 0, '#d4c098', T, 1); px(g, 0, 7, '#c8b48a', T, 1);
+    for (const y of [1, 9]) for (const x of [2, 9]) {
+      px(g, x, y, '#2e4468', 5, 5); px(g, x + 1, y + 1, '#7ab0e0', 3, 2); px(g, x + 1, y + 1, '#c8e4f8', 1, 1);
+      px(g, x - 1, y + 5, '#4a3a3a', 7, 1); px(g, x, y + 4, '#4a3a3a', 1, 1); px(g, x + 2, y + 4, '#4a3a3a', 1, 1); px(g, x + 4, y + 4, '#4a3a3a', 1, 1);
+    }
+  },
+  'Ԍ': (g) => {
+    // the stepped side wing, a shade darker, with a pilaster
+    px(g, 0, 0, '#d8c69e', T, T);
+    px(g, 0, 0, '#c0ac84', T, 1);
+    px(g, 11, 0, '#ecdcb8', 3, T); px(g, 13, 0, '#b09c74', 1, T);
+    for (const y of [2, 10]) { px(g, 3, y, '#2e4468', 5, 4); px(g, 4, y + 1, '#7ab0e0', 3, 2); px(g, 2, y + 4, '#a8946a', 7, 1); }
+  },
+  'Ԏ': (g, r) => {
+    // a curtain of blue glass; some windows lit
+    px(g, 0, 0, '#1c3458', T, T);
+    for (let y = 0; y < T; y += 4) for (let x = 0; x < T; x += 4) {
+      px(g, x + 1, y + 1, r.int(0, 6) === 0 ? '#ffe070' : '#3a6aa8', 3, 3);
+      px(g, x + 1, y + 1, r.int(0, 2) ? '#6aa8e0' : '#4a88c8', 1, 1);
+    }
+    g.fillStyle = 'rgba(200,236,255,0.22)'; g.beginPath(); g.moveTo(0, 12); g.lineTo(12, 0); g.lineTo(16, 0); g.lineTo(0, 16); g.fill();
+  },
+});
+Object.assign(OVER, {
+  'Ԋ': (g) => {
+    // the spire and lighthouse of the Salvo
+    px(g, 5, 9, OUTLINE, 6, 7); px(g, 6, 10, '#ecdcb8', 4, 6); px(g, 6, 12, '#3a4a68', 4, 2);
+    px(g, 6, 4, OUTLINE, 4, 6); px(g, 7, 5, '#7a9a88', 2, 5);
+    px(g, 7, 0, OUTLINE, 2, 5); px(g, 7, 1, '#ffe060', 2, 2); px(g, 7, 1, '#fff6c0', 1, 1);
+  },
+  'ԍ': (g) => {
+    // the Torre de los Homenajes: a white shaft with a flag on top
+    shade(g, 8, 15, 4, 1);
+    px(g, 5, 4, OUTLINE, 6, 12); px(g, 6, 5, '#f4f2ec', 4, 11); px(g, 9, 5, '#c8c4bc', 1, 11);
+    for (let y = 7; y < 15; y += 3) px(g, 7, y, '#a8a49c', 1, 2);
+    px(g, 7, 0, OUTLINE, 1, 5); px(g, 8, 0, '#6cc8f0', 5, 1); px(g, 8, 1, '#ffffff', 5, 1); px(g, 8, 2, '#6cc8f0', 5, 1); px(g, 9, 1, '#f2c02a', 1, 1);
+  },
+  'ԏ': (g) => {
+    // the Fortaleza del Cerro: stone walls and the lighthouse on top of the hill
+    shade(g, 8, 15, 7, 1.2);
+    px(g, 1, 9, OUTLINE, 14, 7); px(g, 2, 10, '#b8a47e', 12, 6);
+    for (const x of [2, 6, 10]) px(g, x, 8, '#b8a47e', 2, 2);
+    px(g, 2, 13, '#94805e', 12, 1); px(g, 7, 12, '#3a2a1a', 2, 4);
+    px(g, 6, 2, OUTLINE, 4, 8); px(g, 7, 3, '#f4f2ec', 2, 7); px(g, 7, 5, '#d8302e', 2, 2);
+    px(g, 6, 0, OUTLINE, 4, 3); px(g, 7, 1, '#ffe060', 2, 1);
+  },
+  'Ԑ': (g) => {
+    // a candombe drum (tamboril) standing on its end, with its strap
+    shade(g, 8, 15, 5, 1.2);
+    px(g, 4, 3, OUTLINE, 8, 13); px(g, 5, 4, '#b06a34', 6, 11); px(g, 5, 4, '#d08a4a', 2, 11);
+    px(g, 5, 7, '#f2c02a', 6, 1); px(g, 5, 10, '#d83a2a', 6, 1); px(g, 5, 13, '#2a6ad8', 6, 1);
+    px(g, 4, 2, OUTLINE, 8, 2); px(g, 5, 2, '#f4ead0', 6, 1); // the leather head
+    px(g, 11, 5, '#4a2a1a', 1, 8);
+  },
+});
+
 // The cave between Piriápolis and Minas: stone floor, rubble where creatures hide, rock walls and crystals.
 const caveFloor = (g, r) => speckle(g, r, '#5a5560', ['#524d58', '#625d68', '#4a4650'], 14);
 const caveWall = (g, r) => {

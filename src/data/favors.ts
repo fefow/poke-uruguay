@@ -135,7 +135,7 @@ export const FAVORS: Chain[] = [
     reward: [['superesfera', 2], ['mate_dulce', 2]],
   },
   {
-    id: 'ciudad', giver: { map: 'montevideo', x: 14, y: 14, look: 'clerk', name: 'Guardia del puerto' },
+    id: 'ciudad', giver: { map: 'montevideo', x: 8, y: 23, look: 'clerk', name: 'Guardia del puerto' },
     mids: [{ map: 'interbalnearia', x: 12, y: 8, look: 'sailor', name: 'Viajante' }],
     ask: ['Un viajante dejó un bolso en el puerto antes de salir hacia Interbalnearia. Tiene papeles que va a necesitar.', 'Si lo encontrás, decile que pase a buscarlo antes de que cierre la oficina.'],
     wait: ['El bolso lleva dos días acá. Papeles de verdad, de esos que no se reponen.'],

@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-11 (v213).
+> Última actualización: 2026-11-12 (v215).
 
 ## Dónde está cada cosa en el código
 
@@ -74,7 +74,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 23. **Casupá** (localidad) y **Florida. Gimnasio 9.** Juan M. Boiso Lanza, **Volador**. Tras la medalla Boiso regala el **Silbato del Hornero** (MO Vuelo, flag `got_vuelo`).
 24. **Sarandí Grande** (localidad) y **Durazno. Gimnasio 10.** Candelaria, ANCAP, **Fuego**: el gimnasio, los entrenadores y los salvajes de la zona volcánica son todos de Fuego. Cerrado hasta liberar el **Depósito de la refinería** (Ferreira, MT Descarga). Los edificios tomados por el PP tienen fachada propia.
 25. **San Ramón** (localidad) y **Canelones. Gimnasio 11.** Tomás, INAVI, **Bicho**. Concurso de Bichos; mini historia La vendimia (Tomás está en San Ramón, espantando tres enjambres, hasta que se despejan las parras). El gimnasio es un viñedo laberinto y hábitat de insectos (setos con uvas, flores y telarañas, colmenas, hongos gigantes, árboles); sus entrenadores usan solo criaturas de tipo Bicho.
-26. **Las Piedras** (localidad; la ruta hacia Montevideo es el Camino Maldonado, cueva de tres veteranos y guardia de la Liga) y **Montevideo. Gimnasio 12.** Sofía, UTE, **Eléctrico**, en el Palacio de la Luz. El puerto queda cerrado por la Torre del puerto del PP (ver Final).
+26. **Las Piedras** (localidad; la ruta hacia Montevideo es el Camino Maldonado, cueva de tres veteranos y guardia de la Liga) y **Montevideo. Gimnasio 12.** Sofía, UTE, **Eléctrico**, en el Palacio de la Luz. El puerto queda cerrado por la Torre del puerto del PP (ver Final). Montevideo es la ciudad más grande del juego (64x42): se entra por el oeste, desde el Camino Maldonado, a través del Parque Batlle (Estadio Centenario con la Torre de los Homenajes); la Avenida Italia y el Bulevar Artigas bajan a 18 de Julio (Shopping, Policlínica, Palacio de la Luz) y a la Rambla con la playa Pocitos y su muelle. En el centro, la Plaza Independencia (monumento y mausoleo de Artigas, Palacio Salvo, Teatro Solís) y la Puerta de la Ciudadela, que lleva a la Ciudad Vieja: Mercado del Puerto, Plaza Matriz, el muelle con el Buquebus amarrado y la Torre del puerto. Del otro lado de la bahía se ve el Cerro con su fortaleza.
 
 ### Buquebus China Zorrilla
 
@@ -113,6 +113,7 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
 - **Rival Facu:** Bosque Grande, Buquebus, Lascano, Sarandí Grande (rumbo a Durazno) y Centenario. Nunca se une al PP.
 - **Pistas:** quienes bloquean un camino solo describen la situación, nunca dicen qué hacer; las pistas son parciales y repartidas.
 - **Favores entre pueblos:** 13 cadenas (faro, queso, radio, carta, cosecha, frontera, cuchilla, cerro, laguna, cerro_mina, sierra, costa, ciudad). No tocan la historia del PP.
+- **Eventos de ciudad (opcionales, una vez):** examen del casco histórico (Colonia), payada (San José), torneo (Mercedes), tesoro del marinero (Rocha), trueques, adivinos, carrera de la Ciclovía, concurso de bichos (Canelones) y **la llamada de candombe** (Montevideo): al director de la cuerda del Barrio Sur, junto a la Rambla, le faltan el repique (en la playa Pocitos) y el piano (en el Parque Batlle); avisados, cada tamborilero se va caminando y aparece junto a él; con los tres tambores la cuerda toca y regala 2 Chivitos y 3 Ultraballs (flags `ev_candombe_ok`, `ev_candombe_rep`, `ev_candombe_pia`, `ev_candombe`).
 - **Mini historias:** cadenas de eventos en una ciudad y sus alrededores para conseguir un objeto o abrir un camino, sin acertijos (La soga del escalador, El cuaderno de Quiroga, La canoa del Cuareim, Las bicicletas que no llegan, El potro del domador, La vendimia, entre otras).
 - **Rutas:** cada ruta conserva una o dos piezas entre compuerta, acertijo, palanca y máquina de niebla; las máquinas de niebla deben bloquear de verdad el camino.
 
