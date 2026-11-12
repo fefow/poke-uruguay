@@ -247,7 +247,7 @@ export const MS_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void>> 
 // ---------------------------------------------------------------- placing people on the maps
 
 const solid = (c: string | undefined) => c === undefined || !!TILE_INFO[c]?.solid;
-const GROUND = new Set(['.', ',', '`', ';', 'f', 's', 'i', 'Y', 'A', 'c', '=', 'b']);
+const GROUND = new Set(['.', ',', '`', ';', 'f', 's', 'i', 'Y', 'A', 'Ժ', 'Ի', 'c', '=', 'b']);
 const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 /** A free tile the player can reach, as close as possible to what `at` asks for. */

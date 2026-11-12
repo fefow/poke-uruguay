@@ -5,7 +5,7 @@
 
 
 import type { MapDef } from '../types.ts';
-import { TR, room, HOUSE, POLI, SHOP, GYM, nurse, pc, poli, shop } from './map-kit.ts';
+import { TR, room, HOUSE, POLI, SHOP, GYM, nurse, pc, poli, shop, furnishHouses } from './map-kit.ts';
 
 // ---------------------------------------------------------------- OUTDOORS
 const BASE_OUTDOOR: Record<string, MapDef> = {
@@ -570,13 +570,13 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     ],
   }),
   lab: room([
-    'xBBBxxXxxBBB',
-    'iiiiiiiiiiii',
+    'xBBBԽxXxԼBBB',
+    'ԵiiiiiiiiiՏՍ',
     'iiiiiiiiiiPi',
     'iiiiTTTiiiii',
     'iiiiiiiiiiii',
     'BBiiiiiiiiBB',
-    'iiiiiiiiiiii',
+    'Ղiiiiiiiiiii',
     'NiiiiiiiiiiN',
     'iiiiimmiiiii',
   ], {
@@ -603,7 +603,7 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     npcs: [{ x: 6, y: 3, look: 'gaucho', dir: 'left', text: ['Los Treinta y Tres Orientales cruzaron el río en 1825.', 'Coraje como ese se llama "garra charrúa".'] }],
   }),
   palacio: room([
-    'xxXxxxxxXxxx',
+    'xԼXxԼxxԼXxԼx',
     'BBBiiiiiiBBB',
     'iiiiiiiiiiii',
     'iiTTiiiiTTii',
@@ -621,11 +621,11 @@ const BASE_INTERIOR: Record<string, MapDef> = {
     ],
   }),
   faro_cabo: room([
-    'xxxXXxxx',
+    'xԽxXXxԾx',
     'iiiiiiii',
-    'iiTTiiNi',
+    'ԷiԹTiiNi',
     'iiiiiiii',
-    'Niiiiiii',
+    'NiiiiiiԶ',
     'iiiiiiii',
     'iiiimmii',
   ], {
@@ -1154,6 +1154,7 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   g[0][4] = 'X'; g[0][19] = 'X';
   for (let x = 9; x <= 14; x++) g[2][x] = 'T';
   g[1][0] = 'N'; g[1][23] = 'N'; g[12][0] = 'N'; g[12][23] = 'N';
+  g[0][8] = 'Լ'; g[0][15] = 'Խ'; g[1][2] = 'Է'; g[1][20] = 'Գ'; g[1][21] = 'Դ'; g[1][22] = 'Ե'; g[2][10] = 'Թ'; // the breeders' kitchen
   const pens = [1, 9, 17];
   for (const px of pens) for (let y = 5; y <= 10; y++) for (let x = px; x <= px + 5; x++) g[y][x] = (y === 5 || y === 10 || x === px || x === px + 5) ? 'F' : '.';
   g[13][11] = 'm'; g[13][12] = 'm';
@@ -1180,6 +1181,7 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
   for (let x = 10; x <= 14; x++) g[2][x] = 'T';
   for (let x = 6; x <= 9; x++) g[5][x] = 'T';
   g[1][0] = 'N'; g[1][15] = 'N'; g[8][0] = 'N'; g[8][15] = 'N';
+  g[0][7] = 'Խ'; g[0][8] = 'Լ';
   g[9][7] = 'm'; g[9][8] = 'm';
   INTERIOR.bici_tac = MAPS.bici_tac = room(g.map((r) => r.join('')), {
     name: 'Bicicletería El Pedal',
@@ -1215,7 +1217,10 @@ makePPCave(OUTDOOR.r_palmitas_mercedes);
     for (const x of [3, 7, 14, 18]) g[0][x] = 'X';
     g[0][10] = 'Ͽ'; g[0][11] = 'Ͽ';
     for (const x of [1, 2, 3, 4, 5, 6, 15, 16, 17, 18, 19, 20]) g[1][x] = 'B';
+    for (const x of [1, 2, 3, 4, 5, 6]) g[1][x] = 'Ն'; // the left store is a grocery: shelves of yerba, jars and tins
     for (const x of [2, 3, 4, 17, 18, 19]) g[3][x] = 'n';
+    g[3][2] = 'Պ'; g[3][19] = 'Պ';
+    for (const x of [6, 7, 14, 15]) g[12][x] = 'Ռ'; // benches for the ones who only look at shop windows
     for (const [x, y] of [[0, 1], [21, 1], [8, 6], [13, 6], [0, 12], [21, 12], [4, 9], [17, 9]]) g[y][x] = 'N';
     for (const x of [7, 8, 13, 14]) g[9][x] = 'T';
     g[13][10] = 'm'; g[13][11] = 'm';
@@ -1493,6 +1498,9 @@ const MO_BLOCKS = [
 // Scenery over open grass on routes and in localities (before the editor baseline below, so it is not an "edit").
 const LOCALITIES = new Set(STOPS.filter((st) => st.kind === 'loc').map((st) => st.id));
 scatterDecor(MAPS, (id) => id.startsWith('r_') || id.startsWith('ruta') || LOCALITIES.has(id));
+
+// Houses get their furniture once every resident is in place (the player wakes up at 6,5 in their own house).
+furnishHouses(INTERIOR, { casa_jugador: [[6, 5]] });
 
 export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m]) => {
   const keys = npcKeys(m.npcs);
