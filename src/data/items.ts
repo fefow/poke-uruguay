@@ -81,6 +81,10 @@ const BASE_ITEMS = {
   brea: { name: 'Tarro de brea', pocket: 'key', price: 0, desc: 'Brea caliente de un carpintero de ribera de Tranqueras. Sirve para tapar un casco rajado.' },
   remos: { name: 'Remos', pocket: 'key', price: 0, desc: 'Un par de remos con iniciales talladas en el mango. Los trajo la corriente hasta Belén.' },
   correa: { name: 'Correa de motor', pocket: 'key', price: 0, desc: 'Una correa nueva del taller de la frontera, en Rivera. Es la medida de un camión.' },
+  yerba_fiesta: { name: 'Bolsa de yerba', pocket: 'key', price: 0, desc: 'La yerba de la Fiesta del Mate, secada con leña de monte en Rosario. La esperan en San José.' },
+  calabaza_fiesta: { name: 'Mate grande', pocket: 'key', price: 0, desc: 'El mate de calabaza de la Fiesta del Mate, curado por un artesano de Ecilda Paullier. Va para la rueda de San José.' },
+  traje_carnaval: { name: 'Traje de portabandera', pocket: 'key', price: 0, desc: 'Un traje de carnaval con amatistas cosidas en el tocado. Lo espera una escuela de samba de Artigas.' },
+  surdo: { name: 'Surdo', pocket: 'key', price: 0, desc: 'El tambor más grave de la batería de una escuela de samba de Artigas. Quedó en la costa de Belén después de un ensayo.' },
   cabestro: { name: 'Cabestro', pocket: 'key', price: 0, desc: 'El cabestro del potro moro del domador de Tacuarembó. Sin él no se deja tocar por nadie.' },
 };
 

@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-12 (v215).
+> Última actualización: 2026-11-12 (v217).
 
 ## Dónde está cada cosa en el código
 
@@ -12,8 +12,9 @@
 | Misiones de edificios tomados por el PP | `src/data/story.ts` `EVENTS` + salas en `maps-act2.ts` (`eventRoom`) |
 | Historias y personajes de rutas | `route-stories.ts`, `route-folk.ts`, `route-flavor.ts`, `maps-route.ts` |
 | Favores entre pueblos | `favors.ts` |
-| Mini historias (cadenas de eventos) | `mini-stories.ts` |
+| Mini historias (cadenas de eventos) y festivales de pueblo | `mini-stories.ts` (`festival: true` en los festivales) |
 | Eventos opcionales (quiz, payada, concurso de bichos) | `events.ts` |
+| Las cinco leyendas, Tabárez como mentor, ex miembros del PP | `leyendas.ts` (`LEYENDAS`, `tabarezTalk`, `addLeyendas`) |
 | Amistad con Ramón | `amistad.ts` |
 | Huevo | `egg.ts` |
 | Medidor de Niebla (plantas del PP) | `toxicity.ts` (`PP_PLANTS`, total 85 puntos + 15 de máquinas sueltas) |
@@ -42,6 +43,9 @@ Notas de lectura: los campos `order` y `badge` dentro de `LEADERS` son heredados
 | **Almada** | Investigador, ex alumno de Tabárez | Observatorio del Cerro (Piriápolis) | Deja el PP al perder y lleva el registro a Tabárez |
 | **Dr. Díaz** | Fundador | Montevideo (puerto) | Jefe final del PP; requiere las 12 medallas |
 | Capataces (Ferreira, Rondeau, Bianchi, Cáceres, Vidal) | Jefes de edificio | Refinería, Parrilla, Aduana, Radio, Muelle | Ver misiones |
+| **Recluta Olivera** | Recluta | San José (alambre), Artigas (geodas), Rocha (laguna) | El mismo recluta en las tres ciudades: reconoce al jugador, duda cada vez más y deja el PP en Rocha |
+
+**Después del PP (`anglo_clear`):** Olivera cuenta flamencos en la Laguna de Rocha, Bruma ayuda al farero en Cabo Polonio y Garúa desarma la fábrica de Minas con una orden del juzgado. Almada trabaja en el laboratorio de Carmelo desde que deja el PP (`obs_clear`). Brumario no vuelve.
 
 ## Recorrido por ciudades (orden de `STOPS`)
 
@@ -50,7 +54,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 1. **Carmelo.** Inicio. Tu madre te manda con Tabárez. Hablás con él antes de elegir; elegís inicial entre tres Pokeballs y el rival elige la que le gana a la tuya (Fuego → Agua, Agua → Planta, Planta → Fuego): rodea la mesa caminando, la toma del lado del frente (el mismo que el tuyo) y se da vuelta para mirarte.
 2. **Colonia del Sacramento.** Hay que traerle a Tabárez la carta del almacén. A cambio: PokeDex y 5 Pokeballs. Una vecina cierra la Ruta 1 hasta tener la PokeDex.
 3. **Rosario** (localidad). Caña de pescar. En Bosque Grande hay una revancha corta con el rival.
-4. **San José de Mayo.** Un recluta del PP se lleva el alambre de la intendencia; se lo vence y se abre el camino.
+4. **San José de Mayo.** El recluta **Olivera** se lleva el alambre de la intendencia; se lo vence y se abre el camino. Festival: **Fiesta del Mate**.
 5. **Ecilda Paullier** (localidad).
 6. **Trinidad. Gimnasio 1.** Elena, Instituto de Colonización, **Tierra**. Tras la medalla, el ayudante **Gonzalo** entrega el **Huevo**, que eclosiona a los 1000 pasos en Gato Pajero Nv8.
 7. **Palmitas** (localidad). Cueva donde Marta, del Correo, está retenida por dos reclutas.
@@ -59,12 +63,12 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 10. **Fray Bentos. Gimnasio 3.** Zoraida, Museo del Anglo, **Siniestro**. Antes, en el Frigorífico Anglo, Bruma defiende las máquinas; Tabárez llega, confiesa el origen del compañero y entrega el **Medidor de Niebla** (flag `anglo_pp`). Un obrero neutral del Anglo da el Ticket del Buquebus.
 11. **Young** (localidad) y **Paysandú.** Misión del **Muelle** (Vidal, MT Bomba Lodo). Caña Vieja en el muelle, Súper Caña en una casa.
 12. **Termas de Guaviyú** (localidad) y **Salto. Gimnasio 4.** Horacio Quiroga, **Psíquico**. Misión de la **Radio** (Cáceres, MT Psíquico) y la **Represa** (Garúa, flag `represa_clear`). Mini historia El cuaderno de Quiroga.
-13. **Belén** (localidad) y **Artigas.** Un minero pide echar a un recluta que se lleva geodas. Mini historia La canoa del Cuareim (Surf).
-14. **Tranqueras** (localidad) y **Rivera. Gimnasio 5.** Mariela, Ministra de Defensa, **Lucha**. Hay que apagar la **Torre de Niebla** (Bruma). Misión de la **Aduana** (Bianchi, MT Puño Gaucho). Mi Zoo (safari).
+13. **Belén** (localidad) y **Artigas.** Un minero pide echar a un recluta que se lleva geodas (otra vez Olivera). Festival: **el carnaval de Artigas**. Mini historia La canoa del Cuareim (Surf).
+14. **Tranqueras** (localidad) y **Rivera. Gimnasio 5.** En la ruta, antes de la ciudad, Facu mide el viento para «el estudio» y no cree que sea del PP; tras el combate va a ver la Torre con sus propios ojos (`rival7`). Mariela, Ministra de Defensa, **Lucha**. Hay que apagar la **Torre de Niebla** (Bruma). Misión de la **Aduana** (Bianchi, MT Puño Gaucho). Mi Zoo (safari).
 15. **Paso del Río Tacuarembó** (localidad) y **Tacuarembó. Gimnasio 6.** Ramón, Ministro de Ganadería, **Planta**; lo conociste antes sin saber quién era (`amistad.ts`). Bicicleta y ciclovía. Misión de la **Parrilla** (Rondeau, MT Parrillada). Mini historia El potro del domador (Fuerza). **Fiesta de la Patria Gaucha** (`fiesta.ts`): empieza la primera vez que entrás al pueblo y dura dos días del reloj; el campo al noreste se vuelve predio con sortija, jineteada y taba (premios sin MT ni equipables) y regalo de un Criollo; al terminar el segundo día se desarma para siempre.
 16. **Tupambaé** (localidad) y **Melo.** En la **Torre de las Ánimas** el Ánima del Sereno (`anima_clear`, MT Triturar) abre el camino.
-17. **Arbolito** (localidad) y **Treinta y Tres. Gimnasio 7.** Juan A. Lavalleja, **Roca**. Al este está la **Quebrada de los Cuervos** (mapa propio, pide la medalla): el ayudante **Martín** sube detrás del jugador; **Brumario** custodia al Cardenal Azul; al vencerlo el Cardenal se va, Tabárez llega, cuenta la historia completa y entrega la **Pluma Azul** (`quebrada_clear`). El Cardenal se captura después de la Liga.
-18. **Lascano** (localidad) y **Rocha.** La laguna está cubierta de niebla; un recluta vigila el camino a La Paloma.
+17. **Arbolito** (localidad) y **Treinta y Tres. Gimnasio 7.** Juan A. Lavalleja, **Roca**. Al este está la **Quebrada de los Cuervos** (mapa propio, pide la medalla): el ayudante **Martín** sube detrás del jugador; **Brumario** custodia al Cardenal Azul; al vencerlo el Cardenal se va, Tabárez llega, cuenta la historia completa y entrega la **Pluma Azul** (`quebrada_clear`). El Cardenal se captura después de la Liga. Festival: **Festival del Olimar**.
+18. **Lascano** (localidad) y **Rocha.** La laguna está cubierta de niebla; Olivera vigila el camino a La Paloma y, al perder por tercera vez, apaga el aparato y deja el PP.
 19. **La Paloma** (localidad, Guardería) y **Cabo Polonio.** Bruma robó la lámpara del faro; al vencerla se devuelve y el farero da el **Farol** (Destello).
 20. **Maldonado. Gimnasio 8.** Lucía, OSE, **Agua**. Casino Peninsula (las fichas nunca vuelven a dinero; las tragamonedas son un minijuego sin texto dentro de la máquina, con 1, 3 o 5 líneas: filas y diagonales; música de salón suave).
     - Identidad de la ciudad: Casapueblo (terrazas blancas con arcos, cartel) en la esquina noroeste, faro rojo y blanco en la punta este, sombrillas en la playa y vecinos que comentan Casapueblo, el faro, la Mano y los lobos marinos.
@@ -84,7 +88,23 @@ El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Termi
 
 1. Con las 12 medallas y la Fábrica de Minas liberada (`pp_clear`), en Montevideo se abre la **Torre del puerto** (sede del PP, 3 pisos: `sede_1`, `sede_2`, `sede_3` en `maps-act2.ts`). Piso 1: **Bruma** (flag `ev_sede_1`). Piso 2: **Brumario** y **Garúa** en dos tandas (`ev_sede_2a`, `ev_sede_2`). Cúpula: **Dr. Díaz**; aparecen caminando Facu, Tabárez y el Cardenal Azul, y se apaga la niebla (flag `anglo_clear`, el Medidor baja a 0 %). Hasta entonces el Estadio Centenario está cerrado y la gente de Montevideo lo explica.
 2. **Liga en el Estadio Centenario:** Estela (aire), Teófilo (roca y tierra), Dolores (veneno y bicho), Federico (lucha y normal), duelo final con Facu y el Campeón **Obdulio** (con revancha).
-3. Epílogo: semanas después, en Carmelo, se hablan de legendarias (viento helado en la Quebrada, un canto en Maldonado). Quedan las legendarias, las revanchas y el Cardenal Azul.
+3. Epílogo: semanas después, en Carmelo, se habla de legendarias (viento helado en la Quebrada, un canto en Maldonado) y Tabárez deja dicho que el jugador pase por el laboratorio. Ahí empieza **Las cinco leyendas**.
+
+## Las cinco leyendas (después de la Liga)
+
+El viento, el mar, el sol, el monte y el árbol. Durante el viaje, un **cuentero** por leyenda cuenta lo que dicen los viejos (flags `ev_ley_<especie>`). Después de la Liga, Tabárez abre el último capítulo en el laboratorio (`ev_ley_intro`): da una pista parcial de la siguiente leyenda, escucha cada captura y la premia con objetos comunes (`ev_ley_ok_<especie>`), y cierra el registro del Proyecto Pampero cuando están las cinco (`ev_ley_fin`). Cada leyenda aparece solo cuando las anteriores están en paz.
+
+| Orden | Leyenda | Dónde aparece | Condición (además de ser Campeón) | Cuentero | Pista de Tabárez |
+|---|---|---|---|---|---|
+| 1 | **Cardenal Azul** (viento) | Quebrada de los Cuervos, donde estaba el nido | Pluma Azul | Abuela, Ecilda Paullier | Todo pájaro vuelve a su nido |
+| 2 | **Ballenaplata** (mar) | Mar de Maldonado | Ninguna | Pescador viejo, La Paloma | Un canto que solo se oye desde el agua |
+| 3 | **Soldemayo** (sol) | Estadio Centenario, cancha de la final | Cardenal y Ballenaplata | Maestra, Florida | Una luz sobre la Torre de los Homenajes |
+| 4 | **Yaguareté** (monte) | Minas, entre los cerros | Las tres anteriores | Tropero, Casupá | Almada midió noches sin un grillo en las sierras |
+| 5 | **Ombú** (árbol) | Sarandí Grande, donde termina el pueblo | Las cuatro anteriores | Paisano, Sarandí Grande | Un árbol que ayer no estaba, en un pueblo antes de Durazno |
+
+## Maestro Tabárez como mentor
+
+Cada vez que el jugador vuelve al laboratorio, Tabárez comenta lo último que pasó en el camino y que todavía no comentó (`NEWS` en `leyendas.ts`, flags `ev_tab_<n>`): la medalla de Trinidad y el huevo, los planos de Marta, la confesión del Anglo, la Represa (Garúa es ingeniera), la Torre de Rivera (Bruma cree que cuida el clima), el vuelo del Cardenal, el faro, la vuelta de Almada, la fábrica de Minas y la caída de Díaz. Después ofrece revisar la PokeDex.
 
 ## Misiones de edificios tomados por el PP
 
@@ -110,15 +130,20 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
 - **MT:** solo como recompensa de misiones, eventos y líderes (nunca sueltas ni regalos de NPC).
 - **Equipables:** solo de jefes del PP, torres y grandes eventos; no se venden.
 - **Tipos y naturalezas:** 14 tipos (incluye Acero) y 25 naturalezas (`types.ts`, `natures.ts`).
-- **Rival Facu:** Bosque Grande, Buquebus, Lascano, Sarandí Grande (rumbo a Durazno) y Centenario. Nunca se une al PP.
+- **Rival Facu:** siete combates y una revancha libre. Laboratorio (elige después del jugador), Bosque Grande, Buquebus (cuenta que pasó datos del laboratorio a «un estudio del clima»), Ruta 3 (sigue midiendo para el estudio; su tío no le contó nada), ruta a Rivera (no cree que el estudio sea del PP y va a ver la Torre, `rival7`), Lascano (vio la Quebrada vacía: lo usaron), Sarandí Grande (habló con su tío, ya no trabaja para nadie) y Centenario. Sube a la cúpula de la Torre del puerto en el final. Después de la Liga trabaja con Tabárez en el laboratorio y acepta revancha cuando el jugador quiera (`rival_lab_post`, equipo 12 niveles más alto). Nunca se une al PP.
 - **Pistas:** quienes bloquean un camino solo describen la situación, nunca dicen qué hacer; las pistas son parciales y repartidas.
 - **Favores entre pueblos:** 13 cadenas (faro, queso, radio, carta, cosecha, frontera, cuchilla, cerro, laguna, cerro_mina, sierra, costa, ciudad). No tocan la historia del PP.
 - **Eventos de ciudad (opcionales, una vez):** examen del casco histórico (Colonia), payada (San José), torneo (Mercedes), tesoro del marinero (Rocha), trueques, adivinos, carrera de la Ciclovía, concurso de bichos (Canelones) y **la llamada de candombe** (Montevideo): al director de la cuerda del Barrio Sur, junto a la Rambla, le faltan el repique (en la playa Pocitos) y el piano (en el Parque Batlle); avisados, cada tamborilero se va caminando y aparece junto a él; con los tres tambores la cuerda toca y regala 2 Chivitos y 3 Ultraballs (flags `ev_candombe_ok`, `ev_candombe_rep`, `ev_candombe_pia`, `ev_candombe`).
-- **Mini historias:** cadenas de eventos en una ciudad y sus alrededores para conseguir un objeto o abrir un camino, sin acertijos (La soga del escalador, El cuaderno de Quiroga, La canoa del Cuareim, Las bicicletas que no llegan, El potro del domador, La vendimia, entre otras).
+- **Mini historias:** cadenas de eventos en una ciudad y sus alrededores para conseguir un objeto o abrir un camino, sin acertijos (La soga del escalador, El cuaderno de Quiroga, La canoa del Cuareim, Las bicicletas que no llegan, El potro del domador, La vendimia).
+- **Festivales de pueblo (opcionales, una vez, mismo motor que las mini historias; premian con objetos comunes, nunca MT ni equipables):**
+  - **Fiesta del Mate (San José).** Inicio: a la organizadora le faltan la yerba y el mate grande para la rueda de la plaza. Misión: la yerba la tiene el yerbatero de Rosario; el mate de calabaza, un artesano de Ecilda Paullier al que una comadreja le tomó el galpón (combate salvaje). Dos vecinos dan una pista cada uno. Desenlace: se arma la rueda; premio 3 Mates y 2 Superballs. Flags `ev_ms_mate_*`.
+  - **El carnaval de Artigas.** Inicio: la escuela de samba sale última y no está lista. Misión: el traje de la portabandera (con amatistas de la cantera) lo tiene la costurera de Tranqueras; el surdo quedó en la costa de Belén con una mulita adentro (combate salvaje). Desenlace: la batería arranca y la escuela desfila por la avenida; premio 2 Ultraballs y 2 alfajores triples. Flags `ev_ms_carnaval_*`.
+  - **Festival del Olimar (Treinta y Tres).** Inicio: la costumbre manda combatir antes de cantar y nadie se animó con los tres guitarreros. Misión: vencer a Anselmo, Rufino y Zulma, repartidos por la ciudad (tres combates de entrenador, en cualquier orden). Desenlace: el organizador abre el festival; premio 3 Ultraballs, 2 Mates con carqueja y 1 garrapiñada. Flags `ev_ms_olimar_*`.
 - **Rutas:** cada ruta conserva una o dos piezas entre compuerta, acertijo, palanca y máquina de niebla; las máquinas de niebla deben bloquear de verdad el camino.
 
 ## Pendiente conocido
 
 - Equilibrio de niveles y estadísticas.
 - Más contenido de historia y rutas con diseño verdaderamente único.
+- Los festivales nuevos y los cuenteros usan personajes existentes: faltan sprites propios (rueda de mate, carroza, escenario).
 - Contenido de Rivera por reubicar y localidades dentro de ciudades.

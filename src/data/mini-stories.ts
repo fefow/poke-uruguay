@@ -9,6 +9,7 @@
 // A story whose prize the player already owns (older saves, or the debug jump) counts as finished.
 import { TILE_INFO } from '../gfx/tiles.ts';
 import { mapBand, badgeOf } from './route.ts';
+import { teamOf } from './map-gen.ts';
 
 type Place = {
   map: string;
@@ -25,6 +26,9 @@ type Act = {
   say: string[];
   fight?: string;               // a wild creature to beat first (level: top of the map's band)
   fled?: string[];              // said when the fight was not won
+  trainer?: { name: string; cls: string; types: string[]; n: number; lose: string }; // or a person to beat first (levels: top of the map's band)
+  prize?: [string, number][];   // ordinary items handed over as thanks (festivals and optional stories)
+  sfx?: string;                 // a sound that plays when the step is done
   take?: string[];              // key items handed over
   give?: string;                // key item received
   grant?: [string, string];     // the prize: [item, flag that says it was received]
@@ -40,6 +44,7 @@ type Person = {
 type Story = {
   id: string; title: string; done: number; parts?: string[];
   owned?: (f: Record<string, boolean>) => boolean; // the prize is already the player's
+  festival?: boolean;           // an optional town festival: its prize is ordinary items, it opens nothing
   gym?: { map: string; to: string; deny: string[] }; // a gym door that stays closed until the story ends
   people: Person[];
 };
@@ -201,6 +206,86 @@ export const MINI_STORIES: Story[] = [
       { key: 'vecino_can', at: { map: 'canelones', near: [32, 24] }, look: 'oldman', name: 'Vecino', lines: [[0, ['Este año la uva se pierde en la planta. Dicen que hay plaga en los viñedos de San Ramón.']], [3, ['Tomás volvió de la vendimia. El gimnasio abrió otra vez.']]] },
     ],
   },
+  // ---------------------------------------------------------------- town festivals (optional: the prize is ordinary items)
+  {
+    id: 'mate', title: 'La Fiesta del Mate', done: 3, parts: ['yerba', 'calabaza'], festival: true,
+    people: [
+      {
+        key: 'organizadora', at: { map: 'sanjose', near: [26, 18] }, look: 'campesina', name: 'Organizadora de la fiesta',
+        lines: [[1, ['Sin yerba y sin el mate grande no hay rueda. Y sin rueda, la Fiesta del Mate es una feria más.']], [3, ['La rueda de este año va a durar hasta la madrugada. Volvé a tomar uno cuando quieras.']]],
+        acts: [
+          { at: 0, say: ['Este fin de semana San José festeja la Fiesta del Mate. Viene gente de todo el país a compartir la rueda de la plaza.', 'Este año falta lo principal: la yerba y el mate grande, el de calabaza. Los dos venían de afuera y ninguno llegó.'] },
+          {
+            at: 2, take: ['yerba_fiesta', 'calabaza_fiesta'], say: ['¡La yerba y la calabaza! Ya mismo pongo el agua.', 'El primer mate de la fiesta es para quien la salvó.'], sfx: 'heal',
+            prize: [['mate', 3], ['superesfera', 2]], then: ['En la rueda no se pregunta de dónde viene cada uno. Se ceba y se pasa. Buen viaje, {player}.'],
+          },
+        ],
+      },
+      {
+        key: 'yerbatero', at: { map: 'rosario', near: [14, 10] }, look: 'gaucho', name: 'Yerbatero',
+        lines: [[0, ['Seco y muelo la yerba como la molía mi padre: despacio y con leña de monte.']], [2, ['La bolsa de la fiesta ya va en camino. Este año salió pareja.']]],
+        acts: [{ at: 1, part: 'yerba', say: ['¿La yerba de la fiesta? Está embolsada desde el lunes. El que la llevaba a San José se quedó sin carro.', 'Llevala vos. Que no se moje.'], give: 'yerba_fiesta' }],
+      },
+      {
+        key: 'artesano', at: { map: 'ecilda', near: [16, 10] }, look: 'oldman', name: 'Artesano',
+        lines: [[0, ['Curo mates de calabaza. Cada uno lleva un mes de trabajo y no hay dos iguales.']], [2, ['El mate grande ya salió para la fiesta. El año que viene hago uno más grande todavía.']]],
+        acts: [{ at: 1, part: 'calabaza', fight: 'comadreja', say: ['El mate grande de la fiesta está listo, pero no puedo sacarlo del galpón.', 'Una comadreja hizo nido entre las calabazas y muerde al que se arrima.'], fled: ['La comadreja sigue en el galpón, entre las calabazas.'], then: ['Se fue al monte. Tomá el mate grande: llevalo a San José, que lo esperan.'], give: 'calabaza_fiesta' }],
+      },
+      { key: 'vecino_sj', at: { map: 'sanjose', near: [14, 22] }, look: 'oldman', name: 'Vecino', lines: [[0, ['La yerba de la fiesta la seca siempre la misma familia, en Rosario. Nunca falló un año.']], [3, ['Qué rueda. Hacía años que la plaza no se llenaba así.']]] },
+      { key: 'vecina_sj', at: { map: 'sanjose', near: [34, 12] }, look: 'abuela', name: 'Vecina', lines: [[0, ['El mate grande lo cura un artesano de Ecilda Paullier. Pasan cien manos por esa calabaza en una sola tarde.']], [3, ['Me tocó el mate veinte. Estaba mejor que el primero.']]] },
+    ],
+  },
+  {
+    id: 'carnaval', title: 'El carnaval de Artigas', done: 3, parts: ['traje', 'surdo'], festival: true,
+    people: [
+      {
+        key: 'directora', at: { map: 'artigas', near: [30, 22] }, look: 'murguero', name: 'Directora de la escuela de samba',
+        lines: [[1, ['Sin el traje no hay portabandera, y sin el surdo no hay batería. Así no salimos.']], [3, ['Este año la avenida fue nuestra. El que viene, te guardo un lugar en la batería.']]],
+        acts: [
+          { at: 0, say: ['Esta noche desfila el carnaval por la avenida. Es el más grande del país y mi escuela sale última.', 'No estamos listos. El traje de la portabandera no volvió de la costurera, y el surdo, el tambor más grave, quedó donde ensayamos.'] },
+          {
+            at: 2, take: ['traje_carnaval', 'surdo'], say: ['¡El traje y el surdo! Formen, que salimos.'], sfx: 'candombe',
+            prize: [['ultraesfera', 2], ['alfajor_triple', 2]], then: ['La batería arranca y la escuela entera avanza por la avenida. Los vecinos aplauden desde las veredas.', 'En Artigas, el que ayuda a una escuela desfila con ella. Esto es tuyo.'],
+          },
+        ],
+      },
+      {
+        key: 'costurera', at: { map: 'baltasar', near: [10, 12] }, look: 'artesana', name: 'Costurera',
+        lines: [[0, ['Coso para el carnaval todo el año. En febrero no duermo.']], [2, ['Ese traje lleva tres meses de aguja. Que lo luzcan bien.']]],
+        acts: [{ at: 1, part: 'traje', say: ['¿El traje de la portabandera? Lo terminé anoche. Le cosí amatistas de la cantera en todo el tocado.', 'No tenía quién lo llevara. Cuidalo: pesa más de lo que parece.'], give: 'traje_carnaval' }],
+      },
+      {
+        key: 'baterista', at: { map: 'belen', near: [16, 8] }, look: 'murguero', name: 'Músico de la batería',
+        lines: [[0, ['Ensayamos acá, lejos de la ciudad, para no despertar a nadie.']], [2, ['El surdo ya va para la avenida. Yo salgo detrás.']]],
+        acts: [{ at: 1, part: 'surdo', fight: 'mulitin', say: ['El surdo quedó acá después del ensayo, boca abajo en el pasto.', 'Una mulita se metió adentro y lo usa de cueva. Cada vez que lo levanto, se pone a pelear.'], fled: ['La mulita sigue adentro del surdo.'], then: ['Salió disparada para el campo. Llevate el surdo: la directora debe estar contando los minutos.'], give: 'surdo' }],
+      },
+      { key: 'vecino_art2', at: { map: 'artigas', near: [14, 14] }, look: 'hincha', name: 'Vecino', lines: [[0, ['Las costureras del carnaval trabajan en Tranqueras. Ahí la tela de la frontera llega más barata.']], [3, ['Todavía me zumban los oídos. Qué batería.']]] },
+      { key: 'vecina_art2', at: { map: 'artigas', near: [44, 26] }, look: 'girl', name: 'Vecina', lines: [[0, ['Las escuelas ensayan en la costa de Belén. De noche se oyen los tambores desde el río.']], [3, ['La portabandera brillaba entera. Dicen que el tocado lleva amatistas de acá.']]] },
+    ],
+  },
+  {
+    id: 'olimar', title: 'El Festival del Olimar', done: 3, parts: ['g1', 'g2', 'g3'], festival: true,
+    people: [
+      {
+        key: 'organizador', at: { map: 'quebrada', near: [24, 22] }, look: 'gaucho', name: 'Organizador del festival',
+        lines: [[1, ['Los tres guitarreros andan por la ciudad, afinando. Mientras nadie les gane, el festival no arranca.']], [3, ['El festival de este año se abrió con tu nombre. Acá no se olvida.']]],
+        acts: [
+          { at: 0, say: ['Esta semana Treinta y Tres vive el Festival del Olimar: canto y guitarra hasta que amanece.', 'La costumbre manda que antes de cantar se combate. Hay tres guitarreros anotados y este año nadie se animó con ellos.'] },
+          {
+            at: 2, say: ['¿Les ganaste a los tres? Entonces el festival queda abierto.'], sfx: 'catch',
+            prize: [['ultraesfera', 3], ['mate_dulce', 2], ['garrapinada', 1]], then: ['Esta noche cantan los tres juntos. El premio de la rueda es tuyo.'],
+          },
+        ],
+      },
+      ...([['g1', [14, 14], 'Guitarrero Anselmo', ['planta', 'normal'], 'Me desafinaste el equipo.', 'Cantarle al río es fácil. Lo difícil es que te conteste.'],
+        ['g2', [36, 16], 'Guitarrero Rufino', ['agua', 'volador'], 'Perdí el compás.', 'Mi milonga es lenta, pero llega.'],
+        ['g3', [28, 30], 'Guitarrera Zulma', ['roca', 'tierra'], 'Esa no me la sabía.', 'Vengo de la sierra. Allá se canta fuerte para que se oiga del otro lado.']] as [string, [number, number], string, string[], string, string][]).map(([part, near, who, types, lose, line]) => ({
+        key: part, at: { map: 'quebrada', near }, look: 'gaucho', name: who,
+        lines: [[0, [line]], [2, ['Buen combate. Esta noche canto por vos.']]] as [number, string[]][],
+        acts: [{ at: 1, part, trainer: { name: who, cls: 'Guitarrero', types, n: 3, lose }, say: ['¿Venís por la rueda del festival? Entonces dejo la guitarra un momento.'], fled: ['Volvé cuando quieras. El festival espera.'], then: ['Me ganaste limpio. Decile al organizador que conmigo ya cumpliste.'] }],
+      })),
+    ],
+  },
 ];
 
 const stageFlag = (s: Story, n: number) => `ev_ms_${s.id}_${n}`;
@@ -232,9 +317,18 @@ export const MS_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void>> 
       const res = await api.wildBattle(act.fight, hi);
       if (res !== 'win' && res !== 'caught') { if (res !== 'lose' && act.fled) await api.say(act.fled); return; }
     }
+    if (act.trainer) {
+      const [, hi] = mapBand(npc.map) ?? [20, 24];
+      const T = act.trainer;
+      const team = teamOf(T.types, Array.from({ length: T.n }, (_, i) => hi - (T.n - 1 - i)), `ms_${s.id}_${p.key}`);
+      const res = await api.battle({ id: `ms_${s.id}_${p.key}`, name: T.name, cls: T.cls, look: p.look, team, prize: hi * 40, intro: null, lose: T.lose, after: null, ai: 'basic' }, { canLose: true });
+      if (res !== 'win') { api.healParty({ silent: true }); if (act.fled) await api.say(act.fled, name); return; }
+    }
     for (const k of act.take ?? []) api.takeItem(k, 1);
     if (act.give) await api.give(act.give, 1);
     if (act.grant) { await api.give(act.grant[0], 1); api.setFlag(act.grant[1]); }
+    if (act.sfx) api.sfx(act.sfx);
+    for (const [k, n] of act.prize ?? []) await api.give(k, n);
     if (act.part) {
       api.setFlag(partFlag(s, act.part));
       if ((s.parts ?? []).every((q) => api.flag(partFlag(s, q)))) api.setFlag(stageFlag(s, st + 1));
@@ -251,7 +345,7 @@ const GROUND = new Set(['.', ',', '`', ';', 'f', 's', 'i', 'Y', 'A', 'Ժ', 'Ի',
 const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 /** A free tile the player can reach, as close as possible to what `at` asks for. */
-function spot(m: any, at: Place): [number, number] | null {
+export function spot(m: any, at: Place): [number, number] | null {
   const rows: string[] = m.tiles;
   const h = rows.length, w = rows[0].length;
   const tile = (x: number, y: number) => rows[y]?.[x];

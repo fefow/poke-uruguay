@@ -5,6 +5,7 @@ import { EVENT_SCRIPTS, riddleFor } from './events.ts';
 import { FAVOR_SCRIPTS } from './favors.ts';
 import { FIESTA_SCRIPTS } from './fiesta.ts';
 import { MS_SCRIPTS } from './mini-stories.ts';
+import { LEYENDA_SCRIPTS, tabarezTalk } from './leyendas.ts';
 import { AMISTAD_SCRIPTS, metRamon, ramonGymIntro } from './amistad.ts';
 import { STOPS, GYM_STOPS, STOP_INDEX, mapBand, openFlag, gymAce, badgeOf } from './route.ts';
 import { teamOf } from './map-gen.ts';
@@ -165,8 +166,8 @@ const CONTRIB = {
   mgap: 'La niebla ya le mata terneros al ganado de la zona. Esto es una cuestión de campo, no de ciencia.',
   lavalleja: 'Treinta y tres hombres cruzaron un río sin saber si volvían. A vos no te va a frenar una niebla.',
   ose: 'Corté el agua de la bomba que alimenta una de sus máquinas. No va a durar mucho, apurate.',
-  ancap: 'Les cerré el combustible. La fábrica de Minas va a funcionar a media máquina.',
-  boiso: 'Volé sobre la niebla. Se junta en un nudo, entre sierras. Ahí está el corazón.',
+  ancap: 'Les cerré el combustible para siempre. La niebla que queda sobre la capital va a durar lo que dure su última carga.',
+  boiso: 'Volé sobre lo que queda de la niebla. Ya no cubre las sierras: se junta toda en un nudo, sobre el puerto de Montevideo. Ahí está el corazón.',
   inavi: 'Los productores de la zona van a declarar ante la intendencia si hace falta. Que se sepa el precio de esta niebla.',
   ute: 'Corté la red que alimenta la última torre. Dr. Díaz está solo en el puerto.',
 };
@@ -214,14 +215,14 @@ const GATE_STORY = {
   sanjose: {
     name: 'Empleado de la intendencia',
     intro: ['Uno del Equipo PP se está llevando el alambre de la intendencia. Dice que es para unas torres en el litoral.', 'Yo solo no puedo. ¿Me das una mano?'],
-    foe: { types: ['veneno', 'siniestro'], intro: ['¿Y vos quién sos? Este alambre ya está pago. Correte.'], lose: 'Pará, pará. Me rindo.', after: ['Bueno, me voy. Igual las torres se van a levantar, con o sin alambre de San José.'] },
+    foe: { name: 'Recluta Olivera', types: ['veneno', 'siniestro'], intro: ['¿Y vos quién sos? Este alambre ya está pago. Correte.'], lose: 'Pará, pará. Me rindo.', after: ['Bueno, me voy. Igual las torres se van a levantar, con o sin alambre de San José.', 'Olivera, me llamo. Acordate, porque la próxima no me agarrás distraído.'] },
     thanks: ['Gracias. Se fue hacia el norte, por la ruta a Trinidad. Ojo con esa gente.', 'El camino a Ecilda Paullier queda abierto.'],
     open: ['Desde que se fue ese tipo, no falta más alambre.'],
   },
   artigas: {
     name: 'Minero de la cooperativa',
     intro: ['Un tipo de capa gris se metió en la cantera y se lleva las geodas en bolsas.', 'Dice que las piedras sirven para cargar las máquinas de niebla. Está acá nomás, en la salida.'],
-    foe: { types: ['roca', 'siniestro'], intro: ['Estas geodas son del Proyecto Pampero ahora. Andá a buscar las tuyas.'], lose: 'Las piedras pesan demasiado.', after: ['Me llevo lo que pude. El jefe va a estar furioso.'] },
+    foe: { name: 'Recluta Olivera', types: ['roca', 'siniestro'], intro: ['¿Otra vez vos? El del alambre de San José, sí. Me mandaron al norte por tu culpa.', 'Estas geodas son del Proyecto Pampero ahora. Andá a buscar las tuyas.'], lose: 'Las piedras pesan demasiado.', after: ['Me llevo lo que pude. El jefe va a estar furioso.', 'Me dijeron que esto era un estudio del clima. Cada vez cargo más bolsas y veo menos ciencia.'] },
     thanks: ['¡Se fue sin las bolsas! La cooperativa te debe una.', 'El camino a Tranqueras queda abierto. Si ves más de esos, avisá.'],
     open: ['Las geodas vuelven a la cooperativa. Gracias otra vez.'],
   },
@@ -235,7 +236,7 @@ const GATE_STORY = {
   rocha: {
     name: 'Guardaparque',
     intro: ['La Laguna de Rocha amaneció tapada de niebla. No es de acá: huele a máquina.', 'Hay uno del Equipo PP vigilando el camino a la costa. Si lo sacás, puedo abrir el paso.'],
-    foe: { types: ['agua', 'siniestro'], intro: ['La laguna es nuestra hasta que termine la prueba. Nadie pasa.'], lose: 'La niebla no me salvó.', after: ['Ya está. Apago el aparato. Pero esto no termina acá: la jefa está en la costa.'] },
+    foe: { name: 'Recluta Olivera', types: ['agua', 'siniestro'], intro: ['Vos. Claro que ibas a ser vos.', 'La laguna es nuestra hasta que termine la prueba. Nadie pasa. Son órdenes.'], lose: 'La niebla no me salvó.', after: ['Ya está. Apago el aparato.', 'San José, Artigas y ahora acá. Tres veces. Y cada vez me cuesta más explicarme por qué sigo con ellos.', 'La jefa está en la costa, en el cabo. Yo hasta acá llegué.'] },
     thanks: ['La niebla se levanta sobre la laguna. Ya se ven los flamencos.', 'El camino a La Paloma queda abierto.'],
     open: ['La laguna está despejada. Se ven los cisnes de cuello negro.'],
   },
@@ -247,7 +248,7 @@ export const EVENTS = {
     team: [['yarara', 49], ['pavesa', 49], ['caudillo', 50], ['temblador', 51]],
     intro: ['De este depósito sale el combustible de la niebla. Cada tanque que cargamos tapa un departamento entero.', 'El Dr. Díaz necesita una última carga para Montevideo. No vas a ser vos quien la frene.'],
     lose: 'Se me fue la presión.',
-    after: ['Está bien. Cierro las válvulas. Sin este combustible, la niebla de Montevideo no va a durar.', 'Pero el Dr. Díaz ya está en el Centenario.'],
+    after: ['Está bien. Cierro las válvulas. Sin este combustible, la niebla de Montevideo no va a durar.', 'Pero el Dr. Díaz ya no depende de mí. Está en la capital, en la torre del puerto.'],
     thanks: ['El depósito vuelve a ser de ANCAP. Gracias, {player}.', 'Candelaria te espera en el gimnasio. Y llevate esta MT, la usamos para las chispas de los motores.'],
   },
   parrilla: {
@@ -346,8 +347,10 @@ export const SCRIPTS = {
       }
       return;
     }
+    const spoke = await tabarezTalk(api); // news of the road and, after the Liga, the five legends (leyendas.ts)
     const seen = api.state.dex.seen.length;
     const caught = api.state.dex.caught.length;
+    if (spoke && !(await api.ask('¿Le mostrás la PokeDex al Maestro?'))) return;
     await api.say([`Veamos tu PokeDex. Viste ${seen} y capturaste ${caught} especies.`,
       caught >= 120 ? 'Un registro casi completo. Es un trabajo notable.' : caught >= 60 ? 'Buen avance. Seguí recorriendo el país.' : 'Todavía quedan muchas especies por registrar. Seguí explorando.'], { name: 'Maestro Tabárez' });
   },
@@ -548,7 +551,7 @@ export const SCRIPTS = {
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
     await api.npcApproach('rival_mvd'); // walks up from the road ahead, never pops in
-    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
+    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo. Y de que mi tío apareció por allá.', 'A mí no me contó nada. Mientras tanto sigo con el estudio del clima: me pidieron mediciones del río, y pagan bien.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
     if (res === 'win') await api.say(['Yo sigo hacia Salto. Nos vemos allá.'], { name: '{rival}' });
@@ -685,11 +688,12 @@ export const SCRIPTS = {
     const [, hi] = mapBand(here.id);
     if (G?.foe) {
       await api.say(G.intro, { name: who });
-      await api.say(G.foe.intro, { name: 'Recluta PP' });
+      const foeName = G.foe.name ?? 'Recluta PP';
+      await api.say(G.foe.intro, { name: foeName });
       const team = teamOf(G.foe.types, [hi, hi + 1], `gatepp_${here.id}`);
-      const res = await api.battle({ id: `gate_${here.id}`, name: 'Recluta PP', cls: 'Equipo PP', look: 'grunt', team, prize: (hi + 1) * 40, intro: null, lose: G.foe.lose, after: null, ai: 'basic' }, { canLose: true });
+      const res = await api.battle({ id: `gate_${here.id}`, name: foeName, cls: 'Equipo PP', look: 'grunt', team, prize: (hi + 1) * 40, intro: null, lose: G.foe.lose, after: null, ai: 'basic' }, { canLose: true });
       if (res !== 'win') return api.say('Volvé cuando tus criaturas estén listas. No los dejes salirse con la suya.', { name: who });
-      await api.say(G.foe.after, { name: 'Recluta PP' });
+      await api.say(G.foe.after, { name: foeName });
     } else if (G) {
       await api.say(G.intro, { name: who });
     } else {
@@ -973,6 +977,33 @@ export const SCRIPTS = {
     await api.npcWalkOff('tabarez_qb');
   },
 
+  // Before Rivera: Facu still measures for "the study" and will not hear that it is the PP. He goes to see the tower himself.
+  async rival_rivera(api) {
+    if (api.flag('rival7')) return;
+    await api.npcApproach('rival_rivera'); // walks up from the road ahead, never pops in
+    await api.say(['{player}. Mirá esto: un anemómetro de los buenos. Me lo mandaron para medir el viento de la frontera.', 'Hace días que marca cero. Ni una brisa. Anoté todo y lo envié, como siempre.'], { name: '{rival}' });
+    await api.say(['¿Que el estudio es del Equipo PP? El que me escribe firma como investigador, no como jefe de ninguna banda.', 'Vos ves reclutas en todos lados. Yo veo datos. Y mis datos dicen que estoy más fuerte que vos.'], { name: '{rival}' });
+    const [, hi] = mapBand('r_baltasar_rivera');
+    const line = LINE[COUNTER[api.starterKey()]];
+    const team = rescaleTeam([['teruterazo', 20], ['zorrigris', 21], ['yacaron', 21], [line[1], 23]], [hi, hi + 2]);
+    const res = await api.battle({ id: 'rival_rivera', name: '{rival}', cls: 'Rival', look: 'rival', team, prize: 2000, intro: null, lose: 'Los datos no decían esto.', after: null, ai: 'smart' }, { canLose: true });
+    api.setFlag('rival7');
+    if (res !== 'win') { api.healParty({ silent: true }); await api.say(['Te lo dije. Ya curé a tus criaturas: no me sirve ganarte con ventaja.'], { name: '{rival}' }); }
+    await api.say(['Está bien. Decís que en Rivera hay una torre que tapa la ciudad de niebla.', 'Si es cierto, alguien usa mis mediciones para algo que no me contó. Voy a verla con mis propios ojos.', 'Y si no es cierto, me debés una disculpa.'], { name: '{rival}' });
+    await api.npcWalkOff('rival_rivera');
+  },
+
+  // After the Liga, in the laboratory: Facu works with his uncle and is always up for a rematch.
+  async rival_lab_post(api) {
+    await api.say(['Con mi tío estamos revisando veinte años de registros del Proyecto Pampero. Todo lo que mandé al PP está acá, en estas carpetas.', 'No se arregla en una tarde, pero se arregla. Y vos, Campeón, ¿venís a ver si seguís siéndolo?'], { name: '{rival}' });
+    if (!(await api.ask('¿Aceptás la revancha?'))) return;
+    const team = rivalTeam(api, 5).map(([sp, l]) => [sp, Math.min(95, l + 12)]);
+    const res = await api.battle({ id: 'rival_post', name: '{rival}', cls: 'Rival', look: 'rival', team, prize: 10000, intro: null, lose: 'Sigue siendo tuyo el título.', after: null, ai: 'smart' }, { canLose: true });
+    api.healParty({ silent: true });
+    await api.say(res === 'win' ? ['Otra vez. Algún día te gano, y ese día lo anoto en el registro.'] : ['Gané. Lo voy a anotar en el registro, con fecha y hora.'], { name: '{rival}' });
+    await api.say('Tus criaturas quedaron recuperadas.');
+  },
+
   async rival_r5(api) {
     if (api.flag('rival5')) return;
     await api.npcApproach('rival_r5'); // walks up from the road ahead, never pops in
@@ -1237,7 +1268,7 @@ export const SCRIPTS = {
 
   async rival_final(api) {
     if (api.flag('rival4')) return;
-    await api.say(['Llegaste, {player}.', 'Desde Carmelo que te vengo siguiendo.', 'Esta es mi revancha. Voy con todo.'], { name: '{rival}' });
+    await api.say(['Llegaste, {player}.', 'Desde Carmelo que te vengo siguiendo. Elegí después que vos, medí para quien no debía y llegué tarde a la torre del puerto.', 'Acá no hay tío, ni datos, ni niebla. Estamos vos y yo, como en el laboratorio.', 'Esta es mi revancha. Voy con todo.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 5, 8000, null, 'Sos mejor que yo. Lo admito.', null), { canLose: true });
     api.setFlag('rival4');
     if (res === 'win') await api.say(['Andá. El Campeón te espera arriba.', 'Y ganale. Si no, quedo mal yo también.'], { name: '{rival}' });
@@ -1272,7 +1303,7 @@ export const SCRIPTS = {
     await api.say(fogs === 3 ? ['Las tres máquinas quedaron apagadas del todo. Un año difícil para el campo, pero el cielo volvió a ser de nadie.']
       : fogs === 0 ? ['Dejaste que algunas máquinas siguieran a cargo de los pueblos. El cielo sigue pidiendo permiso, pero nadie perdió la cosecha.']
         : ['Algunos pueblos pasaron un año difícil y otros siguen con la red de niebla. Nadie quedó del todo conforme, y todos entendieron por qué.']);
-    await api.say(['Algunas semanas después, en Carmelo.', 'Se habla de criaturas legendarias avistadas en el país:', 'un viento helado en la Quebrada, un canto en la costa de Maldonado.', 'Tu aventura continúa.']);
+    await api.say(['Algunas semanas después, en Carmelo.', 'Se habla de criaturas legendarias avistadas en el país:', 'un viento helado en la Quebrada, un canto en la costa de Maldonado.', 'El Maestro Tabárez dejó dicho que pases por el laboratorio. Tu aventura continúa.']);
   },
   // A guard who asks a riddle before letting you through (placed on routes by addRouteStory).
   async route_riddle(api, npc) {
@@ -1313,6 +1344,7 @@ export const SCRIPTS = {
   ...FAVOR_SCRIPTS,
   ...FIESTA_SCRIPTS,
   ...MS_SCRIPTS,
+  ...LEYENDA_SCRIPTS,
   ...AMISTAD_SCRIPTS,
 };
 
