@@ -372,8 +372,8 @@ export const SCRIPTS = {
     await api.say(`¡{player} recibió a ${sp.name}!`);
     const rk = COUNTER[key];
     await api.say(`Entonces yo me quedo con ${SPECIES[rk].name}.`, { name: '{rival}' });
-    // {rival} walks to the table, takes the Pokeball he chose and only then turns to challenge the player
-    await api.npcWalkNextTo('rival_lab', rk);
+    // {rival} walks round to the front of the table (the player's side), takes the Pokeball he chose and only then turns to challenge the player
+    await api.npcWalkNextTo('rival_lab', rk, 'down');
     await api.wait(250);
     api.npcHide(rk);
     api.sfx('catch');
