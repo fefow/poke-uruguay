@@ -15,25 +15,71 @@ export const HOUSE = [
   'Niiiiiiiii',
   'iiiimmiiii',
 ];
+// Every house used to share the HOUSE plan above. Now each one gets one of these furnished plans (kitchen, table with
+// mate, sofa, wood stove, radio, wardrobe…) and a wallpaper; furnishHouses picks one where all its residents still fit.
+// Rows 0 and 7 keep the wall and the door mat where HOUSE has them.
+export const HOUSE_PLANS = [
+  ['xԼxXxxXxԽx', 'ԵԳԴiiiiiԶE', 'iiiiiiiiii', 'iiԸԹTԸiiiN', 'iiiiiiiiԱԲ', 'iiiiԺԻiiii', 'NiiiԺԻiiiԿ', 'iiiimmiiiN'],
+  ['xxXxԽxxXxx', 'EiiԷiiiBBN', 'Eiiiiiiiii', 'iiiiiiiiiԿ', 'iiiiԱԲiiii', 'iiiiԺԻiiii', 'ԸTiiiiiiiN', 'Ճiiimmiiii'],
+  ['xԾxXxxXxԼx', 'ԴԳԵiiiiԶEE', 'iiiiiiiiii', 'iiiiiiiiii', 'iiiTԹԸiiii', 'iiiiiiiiԱԲ', 'NiiiiiiiiԿ', 'iiiimmiiiN'],
+  ['xxXxԼxxXxx', 'BBBiiiiԷiE', 'iiiiiiiiii', 'ԸTiiiiiiiN', 'iiiiԺԻiiii', 'iiiiԺԻiiiԿ', 'NiiiiiiiԱԲ', 'iiiimmiiiՃ'],
+  ['xԽxXxxXxԾx', 'ԷiiiiiiԳԴԵ', 'iiiiiiiiii', 'iԸԹTԸiiiii', 'ԶiiiiiiiiN', 'Eiiiiiiiii', 'iiiiiiiiԱԲ', 'NiiimmiiiՃ'],
+  ['xxXxԼxxXԽx', 'BiiiԿiiiiE', 'iiiiiiiiiE', 'iiԸԹTԸiiiN', 'iiiiiiiiii', 'iiiiiiԺԻii', 'NiiiiiԺԻiԸ', 'iiiimmiiiN'],
+];
+/** The player's own house: kitchen and table by the window, the sofa and rug where you wake up. */
+export const PLAYER_HOUSE = ['xԼxXxxXxԽx', 'ԵԳԴiiiiԿBB', 'iiiiiiiiii', 'iiԸԹTԸiiii', 'iiiiiiiiԱԲ', 'iiiiiiԺԻii', 'NiiiiiԺԻiN', 'iiiimmiiii'];
+const HOUSE_LOOKS = [null, 'casa_b', 'casa_c', 'casa_d'];
+const WALKABLE = new Set(['i', 'm', 'Ժ', 'Ի', 'A', 'Y']);
+/** True when every resident stands on a free tile that can be walked to from the door mat. */
+function residentsFit(rows: string[], npcs: any[] = []) {
+  const seen = new Set<string>();
+  const q: [number, number][] = [];
+  rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'm') { seen.add(`${x},${y}`); q.push([x, y]); } }));
+  while (q.length) {
+    const [x, y] = q.pop()!;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
+      if (!seen.has(k) && WALKABLE.has(rows[ny]?.[nx])) { seen.add(k); q.push([nx, ny]); }
+    }
+  }
+  return npcs.every((n) => n.look === null || seen.has(`${n.x},${n.y}`));
+}
+/**
+ * Gives every house built on the bare HOUSE plan a furnished plan and a wallpaper of its own (chosen from its id, so a
+ * house always looks the same). Run once all residents are placed; a plan that would put furniture under someone is skipped.
+ */
+export function furnishHouses(INTERIOR: Record<string, any>, extraFree: Record<string, [number, number][]> = {}) {
+  for (const [id, m] of Object.entries(INTERIOR)) {
+    if (m.tiles !== HOUSE) continue;
+    const free = (extraFree[id] ?? []).map(([x, y]) => ({ x, y, look: 'spot' }));
+    const people = [...(m.npcs ?? []), ...free];
+    const h = hashOf(id);
+    const tries = id === 'casa_jugador' ? [PLAYER_HOUSE, ...HOUSE_PLANS] : HOUSE_PLANS.map((_, k) => HOUSE_PLANS[(h + k) % HOUSE_PLANS.length]);
+    const plan = tries.find((p) => residentsFit(p, people));
+    if (plan) m.tiles = plan;
+    if (!m.theme && id !== 'casa_jugador') { const t = HOUSE_LOOKS[hashOf(`${id}#`) % HOUSE_LOOKS.length]; if (t) m.theme = t; }
+  }
+}
+
 export const POLI = [
-  'xxXxxxxxxXxx',
-  'iiiiiiiiiPii',
+  'xՎxXxxxxXxՎx',
+  'ՍiiՏiiiiiPiՍ',
   'iinnnnnnniii',
   'iiiiiiiiiiii',
   'NiiiiiiiiiiN',
   'iiAAAAAAAAii',
-  'iEEiiiiiiEEi',
+  'iՌՌiiiiiiՌՌi',
   'iiiiimmiiiii',
 ];
 export const SHOP = [
-  'xxXxxxxXxx',
-  'BBBiiiiBBB',
+  'xԾxXxxXxԾx',
+  'ՆՆՆiiiiՇՇՇ',
   'iiiiiiiiii',
-  'nnniiiiiii',
+  'ՊnniiiiiiՋ',
   'iiiiiiiiii',
-  'iiiiiiiBBi',
+  'iՈՈiiiiՆՆi',
   'Niiiiiiiii',
-  'iiiimmiiii',
+  'iiiimmiiiN',
 ];
 export const GYM = [
   'xxxxxXZxxxxx',
@@ -94,6 +140,6 @@ const CUSTOMERS = [
 export const shop = (name, stock) => {
   const [look, clerkName, greeting] = KEEPERS[hashOf(name) % KEEPERS.length];
   const [cl, ct] = CUSTOMERS[hashOf(name + 'c') % CUSTOMERS.length];
-  return room(SHOP, { name, npcs: [{ x: 1, y: 2, look, dir: 'down', script: 'shop', stock, greeting, clerkName }, { x: 6, y: 4, look: cl, dir: 'left', wander: true, text: ct }] });
+  return room(SHOP, { name, theme: 'almacen', npcs: [{ x: 1, y: 2, look, dir: 'down', script: 'shop', stock, greeting, clerkName }, { x: 6, y: 4, look: cl, dir: 'left', wander: true, text: ct }] });
 };
 

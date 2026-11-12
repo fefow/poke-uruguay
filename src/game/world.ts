@@ -785,7 +785,7 @@ function interact() {
   let tx = p.x + dx;
   let ty = p.y + dy;
   // talk across counters
-  if (tileAt(tx, ty) === 'n') { tx += dx; ty += dy; }
+  if (tileAt(tx, ty) === 'n' || tileAt(tx, ty) === 'Պ') { tx += dx; ty += dy; }
   const n = W_.npcs.find((o) => o.visible && o.x === tx && o.y === ty);
   if (n) return void runScript(() => talkTo(n));
   const it = W_.items.find((o) => o.x === tx && o.y === ty);
