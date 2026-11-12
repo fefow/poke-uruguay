@@ -147,8 +147,16 @@ export function choose(options, { cancel = true, cls = '', title = null, start =
         o.content ? null : o.hint ? h('span', { class: 'hint', text: o.hint }) : null),
     );
     const list = h('ul', { class: 'menu-list', role: 'listbox' }, items);
-    const box = h('div', { class: `menu ${cls}` }, title ? h('div', { class: 'menu-title', text: fmt(title) }) : null, list);
+    // blinking arrows at the edges when more options are hidden above or below (the list scrolls inside the box)
+    const upArrow = h('div', { class: 'menu-more menu-more-up', 'aria-hidden': 'true' });
+    const downArrow = h('div', { class: 'menu-more menu-more-down', 'aria-hidden': 'true' });
+    const box = h('div', { class: `menu ${cls}` }, upArrow, title ? h('div', { class: 'menu-title', text: fmt(title) }) : null, list, downArrow);
     root.append(box);
+    const arrows = () => {
+      upArrow.classList.toggle('is-on', box.scrollTop > 2);
+      downArrow.classList.toggle('is-on', box.scrollTop + box.clientHeight < box.scrollHeight - 2);
+    };
+    box.addEventListener('scroll', arrows, { passive: true });
     // Phones: a strip just outside the box with "Volver" (the X button hides while a list is open, it would cover it)
     // and, the first times, a label saying the options are touchable.
     let bar = null;
@@ -160,21 +168,28 @@ export function choose(options, { cancel = true, cls = '', title = null, start =
       if (back || label) {
         bar = h('div', { class: 'menu-touchbar' }, back, label ? h('span', { class: 'menu-touch-hint' }, h('i', { class: 'tap-dot', 'aria-hidden': 'true' }), h('span', { text: label })) : null);
         root.append(bar);
-        // sits on top of the box, or under it when the box touches the top of the screen
+        // sits on top of the box, or under it when the box touches the top of the screen;
+        // when neither fits, the box gets shorter (its list scrolls) so "Volver" always stays on screen
         const place = () => {
           if (!bar.isConnected) return;
           const above = box.offsetTop - bar.offsetHeight - 6;
+          const room = (root.clientHeight || innerHeight) - bar.offsetHeight - 12;
+          if (above < 0 && box.offsetTop + box.offsetHeight > room) {
+            box.style.maxHeight = `${Math.max(80, room - box.offsetTop)}px`;
+            items[idx]?.scrollIntoView({ block: 'nearest' });
+          }
           bar.style.left = `${box.offsetLeft}px`;
           bar.style.minWidth = `${box.offsetWidth}px`;
           bar.style.top = `${above >= 0 ? above : box.offsetTop + box.offsetHeight + 6}px`;
         };
         place();
-        requestAnimationFrame(place);
+        requestAnimationFrame(() => { place(); arrows(); });
       }
     }
     const render = () => {
       items.forEach((li, i) => li.classList.toggle('is-active', i === idx));
       items[idx]?.scrollIntoView({ block: 'nearest' });
+      arrows();
       onMove?.(idx);
     };
     let closed = false;
