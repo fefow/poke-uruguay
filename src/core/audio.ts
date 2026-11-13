@@ -225,9 +225,12 @@ export const JINGLES = {
 };
 
 /** Plays a fanfare over a muted music track; resolves when it ends so scripts can wait for it. */
+/** Only one fanfare at a time: while one plays, other jingles and effects stay quiet (UI blips excepted). */
+let jingleUntil = 0;
+const jingleBusy = () => !!ctx && ctx.currentTime < jingleUntil;
 export function jingle(name) {
   const j = JINGLES[name];
-  if (!ctx || !j) return Promise.resolve();
+  if (!ctx || !j || jingleBusy()) return Promise.resolve();
   const eighth = 60 / j.bpm / 2;
   const t0 = ctx.currentTime + 0.03;
   let t = t0;
@@ -236,6 +239,7 @@ export function jingle(name) {
   t = t0;
   for (const [n, d] of parseSeq(j.bass)) { tone(freq(n), t, d * eighth * 0.85, { type: 'triangle', vol: 0.8 * (j.v ?? 0.8) }); t += d * eighth; }
   const len = end - t0;
+  jingleUntil = end + 0.15;
   if (musicGain) {
     const g = musicGain.gain;
     const base = settings.music * 0.18;
@@ -321,6 +325,7 @@ function duck(len: number, depth = 0.4) {
 const BATTLE_SFX = /^(hit|super|weak|crit|faint|dash|charge|orb|aura|fx_|st_|cut|cast|bite|pc|stat_|encounter|poof|throw|shake)/;
 // Big sounds queue one after another instead of landing together (end of a fight: faint, exp, level up, money...).
 // Each takes a slot of SLOT seconds; anything that would wait more than MAX_WAIT is dropped.
+const JINGLE_OK = /^(select|confirm|cancel|menu|bump)/;
 let nextSlot = 0;
 const SLOT = 0.28, MAX_WAIT = 1.4;
 // In fights only the essentials sound (hit, super/weak, crit, faint, throw/shake/catch, level up, evolve, encounter);
@@ -328,6 +333,7 @@ const SLOT = 0.28, MAX_WAIT = 1.4;
 const FIGHT_SILENT = /^(charge|orb|aura|dash|fx_|st_|stat_|expTick|poof)/;
 export function sfx(name) {
   if (!ctx || !SFX[name] || FIGHT_SILENT.test(name)) return;
+  if (jingleBusy() && !JINGLE_OK.test(name)) return;
   sfxGain = BATTLE_SFX.test(name) ? sfxBattle : sfxMain;
   let at = ctx.currentTime + 0.001;
   if (!NO_DUCK.test(name)) {
