@@ -884,7 +884,7 @@ test('mochila: los objetos de encargo van a la pestaña Misión, quedan como ít
   assert.ok(SCRIPTS.ms_step);
 });
 
-test('gimnasio de Fray Bentos: Centro Toxicológico, todo de tipo Veneno (líder, entrenadores y fachada)', async () => {
+test('gimnasio de Fray Bentos: Centro Toxicológico, todo de tipo Veneno (líder y entrenadores; el arte no cambia)', async () => {
   const { LEADERS } = await import('../src/data/story.ts');
   const { SPECIES } = await import('../src/data/species.ts');
   const { MAPS, OUTDOOR } = await import('../src/data/maps.ts');
@@ -896,6 +896,5 @@ test('gimnasio de Fray Bentos: Centro Toxicológico, todo de tipo Veneno (líder
   const foes = (gym.npcs ?? []).filter((n) => n.trainer);
   assert.ok(foes.length >= 2);
   for (const n of foes) assert.ok(n.trainer.team.every(([sp]) => SPECIES[sp].types.includes('veneno')), `${n.trainer.name}: equipo de Veneno`);
-  assert.ok(!JSON.stringify(gym).match(/museo|Museo|Siniestro/i), 'el gimnasio no habla de museo ni de Siniestro');
-  assert.ok(OUTDOOR.fraybentos.tiles.join('').includes('&'), 'la fachada del gimnasio es la de Veneno');
+  assert.ok(!JSON.stringify([gym.name, gym.npcs]).match(/museo|Siniestro/i), 'el gimnasio no habla de museo ni de Siniestro');
 });

@@ -57,8 +57,8 @@ export const TILE_INFO = {
   'Ҳ': { name: 'seto con telaraña', solid: true },
   'ҳ': { name: 'colmena', solid: true },
   'Ҵ': { name: 'hongos gigantes', solid: true },
-  Ϯ: { name: 'vitrina de muestras', solid: true },
-  ϯ: { name: 'busto de un toxicólogo', solid: true },
+  Ϯ: { name: 'vitrina del museo', solid: true },
+  ϯ: { name: 'busto del museo', solid: true },
   Ϫ: { name: 'puerta de camarote', solid: true },
   Ϭ: { name: 'bote salvavidas', solid: true },
   ϭ: { name: 'salvavidas', solid: true },
@@ -1831,7 +1831,7 @@ const EMBLEMS = {
   planta: (g) => { g.fillStyle = '#7ed858'; g.beginPath(); g.moveTo(3.5, 12.5); g.bezierCurveTo(3, 6, 8, 3, 12.5, 3.5); g.bezierCurveTo(13, 9, 9, 12.5, 3.5, 12.5); g.fill(); px(g, 3, 12, '#2f7a34', 6, 1); g.strokeStyle = '#2f7a34'; g.lineWidth = 1; g.beginPath(); g.moveTo(4, 12); g.lineTo(10, 6); g.stroke(); },
   lucha: (g) => { px(g, 4, 5, '#f2e0c0', 8, 6); px(g, 4, 5, '#d8b890', 8, 1); for (let i = 0; i < 4; i++) px(g, 4 + i * 2, 3, '#f2e0c0', 2, 2); px(g, 4, 11, '#d8b890', 8, 1); px(g, 5, 12, '#e0263a', 6, 1); },
   psiquico: (g) => { disc(g, 8, 8, 4.2, '#f4f0ff'); disc(g, 8, 8, 2.4, '#8a4ad8'); disc(g, 8, 8, 1, '#1a1a2a'); px(g, 3, 8, '#f4f0ff', 1, 1); px(g, 12, 8, '#f4f0ff', 1, 1); },
-  veneno: (g) => { g.fillStyle = '#9aff5a'; g.beginPath(); g.moveTo(8, 2.5); g.bezierCurveTo(10.5, 6, 12.5, 8, 12.5, 10); g.bezierCurveTo(12.5, 12.6, 10.5, 13.8, 8, 13.8); g.bezierCurveTo(5.5, 13.8, 3.5, 12.6, 3.5, 10); g.bezierCurveTo(3.5, 8, 5.5, 6, 8, 2.5); g.fill(); px(g, 6, 9, '#e8ffd0', 1, 3); px(g, 7, 8, '#2a1240', 2, 2); px(g, 10, 8, '#2a1240', 1, 2); px(g, 7, 11, '#2a1240', 3, 1); },
+  siniestro: (g) => { disc(g, 8, 8, 4.8, '#e8e0f0'); disc(g, 10, 7, 4.3, '#2a2a3a'); },
   tierra: (g) => { g.fillStyle = '#e8d098'; g.beginPath(); g.moveTo(2.5, 12); g.lineTo(8, 3.5); g.lineTo(13.5, 12); g.fill(); g.fillStyle = '#8a5a30'; g.beginPath(); g.moveTo(5.5, 12); g.lineTo(8, 8); g.lineTo(10.5, 12); g.fill(); px(g, 3, 12, '#7ac04a', 10, 1); },
   normal: (g) => { g.fillStyle = '#ffffff'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5; const r = i % 2 ? 2.2 : 5; g.lineTo(8 + Math.cos(a) * r, 8.5 + Math.sin(a) * r); } g.closePath(); g.fill(); },
   bicho: (g) => { disc(g, 8, 9, 4.2, '#d83a2a'); disc(g, 8, 4.8, 2.1, '#1a2a0a'); px(g, 7.5, 5, '#1a2a0a', 1, 8); disc(g, 6, 8, 0.9, '#1a2a0a'); disc(g, 10, 10, 0.9, '#1a2a0a'); disc(g, 6, 11, 0.8, '#1a2a0a'); },
@@ -1887,7 +1887,7 @@ gymFamily(['À', 'Á', 'Â'], { type: 'tierra', roof: '#8a5a30', roofLight: '#c8
 gymFamily(['Ã', 'Ä', 'Å'], { type: 'normal', roof: '#9a8a78', roofLight: '#c8bcaa', roofDark: '#4a4238', rim: '#f4ecd8', wall: '#e8e0cc', wallDark: '#b8ae98', wallLight: '#fffaec', trim: '#4a4238', door: '#8a7a68', doorLight: '#f4ecd8', wallIn: '#6a6254', wallInLight: '#a89c88', floorA: '#d8d0bc', floorB: '#b8ae98', accent: '#c8bcaa' });
 gymFamily(['È', 'É', 'Ê'], { type: 'bicho', roof: '#5a8a1a', roofLight: '#9ac83a', roofDark: '#2a4a0a', rim: '#e8f090', wall: '#d8e0a8', wallDark: '#a8b878', wallLight: '#f2f8d0', trim: '#2a4a0a', door: '#6a9a2a', doorLight: '#e8f090', wallIn: '#3a5a1a', wallInLight: '#6a9a2a', floorA: '#a8c868', floorB: '#7aa03a', accent: '#9ac83a' });
 gymFamily(['Ì', 'Í', 'Î'], { type: 'volador', roof: '#4a88c8', roofLight: '#8ac8f0', roofDark: '#1a3a6a', rim: '#f4faff', wall: '#e0eef8', wallDark: '#a8c0d8', wallLight: '#ffffff', trim: '#1a3a6a', door: '#5a98d8', doorLight: '#f4faff', wallIn: '#2a5a9a', wallInLight: '#5a98d8', floorA: '#b8d8f0', floorB: '#88b0d8', accent: '#8ac8f0' });
-gymFamily(['&', '*', '+'], { type: 'veneno', roof: '#5a2a7a', roofLight: '#9a5ac8', roofDark: '#2a1240', rim: '#9aff5a', wall: '#a8b878', wallDark: '#6a7a48', wallLight: '#c8d898', trim: '#2a1240', door: '#3a1a5a', doorLight: '#9aff5a', wallIn: '#2a1a3a', wallInLight: '#4a3a64', floorA: '#34402e', floorB: '#4a5c3a', accent: '#9aff5a' });
+gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a5a78', roofDark: '#12121c', rim: '#c8506a', wall: '#585870', wallDark: '#3a3a4e', wallLight: '#7a7a94', trim: '#12121c', door: '#2a2a3a', doorLight: '#c8506a', wallIn: '#1e1e2c', wallInLight: '#3a3a52', floorA: '#2a2a34', floorB: '#3e3e4c', accent: '#c8506a' });
 
 // ---- Casino Peninsula: purple roof with a gold medallion, burgundy facade with a blinking sign, gold columns; inside, a red carpet room ----
 {
@@ -2069,7 +2069,7 @@ gymFamily(['&', '*', '+'], { type: 'veneno', roof: '#5a2a7a', roofLight: '#9a5ac
   type Kit = { haz: [string, string, string, string]; walk: [string, string, string, string]; wall: [string, string, string, string]; obj: [string, string, string, string] };
   const rim = (g, c) => { px(g, 0, 0, c, T, 1); px(g, 0, 0, c, 1, T); };
   const KITS: Record<string, Kit> = {
-    gym_veneno: { haz: ['liquid', '#1a3a1a', '#3a8a3a', '#9aff5a'], walk: ['stone', '#4a5c3a', '#34402e', ''], wall: ['shelf', '#4a3a64', '#9a5ac8', '#9aff5a'], obj: ['barrel', '#5a2a7a', '#9a5ac8', '#9aff5a'] },
+    gym_siniestro: { haz: ['liquid', '#1a1a26', '#2e2e42', '#c8506a'], walk: ['stone', '#3e3e4c', '#2a2a34', ''], wall: ['hooks', '#585870', '#8a8aa0', '#c8506a'], obj: ['crate', '#5a5a74', '#3a3a4e', '#c8506a'] },
     gym_psiquico: { haz: ['liquid', '#2a1a4a', '#4a3a7a', '#e8d8ff'], walk: ['stone', '#5a4a8a', '#3a2a6a', ''], wall: ['shelf', '#3a2a6a', '#c8506a', '#e8d8ff'], obj: ['barrel', '#6a3a9a', '#a878e0', '#e8d8ff'] },
     gym_lucha: { haz: ['liquid', '#7a2a2a', '#a84a3a', '#f8e0c0'], walk: ['stone', '#c8b070', '#a89050', ''], wall: ['pipe', '#7a2a2a', '#c8402a', '#f8e0c0'], obj: ['sandbag', '#c8b070', '#8a6a3a', '#f8e0c0'] },
     gym_planta: { haz: ['bed', '#6a4a2a', '#4aa03c', '#b8f090'], walk: ['stone', '#b8a878', '#8a7a58', ''], wall: ['shelf', '#2a5a2a', '#4aa03c', '#b8f090'], obj: ['barrel', '#8a5a30', '#c89058', '#f0d8a0'] },
@@ -2169,18 +2169,18 @@ gymFamily(['&', '*', '+'], { type: 'veneno', roof: '#5a2a7a', roofLight: '#9a5ac
   t['Ϲ'] = t.A;
 }
 
-// Centro Toxicológico (gym): sample cases with reagent flasks and a bust on a pedestal, on the green gym floor.
+// Museo del Anglo (gym): display cases with old tins and a bust on a pedestal, on the dark gym floor.
 {
-  const t = (THEMES as any).gym_veneno;
+  const t = (THEMES as any).gym_siniestro;
   t['Ϯ'] = (g, r) => {
     t.Y(g, r);
-    px(g, 2, 6, '#3a2a54', 12, 9); px(g, 3, 4, '#8ac8f0', 10, 8); px(g, 3, 4, '#d8f0ff', 10, 1); px(g, 3, 4, '#d8f0ff', 1, 8);
-    px(g, 6, 7, '#9aff5a', 4, 4); px(g, 6, 6, '#e8f8d0', 4, 1); px(g, 7, 8, '#f2c02a', 2, 1); px(g, 2, 14, '#00000050', 12, 1);
+    px(g, 2, 6, '#3a3a4e', 12, 9); px(g, 3, 4, '#8ac8f0', 10, 8); px(g, 3, 4, '#d8f0ff', 10, 1); px(g, 3, 4, '#d8f0ff', 1, 8);
+    px(g, 6, 7, '#c8506a', 4, 4); px(g, 6, 6, '#e8e0f0', 4, 1); px(g, 7, 8, '#f2c02a', 2, 1); px(g, 2, 14, '#00000050', 12, 1);
   };
   t['ϯ'] = (g, r) => {
     t.Y(g, r);
-    px(g, 3, 11, '#6a4a8a', 10, 4); px(g, 3, 11, '#a88ac8', 10, 1); px(g, 5, 10, '#3a2a54', 6, 1);
-    px(g, 6, 2, '#c8e8a8', 4, 6); px(g, 5, 8, '#c8e8a8', 6, 3); px(g, 6, 2, '#e8f8d0', 1, 6); px(g, 7, 4, '#3a2a54', 1, 1); px(g, 9, 4, '#3a2a54', 1, 1);
+    px(g, 3, 11, '#5a5a74', 10, 4); px(g, 3, 11, '#8a8aa0', 10, 1); px(g, 5, 10, '#3a3a4e', 6, 1);
+    px(g, 6, 2, '#c8c8d8', 4, 6); px(g, 5, 8, '#c8c8d8', 6, 3); px(g, 6, 2, '#e8e8f4', 1, 6); px(g, 7, 4, '#3a3a4e', 1, 1); px(g, 9, 4, '#3a3a4e', 1, 1);
     px(g, 3, 14, '#00000050', 10, 1);
   };
 }

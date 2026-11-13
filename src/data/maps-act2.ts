@@ -90,7 +90,7 @@ const R24 = route({ seed: 'ruta24', w: 20, h: 26, axis: 'v', from: 10, to: 10, g
 // ---------------------------------------------------------------- FRAY BENTOS (gym 8, dark)
 const FRB = city({
   seed: 'fraybentos', sa: 6, sb: 15, road: 'c',
-  a: [['house', 2, 'casa_frb'], ['veneno', 8, 'gym_frb'], ['poli', 17, 'poli_frb'], ['shop', 23, 'shop_frb']],
+  a: [['house', 2, 'casa_frb'], ['siniestro', 8, 'gym_frb'], ['poli', 17, 'poli_frb'], ['shop', 23, 'shop_frb']],
   b: [['houseB', 1], ['guarida', 7, 'anglo_1'], ['houseG', 17, 'casa_frb2']],
   vroads: [14], decor: { '#': 8, f: 8 },
   water: [[1, 17, 26, 1]],
@@ -586,7 +586,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     tr({ x: 3, y: 9 }, 'girl', 'g7_b', 'Noelia', 'Vidente', ['psiquico', 'volador'], [44, 44], ['Sé qué vas a elegir antes que vos.', 'Me equivoqué.', 'Quiroga usa tipo Psíquico.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Salto. El líder usa criaturas de tipo Psíquico.', 'Las de tipo Siniestro y Bicho tienen ventaja.'], { dir: 'down' }),
   ]),
-  gym_frb: gym('Centro Toxicológico (Fray Bentos)', 'gym_veneno', 'leader_dark', 'anglo', [
+  gym_frb: gym('Centro Toxicológico (Fray Bentos)', 'gym_siniestro', 'leader_dark', 'anglo', [
     tr({ x: 8, y: 6 }, 'boy', 'g8_a', 'Dante', 'Laboratorista', ['veneno'], [46, 46], ['Acá se estudia lo que envenena y lo que cura. Para pasar de sala, siempre la amarilla; después, la roja.', 'Me contaminaste el turno.', 'Zoraida cierra el camino a la Liga.'], { dir: 'left', team: [['yararita', 46], ['sapo', 46]] }),
     tr({ x: 3, y: 9 }, 'girl', 'g8_b', 'Alma', 'Toxicóloga', ['veneno'], [46, 47], ['Un descuido y el efecto no se frena. Dos azules seguidas y te perdés en las salas.', 'Mi antídoto no alcanzó.', 'La Liga está en Montevideo, en el Centenario.'], { dir: 'right', team: [['viuda', 46], ['ciempies', 47]] }),
     npc(6, 10, 'oldman', ['Gimnasio de Fray Bentos. La líder usa criaturas de tipo Veneno.', 'Las de tipo Psíquico y Tierra tienen ventaja.', 'Acá no hay puertas hacia la oficina: las cajas te llevan, o te devuelven al principio.', 'Dicen que el recorrido termina con amarilla y roja. Ojo con los guardias.'], { dir: 'down' }),
