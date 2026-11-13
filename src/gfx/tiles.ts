@@ -66,6 +66,12 @@ export const TILE_INFO = {
   Ϥ: { name: 'flecha lanzadora' },
   Ϧ: { name: 'flecha lanzadora' },
   Ϩ: { name: 'flecha lanzadora' },
+  'ӵ': { name: 'hielo (desliza)' },
+  'ӷ': { name: 'cajón congelado', solid: true },
+  'Ӻ': { name: 'escalera' },
+  'ӻ': { name: 'puerta de la cámara de frío' },
+  'Ӹ': { name: 'máquina de niebla', solid: true },
+  'ӹ': { name: 'escritorio de oficina', solid: true },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -2202,6 +2208,13 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
     'Ϲ': (g) => { px(g, 0, 0, '#8a96a4', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 15, '#f2c02a', T, 1); px(g, 0, 0, '#f2c02a', 1, T); px(g, 15, 0, '#f2c02a', 1, T); for (let i = 3; i < 13; i += 4) { px(g, i, 4, '#aab4c0', 2, 2); px(g, i + 2, 9, '#aab4c0', 2, 2); } },
     'ϻ': (g) => { wall(g); px(g, 0, 1, '#1e2a36', T, 2); for (const x of [2, 9]) { px(g, x + 1, 3, '#aab4c0', 1, 2); px(g, x, 5, '#c85a5a', 4, 8); px(g, x + 1, 5, '#e8908a', 1, 6); px(g, x + 2, 9, '#a03a3a', 2, 4); } },
   };
+  // Cámara de frío (hielo que desliza), escaleras, puerta aislada, máquina de niebla y escritorio
+  T_['ӵ'] = (g) => { px(g, 0, 0, '#bfe6f8', T, T); px(g, 0, 0, '#e4f6ff', T, 2); px(g, 0, 14, '#8cc4e4', T, 2); px(g, 2, 4, '#f4fcff', 5, 1); px(g, 3, 5, '#f4fcff', 1, 3); px(g, 9, 9, '#f4fcff', 4, 1); px(g, 12, 3, '#9ccfec', 1, 4); px(g, 5, 11, '#9ccfec', 4, 1); };
+  T_['ӷ'] = (g) => { floor(g); px(g, 1, 2, '#3e5468', 14, 13); px(g, 2, 3, '#b9dcf0', 12, 11); px(g, 2, 3, '#f4fcff', 12, 2); px(g, 2, 7, '#8cc4e4', 12, 1); px(g, 7, 3, '#8cc4e4', 1, 11); px(g, 3, 9, '#f4fcff', 3, 1); px(g, 10, 11, '#f4fcff', 3, 1); };
+  T_['Ӻ'] = (g) => { px(g, 0, 0, '#6f8aa2', T, T); for (let i = 0; i < 4; i++) { px(g, 1, 2 + i * 3, '#d4e0ea', 14, 2); px(g, 1, 4 + i * 3, '#7e92a6', 14, 1); } px(g, 0, 0, '#3e5468', 1, T); px(g, 15, 0, '#3e5468', 1, T); px(g, 0, 0, '#f2c02a', 1, 3); px(g, 15, 0, '#f2c02a', 1, 3); };
+  T_['ӻ'] = (g) => { wall(g); px(g, 2, 1, '#3e5468', 12, 15); px(g, 3, 2, '#dce8f2', 10, 14); px(g, 3, 2, '#ffffff', 10, 1); px(g, 3, 9, '#9cb6cc', 10, 1); px(g, 10, 7, '#2a2a32', 2, 5); px(g, 10, 6, '#c8d4de', 2, 1); px(g, 4, 4, '#8ac8f0', 3, 2); px(g, 4, 12, '#8ac8f0', 5, 1); };
+  T_['Ӹ'] = (g) => { floor(g); px(g, 1, 1, '#3e4856', 14, 14); px(g, 2, 2, '#8a96a4', 12, 11); px(g, 2, 2, '#c8d4de', 12, 1); for (let y = 5; y < 11; y += 2) px(g, 3, y, '#4e5868', 10, 1); px(g, 11, 3, '#6ae0a0', 2, 1); px(g, 3, 11, '#e8f4fc', 3, 2); px(g, 6, 11, '#d8e8f4', 5, 2); px(g, 8, 12, '#f4faff', 4, 2); };
+  T_['ӹ'] = (g) => { floor(g); px(g, 0, 3, '#5a3e22', T, 11); px(g, 0, 3, '#a98f66', T, 3); px(g, 1, 14, '#3e2a16', 14, 2); px(g, 3, 5, '#f4f4f0', 4, 3); px(g, 9, 5, '#2a4a6a', 4, 2); px(g, 4, 6, '#9aa8b8', 2, 1); };
   for (const [dir, ch] of [['up', 'Ϣ'], ['down', 'Ϥ'], ['left', 'Ϧ'], ['right', 'Ϩ']]) {
     T_[ch] = (g) => {
       px(g, 0, 0, '#454a54', T, T); px(g, 0, 0, '#6a707c', T, 1); px(g, 0, 15, '#2a2e36', T, 1);

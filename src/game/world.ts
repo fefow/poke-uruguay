@@ -336,7 +336,9 @@ const SPIN_DIR = { 'Ϣ': 'up', 'Ϥ': 'down', 'Ϧ': 'left', 'Ϩ': 'right' };
 /** Launch arrows: standing on one throws the player along it, tile after tile, until a plain tile (or a wall) stops them. */
 function spin() {
   const p = W_.player;
-  const d = SPIN_DIR[tileAt(p.x, p.y)];
+  let d = SPIN_DIR[tileAt(p.x, p.y)];
+  // Ice (cámara de frío): after a step onto ice the player keeps gliding the same way until something stops them.
+  if (!d && tileAt(p.x, p.y) === 'ӵ' && p.from && (p.x - p.from.x) * (DIRS[p.dir]?.[0] ?? 0) + (p.y - p.from.y) * (DIRS[p.dir]?.[1] ?? 0) > 0) d = p.dir;
   if (!d) return false;
   const [dx, dy] = DIRS[d];
   const nx = p.x + dx, ny = p.y + dy;

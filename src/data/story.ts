@@ -880,19 +880,19 @@ export const SCRIPTS = {
 
   /** A neutral worker kept inside the Anglo by the PP: returns his lost badge, gives the Buquebus ticket. */
   async obrero_anglo(api) {
-    if (api.flag('got_ticket')) return api.say('Gracias por la credencial. Cuando salgas de este laberinto, subí al barco con el ticket.', { name: 'Operario' });
+    if (api.flag('got_ticket')) return api.say('Gracias por la credencial. Cuando salgas de este frigorífico, subí al barco con el ticket.', { name: 'Operario' });
     if (api.hasItem('credencial_anglo') && !api.flag('anglo_pp')) {
       return api.say(['¡Esa es mi credencial! Pero con la jefa de la banda acá adentro no puedo despachar ningún pasaje.', 'Si ella se va, el ticket es tuyo. Quedate con la credencial hasta entonces.'], { name: 'Operario' });
     }
     if (api.hasItem('credencial_anglo')) {
-      await api.say('¡Esa es mi credencial! Estaba perdida en alguna de las cintas.', { name: 'Operario' });
+      await api.say('¡Esa es mi credencial! Se me cayó en la cámara de frío.', { name: 'Operario' });
       api.takeItem('credencial_anglo');
-      await api.say(['No soy del PP. Me tienen acá adentro manejando las cintas porque soy el único que las conoce.', 'Soy de los que despachan los pasajes del Buquebus. Tomá uno, es lo mínimo.'], { name: 'Operario' });
+      await api.say(['No soy del PP. Me tienen acá adentro manejando las cámaras porque soy el único que las conoce.', 'Soy de los que despachan los pasajes del Buquebus. Tomá uno, es lo mínimo.'], { name: 'Operario' });
       await api.give('ticket_ferry', 1);
       api.setFlag('got_ticket');
       return api.say('Si el capitán anda mareado, llevale un Mate. Dicen que es lo único que lo calma.', { name: 'Operario' });
     }
-    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me tienen encerrado en esta oficina, a la vista de la jefa.', 'Perdí mi credencial de operario en algún rincón de las cintas y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
+    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me tienen encerrado en esta oficina, un piso abajo de la jefa.', 'Perdí mi credencial de operario al cruzar la cámara de frío y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
   },
 
   async ferry_captain(api) {

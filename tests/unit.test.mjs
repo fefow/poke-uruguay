@@ -898,3 +898,35 @@ test('gimnasio de Fray Bentos: Centro Toxicológico, todo de tipo Veneno (líder
   for (const n of foes) assert.ok(n.trainer.team.every(([sp]) => SPECIES[sp].types.includes('veneno')), `${n.trainer.name}: equipo de Veneno`);
   assert.ok(!JSON.stringify([gym.name, gym.npcs]).match(/museo|Siniestro/i), 'el gimnasio no habla de museo ni de Siniestro');
 });
+
+test('Frigorífico Anglo: cuatro pisos, la cámara de frío se resuelve y no deja atrapado', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { iceReach, onExitPlatform, onStartPlatform, ICE_START, MIN_SLIDES } = await import('../src/data/ice-room.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
+  const solid = (m, x, y) => !m.tiles[y]?.[x] || TILE_INFO[m.tiles[y][x]]?.solid;
+  // pisos enlazados: depósito -> cámara -> oficinas -> jefa, y de vuelta
+  const hop = (a, b) => assert.ok((MAPS[a].warps ?? []).some((w) => w.to === b) || MAPS[a].exitTo?.map === b, `${a} -> ${b}`);
+  hop('anglo_1', 'anglo_2'); hop('anglo_2', 'anglo_3'); hop('anglo_3', 'anglo_4');
+  hop('anglo_2', 'anglo_1'); hop('anglo_3', 'anglo_2'); hop('anglo_4', 'anglo_3');
+  // hielo: con las personas y el objeto del piso como obstáculos, hay camino de ida y vuelta
+  const ice = MAPS.anglo_2;
+  const people = new Set([...(ice.npcs ?? []), ...(ice.items ?? [])].map((o) => `${o.x},${o.y}`));
+  const dist = iceReach(ice.tiles, people, ICE_START);
+  const goal = [...dist].filter(([k]) => onExitPlatform(...k.split(',').map(Number))).sort((a, b) => a[1] - b[1])[0];
+  assert.ok(goal && goal[1] >= MIN_SLIDES, 'la cámara pide varios deslizamientos');
+  const [gx, gy] = goal[0].split(',').map(Number);
+  assert.ok([...iceReach(ice.tiles, people, { x: gx, y: gy }).keys()].some((k) => onStartPlatform(...k.split(',').map(Number))), 'se puede volver a la entrada');
+  // cada piso: todo lo que hay en él se alcanza caminando desde donde se llega (el hielo cuenta como transitable salvo en la cámara, ya probada)
+  const arrive = { anglo_1: [11, 14], anglo_3: [2, 9], anglo_4: [20, 10] };
+  for (const [id, [sx, sy]] of Object.entries(arrive)) {
+    const m = MAPS[id];
+    const blockers = new Set((m.npcs ?? []).filter((n) => !n.arrive).map((n) => `${n.x},${n.y}`));
+    const seen = new Set([`${sx},${sy}`]); const q = [[sx, sy]];
+    while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = `${x + dx},${y + dy}`; if (!seen.has(k) && !solid(m, x + dx, y + dy)) { seen.add(k); q.push([x + dx, y + dy]); } } }
+    // alcanzable aunque las personas bloqueen: se mira que cada objeto, escalera y persona tenga una casilla vecina libre alcanzada
+    const near = (x, y) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen.has(`${x + dx},${y + dy}`) || seen.has(`${x},${y}`));
+    for (const o of [...(m.items ?? []), ...(m.npcs ?? []).filter((n) => !n.arrive)]) assert.ok(near(o.x, o.y), `${id}: ${o.id ?? o.look} en ${o.x},${o.y} es inalcanzable`);
+    for (const w of m.warps ?? []) assert.ok(near(w.x, w.y), `${id}: escalera en ${w.x},${w.y} inalcanzable`);
+    void blockers;
+  }
+});
