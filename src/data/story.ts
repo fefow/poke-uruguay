@@ -903,7 +903,7 @@ export const SCRIPTS = {
     api.takeItem('mate');
     api.sfx('heal');
     await api.say('{player} le dio el Mate al capitán. Poco a poco recupera el color.');
-    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá este machete: lo uso para abrir paso entre los zarzales del muelle viejo.', 'Se usa parándote frente al zarzal y apretando A. En Fray Bentos la guardia solo deja cortar a quien ganó la Medalla de este pueblo; en los caminos más al norte, a quien ganó la Medalla Salto.'], { name: 'Capitán' });
+    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá este machete. Sirve para abrir camino entre las chircas y los zarzales que cierran los lugares complicados.', 'Se usa parándote frente al zarzal y apretando A.'], { name: 'Capitán' });
     await api.give('machete', 1);
     api.setFlag('got_machete');
     await api.say('También te dejo unas Pokeballs y unos panes que el barco no va a usar.', { name: 'Capitán' });
@@ -915,7 +915,6 @@ export const SCRIPTS = {
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
     await api.warp('fraybentos', 3, 24, 'down');
     await api.say('El Buquebus "China Zorrilla" ya no se ve en el río. No va a volver a este puerto.');
-    await api.say('Con el Machete vas a poder abrir los zarzales de la salida norte de Fray Bentos cuando ganes la Medalla del gimnasio del pueblo.');
   },
 
   /** The Ánima of Melo's tower: the Sereno who still keeps watch. Calmed after a battle, it asks for the PP piece to be gone. */

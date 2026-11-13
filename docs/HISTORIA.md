@@ -82,7 +82,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 
 ### Buquebus China Zorrilla
 
-El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Terminal de Montevideo) se pelea con Facu en cubierta; el capitán, mareado, pide un **Mate** y a cambio entrega el **Machete**. Después el barco zarpa para no volver (`ferry_done`).
+El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Terminal de Montevideo) se pelea con Facu en cubierta; el capitán, mareado, pide un **Mate** y a cambio entrega el **Machete** y solo explica para qué sirve (abrir camino entre chircas y zarzales; no dice adónde ir ni qué medalla hace falta: eso lo cuenta el zarzal al intentar cortarlo). Después el barco zarpa para no volver (`ferry_done`).
 
 ### Final
 
