@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-13 (v218).
+> Última actualización: 2026-11-13 (v219).
 
 ## Dónde está cada cosa en el código
 
@@ -60,7 +60,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 7. **Palmitas** (localidad). Cueva donde Marta, del Correo, está retenida por dos reclutas.
 8. **Mercedes. Gimnasio 2.** Marta, Correo Uruguayo, **Normal**. Cerrado hasta liberarla.
 9. **Villa Soriano** (localidad).
-10. **Fray Bentos. Gimnasio 3.** Zoraida, Museo del Anglo, **Siniestro**. Antes, en el Frigorífico Anglo, Bruma defiende las máquinas; Tabárez llega, confiesa el origen del compañero y entrega el **Medidor de Niebla** (flag `anglo_pp`). Un obrero neutral del Anglo da el Ticket del Buquebus.
+10. **Fray Bentos. Gimnasio 3.** Zoraida, Centro de Información Toxicológica, **Veneno** (todo el gimnasio: líder, entrenadores y facha son de Veneno; las cajas de reactivos son el recorrido; el id interno sigue siendo `anglo`). Antes, en el Frigorífico Anglo, Bruma defiende las máquinas; Tabárez llega, confiesa el origen del compañero y entrega el **Medidor de Niebla** (flag `anglo_pp`). Un obrero neutral del Anglo da el Ticket del Buquebus.
 11. **Young** (localidad) y **Paysandú.** Misión del **Muelle** (Vidal, MT Bomba Lodo). Caña Vieja en el muelle, Súper Caña en una casa.
 12. **Termas de Guaviyú** (localidad) y **Salto. Gimnasio 4.** Horacio Quiroga, **Psíquico**. Misión de la **Radio** (Cáceres, MT Psíquico) y la **Represa** (Garúa, flag `represa_clear`). Mini historia El cuaderno de Quiroga.
 13. **Belén** (localidad) y **Artigas.** Un minero pide echar a un recluta que se lleva geodas (otra vez Olivera). Festival: **el carnaval de Artigas**. Mini historia La canoa del Cuareim (Surf).

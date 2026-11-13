@@ -129,10 +129,10 @@ export const LEADERS = {
     after: ['La Medalla Salto es tuya.', 'La Represa sigue bajo control de los de gris, bajo el puente.', 'Seguí hacia Artigas y Rivera. El camino se pone más duro.'],
   },
   anglo: {
-    order: 1, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Museo del Anglo', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
-    team: [['yarara', 47], ['zorromonte', 48], ['vespertino', 48], ['zarigueya', 48], ['buho', 49], ['yacaron', 50]], prize: 6500, badge: 'badge1', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
-    intro: ['Bienvenido al Museo del Anglo, {player}. Cada caja de despacho de estas salas fue una máquina de otra época.', 'Soy Zoraida. Cuido el museo de noche, entre las sombras y los mecanismos.', 'Llegaste hasta acá usando las cajas. Ahora demostrá que sabés pelear como sabés moverte.'],
-    lose: 'Salí de la sombra gracias a vos. Y llegaste mejor de lo que pensé.',
+    order: 1, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Centro Toxicológico', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
+    team: [['ciempies', 47], ['viudanegra', 48], ['sapo', 48], ['escolopendra', 49], ['yararita', 49], ['escuerzo', 50]], prize: 6500, badge: 'badge1', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
+    intro: ['Bienvenido al Centro de Información Toxicológica, {player}. Cada caja de estas salas guarda reactivos que llegan de todo el país.', 'Soy Zoraida. Atiendo a quien se intoxicó con una planta, un hongo o una picadura, y sé qué veneno es cada cosa.', 'Llegaste hasta acá usando las cajas. Ahora demostrá que sabés pelear como sabés moverte.'],
+    lose: 'Antídoto a tiempo. Y llegaste mejor de lo que pensé.',
     after: ['La Medalla Fray Bentos es tuya. Es la tercera de doce.', 'El Equipo PP usa el viejo frigorífico como depósito. Hay gente que trabaja ahí adentro sin querer.', 'Del puerto sale un barco que lleva el nombre de una gran actriz. Quien lo sube puede conseguir una herramienta que abre el monte.'],
   },
 };
@@ -160,7 +160,7 @@ for (const [key, L] of Object.entries(LEADERS)) {
 const CONTRIB = {
   inc: 'Mirá este mapa de tierras: donde hay niebla espesa, las chacras se están secando. Ahí van a estar sus torres.',
   correo: 'Tengo cartas de todo el litoral que hablan de una niebla comprada. Que el Correo avise: la próxima torre está cerca del frigorífico.',
-  anglo: 'Conozco los depósitos del Anglo de memoria. Las máquinas están en el último piso: subí.',
+  anglo: 'Analicé una muestra de esa niebla: no es vapor, es un compuesto. Las máquinas que lo producen están en el último piso del Anglo: subí.',
   quiroga: 'Escribí un cuento sobre una niebla que se vende. El final marca una represa. Mirá debajo del puente.',
   defensa: 'Cerré la frontera para sus camiones. Hasta que apagues la Torre, no pasan más.',
   mgap: 'La niebla ya le mata terneros al ganado de la zona. Esto es una cuestión de campo, no de ciencia.',
@@ -551,7 +551,7 @@ export const SCRIPTS = {
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
     await api.npcApproach('rival_mvd'); // walks up from the road ahead, never pops in
-    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo. Y de que mi tío apareció por allá.', 'A mí no me contó nada. Mientras tanto sigo con el estudio del clima: me pidieron mediciones del río, y pagan bien.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
+    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en Fray Bentos. Y de que mi tío apareció por allá.', 'A mí no me contó nada. Mientras tanto sigo con el estudio del clima: me pidieron mediciones del río, y pagan bien.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
     if (res === 'win') await api.say(['Yo sigo hacia Salto. Nos vemos allá.'], { name: '{rival}' });
@@ -797,12 +797,12 @@ export const SCRIPTS = {
     await api.say(['Se llevaron la lámpara. Fue una mujer vestida de gris, con capa.', 'Sigue afuera, del lado de las rocas.'], { name: 'Farero' });
   },
 
-  /** Fray Bentos' history teacher: the Anglo, the museum, then the PP, as the player advances. */
+  /** Fray Bentos' history teacher: the Anglo, its museum, the toxicology centre (the gym), then the PP, as the player advances. */
   async frb_historia(api) {
     const nm = { name: 'Profesora Irene' };
     if (api.flag('anglo_pp')) return api.say(['Las máquinas que había en las cámaras de frío no eran de la fábrica. Las trajo alguien de afuera.', 'Y esa niebla artificial que se vende por el litoral, creo que no es una casualidad.', 'Esta ciudad fue la cocina del mundo. Que no sea ahora un depósito de máquinas ajenas.'], nm);
-    if (api.flag(badgeOf('fraybentos'))) return api.say(['Veo que pasaste por el museo. Zoraida cuida ese lugar como a un tesoro.', 'Las cajas del museo se usaban para despachar mercadería entre depósitos. Ahora las usa ella para recibir a los visitantes.', 'Si te interesa la historia del Anglo, andá a ver el frigorífico viejo. Pero con cuidado: se movió gente rara por ahí.'], nm);
-    return api.say(['Soy docente de historia. Fray Bentos nació alrededor de una fábrica de extracto de carne, hace más de un siglo y medio.', 'El Anglo faenaba miles de reses por día y mandaba conservas a medio mundo. Por eso le decían "la cocina del mundo".', 'Hoy el museo guarda esa historia. Preguntá por Zoraida, la directora.'], nm);
+    if (api.flag(badgeOf('fraybentos'))) return api.say(['Veo que pasaste por el Centro Toxicológico. Zoraida atiende llamadas de todo el litoral: cuando alguien no sabe qué lo intoxicó, llaman ahí.', 'Si te interesa la historia del Anglo, andá a ver el frigorífico viejo. Pero con cuidado: se movió gente rara por ahí.'], nm);
+    return api.say(['Soy docente de historia. Fray Bentos nació alrededor de una fábrica de extracto de carne, hace más de un siglo y medio.', 'El Anglo faenaba miles de reses por día y mandaba conservas a medio mundo. Por eso le decían "la cocina del mundo".', 'Hoy el museo guarda esa historia. Y si buscás el gimnasio, es el Centro Toxicológico: preguntá por Zoraida, la directora.'], nm);
   },
 
   async rival_ferry(api) {

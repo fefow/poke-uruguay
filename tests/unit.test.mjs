@@ -883,3 +883,19 @@ test('mochila: los objetos de encargo van a la pestaña Misión, quedan como ít
   for (const k of quest) assert.ok(new RegExp(`takeItem\\('${k}'|take: \\[[^\\]]*'${k}'|for \\(const k of \\[[^\\]]*'${k}'[^\\]]*\\]\\) if \\(api\\.hasItem\\(k\\)\\) api\\.takeItem`).test(src), `${k}: alguien lo recibe y desaparece de la mochila`);
   assert.ok(SCRIPTS.ms_step);
 });
+
+test('gimnasio de Fray Bentos: Centro Toxicológico, todo de tipo Veneno (líder, entrenadores y fachada)', async () => {
+  const { LEADERS } = await import('../src/data/story.ts');
+  const { SPECIES } = await import('../src/data/species.ts');
+  const { MAPS, OUTDOOR } = await import('../src/data/maps.ts');
+  const L = LEADERS.anglo;
+  assert.match(L.cls, /Toxicol/);
+  assert.ok(L.team.every(([sp]) => SPECIES[sp].types.includes('veneno')), 'el equipo de Zoraida es de Veneno');
+  const gym = MAPS.gym_frb;
+  assert.match(gym.name, /Toxicol/);
+  const foes = (gym.npcs ?? []).filter((n) => n.trainer);
+  assert.ok(foes.length >= 2);
+  for (const n of foes) assert.ok(n.trainer.team.every(([sp]) => SPECIES[sp].types.includes('veneno')), `${n.trainer.name}: equipo de Veneno`);
+  assert.ok(!JSON.stringify(gym).match(/museo|Museo|Siniestro/i), 'el gimnasio no habla de museo ni de Siniestro');
+  assert.ok(OUTDOOR.fraybentos.tiles.join('').includes('&'), 'la fachada del gimnasio es la de Veneno');
+});

@@ -100,7 +100,7 @@ const blank = (W = 28, H = 20) => {
 };
 
 /**
- * Anglo (Fray Bentos, siniestro): a museum of teleport crates. Every room is sealed; each holds three crates (red, blue,
+ * Centro Toxicológico (Fray Bentos, veneno; the plan keeps the id `anglo`): a lab of teleport crates of reagents. Every room is sealed; each holds three crates (red, blue,
  * yellow) that send the visitor to another room. Only one crate per room moves you forward; the director's office has no
  * door at all and can only be reached by the last crate of the chain. Two trainers stand next to crates.
  */

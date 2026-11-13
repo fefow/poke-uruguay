@@ -21,7 +21,7 @@ export function addFrayBentosStory(m: any) {
   folk.push(
     critter(16, 22, 'carpincho', ['Un carpincho tomando sol en la costa, como si el puerto fuera suyo.']),
     critter(30, 22, 'cumulo', ['Un cuervo mira desde la orilla las latas viejas del Anglo.']),
-    critter(36, 21, 'nimbo', ['Una golondrina va y viene del muelle al techo del museo.']),
+    critter(36, 21, 'nimbo', ['Una golondrina va y viene del muelle al techo del puerto.']),
   );
   fitToMap(m.tiles, folk, taken);
   (m.npcs ??= []).push(...folk);

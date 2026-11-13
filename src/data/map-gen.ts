@@ -19,7 +19,7 @@ const rows = (g) => g.map((r) => r.join(''));
 
 /** Gym block, 7 wide x 3 tall: roof, roof with emblem, facade with the door. */
 export const GYM_CHARS = {
-  fuego: ['1', '2', '3'], planta: ['4', '5', '6'], lucha: ['7', '8', '9'], psiquico: ['!', '@', '$'], siniestro: ['&', '*', '+'],
+  fuego: ['1', '2', '3'], planta: ['4', '5', '6'], lucha: ['7', '8', '9'], psiquico: ['!', '@', '$'], veneno: ['&', '*', '+'],
   tierra: ['À', 'Á', 'Â'], normal: ['Ã', 'Ä', 'Å'], bicho: ['È', 'É', 'Ê'], volador: ['Ì', 'Í', 'Î'],
 };
 const gymBlock = (fam) => { const [r, f, e] = GYM_CHARS[fam]; return [`${r}${r}${r}${r}${r}${r}${r}`, `${r}${r}${r}${e}${r}${r}${r}`, `${f}${f}${f}D${f}${f}${f}`]; };
