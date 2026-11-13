@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-13 (v221)
+> Última actualización: 2026-11-13 (v222)
 
 ## Dónde está cada cosa en el código
 
@@ -59,7 +59,7 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 6. **Trinidad. Gimnasio 1.** Elena, Instituto de Colonización, **Tierra**. Tras la medalla, el ayudante **Gonzalo** entrega el **Huevo**, que eclosiona a los 1000 pasos en Gato Pajero Nv8.
 7. **Palmitas** (localidad). Cueva donde Marta, del Correo, está retenida por dos reclutas.
 8. **Mercedes. Gimnasio 2.** Marta, Correo Uruguayo, **Normal**. Cerrado hasta liberarla.
-9. **Villa Soriano** (localidad).
+9. **Villa Soriano** (localidad). **Ruta 2** (a Fray Bentos): ya no la cierran animales y nadadores; una balsa trabada con tres amarras, con tres cabrestantes en cada orilla que se sueltan en el orden justo (lo sabe un balsero de la orilla; si se erra, se reinician).
 10. **Fray Bentos. Gimnasio 3.** Zoraida, Centro de Información Toxicológica, **Veneno** (líder y entrenadores son todos de Veneno; las cajas de reactivos son el recorrido; la fachada y la sala conservan el arte original; el id interno sigue siendo `anglo`). Antes, el **Frigorífico Anglo** tiene cuatro pisos: **depósito** (estantes en serpentina, tres reclutas), **cámara de frío** (piso de hielo: el jugador patina en la dirección en que camina hasta que un cajón, una pared o una persona lo frena; hay que averiguar la secuencia de paradas hasta la escalera, la Credencial del operario está al otro lado), **oficinas** (despachos, el operario encerrado, un contador PP y la escalera) y la **oficina de Bruma junto a la sala de máquinas de niebla** (se llega por la sala de máquinas y se cruza hasta la oficina). Bruma defiende las máquinas; Tabárez llega, confiesa el origen del compañero y entrega el **Medidor de Niebla** (flag `anglo_pp`). Un obrero neutral del Anglo da el Ticket del Buquebus.
 11. **Young** (localidad) y **Paysandú.** Misión del **Muelle** (Vidal, MT Bomba Lodo). Caña Vieja en el muelle, Súper Caña en una casa.
 12. **Termas de Guaviyú** (localidad) y **Salto. Gimnasio 4.** Horacio Quiroga, **Psíquico**. Misión de la **Radio** (Cáceres, MT Psíquico) y la **Represa** (Garúa, flag `represa_clear`). Mini historia El cuaderno de Quiroga.

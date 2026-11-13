@@ -1321,22 +1321,23 @@ export const SCRIPTS = {
   // Lever gate: pull the three levers in the right order (see addLeverGate).
   async route_palanca(api, npc) {
     const key = (k) => `rf_pl_${npc.routeId}_${k}`.slice(0, 40);
-    if (api.flag(npc.doneFlag)) return api.say('La tranquera ya está abierta.', { name: npc.name });
+    const W = npc.words;
+    if (api.flag(npc.doneFlag)) return api.say(W?.done ?? 'La tranquera ya está abierta.', { name: npc.name });
     const n = [0, 1, 2].filter((k) => api.flag(key(k))).length;
-    if (api.flag(key(npc.lever))) { for (let k = 0; k < 3; k++) api.setFlag(key(k), false); api.sfx('cancel'); return api.say('Soltaste la palanca. Los cerrojos vuelven a su lugar.', { name: npc.name }); }
+    if (api.flag(key(npc.lever))) { for (let k = 0; k < 3; k++) api.setFlag(key(k), false); api.sfx('cancel'); return api.say(W?.release ?? 'Soltaste la palanca. Los cerrojos vuelven a su lugar.', { name: npc.name }); }
     if (npc.order[n] === npc.lever) {
       api.setFlag(key(npc.lever));
       api.sfx('confirm');
       if (n === 2) {
         api.setFlag(npc.doneFlag);
         for (let k = 0; k < 3; k++) api.setFlag(key(k), false);
-        return api.say('Se oye el último cerrojo. La tranquera se abre sola.', { name: npc.name });
+        return api.say(W?.last ?? 'Se oye el último cerrojo. La tranquera se abre sola.', { name: npc.name });
       }
-      return api.say(`${npc.name}: algo hizo clic. ${n === 0 ? 'Un cerrojo se soltó.' : 'Otro cerrojo cedió.'}`);
+      return api.say(W ? `${npc.name}: ${W.click[n === 0 ? 0 : 1]}` : `${npc.name}: algo hizo clic. ${n === 0 ? 'Un cerrojo se soltó.' : 'Otro cerrojo cedió.'}`);
     }
     for (let k = 0; k < 3; k++) api.setFlag(key(k), false);
     api.sfx('cancel');
-    await api.say('Algo hizo un ruido seco. Los cerrojos volvieron a su lugar.', { name: npc.name });
+    await api.say(W?.reset ?? 'Algo hizo un ruido seco. Los cerrojos volvieron a su lugar.', { name: npc.name });
   },
 
   ...EVENT_SCRIPTS,

@@ -158,7 +158,7 @@ function entryEnd(m, id): 'lo' | 'hi' {
 // Each route keeps only some of the obstacles so no two walks feel the same: g = trainers' toll gate, r = riddle herd,
 // l = lever gate, f = PP fog machine. (The lost-item person and the local legend are on every route.)
 const ROUTE_MIX: Record<string, string> = {
-  ruta1: 'g', r_colonia_rosario: 'gf', r_rosario_sanjose: 'r', r_ecilda_trinidad: 'lg', r_villasoriano_fraybentos: 'fr',
+  ruta1: 'g', r_colonia_rosario: 'gf', r_rosario_sanjose: 'r', r_ecilda_trinidad: 'lg', r_villasoriano_fraybentos: 'fl',
   r_belen_artigas: 'g', r_baltasar_rivera: 'rl', r_tupambae_melo: 'f', r_cerrochato_quebrada: 'gl', r_lascano_rocha: 'r',
   r_rocha_paloma: 'gf', r_casupa_florida: 'l', r_sarandi_durazno: 'gr', r_sanramon_canelones: 'f',
   ruta8: 'g', ruta5: 'r', ruta30: '', ruta31: 'l', ruta3: 'g', ruta24: 'f',
@@ -348,6 +348,12 @@ const LEVERS = [['Palanca verde', 'verde'], ['Palanca azul', 'azul'], ['Palanca 
 const ORDERS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
 
 /** A gate held by three levers on each side of it: they must be pulled in the right order, learned from a farmhand. */
+const BALSA = {
+  names: [['Cabrestante verde', 'verde'], ['Cabrestante azul', 'azul'], ['Cabrestante rojo', 'roja']],
+  block: ['Balsa', 'sailor', ['La balsa está trabada con tres amarras.', 'Cada orilla tiene un cabrestante por amarra: soltarlas en el orden justo la deja libre.']],
+  hand: ['Balsero', 'sailor', (a, c) => [`Esa balsa la conozco de memoria. La amarra ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, las amarras vuelven a tensarse y se empieza de nuevo.']] as [string, string, (a: string, c: string) => string[]],
+  words: { done: 'La balsa ya está suelta.', release: 'Soltaste el cabrestante. Las amarras vuelven a tensarse.', last: 'Se oye soltarse la última amarra. La balsa queda libre y atraviesa sola el paso.', click: ['La amarra aflojó.', 'Otra amarra cedió.'], reset: 'Algo crujió. Las amarras volvieron a tensarse.' },
+};
 export function addLeverGate(m, id, busy) {
   const w = m.tiles[0].length, h = m.tiles.length;
   if (Math.max(w, h) < 60) return;
@@ -373,11 +379,14 @@ export function addLeverGate(m, id, busy) {
   const sides = [spotsOn(-1), spotsOn(1)];
   if (sides.some((l) => l.length < 4)) return;
   const done = `rf_gt_${id}`.slice(0, 40);
+  const balsa = id === 'r_villasoriano_fraybentos';
+  const LV = balsa ? BALSA.names : LEVERS;
   const a = LEVERS[order[0]][1], c = LEVERS[order[2]][1];
-  cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: blockLook(m, x, y, 'gaucho'), dir: 'down', blocker: true, fixed: true, name: 'Tranquera', text: ['La tranquera está trabada con tres cerrojos.', 'Cada lado del camino tiene palancas que los mueven.'], cond: (f) => !f[done] }); taken.add(`${x},${y}`); });
+  cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: balsa ? 'sailor' : blockLook(m, x, y, 'gaucho'), dir: 'down', blocker: true, fixed: true, name: balsa ? BALSA.block[0] : 'Tranquera', text: balsa ? BALSA.block[2] : ['La tranquera está trabada con tres cerrojos.', 'Cada lado del camino tiene palancas que los mueven.'], cond: (f) => !f[done] }); taken.add(`${x},${y}`); });
   sides.forEach((list) => {
-    LEVERS.forEach(([name], k) => { const [x, y] = list[k]; m.npcs.push({ x, y, look: 'machine', dir: 'down', name, script: 'route_palanca', routeId: id, lever: k, order, doneFlag: done }); taken.add(`${x},${y}`); });
+    LV.forEach(([name], k) => { const [x, y] = list[k]; m.npcs.push({ x, y, look: 'machine', dir: 'down', name, script: 'route_palanca', routeId: id, lever: k, order, doneFlag: done, ...(balsa ? { words: BALSA.words } : {}) }); taken.add(`${x},${y}`); });
     const [x, y] = list[3];
-    m.npcs.push({ x, y, look: 'gaucho', dir: 'down', name: 'Peón', text: [`Esa tranquera la arreglé yo. La traba ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, los cerrojos vuelven a su lugar y se empieza de nuevo.'] });
+    if (balsa) m.npcs.push({ x, y, look: 'sailor', dir: 'down', name: BALSA.hand[0], text: BALSA.hand[2](a, c) });
+    else m.npcs.push({ x, y, look: 'gaucho', dir: 'down', name: 'Peón', text: [`Esa tranquera la arreglé yo. La traba ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, los cerrojos vuelven a su lugar y se empieza de nuevo.'] });
   });
 }
