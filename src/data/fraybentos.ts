@@ -10,7 +10,7 @@ export function addFrayBentosStory(m: any) {
     // an old fisherman at the foot of the pier
     { x: 11, y: 22, look: 'sailor', dir: 'left', name: 'Pescador', text: ['Desde chico pesco bajo ese muelle. El río tiene humor propio.', 'Hoy no vi a la gente de la boletería. Los del barco andan nerviosos y nadie me explica por qué.'] },
     // retired Anglo worker by the factory gate: tells how the plant worked
-    { x: 34, y: 15, look: 'obrero', dir: 'right', name: 'Jubilado del Anglo', text: ['Trabajé treinta años en esa planta. Las cámaras de frío tenían cintas por todos lados: una te llevaba, otra te devolvía.', 'Si entrás, no te enojes con las cintas. Cada una va para un solo lado, y se aprende probando.'] },
+    { x: 34, y: 15, look: 'obrero', dir: 'right', name: 'Jubilado del Anglo', text: ['Trabajé treinta años en esa planta. Las cámaras de frío tienen el piso cubierto de hielo: si arrancás a patinar, no frenás hasta chocar con algo.', 'Si entrás, no te enojes con el piso. Se aprende probando dónde te frenás.'] },
     // a kid who collects tins from the old factory
     { x: 26, y: 20, look: 'nino', dir: 'down', wander: true, name: 'Nene', text: ['Junto latas viejas del Anglo. Dicen que algunas valen plata.', 'Una vez encontré una con el dibujo de un barco. ¿Será el mismo de la boletería?'] },
     // someone who knows the port's rumours
@@ -21,7 +21,7 @@ export function addFrayBentosStory(m: any) {
   folk.push(
     critter(16, 22, 'carpincho', ['Un carpincho tomando sol en la costa, como si el puerto fuera suyo.']),
     critter(30, 22, 'cumulo', ['Un cuervo mira desde la orilla las latas viejas del Anglo.']),
-    critter(36, 21, 'nimbo', ['Una golondrina va y viene del muelle al techo del museo.']),
+    critter(36, 21, 'nimbo', ['Una golondrina va y viene del muelle al techo del puerto.']),
   );
   fitToMap(m.tiles, folk, taken);
   (m.npcs ??= []).push(...folk);

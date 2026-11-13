@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-12 (v217).
+> Última actualización: 2026-11-13 (v222)
 
 ## Dónde está cada cosa en el código
 
@@ -59,8 +59,8 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 6. **Trinidad. Gimnasio 1.** Elena, Instituto de Colonización, **Tierra**. Tras la medalla, el ayudante **Gonzalo** entrega el **Huevo**, que eclosiona a los 1000 pasos en Gato Pajero Nv8.
 7. **Palmitas** (localidad). Cueva donde Marta, del Correo, está retenida por dos reclutas.
 8. **Mercedes. Gimnasio 2.** Marta, Correo Uruguayo, **Normal**. Cerrado hasta liberarla.
-9. **Villa Soriano** (localidad).
-10. **Fray Bentos. Gimnasio 3.** Zoraida, Museo del Anglo, **Siniestro**. Antes, en el Frigorífico Anglo, Bruma defiende las máquinas; Tabárez llega, confiesa el origen del compañero y entrega el **Medidor de Niebla** (flag `anglo_pp`). Un obrero neutral del Anglo da el Ticket del Buquebus.
+9. **Villa Soriano** (localidad). **Ruta 2** (a Fray Bentos): ya no la cierran animales y nadadores; una balsa trabada con tres amarras, con tres cabrestantes en cada orilla que se sueltan en el orden justo (lo sabe un balsero de la orilla; si se erra, se reinician).
+10. **Fray Bentos. Gimnasio 3.** Zoraida, Centro de Información Toxicológica, **Veneno** (líder y entrenadores son todos de Veneno; las cajas de reactivos son el recorrido; la fachada y la sala conservan el arte original; el id interno sigue siendo `anglo`). Antes, el **Frigorífico Anglo** tiene cuatro pisos: **depósito** (estantes en serpentina, tres reclutas), **cámara de frío** (piso de hielo: el jugador patina en la dirección en que camina hasta que un cajón, una pared o una persona lo frena; hay que averiguar la secuencia de paradas hasta la escalera, la Credencial del operario está al otro lado), **oficinas** (despachos, el operario encerrado, un contador PP y la escalera) y la **oficina de Bruma junto a la sala de máquinas de niebla** (se llega por la sala de máquinas y se cruza hasta la oficina). Bruma defiende las máquinas; Tabárez llega, confiesa el origen del compañero y entrega el **Medidor de Niebla** (flag `anglo_pp`). Un obrero neutral del Anglo da el Ticket del Buquebus.
 11. **Young** (localidad) y **Paysandú.** Misión del **Muelle** (Vidal, MT Bomba Lodo). Caña Vieja en el muelle, Súper Caña en una casa.
 12. **Termas de Guaviyú** (localidad) y **Salto. Gimnasio 4.** Horacio Quiroga, **Psíquico**. Misión de la **Radio** (Cáceres, MT Psíquico) y la **Represa** (Garúa, flag `represa_clear`). Mini historia El cuaderno de Quiroga.
 13. **Belén** (localidad) y **Artigas.** Un minero pide echar a un recluta que se lleva geodas (otra vez Olivera). Festival: **el carnaval de Artigas**. Mini historia La canoa del Cuareim (Surf).
@@ -82,13 +82,32 @@ Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio 
 
 ### Buquebus China Zorrilla
 
-El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Terminal de Montevideo) se pelea con Facu en cubierta; el capitán, mareado, pide un **Mate** y a cambio entrega el **Machete**. Después el barco zarpa para no volver (`ferry_done`).
+El Ticket del Buquebus llega de la mano del obrero del Anglo. En el barco (Terminal de Montevideo) se pelea con Facu en cubierta; el capitán, mareado, pide un **Mate** y a cambio entrega el **Machete** y solo explica para qué sirve (abrir camino entre chircas y zarzales; no dice adónde ir ni qué medalla hace falta: eso lo cuenta el zarzal al intentar cortarlo). Después el barco zarpa para no volver (`ferry_done`).
 
 ### Final
 
 1. Con las 12 medallas y la Fábrica de Minas liberada (`pp_clear`), en Montevideo se abre la **Torre del puerto** (sede del PP, 3 pisos: `sede_1`, `sede_2`, `sede_3` en `maps-act2.ts`). Piso 1: **Bruma** (flag `ev_sede_1`). Piso 2: **Brumario** y **Garúa** en dos tandas (`ev_sede_2a`, `ev_sede_2`). Cúpula: **Dr. Díaz**; aparecen caminando Facu, Tabárez y el Cardenal Azul, y se apaga la niebla (flag `anglo_clear`, el Medidor baja a 0 %). Hasta entonces el Estadio Centenario está cerrado y la gente de Montevideo lo explica.
 2. **Liga en el Estadio Centenario:** Estela (aire), Teófilo (roca y tierra), Dolores (veneno y bicho), Federico (lucha y normal), duelo final con Facu y el Campeón **Obdulio** (con revancha).
 3. Epílogo: semanas después, en Carmelo, se habla de legendarias (viento helado en la Quebrada, un canto en Maldonado) y Tabárez deja dicho que el jugador pase por el laboratorio. Ahí empieza **Las cinco leyendas**.
+
+## Mecanismos de los gimnasios (`gym-puzzles.ts`, `gym-layouts.ts`)
+
+Cada gimnasio tiene su propio camino hasta el líder. El estado del mecanismo vive solo mientras se está adentro: al salir y volver a entrar todo se reinicia (un carro atascado nunca encierra a nadie). El guía de la entrada cuenta de qué se trata el mecanismo, nunca la solución. Las pruebas (`tests/unit.test.mjs`) simulan cada gimnasio y exigen que se resuelva, que no sea trivial y que no deje atrapado.
+
+| Gimnasio | Mecanismo |
+|---|---|
+| Trinidad (Tierra) | Plano propio editado a mano (no se re-diseña sin avisar). |
+| Mercedes, Correo | Cintas transportadoras (única vez que se usan). |
+| Fray Bentos, Centro Toxicológico | Cajas de teletransporte de reactivos. |
+| Salto, Quiroga (Psíquico) | Carros de libros que se empujan (nunca se tiran) y tapan cada hueco entre pasillos. |
+| Rivera, Defensa (Lucha) | Dos puestos de guardia: la barrera sube cuando el guardia pierde. |
+| Tacuarembó, MGAP (Planta) | Una pared de enredaderas secas se abre con el riego: tres llaves de paso lejanas entre sí. |
+| Treinta y Tres, Lavalleja (Roca) | Bloques de granito que se empujan al río: hacen falta tres seguidos para cruzar. |
+| Maldonado, OSE (Agua) | Tres compuertas en la pasarela del tanque; cuatro válvulas mueven las compuertas de a pares (los costados están cerrados por canales). |
+| Florida, Boiso (Volador) | Tres paredes de hangar cruzadas por la pista a través de hélices que giran por turnos (cada 6 pasos). |
+| Durazno, ANCAP (Fuego) | Tres chorros de fuego sobre la pasarela; cada válvula cierra uno y abre otro. |
+| Canelones, INAVI (Bicho) | Enjambres que tapan pasillos de la ruta del laberinto y se turnan cada 10 pasos. |
+| Montevideo, UTE (Eléctrico) | Puerta blindada de la oficina: se abre con cuatro luces prendidas; cuatro tableros cambian las luces de a pares. |
 
 ## Las cinco leyendas (después de la Liga)
 
@@ -131,6 +150,7 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
 - **Equipables:** solo de jefes del PP, torres y grandes eventos; no se venden.
 - **Tipos y naturalezas:** 14 tipos (incluye Acero) y 25 naturalezas (`types.ts`, `natures.ts`).
 - **Rival Facu:** siete combates y una revancha libre. Laboratorio (elige después del jugador), Bosque Grande, Buquebus (cuenta que pasó datos del laboratorio a «un estudio del clima»), Ruta 3 (sigue midiendo para el estudio; su tío no le contó nada), ruta a Rivera (no cree que el estudio sea del PP y va a ver la Torre, `rival7`), Lascano (vio la Quebrada vacía: lo usaron), Sarandí Grande (habló con su tío, ya no trabaja para nadie) y Centenario. Sube a la cúpula de la Torre del puerto en el final. Después de la Liga trabaja con Tabárez en el laboratorio y acepta revancha cuando el jugador quiera (`rival_lab_post`, equipo 12 niveles más alto). Nunca se une al PP.
+- **Mochila, pestaña Misión:** los objetos de encargo (los que una persona te da para llevarle a otra: carta de Tabárez, lámpara del faro, credencial y ticket del Anglo, llaves del Buquebus, soga mojada, cabos, cuaderno, brea, remos, correa, cabestro, yerba, mate grande, traje y surdo) van a la pestaña **Misión** apenas los recibís y desaparecen al entregarlos. Herramientas y recuerdos (Mapa, PokeDex, Bicicleta, Canoa, Machete, Soga, Pluma Azul, Medidor) siguen en **Clave**. En `items.ts`, `pocket: 'quest'`; `isKeyItem()` cubre ambos. La primera vez, un aviso lo explica (`ev_quest_tab`).
 - **Pistas:** quienes bloquean un camino solo describen la situación, nunca dicen qué hacer; las pistas son parciales y repartidas.
 - **Favores entre pueblos:** 13 cadenas (faro, queso, radio, carta, cosecha, frontera, cuchilla, cerro, laguna, cerro_mina, sierra, costa, ciudad). No tocan la historia del PP.
 - **Eventos de ciudad (opcionales, una vez):** examen del casco histórico (Colonia), payada (San José), torneo (Mercedes), tesoro del marinero (Rocha), trueques, adivinos, carrera de la Ciclovía, concurso de bichos (Canelones) y **la llamada de candombe** (Montevideo): al director de la cuerda del Barrio Sur, junto a la Rambla, le faltan el repique (en la playa Pocitos) y el piano (en el Parque Batlle); avisados, cada tamborilero se va caminando y aparece junto a él; con los tres tambores la cuerda toca y regala 2 Chivitos y 3 Ultraballs (flags `ev_candombe_ok`, `ev_candombe_rep`, `ev_candombe_pia`, `ev_candombe`).

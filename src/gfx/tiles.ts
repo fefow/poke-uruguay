@@ -66,6 +66,25 @@ export const TILE_INFO = {
   Ϥ: { name: 'flecha lanzadora' },
   Ϧ: { name: 'flecha lanzadora' },
   Ϩ: { name: 'flecha lanzadora' },
+  'ӵ': { name: 'hielo (desliza)' },
+  'ӷ': { name: 'cajón congelado', solid: true },
+  'Ӻ': { name: 'escalera' },
+  'ӻ': { name: 'puerta de la cámara de frío' },
+  'Ӹ': { name: 'máquina de niebla', solid: true },
+  'ӹ': { name: 'escritorio de oficina', solid: true },
+  // Mecanismos de los gimnasios (ver gym-puzzles.ts)
+  'Ӽ': { name: 'compuerta cerrada', solid: true },
+  'ӽ': { name: 'carro de libros (se empuja)', solid: true },
+  'Ӿ': { name: 'bloque de granito (se empuja)', solid: true },
+  'ӿ': { name: 'chorro de fuego', solid: true },
+  'ԑ': { name: 'válvula (apagada)', solid: true },
+  'Ԓ': { name: 'válvula (abierta)', solid: true },
+  'ԓ': { name: 'luz apagada', solid: true },
+  'Ԕ': { name: 'luz encendida', solid: true },
+  'ԕ': { name: 'enjambre', solid: true },
+  'Ԗ': { name: 'hélice', solid: true },
+  'ԗ': { name: 'enredadera seca', solid: true },
+  'Ԙ': { name: 'barrera del puesto', solid: true },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -2202,6 +2221,13 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
     'Ϲ': (g) => { px(g, 0, 0, '#8a96a4', T, T); px(g, 0, 0, '#f2c02a', T, 1); px(g, 0, 15, '#f2c02a', T, 1); px(g, 0, 0, '#f2c02a', 1, T); px(g, 15, 0, '#f2c02a', 1, T); for (let i = 3; i < 13; i += 4) { px(g, i, 4, '#aab4c0', 2, 2); px(g, i + 2, 9, '#aab4c0', 2, 2); } },
     'ϻ': (g) => { wall(g); px(g, 0, 1, '#1e2a36', T, 2); for (const x of [2, 9]) { px(g, x + 1, 3, '#aab4c0', 1, 2); px(g, x, 5, '#c85a5a', 4, 8); px(g, x + 1, 5, '#e8908a', 1, 6); px(g, x + 2, 9, '#a03a3a', 2, 4); } },
   };
+  // Cámara de frío (hielo que desliza), escaleras, puerta aislada, máquina de niebla y escritorio
+  T_['ӵ'] = (g) => { px(g, 0, 0, '#bfe6f8', T, T); px(g, 0, 0, '#e4f6ff', T, 2); px(g, 0, 14, '#8cc4e4', T, 2); px(g, 2, 4, '#f4fcff', 5, 1); px(g, 3, 5, '#f4fcff', 1, 3); px(g, 9, 9, '#f4fcff', 4, 1); px(g, 12, 3, '#9ccfec', 1, 4); px(g, 5, 11, '#9ccfec', 4, 1); };
+  T_['ӷ'] = (g) => { floor(g); px(g, 1, 2, '#3e5468', 14, 13); px(g, 2, 3, '#b9dcf0', 12, 11); px(g, 2, 3, '#f4fcff', 12, 2); px(g, 2, 7, '#8cc4e4', 12, 1); px(g, 7, 3, '#8cc4e4', 1, 11); px(g, 3, 9, '#f4fcff', 3, 1); px(g, 10, 11, '#f4fcff', 3, 1); };
+  T_['Ӻ'] = (g) => { px(g, 0, 0, '#6f8aa2', T, T); for (let i = 0; i < 4; i++) { px(g, 1, 2 + i * 3, '#d4e0ea', 14, 2); px(g, 1, 4 + i * 3, '#7e92a6', 14, 1); } px(g, 0, 0, '#3e5468', 1, T); px(g, 15, 0, '#3e5468', 1, T); px(g, 0, 0, '#f2c02a', 1, 3); px(g, 15, 0, '#f2c02a', 1, 3); };
+  T_['ӻ'] = (g) => { wall(g); px(g, 2, 1, '#3e5468', 12, 15); px(g, 3, 2, '#dce8f2', 10, 14); px(g, 3, 2, '#ffffff', 10, 1); px(g, 3, 9, '#9cb6cc', 10, 1); px(g, 10, 7, '#2a2a32', 2, 5); px(g, 10, 6, '#c8d4de', 2, 1); px(g, 4, 4, '#8ac8f0', 3, 2); px(g, 4, 12, '#8ac8f0', 5, 1); };
+  T_['Ӹ'] = (g) => { floor(g); px(g, 1, 1, '#3e4856', 14, 14); px(g, 2, 2, '#8a96a4', 12, 11); px(g, 2, 2, '#c8d4de', 12, 1); for (let y = 5; y < 11; y += 2) px(g, 3, y, '#4e5868', 10, 1); px(g, 11, 3, '#6ae0a0', 2, 1); px(g, 3, 11, '#e8f4fc', 3, 2); px(g, 6, 11, '#d8e8f4', 5, 2); px(g, 8, 12, '#f4faff', 4, 2); };
+  T_['ӹ'] = (g) => { floor(g); px(g, 0, 3, '#5a3e22', T, 11); px(g, 0, 3, '#a98f66', T, 3); px(g, 1, 14, '#3e2a16', 14, 2); px(g, 3, 5, '#f4f4f0', 4, 3); px(g, 9, 5, '#2a4a6a', 4, 2); px(g, 4, 6, '#9aa8b8', 2, 1); };
   for (const [dir, ch] of [['up', 'Ϣ'], ['down', 'Ϥ'], ['left', 'Ϧ'], ['right', 'Ϩ']]) {
     T_[ch] = (g) => {
       px(g, 0, 0, '#454a54', T, T); px(g, 0, 0, '#6a707c', T, 1); px(g, 0, 15, '#2a2e36', T, 1);
@@ -2210,6 +2236,24 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
       for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (A[y][x] === '#') { const [rx, ry] = (rot as any)[dir](x, y); px(g, rx * 2, ry * 2, '#f2c02a', 2, 2); px(g, rx * 2, ry * 2 + 1, '#b88a10', 2, 1); }
     };
   }
+}
+
+// Mecanismos de los gimnasios: compuerta, carro, bloque de granito, chorro de fuego, válvula, luces, enjambre, hélice, enredadera y barrera.
+// Cada tile trae su propio fondo para verse igual en cualquier gimnasio; abiertos, la casilla vuelve a ser el piso del gimnasio.
+{
+  const base = (g, c = '#5a6270') => { px(g, 0, 0, c, T, T); px(g, 0, 15, '#00000040', T, 1); };
+  DRAW['Ӽ'] = (g) => { base(g, '#3e4856'); for (let x = 1; x < T; x += 3) px(g, x, 1, '#aab4c0', 2, 14); px(g, 0, 0, '#f2c02a', T, 2); px(g, 0, 14, '#f2c02a', T, 2); for (let i = 0; i < 4; i++) px(g, 2 + i * 4, 6, '#2a303a', 1, 4); };
+  DRAW['ӽ'] = (g) => { base(g, '#8a6a46'); px(g, 1, 1, '#5a3e22', 14, 12); px(g, 2, 2, '#a98f66', 12, 10); for (const y of [3, 7]) { px(g, 2, y, '#5a3e22', 12, 1); for (let x = 3; x < 13; x += 2) px(g, x, y + 1, ['#c85a5a', '#5a8ac8', '#6ab070', '#e8c04a'][(x >> 1) % 4], 1, 3); } px(g, 2, 13, '#2a2a32', 3, 3); px(g, 11, 13, '#2a2a32', 3, 3); };
+  DRAW['Ӿ'] = (g) => { base(g, '#8c8c84'); px(g, 1, 2, '#6a6a64', 14, 13); px(g, 2, 3, '#b4b4ac', 12, 3); px(g, 2, 6, '#9a9a92', 12, 8); px(g, 5, 7, '#6a6a64', 1, 5); px(g, 10, 9, '#6a6a64', 3, 1); px(g, 3, 4, '#d8d8d0', 4, 1); };
+  DRAW['ӿ'] = (g) => { base(g, '#2a2a32'); px(g, 4, 10, '#5a606c', 8, 5); px(g, 6, 8, '#7a8090', 4, 3); g.fillStyle = '#e8672c'; g.beginPath(); g.moveTo(8, 0); g.lineTo(13, 8); g.lineTo(3, 8); g.closePath(); g.fill(); g.fillStyle = '#f2c02a'; g.beginPath(); g.moveTo(8, 3); g.lineTo(11, 8); g.lineTo(5, 8); g.closePath(); g.fill(); };
+  const lever = (on) => (g) => { base(g, '#4e5868'); px(g, 2, 2, '#2a303a', 12, 12); px(g, 3, 3, '#6a7280', 10, 10); px(g, 7, 3, on ? '#5ae08a' : '#e84a3a', 2, 10); px(g, 3, 7, on ? '#5ae08a' : '#e84a3a', 10, 2); px(g, 7, 7, '#f4f4f0', 2, 2); px(g, 2, 13, on ? '#5ae08a' : '#e84a3a', 12, 1); };
+  DRAW['ԑ'] = lever(false); DRAW['Ԓ'] = lever(true);
+  DRAW['ԓ'] = (g) => { base(g, '#3e4856'); px(g, 4, 3, '#1a1e26', 8, 10); px(g, 5, 4, '#2a303a', 6, 8); px(g, 7, 13, '#7a8090', 2, 2); };
+  DRAW['Ԕ'] = (g) => { base(g, '#3e4856'); px(g, 3, 2, '#ffe88a40', 10, 12); px(g, 4, 3, '#f2c02a', 8, 10); px(g, 5, 4, '#fff6b0', 6, 7); px(g, 7, 13, '#7a8090', 2, 2); };
+  DRAW['ԕ'] = (g) => { base(g, '#3e6a34'); for (const [x, y] of [[3, 3], [7, 2], [11, 4], [5, 7], [9, 8], [12, 10], [3, 11], [7, 12], [10, 6]]) { px(g, x, y, '#f2c02a', 2, 2); px(g, x, y + 1, '#2a2a32', 2, 1); px(g, x - 1, y, '#ffffff80', 1, 1); } px(g, 6, 5, '#2a2a32', 4, 1); };
+  DRAW['Ԗ'] = (g) => { base(g, '#4a5160'); px(g, 7, 1, '#c8d0da', 2, 14); px(g, 1, 7, '#c8d0da', 14, 2); px(g, 3, 3, '#aab4c0', 2, 2); px(g, 11, 3, '#aab4c0', 2, 2); px(g, 3, 11, '#aab4c0', 2, 2); px(g, 11, 11, '#aab4c0', 2, 2); px(g, 6, 6, '#e84a3a', 4, 4); px(g, 7, 7, '#f4f4f0', 2, 2); };
+  DRAW['ԗ'] = (g) => { base(g, '#3e5a2a'); for (const [x, y, w, h] of [[1, 2, 14, 2], [1, 7, 14, 2], [1, 12, 14, 2], [3, 0, 2, 16], [10, 0, 2, 16]]) px(g, x, y, '#6a4a22', w, h); for (const [x, y] of [[2, 1], [6, 6], [11, 8], [4, 11], [13, 3]]) { px(g, x, y, '#c8d0a0', 1, 3); px(g, x - 1, y + 1, '#c8d0a0', 3, 1); } for (const [x, y] of [[8, 4], [5, 9], [12, 13]]) px(g, x, y, '#c83a3a', 2, 2); };
+  DRAW['Ԙ'] = (g) => { base(g, '#6a707c'); px(g, 0, 5, '#2a303a', T, 6); for (let x = 0; x < T; x += 4) { px(g, x, 6, '#f4f4f0', 2, 4); px(g, x + 2, 6, '#d83a3a', 2, 4); } px(g, 1, 3, '#2a303a', 2, 12); px(g, 13, 3, '#2a303a', 2, 12); px(g, 1, 1, '#f2c02a', 2, 2); };
 }
 
 // Interior cabin / ship door: a wooden door set in the panelled wall.

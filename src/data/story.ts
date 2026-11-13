@@ -129,10 +129,10 @@ export const LEADERS = {
     after: ['La Medalla Salto es tuya.', 'La Represa sigue bajo control de los de gris, bajo el puente.', 'Seguí hacia Artigas y Rivera. El camino se pone más duro.'],
   },
   anglo: {
-    order: 1, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Museo del Anglo', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
-    team: [['yarara', 47], ['zorromonte', 48], ['vespertino', 48], ['zarigueya', 48], ['buho', 49], ['yacaron', 50]], prize: 6500, badge: 'badge1', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
-    intro: ['Bienvenido al Museo del Anglo, {player}. Cada caja de despacho de estas salas fue una máquina de otra época.', 'Soy Zoraida. Cuido el museo de noche, entre las sombras y los mecanismos.', 'Llegaste hasta acá usando las cajas. Ahora demostrá que sabés pelear como sabés moverte.'],
-    lose: 'Salí de la sombra gracias a vos. Y llegaste mejor de lo que pensé.',
+    order: 1, id: 'leader_anglo', name: 'Zoraida', cls: 'Directora del Centro Toxicológico', look: 'leader_dark', ai: 'smart', items: ['dulce_de_leche', 'dulce_de_leche'],
+    team: [['ciempies', 47], ['viudanegra', 48], ['sapo', 48], ['escolopendra', 49], ['yararita', 49], ['escuerzo', 50]], prize: 6500, badge: 'badge1', badgeName: 'Medalla Fray Bentos', reward: 'alfajor_triple', rewardQty: 5, tm: 'mt_sombra_nocturna',
+    intro: ['Bienvenido al Centro de Información Toxicológica, {player}. Cada caja de estas salas guarda reactivos que llegan de todo el país.', 'Soy Zoraida. Atiendo a quien se intoxicó con una planta, un hongo o una picadura, y sé qué veneno es cada cosa.', 'Llegaste hasta acá usando las cajas. Ahora demostrá que sabés pelear como sabés moverte.'],
+    lose: 'Antídoto a tiempo. Y llegaste mejor de lo que pensé.',
     after: ['La Medalla Fray Bentos es tuya. Es la tercera de doce.', 'El Equipo PP usa el viejo frigorífico como depósito. Hay gente que trabaja ahí adentro sin querer.', 'Del puerto sale un barco que lleva el nombre de una gran actriz. Quien lo sube puede conseguir una herramienta que abre el monte.'],
   },
 };
@@ -160,7 +160,7 @@ for (const [key, L] of Object.entries(LEADERS)) {
 const CONTRIB = {
   inc: 'Mirá este mapa de tierras: donde hay niebla espesa, las chacras se están secando. Ahí van a estar sus torres.',
   correo: 'Tengo cartas de todo el litoral que hablan de una niebla comprada. Que el Correo avise: la próxima torre está cerca del frigorífico.',
-  anglo: 'Conozco los depósitos del Anglo de memoria. Las máquinas están en el último piso: subí.',
+  anglo: 'Analicé una muestra de esa niebla: no es vapor, es un compuesto. Las máquinas que lo producen están en el último piso del Anglo: subí.',
   quiroga: 'Escribí un cuento sobre una niebla que se vende. El final marca una represa. Mirá debajo del puente.',
   defensa: 'Cerré la frontera para sus camiones. Hasta que apagues la Torre, no pasan más.',
   mgap: 'La niebla ya le mata terneros al ganado de la zona. Esto es una cuestión de campo, no de ciencia.',
@@ -551,7 +551,7 @@ export const SCRIPTS = {
   async rival_mvd(api) {
     if (api.flag('rival2')) return;
     await api.npcApproach('rival_mvd'); // walks up from the road ahead, never pops in
-    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en el Anglo. Y de que mi tío apareció por allá.', 'A mí no me contó nada. Mientras tanto sigo con el estudio del clima: me pidieron mediciones del río, y pagan bien.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
+    await api.say(['{player}, te estaba esperando.', 'Me enteré de que le ganaste a Zoraida, en Fray Bentos. Y de que mi tío apareció por allá.', 'A mí no me contó nada. Mientras tanto sigo con el estudio del clima: me pidieron mediciones del río, y pagan bien.', 'Yo también estuve entrenando. Veamos quién está más fuerte.'], { name: '{rival}' });
     const res = await api.battle(rival(api, 2, 700, null, 'Perdí. Buen combate.', null), { canLose: true });
     api.setFlag('rival2');
     if (res === 'win') await api.say(['Yo sigo hacia Salto. Nos vemos allá.'], { name: '{rival}' });
@@ -797,12 +797,12 @@ export const SCRIPTS = {
     await api.say(['Se llevaron la lámpara. Fue una mujer vestida de gris, con capa.', 'Sigue afuera, del lado de las rocas.'], { name: 'Farero' });
   },
 
-  /** Fray Bentos' history teacher: the Anglo, the museum, then the PP, as the player advances. */
+  /** Fray Bentos' history teacher: the Anglo, its museum, the toxicology centre (the gym), then the PP, as the player advances. */
   async frb_historia(api) {
     const nm = { name: 'Profesora Irene' };
     if (api.flag('anglo_pp')) return api.say(['Las máquinas que había en las cámaras de frío no eran de la fábrica. Las trajo alguien de afuera.', 'Y esa niebla artificial que se vende por el litoral, creo que no es una casualidad.', 'Esta ciudad fue la cocina del mundo. Que no sea ahora un depósito de máquinas ajenas.'], nm);
-    if (api.flag(badgeOf('fraybentos'))) return api.say(['Veo que pasaste por el museo. Zoraida cuida ese lugar como a un tesoro.', 'Las cajas del museo se usaban para despachar mercadería entre depósitos. Ahora las usa ella para recibir a los visitantes.', 'Si te interesa la historia del Anglo, andá a ver el frigorífico viejo. Pero con cuidado: se movió gente rara por ahí.'], nm);
-    return api.say(['Soy docente de historia. Fray Bentos nació alrededor de una fábrica de extracto de carne, hace más de un siglo y medio.', 'El Anglo faenaba miles de reses por día y mandaba conservas a medio mundo. Por eso le decían "la cocina del mundo".', 'Hoy el museo guarda esa historia. Preguntá por Zoraida, la directora.'], nm);
+    if (api.flag(badgeOf('fraybentos'))) return api.say(['Veo que pasaste por el Centro Toxicológico. Zoraida atiende llamadas de todo el litoral: cuando alguien no sabe qué lo intoxicó, llaman ahí.', 'Si te interesa la historia del Anglo, andá a ver el frigorífico viejo. Pero con cuidado: se movió gente rara por ahí.'], nm);
+    return api.say(['Soy docente de historia. Fray Bentos nació alrededor de una fábrica de extracto de carne, hace más de un siglo y medio.', 'El Anglo faenaba miles de reses por día y mandaba conservas a medio mundo. Por eso le decían "la cocina del mundo".', 'Hoy el museo guarda esa historia. Y si buscás el gimnasio, es el Centro Toxicológico: preguntá por Zoraida, la directora.'], nm);
   },
 
   async rival_ferry(api) {
@@ -880,19 +880,19 @@ export const SCRIPTS = {
 
   /** A neutral worker kept inside the Anglo by the PP: returns his lost badge, gives the Buquebus ticket. */
   async obrero_anglo(api) {
-    if (api.flag('got_ticket')) return api.say('Gracias por la credencial. Cuando salgas de este laberinto, subí al barco con el ticket.', { name: 'Operario' });
+    if (api.flag('got_ticket')) return api.say('Gracias por la credencial. Cuando salgas de este frigorífico, subí al barco con el ticket.', { name: 'Operario' });
     if (api.hasItem('credencial_anglo') && !api.flag('anglo_pp')) {
       return api.say(['¡Esa es mi credencial! Pero con la jefa de la banda acá adentro no puedo despachar ningún pasaje.', 'Si ella se va, el ticket es tuyo. Quedate con la credencial hasta entonces.'], { name: 'Operario' });
     }
     if (api.hasItem('credencial_anglo')) {
-      await api.say('¡Esa es mi credencial! Estaba perdida en alguna de las cintas.', { name: 'Operario' });
+      await api.say('¡Esa es mi credencial! Se me cayó en la cámara de frío.', { name: 'Operario' });
       api.takeItem('credencial_anglo');
-      await api.say(['No soy del PP. Me tienen acá adentro manejando las cintas porque soy el único que las conoce.', 'Soy de los que despachan los pasajes del Buquebus. Tomá uno, es lo mínimo.'], { name: 'Operario' });
+      await api.say(['No soy del PP. Me tienen acá adentro manejando las cámaras porque soy el único que las conoce.', 'Soy de los que despachan los pasajes del Buquebus. Tomá uno, es lo mínimo.'], { name: 'Operario' });
       await api.give('ticket_ferry', 1);
       api.setFlag('got_ticket');
       return api.say('Si el capitán anda mareado, llevale un Mate. Dicen que es lo único que lo calma.', { name: 'Operario' });
     }
-    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me tienen encerrado en esta oficina, a la vista de la jefa.', 'Perdí mi credencial de operario en algún rincón de las cintas y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
+    return api.say(['Yo trabajo en el Anglo desde antes de que llegaran estos del PP. Me tienen encerrado en esta oficina, un piso abajo de la jefa.', 'Perdí mi credencial de operario al cruzar la cámara de frío y sin ella no puedo ni salir a cobrar.', 'Si la encontrás, hablamos. Yo despacho los pasajes del Buquebus.'], { name: 'Operario' });
   },
 
   async ferry_captain(api) {
@@ -903,7 +903,7 @@ export const SCRIPTS = {
     api.takeItem('mate');
     api.sfx('heal');
     await api.say('{player} le dio el Mate al capitán. Poco a poco recupera el color.');
-    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá este machete: lo uso para abrir paso entre los zarzales del muelle viejo.', 'Se usa parándote frente al zarzal y apretando A. En Fray Bentos la guardia solo deja cortar a quien ganó la Medalla de este pueblo; en los caminos más al norte, a quien ganó la Medalla Salto.'], { name: 'Capitán' });
+    await api.say(['Mucho mejor. Me salvaste, {player}.', 'En agradecimiento, tomá este machete. Sirve para abrir camino entre las chircas y los zarzales que cierran los lugares complicados.', 'Se usa parándote frente al zarzal y apretando A.'], { name: 'Capitán' });
     await api.give('machete', 1);
     api.setFlag('got_machete');
     await api.say('También te dejo unas Pokeballs y unos panes que el barco no va a usar.', { name: 'Capitán' });
@@ -915,7 +915,6 @@ export const SCRIPTS = {
     await api.say(['Ahora, a trabajar: el barco zarpa en minutos rumbo a Buenos Aires.', 'Todos los pasajeros tienen que bajar. ¡Gracias por todo!'], { name: 'Capitán' });
     await api.warp('fraybentos', 3, 24, 'down');
     await api.say('El Buquebus "China Zorrilla" ya no se ve en el río. No va a volver a este puerto.');
-    await api.say('Con el Machete vas a poder abrir los zarzales de la salida norte de Fray Bentos cuando ganes la Medalla del gimnasio del pueblo.');
   },
 
   /** The Ánima of Melo's tower: the Sereno who still keeps watch. Calmed after a battle, it asks for the PP piece to be gone. */
@@ -1322,22 +1321,23 @@ export const SCRIPTS = {
   // Lever gate: pull the three levers in the right order (see addLeverGate).
   async route_palanca(api, npc) {
     const key = (k) => `rf_pl_${npc.routeId}_${k}`.slice(0, 40);
-    if (api.flag(npc.doneFlag)) return api.say('La tranquera ya está abierta.', { name: npc.name });
+    const W = npc.words;
+    if (api.flag(npc.doneFlag)) return api.say(W?.done ?? 'La tranquera ya está abierta.', { name: npc.name });
     const n = [0, 1, 2].filter((k) => api.flag(key(k))).length;
-    if (api.flag(key(npc.lever))) { for (let k = 0; k < 3; k++) api.setFlag(key(k), false); api.sfx('cancel'); return api.say('Soltaste la palanca. Los cerrojos vuelven a su lugar.', { name: npc.name }); }
+    if (api.flag(key(npc.lever))) { for (let k = 0; k < 3; k++) api.setFlag(key(k), false); api.sfx('cancel'); return api.say(W?.release ?? 'Soltaste la palanca. Los cerrojos vuelven a su lugar.', { name: npc.name }); }
     if (npc.order[n] === npc.lever) {
       api.setFlag(key(npc.lever));
       api.sfx('confirm');
       if (n === 2) {
         api.setFlag(npc.doneFlag);
         for (let k = 0; k < 3; k++) api.setFlag(key(k), false);
-        return api.say('Se oye el último cerrojo. La tranquera se abre sola.', { name: npc.name });
+        return api.say(W?.last ?? 'Se oye el último cerrojo. La tranquera se abre sola.', { name: npc.name });
       }
-      return api.say(`${npc.name}: algo hizo clic. ${n === 0 ? 'Un cerrojo se soltó.' : 'Otro cerrojo cedió.'}`);
+      return api.say(W ? `${npc.name}: ${W.click[n === 0 ? 0 : 1]}` : `${npc.name}: algo hizo clic. ${n === 0 ? 'Un cerrojo se soltó.' : 'Otro cerrojo cedió.'}`);
     }
     for (let k = 0; k < 3; k++) api.setFlag(key(k), false);
     api.sfx('cancel');
-    await api.say('Algo hizo un ruido seco. Los cerrojos volvieron a su lugar.', { name: npc.name });
+    await api.say(W?.reset ?? 'Algo hizo un ruido seco. Los cerrojos volvieron a su lugar.', { name: npc.name });
   },
 
   ...EVENT_SCRIPTS,

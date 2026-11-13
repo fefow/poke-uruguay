@@ -1,4 +1,5 @@
 import { rng } from './map-gen.ts';
+import { applyPuzzle, type Puzzle } from './gym-puzzles.ts';
 // Six gym floor plans (12x12), each also mirrored: twelve gyms, twelve different insides. The leader always waits at
 // the far end; trainers stand where the player has to pass; the old guide stands near the entrance.
 const TOP = 'xxxxxXZxxxxx';
@@ -73,20 +74,31 @@ function osePlan() {
   rect(12, 5, 15, 5, 'Y');
   rect(1, 6, 26, 17, 'Y');
   rect(8, 8, 19, 14, 'ϸ'); rect(13, 8, 14, 14, 'Ϲ');           // the tank and the catwalk across it
+  rect(1, 8, 7, 8, 'ϸ'); rect(20, 8, 26, 8, 'ϸ');                // a canal on each side closes the pockets where the valves are: the catwalk is the only way north
   for (let x = 2; x < 10; x++) g[5][x] = 'ϻ'; for (let x = 18; x < 26; x++) g[5][x] = 'ϻ';
-  for (const [x, y] of [[2, 8], [2, 14], [25, 8], [25, 14], [6, 16], [21, 16], [4, 11], [23, 11]]) g[y][x] = 'ϼ';
+  for (const [x, y] of [[2, 14], [25, 14], [6, 16], [21, 16], [4, 11], [23, 11]]) g[y][x] = 'ϼ';
   rect(10, 18, 17, 18, 'Y');
   g[19][13] = 'm'; g[19][14] = 'm';
+  // three sluice gates across the catwalk; four valves around the tank move them in pairs
+  const gate = (id, y) => ({ id, tiles: [[13, y], [14, y]] as [number, number][], closed: 'Ӽ', open: 'Ϲ' });
+  const puzzle: Puzzle = {
+    gates: [gate('A', 9), gate('B', 11), gate('C', 13)],
+    levers: [{ id: 'v1', x: 6, y: 10, flips: ['A', 'B'] }, { id: 'v2', x: 21, y: 10, flips: ['B', 'C'] }, { id: 'v3', x: 6, y: 13, flips: ['C'] }, { id: 'v4', x: 21, y: 13, flips: ['A'] }],
+    goal: [13, 5],
+    use: ['Giraste la válvula. Se oye correr agua por las cañerías.', 'Cerraste la válvula. El agua deja de correr.'],
+    hint: ['Las compuertas de la pasarela están cerradas. Cada válvula del contorno del tanque mueve más de una.'],
+  };
   return {
     tiles: g.map((r) => r.join('')),
     leader: { x: 13, y: 2 },
-    trainers: [{ x: 13, y: 11, dir: 'down' }, { x: 17, y: 7, dir: 'left' }],
+    trainers: [{ x: 9, y: 16, dir: 'up' }, { x: 17, y: 7, dir: 'left' }],
     guide: { x: 5, y: 16 },
+    puzzle,
   };
 }
 
 
-type GymPlan = { tiles: string[]; leader: { x: number; y: number; dir?: string }; trainers: { x: number; y: number; dir: string }[]; guide: { x: number; y: number } };
+type GymPlan = { puzzle?: Puzzle; tiles: string[]; leader: { x: number; y: number; dir?: string }; trainers: { x: number; y: number; dir: string }[]; guide: { x: number; y: number } };
 const blank = (W = 28, H = 20) => {
   const g: string[][] = Array.from({ length: H }, () => Array(W).fill('x'));
   const rect = (x1, y1, x2, y2, c) => { for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) g[y][x] = c; };
@@ -100,7 +112,7 @@ const blank = (W = 28, H = 20) => {
 };
 
 /**
- * Anglo (Fray Bentos, siniestro): a museum of teleport crates. Every room is sealed; each holds three crates (red, blue,
+ * Centro Toxicológico (Fray Bentos, veneno; the plan keeps the id `anglo`): a lab of teleport crates of reagents. Every room is sealed; each holds three crates (red, blue,
  * yellow) that send the visitor to another room. Only one crate per room moves you forward; the director's office has no
  * door at all and can only be reached by the last crate of the chain. Two trainers stand next to crates.
  */
@@ -162,18 +174,27 @@ function quirogaPlan(): GymPlan {
   rect(10, 17, 17, 18, 'Y'); g[19][13] = 'm'; g[19][14] = 'm';
   for (const [x, y] of [[8, 6], [16, 6], [20, 7], [7, 10], [15, 9], [21, 10], [8, 13], [16, 12], [12, 16], [20, 15], [5, 16]]) g[y][x] = 'ϼ';     // reading desks
   for (let x = 2; x < 10; x++) if (g[5][x] === 'x') g[5][x] = 'ϻ'; for (let x = 18; x < 26; x++) if (g[5][x] === 'x') g[5][x] = 'ϻ';
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 24, y: 12, dir: 'down' }, { x: 3, y: 9, dir: 'down' }], guide: { x: 11, y: 18 } };
+  // book carts ('ӽ') plug each gap and jam the aisles: they are pushed, never pulled
+  for (const [x, y] of [[24, 14], [3, 11], [24, 8], [21, 12], [21, 13], [18, 6], [18, 7], [6, 9], [6, 10]]) g[y][x] = 'ӽ';
+  const puzzle: Puzzle = { gates: [], levers: [], goal: [13, 5], hint: ['Los carros de libros se empujan, no se tiran. Si uno queda contra la pared, salí y volvé a entrar: la biblioteca se acomoda sola.'] };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 14, y: 16, dir: 'left' }, { x: 12, y: 10, dir: 'right' }], guide: { x: 11, y: 18 }, puzzle };
 }
+
 
 /** Defensa (Rivera, lucha): an army training course; sandbags and dummies scattered over a long parade ground. */
 function defensaPlan(): GymPlan {
   const { g, rect, office, mat, out } = blank();
   office(); rect(1, 6, 26, 17, 'Y'); rect(10, 18, 17, 18, 'Y');
-  for (let y = 8; y <= 15; y += 3) for (let x = (y % 6 === 2 ? 3 : 6); x <= 24; x += 6) { g[y][x] = 'ϼ'; if (y % 2 === 0) g[y][x + 1] = 'ϼ'; }
+  // two guard posts cut the parade ground: sandbag walls with a boom barrier that rises when the guard loses
+  for (const y of [8, 12]) { rect(1, y, 26, y, 'ϼ'); rect(12, y, 15, y, 'Ԙ'); }
+  for (const [x, y] of [[4, 14], [8, 16], [20, 15], [23, 14], [5, 10], [22, 10], [8, 6], [19, 7], [3, 7]]) g[y][x] = 'ϼ';
   for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
   mat();
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 9, y: 10, dir: 'down' }, { x: 19, y: 12, dir: 'left' }], guide: { x: 4, y: 17 } };
+  const gate = (id, y, k) => ({ id, tiles: [12, 13, 14, 15].map((x) => [x, y] as [number, number]), closed: 'Ԙ', open: 'Y', beaten: [k] });
+  const puzzle: Puzzle = { gates: [gate('P1', 12, 0), gate('P2', 8, 1)], levers: [], goal: [13, 5], hint: ['Cada puesto tiene su barrera y su guardia. La barrera sube cuando el guardia pierde.'] };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 10, y: 14, dir: 'right' }, { x: 17, y: 10, dir: 'left' }], guide: { x: 4, y: 17 }, puzzle };
 }
+
 
 /** MGAP (Tacuarembó, planta): a greenhouse with six long planting beds and watering barrels at the corners. */
 function mgapPlan(): GymPlan {
@@ -183,8 +204,18 @@ function mgapPlan(): GymPlan {
   for (const [x, y] of [[1, 6], [26, 6], [1, 17], [26, 17], [9, 16], [18, 16]]) g[y][x] = 'ϼ';
   for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
   mat();
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 9, y: 10, dir: 'down' }, { x: 18, y: 11, dir: 'left' }], guide: { x: 4, y: 15 } };
+  // a dry vine wall closes the middle of the greenhouse; three irrigation taps (two in the south, one in the north) bring it back to life
+  const row = (y) => Array.from({ length: 26 }, (_, i) => [i + 1, y] as [number, number]);
+  const puzzle: Puzzle = {
+    gates: [{ id: 'V1', tiles: row(10), closed: 'ԗ', open: 'Y', allLevers: ['t1', 't2'] }, { id: 'V2', tiles: [12, 13, 14, 15].map((x) => [x, 5] as [number, number]), closed: 'ԗ', open: 'Y', allLevers: ['t3'] }],
+    levers: [{ id: 't1', x: 1, y: 15, flips: [] }, { id: 't2', x: 26, y: 15, flips: [] }, { id: 't3', x: 9, y: 7, flips: [] }],
+    goal: [13, 5],
+    use: ['Abriste la llave de riego. El agua corre por los canteros.', 'Cerraste la llave de riego.'],
+    hint: ['El invernadero está seco: las enredaderas cierran el paso y se marchitan con el riego. Las llaves de paso están lejos unas de otras.'],
+  };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 9, y: 11, dir: 'right' }, { x: 18, y: 14, dir: 'left' }], guide: { x: 4, y: 15 }, puzzle };
 }
+
 
 /** Lavalleja (Treinta y Tres, roca): a quarry cut by a river. One stone bridge joins the bank where you arrive with the far bank. */
 function lavallejaPlan(): GymPlan {
@@ -192,23 +223,34 @@ function lavallejaPlan(): GymPlan {
   rect(17, 1, 24, 4, 'Y'); rect(20, 1, 21, 4, 'A'); for (const [x, y] of [[17, 1], [24, 1], [17, 4], [24, 4]]) g[y][x] = 'N';
   g[0][20] = 'X'; g[0][21] = 'Z';
   rect(19, 5, 22, 5, 'Y');
-  rect(1, 6, 26, 17, 'Y'); rect(12, 6, 14, 17, 'ϸ'); rect(12, 12, 14, 13, 'Ϲ');
+  rect(1, 6, 26, 17, 'Y'); rect(12, 6, 14, 17, 'ϸ');                 // the river cuts the quarry in two
   rect(4, 18, 9, 18, 'Y'); g[19][6] = 'm'; g[19][7] = 'm';
-  for (const [x, y] of [[2, 7], [5, 9], [9, 8], [3, 14], [8, 15], [10, 11], [16, 8], [24, 7], [17, 15], [22, 12], [25, 16], [19, 9], [26, 11]]) g[y][x] = 'ϼ';
+  for (const [x, y] of [[2, 7], [3, 15], [8, 16], [16, 8], [24, 7], [17, 15], [22, 12], [25, 16], [19, 9], [26, 11]]) g[y][x] = 'ϼ';
   for (let x = 2; x < 26; x += 3) if (g[5][x] === 'x') g[5][x] = 'ϻ';
-  return { tiles: out(), leader: { x: 20, y: 2 }, trainers: [{ x: 9, y: 12, dir: 'right' }, { x: 20, y: 10, dir: 'left' }], guide: { x: 3, y: 17 } };
+  // granite blocks ('Ӿ') on the west bank: pushed into the river they fill a tile; three in a row make a crossing
+  // they travel along a lane (rows 9-10) walled in by boulders: row 10 lets the player walk beside them
+  rect(2, 8, 11, 8, 'ϼ'); rect(2, 11, 11, 11, 'ϼ');
+  for (const [x, y] of [[3, 9], [5, 9], [7, 9], [9, 9]]) g[y][x] = 'Ӿ';
+  const puzzle: Puzzle = { gates: [], levers: [], goal: [20, 5], hint: ['Los bloques de granito se empujan hacia el río y lo rellenan de a una casilla. El río es ancho: un solo bloque no alcanza.'] };
+  return { tiles: out(), leader: { x: 20, y: 2 }, trainers: [{ x: 9, y: 13, dir: 'right' }, { x: 20, y: 10, dir: 'left' }], guide: { x: 3, y: 17 }, puzzle };
 }
+
 
 /** Boiso (Florida, volador): an airfield hangar; engines and fuselages stand in two rows beside a marked runway. */
 function boisoPlan(): GymPlan {
   const { g, rect, office, mat, out } = blank();
   office(); rect(1, 6, 26, 17, 'Y'); rect(10, 18, 17, 18, 'Y');
   rect(12, 6, 15, 17, 'Ϲ');
-  for (const [x, y] of [[3, 8], [3, 13], [7, 10], [7, 15], [20, 10], [20, 15], [24, 8], [24, 13]]) { g[y][x] = 'ϼ'; g[y][x + 1] = 'ϼ'; g[y + 1][x] = 'ϼ'; g[y + 1][x + 1] = 'ϼ'; }
+  // three hangar walls cut the field; each is crossed on the runway through a spinning propeller
+  for (const y of [9, 12, 15]) { rect(1, y, 26, y, 'ϻ'); rect(12, y, 15, y, 'Ԗ'); }
+  for (const [x, y] of [[3, 7], [7, 10], [20, 10], [24, 7], [4, 13], [22, 13], [8, 16], [21, 16]]) { g[y][x] = 'ϼ'; g[y][x + 1] = 'ϼ'; }
   for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
   mat();
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 13, y: 12, dir: 'down' }, { x: 9, y: 7, dir: 'right' }], guide: { x: 22, y: 17 } };
+  const gate = (id, y, ph) => ({ id, tiles: [12, 13, 14, 15].map((x) => [x, y] as [number, number]), closed: 'Ԗ', open: 'Ϲ', closedPhases: [ph] });
+  const puzzle: Puzzle = { gates: [gate('H1', 15, 0), gate('H2', 12, 1), gate('H3', 9, 0)], levers: [], period: 6, phases: 2, goal: [13, 5], hint: ['Las hélices giran por turnos: cuando una frena, la otra arranca. Se cruza entre una y otra.'] };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 9, y: 10, dir: 'right' }, { x: 20, y: 13, dir: 'left' }], guide: { x: 22, y: 17 }, puzzle };
 }
+
 
 /** ANCAP (Durazno, fuego): a refinery. The floor is molten metal; the way through is a snaking steel walkway. */
 function ancapPlan(): GymPlan {
@@ -217,8 +259,18 @@ function ancapPlan(): GymPlan {
   for (const [a, b, c, d] of [[12, 16, 15, 17], [3, 16, 15, 17], [3, 12, 4, 17], [3, 12, 24, 13], [23, 8, 24, 13], [5, 8, 24, 9], [5, 6, 6, 9], [5, 6, 15, 7]]) rect(a, b, c, d, 'Ϲ');
   for (let x = 2; x < 26; x += 3) g[5][x] = 'ϻ';
   mat();
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 14, y: 13, dir: 'left' }, { x: 9, y: 8, dir: 'right' }], guide: { x: 4, y: 17 } };
+  // fire jets cross the walkway in three places; valves beside it close one jet and open another
+  const jet = (id, tiles, init) => ({ id, tiles: tiles as [number, number][], closed: 'ӿ', open: 'Ϲ', init: init as 'open' | 'closed' });
+  const puzzle: Puzzle = {
+    gates: [jet('G1', [[3, 14], [4, 14]], 'closed'), jet('G2', [[23, 10], [24, 10]], 'open'), jet('G3', [[5, 8], [6, 8]], 'closed')],
+    levers: [{ id: 'k1', x: 2, y: 16, flips: ['G1', 'G2'] }, { id: 'k2', x: 18, y: 14, flips: ['G2', 'G3'] }, { id: 'k3', x: 14, y: 10, flips: ['G1', 'G3'] }],
+    goal: [13, 5],
+    use: ['Giraste la válvula. Se oye correr gas por los caños.', 'Volviste la válvula a su lugar. Se oye correr gas por los caños.'],
+    hint: ['Cada válvula cierra un chorro y abre otro. Mirá antes de girarla: hay chorros que ya están abiertos.'],
+  };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 14, y: 13, dir: 'left' }, { x: 9, y: 8, dir: 'right' }], guide: { x: 4, y: 17 }, puzzle };
 }
+
 
 /** INAVI (Canelones, bicho): a vineyard hedge maze, different every gym but always solvable; trainers wait at junctions. */
 function inaviPlan(): GymPlan {
@@ -256,7 +308,18 @@ function inaviPlan(): GymPlan {
   for (const [x, y] of [[4, 2], [5, 3], [22, 2], [21, 3], [6, 1], [20, 1]]) g[y][x] = 'N';
   const spot = (n: number) => { const [i, j] = cell(route[Math.min(route.length - 1, Math.max(1, Math.floor((route.length * n))))]); return { x: ox + 3 * i, y: oy + 3 * j }; };
   const t1 = spot(0.35), t2 = spot(0.7);
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ ...t1, dir: 'down' }, { ...t2, dir: 'down' }], guide: { x: 13, y: 18 } };
+  // swarms plug some of the connectors along the route, taking turns: every 10 steps the closed ones open and the others close
+  const link = (k: number) => {
+    const [ci, cj] = cell(route[k + 1]), [pi, pj] = cell(route[k]);
+    return ci !== pi ? [0, 1].map((d) => [ox + 3 * Math.min(ci, pi) + 2, oy + 3 * cj + d] as [number, number]) : [0, 1].map((d) => [ox + 3 * ci + d, oy + 3 * Math.min(cj, pj) + 2] as [number, number]);
+  };
+  const swarmLinks = [1, 3, 5, 7].filter((k) => k + 1 < route.length - 1);
+  const puzzle: Puzzle = {
+    gates: swarmLinks.map((k, n) => ({ id: `S${n}`, tiles: link(k), closed: 'ԕ', open: 'Y', closedPhases: [n % 2] })),
+    levers: [], period: 10, phases: 2, goal: [ox + 9, 5],
+    hint: ['Los enjambres cambian de pasillo cada tanto: lo que está cerrado ahora se abre enseguida. Con paciencia se cruza.'],
+  };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ ...t1, dir: 'down' }, { ...t2, dir: 'down' }], guide: { x: 13, y: 18 }, puzzle };
 }
 
 /** UTE (Montevideo, eléctrico): the power station. A live transformer hub in the middle; the ring around it is the only way, with generators at the corners. */
@@ -268,7 +331,17 @@ function utePlan(): GymPlan {
   for (const [x, y] of [[1, 6], [26, 6], [1, 17], [26, 17], [6, 9], [6, 14], [21, 9], [21, 14]]) { g[y][x] = 'ϼ'; }
   for (let x = 2; x < 26; x += 2) g[5][x] = 'ϻ';
   mat();
-  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 24, y: 7, dir: 'down' }, { x: 3, y: 7, dir: 'down' }], guide: { x: 10, y: 17 } };
+  // the armoured door of the director's office opens only with the four lamps above it lit; four breakers switch the lamps in pairs
+  const lamp = (id, x) => ({ id, tiles: [[x, 5]] as [number, number][], closed: 'ԓ', open: 'Ԕ' });
+  const puzzle: Puzzle = {
+    gates: [lamp('L1', 9), lamp('L2', 10), lamp('L3', 17), lamp('L4', 18),
+      { id: 'D', tiles: [12, 13, 14, 15].map((x) => [x, 5] as [number, number]), closed: 'Ӽ', open: 'Y', allGates: ['L1', 'L2', 'L3', 'L4'] }],
+    levers: [{ id: 'b1', x: 2, y: 9, flips: ['L1', 'L2'] }, { id: 'b2', x: 25, y: 9, flips: ['L2', 'L3'] }, { id: 'b3', x: 2, y: 14, flips: ['L3', 'L4'] }, { id: 'b4', x: 25, y: 14, flips: ['L4', 'L1'] }],
+    goal: [13, 5],
+    use: ['Subiste la llave del tablero. Se oye un zumbido y algunas luces cambian.', 'Bajaste la llave del tablero. Se oye un zumbido y algunas luces cambian.'],
+    hint: ['La puerta blindada de la oficina se abre con las cuatro luces prendidas. Cada tablero cambia dos luces vecinas.'],
+  };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 24, y: 7, dir: 'down' }, { x: 3, y: 7, dir: 'down' }], guide: { x: 10, y: 17 }, puzzle };
 }
 
 const FLIP = { left: 'right', right: 'left', up: 'up', down: 'down' };
@@ -289,4 +362,13 @@ export function layoutGym(m, i, id = '') {
   if (leader) { leader.x = lead.x; leader.y = lead.y; if (lead.dir) leader.dir = lead.dir; }
   trainers.forEach((n, k) => { const s = plan.trainers[k % plan.trainers.length]; n.x = fx(s.x); n.y = s.y; n.dir = mirror ? FLIP[s.dir] : s.dir; });
   if (guide) { guide.x = fx(plan.guide.x); guide.y = plan.guide.y; }
+  // this gym's mechanism: the guide at the door tells what it is (never how to solve it), barriers wait for their guard
+  const pz = (plan as any).puzzle as Puzzle | undefined;
+  if (pz) {
+    const ids = trainers.map((n) => n.trainer.id);
+    m.puzzle = { ...pz, gates: pz.gates.map((g) => (g.beaten ? { ...g, beatenIds: g.beaten.map((k) => ids[k]).filter(Boolean) } : g)) };
+    applyPuzzle(m.tiles, m.puzzle, { on: new Set(), steps: 0, beaten: () => false });
+    if (guide && pz.hint) guide.text = [...(Array.isArray(guide.text) ? guide.text : [guide.text]), ...pz.hint];
+    else if (pz.hint) (m.npcs ??= []).push({ x: plan.guide.x, y: plan.guide.y, look: 'oldman', dir: 'down', text: pz.hint });
+  }
 }

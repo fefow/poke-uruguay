@@ -703,8 +703,8 @@ test('mini historias: cadenas de pasos con personas en mapas reales, ítems clav
       flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, sfx() {},
       give: async (k) => {
         assert.ok(ITEMS[k], `${s.id}: ítem ${k}`);
-        if (prizes.has(k)) { assert.ok(s.festival, `${s.id}: solo un festival premia con objetos comunes`); assert.notEqual(ITEMS[k].pocket, 'key'); assert.ok(!k.startsWith('mt_') && !ITEMS[k].held, `${s.id}: ${k} no es MT ni equipable`); return; }
-        assert.equal(ITEMS[k].pocket, 'key', `${s.id}: ${k} es ítem clave`); bag[k] = 1;
+        if (prizes.has(k)) { assert.ok(s.festival, `${s.id}: solo un festival premia con objetos comunes`); assert.ok(!['key', 'quest'].includes(ITEMS[k].pocket)); assert.ok(!k.startsWith('mt_') && !ITEMS[k].held, `${s.id}: ${k} no es MT ni equipable`); return; }
+        assert.ok(['key', 'quest'].includes(ITEMS[k].pocket), `${s.id}: ${k} es ítem clave`); if (!['soga', 'canoa', 'bici', 'guantes'].includes(k)) assert.equal(ITEMS[k].pocket, 'quest', `${s.id}: ${k} es un encargo y va a la pestaña Misión`); bag[k] = 1;
       },
       battle: async (t) => { assert.ok(t.team.length && t.team.every(([sp]) => SPECIES[sp]), `${s.id}: equipo de ${t.name}`); return 'win'; }, healParty() {},
       takeItem: (k) => { assert.ok(bag[k], `${s.id}: entrega ${k} sin tenerlo`); delete bag[k]; },
@@ -868,4 +868,98 @@ test('historia: Facu aparece antes de Rivera, Olivera es el recluta de las tres 
   const lab = Object.values(INTERIOR).find((m) => (m.npcs ?? []).some((n) => n.script === 'prof'));
   assert.ok(lab.npcs.some((n) => n.name === 'Almada' && n.cond({ obs_clear: true }) && !n.cond({})));
   assert.ok(lab.npcs.some((n) => n.script === 'rival_lab_post' && n.cond({ champion: true }) && !n.cond({})));
+});
+
+test('mochila: los objetos de encargo van a la pestaña Misión, quedan como ítem único y los que se entregan salen de la mochila', async () => {
+  const { ITEMS, isKeyItem } = await import('../src/data/items.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const quest = Object.keys(ITEMS).filter((k) => ITEMS[k].pocket === 'quest');
+  assert.ok(quest.length >= 15);
+  for (const k of ['uru_dex', 'mapa_uruguay', 'bici', 'canoa', 'machete', 'soga', 'guantes', 'farol', 'silbato', 'pluma_azul', 'medidor_niebla']) assert.equal(ITEMS[k].pocket, 'key', `${k} es una herramienta o recuerdo: se queda en Clave`);
+  for (const k of quest) { assert.ok(isKeyItem(k)); assert.equal(ITEMS[k].price, 0); }
+  // every errand object is handed over somewhere: some script or mini story takes it
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const src = readdirSync('src/data').filter((f) => f.endsWith('.ts')).map((f) => readFileSync(`src/data/${f}`, 'utf8')).join('\n');
+  for (const k of quest) assert.ok(new RegExp(`takeItem\\('${k}'|take: \\[[^\\]]*'${k}'|for \\(const k of \\[[^\\]]*'${k}'[^\\]]*\\]\\) if \\(api\\.hasItem\\(k\\)\\) api\\.takeItem`).test(src), `${k}: alguien lo recibe y desaparece de la mochila`);
+  assert.ok(SCRIPTS.ms_step);
+});
+
+test('gimnasio de Fray Bentos: Centro Toxicológico, todo de tipo Veneno (líder y entrenadores; el arte no cambia)', async () => {
+  const { LEADERS } = await import('../src/data/story.ts');
+  const { SPECIES } = await import('../src/data/species.ts');
+  const { MAPS, OUTDOOR } = await import('../src/data/maps.ts');
+  const L = LEADERS.anglo;
+  assert.match(L.cls, /Toxicol/);
+  assert.ok(L.team.every(([sp]) => SPECIES[sp].types.includes('veneno')), 'el equipo de Zoraida es de Veneno');
+  const gym = MAPS.gym_frb;
+  assert.match(gym.name, /Toxicol/);
+  const foes = (gym.npcs ?? []).filter((n) => n.trainer);
+  assert.ok(foes.length >= 2);
+  for (const n of foes) assert.ok(n.trainer.team.every(([sp]) => SPECIES[sp].types.includes('veneno')), `${n.trainer.name}: equipo de Veneno`);
+  assert.ok(!JSON.stringify([gym.name, gym.npcs]).match(/museo|Siniestro/i), 'el gimnasio no habla de museo ni de Siniestro');
+});
+
+test('Frigorífico Anglo: cuatro pisos, la cámara de frío se resuelve y no deja atrapado', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { iceReach, onExitPlatform, onStartPlatform, ICE_START, MIN_SLIDES } = await import('../src/data/ice-room.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
+  const solid = (m, x, y) => !m.tiles[y]?.[x] || TILE_INFO[m.tiles[y][x]]?.solid;
+  // pisos enlazados: depósito -> cámara -> oficinas -> jefa, y de vuelta
+  const hop = (a, b) => assert.ok((MAPS[a].warps ?? []).some((w) => w.to === b) || MAPS[a].exitTo?.map === b, `${a} -> ${b}`);
+  hop('anglo_1', 'anglo_2'); hop('anglo_2', 'anglo_3'); hop('anglo_3', 'anglo_4');
+  hop('anglo_2', 'anglo_1'); hop('anglo_3', 'anglo_2'); hop('anglo_4', 'anglo_3');
+  // hielo: con las personas y el objeto del piso como obstáculos, hay camino de ida y vuelta
+  const ice = MAPS.anglo_2;
+  const people = new Set([...(ice.npcs ?? []), ...(ice.items ?? [])].map((o) => `${o.x},${o.y}`));
+  const dist = iceReach(ice.tiles, people, ICE_START);
+  const goal = [...dist].filter(([k]) => onExitPlatform(...k.split(',').map(Number))).sort((a, b) => a[1] - b[1])[0];
+  assert.ok(goal && goal[1] >= MIN_SLIDES, 'la cámara pide varios deslizamientos');
+  const [gx, gy] = goal[0].split(',').map(Number);
+  assert.ok([...iceReach(ice.tiles, people, { x: gx, y: gy }).keys()].some((k) => onStartPlatform(...k.split(',').map(Number))), 'se puede volver a la entrada');
+  // cada piso: todo lo que hay en él se alcanza caminando desde donde se llega (el hielo cuenta como transitable salvo en la cámara, ya probada)
+  const arrive = { anglo_1: [11, 14], anglo_3: [2, 9], anglo_4: [20, 10] };
+  for (const [id, [sx, sy]] of Object.entries(arrive)) {
+    const m = MAPS[id];
+    const blockers = new Set((m.npcs ?? []).filter((n) => !n.arrive).map((n) => `${n.x},${n.y}`));
+    const seen = new Set([`${sx},${sy}`]); const q = [[sx, sy]];
+    while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = `${x + dx},${y + dy}`; if (!seen.has(k) && !solid(m, x + dx, y + dy)) { seen.add(k); q.push([x + dx, y + dy]); } } }
+    // alcanzable aunque las personas bloqueen: se mira que cada objeto, escalera y persona tenga una casilla vecina libre alcanzada
+    const near = (x, y) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen.has(`${x + dx},${y + dy}`) || seen.has(`${x},${y}`));
+    for (const o of [...(m.items ?? []), ...(m.npcs ?? []).filter((n) => !n.arrive)]) assert.ok(near(o.x, o.y), `${id}: ${o.id ?? o.look} en ${o.x},${o.y} es inalcanzable`);
+    for (const w of m.warps ?? []) assert.ok(near(w.x, w.y), `${id}: escalera en ${w.x},${w.y} inalcanzable`);
+    void blockers;
+  }
+});
+
+test('gimnasios: cada uno tiene su mecanismo, se resuelve de punta a punta y no deja atrapado', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
+  const { solveLevers, solvePushes } = await import('../src/data/gym-puzzles.ts');
+  const solid = (c) => !!TILE_INFO[c]?.solid;
+  const gyms = Object.entries(MAPS).filter(([, m]) => m.puzzle);
+  assert.equal(gyms.length, 9, 'OSE, UTE, Quiroga, ANCAP, INAVI, Defensa, MGAP, Lavalleja y Boiso');
+  for (const [id, m] of gyms) {
+    const pz = m.puzzle;
+    const last = m.tiles.length - 1;
+    const sim = { tiles: m.tiles, blocked: new Set((m.npcs ?? []).filter((n) => !n.arrive).map((n) => `${n.x},${n.y}`)), solid, puzzle: pz, start: [m.tiles[last].indexOf('m'), last - 1] };
+    const guide = (m.npcs ?? []).find((n) => !n.trainer && n.script !== 'leader');
+    assert.ok(pz.hint?.every((h) => (Array.isArray(guide.text) ? guide.text : [guide.text]).includes(h)), `${id}: el guía cuenta de qué se trata`);
+    if (m.tiles.join('').match(/[ӽӾ]/)) {
+      const r = solvePushes(sim);
+      assert.ok(r.solved && r.pushes >= 6, `${id}: se resuelve empujando (${r.pushes} empujes)`);
+      continue;
+    }
+    const r = solveLevers(sim);
+    if (pz.gates.some((g) => g.beatenIds)) {
+      assert.ok(!r.solved, `${id}: las barreras cierran el paso hasta vencer al guardia`);
+      assert.ok(solveLevers({ ...sim, beatenAll: true }).solved, `${id}: con los guardias vencidos se llega al líder`);
+      continue;
+    }
+    assert.ok(r.solved && !r.softLock, `${id}: se llega al líder y ningún estado deja encerrado`);
+    assert.ok(r.steps >= 20, `${id}: el recorrido no es trivial (${r.steps} pasos)`);
+    if (!pz.period) {
+      const dead = solveLevers({ ...sim, puzzle: { ...pz, levers: pz.levers.map((l) => ({ ...l, x: -9, y: -9 })) } });
+      assert.ok(!dead.solved, `${id}: sin accionar nada el paso sigue cerrado`);
+    }
+  }
 });

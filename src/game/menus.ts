@@ -7,7 +7,7 @@ import { isTouch } from '../core/touchpad.ts';
 import { sfx, setVolumes, cry } from '../core/audio.ts';
 import { SPECIES, DEX_ORDER } from '../data/species.ts';
 import { MOVES } from '../data/moves.ts';
-import { ITEMS } from '../data/items.ts';
+import { ITEMS, isKeyItem } from '../data/items.ts';
 import { TYPES } from '../data/types.ts';
 import { creatureIcon, silhouette } from '../gfx/creatures.ts';
 import { panel, say, choose, ask, closeDialog, toast, fmt } from './ui.ts';
@@ -282,7 +282,7 @@ export function openSummary(index) {
 }
 
 // ---------------------------------------------------------------- BAG
-const POCKETS = [['items', 'Objetos'], ['tm', 'MT'], ['held', 'Equipables'], ['balls', 'Pokeballs'], ['key', 'Clave']];
+const POCKETS = [['items', 'Objetos'], ['tm', 'MT'], ['held', 'Equipables'], ['balls', 'Pokeballs'], ['key', 'Clave'], ['quest', 'Misión']];
 
 function itemUsable(key, c) {
   const it = ITEMS[key];
@@ -316,8 +316,8 @@ export function openBag({ mode = 'field', wild = false } = {}) {
         return tab;
       }));
       keys = Object.keys(S.bag).filter((k) => ITEMS[k]?.pocket === POCKETS[pocket][0]);
-      const rows = keys.map((k) => h('li', {}, h('span', { class: 'item-name' }, h('img', { class: 'item-icon', src: itemIcon(k), alt: '' }), ITEMS[k].name), h('b', { text: ITEMS[k].pocket === 'key' ? '' : `×${S.bag[k]}` })));
-      if (!rows.length) desc.textContent = 'No hay nada en este bolsillo.';
+      const rows = keys.map((k) => h('li', {}, h('span', { class: 'item-name' }, h('img', { class: 'item-icon', src: itemIcon(k), alt: '' }), ITEMS[k].name), h('b', { text: isKeyItem(k) ? '' : `×${S.bag[k]}` })));
+      if (!rows.length) desc.textContent = POCKETS[pocket][0] === 'quest' ? 'No tenés encargos en curso. Lo que te den para entregar aparece acá, y se va cuando lo entregás.' : 'No hay nada en este bolsillo.';
       list.replaceChildren(...rows);
       nav = listNav(rows, {
         start,
@@ -339,7 +339,7 @@ export function openBag({ mode = 'field', wild = false } = {}) {
       if (!key) return;
       const it = ITEMS[key];
       if (mode === 'battle') {
-        if (it.pocket === 'key') return say('¡No es momento de usar eso!');
+        if (isKeyItem(key)) return say('¡No es momento de usar eso!');
         if (it.ball) {
           if (S.party.length >= PARTY_MAX && S.box.length >= 500) return say('¡No hay lugar para más criaturas!');
           return close({ item: key });
@@ -366,7 +366,7 @@ export function openBag({ mode = 'field', wild = false } = {}) {
       }
       const r = await choose(['Usar', 'Tirar', 'Cancelar'], { cls: 'menu-sub' });
       if (r === 1) {
-        if (it.pocket === 'key') return say('¡Eso es muy importante para tirarlo!');
+        if (isKeyItem(key)) return say(it.pocket === 'quest' ? 'Es un encargo: hay que entregarlo, no tirarlo.' : '¡Eso es muy importante para tirarlo!');
         if (await ask(`¿Tirar 1 ${it.name}?`)) { removeItem(key, 1); render(Math.min(i, keys.length - 1)); }
         return;
       }
@@ -406,7 +406,7 @@ async function useInField(key) {
     const { toggleBike } = await import('./world.ts');
     return say(toggleBike());
   }
-  if (it.pocket === 'key') return say(it.desc);
+  if (isKeyItem(key)) return say(it.desc);
   if (it.held) return equipHeld(key);
   if (it.ball) return say('¡Las Pokeballs se usan en combate!');
   if (it.repel) {
@@ -1025,7 +1025,7 @@ async function buyFlow(stock) {
 async function sellFlow() {
   const S = state();
   while (true) {
-    const keys = Object.keys(S.bag).filter((k) => ITEMS[k].price > 0 && ITEMS[k].pocket !== 'key');
+    const keys = Object.keys(S.bag).filter((k) => ITEMS[k].price > 0 && !isKeyItem(k));
     if (!keys.length) return say('No tenés nada para vender.', { name: 'Almacenero' });
     const i = await choose(keys.map((k) => ({ label: `${ITEMS[k].name} ×${S.bag[k]}`, icon: itemIcon(k), hint: `$${ITEMS[k].price / 2}` })), { cls: 'menu-shop', title: 'Vender' });
     if (i < 0) return;

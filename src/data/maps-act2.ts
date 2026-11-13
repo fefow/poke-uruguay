@@ -3,7 +3,7 @@
 import type { MapDef } from '../types.ts';
 import { TR, room, HOUSE, GYM, poli, shop, casaNpc } from './map-kit.ts';
 import { city, route, wildList, fishList, teamOf, fitToMap } from './map-gen.ts';
-import { spinMaze } from './spin-maze.ts';
+import { iceRoom, ICE_START, ICE_STAIRS } from './ice-room.ts';
 import { parkTiles, PARK, CONTEST_CITY } from './events.ts';
 import { mapBand } from './route.ts';
 
@@ -374,7 +374,7 @@ export const ACT2_OUTDOOR: Record<string, MapDef> = {
     fish: fishList(49, 51, 8),
     npcs: [
       wander(10, 9, 'oldman', ['El Anglo tuvo su época de oro. Después quedó vacío.', 'Hace unas semanas volvieron a prender las luces.']),
-      npc(21, 9, 'girl', ['El gimnasio de acá es de tipo Siniestro. Zoraida trabaja de noche.', 'Dicen que en el frigorífico se mueve gente de gris. Con cuidado.'], { dir: 'down' }),
+      npc(21, 9, 'girl', ['El gimnasio de acá es de tipo Veneno. Zoraida dirige el Centro Toxicológico y atiende llamadas a cualquier hora.', 'Dicen que en el frigorífico se mueve gente de gris. Con cuidado.'], { dir: 'down' }),
       grunt({ x: 13, y: 11, dir: 'right' }, 'frb_g1', [50, 51], 'Acá nadie entra a la planta.', 'Increíble.', 'La entrada es la puerta grande del frigorífico.', { cond: (f) => !f.anglo_pp }),
       { x: 5, y: 3, look: 'grunt', dir: 'down', text: ['El frigorífico es propiedad privada.'], cond: (f) => !f.anglo_pp },
     ],
@@ -505,6 +505,49 @@ const FERRY: Record<string, any> = {
 };
 for (const m of Object.values(FERRY)) m.theme = 'barco';
 
+// Frigorífico Anglo, planos de los pisos. Y piso, x muro, N estante, ӹ escritorio, Ӹ máquina de niebla, A alfombra, Ӻ escalera, ӻ puerta de la cámara.
+const grid = (w: number, h: number, c = 'x') => Array.from({ length: h }, () => Array(w).fill(c));
+const fill = (g: string[][], x1: number, y1: number, x2: number, y2: number, c: string) => { for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) g[y][x] = c; };
+/** Planta baja: un depósito en serpentina de estantes. La puerta de la cámara de frío está arriba. */
+function depositoTiles() {
+  const g = grid(24, 16);
+  fill(g, 1, 1, 22, 14, 'Y');
+  fill(g, 3, 12, 22, 13, 'N');  // estantes: se pasa por la izquierda
+  fill(g, 1, 8, 20, 9, 'N');    // se pasa por la derecha
+  fill(g, 3, 4, 22, 5, 'N');    // se pasa por la izquierda
+  for (const [x, y] of [[8, 12], [14, 8], [10, 4], [18, 12]]) g[y][x] = 'ϻ';
+  g[0][11] = 'ӻ'; g[15][11] = 'm'; g[15][12] = 'm';
+  return g.map((r) => r.join(''));
+}
+/** Primer piso: pasillo central con despachos arriba y abajo; escalera a la cámara (felpudo, abajo a la izquierda) y a la oficina de la jefa (arriba a la derecha). */
+const OFICINAS = (() => {
+  const g = grid(24, 12);
+  for (const [x1, x2] of [[1, 5], [7, 11], [13, 17], [19, 22]]) fill(g, x1, 1, x2, 3, 'Y');
+  fill(g, 1, 5, 22, 6, 'Y');
+  for (const [x1, x2] of [[1, 4], [6, 11], [13, 18], [20, 22]]) fill(g, x1, 8, x2, 10, 'Y');
+  for (const x of [3, 9, 15, 20]) g[4][x] = 'Y';
+  for (const x of [2, 8, 15, 21]) g[7][x] = 'Y';
+  for (const [x, y] of [[1, 1], [1, 2], [7, 1], [11, 1], [13, 1], [17, 1], [19, 1], [22, 1], [6, 8], [11, 9], [13, 8], [18, 8], [20, 8]]) g[y][x] = 'N';
+  for (const [x, y] of [[2, 1], [3, 1], [8, 1], [9, 1], [14, 1], [4, 9], [8, 9], [16, 8], [21, 10]]) g[y][x] = 'ӹ';
+  fill(g, 2, 9, 3, 10, 'Y');
+  g[11][2] = 'm'; g[11][3] = 'm'; g[0][21] = 'Ӻ';
+  return g.map((r) => r.join(''));
+})();
+/** Último piso: la sala de máquinas (derecha, donde se llega) y, pasando la puerta, la oficina de la jefa (izquierda). */
+const JEFE = (() => {
+  const g = grid(24, 12);
+  fill(g, 12, 1, 22, 10, 'Y');
+  fill(g, 1, 1, 10, 10, 'A');
+  for (const y of [5, 6]) g[y][11] = 'Y';
+  for (let x = 12; x <= 22; x++) g[1][x] = 'Ӹ';
+  for (const [x, y] of [[13, 3], [15, 3], [19, 3], [21, 3], [13, 8], [14, 8], [21, 8], [22, 8], [16, 7], [18, 6]]) g[y][x] = 'Ӹ';
+  for (let x = 3; x <= 7; x++) g[1][x] = 'ӹ';
+  for (const [x, y] of [[1, 1], [10, 1], [1, 10], [10, 10]]) g[y][x] = 'N';
+  g[11][20] = 'm'; g[11][21] = 'm';
+  return g.map((r) => r.join(''));
+})();
+
+
 // dungeon floors (shared 12-wide plans)
 const FLOOR_UP = [
   'xxxxXxxxxXxx',
@@ -586,10 +629,10 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     tr({ x: 3, y: 9 }, 'girl', 'g7_b', 'Noelia', 'Vidente', ['psiquico', 'volador'], [44, 44], ['Sé qué vas a elegir antes que vos.', 'Me equivoqué.', 'Quiroga usa tipo Psíquico.'], { dir: 'right' }),
     npc(6, 10, 'oldman', ['Gimnasio de Salto. El líder usa criaturas de tipo Psíquico.', 'Las de tipo Siniestro y Bicho tienen ventaja.'], { dir: 'down' }),
   ]),
-  gym_frb: gym('Museo del Anglo (Fray Bentos)', 'gym_siniestro', 'leader_dark', 'anglo', [
-    tr({ x: 8, y: 6 }, 'boy', 'g8_a', 'Dante', 'Sereno', ['siniestro'], [46, 46], ['La noche es mi territorio. Para entrar al museo, siempre la amarilla; después, la roja.', 'Salí de la sombra.', 'Zoraida cierra el camino a la Liga.'], { dir: 'left' }),
-    tr({ x: 3, y: 9 }, 'girl', 'g8_b', 'Alma', 'Sombra', ['siniestro', 'veneno'], [46, 47], ['No me vas a ver venir. Dos azules seguidas y te pierdo el rastro.', 'Me ganaste.', 'La Liga está en Montevideo, en el Centenario.'], { dir: 'right' }),
-    npc(6, 10, 'oldman', ['Gimnasio de Fray Bentos. La líder usa criaturas de tipo Siniestro.', 'Acá no hay puertas hacia la oficina: las cajas te llevan, o te devuelven al principio.', 'Dicen que el recorrido termina con amarilla y roja. Ojo con los guardias.'], { dir: 'down' }),
+  gym_frb: gym('Centro Toxicológico (Fray Bentos)', 'gym_siniestro', 'leader_dark', 'anglo', [
+    tr({ x: 8, y: 6 }, 'boy', 'g8_a', 'Dante', 'Laboratorista', ['veneno'], [46, 46], ['Acá se estudia lo que envenena y lo que cura. Para pasar de sala, siempre la amarilla; después, la roja.', 'Me contaminaste el turno.', 'Zoraida cierra el camino a la Liga.'], { dir: 'left', team: [['yararita', 46], ['sapo', 46]] }),
+    tr({ x: 3, y: 9 }, 'girl', 'g8_b', 'Alma', 'Toxicóloga', ['veneno'], [46, 47], ['Un descuido y el efecto no se frena. Dos azules seguidas y te perdés en las salas.', 'Mi antídoto no alcanzó.', 'La Liga está en Montevideo, en el Centenario.'], { dir: 'right', team: [['viuda', 46], ['ciempies', 47]] }),
+    npc(6, 10, 'oldman', ['Gimnasio de Fray Bentos. La líder usa criaturas de tipo Veneno.', 'Las de tipo Psíquico y Tierra tienen ventaja.', 'Acá no hay puertas hacia la oficina: las cajas te llevan, o te devuelven al principio.', 'Dicen que el recorrido termina con amarilla y roja. Ojo con los guardias.'], { dir: 'down' }),
   ]),
 
   // --- Policlínicas, almacenes y casas
@@ -761,27 +804,55 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
     npcs: [{ x: 5, y: 2, look: 'garua', dir: 'down', id: 'garua2', cond: (f) => !f.represa_clear, script: 'garua2' }],
   }),
 
-  // --- Frigorífico Anglo (Fray Bentos): one big spinner maze (see spin-maze.ts); Bruma waits in the office at the end
-  anglo_1: (() => {
-    const mz = spinMaze();
-    const al = mz.alcoves;
-    const at = (k, extra: any = {}) => ({ x: al[k].x, y: al[k].y, dir: al[k].face, ...extra });
-    const gr = (k, id, lv, a, b, c, sight = 1) => grunt({ x: al[k].x, y: al[k].y }, id, lv, a, b, c, { dir: al[k].face, sight });
-    return room(mz.tiles, {
-      name: 'Frigorífico Anglo', music: 'cave', theme: 'frigorifico',
+  // --- Frigorífico Anglo (Fray Bentos), cuatro pisos: depósito, cámara de frío (hielo que desliza), oficinas y, arriba,
+  // la oficina de Bruma junto a la sala de máquinas de niebla. Bruma espera al final.
+  anglo_1: room(depositoTiles(), {
+    name: 'Frigorífico Anglo: depósito', music: 'cave', theme: 'frigorifico',
+    warps: [{ x: 11, y: 0, to: 'anglo_2', tx: ICE_START.x, ty: ICE_START.y }],
+    npcs: [
+      grunt({ x: 5, y: 14 }, 'an_g1', [48, 48], 'Este frigorífico es del Equipo PP.', 'No pasa nada.', 'La cámara de frío está al fondo del depósito, arriba.', { dir: 'right', sight: 4 }),
+      grunt({ x: 12, y: 10 }, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'Subí por el pasillo de la izquierda.', { dir: 'left', sight: 4 }),
+      grunt({ x: 9, y: 6 }, 'an_g3', [48, 49], 'Alto. Esto es mercadería del jefe.', 'Pasá.', 'En la cámara el piso es puro hielo. Una vez que arrancás, no frenás.', { dir: 'right', sight: 4 }),
+      grunt({ x: 14, y: 1 }, 'an_g4', [49, 50], 'La cámara de frío es privada.', 'Me ganaste.', 'Empujá la puerta aislada y fijate dónde apoyás los pies.', { dir: 'left', sight: 3 }),
+    ],
+    items: [{ x: 22, y: 10, item: 'pan_casero', id: 'an_item1' }, { x: 22, y: 2, item: 'alfajor_triple', id: 'an_item2' }],
+  }),
+  anglo_2: (() => {
+    const ic = iceRoom();
+    return room(ic.tiles, {
+      name: 'Frigorífico Anglo: cámara de frío', music: 'cave', theme: 'frigorifico',
+      exitTo: { map: 'anglo_1', x: 11, y: 1 },
+      warps: [{ x: ICE_STAIRS.x, y: ICE_STAIRS.y, to: 'anglo_3', tx: 2, ty: 9 }],
       npcs: [
-        gr(0, 'an_g1', [48, 48], 'Este frigorífico es del Equipo PP.', 'No pasa nada.', 'Las flechas te llevan solas. Fijate bien adónde apuntan.'),
-        gr(1, 'an_g2', [48, 49], 'No pasás.', 'Qué mala suerte.', 'Si una cinta te devuelve al principio, probá otra.'),
-        gr(2, 'an_g3', [48, 49], 'Alto.', 'Pasá.', 'Hay cintas que solo van en un sentido.'),
-        gr(3, 'an_g4', [49, 50], 'Las cámaras frías son privadas.', 'Me ganaste.', 'El jefe de verdad está arriba, en las oficinas.'),
-        gr(4, 'an_g5', [49, 50], 'Un paso más y listo.', 'Pasá.', 'No lo vas a detener.'),
-        { x: 16, y: 3, look: 'obrero', dir: 'left', script: 'obrero_anglo', cond: (f) => !f.ferry_done },
-        { x: 13, y: 2, look: 'bruma', dir: 'down', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' },
-        { x: 14, y: 3, look: 'prof', dir: 'down', id: 'tabarez_anglo', arrive: true },
+        grunt({ x: 12, y: 14 }, 'an_g5', [49, 50], 'Nadie cruza la cámara sin patinar. Probá.', 'Qué frío.', 'El hielo no perdona: pensá dónde te vas a frenar.', { dir: 'left', sight: 3 }),
+        grunt({ x: 12, y: 1 }, 'an_g6', [49, 50], 'Llegaste patinando, ¿eh?', 'Se me congeló la estrategia.', 'Las oficinas están arriba. Si te caés para atrás, volvé a intentarlo.', { dir: 'down', sight: 3 }),
       ],
-      items: [{ x: al[5].x, y: al[5].y, item: 'pan_casero', id: 'an_item1' }, { x: al[6].x, y: al[6].y, item: 'alfajor_triple', id: 'an_item2' }, { x: al[8].x, y: al[8].y, item: 'credencial_anglo', id: 'an_cred' }],
+      items: [{ x: 7, y: 1, item: 'credencial_anglo', id: 'an_cred' }],
     });
   })(),
+  anglo_3: room(OFICINAS, {
+    name: 'Frigorífico Anglo: oficinas', music: 'cave', theme: 'frigorifico',
+    exitTo: { map: 'anglo_2', x: 9, y: 1 },
+    warps: [{ x: 21, y: 0, to: 'anglo_4', tx: 20, ty: 10 }],
+    npcs: [
+      grunt({ x: 9, y: 5 }, 'an_g7', [49, 50], 'Las oficinas son del Equipo PP.', 'No puede ser.', 'La jefa está en el último piso.', { dir: 'left', sight: 4 }),
+      grunt({ x: 15, y: 2 }, 'an_g8', [49, 50], 'Un paso más y llamo a seguridad.', 'Llamé tarde.', 'La escalera al último piso está al fondo a la derecha.', { dir: 'down', sight: 3 }),
+      tr({ x: 16, y: 9, dir: 'up' }, 'clerk', 'an_t1', 'Contador Ferrán', 'Contador PP', ['veneno', 'siniestro'], [49, 50], ['Cada planilla de la banda pasa por mi escritorio.', 'Me quedé sin balance.', 'Hay un operario encerrado en la tercera oficina. Ni el PP lo deja salir.'], { sight: 3 }),
+      grunt({ x: 20, y: 2 }, 'an_g9', [50, 50], 'La escalera es solo para personal.', 'Pasá.', 'Arriba están las máquinas de niebla.', { dir: 'down', sight: 2 }),
+      { x: 8, y: 2, look: 'obrero', dir: 'down', script: 'obrero_anglo', cond: (f) => !f.ferry_done },
+    ],
+    items: [{ x: 21, y: 9, item: 'ultraesfera', id: 'an_item3' }],
+  }),
+  anglo_4: room(JEFE, {
+    name: 'Frigorífico Anglo: sala de máquinas y oficina de la jefa', music: 'cave', theme: 'frigorifico',
+    exitTo: { map: 'anglo_3', x: 21, y: 1 },
+    triggers: [{ x: 1, y: 3, w: 8, h: 6, script: 'bruma_anglo', cond: (f) => !f.anglo_pp }],
+    npcs: [
+      tr({ x: 17, y: 5, dir: 'left' }, 'clerk', 'an_t2', 'Técnico Olmos', 'Técnico PP', ['veneno', 'acero'], [50, 51], ['Estas máquinas están prendidas día y noche.', 'Se me apagó el turno.', 'La niebla de toda Fray Bentos sale de acá. Al fondo está la oficina de la jefa.'], { sight: 3 }),
+      { x: 3, y: 5, look: 'bruma', dir: 'right', id: 'bruma_anglo', cond: (f) => !f.anglo_pp, script: 'bruma_anglo' },
+      { x: 4, y: 9, look: 'prof', dir: 'up', id: 'tabarez_anglo', arrive: true },
+    ],
+  }),
 
   // --- Liga: Alto Mando en cuatro salas, luego el Campeón
   liga_1: room([

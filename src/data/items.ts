@@ -2,7 +2,8 @@ import { deepFreeze } from '../core/util.ts';
 import type { Item } from '../types.ts';
 import { MOVES } from './moves.ts';
 
-// pocket: 'items' | 'balls' | 'key'
+// pocket: 'items' | 'tm' | 'held' | 'balls' | 'key' (tools and story objects the player keeps) | 'quest' (errand objects: they
+// show in the Misión tab from the moment they are received and leave the bag when they are handed over)
 // use: what the item does; validated in game/items logic, never trusted from saves.
 const BASE_ITEMS = {
   ficha: { name: 'Ficha de Casino', pocket: 'items', price: 0, desc: 'Se compran en el Casino Peninsula de Maldonado y se juegan en las tragamonedas. Se cambian por premios, no por dinero.' },
@@ -51,11 +52,11 @@ const BASE_ITEMS = {
   repelente_max: { name: 'Repelente Máximo', pocket: 'items', price: 700, repel: 250, desc: 'Evita criaturas salvajes débiles por 250 pasos.' },
   repelente: { name: 'Repelente', pocket: 'items', price: 350, repel: 100, desc: 'Evita criaturas salvajes débiles por 100 pasos.' },
 
-  carta_tabarez: { name: 'Carta de Tabárez', pocket: 'key', price: 0, desc: 'Una carta cerrada que el almacenero de Colonia del Sacramento guardaba para el Maestro Tabárez.' },
+  carta_tabarez: { name: 'Carta de Tabárez', pocket: 'quest', price: 0, desc: 'Una carta cerrada que el almacenero de Colonia del Sacramento guardaba para el Maestro Tabárez.' },
   huevo: { name: 'Huevo', pocket: 'key', price: 0, desc: 'Un huevo que un estanciero de Palmitas le mandó al Maestro Tabárez. Nace solo, después de viajar un buen tiempo con él.' },
   uru_dex: { name: 'PokeDex', pocket: 'key', price: 0, desc: 'Registra las criaturas que viste y atrapaste.' },
   pluma_azul: { name: 'Pluma Azul', pocket: 'key', price: 0, desc: 'Una pluma que soltó el Cardenal Azul en la Quebrada de los Cuervos. Chispea con el viento del sur.' },
-  lampara: { name: 'Lámpara del Faro', pocket: 'key', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
+  lampara: { name: 'Lámpara del Faro', pocket: 'quest', price: 0, desc: 'La lámpara del faro de Cabo Polonio. Hay que devolverla.' },
   mapa_uruguay: { name: 'Mapa de Uruguay', pocket: 'key', price: 0, desc: 'Muestra el país entero y marca los lugares que ya visitaste y dónde estás ahora.' },
   cana_pescar: { name: 'Caña Vieja', pocket: 'key', price: 0, rod: 1, desc: 'Una caña simple. Parada frente al agua, apretá A: solo pican las criaturas más comunes y chicas.' },
   cana_buena: { name: 'Caña Buena', pocket: 'key', price: 0, rod: 2, desc: 'Más firme y con mejor carnada. Atrae criaturas acuáticas de mayor nivel.' },
@@ -66,26 +67,26 @@ const BASE_ITEMS = {
   soga: { name: 'Soga de Escalador', pocket: 'key', price: 0, desc: 'Trepar: parate frente a una cascada de la cueva y caminá contra ella para subir por la soga. Para bajar, caminá hacia abajo desde la cornisa.' },
   farol: { name: 'Farol de Gaucho', pocket: 'key', price: 0, desc: 'Destello: ilumina las cuevas oscuras. Se usa desde el menú. Hace falta la Medalla Maldonado.' },
   bici: { name: 'Bicicleta', pocket: 'key', price: 0, bike: true, desc: 'Cuatro veces más rápida que caminar, pero solo para moverse: no cambia nada en los combates. Se usa desde el menú. No se puede usar bajo techo.' },
-  ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'key', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Fray Bentos.' },
-  credencial_anglo: { name: 'Credencial de operario', pocket: 'key', price: 0, desc: 'Credencial del Frigorífico Anglo a nombre de un operario. Alguien la perdió adentro.' },
-  llave_c2: { name: 'Llave del camarote 2', pocket: 'key', price: 0, desc: 'Llave de bronce con una chapita: "Camarote 2". Del Buquebus China Zorrilla.' },
-  llave_bodega: { name: 'Llave de la bodega', pocket: 'key', price: 0, desc: 'Llave grande y oxidada. Abre la bodega del Buquebus China Zorrilla.' },
-  llave_cubierta: { name: 'Llave de la cubierta', pocket: 'key', price: 0, desc: 'Llave de la puerta a la cubierta superior del Buquebus China Zorrilla.' },
+  ticket_ferry: { name: 'Ticket del Buquebus', pocket: 'quest', price: 0, desc: 'Pasaje para subir al Buquebus China Zorrilla, atracado en la terminal de Fray Bentos.' },
+  credencial_anglo: { name: 'Credencial de operario', pocket: 'quest', price: 0, desc: 'Credencial del Frigorífico Anglo a nombre de un operario. Alguien la perdió adentro.' },
+  llave_c2: { name: 'Llave del camarote 2', pocket: 'quest', price: 0, desc: 'Llave de bronce con una chapita: "Camarote 2". Del Buquebus China Zorrilla.' },
+  llave_bodega: { name: 'Llave de la bodega', pocket: 'quest', price: 0, desc: 'Llave grande y oxidada. Abre la bodega del Buquebus China Zorrilla.' },
+  llave_cubierta: { name: 'Llave de la cubierta', pocket: 'quest', price: 0, desc: 'Llave de la puerta a la cubierta superior del Buquebus China Zorrilla.' },
   medidor_niebla: { name: 'Medidor de Niebla', pocket: 'key', price: 0, desc: 'Aparato del laboratorio del Maestro Tabárez. Mide cuánta niebla del Equipo PP queda en el aire de Uruguay.' },
   silbato: { name: 'Silbato del Hornero', pocket: 'key', price: 0, desc: 'Vuelo: un hornero te lleva en vuelo a cualquier ciudad que ya visitaste. Hace falta la Medalla Florida. Se usa desde el menú.' },
   boleto: { name: 'Entrada al Centenario', pocket: 'key', price: 0, desc: 'Permite entrar a la Liga en el Estadio Centenario.' },
   // Mini stories: things carried from one person to another along the way
-  soga_mojada: { name: 'Soga mojada', pocket: 'key', price: 0, desc: 'Una soga de escalador de colores, mojada y con olor a río. Su dueño la perdió en la Cueva de Palmitas.' },
-  cabos: { name: 'Cabos de amarre', pocket: 'key', price: 0, desc: 'Unos rollos de cabo nuevo del depósito del almacén de Mercedes, para amarrar un bote.' },
-  cuaderno_quiroga: { name: 'Cuaderno empapado', pocket: 'key', price: 0, desc: 'Un cuaderno lleno de letra apretada, con "H. Q." en la tapa. Se lo llevó el viento en la Ruta 3.' },
-  brea: { name: 'Tarro de brea', pocket: 'key', price: 0, desc: 'Brea caliente de un carpintero de ribera de Tranqueras. Sirve para tapar un casco rajado.' },
-  remos: { name: 'Remos', pocket: 'key', price: 0, desc: 'Un par de remos con iniciales talladas en el mango. Los trajo la corriente hasta Belén.' },
-  correa: { name: 'Correa de motor', pocket: 'key', price: 0, desc: 'Una correa nueva del taller de la frontera, en Rivera. Es la medida de un camión.' },
-  yerba_fiesta: { name: 'Bolsa de yerba', pocket: 'key', price: 0, desc: 'La yerba de la Fiesta del Mate, secada con leña de monte en Rosario. La esperan en San José.' },
-  calabaza_fiesta: { name: 'Mate grande', pocket: 'key', price: 0, desc: 'El mate de calabaza de la Fiesta del Mate, curado por un artesano de Ecilda Paullier. Va para la rueda de San José.' },
-  traje_carnaval: { name: 'Traje de portabandera', pocket: 'key', price: 0, desc: 'Un traje de carnaval con amatistas cosidas en el tocado. Lo espera una escuela de samba de Artigas.' },
-  surdo: { name: 'Surdo', pocket: 'key', price: 0, desc: 'El tambor más grave de la batería de una escuela de samba de Artigas. Quedó en la costa de Belén después de un ensayo.' },
-  cabestro: { name: 'Cabestro', pocket: 'key', price: 0, desc: 'El cabestro del potro moro del domador de Tacuarembó. Sin él no se deja tocar por nadie.' },
+  soga_mojada: { name: 'Soga mojada', pocket: 'quest', price: 0, desc: 'Una soga de escalador de colores, mojada y con olor a río. Su dueño la perdió en la Cueva de Palmitas.' },
+  cabos: { name: 'Cabos de amarre', pocket: 'quest', price: 0, desc: 'Unos rollos de cabo nuevo del depósito del almacén de Mercedes, para amarrar un bote.' },
+  cuaderno_quiroga: { name: 'Cuaderno empapado', pocket: 'quest', price: 0, desc: 'Un cuaderno lleno de letra apretada, con "H. Q." en la tapa. Se lo llevó el viento en la Ruta 3.' },
+  brea: { name: 'Tarro de brea', pocket: 'quest', price: 0, desc: 'Brea caliente de un carpintero de ribera de Tranqueras. Sirve para tapar un casco rajado.' },
+  remos: { name: 'Remos', pocket: 'quest', price: 0, desc: 'Un par de remos con iniciales talladas en el mango. Los trajo la corriente hasta Belén.' },
+  correa: { name: 'Correa de motor', pocket: 'quest', price: 0, desc: 'Una correa nueva del taller de la frontera, en Rivera. Es la medida de un camión.' },
+  yerba_fiesta: { name: 'Bolsa de yerba', pocket: 'quest', price: 0, desc: 'La yerba de la Fiesta del Mate, secada con leña de monte en Rosario. La esperan en San José.' },
+  calabaza_fiesta: { name: 'Mate grande', pocket: 'quest', price: 0, desc: 'El mate de calabaza de la Fiesta del Mate, curado por un artesano de Ecilda Paullier. Va para la rueda de San José.' },
+  traje_carnaval: { name: 'Traje de portabandera', pocket: 'quest', price: 0, desc: 'Un traje de carnaval con amatistas cosidas en el tocado. Lo espera una escuela de samba de Artigas.' },
+  surdo: { name: 'Surdo', pocket: 'quest', price: 0, desc: 'El tambor más grave de la batería de una escuela de samba de Artigas. Quedó en la costa de Belén después de un ensayo.' },
+  cabestro: { name: 'Cabestro', pocket: 'quest', price: 0, desc: 'El cabestro del potro moro del domador de Tacuarembó. Sin él no se deja tocar por nadie.' },
 };
 
 // Máquinas de movimientos (MT): se consumen al usarse. Una criatura puede aprender
@@ -97,6 +98,8 @@ for (const m of TM_MOVES) {
 
 export const ITEMS: Record<string, Item> = deepFreeze(BASE_ITEMS);
 
-export const KEY_ITEMS = deepFreeze(Object.keys(ITEMS).filter((k) => ITEMS[k].pocket === 'key'));
+/** Key items and errand objects: one at most, never sold, never thrown away. */
+export const isKeyItem = (k: string) => ITEMS[k]?.pocket === 'key' || ITEMS[k]?.pocket === 'quest';
+export const KEY_ITEMS = deepFreeze(Object.keys(ITEMS).filter(isKeyItem));
 export const MAX_STACK = 99;
 export const MAX_FICHAS = 999;
