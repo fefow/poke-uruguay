@@ -5,7 +5,7 @@ import { NATURES } from '../data/natures.ts';
 import { badgeOf } from '../data/route.ts';
 import { SPECIES, MIN_LEVEL, STARTERS } from '../data/species.ts';
 import { MOVES } from '../data/moves.ts';
-import { ITEMS, MAX_STACK, MAX_FICHAS } from '../data/items.ts';
+import { ITEMS, MAX_STACK, MAX_FICHAS, isKeyItem } from '../data/items.ts';
 import { MAPS } from '../data/maps.ts';
 import { LOOKS } from '../gfx/characters.ts';
 import { expForLevel, calcStats, legalMoves, MAX_LEVEL } from '../game/creature.ts';
@@ -154,7 +154,7 @@ export function validateSave(d: any) {
   for (const [k, q] of Object.entries(d.bag ?? {})) {
     const it = ITEMS[k];
     if (!it) { e(`objeto desconocido "${k}"`); continue; }
-    const max = it.pocket === 'key' ? 1 : k === 'ficha' ? MAX_FICHAS : MAX_STACK;
+    const max = isKeyItem(k) ? 1 : k === 'ficha' ? MAX_FICHAS : MAX_STACK;
     if (!isInt(q, 1, max)) { e(`cantidad inválida de ${it.name}`); continue; }
     bag[k] = q;
   }

@@ -6,7 +6,7 @@ import { OUTDOOR, INTERIOR, MAPS, MAP_ORIGINALS } from '../data/maps.ts';
 import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
-import { ITEMS } from '../data/items.ts';
+import { ITEMS, isKeyItem } from '../data/items.ts';
 import { tileCanvas, groundFor, drawBuildingTrim, drawGroundEdges, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
@@ -25,7 +25,7 @@ const LOCKED = new Set(['D', 'S']); // doors and signs are matched to their targ
 const SOLID = (c) => c === undefined || !!TILE_INFO[c]?.solid;
 const DIRS = [['down', 'Abajo'], ['up', 'Arriba'], ['left', 'Izquierda'], ['right', 'Derecha']];
 const KIND_NAME = { trainer: 'Entrenador', script: 'Evento', critter: 'Animal', blocker: 'Guardia de paso', npc: 'Persona', added: 'Persona nueva' };
-const ITEM_KEYS = Object.keys(ITEMS).filter((k) => ITEMS[k].pocket !== 'key');
+const ITEM_KEYS = Object.keys(ITEMS).filter((k) => !isKeyItem(k));
 
 // ---------------------------------------------------------------- drafts and working copies
 let base = structuredClone(MAP_OVERRIDES); // what the game has now

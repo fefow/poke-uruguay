@@ -703,8 +703,8 @@ test('mini historias: cadenas de pasos con personas en mapas reales, ítems clav
       flag: (k) => !!flags[k], setFlag: (k) => { flags[k] = true; }, say: async () => {}, sfx() {},
       give: async (k) => {
         assert.ok(ITEMS[k], `${s.id}: ítem ${k}`);
-        if (prizes.has(k)) { assert.ok(s.festival, `${s.id}: solo un festival premia con objetos comunes`); assert.notEqual(ITEMS[k].pocket, 'key'); assert.ok(!k.startsWith('mt_') && !ITEMS[k].held, `${s.id}: ${k} no es MT ni equipable`); return; }
-        assert.equal(ITEMS[k].pocket, 'key', `${s.id}: ${k} es ítem clave`); bag[k] = 1;
+        if (prizes.has(k)) { assert.ok(s.festival, `${s.id}: solo un festival premia con objetos comunes`); assert.ok(!['key', 'quest'].includes(ITEMS[k].pocket)); assert.ok(!k.startsWith('mt_') && !ITEMS[k].held, `${s.id}: ${k} no es MT ni equipable`); return; }
+        assert.ok(['key', 'quest'].includes(ITEMS[k].pocket), `${s.id}: ${k} es ítem clave`); if (!['soga', 'canoa', 'bici', 'guantes'].includes(k)) assert.equal(ITEMS[k].pocket, 'quest', `${s.id}: ${k} es un encargo y va a la pestaña Misión`); bag[k] = 1;
       },
       battle: async (t) => { assert.ok(t.team.length && t.team.every(([sp]) => SPECIES[sp]), `${s.id}: equipo de ${t.name}`); return 'win'; }, healParty() {},
       takeItem: (k) => { assert.ok(bag[k], `${s.id}: entrega ${k} sin tenerlo`); delete bag[k]; },
@@ -868,4 +868,18 @@ test('historia: Facu aparece antes de Rivera, Olivera es el recluta de las tres 
   const lab = Object.values(INTERIOR).find((m) => (m.npcs ?? []).some((n) => n.script === 'prof'));
   assert.ok(lab.npcs.some((n) => n.name === 'Almada' && n.cond({ obs_clear: true }) && !n.cond({})));
   assert.ok(lab.npcs.some((n) => n.script === 'rival_lab_post' && n.cond({ champion: true }) && !n.cond({})));
+});
+
+test('mochila: los objetos de encargo van a la pestaña Misión, quedan como ítem único y los que se entregan salen de la mochila', async () => {
+  const { ITEMS, isKeyItem } = await import('../src/data/items.ts');
+  const { SCRIPTS } = await import('../src/data/story.ts');
+  const quest = Object.keys(ITEMS).filter((k) => ITEMS[k].pocket === 'quest');
+  assert.ok(quest.length >= 15);
+  for (const k of ['uru_dex', 'mapa_uruguay', 'bici', 'canoa', 'machete', 'soga', 'guantes', 'farol', 'silbato', 'pluma_azul', 'medidor_niebla']) assert.equal(ITEMS[k].pocket, 'key', `${k} es una herramienta o recuerdo: se queda en Clave`);
+  for (const k of quest) { assert.ok(isKeyItem(k)); assert.equal(ITEMS[k].price, 0); }
+  // every errand object is handed over somewhere: some script or mini story takes it
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const src = readdirSync('src/data').filter((f) => f.endsWith('.ts')).map((f) => readFileSync(`src/data/${f}`, 'utf8')).join('\n');
+  for (const k of quest) assert.ok(new RegExp(`takeItem\\('${k}'|take: \\[[^\\]]*'${k}'|for \\(const k of \\[[^\\]]*'${k}'[^\\]]*\\]\\) if \\(api\\.hasItem\\(k\\)\\) api\\.takeItem`).test(src), `${k}: alguien lo recibe y desaparece de la mochila`);
+  assert.ok(SCRIPTS.ms_step);
 });

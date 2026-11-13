@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-12 (v217).
+> Última actualización: 2026-11-13 (v218).
 
 ## Dónde está cada cosa en el código
 
@@ -131,6 +131,7 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
 - **Equipables:** solo de jefes del PP, torres y grandes eventos; no se venden.
 - **Tipos y naturalezas:** 14 tipos (incluye Acero) y 25 naturalezas (`types.ts`, `natures.ts`).
 - **Rival Facu:** siete combates y una revancha libre. Laboratorio (elige después del jugador), Bosque Grande, Buquebus (cuenta que pasó datos del laboratorio a «un estudio del clima»), Ruta 3 (sigue midiendo para el estudio; su tío no le contó nada), ruta a Rivera (no cree que el estudio sea del PP y va a ver la Torre, `rival7`), Lascano (vio la Quebrada vacía: lo usaron), Sarandí Grande (habló con su tío, ya no trabaja para nadie) y Centenario. Sube a la cúpula de la Torre del puerto en el final. Después de la Liga trabaja con Tabárez en el laboratorio y acepta revancha cuando el jugador quiera (`rival_lab_post`, equipo 12 niveles más alto). Nunca se une al PP.
+- **Mochila, pestaña Misión:** los objetos de encargo (los que una persona te da para llevarle a otra: carta de Tabárez, lámpara del faro, credencial y ticket del Anglo, llaves del Buquebus, soga mojada, cabos, cuaderno, brea, remos, correa, cabestro, yerba, mate grande, traje y surdo) van a la pestaña **Misión** apenas los recibís y desaparecen al entregarlos. Herramientas y recuerdos (Mapa, PokeDex, Bicicleta, Canoa, Machete, Soga, Pluma Azul, Medidor) siguen en **Clave**. En `items.ts`, `pocket: 'quest'`; `isKeyItem()` cubre ambos. La primera vez, un aviso lo explica (`ev_quest_tab`).
 - **Pistas:** quienes bloquean un camino solo describen la situación, nunca dicen qué hacer; las pistas son parciales y repartidas.
 - **Favores entre pueblos:** 13 cadenas (faro, queso, radio, carta, cosecha, frontera, cuchilla, cerro, laguna, cerro_mina, sierra, costa, ciudad). No tocan la historia del PP.
 - **Eventos de ciudad (opcionales, una vez):** examen del casco histórico (Colonia), payada (San José), torneo (Mercedes), tesoro del marinero (Rocha), trueques, adivinos, carrera de la Ciclovía, concurso de bichos (Canelones) y **la llamada de candombe** (Montevideo): al director de la cuerda del Barrio Sur, junto a la Rambla, le faltan el repique (en la playa Pocitos) y el piano (en el Parque Batlle); avisados, cada tamborilero se va caminando y aparece junto a él; con los tres tambores la cuerda toca y regala 2 Chivitos y 3 Ultraballs (flags `ev_candombe_ok`, `ev_candombe_rep`, `ev_candombe_pia`, `ev_candombe`).

@@ -6,7 +6,7 @@ import { SPECIES } from '../data/species.ts';
 import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
-import { ITEMS } from '../data/items.ts';
+import { ITEMS, isKeyItem } from '../data/items.ts';
 import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim, drawGroundEdges } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
@@ -929,8 +929,16 @@ async function pickItem(it) {
   setFlag(`it_${it.id}`);
   addItem(it.item, 1);
   refreshEntities();
-  jingle(ITEMS[it.item].pocket === 'key' ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
+  jingle(isKeyItem(it.item) ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
   await say(`¡Obtuviste ${ITEMS[it.item].name}!`);
+  await questTabHint(it.item);
+}
+
+/** The first errand object explains where it went: the Misión tab of the bag lists what is still to be handed over. */
+async function questTabHint(item) {
+  if (ITEMS[item].pocket !== 'quest' || flag('ev_quest_tab')) return;
+  setFlag('ev_quest_tab');
+  await say('Es un encargo: quedó en la pestaña Misión de la mochila, y desaparece cuando lo entregás.');
 }
 
 async function legendEncounter(L) {
@@ -1116,8 +1124,9 @@ export const api = {
   typeNames: (k) => SPECIES[k].types.map((t) => TYPES[t].name).join('/'),
   async give(item, qty = 1) {
     addItem(item, qty);
-    jingle(ITEMS[item].pocket === 'key' ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
+    jingle(isKeyItem(item) ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
     await say(`¡{player} recibió ${ITEMS[item].name}${qty > 1 ? ` ×${qty}` : ''}!`);
+    await questTabHint(item);
   },
   giveCreature(sp, lvl) {
     const S = state();
