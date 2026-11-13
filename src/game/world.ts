@@ -1,5 +1,6 @@
 // Overworld: map loading/linking, movement, NPCs, trainers, encounters,
 // rendering and the script API used by story scripts.
+import { applyPuzzle } from '../data/gym-puzzles.ts';
 import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
@@ -99,6 +100,13 @@ function tileAt(x, y) {
   return (W_.tiles ?? m.tiles)[y][x];
 }
 
+/** Gym mechanisms (gates, valves, lamps, clocks): state lives only while inside the gym (see gym-puzzles.ts). */
+function applyGp() {
+  const pz = W_.map.puzzle;
+  if (!pz || !W_.gp) return;
+  applyPuzzle(W_.tiles, pz, { on: W_.gp.on, steps: W_.gp.steps, beaten: (id) => !!flag(`tr_${id}`) });
+}
+
 let canoeGo = false; // true for the single step that boards the canoe
 let canoeStep: string | null = null; // direction to step onto the water once the question's script is over
 function solidAt(x, y, { ignorePlayer = false, self = null, player = false } = {}) {
@@ -117,6 +125,7 @@ function solidAt(x, y, { ignorePlayer = false, self = null, player = false } = {
 
 function refreshEntities() {
   const m = W_.map;
+  applyGp();
   W_.npcs = (m.npcs ?? []).map((def, i) => {
     const prev = W_.npcs.find((n) => n.def === def);
     return prev ?? { def, i, x: def.x, y: def.y, ox: def.x, oy: def.y, dir: def.dir ?? 'down', visible: true, gone: typeof def.arrive === 'function' ? !!def.arrive(flagsObj()) : !!def.arrive, moving: false, t: 0, from: null, wanderAt: performance.now() + 1000 + worldRng.next() * 3000 };
@@ -190,6 +199,8 @@ export function loadMap(id, x, y, dir = 'down') {
   for (const e of (m as any).flagTiles ?? []) if (S.flags[e.flag]) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
   // Scenery that is only there for a while (e.g. the Fiesta de la Patria Gaucha): m.condTiles = [{ cond, x, y, ch }]
   for (const e of (m as any).condTiles ?? []) if (e.cond()) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
+  W_.gp = m.puzzle ? { on: new Set<string>(), steps: 0 } : null;
+  applyGp();
   if (changed) { W_.npcs = []; W_.lit = hasItem('farol') && !!flag(badgeOf('punta')); } // the Farol lights dark maps by itself
   // The bicycle is never used indoors, and bike-only zones put you on it.
   if (m.indoor) W_.bike = false;
@@ -393,6 +404,7 @@ function tryMove(d) {
     return;
   }
   if (tileAt(nx, ny) === '\\') return void pushBoulder(dx, dy, nx, ny);
+  if (tileAt(nx, ny) === 'ӽ' || tileAt(nx, ny) === 'Ӿ') return void pushBlock(dx, dy, nx, ny);
   if (tileAt(nx, ny) === 'Ϡ') return void climbFalls(dx, dy, nx, ny);
   const blocker = W_.npcs.find((n) => n.visible && n.x === nx && n.y === ny && n.def.blocker);
   if (blocker) return void runScript(async () => { await say(blocker.def.text, { name: blocker.def.name }); });
@@ -415,6 +427,35 @@ function hint(msg) {
   if (now - hintAt < 2500 || W_.scriptRunning) return;
   hintAt = now;
   void runScript(() => say(msg));
+}
+
+/** A valve, breaker or tap in a gym: flips on and off; the gates it moves follow the rules in gym-puzzles.ts. */
+async function pullLever(l) {
+  const on = W_.gp.on;
+  const now = !on.has(l.id);
+  if (now) on.add(l.id); else on.delete(l.id);
+  sfx('door');
+  applyGp();
+  const use = W_.map.puzzle.use ?? ['Accionaste el mecanismo. En algún lugar de la sala algo se movió.', 'Volviste el mecanismo a su lugar. En algún lugar de la sala algo se movió.'];
+  await say(use[now ? 0 : 1]);
+}
+
+let blockAt = 0;
+/** Carts and granite blocks in the gyms are pushed one tile at a time; a granite block pushed into the river fills that tile. */
+function pushBlock(dx, dy, bx, by) {
+  const now = performance.now();
+  if (now - blockAt < 280) return;
+  blockAt = now;
+  const ch = tileAt(bx, by);
+  const tx = bx + dx, ty = by + dy;
+  const t = tileAt(tx, ty);
+  const fill = ch === 'Ӿ' && t === 'ϸ';
+  const taken = W_.npcs.some((n) => n.visible && n.x === tx && n.y === ty) || W_.items.some((it) => it.x === tx && it.y === ty) || (W_.player.x === tx && W_.player.y === ty);
+  if (t == null || taken || (!fill && solidAt(tx, ty))) return bump();
+  sfx('boulder');
+  const put = (x, y, c) => { W_.tiles[y] = W_.tiles[y].slice(0, x) + c + W_.tiles[y].slice(x + 1); };
+  put(bx, by, 'Y');
+  put(tx, ty, fill ? 'Ϲ' : ch);
 }
 
 let pushAt = 0;
@@ -548,6 +589,7 @@ function onStep() {
   const p = W_.player;
   S.stats.steps++;
   S.pos = { map: W_.map.id, x: p.x, y: p.y, dir: p.dir };
+  if (W_.gp) { W_.gp.steps++; applyGp(); }
   const ch = tileAt(p.x, p.y);
   if (W_.map.indoor && ch === 'm' && p.dir === 'down' && p.from && tileAt(p.from.x, p.from.y) !== 'm') {
     return void runScript(() => exitInterior());
@@ -788,6 +830,8 @@ function interact() {
   let ty = p.y + dy;
   // talk across counters
   if (tileAt(tx, ty) === 'n' || tileAt(tx, ty) === 'Պ') { tx += dx; ty += dy; }
+  const lever = W_.map.puzzle?.levers.find((l) => l.x === tx && l.y === ty);
+  if (lever && W_.gp) return void runScript(() => pullLever(lever));
   const n = W_.npcs.find((o) => o.visible && o.x === tx && o.y === ty);
   if (n) return void runScript(() => talkTo(n));
   const it = W_.items.find((o) => o.x === tx && o.y === ty);

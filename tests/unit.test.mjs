@@ -930,3 +930,36 @@ test('Frigorífico Anglo: cuatro pisos, la cámara de frío se resuelve y no dej
     void blockers;
   }
 });
+
+test('gimnasios: cada uno tiene su mecanismo, se resuelve de punta a punta y no deja atrapado', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
+  const { solveLevers, solvePushes } = await import('../src/data/gym-puzzles.ts');
+  const solid = (c) => !!TILE_INFO[c]?.solid;
+  const gyms = Object.entries(MAPS).filter(([, m]) => m.puzzle);
+  assert.equal(gyms.length, 9, 'OSE, UTE, Quiroga, ANCAP, INAVI, Defensa, MGAP, Lavalleja y Boiso');
+  for (const [id, m] of gyms) {
+    const pz = m.puzzle;
+    const last = m.tiles.length - 1;
+    const sim = { tiles: m.tiles, blocked: new Set((m.npcs ?? []).filter((n) => !n.arrive).map((n) => `${n.x},${n.y}`)), solid, puzzle: pz, start: [m.tiles[last].indexOf('m'), last - 1] };
+    const guide = (m.npcs ?? []).find((n) => !n.trainer && n.script !== 'leader');
+    assert.ok(pz.hint?.every((h) => (Array.isArray(guide.text) ? guide.text : [guide.text]).includes(h)), `${id}: el guía cuenta de qué se trata`);
+    if (m.tiles.join('').match(/[ӽӾ]/)) {
+      const r = solvePushes(sim);
+      assert.ok(r.solved && r.pushes >= 6, `${id}: se resuelve empujando (${r.pushes} empujes)`);
+      continue;
+    }
+    const r = solveLevers(sim);
+    if (pz.gates.some((g) => g.beatenIds)) {
+      assert.ok(!r.solved, `${id}: las barreras cierran el paso hasta vencer al guardia`);
+      assert.ok(solveLevers({ ...sim, beatenAll: true }).solved, `${id}: con los guardias vencidos se llega al líder`);
+      continue;
+    }
+    assert.ok(r.solved && !r.softLock, `${id}: se llega al líder y ningún estado deja encerrado`);
+    assert.ok(r.steps >= 20, `${id}: el recorrido no es trivial (${r.steps} pasos)`);
+    if (!pz.period) {
+      const dead = solveLevers({ ...sim, puzzle: { ...pz, levers: pz.levers.map((l) => ({ ...l, x: -9, y: -9 })) } });
+      assert.ok(!dead.solved, `${id}: sin accionar nada el paso sigue cerrado`);
+    }
+  }
+});
