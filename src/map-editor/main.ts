@@ -15,12 +15,16 @@ import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { drawItem } from '../gfx/items.ts';
 import { h, safeStorage } from '../core/util.ts';
 import { devToken, isDev, unlockDev, checkToken, lockDev } from '../core/devauth.ts';
+import { rectBetween, rectCells, lineCells, brushCells, copyRegion, flipH, flipV, rotate, pasteStamp, paintCells, replaceAll, changedCells, fitZoom } from './ops.ts';
 
 const REPO = 'fefow/poke-uruguay';
 const FILE = 'src/data/map-overrides.js';
 const store = safeStorage();
 const DRAFTS_KEY = 'pokeuy:map-drafts';
-const MAX_UNDO = 80;
+const MAX_UNDO = 120;
+const CLIP_KEY = 'pokeuy:map-clip';
+const RECENT_KEY = 'pokeuy:map-recent';
+const ZOOMS = [1, 2, 3, 4, 5, 6];
 const LOCKED = new Set(['D', 'S']); // doors and signs are matched to their targets and texts in order
 const SOLID = (c) => c === undefined || !!TILE_INFO[c]?.solid;
 const DIRS = [['down', 'Abajo'], ['up', 'Arriba'], ['left', 'Izquierda'], ['right', 'Derecha']];
@@ -98,11 +102,22 @@ function diff(id, W) {
 }
 
 // ---------------------------------------------------------------- editor state
-const S = {
-  id: null, W: null, tool: 'paint', tile: '.', zoom: 2, grid: true,
+const S: any = {
+  id: null, W: null, tool: 'paint', tile: '.', zoom: 2, grid: true, brush: 1,
   sel: null, // { type: 'npc'|'item', ref }
   drag: null, painting: false, hover: null, undo: [], redo: [], problems: [], filter: '', tileFilter: '',
+  area: null, // selected rectangle { x, y, w, h } (tool Selección)
+  shape: null, // { from: cell, to: cell } while dragging a line, rectangle or selection
+  clip: loadJSON(CLIP_KEY, null), // copied tiles (string[][]), kept between maps and visits
+  pasting: false, // the clipboard follows the pointer until a click places it
+  recent: loadJSON(RECENT_KEY, []) as string[],
+  showSolid: false, showChanges: false, onlyEdited: false,
+  pan: null, spaceDown: false, lastPaint: null,
+  history: new Map(), // id -> { undo, redo } so switching maps keeps each map's undo
+  back: [] as string[], // maps opened before this one (Volver)
 };
+function loadJSON(k, def) { try { const v = JSON.parse(store.getItem(k) || 'null'); return v ?? def; } catch { return def; } }
+function saveJSON(k, v) { try { store.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } }
 const nameOf = (id) => (MAPS[id]?.name ?? id).replace('{rival}', 'tu rival');
 const isOutdoor = (id) => id in OUTDOOR;
 
@@ -120,28 +135,54 @@ const head = h('header', { class: 'ed-head' },
   h('a', { class: 'ed-btn ed-mini', href: 'editor.html', text: 'Editor de sprites' }),
   h('a', { class: 'ed-btn ed-mini', href: 'texts.html', text: 'Editor de textos' }),
   pending,
-  h('div', { class: 'ed-actions' }, undoBtn, redoBtn, resetBtn, btn('Descargar', () => download()), saveBtn));
+  h('div', { class: 'ed-actions' }, btn('Atajos', () => toggleHelp(), { class: 'ed-btn ed-mini', title: 'Atajos de teclado (tecla ?)' }), undoBtn, redoBtn, resetBtn, btn('Descargar', () => download()), saveBtn));
 
-const search = h('input', { class: 'ed-input', type: 'search', placeholder: 'Buscar mapa…', oninput: () => { S.filter = search.value.toLowerCase(); renderMapList(); } });
+const search = h('input', { class: 'ed-input', type: 'search', placeholder: 'Buscar mapa…  (Ctrl+P)', oninput: () => { S.filter = search.value.toLowerCase(); renderMapList(); },
+  onkeydown: (ev) => { if (ev.key === 'Enter') { const first = mapList.querySelector('.me-map') as HTMLElement; first?.click(); search.blur(); } } });
+const editedChk = h('input', { type: 'checkbox', onchange: () => { S.onlyEdited = editedChk.checked; renderMapList(); } });
 const mapList = h('ul', { class: 'ed-list me-maps' });
-const side = h('aside', { class: 'ed-side' }, search, mapList);
+const reviewAllBtn = btn('Revisar todos los editados', () => reviewAll(), { class: 'ed-btn ed-mini', title: 'Corre la revisión en cada mapa con cambios y lista los que tienen problemas' });
+const reviewOut = h('div', { class: 'me-review' });
+const side = h('aside', { class: 'ed-side' }, search, h('label', { class: 'me-check' }, editedChk, ' Solo mapas con cambios'), mapList, reviewAllBtn, reviewOut);
 
 const canvas = h('canvas', { class: 'me-canvas' });
 const g = canvas.getContext('2d');
 const hoverEl = h('p', { class: 'me-hover' });
-const zoomSel = h('select', { class: 'ed-input me-zoom', onchange: () => { S.zoom = +zoomSel.value; draw(); } },
-  [1, 2, 3, 4].map((z) => h('option', { value: z, text: `Zoom ×${z}`, selected: z === S.zoom })));
+const zoomSel = h('select', { class: 'ed-input me-zoom', title: 'Ctrl + rueda del mouse también cambia el zoom', onchange: () => setZoom(+zoomSel.value) },
+  ZOOMS.map((z) => h('option', { value: z, text: `Zoom ×${z}`, selected: z === S.zoom })));
+const fitBtn = btn('Ajustar', () => setZoom(fitZoom(S.W.tiles[0].length, S.W.tiles.length, T, stage.clientWidth - 24, stage.clientHeight - 24)), { class: 'ed-btn ed-mini me-fit', title: 'El zoom entero más grande en el que entra el mapa entero (tecla 0)' });
 const gridChk = h('input', { type: 'checkbox', checked: S.grid, onchange: () => { S.grid = gridChk.checked; draw(); } });
+const solidChk = h('input', { type: 'checkbox', onchange: () => { S.showSolid = solidChk.checked; draw(); } });
+const changesChk = h('input', { type: 'checkbox', onchange: () => { S.showChanges = changesChk.checked; draw(); } });
+const brushSel = h('select', { class: 'ed-input me-zoom', title: 'Tamaño del pincel (teclas [ y ])', onchange: () => { S.brush = +brushSel.value; } },
+  [1, 2, 3, 5].map((n) => h('option', { value: n, text: `Pincel ${n}×${n}`, selected: n === S.brush })));
 const toolBtns: Record<string, HTMLElement> = {};
-const TOOLS = [['paint', 'Pincel', 'B'], ['fill', 'Rellenar', 'G'], ['pick', 'Cuentagotas', 'I'], ['move', 'Mover / elegir', 'V']];
+const TOOLS = [
+  ['paint', 'Pincel', 'B', 'Pinta casilla por casilla. Shift + clic: línea recta desde la última casilla pintada.'],
+  ['line', 'Línea', 'L', 'Arrastrá de una punta a la otra.'],
+  ['rect', 'Rectángulo', 'R', 'Arrastrá de una esquina a la otra. Con Shift al soltar: solo el borde.'],
+  ['fill', 'Rellenar', 'G', 'Rellena la zona del mismo suelo. Shift + clic: cambia esa pieza en todo el mapa (o en la selección).'],
+  ['select', 'Selección', 'M', 'Marcá una zona para copiar (Ctrl+C), cortar (Ctrl+X), borrar o rellenar. Ctrl+V pega.'],
+  ['pick', 'Cuentagotas', 'I', 'Toma la pieza de una casilla. También con clic derecho o Alt + clic.'],
+  ['move', 'Mover / elegir', 'V', 'Elegí y arrastrá personas y objetos. Las flechas los corren una casilla.'],
+];
 const toolbar = h('div', { class: 'me-toolbar' },
-  TOOLS.map(([id, label, key]) => (toolBtns[id] = h('button', { class: 'ed-btn ed-mini', type: 'button', onclick: () => setTool(id) }, label, ' ', h('kbd', { text: key })))),
-  zoomSel, h('label', { class: 'me-check' }, gridChk, ' Grilla'));
+  TOOLS.map(([id, label, key, tip]) => (toolBtns[id] = h('button', { class: 'ed-btn ed-mini', type: 'button', title: tip, onclick: () => setTool(id) }, label, ' ', h('kbd', { text: key })))),
+  h('span', { class: 'me-sep' }),
+  brushSel,
+  h('label', { class: 'me-check', title: 'Tecla H' }, gridChk, ' Grilla'),
+  h('label', { class: 'me-check', title: 'Marca en rojo lo que no se pisa (tecla P)' }, solidChk, ' Paso'),
+  h('label', { class: 'me-check', title: 'Marca las casillas distintas al mapa original (tecla C)' }, changesChk, ' Cambios'),
+  fitBtn, zoomSel);
 const stage = h('div', { class: 'me-stage' }, canvas);
-const center = h('main', { class: 'me-center' }, toolbar, stage, hoverEl, statusEl);
+const helpEl = h('div', { class: 'me-help', hidden: true });
+const center = h('main', { class: 'me-center' }, toolbar, stage, hoverEl, statusEl, helpEl);
 
 const tileSearch = h('input', { class: 'ed-input', type: 'search', placeholder: 'Buscar pieza…', oninput: () => { S.tileFilter = tileSearch.value.toLowerCase(); renderPalette(); } });
 const current = h('div', { class: 'me-current' });
+const recentEl = h('div', { class: 'me-recent', title: 'Últimas piezas usadas' });
+const areaBox = h('div', { class: 'me-inspector' });
+const linksEl = h('div', { class: 'me-links' });
 const palette = h('div', { class: 'me-palette' });
 const inspector = h('div', { class: 'me-inspector' });
 const entityList = h('ul', { class: 'me-entities' });
@@ -157,8 +198,10 @@ const sizeInfo = h('p', { class: 'ed-hint' });
 const growIn = (def = 0) => h('input', { class: 'ed-input', type: 'number', min: '0', max: '120', value: String(def), style: { width: '100%' } });
 const GROW: [string, string, HTMLInputElement][] = [['left', 'Izq.', growIn()], ['top', 'Arriba', growIn()], ['right', 'Der.', growIn()], ['bottom', 'Abajo', growIn()]];
 const right = h('aside', { class: 'me-right' },
-  h('section', {}, h('h2', { text: 'Piezas' }), h('a', { class: 'ed-btn ed-mini is-primary', href: 'editor.html#nueva-pieza', target: '_blank', rel: 'noopener', title: 'Abre el editor de sprites para crear y dibujar una pieza nueva; después de guardarla aparece acá', text: '＋ Nueva pieza' }), current, tileSearch, palette),
+  h('section', {}, h('h2', { text: 'Piezas' }), h('a', { class: 'ed-btn ed-mini is-primary', href: 'editor.html#nueva-pieza', target: '_blank', rel: 'noopener', title: 'Abre el editor de sprites para crear y dibujar una pieza nueva; después de guardarla aparece acá', text: '＋ Nueva pieza' }), current, recentEl, tileSearch, palette),
+  h('section', {}, h('h2', { text: 'Zona y portapapeles' }), areaBox),
   h('section', {}, h('h2', { text: 'Seleccionado' }), inspector),
+  h('section', {}, h('h2', { text: 'Conexiones' }), linksEl),
   h('section', {}, h('h2', { text: 'Clima de la zona' }), weatherSel,
     h('p', { class: 'ed-hint', text: 'Aleatorio: despejado, lluvia, tormenta o niebla según el momento. En interiores no se nota.' })),
   h('section', {}, h('h2', { text: 'Fondo base del mapa' }), groundSel,
@@ -182,7 +225,7 @@ function status(text, kind = '') {
 // ---------------------------------------------------------------- lists
 function renderMapList() {
   const group = (title, ids) => {
-    const shown = ids.filter((id) => !S.filter || id.toLowerCase().includes(S.filter) || nameOf(id).toLowerCase().includes(S.filter));
+    const shown = ids.filter((id) => (!S.filter || id.toLowerCase().includes(S.filter) || nameOf(id).toLowerCase().includes(S.filter)) && (!S.onlyEdited || patchOf(id)));
     if (!shown.length) return [];
     return [h('li', { class: 'me-group', text: title }), ...shown.map((id) => h('li', {
       class: `me-map ${id === S.id ? 'is-active' : ''}`, onclick: () => openMap(id), title: id,
@@ -193,6 +236,7 @@ function renderMapList() {
 
 /** Maps in the order the player meets them: the route from Carmelo to Montevideo, then whatever is left; interiors follow their city. */
 let ORDER = null;
+const PARENT: Record<string, string> = {}; // interior -> the map whose door leads into it
 function storyOrder() {
   if (ORDER) return ORDER;
   const outdoor = [...new Set([...CHAIN, ...Object.keys(OUTDOOR)])].filter((id) => id in OUTDOOR);
@@ -201,7 +245,7 @@ function storyOrder() {
   const visit = (id: string) => {
     for (const d of (MAPS[id] as any)?.doors ?? []) {
       const to = typeof d === 'string' ? d : d?.to;
-      if (to && to in INTERIOR && !seen.has(to)) { seen.add(to); indoor.push(to); visit(to); }
+      if (to && to in INTERIOR && !seen.has(to)) { seen.add(to); PARENT[to] = id; indoor.push(to); visit(to); }
     }
     for (const w of Object.values((MAPS[id] as any)?.doorWarps ?? {})) {
       const to = (w as any)?.to;
@@ -246,11 +290,18 @@ function renderPalette() {
   const c = h('canvas', { width: T, height: T });
   c.getContext('2d').drawImage(tileCanvas(S.tile, 0, theme), 0, 0);
   current.replaceChildren(c, h('span', { text: `${TILE_INFO[S.tile]?.name ?? S.tile} "${S.tile}"${TILE_INFO[S.tile]?.solid ? ' · no se pisa' : ''}` }));
+  recentEl.replaceChildren(...S.recent.filter((ch) => TILE_INFO[ch]).map((ch, i) => {
+    const rc = h('canvas', { width: T, height: T });
+    rc.getContext('2d').drawImage(tileCanvas(ch, 0, theme), 0, 0);
+    return h('button', { type: 'button', class: `me-tile ${ch === S.tile ? 'is-active' : ''}`, title: `${TILE_INFO[ch].name} "${ch}"${i < 9 ? ` · tecla ${i + 1}` : ''}`, onclick: () => pickTile(ch) }, rc);
+  }));
 }
 
 function pickTile(ch) {
   if (LOCKED.has(ch)) return status('Las puertas y los carteles no se pintan: van atados a su destino y su texto.', 'warn');
   S.tile = ch;
+  S.recent = [ch, ...S.recent.filter((c) => c !== ch)].slice(0, 10);
+  saveJSON(RECENT_KEY, S.recent);
   if (S.tool === 'pick' || S.tool === 'move') setTool('paint');
   renderPalette();
 }
@@ -353,12 +404,49 @@ function draw() {
     for (let y = 0; y <= hgt; y++) { g.moveTo(0, y * T * Z + 0.5); g.lineTo(wid * T * Z, y * T * Z + 0.5); }
     g.stroke();
   }
+  const Zt = T * Z;
+  if (S.showSolid) {
+    g.fillStyle = 'rgba(255,40,60,.32)';
+    rows.forEach((r, y) => [...r].forEach((c, x) => { if (SOLID(c)) g.fillRect(x * Zt, y * Zt, Zt, Zt); }));
+  }
+  if (S.showChanges) {
+    g.fillStyle = 'rgba(80,220,255,.35)';
+    g.strokeStyle = 'rgba(80,220,255,.9)'; g.lineWidth = 1;
+    for (const c of changedCells(MAP_ORIGINALS[S.id].tiles, W.tiles, W.shift)) { g.fillRect(c.x * Zt, c.y * Zt, Zt, Zt); g.strokeRect(c.x * Zt + 0.5, c.y * Zt + 0.5, Zt - 1, Zt - 1); }
+  }
+  // previews: the shape being dragged, or the clipboard under the pointer
+  const ghost = (cells, ch) => {
+    g.globalAlpha = 0.75;
+    for (const c of cells) if (W.tiles[c.y]?.[c.x] !== undefined) g.drawImage(tileCanvas(ch, 0, m.theme), c.x * Zt, c.y * Zt, Zt, Zt);
+    g.globalAlpha = 1;
+  };
+  if (S.shape && S.tool === 'line') ghost(lineCells(S.shape.from, S.shape.to), S.tile);
+  if (S.shape && S.tool === 'rect') ghost(rectCells(S.shape.from, S.shape.to, !S.shape.border), S.tile);
+  if (S.pasting && S.clip && S.hover) {
+    g.globalAlpha = 0.75;
+    S.clip.forEach((r, dy) => r.forEach((ch, dx) => { if (W.tiles[S.hover.y + dy]?.[S.hover.x + dx] !== undefined) g.drawImage(tileCanvas(ch, 0, m.theme), (S.hover.x + dx) * Zt, (S.hover.y + dy) * Zt, Zt, Zt); }));
+    g.globalAlpha = 1;
+    g.setLineDash([6, 4]); g.strokeStyle = '#7fe8ff'; g.lineWidth = 2;
+    g.strokeRect(S.hover.x * Zt + 1, S.hover.y * Zt + 1, S.clip[0].length * Zt - 2, S.clip.length * Zt - 2);
+    g.setLineDash([]);
+  }
+  const area = S.shape && S.tool === 'select' ? rectBetween(S.shape.from, S.shape.to) : S.area;
+  if (area) {
+    g.fillStyle = 'rgba(127,232,255,.12)'; g.fillRect(area.x * Zt, area.y * Zt, area.w * Zt, area.h * Zt);
+    g.setLineDash([6, 4]); g.strokeStyle = '#7fe8ff'; g.lineWidth = 2;
+    g.strokeRect(area.x * Zt + 1, area.y * Zt + 1, area.w * Zt - 2, area.h * Zt - 2);
+    g.setLineDash([]);
+  }
   // problems in red, selection in yellow, hover in white
   g.lineWidth = 2;
   g.strokeStyle = 'rgba(255,70,70,.95)';
   for (const p of S.problems) if (p.x != null) g.strokeRect(p.x * T * Z + 1, p.y * T * Z + 1, T * Z - 2, T * Z - 2);
   if (S.sel && !S.sel.ref.removed) { g.strokeStyle = '#ffe05a'; g.strokeRect(S.sel.ref.x * T * Z + 1, S.sel.ref.y * T * Z + 1, T * Z - 2, T * Z - 2); }
-  if (S.hover) { g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1; g.strokeRect(S.hover.x * T * Z + 0.5, S.hover.y * T * Z + 0.5, T * Z - 1, T * Z - 1); }
+  if (S.hover && !S.pasting) {
+    const size = S.tool === 'paint' ? S.brush : 1;
+    const b = brushCells(S.hover, size)[0];
+    g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1; g.strokeRect(b.x * Zt + 0.5, b.y * Zt + 0.5, size * Zt - 1, size * Zt - 1);
+  }
 }
 
 // ---------------------------------------------------------------- editing
@@ -406,6 +494,8 @@ function changed() {
   renderInspector();
   renderMapList();
   syncPending();
+  syncReplaceFrom();
+  renderArea();
   undoBtn.disabled = !S.undo.length;
   redoBtn.disabled = !S.redo.length;
 }
@@ -530,6 +620,163 @@ function resetMap() {
   status('Mapa vuelto al original. Si lo guardás, el juego también vuelve al original.', 'ok');
 }
 
+// ---------------------------------------------------------------- zone, clipboard and stamps
+const areaName = (r) => `${r.w}×${r.h} desde ${r.x},${r.y}`;
+function copyArea(cut = false) {
+  if (!S.area) return status('Marcá una zona con la herramienta Selección (M) primero.', 'warn');
+  S.clip = copyRegion(S.W.tiles, S.area);
+  saveJSON(CLIP_KEY, S.clip);
+  if (cut) {
+    const r = S.area;
+    edit(() => paintCells(S.W.tiles, rectCells({ x: r.x, y: r.y }, { x: r.x + r.w - 1, y: r.y + r.h - 1 }), S.tile, LOCKED));
+    status(`Cortado ${areaName(r)}: quedó rellenado con ${TILE_INFO[S.tile]?.name ?? S.tile}. Ctrl+V para pegar.`, 'ok');
+  } else status(`Copiado ${areaName(S.area)}. Ctrl+V para pegar (sirve también en otro mapa).`, 'ok');
+  renderArea();
+}
+function fillArea() {
+  if (!S.area) return;
+  const r = S.area;
+  edit(() => paintCells(S.W.tiles, rectCells({ x: r.x, y: r.y }, { x: r.x + r.w - 1, y: r.y + r.h - 1 }), S.tile, LOCKED));
+}
+function startPaste() {
+  if (!S.clip?.length) return status('No hay nada copiado todavía.', 'warn');
+  S.pasting = true;
+  S.area = null;
+  canvas.dataset.tool = 'paste';
+  status('Pegando: hacé clic donde va la esquina de arriba a la izquierda. X espeja, Y da vuelta, R gira. Esc cancela.', 'ok');
+  renderArea();
+  draw();
+}
+function stopPaste() {
+  S.pasting = false;
+  canvas.dataset.tool = S.tool;
+  renderArea();
+  draw();
+}
+function transformClip(fn, what) {
+  if (!S.clip) return;
+  S.clip = fn(S.clip);
+  saveJSON(CLIP_KEY, S.clip);
+  status(`Portapapeles ${what}.`, 'ok');
+  renderArea();
+  draw();
+}
+function replaceInMap(from) {
+  if (LOCKED.has(from)) return status('Las puertas y los carteles no se reemplazan.', 'warn');
+  let n = 0;
+  edit(() => { n = replaceAll(S.W.tiles, from, S.tile, LOCKED, S.area ?? undefined); });
+  status(`${n} casilla${n === 1 ? '' : 's'} de ${TILE_INFO[from]?.name ?? from} cambiada${n === 1 ? '' : 's'} por ${TILE_INFO[S.tile]?.name ?? S.tile}${S.area ? ' dentro de la selección' : ' en todo el mapa'}.`, n ? 'ok' : '');
+}
+function renderArea() {
+  const rows = [];
+  if (S.area) {
+    rows.push(h('p', { class: 'ed-hint', text: `Zona marcada: ${areaName(S.area)}.` }));
+    rows.push(h('div', { class: 'me-row me-wrap' },
+      btn('Copiar', () => copyArea(), { class: 'ed-btn ed-mini', title: 'Ctrl+C' }),
+      btn('Cortar', () => copyArea(true), { class: 'ed-btn ed-mini', title: 'Ctrl+X: copia y rellena la zona con la pieza elegida' }),
+      btn('Rellenar con la pieza', () => fillArea(), { class: 'ed-btn ed-mini', title: 'Supr: rellena la zona con la pieza elegida' }),
+      btn('Soltar', () => { S.area = null; renderArea(); draw(); }, { class: 'ed-btn ed-mini', title: 'Esc' })));
+  } else rows.push(h('p', { class: 'ed-hint', text: 'Con Selección (M) marcás una zona para copiarla a otro lugar o a otro mapa, rellenarla, o limitar el reemplazo de piezas.' }));
+  if (S.clip?.length) {
+    const c = h('canvas', { width: S.clip[0].length * T, height: S.clip.length * T, class: 'me-clip' });
+    const cg = c.getContext('2d');
+    const theme = MAPS[S.id]?.theme ?? null;
+    S.clip.forEach((r, y) => r.forEach((ch, x) => cg.drawImage(tileCanvas(ch, 0, theme), x * T, y * T)));
+    rows.push(h('div', { class: 'me-clipbox' }, c, h('small', { text: `Copiado: ${S.clip[0].length}×${S.clip.length}` })));
+    rows.push(h('div', { class: 'me-row me-wrap' },
+      btn(S.pasting ? 'Cancelar pegado' : 'Pegar', () => (S.pasting ? stopPaste() : startPaste()), { class: `ed-btn ed-mini ${S.pasting ? '' : 'is-primary'}`, title: 'Ctrl+V' }),
+      btn('Espejar', () => transformClip(flipH, 'espejado'), { class: 'ed-btn ed-mini', title: 'X mientras pegás' }),
+      btn('Dar vuelta', () => transformClip(flipV, 'dado vuelta'), { class: 'ed-btn ed-mini', title: 'Y mientras pegás' }),
+      btn('Girar', () => transformClip(rotate, 'girado'), { class: 'ed-btn ed-mini', title: 'R mientras pegás' })));
+    rows.push(h('p', { class: 'ed-hint', text: 'Solo se copian piezas de suelo; puertas y carteles no se pegan ni se pisan.' }));
+  }
+  rows.push(h('div', { class: 'me-row' },
+    btn('Reemplazar', () => replaceInMap(replaceFrom.value), { class: 'ed-btn ed-mini', title: 'Cambia todas las piezas del tipo elegido por la pieza actual' }),
+    replaceFrom));
+  rows.push(h('p', { class: 'ed-hint', text: `Cambia cada «${replaceFrom.selectedOptions[0]?.textContent ?? ''}» por la pieza elegida${S.area ? ', solo dentro de la zona marcada' : ' en todo el mapa'}. Atajo: Shift + clic con Rellenar.` }));
+  areaBox.replaceChildren(...rows);
+}
+const replaceFrom = h('select', { class: 'ed-input', title: 'Pieza a reemplazar', onchange: () => renderArea() });
+function syncReplaceFrom() {
+  const used = [...new Set(S.W.tiles.flat())].filter((ch: string) => !LOCKED.has(ch) && TILE_INFO[ch]) as string[];
+  const keep = used.includes(replaceFrom.value) ? replaceFrom.value : used[0];
+  replaceFrom.replaceChildren(...used.map((ch) => h('option', { value: ch, text: `${TILE_INFO[ch].name} "${ch}"`, selected: ch === keep })));
+}
+
+/** Exits, doors and the way back: one click opens the other map. */
+function renderLinks() {
+  const m = MAPS[S.id];
+  const go = (to, label) => (MAPS[to] ? btn(label, () => openMap(to, true), { class: 'ed-btn ed-mini me-link', title: to }) : h('span', { class: 'ed-hint', text: `${label} (no existe)` }));
+  const items = [];
+  if (S.back.length) items.push(btn(`← Volver a ${nameOf(S.back[S.back.length - 1])}`, () => goBack(), { class: 'ed-btn ed-mini is-primary', title: 'Alt + ←' }));
+  for (const [side, ex] of Object.entries(m.exits ?? {}) as [string, any][]) items.push(go(ex.to, `${{ n: '↑', s: '↓', w: '←', e: '→' }[side]} ${nameOf(ex.to)}`));
+  const doors = (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d?.to)).filter(Boolean);
+  for (const to of [...new Set(doors)] as string[]) items.push(go(to, `🚪 ${nameOf(to)}`));
+  if (PARENT[S.id]) items.push(go(PARENT[S.id], `⌂ Salir a ${nameOf(PARENT[S.id])}`));
+  linksEl.replaceChildren(...(items.length ? items : [h('p', { class: 'ed-hint', text: 'Este mapa no tiene salidas registradas.' })]),
+    h('p', { class: 'ed-hint', text: 'Doble clic sobre una puerta del mapa también la abre.' }));
+}
+function goBack() {
+  const id = S.back.pop();
+  if (id) openMap(id, false);
+}
+/** Door number k (reading order) leads to doors[k]. */
+function doorTarget(x, y) {
+  const m = MAPS[S.id];
+  const doors = (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d?.to));
+  let k = 0;
+  for (let yy = 0; yy < S.W.tiles.length; yy++) for (let xx = 0; xx < S.W.tiles[yy].length; xx++) {
+    if (S.W.tiles[yy][xx] !== 'D') continue;
+    if (xx === x && yy === y) return doors[k] ?? null;
+    k++;
+  }
+  return null;
+}
+
+function setZoom(z, anchor?: { clientX: number; clientY: number }) {
+  z = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], Math.round(z)));
+  if (z === S.zoom) { zoomSel.value = String(z); return; }
+  const r = stage.getBoundingClientRect();
+  const ax = anchor ? anchor.clientX - r.left : stage.clientWidth / 2, ay = anchor ? anchor.clientY - r.top : stage.clientHeight / 2;
+  const cr = canvas.getBoundingClientRect();
+  const mx = (r.left + ax - cr.left) / S.zoom, my = (r.top + ay - cr.top) / S.zoom; // map pixel under the anchor
+  S.zoom = z;
+  zoomSel.value = String(z);
+  draw();
+  const cr2 = canvas.getBoundingClientRect();
+  stage.scrollLeft += cr2.left + mx * z - (r.left + ax);
+  stage.scrollTop += cr2.top + my * z - (r.top + ay);
+}
+
+const HELP: [string, string][] = [
+  ['B / L / R / G / M / I / V', 'Pincel, Línea, Rectángulo, Rellenar, Selección, Cuentagotas, Mover'],
+  ['[ y ]', 'Achicar o agrandar el pincel'],
+  ['1 … 9', 'Elegir una de las últimas piezas usadas'],
+  ['Clic derecho o Alt + clic', 'Tomar la pieza de la casilla (cuentagotas)'],
+  ['Shift + clic (Pincel)', 'Línea recta desde la última casilla pintada'],
+  ['Shift al soltar (Rectángulo)', 'Solo el borde'],
+  ['Shift + clic (Rellenar)', 'Cambiar esa pieza en todo el mapa o en la selección'],
+  ['Ctrl+C / Ctrl+X / Ctrl+V', 'Copiar, cortar y pegar la zona marcada (también entre mapas)'],
+  ['X / Y / R al pegar', 'Espejar, dar vuelta, girar'],
+  ['Supr', 'Rellenar la zona marcada con la pieza, o borrar la persona u objeto elegido'],
+  ['Flechas', 'Correr una casilla la persona u objeto elegido'],
+  ['Esc', 'Cancelar el pegado o soltar la selección'],
+  ['Ctrl + rueda, + / −, 0', 'Zoom, y zoom que entra entero'],
+  ['Espacio + arrastrar, o rueda apretada', 'Moverse por el mapa'],
+  ['H / P / C', 'Grilla, lo que no se pisa, cambios respecto al original'],
+  ['Doble clic en una puerta', 'Abrir el mapa al que lleva'],
+  ['Alt + ←', 'Volver al mapa anterior'],
+  ['Ctrl+P', 'Buscar mapa'],
+  ['Ctrl+Z / Ctrl+Y', 'Deshacer / Rehacer (cada mapa guarda el suyo)'],
+  ['Ctrl+S', 'Guardar en el juego'],
+];
+function toggleHelp(force?: boolean) {
+  const show = force ?? helpEl.hidden;
+  helpEl.hidden = !show;
+  if (show) helpEl.replaceChildren(h('h2', { text: 'Atajos de teclado' }), h('dl', {}, ...HELP.flatMap(([k, v]) => [h('dt', {}, h('kbd', { text: k })), h('dd', { text: v })])),
+    btn('Cerrar', () => toggleHelp(false), { class: 'ed-btn ed-mini' }));
+}
+
 // ---------------------------------------------------------------- mouse and keys
 function cellAt(ev) {
   const r = canvas.getBoundingClientRect();
@@ -537,12 +784,49 @@ function cellAt(ev) {
   const y = Math.floor((ev.clientY - r.top) / (T * S.zoom));
   return S.W?.tiles[y]?.[x] === undefined ? null : { x, y };
 }
+/** Same as cellAt, but clamped to the map (for shapes dragged past the edge). */
+function cellClamped(ev) {
+  const r = canvas.getBoundingClientRect();
+  const x = Math.floor((ev.clientX - r.left) / (T * S.zoom));
+  const y = Math.floor((ev.clientY - r.top) / (T * S.zoom));
+  return { x: Math.max(0, Math.min(S.W.tiles[0].length - 1, x)), y: Math.max(0, Math.min(S.W.tiles.length - 1, y)) };
+}
 canvas.addEventListener('contextmenu', (ev) => ev.preventDefault());
+stage.addEventListener('pointerdown', (ev) => {
+  if (ev.button === 1 || (ev.button === 0 && S.spaceDown)) {
+    ev.preventDefault();
+    stage.setPointerCapture(ev.pointerId);
+    S.pan = { x: ev.clientX, y: ev.clientY, sl: stage.scrollLeft, st: stage.scrollTop };
+    stage.classList.add('is-panning');
+  }
+}, { capture: true });
+stage.addEventListener('pointermove', (ev) => {
+  if (!S.pan) return;
+  stage.scrollLeft = S.pan.sl - (ev.clientX - S.pan.x);
+  stage.scrollTop = S.pan.st - (ev.clientY - S.pan.y);
+});
+const endPan = () => { if (S.pan) { S.pan = null; stage.classList.remove('is-panning'); } };
+stage.addEventListener('pointerup', endPan);
+stage.addEventListener('pointercancel', endPan);
+stage.addEventListener('wheel', (ev) => {
+  if (!(ev.ctrlKey || ev.metaKey)) return;
+  ev.preventDefault();
+  setZoom(S.zoom + (ev.deltaY < 0 ? 1 : -1), ev);
+}, { passive: false });
+
 canvas.addEventListener('pointerdown', (ev) => {
+  if (S.pan || ev.button === 1) return;
   const c = cellAt(ev);
   if (!c) return;
   canvas.setPointerCapture(ev.pointerId);
-  if (ev.button === 2 || S.tool === 'pick') { pickTile(S.W.tiles[c.y][c.x]); return; }
+  if (S.pasting) {
+    if (ev.button === 2) { stopPaste(); return; }
+    let n = 0;
+    edit(() => { n = pasteStamp(S.W.tiles, S.clip, c.x, c.y, LOCKED); });
+    status(`Pegado (${n} casilla${n === 1 ? '' : 's'}). Seguí haciendo clic para pegar otra vez, o Esc para terminar.`, 'ok');
+    return;
+  }
+  if (ev.button === 2 || ev.altKey || S.tool === 'pick') { pickTile(S.W.tiles[c.y][c.x]); return; }
   if (S.tool === 'move') {
     const e = entityAt(c.x, c.y);
     if (!e) { S.sel = null; draw(); renderEntities(); renderInspector(); return; }
@@ -550,57 +834,141 @@ canvas.addEventListener('pointerdown', (ev) => {
     S.drag = { ref: e.ref, before: snap(), moved: false };
     return;
   }
-  if (S.tool === 'fill') { edit(() => fill(c.x, c.y, S.tile)); return; }
+  if (S.tool === 'fill') {
+    if (ev.shiftKey) { replaceInMap(S.W.tiles[c.y][c.x]); return; }
+    edit(() => fill(c.x, c.y, S.tile));
+    return;
+  }
+  if (S.tool === 'line' || S.tool === 'rect' || S.tool === 'select') {
+    S.shape = { from: c, to: c, border: false };
+    if (S.tool === 'select') S.area = null;
+    draw();
+    return;
+  }
+  // pincel
   pushUndo();
   S.painting = true;
-  if (setTile(c.x, c.y, S.tile)) draw();
+  const cells = ev.shiftKey && S.lastPaint ? lineCells(S.lastPaint, c).flatMap((p) => brushCells(p, S.brush)) : brushCells(c, S.brush);
+  paintCells(S.W.tiles, cells, S.tile, LOCKED);
+  if (cells.some((p) => LOCKED.has(S.W.tiles[p.y]?.[p.x]))) status('Las puertas y los carteles no se pintan: quedaron como estaban.', 'warn');
+  S.lastPaint = c;
+  draw();
 });
 canvas.addEventListener('pointermove', (ev) => {
+  if (S.pan) return;
   const c = cellAt(ev);
   S.hover = c;
   if (c) {
     const ch = S.W.tiles[c.y][c.x];
     const e = entityAt(c.x, c.y);
-    hoverEl.textContent = `Casilla ${c.x},${c.y} · ${TILE_INFO[ch]?.name ?? ch} "${ch}"${TILE_INFO[ch]?.solid ? ' (no se pisa)' : ''}${e ? ` · ${e.type === 'npc' ? (e.ref.name ?? KIND_NAME[e.ref.kind]) : ITEMS[e.ref.item]?.name}` : ''}`;
+    const door = ch === 'D' ? doorTarget(c.x, c.y) : null;
+    const shape = S.shape ? ` · ${rectBetween(S.shape.from, S.shape.to).w}×${rectBetween(S.shape.from, S.shape.to).h}` : '';
+    hoverEl.textContent = `Casilla ${c.x},${c.y} · ${TILE_INFO[ch]?.name ?? ch} "${ch}"${TILE_INFO[ch]?.solid ? ' (no se pisa)' : ''}${door ? ` · lleva a ${nameOf(door)} (doble clic)` : ''}${e ? ` · ${e.type === 'npc' ? (e.ref.name ?? KIND_NAME[e.ref.kind]) : ITEMS[e.ref.item]?.name}` : ''}${shape}`;
   }
-  if (S.painting && c && S.tool === 'paint') setTile(c.x, c.y, S.tile);
+  if (S.shape) { S.shape.to = cellClamped(ev); S.shape.border = ev.shiftKey; }
+  if (S.painting && c && S.tool === 'paint') {
+    const from = S.lastPaint ?? c;
+    paintCells(S.W.tiles, lineCells(from, c).flatMap((p) => brushCells(p, S.brush)), S.tile, LOCKED); // no gaps on fast strokes
+    S.lastPaint = c;
+  }
   if (S.drag && c && (c.x !== S.drag.ref.x || c.y !== S.drag.ref.y)) {
     if (S.drag.ref.look === 'swimmer' && S.W.tiles[c.y][c.x] !== '~') status('El nadador solo puede estar sobre agua.', 'warn');
     else if ((S.drag.ref.look === 'swimmer' || !SOLID(S.W.tiles[c.y][c.x])) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
   }
   draw();
 });
-const endStroke = () => {
+const endStroke = (ev?) => {
   if (S.painting) { S.painting = false; changed(); }
+  if (S.shape) {
+    const { from, to } = S.shape;
+    const border = !!ev?.shiftKey;
+    S.shape = null;
+    if (S.tool === 'line') edit(() => paintCells(S.W.tiles, lineCells(from, to), S.tile, LOCKED));
+    else if (S.tool === 'rect') edit(() => paintCells(S.W.tiles, rectCells(from, to, !border), S.tile, LOCKED));
+    else if (S.tool === 'select') {
+      S.area = rectBetween(from, to);
+      status(`Zona ${areaName(S.area)}: Ctrl+C copia, Ctrl+X corta, Supr la rellena con la pieza elegida.`, 'ok');
+      renderArea();
+      draw();
+    }
+  }
   if (S.drag) {
     if (S.drag.moved) { S.undo.push(S.drag.before); S.redo = []; changed(); }
     S.drag = null;
   }
 };
 canvas.addEventListener('pointerup', endStroke);
-canvas.addEventListener('pointercancel', endStroke);
+canvas.addEventListener('pointercancel', () => endStroke());
 canvas.addEventListener('pointerleave', () => { S.hover = null; draw(); });
+canvas.addEventListener('dblclick', (ev) => {
+  const c = cellAt(ev);
+  if (!c || S.W.tiles[c.y][c.x] !== 'D') return;
+  const to = doorTarget(c.x, c.y);
+  if (to && MAPS[to]) openMap(to, true);
+});
 
 function setTool(id) {
+  if (S.pasting) stopPaste();
   S.tool = id;
+  S.shape = null;
   for (const [k, b] of Object.entries(toolBtns)) b.classList.toggle('is-active', k === id);
   canvas.dataset.tool = id;
+  const tip = TOOLS.find((t) => t[0] === id)?.[3];
+  if (tip) status(tip);
 }
+function nudge(dx, dy) {
+  const r = S.sel?.ref;
+  if (!r || r.removed) return;
+  const x = r.x + dx, y = r.y + dy;
+  const t = S.W.tiles[y]?.[x];
+  if (t === undefined) return;
+  if (r.look === 'swimmer' ? t !== '~' : SOLID(t)) return status('Ahí no se puede parar.', 'warn');
+  if (occupied(x, y, r)) return status('Esa casilla ya está ocupada.', 'warn');
+  edit(() => { r.x = x; r.y = y; });
+}
+addEventListener('keyup', (ev) => { if (ev.key === ' ') { S.spaceDown = false; stage.classList.remove('can-pan'); } });
 addEventListener('keydown', (ev) => {
-  if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement || ev.target instanceof HTMLSelectElement) return;
+  const typing = ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement || ev.target instanceof HTMLSelectElement;
   const k = ev.key.toLowerCase();
-  if ((ev.ctrlKey || ev.metaKey) && k === 'z') { ev.preventDefault(); ev.shiftKey ? redo() : undo(); return; }
-  if ((ev.ctrlKey || ev.metaKey) && k === 'y') { ev.preventDefault(); redo(); return; }
-  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
-  const tool = { b: 'paint', g: 'fill', i: 'pick', v: 'move' }[k];
+  const mod = ev.ctrlKey || ev.metaKey;
+  if (mod && k === 's') { ev.preventDefault(); if (!saveBtn.disabled) saveToGitHub(); return; }
+  if (mod && k === 'p') { ev.preventDefault(); search.focus(); search.select(); return; }
+  if (typing || !S.W) return;
+  if (mod && k === 'z') { ev.preventDefault(); ev.shiftKey ? redo() : undo(); return; }
+  if (mod && k === 'y') { ev.preventDefault(); redo(); return; }
+  if (mod && k === 'c') { ev.preventDefault(); copyArea(); return; }
+  if (mod && k === 'x') { ev.preventDefault(); copyArea(true); return; }
+  if (mod && k === 'v') { ev.preventDefault(); startPaste(); return; }
+  if (ev.altKey && ev.key === 'ArrowLeft') { ev.preventDefault(); goBack(); return; }
+  if (mod || ev.altKey) return;
+  if (ev.key === ' ') { ev.preventDefault(); S.spaceDown = true; stage.classList.add('can-pan'); return; }
+  if (S.pasting) {
+    if (k === 'escape') return stopPaste();
+    if (k === 'x') return transformClip(flipH, 'espejado');
+    if (k === 'y') return transformClip(flipV, 'dado vuelta');
+    if (k === 'r') return transformClip(rotate, 'girado');
+  }
+  const arrows = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] }[k];
+  if (arrows && S.sel) { ev.preventDefault(); nudge(arrows[0], arrows[1]); return; }
+  const tool = { b: 'paint', l: 'line', r: 'rect', g: 'fill', m: 'select', i: 'pick', v: 'move' }[k];
   if (tool) setTool(tool);
   else if (k === 'h') { S.grid = !S.grid; gridChk.checked = S.grid; draw(); }
-  else if ((k === 'delete' || k === 'backspace') && S.sel) removeSel();
+  else if (k === 'p') { S.showSolid = !S.showSolid; solidChk.checked = S.showSolid; draw(); }
+  else if (k === 'c') { S.showChanges = !S.showChanges; changesChk.checked = S.showChanges; draw(); }
+  else if (k === '[' || k === ']') { const sizes = [1, 2, 3, 5]; const i = Math.max(0, Math.min(sizes.length - 1, sizes.indexOf(S.brush) + (k === ']' ? 1 : -1))); S.brush = sizes[i]; brushSel.value = String(S.brush); draw(); }
+  else if (/^[1-9]$/.test(k) && S.recent[+k - 1]) pickTile(S.recent[+k - 1]);
+  else if (k === '+' || k === '=') setZoom(S.zoom + 1);
+  else if (k === '-') setZoom(S.zoom - 1);
+  else if (k === '0') fitBtn.click();
+  else if (k === '?') toggleHelp();
+  else if (k === 'escape') { if (!helpEl.hidden) toggleHelp(false); else if (S.area) { S.area = null; renderArea(); draw(); } else if (S.sel) { S.sel = null; draw(); renderEntities(); renderInspector(); } }
+  else if (k === 'delete' || k === 'backspace') { if (S.sel) removeSel(); else if (S.area) fillArea(); }
 });
 
 // ---------------------------------------------------------------- checks (same rules as tests/check-maps.mjs)
-function runChecks() {
-  const id = S.id, W = S.W, m = MAPS[id];
+/** What is wrong with map `id` as W has it (blocked exits, people or items out of reach, ...). */
+function problemsOf(id, W) {
+  const m = MAPS[id];
   const rows = W.tiles.map((r) => r.join(''));
   const at = (x, y) => rows[y]?.[x];
   const hgt = rows.length, wid = rows[0].length;
@@ -637,20 +1005,48 @@ function runChecks() {
     for (const n of npcs) if (n.look !== null && n.kind !== 'critter' && !near(n.x, n.y)) out.push({ x: n.x, y: n.y, msg: `No se puede llegar a ${n.name ?? KIND_NAME[n.kind].toLowerCase()}.` });
     for (const it of items) if (!near(it.x, it.y)) out.push({ x: it.x, y: it.y, msg: `No se puede llegar a ${ITEMS[it.item]?.name ?? it.item}.` });
   }
+  return out;
+}
+function runChecks() {
+  const out = problemsOf(S.id, S.W);
   S.problems = out;
   checks.replaceChildren(out.length
-    ? h('ul', { class: 'me-problems' }, out.map((p) => h('li', { text: p.msg })))
+    ? h('ul', { class: 'me-problems' }, out.map((p) => h('li', { text: p.msg, class: p.x != null ? 'is-link' : '', title: p.x != null ? 'Ir a esa casilla' : '', onclick: () => p.x != null && scrollToCell(p.x, p.y) })))
     : h('p', { class: 'me-ok', text: 'Todo en orden: se llega a todas las salidas, puertas, personas y objetos.' }));
+}
+function scrollToCell(x, y) {
+  const Zt = T * S.zoom;
+  stage.scrollTo({ left: x * Zt - stage.clientWidth / 2 + Zt / 2 + 12, top: y * Zt - stage.clientHeight / 2 + Zt / 2 + 12, behavior: 'smooth' });
+  S.hover = { x, y };
+  draw();
+}
+/** Problems in every map with changes (saved or not). */
+function edited() { return [...new Set([...Object.keys(base), ...Object.keys(drafts)])].filter((id) => MAPS[id] && patchOf(id)); }
+function reviewAll() {
+  const bad = edited().map((id) => [id, id === S.id ? S.problems : problemsOf(id, working(id))] as [string, any[]]).filter(([, p]) => p.length);
+  reviewOut.replaceChildren(bad.length
+    ? h('ul', { class: 'me-problems' }, bad.map(([id, p]) => h('li', { class: 'is-link', onclick: () => openMap(id, true), title: p.map((x) => x.msg).join('\n') }, `${nameOf(id)}: ${p.length} problema${p.length === 1 ? '' : 's'}`)))
+    : h('p', { class: 'me-ok', text: `Los ${edited().length} mapas editados están en orden.` }));
 }
 
 // ---------------------------------------------------------------- open a map
-function openMap(id) {
+function openMap(id, remember = false) {
+  if (S.pasting) stopPaste();
+  if (S.id && S.id !== id) {
+    S.history.set(S.id, { undo: S.undo, redo: S.redo });
+    if (remember) S.back = [...S.back.filter((x) => x !== S.id), S.id].slice(-20);
+  }
   S.id = id;
   S.W = working(id);
   S.sel = null;
-  S.undo = [];
-  S.redo = [];
-  undoBtn.disabled = redoBtn.disabled = true;
+  S.area = null;
+  S.shape = null;
+  S.lastPaint = null;
+  const hist = S.history.get(id) ?? { undo: [], redo: [] };
+  S.undo = hist.undo;
+  S.redo = hist.redo;
+  undoBtn.disabled = !S.undo.length;
+  redoBtn.disabled = !S.redo.length;
   try { store.setItem('pokeuy:map-last', id); } catch { /* storage blocked */ }
   weatherSel.value = S.W.weather ?? 'random';
   groundSel.value = S.W.ground ?? 'auto';
@@ -659,6 +1055,9 @@ function openMap(id) {
   runChecks();
   renderEntities();
   renderInspector();
+  syncReplaceFrom();
+  renderArea();
+  renderLinks();
   draw();
   stage.scrollTo(0, 0);
   sizeInfo.textContent = `Ahora: ${S.W.tiles[0].length}×${S.W.tiles.length} casillas.`;
@@ -694,8 +1093,8 @@ const b64decode = (b64) => decodeURIComponent(escape(atob(b64.replace(/\s/g, '')
 
 async function saveToGitHub() {
   if (!Object.keys(drafts).length) return status('No hay cambios para guardar.');
-  const bad = Object.keys(drafts).filter((id) => id === S.id && S.problems.length);
-  if (bad.length && !confirm('Este mapa tiene problemas en la revisión (algo quedó tapado). ¿Guardar igual?')) return;
+  const bad = Object.keys(drafts).filter((id) => MAPS[id] && drafts[id] && (id === S.id ? S.problems : problemsOf(id, working(id))).length);
+  if (bad.length && !confirm(`Hay problemas en la revisión (algo quedó tapado o fuera de alcance) en: ${bad.map(nameOf).join(', ')}. ¿Guardar igual?`)) return;
   const url = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
   const headers = { Authorization: `Bearer ${devToken()}`, Accept: 'application/vnd.github+json' };
   status('Guardando en GitHub…');

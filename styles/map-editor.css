@@ -11,7 +11,8 @@
 .me-center { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; min-width: 0; min-height: 0; }
 .me-toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   & .ed-btn.is-active { background: var(--celeste-deep); border-color: var(--celeste); }
-  & .me-zoom { width: auto; padding: 3px 8px; margin-left: auto; }
+  & .me-zoom { width: auto; padding: 3px 8px; }
+  & .me-fit { margin-left: auto; }
 }
 .me-check { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; cursor: pointer; }
 .me-stage { flex: 1; min-height: 0; overflow: auto; padding: 12px; border-radius: 12px;
@@ -65,3 +66,32 @@
   & small { color: var(--muted); font-size: 12px; white-space: nowrap; }
 }
 .me-tile.is-mine { border-color: oklch(0.8 0.15 85); box-shadow: 0 0 0 1px oklch(0.8 0.15 85 / 0.6); }
+
+/* v224: shapes, zone and clipboard, connections, overlays, shortcuts */
+.me-sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }
+.me-canvas[data-tool='rect'], .me-canvas[data-tool='line'], .me-canvas[data-tool='select'] { cursor: crosshair; }
+.me-canvas[data-tool='paste'] { cursor: copy; }
+.me-stage.can-pan, .me-stage.can-pan .me-canvas { cursor: grab; }
+.me-stage.is-panning, .me-stage.is-panning .me-canvas { cursor: grabbing; }
+.me-recent { display: flex; gap: 4px; flex-wrap: wrap;
+  & .me-tile { width: 30px; }
+  &:empty { display: none; }
+}
+.me-wrap { flex-wrap: wrap; }
+.me-clipbox { display: flex; align-items: center; gap: 10px;
+  & small { color: var(--muted); font-size: 12px; }
+}
+.me-clip { max-width: 120px; max-height: 90px; image-rendering: pixelated; border: 1px dashed var(--celeste); border-radius: 4px; background: oklch(0 0 0 / 0.3); }
+.me-links { display: flex; flex-wrap: wrap; gap: 6px; }
+.me-link { text-align: left; }
+.me-problems li.is-link { cursor: pointer; text-decoration: underline dotted; }
+.me-problems li.is-link:hover { color: var(--text); }
+.me-review:empty { display: none; }
+.me-review { max-height: 180px; overflow: auto; }
+.me-help { position: fixed; inset: 60px auto auto 50%; translate: -50% 0; z-index: 20; width: min(640px, 92vw); max-height: 80vh; overflow: auto;
+  padding: 16px 20px; border-radius: 12px; background: var(--panel); border: 1px solid var(--celeste); box-shadow: 0 20px 60px oklch(0 0 0 / 0.6);
+  & h2 { margin: 0 0 12px; font: 12px var(--font-pixel); color: var(--celeste); }
+  & dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0 0 12px; }
+  & dt { text-align: right; }
+  & dd { margin: 0; color: var(--muted); }
+}

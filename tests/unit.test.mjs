@@ -963,3 +963,30 @@ test('gimnasios: cada uno tiene su mecanismo, se resuelve de punta a punta y no 
     }
   }
 });
+
+test('map editor grid tools: shapes, stamps, replace and changes', async () => {
+  const { rectCells, lineCells, brushCells, copyRegion, flipH, flipV, rotate, pasteStamp, paintCells, replaceAll, changedCells, fitZoom, rectBetween } = await import('../src/map-editor/ops.ts');
+  const L = new Set(['D', 'S']);
+  assert.deepEqual(rectBetween({ x: 3, y: 1 }, { x: 1, y: 2 }), { x: 1, y: 1, w: 3, h: 2 });
+  assert.equal(rectCells({ x: 0, y: 0 }, { x: 2, y: 2 }).length, 9);
+  assert.equal(rectCells({ x: 0, y: 0 }, { x: 2, y: 2 }, false).length, 8, 'borde sin el centro');
+  assert.deepEqual(lineCells({ x: 0, y: 0 }, { x: 3, y: 0 }).map((c) => c.x), [0, 1, 2, 3]);
+  assert.equal(lineCells({ x: 0, y: 0 }, { x: 4, y: 2 }).length, 5);
+  assert.equal(brushCells({ x: 5, y: 5 }, 3).length, 9);
+  const g = ['###', '#D.', '...'].map((r) => [...r]);
+  const st = copyRegion(g, { x: 1, y: 0, w: 5, h: 2 });
+  assert.deepEqual(st, [['#', '#'], ['D', '.']], 'recortado al mapa');
+  assert.deepEqual(flipH(st), [['#', '#'], ['.', 'D']]);
+  assert.deepEqual(flipV(st), [['D', '.'], ['#', '#']]);
+  assert.deepEqual(rotate([['a', 'b'], ['c', 'd']]), [['c', 'a'], ['d', 'b']]);
+  const g2 = ['...', '.D.', '...'].map((r) => [...r]);
+  assert.equal(pasteStamp(g2, [['~', '~'], ['~', '~']], 1, 1, L), 3, 'la puerta queda');
+  assert.equal(g2[1][1], 'D');
+  assert.equal(g2[2][2], '~');
+  assert.equal(paintCells(g2, [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 9, y: 9 }], '#', L), 1);
+  assert.equal(replaceAll(g2, '~', ',', L), 3);
+  assert.equal(replaceAll(g2, '.', '#', L, { x: 0, y: 0, w: 1, h: 3 }), 2, 'solo dentro de la zona');
+  assert.deepEqual(changedCells(['ab'], [['x', 'a', 'b']], { x: 1, y: 0 }), [{ x: 0, y: 0 }], 'mapa agrandado a la izquierda');
+  assert.equal(fitZoom(40, 30, 16, 1300, 800), 1);
+  assert.equal(fitZoom(20, 15, 16, 1300, 800), 3);
+});
