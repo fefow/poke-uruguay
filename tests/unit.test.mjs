@@ -990,3 +990,26 @@ test('map editor grid tools: shapes, stamps, replace and changes', async () => {
   assert.equal(fitZoom(40, 30, 16, 1300, 800), 1);
   assert.equal(fitZoom(20, 15, 16, 1300, 800), 3);
 });
+
+test('map editor patches: doors, signs and warps follow the tiles', async () => {
+  const { applyMapEdits, fitsGrown } = await import('../src/data/map-edits.ts');
+  const mk = () => ({ a: { tiles: ['#D#', '.S.', '...'], doors: ['x'], signs: ['hola'], warps: [{ x: 0, y: 2, to: 'b', tx: 1, ty: 1 }], npcs: [{ look: 'boy', x: 1, y: 2, text: ['hi'] }, { look: 'girl', x: 2, y: 2, script: 's', text: ['s'] }], items: [] } });
+  assert.ok(!fitsGrown(['#D#'], ['#D#', 'DDD']), 'sin lista de puertas no cambia la cantidad');
+  assert.ok(fitsGrown(['#D#'], ['#D#', 'DDD'], { doors: ['a', 'b', 'c', 'd'] }));
+  const maps = mk();
+  applyMapEdits(maps, { a: {
+    tiles: ['#D#', 'DSD', '..S'], doors: ['x', { to: 'y', req: 'f' }, 'z'], signs: ['hola', 'otro'],
+    warps: [{ x: 2, y: 1, to: 'c', tx: 0, ty: 0 }],
+    npcs: { 'look:boy': { look: 'gaucho', wander: true }, 's:s': { look: 'cop' } },
+  } });
+  const m = maps.a;
+  assert.deepEqual(m.doors, ['x', { to: 'y', req: 'f' }, 'z']);
+  assert.deepEqual(m.signs, ['hola', 'otro']);
+  assert.deepEqual(m.warps, [{ x: 2, y: 1, to: 'c', tx: 0, ty: 0 }]);
+  assert.equal(m.npcs[0].look, 'gaucho');
+  assert.equal(m.npcs[0].wander, true);
+  assert.equal(m.npcs[1].look, 'girl', 'los eventos no cambian de aspecto');
+  const bad = mk();
+  applyMapEdits(bad, { a: { tiles: ['#D#', '.S.', '...'], doors: ['x', 'y'] } });
+  assert.deepEqual(bad.a.doors, ['x'], 'lista de puertas con otra cantidad: se ignora');
+});
