@@ -12,6 +12,7 @@ import { canoeCanvas } from './ui-icons.ts';
 import { creatureSprite } from './creatures.ts';
 import { skyHour } from './screen.ts';
 
+const PHI_CAM = Math.atan2(0.95, 0.78); // inclinación de la cámara
 const RW = 1920, RH = 1080; // resolución completa: los sprites pixel art quedan nítidos
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera;
@@ -148,7 +149,7 @@ type Kind = 'ground' | 'water' | 'tree' | 'palm' | 'bush' | 'rock' | 'cliff' | '
 const WATER = new Set(['~', 'ӫ', 'ϸ', 'Ϡ', 'Ӥ', 'Ӣ']);
 const CLIFF = new Set(['K', 'k', 'ϰ', 'ϱ', 'ϳ', 'ϲ', ...Object.values(WALL_CAPS).flat()]);
 const ROOF = new Set(['r', 'u', 'g', 'o', 'v', 'C', 'G', 'J', 'U', 'Ӡ']);
-const WALL = new Set(['H', 'w', 'W', 'I', 't', 'h', 'j', 'a', 'd', 'Q', 'ӟ', 'ӡ']);
+const WALL = new Set(['ι', 'H', 'w', 'W', 'I', 't', 'h', 'j', 'a', 'd', 'Q', 'ӟ', 'ӡ']);
 const kindCache = new Map<string, Kind>();
 function kindOf(ch: string): Kind {
   let k = kindCache.get(ch);
@@ -243,7 +244,8 @@ function build(v: WorldView) {
     scene.remove(staticGroup);
     staticGroup.traverse((o: any) => { if (o.geometry !== objGeo) o.geometry?.dispose(); });
   }
-  for (const sm of staticMats.splice(0)) { boardMats.delete(sm); sm.dispose(); }
+  for (const sm of staticMats.splice(0)) { boardMats.delete(sm); sm.map?.dispose(); sm.dispose(); }
+  bldMesh = null;
   const m = v.map;
   const tiles = v.tiles as any;
   const W = m.w, H = m.h;
@@ -314,8 +316,12 @@ function build(v: WorldView) {
   }
   // Agua: una lámina que ondula, por encima del lecho.
   const waterGeo: THREE.BufferGeometry[] = [];
+  // Edificios afuera: cada columna de techo + fachada se arma como una casa 3D con su propio pixel art
+  // (fachada vertical con puerta, ventanas, cruz de la policlínica o emblema del gimnasio; techo a dos aguas).
+  const bld = m.indoor ? new Set<number>() : buildBuildings(m, tiles, theme, parts, groundColor);
   // Objetos de cada tile
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (bld.has(y * W + x)) continue;
     const c: string = tiles[y][x];
     const k = kindOf(c);
     const cx = x + 0.5, cz = y + 0.5;
@@ -465,6 +471,7 @@ function build(v: WorldView) {
     edge.receiveShadow = true;
     staticGroup.add(edge);
   }
+  if (bldMesh) staticGroup.add(bldMesh);
   // objetos en pixel art: un cartel por tile, agrupados por tipo de tile (una sola llamada de dibujo cada uno)
   const byChar = new Map<string, { x: number; y: number }[]>();
   for (const sp of sprites) (byChar.get(sp.c) ?? byChar.set(sp.c, []).get(sp.c)!).push(sp);
@@ -479,6 +486,129 @@ function build(v: WorldView) {
   }
   scene.add(staticGroup);
 }
+// ---------------------------------------------------------------- edificios con su pixel art
+let bldMesh: THREE.Mesh | null = null;
+const isBld = (tiles, W: number, H: number, x: number, y: number): boolean => {
+  if (x < 0 || y < 0 || x >= W || y >= H) return false;
+  const k = kindOf(tiles[y][x]);
+  if (k === 'roof' || k === 'wall') return true;
+  if (k === 'door') { const a = y > 0 ? kindOf(tiles[y - 1][x]) : null; return a === 'roof' || a === 'wall'; }
+  return false;
+};
+const FACADE_H = Math.tan(PHI_CAM); // así una fila de fachada se ve en pantalla igual de alta que en el mapa 2D
+function buildBuildings(m, tiles, theme: string | null, parts: THREE.BufferGeometry[], groundColor: (x: number, y: number) => THREE.Color) {
+  const W = m.w, H = m.h;
+  const used = new Set<number>();
+  // atlas con los tiles de edificio que usa este mapa
+  const cells = new Map<string, number>();
+  const cellOf = (c: string) => { let i = cells.get(c); if (i == null) { i = cells.size; cells.set(c, i); } return i; };
+  const pos: number[] = [], uv: number[] = [], nor: number[] = [];
+  const quad = (a: number[], b: number[], c: number[], d: number[], cell: number) => {
+    // a-b arriba (izq-der), d-c abajo (izq-der); la normal sale de la cara
+    const col = cell % 32, row = Math.floor(cell / 32);
+    const u0 = (col * 16 + 0.05) / 512, u1 = ((col + 1) * 16 - 0.05) / 512;
+    const v1 = 1 - (row * 16 + 0.05) / 512, v0 = 1 - ((row + 1) * 16 - 0.05) / 512;
+    const n = new THREE.Vector3().subVectors(new THREE.Vector3(...d), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...b), new THREE.Vector3(...a))).normalize();
+    for (const [p, q] of [[a, [u0, v1]], [d, [u0, v0]], [b, [u1, v1]], [b, [u1, v1]], [d, [u0, v0]], [c, [u1, v0]]] as [number[], number[]][]) {
+      pos.push(...p); uv.push(...q); nor.push(n.x, n.y, n.z);
+    }
+  };
+  // cada edificio (tiles de edificio conectados) comparte una misma altura de caballete: el techo queda parejo
+  const comp = new Int32Array(W * H).fill(-1);
+  const compRidge: number[] = [];
+  const colOf = (x: number, y0: number) => { let y1 = y0; while (isBld(tiles, W, H, x, y1 + 1)) y1++; let F = 0; while (y1 - F >= y0 && kindOf(tiles[y1 - F][x]) !== 'roof') F++; return { y1, F: Math.max(1, F) }; };
+  for (let sy = 0; sy < H; sy++) for (let sx = 0; sx < W; sx++) {
+    if (comp[sy * W + sx] >= 0 || !isBld(tiles, W, H, sx, sy)) continue;
+    const id = compRidge.length;
+    let best = 0;
+    const stack = [[sx, sy]];
+    comp[sy * W + sx] = id;
+    while (stack.length) {
+      const [cx, cy] = stack.pop()!;
+      if (!isBld(tiles, W, H, cx, cy - 1)) { const { y1, F } = colOf(cx, cy); best = Math.max(best, F * FACADE_H + Math.max(0.5, (y1 + 1 - cy) * 0.32)); }
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = cx + dx, ny = cy + dy;
+        if (isBld(tiles, W, H, nx, ny) && comp[ny * W + nx] < 0) { comp[ny * W + nx] = id; stack.push([nx, ny]); }
+      }
+    }
+    compRidge.push(best);
+  }
+  for (let x = 0; x < W; x++) {
+    let y = 0;
+    while (y < H) {
+      if (!isBld(tiles, W, H, x, y)) { y++; continue; }
+      const y0 = y;
+      while (y < H && isBld(tiles, W, H, x, y)) y++;
+      const y1 = y - 1;
+      // filas de fachada: las de abajo que no son techo
+      let F = 0;
+      while (y1 - F >= y0 && kindOf(tiles[y1 - F][x]) !== 'roof') F++;
+      if (F === 0) F = 1; // solo techo: la última fila hace de fachada
+      const R = y1 - y0 + 1 - F;
+      for (let yy = y0; yy <= y1; yy++) used.add(yy * W + x);
+      const front = y1 + 1, back = y0;
+      const top = F * FACADE_H;
+      const D = front - back;
+      const zm = (front + back) / 2;
+      const ridge = Math.max(top + 0.3, compRidge[comp[y0 * W + x]] ?? top + Math.max(0.5, D * 0.32));
+      const x0 = x, x1 = x + 1;
+      // fachada: una cara por fila, de abajo hacia arriba
+      for (let i = 0; i < F; i++) {
+        const c = tiles[y1 - i][x];
+        quad([x0, (i + 1) * FACADE_H, front], [x1, (i + 1) * FACADE_H, front], [x1, i * FACADE_H, front], [x0, i * FACADE_H, front], cellOf(c));
+      }
+      // techo: las filas de techo del 2D van del caballete al alero por la cara de adelante, y repetidas atrás
+      const roofRows = R > 0 ? Array.from({ length: R }, (_, i) => tiles[y0 + i][x]) : [tiles[y0][x]];
+      const n = roofRows.length;
+      for (let i = 0; i < n; i++) {
+        const k0 = i / n, k1 = (i + 1) / n;
+        const za = zm + (front - zm) * k0, zb = zm + (front - zm) * k1;
+        const ha = ridge + (top - ridge) * k0, hb = ridge + (top - ridge) * k1;
+        quad([x0, ha, za], [x1, ha, za], [x1, hb, zb], [x0, hb, zb], cellOf(roofRows[i]));
+        const zc = zm + (back - zm) * k0, zd = zm + (back - zm) * k1;
+        quad([x1, ha, zc], [x0, ha, zc], [x0, hb, zd], [x1, hb, zd], cellOf(roofRows[i]));
+      }
+      // paredes de los costados (frontón) y de atrás, del color de la fachada
+      const wallCol = avgColor(`f|${theme}|${tiles[y1][x]}`, tileCanvas(tiles[y1][x], 0, theme, false)).clone().multiplyScalar(0.92);
+      const gable = (xs: number, flip: boolean) => {
+        const g = new THREE.BufferGeometry();
+        const P = [[xs, 0, front], [xs, top, front], [xs, ridge, zm], [xs, top, back], [xs, 0, back]];
+        const tri = [[0, 1, 2], [0, 2, 3], [0, 3, 4]];
+        const arr: number[] = [];
+        for (const t of tri) for (const o of [t, [t[0], t[2], t[1]]]) for (const j of o) arr.push(...P[j]); // las dos caras
+        g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+        parts.push(paint(g, wallCol, 0.03, xs));
+      };
+      const sameRun = (xx: number) => isBld(tiles, W, H, xx, y0) && isBld(tiles, W, H, xx, y1) && !isBld(tiles, W, H, xx, y0 - 1) && !isBld(tiles, W, H, xx, y1 + 1);
+      if (!sameRun(x - 1)) gable(x0, true);
+      if (!sameRun(x + 1)) gable(x1, false);
+      const bw = box(1, top, 0.02);
+      parts.push(paint(at(bw, x + 0.5, top / 2, back + 0.01), wallCol, 0.03, x));
+      // escalón de la vereda frente a la fachada
+      parts.push(paint(at(box(1, 0.06, 0.18), x + 0.5, 0.03, front + 0.09), groundColor(x, Math.min(H - 1, front)).clone().multiplyScalar(0.85), 0.02, x));
+    }
+  }
+  if (cells.size) {
+    const atlas = document.createElement('canvas');
+    atlas.width = atlas.height = 512;
+    const g = atlas.getContext('2d')!;
+    g.imageSmoothingEnabled = false;
+    for (const [c, i] of cells) g.drawImage(tileCanvas(c, 0, theme, false), (i % 32) * 16, Math.floor(i / 32) * 16);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    const mat = boardMat(atlas);
+    mat.alphaTest = 0;
+    mat.side = THREE.FrontSide;
+    staticMats.push(mat);
+    bldMesh = new THREE.Mesh(geo, mat);
+    bldMesh.castShadow = true;
+    bldMesh.receiveShadow = true;
+  }
+  return used;
+}
+
 function onlyPosColor(g: THREE.BufferGeometry) {
   for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'color') g.deleteAttribute(k);
   if (!g.attributes.color) paint(g, new THREE.Color(0xffffff), 0);
@@ -488,7 +618,7 @@ function onlyPosColor(g: THREE.BufferGeometry) {
 // ---------------------------------------------------------------- pixel art parado en el mundo
 // Personajes y objetos son los mismos sprites del juego 2D, puestos como carteles dentro de la escena 3D:
 // el terreno, los árboles y el agua son low-poly, y lo que tiene cara o detalle sigue siendo pixel art.
-const PHI = Math.atan2(0.95, 0.78); // inclinación de la cámara
+const PHI = PHI_CAM;
 // Los objetos se inclinan apenas hacia atrás: así un tile de objeto ocupa en pantalla justo su casillero y
 // los objetos de varios tiles (faro, carteles grandes) se apilan sin cortes, como en el mapa 2D.
 const TILT_OBJ = 2 * PHI - Math.PI / 2;
