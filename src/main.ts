@@ -1,6 +1,7 @@
 // Boot: loader -> title -> game loop.
 import { mountScreen, render, setAfterRender } from './gfx/screen.ts';
 import { mountPixi, renderPixi } from './gfx/pixi-layer.ts';
+import { mount3D, drew3DThisFrame } from './gfx/world-3d.ts';
 import { buildTileset, tileCanvas } from './gfx/tiles.ts';
 import { validateSave } from './save/validate.ts';
 import { buildAllSprites, creatureSprite } from './gfx/creatures.ts';
@@ -74,7 +75,14 @@ function frame(now) {
 // ---------------------------------------------------------------- loader
 async function boot() {
   mountScreen($('#view'));
-  if (await mountPixi($('#view'), $('#screen'))) setAfterRender(renderPixi);
+  const pixiOk = await mountPixi($('#view'), $('#screen'));
+  const has3D = mount3D($('#screen'));
+  // Prueba visual 3D: cuando el mundo se dibujó en 3D, se ve su canvas con el 2D transparente encima; si no (batallas, menús), sigue Pixi.
+  setAfterRender(() => {
+    const on = has3D && drew3DThisFrame(performance.now());
+    $('#screen').classList.toggle('three-on', on);
+    if (!on && pixiOk) renderPixi();
+  });
   mountUI($('#ui'));
   mountSidebar($('#stage'), { menu: null, bag: () => runScript(() => openBag({ mode: 'field' })), party: () => runScript(() => openParty({ mode: 'field' })), dex: () => runScript(() => openDex()), map: () => runScript(() => openMap()), options: () => runScript(() => openOptions()), fog: () => runScript(() => openFogMeter()) });
   mountHud({ screen: $('#screen'), game: () => mode === 'game', openSettings: () => runScript(() => openOptions()), openMap: () => runScript(() => openMap()) });
