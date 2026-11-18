@@ -96,6 +96,14 @@ function badge(text: string) {
 }
 
 /** true si el mundo 3D se dibujó en este cuadro (main.ts muestra su canvas y apaga el de Pixi). */
+/** Otra escena 3D (los combates) con el mismo renderizador; cuenta como cuadro 3D para mostrar su canvas. */
+export function render3DScene(sc: THREE.Scene, cam: THREE.Camera) {
+  if (!renderer) return;
+  renderer.render(sc, cam);
+  drewAt = performance.now();
+}
+export const RENDER_SIZE = { w: 1920, h: 1080 };
+
 export function drew3DThisFrame(now: number) {
   return now - drewAt < 40;
 }
@@ -179,11 +187,11 @@ function kindOf(ch: string): Kind {
 }
 
 // ---------------------------------------------------------------- piezas
-const rnd = (x: number, y: number, s = 0) => {
+export const rnd = (x: number, y: number, s = 0) => {
   const v = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453;
   return v - Math.floor(v);
 };
-function paint(geo: THREE.BufferGeometry, col: THREE.Color, jitter = 0.06, seed = 0) {
+export function paint(geo: THREE.BufferGeometry, col: THREE.Color, jitter = 0.06, seed = 0) {
   const g = geo.index ? geo.toNonIndexed() : geo;
   const n = g.attributes.position.count;
   const arr = new Float32Array(n * 3);
@@ -195,15 +203,15 @@ function paint(geo: THREE.BufferGeometry, col: THREE.Color, jitter = 0.06, seed 
   if (g.attributes.uv) g.deleteAttribute('uv');
   return g;
 }
-function at(geo: THREE.BufferGeometry, x: number, y: number, z: number, ry = 0, s = 1) {
+export function at(geo: THREE.BufferGeometry, x: number, y: number, z: number, ry = 0, s = 1) {
   if (s !== 1) geo.scale(s, s, s);
   if (ry) geo.rotateY(ry);
   geo.translate(x, y, z);
   return geo;
 }
-const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+export const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 
-function hostTree(parts: THREE.BufferGeometry[], x: number, z: number, leaf: THREE.Color, trunk: THREE.Color, h: number) {
+export function hostTree(parts: THREE.BufferGeometry[], x: number, z: number, leaf: THREE.Color, trunk: THREE.Color, h: number) {
   const s = 0.85 + rnd(x, z, 1) * 0.3;
   const ox = (rnd(x, z, 2) - 0.5) * 0.15, oz = (rnd(x, z, 4) - 0.5) * 0.15;
   parts.push(paint(at(new THREE.CylinderGeometry(0.08, 0.12, 0.6 * s, 5), x + ox, h + 0.3 * s, z + oz), trunk, 0.05, x));
@@ -216,7 +224,7 @@ function hostTree(parts: THREE.BufferGeometry[], x: number, z: number, leaf: THR
     parts.push(paint(at(new THREE.ConeGeometry(0.4, 0.7, 6), x + ox, h + 1.35 * s, z + oz, rnd(x, z, 7) * 6, s), leaf.clone().multiplyScalar(1.12), 0.14, x + z));
   }
 }
-function palm(parts: THREE.BufferGeometry[], x: number, z: number, leaf: THREE.Color, trunk: THREE.Color, h: number) {
+export function palm(parts: THREE.BufferGeometry[], x: number, z: number, leaf: THREE.Color, trunk: THREE.Color, h: number) {
   const lean = (rnd(x, z, 2) - 0.5) * 0.3;
   const tr = new THREE.CylinderGeometry(0.06, 0.1, 1.3, 5);
   tr.rotateZ(lean);
