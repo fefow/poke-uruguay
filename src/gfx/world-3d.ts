@@ -6,11 +6,13 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { T, TILE_INFO, tileCanvas, tileWithoutGround, groundFor, WALL_CAPS } from './tiles.ts';
-import { LOOKS } from './characters.ts';
+import { charSprite } from './characters.ts';
+import { drawGroundBall } from './items.ts';
+import { canoeCanvas } from './ui-icons.ts';
 import { creatureSprite } from './creatures.ts';
 import { skyHour } from './screen.ts';
 
-const RW = 960, RH = 540; // resolución interna: se agranda sin suavizar, da el aire retro
+const RW = 1920, RH = 1080; // resolución completa: los sprites pixel art quedan nítidos
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera;
 let sun: THREE.DirectionalLight, hemi: THREE.HemisphereLight, playerLamp: THREE.PointLight;
@@ -239,14 +241,16 @@ interface WorldView {
 function build(v: WorldView) {
   if (staticGroup) {
     scene.remove(staticGroup);
-    staticGroup.traverse((o: any) => { o.geometry?.dispose(); });
+    staticGroup.traverse((o: any) => { if (o.geometry !== objGeo) o.geometry?.dispose(); });
   }
+  for (const sm of staticMats.splice(0)) { boardMats.delete(sm); sm.dispose(); }
   const m = v.map;
   const tiles = v.tiles as any;
   const W = m.w, H = m.h;
   const theme = m.theme ?? null;
   const parts: THREE.BufferGeometry[] = [];
   const glow: THREE.BufferGeometry[] = [];
+  const sprites: { c: string; x: number; y: number }[] = [];
   lampSpots = [];
   const ch = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? null : tiles[y][x]);
   const isWater = (x, y) => { const c = ch(x, y); return c != null && kindOf(c) === 'water'; };
@@ -394,26 +398,12 @@ function build(v: WorldView) {
         }
         break;
       }
-      case 'fence': {
-        const [a] = colors();
-        parts.push(paint(at(box(0.1, 0.55, 0.1), cx, 0.27, cz), a, 0.05, x));
-        const left = ch(x - 1, y), right = ch(x + 1, y), up = ch(x, y - 1), down = ch(x, y + 1);
-        const isF = (q) => q && kindOf(q) === 'fence';
-        if (isF(left) || isF(right) || !(isF(up) || isF(down))) for (const yy of [0.2, 0.42]) parts.push(paint(at(box(1, 0.07, 0.05), cx, yy, cz), a, 0.04, x));
-        if (isF(up) || isF(down)) for (const yy of [0.2, 0.42]) parts.push(paint(at(box(0.05, 0.07, 1), cx, yy, cz), a, 0.04, x));
+      case 'fence':
+      case 'sign':
+      case 'lamp':
+        sprites.push({ c, x, y });
+        if (k === 'lamp') lampSpots.push({ x: cx, y: 0.85, z: y + 0.9, color: 0xffd890, always: false });
         break;
-      }
-      case 'sign': {
-        parts.push(paint(at(box(0.08, 0.5, 0.08), cx, 0.25, cz), new THREE.Color(0x6a4220), 0.04, x));
-        parts.push(paint(at(box(0.7, 0.42, 0.08), cx, 0.62, cz), new THREE.Color(0xc89458), 0.06, x));
-        break;
-      }
-      case 'lamp': {
-        parts.push(paint(at(new THREE.CylinderGeometry(0.04, 0.06, 1.3, 5), cx, 0.65, cz), new THREE.Color(0x2a2a36), 0.04, x));
-        glow.push(paint(at(new THREE.OctahedronGeometry(0.13, 0), cx, 1.35, cz), new THREE.Color(0xffe0a0), 0));
-        lampSpots.push({ x: cx, y: 1.3, z: cz, color: 0xffd890, always: false });
-        break;
-      }
       case 'grass': {
         const base = groundColor(x, y);
         for (let i = 0; i < 5; i++) {
@@ -435,15 +425,10 @@ function build(v: WorldView) {
         break;
       }
       case 'prop':
-      case 'tallprop': {
-        const [a, b] = colors();
-        const tall = k === 'tallprop';
-        const hh = tall ? 2.4 : m.indoor ? 0.75 : 0.6;
-        parts.push(paint(at(box(tall ? 0.7 : 0.84, hh, tall ? 0.7 : 0.84), cx, hh / 2, cz), a, 0.06, x + y));
-        parts.push(paint(at(box(tall ? 0.5 : 0.6, 0.08, tall ? 0.5 : 0.6), cx, hh + 0.04, cz), b, 0.04, x));
-        if (c === 'П') { glow.push(paint(at(new THREE.OctahedronGeometry(0.2, 0), cx, hh + 0.2, cz), new THREE.Color(0xff9a40), 0)); lampSpots.push({ x: cx, y: hh + 0.3, z: cz, color: 0xff9a40, always: true }); }
+      case 'tallprop':
+        sprites.push({ c, x, y });
+        if (c === 'П') lampSpots.push({ x: cx, y: 0.6, z: y + 0.8, color: 0xff9a40, always: true });
         break;
-      }
       default: break;
     }
   }
@@ -480,6 +465,18 @@ function build(v: WorldView) {
     edge.receiveShadow = true;
     staticGroup.add(edge);
   }
+  // objetos en pixel art: un cartel por tile, agrupados por tipo de tile (una sola llamada de dibujo cada uno)
+  const byChar = new Map<string, { x: number; y: number }[]>();
+  for (const sp of sprites) (byChar.get(sp.c) ?? byChar.set(sp.c, []).get(sp.c)!).push(sp);
+  const mtx = new THREE.Matrix4();
+  for (const [c, list] of byChar) {
+    const bm = boardMat(objectCanvas(c, theme));
+    staticMats.push(bm);
+    const im = new THREE.InstancedMesh(objGeo, bm, list.length);
+    list.forEach((sp, i) => im.setMatrixAt(i, mtx.makeTranslation(sp.x + 0.5, 0, sp.y + 1)));
+    im.castShadow = true;
+    staticGroup.add(im);
+  }
   scene.add(staticGroup);
 }
 function onlyPosColor(g: THREE.BufferGeometry) {
@@ -488,128 +485,121 @@ function onlyPosColor(g: THREE.BufferGeometry) {
   return g;
 }
 
-// ---------------------------------------------------------------- personajes
+// ---------------------------------------------------------------- pixel art parado en el mundo
+// Personajes y objetos son los mismos sprites del juego 2D, puestos como carteles dentro de la escena 3D:
+// el terreno, los árboles y el agua son low-poly, y lo que tiene cara o detalle sigue siendo pixel art.
+const PHI = Math.atan2(0.95, 0.78); // inclinación de la cámara
+// Los objetos se inclinan apenas hacia atrás: así un tile de objeto ocupa en pantalla justo su casillero y
+// los objetos de varios tiles (faro, carteles grandes) se apilan sin cortes, como en el mapa 2D.
+const TILT_OBJ = 2 * PHI - Math.PI / 2;
+// Los personajes miran de frente a la cámara: se ven sin achatarse.
+const TILT_CHAR = Math.PI / 2 - PHI;
+const texCache = new WeakMap<HTMLCanvasElement, THREE.Texture>();
+function texOf(c: HTMLCanvasElement) {
+  let t = texCache.get(c);
+  if (!t) {
+    t = new THREE.CanvasTexture(c);
+    t.magFilter = THREE.NearestFilter;
+    t.minFilter = THREE.NearestFilter;
+    t.generateMipmaps = false;
+    t.colorSpace = THREE.SRGBColorSpace;
+    texCache.set(c, t);
+  }
+  return t;
+}
+const boardMats = new Set<THREE.MeshLambertMaterial>();
+function boardMat(c: HTMLCanvasElement) {
+  const map = texOf(c);
+  const m = new THREE.MeshLambertMaterial({ map, emissiveMap: map, emissive: 0xffffff, alphaTest: 0.5, side: THREE.DoubleSide, toneMapped: false });
+  boardMats.add(m);
+  return m;
+}
+/** Luz de los sprites: casi todo es su propio color (fiel al pixel art) y el resto lo pone la luz de la escena. */
+function lightBoards(day: number, dark: boolean) {
+  for (const m of boardMats) {
+    m.color.setScalar(dark ? 1.2 : 0.3);
+    m.emissiveIntensity = dark ? 0 : day;
+  }
+}
+const boardGeo = (w: number, h: number, tilt: number) => {
+  const g = new THREE.PlaneGeometry(w, h);
+  g.translate(0, h / 2, 0);
+  g.rotateX(-tilt);
+  return g;
+};
+const objGeo = boardGeo(1, 1, TILT_OBJ);
+const staticMats: THREE.MeshLambertMaterial[] = [];
+const objCanvas = new Map<string, HTMLCanvasElement>();
+function objectCanvas(c: string, theme: string | null) {
+  const k = `${theme}|${c}`;
+  let cv = objCanvas.get(k);
+  if (!cv) { cv = tileWithoutGround(c, 0, theme); objCanvas.set(k, cv); }
+  return cv;
+}
+
 const toonMat = new Map<string, THREE.MeshStandardMaterial>();
 function matOf(color: string | number) {
   const key = String(color);
   let m = toonMat.get(key);
   if (!m) {
-    const c = new THREE.Color(color as any);
-    vivid(c, 1.1);
-    m = new THREE.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.8 });
+    m = new THREE.MeshStandardMaterial({ color: new THREE.Color(color as any), flatShading: true, roughness: 0.8 });
     toonMat.set(key, m);
   }
   return m;
 }
-interface Figure { root: THREE.Group; legL: THREE.Object3D; legR: THREE.Object3D; armL: THREE.Object3D; armR: THREE.Object3D; body: THREE.Object3D; kind: string }
 function part(geo: THREE.BufferGeometry, color: string | number, x: number, y: number, z: number) {
   const m = new THREE.Mesh(geo, matOf(color));
   m.position.set(x, y, z);
   m.castShadow = true;
   return m;
 }
-function person(look: string): Figure {
-  look = look || 'boy';
-  const p = LOOKS[look] ?? LOOKS.boy ?? { h: '#3a2a1a', H: '#3a2a1a', s: '#f2c8a0', c: '#6a8ac8', C: '#4a6aa8', p: '#3a3a4a', b: '#1a1a1a' };
+
+interface Board { root: THREE.Object3D; mesh: THREE.Mesh | null; mat: THREE.MeshLambertMaterial | null; key: string; w: number; h: number }
+function board(c: HTMLCanvasElement, wTiles: number, tilt = TILT_CHAR): Board {
+  const w = wTiles, h = (c.height / c.width) * wTiles;
+  const mat = boardMat(c);
+  const mesh = new THREE.Mesh(boardGeo(w, h, tilt), mat);
+  mesh.castShadow = true;
   const root = new THREE.Group();
-  const body = new THREE.Group();
-  root.add(body);
-  const mkLimb = (color: string, x: number, y: number, len: number, w: number) => {
-    const pivot = new THREE.Group();
-    pivot.position.set(x, y, 0);
-    const g = box(w, len, w);
-    g.translate(0, -len / 2, 0);
-    const m = new THREE.Mesh(g, matOf(color));
-    m.castShadow = true;
-    pivot.add(m);
-    body.add(pivot);
-    return pivot;
-  };
-  const legL = mkLimb(p.p, -0.09, 0.32, 0.3, 0.13);
-  const legR = mkLimb(p.p, 0.09, 0.32, 0.3, 0.13);
-  body.add(part(box(0.15, 0.06, 0.2), p.b, -0.09, 0.03, 0.03), part(box(0.15, 0.06, 0.2), p.b, 0.09, 0.03, 0.03));
-  body.add(part(box(0.36, 0.34, 0.24), p.c, 0, 0.48, 0));
-  const armL = mkLimb(p.C ?? p.c, -0.23, 0.62, 0.3, 0.1);
-  const armR = mkLimb(p.C ?? p.c, 0.23, 0.62, 0.3, 0.1);
-  const head = new THREE.Group();
-  head.position.set(0, 0.82, 0);
-  head.add(part(box(0.32, 0.3, 0.3), p.s, 0, 0, 0));
-  head.add(part(box(0.35, 0.12, 0.34), p.H ?? p.h, 0, 0.17, -0.01));
-  head.add(part(box(0.35, 0.18, 0.08), p.h, 0, 0.06, -0.15));
-  if (p.long) head.add(part(box(0.34, 0.3, 0.08), p.h, 0, -0.08, -0.17));
-  // ojos: dos puntos oscuros en la cara
-  head.add(part(box(0.05, 0.07, 0.02), '#1a1a24', -0.07, 0.0, 0.155), part(box(0.05, 0.07, 0.02), '#1a1a24', 0.07, 0.0, 0.155));
-  if (look.startsWith('player')) {
-    head.add(part(box(0.36, 0.04, 0.16), p.H, 0, 0.12, 0.2)); // visera de la gorra
-    body.add(part(box(0.3, 0.32, 0.14), p.B, 0, 0.52, -0.18)); // mochila
-    body.add(part(box(0.38, 0.07, 0.26), p.R, 0, 0.66, 0.01)); // bufanda
-  }
-  body.add(head);
-  return { root, legL, legR, armL, armR, body, kind: 'person' };
+  root.add(mesh);
+  return { root, mesh, mat, key: '', w, h };
 }
-function critter(species: string): Figure {
-  const spr = creatureSprite(species);
-  const [a, b] = mainColors(`cr|${species}`, spr, new THREE.Color(0xa08060));
-  const root = new THREE.Group();
-  const body = new THREE.Group();
-  root.add(body);
-  const torso = new THREE.Mesh(new THREE.IcosahedronGeometry(0.24, 0), new THREE.MeshStandardMaterial({ color: a, flatShading: true, roughness: 0.8 }));
-  torso.scale.set(1, 0.85, 1.25);
-  torso.position.y = 0.28;
-  torso.castShadow = true;
-  const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 0), new THREE.MeshStandardMaterial({ color: b, flatShading: true, roughness: 0.8 }));
-  head.position.set(0, 0.45, 0.22);
-  head.castShadow = true;
-  body.add(torso, head);
-  head.add(part(box(0.04, 0.05, 0.02), '#111', -0.06, 0.03, 0.14), part(box(0.04, 0.05, 0.02), '#111', 0.06, 0.03, 0.14));
-  const dummy = new THREE.Object3D();
-  return { root, legL: dummy, legR: dummy, armL: dummy, armR: dummy, body, kind: 'critter' };
+function setBoardCanvas(b: Board, c: HTMLCanvasElement) {
+  if (b.mat && b.mat.map?.image !== c) { const t = texOf(c); b.mat.map = t; b.mat.emissiveMap = t; b.mat.needsUpdate = true; }
 }
-function ballFigure(): Figure {
+function machineBoard(): Board {
   const root = new THREE.Group();
-  const body = new THREE.Group();
-  root.add(body);
-  const top = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), matOf('#e0263a'));
-  const bot = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 4, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), matOf('#f2f2f2'));
-  top.castShadow = bot.castShadow = true;
-  top.position.y = bot.position.y = 0.17;
-  const band = part(new THREE.CylinderGeometry(0.165, 0.165, 0.03, 8), '#1a1a24', 0, 0.17, 0);
-  body.add(top, bot, band, part(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 6).rotateX(Math.PI / 2), '#ffffff', 0, 0.17, 0.16));
-  const d = new THREE.Object3D();
-  return { root, legL: d, legR: d, armL: d, armR: d, body, kind: 'ball' };
-}
-function machineFigure(): Figure {
-  const root = new THREE.Group();
-  const body = new THREE.Group();
-  root.add(body);
-  body.add(part(box(0.8, 0.7, 0.6), '#4a4a5a', 0, 0.35, 0), part(new THREE.CylinderGeometry(0.1, 0.12, 0.3, 6), '#2a2a36', 0.2, 0.85, 0));
+  root.add(part(box(0.8, 0.7, 0.6), '#4a4a5a', 0, 0.35, 0), part(new THREE.CylinderGeometry(0.1, 0.12, 0.3, 6), '#2a2a36', 0.2, 0.85, 0));
   const panel = new THREE.Mesh(box(0.3, 0.16, 0.04), new THREE.MeshBasicMaterial({ color: 0x7af08a }));
   panel.position.set(-0.15, 0.45, 0.31);
-  body.add(panel);
-  const d = new THREE.Object3D();
-  return { root, legL: d, legR: d, armL: d, armR: d, body, kind: 'machine' };
+  root.add(panel);
+  return { root, mesh: null, mat: null, key: '', w: 1, h: 1 };
 }
-function legendFigure(species: string): Figure {
-  const f = critter(species);
-  f.root.scale.setScalar(2.2);
-  f.kind = 'legend';
-  return f;
+let ballCv: HTMLCanvasElement | null = null;
+function ballCanvas() {
+  if (!ballCv) {
+    ballCv = document.createElement('canvas');
+    ballCv.width = 16; ballCv.height = 16;
+    drawGroundBall(ballCv.getContext('2d'), 0, 0);
+  }
+  return ballCv;
 }
 
-const figures = new Map<any, { fig: Figure; look: string }>();
-let canoe: THREE.Group | null = null;
+const boards = new Map<any, Board>();
+let canoeBoard: Board | null = null;
 let emoteSprite: THREE.Sprite | null = null;
-function figureFor(key: any, look: string, make: () => Figure) {
-  let e = figures.get(key);
-  if (!e || e.look !== look) {
-    if (e) scene.remove(e.fig.root);
-    e = { fig: make(), look };
-    figures.set(key, e);
-    scene.add(e.fig.root);
+const dropBoard = (b: Board) => { scene.remove(b.root); if (b.mat) { boardMats.delete(b.mat); b.mat.dispose(); } };
+function boardFor(keyObj: any, key: string, make: () => Board) {
+  let b = boards.get(keyObj);
+  if (!b || b.key !== key) {
+    if (b) dropBoard(b);
+    b = make();
+    b.key = key;
+    boards.set(keyObj, b);
+    scene.add(b.root);
   }
-  return e.fig;
+  return b;
 }
-const YAW = { down: 0, up: Math.PI, left: -Math.PI / 2, right: Math.PI / 2 };
 
 function emoteTex() {
   const c = document.createElement('canvas');
@@ -617,9 +607,15 @@ function emoteTex() {
   const g = c.getContext('2d')!;
   g.fillStyle = '#fff'; g.fillRect(2, 0, 12, 16); g.fillRect(6, 16, 4, 3);
   g.fillStyle = '#1a1a24'; g.fillRect(6, 3, 4, 7); g.fillRect(6, 11, 4, 3);
-  const t = new THREE.CanvasTexture(c);
-  t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.colorSpace = THREE.SRGBColorSpace;
-  return t;
+  return texOf(c);
+}
+
+/** Pose de caminata, igual que en el mapa 2D. */
+function poseOf(n: any, player: boolean, rowing: boolean) {
+  if (rowing) return 0;
+  if (player && n.moving) return n.t < n.dur / 2 ? (n.step % 2) + 1 : n.step % 2 ? 3 : 0;
+  if (n.moving) return ((n.step ?? Math.floor(n.t / 100)) % 2) + 1;
+  return 0;
 }
 
 // ---------------------------------------------------------------- cuadro
@@ -630,89 +626,81 @@ export function drawWorld3D(v: WorldView, t: number) {
   if (key !== builtKey) {
     build(v);
     builtKey = key;
-    for (const [, e] of figures) scene.remove(e.fig.root);
-    figures.clear();
+    for (const [, b] of boards) dropBoard(b);
+    boards.clear();
     camReady = false;
   }
   waterTime.value = t / 1000;
   const seen = new Set<any>();
-  // entidades
-  const place = (keyObj: any, fig: Figure, pos: { x: number; y: number }, dir: string, moving: boolean, phase: number) => {
-    seen.add(keyObj);
-    const x = pos.x / T + 0.5, z = pos.y / T + 0.5;
-    const gx = Math.floor(x), gz = Math.floor(z);
-    const onWater = v.tileAt(gx, gz) != null && kindOf(v.tileAt(gx, gz)!) === 'water';
-    fig.root.position.set(x, onWater ? -0.05 : 0, z);
-    const target = YAW[dir] ?? 0;
-    let d = target - fig.root.rotation.y;
-    d = Math.atan2(Math.sin(d), Math.cos(d));
-    fig.root.rotation.y += d * 0.35;
-    const sw = moving ? Math.sin(phase) * 0.7 : 0;
-    fig.legL.rotation.x = sw; fig.legR.rotation.x = -sw;
-    fig.armL.rotation.x = -sw * 0.8; fig.armR.rotation.x = sw * 0.8;
-    fig.body.position.y = moving ? Math.abs(Math.sin(phase)) * 0.04 : 0;
+  const onWaterAt = (x: number, z: number) => { const c = v.tileAt(Math.floor(x), Math.floor(z)); return c != null && kindOf(c) === 'water'; };
+  // Un personaje se para en el centro de su casillero, un poco hacia adelante (como sus pies en el sprite 2D).
+  const stand = (b: Board, pos: { x: number; y: number }) => {
+    const x = pos.x / T + 0.5, z = pos.y / T + 0.72;
+    b.root.position.set(x, onWaterAt(x, z - 0.2) ? -0.06 : 0, z);
   };
   const p = v.player;
   const ppos = v.entityPos(p);
-  const pf = figureFor(p, v.look, () => person(v.look));
-  // salto de desnivel
-  const hopK = p.moving && p.from && p.y - p.from.y === 2 ? Math.min(1, p.t / p.dur) : -1;
-  place(p, pf, ppos, p.dir, p.moving, (t / 1000) * (p.dur < 150 ? 22 : 14));
-  if (hopK >= 0) pf.root.position.y += Math.sin(hopK * Math.PI) * 0.45;
-  // canoa
   const inCanoe = v.tileAt(p.x, p.y) === '~';
+  const pb = boardFor(p, 'player:' + v.look, () => board(charSprite(v.look, 'down', 0), 1));
+  seen.add(p);
+  setBoardCanvas(pb, charSprite(v.look, p.dir, poseOf(p, true, inCanoe)));
+  stand(pb, ppos);
+  // salto de desnivel: el sprite sube y baja, la sombra queda en el suelo
+  const hopK = p.moving && p.from && p.y - p.from.y === 2 ? Math.min(1, p.t / p.dur) : -1;
+  if (hopK >= 0) pb.root.position.y += Math.sin(hopK * Math.PI) * 0.45;
   if (inCanoe) {
-    if (!canoe) {
-      canoe = new THREE.Group();
-      canoe.add(part(box(0.5, 0.18, 1.3), '#8a5a2a', 0, 0.05, 0), part(box(0.4, 0.06, 1.1), '#5a3418', 0, 0.15, 0));
-      scene.add(canoe);
-    }
-    canoe.visible = true;
-    canoe.position.copy(pf.root.position);
-    canoe.position.y = -0.1 + Math.sin(t / 400) * 0.03;
-    canoe.rotation.y = pf.root.rotation.y;
-    pf.root.position.y = 0.0 + Math.sin(t / 400) * 0.03;
-    pf.legL.rotation.x = pf.legR.rotation.x = -1.2;
-  } else if (canoe) canoe.visible = false;
+    const cv = canoeCanvas(p.dir);
+    if (!canoeBoard) { canoeBoard = board(cv, cv.width / T); scene.add(canoeBoard.root); }
+    setBoardCanvas(canoeBoard, cv);
+    canoeBoard.root.visible = true;
+    const bob = Math.sin(t / 400) * 0.03;
+    canoeBoard.root.position.set(pb.root.position.x, -0.12 + bob, pb.root.position.z + 0.05);
+    pb.root.position.y = 0.05 + bob;
+  } else if (canoeBoard) canoeBoard.root.visible = false;
   for (const n of v.npcs) {
     if (!n.visible) continue;
     const look = n.def.look;
     if (look === null) continue;
-    let fig: Figure;
-    if (look === 'ball') fig = figureFor(n, 'ball', ballFigure);
-    else if (look === 'machine') fig = figureFor(n, 'machine', machineFigure);
-    else if (typeof look === 'string' && look.startsWith('animal:')) fig = figureFor(n, look, () => critter(look.slice(7)));
-    else {
-      let lk = look ?? 'boy';
-      if (lk === 'swimmer' && v.tileAt(n.x, n.y) !== '~') lk = 'turista';
-      fig = figureFor(n, lk, () => person(lk));
-    }
-    place(n, fig, v.entityPos(n), n.dir, n.moving, t / 70 + n.i);
-    if (fig.kind === 'critter') {
-      fig.body.position.y = n.moving ? Math.abs(Math.sin(t / 90)) * 0.12 : 0;
+    seen.add(n);
+    if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, 0, n.y + 0.5); continue; }
+    if (look === 'ball') { const b = boardFor(n, 'ball', () => board(ballCanvas(), 1)); stand(b, v.entityPos(n)); continue; }
+    if (typeof look === 'string' && look.startsWith('animal:')) {
+      // criaturas a lo lejos: su sprite de combate en chico, dan saltitos al moverse
+      const cv = creatureSprite(look.slice(7));
+      const b = boardFor(n, look, () => board(cv, 1.5));
+      stand(b, v.entityPos(n));
+      b.root.scale.x = n.dir === 'left' ? -1 : 1;
+      b.root.position.y += n.moving ? Math.abs(Math.sin(t / 90)) * 0.12 : 0;
       if (n.fly) {
         const fk = Math.min(1, (performance.now() - n.fly.t0) / n.fly.ms);
-        fig.root.position.x += fk * 3;
-        fig.root.position.y += fk * fk * 9;
-        fig.root.position.z -= fk * 3;
+        b.root.position.x += fk * 3;
+        b.root.position.y += fk * fk * 9;
+        b.root.position.z -= fk * 3;
       }
+      continue;
     }
+    let lk = look ?? 'boy';
+    if (lk === 'swimmer' && v.tileAt(n.x, n.y) !== '~') lk = 'turista';
+    const b = boardFor(n, lk, () => board(charSprite(lk, 'down', 0), 1));
+    setBoardCanvas(b, charSprite(lk, n.dir, poseOf(n, false, false)));
+    stand(b, v.entityPos(n));
   }
   v.items.forEach((it) => {
-    const fig = figureFor(it, 'ball', ballFigure);
-    place(it, fig, { x: it.x * T, y: it.y * T }, 'down', false, 0);
-    fig.body.rotation.y = Math.sin(t / 600 + it.x) * 0.4;
+    seen.add(it);
+    const b = boardFor(it, 'ball', () => board(ballCanvas(), 1));
+    stand(b, { x: it.x * T, y: it.y * T });
   });
   if (v.legend) {
-    const fig = figureFor(v.legend, 'legend:' + v.legend.species, () => legendFigure(v.legend.species));
-    place(v.legend, fig, { x: v.legend.x * T, y: v.legend.y * T }, 'down', false, 0);
-    fig.root.position.y = 0.3 + Math.sin(t / 300) * 0.15;
+    seen.add(v.legend);
+    const b = boardFor(v.legend, 'legend:' + v.legend.species, () => board(creatureSprite(v.legend.species), 2));
+    stand(b, { x: v.legend.x * T, y: v.legend.y * T });
+    b.root.position.y = Math.sin(t / 300) * 0.12;
   }
-  for (const [k, e] of figures) if (!seen.has(k)) { scene.remove(e.fig.root); figures.delete(k); }
+  for (const [k, b] of boards) if (!seen.has(k)) { dropBoard(b); boards.delete(k); }
   // emoción "!" sobre un NPC
   if (v.emote) {
     if (!emoteSprite) {
-      emoteSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: emoteTex(), depthTest: false }));
+      emoteSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: emoteTex(), depthTest: false, toneMapped: false }));
       emoteSprite.scale.set(0.45, 0.56, 1);
       emoteSprite.renderOrder = 10;
       scene.add(emoteSprite);
@@ -730,6 +718,7 @@ export function drawWorld3D(v: WorldView, t: number) {
   const sky = new THREE.Color(0x8ecdf4).lerp(new THREE.Color(0xf2a070), Math.max(0, dusk) * 0.7).lerp(new THREE.Color(0x10183a), night);
   const indoor = !!m.indoor;
   scene.background = indoor || m.dark ? new THREE.Color(0x0c0c16) : sky;
+  lightBoards(dark ? 0 : indoor ? 0.85 : 0.85 * (1 - night * 0.65) * (1 - Math.max(0, dusk) * 0.1), dark);
   hemi.intensity = dark ? 0.06 : indoor ? 1.3 : 1.15 - night * 0.8;
   hemi.color.set(0xcfe8ff).lerp(new THREE.Color(0x6a7ad8), night);
   sun.intensity = dark ? 0 : indoor ? 1.2 : 2.6 * (1 - night * 0.85);
