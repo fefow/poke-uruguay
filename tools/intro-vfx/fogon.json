@@ -1,0 +1,235 @@
+{
+ "frames": [
+  {
+   "filename": "intro-fogon 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 1.png",
+   "frame": {
+    "x": 38,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 2.png",
+   "frame": {
+    "x": 76,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 3.png",
+   "frame": {
+    "x": 0,
+    "y": 39,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 4.png",
+   "frame": {
+    "x": 38,
+    "y": 39,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 5.png",
+   "frame": {
+    "x": 76,
+    "y": 39,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 6.png",
+   "frame": {
+    "x": 0,
+    "y": 78,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-fogon 7.png",
+   "frame": {
+    "x": 38,
+    "y": 78,
+    "w": 38,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 38,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 38,
+    "h": 39
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8717948717948718
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-fogon.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 114,
+   "h": 117
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 19,
+   "y": 34
+  },
+  "frameTags": [
+   {
+    "name": "intro-fogon",
+    "from": 0,
+    "to": 7,
+    "direction": "forward"
+   }
+  ]
+ }
+}

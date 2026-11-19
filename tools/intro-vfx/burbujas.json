@@ -1,0 +1,443 @@
+{
+ "frames": [
+  {
+   "filename": "intro-burbujas-carpincho 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 1.png",
+   "frame": {
+    "x": 81,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 2.png",
+   "frame": {
+    "x": 162,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 3.png",
+   "frame": {
+    "x": 243,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 4.png",
+   "frame": {
+    "x": 0,
+    "y": 123,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 5.png",
+   "frame": {
+    "x": 81,
+    "y": 123,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 6.png",
+   "frame": {
+    "x": 162,
+    "y": 123,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 7.png",
+   "frame": {
+    "x": 243,
+    "y": 123,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 8.png",
+   "frame": {
+    "x": 0,
+    "y": 246,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 9.png",
+   "frame": {
+    "x": 81,
+    "y": 246,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 10.png",
+   "frame": {
+    "x": 162,
+    "y": 246,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 11.png",
+   "frame": {
+    "x": 243,
+    "y": 246,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 12.png",
+   "frame": {
+    "x": 0,
+    "y": 369,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 13.png",
+   "frame": {
+    "x": 81,
+    "y": 369,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 14.png",
+   "frame": {
+    "x": 162,
+    "y": 369,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-burbujas-carpincho 15.png",
+   "frame": {
+    "x": 243,
+    "y": 369,
+    "w": 81,
+    "h": 123
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 123
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 123
+   },
+   "pivot": {
+    "x": 0.4444444444444444,
+    "y": 0.9024390243902439
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-burbujas-carpincho.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 324,
+   "h": 492
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 36,
+   "y": 111
+  },
+  "frameTags": [
+   {
+    "name": "intro-burbujas-carpincho",
+    "from": 0,
+    "to": 15,
+    "direction": "forward"
+   }
+  ]
+ }
+}

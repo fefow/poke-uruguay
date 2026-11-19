@@ -1,0 +1,443 @@
+{
+ "frames": [
+  {
+   "filename": "intro-estallido-titulo 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 1.png",
+   "frame": {
+    "x": 114,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 2.png",
+   "frame": {
+    "x": 228,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 3.png",
+   "frame": {
+    "x": 342,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 4.png",
+   "frame": {
+    "x": 0,
+    "y": 127,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 5.png",
+   "frame": {
+    "x": 114,
+    "y": 127,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 6.png",
+   "frame": {
+    "x": 228,
+    "y": 127,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 7.png",
+   "frame": {
+    "x": 342,
+    "y": 127,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 8.png",
+   "frame": {
+    "x": 0,
+    "y": 254,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 9.png",
+   "frame": {
+    "x": 114,
+    "y": 254,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 10.png",
+   "frame": {
+    "x": 228,
+    "y": 254,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 11.png",
+   "frame": {
+    "x": 342,
+    "y": 254,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 12.png",
+   "frame": {
+    "x": 0,
+    "y": 381,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 13.png",
+   "frame": {
+    "x": 114,
+    "y": 381,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 14.png",
+   "frame": {
+    "x": 228,
+    "y": 381,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-estallido-titulo 15.png",
+   "frame": {
+    "x": 342,
+    "y": 381,
+    "w": 114,
+    "h": 127
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 114,
+    "h": 127
+   },
+   "sourceSize": {
+    "w": 114,
+    "h": 127
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.3228346456692913
+   },
+   "duration": 71
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-estallido-titulo.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 456,
+   "h": 508
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 57,
+   "y": 41
+  },
+  "frameTags": [
+   {
+    "name": "intro-estallido-titulo",
+    "from": 0,
+    "to": 15,
+    "direction": "forward"
+   }
+  ]
+ }
+}

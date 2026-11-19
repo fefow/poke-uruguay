@@ -3,7 +3,8 @@ import { W, H, W as CW, H as CH, setRenderer, text } from '../gfx/screen.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { pamperoAt, PAMPERO_W, PAMPERO_H } from '../gfx/pampero.ts';
 import { charSprite } from '../gfx/characters.ts';
-import { DEX_ORDER, SPECIES } from '../data/species.ts';
+import { DEX_ORDER, SPECIES, STARTERS } from '../data/species.ts';
+import { preloadIntroVfx, drawVfx } from '../gfx/intro-vfx.ts';
 import { playMusic, sfx } from '../core/audio.ts';
 import { input, keyName } from '../core/input.ts';
 import { h, wait, sanitizeName, formatTime } from '../core/util.ts';
@@ -128,16 +129,19 @@ export function startTitle() {
 
 
 // ---------------------------------------------------------------- INTRO CINEMATIC
+// Seven short scenes told like a tale by the fire. Pixel art stays at native size; the effects
+// (fire, splash, lightning, wind, light beams, petals, embers, bubbles, title burst) are PixelLab VFX sheets.
 const sky = (g, stops) => {
   const grd = g.createLinearGradient(0, 0, 0, H);
   stops.forEach(([o, c]) => grd.addColorStop(o, c));
   g.fillStyle = grd;
   g.fillRect(0, 0, W, H);
 };
-const stars = (g, t, n = 50, maxY = 120) => {
+const stars = (g, t, n = 70, maxY = 130) => {
   for (let i = 0; i < n; i++) {
     g.fillStyle = (Math.floor(t / 400) + i) % 5 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.3)';
-    g.fillRect((i * 97) % W, (i * 53) % maxY, i % 7 ? 1 : 2, i % 7 ? 1 : 2);
+    const n1 = Math.sin(i * 12.9898) * 43758.5453, n2 = Math.sin(i * 78.233) * 12345.6789; // scattered, not in rows
+    g.fillRect(Math.floor((n1 - Math.floor(n1)) * W), 14 + Math.floor((n2 - Math.floor(n2)) * (maxY - 14)), i % 7 ? 1 : 2, i % 7 ? 1 : 2);
   }
 };
 /** Rolling hills drawn as a sine silhouette; `speed` scrolls it for parallax. */
@@ -154,106 +158,243 @@ const ceibo = (g, x, y, s = 1) => {
   g.beginPath(); g.arc(x, y - 16 * s, 8 * s, 0, 7); g.fill();
   g.fillStyle = '#e0263a'; for (const [dx, dy] of [[-4, -18], [3, -20], [0, -14], [5, -15]]) g.fillRect(x + dx * s, y + dy * s, 2 * s, 2 * s);
 };
+/** A big ombú seen against the sky: thick twisted trunk and a wide round crown. */
+const ombu = (g, x, y, col) => {
+  g.fillStyle = col;
+  g.beginPath(); g.moveTo(x - 22, y); g.lineTo(x - 10, y - 40); g.lineTo(x - 16, y - 58); g.lineTo(x + 14, y - 58); g.lineTo(x + 8, y - 40); g.lineTo(x + 24, y); g.fill();
+  for (const [dx, dy, r] of [[-38, -70, 24], [-8, -84, 30], [28, -72, 26], [52, -60, 16], [-58, -58, 14], [6, -60, 22]]) { g.beginPath(); g.arc(x + dx, y + dy, r, 0, 7); g.fill(); }
+};
+/** Drifting fog: soft bands that slide sideways; `a` is how thick it is (0..1). */
+const fogBands = (g, t, a, top = 120, col = '200,205,220') => {
+  if (a <= 0) return;
+  for (let i = 0; i < 7; i++) {
+    const y = top + i * 18;
+    const x = ((t / (30 + i * 9)) * (i % 2 ? 1 : -1)) % 160;
+    g.fillStyle = `rgba(${col},${(0.16 + i * 0.03) * a})`;
+    for (let k = -1; k < 5; k++) { g.beginPath(); g.ellipse(x + k * 160, y, 110, 14 + (i % 3) * 3, 0, 0, 7); g.fill(); }
+  }
+};
+const fireflies = (g, t, n = 14) => {
+  for (let i = 0; i < n; i++) {
+    const on = Math.sin(t / 380 + i * 2.3) > 0.2;
+    if (!on) continue;
+    const x = Math.round((i * 131 + Math.sin(t / 1300 + i) * 18) % W), y = Math.round(120 + ((i * 47) % 80) + Math.cos(t / 900 + i) * 6);
+    g.fillStyle = '#f2ff8a'; g.fillRect(x, y, 2, 2);
+    g.fillStyle = 'rgba(242,255,138,0.25)'; g.fillRect(x - 1, y - 1, 4, 4);
+  }
+};
+/** A creature sprite with a colour laid over its pixels (firelight, dusk, fog silhouettes). Cached. */
+const tintCache = new Map();
+function tinted(key, col, a) {
+  const ck = `${key}|${col}|${a}`;
+  if (tintCache.has(ck)) return tintCache.get(ck);
+  const c = document.createElement('canvas');
+  c.width = SPRITE; c.height = SPRITE;
+  const x = c.getContext('2d');
+  x.drawImage(creatureSprite(key), 0, 0);
+  x.globalCompositeOperation = 'source-atop';
+  x.globalAlpha = a;
+  x.fillStyle = col;
+  x.fillRect(0, 0, SPRITE, SPRITE);
+  tintCache.set(ck, c);
+  return c;
+}
+/** Draws an 80x80 creature with its feet at (cx, feet); `flip` turns it to face right. */
+const mon = (g, img, cx, feet, flip = false) => {
+  const x = Math.round(cx - SPRITE / 2), y = Math.round(feet - SPRITE + 4);
+  if (!flip) { g.drawImage(img, x, y); return; }
+  g.save(); g.translate(x + SPRITE, y); g.scale(-1, 1); g.drawImage(img, 0, 0); g.restore();
+};
+const lerpCol = (a, b, k) => {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = (s) => Math.round(((pa >> s) & 255) * (1 - k) + ((pb >> s) & 255) * k);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+};
+/** The Cardenal Azul flying to the right at native size, leaving glitter behind. */
+function cardenal(g, t, path) {
+  const here = path(t);
+  if (!here) return;
+  glitter(g, t, (tt) => { const q = path(tt); return q && q.x <= here.x ? { x: q.x + 8, y: q.y + PAMPERO_H * 0.52 } : null; }, 30, 45);
+  g.save();
+  g.translate(Math.round(here.x) + PAMPERO_W, Math.round(here.y));
+  g.scale(-1, 1); // the sprite faces left; flip it to face right
+  g.drawImage(pamperoAt(t, 620), 0, 0, PAMPERO_W, PAMPERO_H);
+  g.restore();
+}
+const flash = (g, a) => { if (a > 0) { g.fillStyle = `rgba(230,240,255,${Math.min(0.75, a)})`; g.fillRect(0, 0, W, H); } };
+
+const STARTER_FX = { ceibito: 'petalos', tejuchispa: 'brasas', carpinchito: 'burbujas' };
+const STARTER_CUE = [600, 2100, 3600];
+type Cue = [number, () => void];
 
 const CINEMATIC = [
-  {
-    dur: 6500,
-    lines: ['Entre el río y el océano existe una tierra', 'de cuchillas, arroyos y cielo abierto.'],
-    draw(g, t, p) {
-      sky(g, [[0, '#070a22'], [0.6, '#1d2a5c'], [1, '#3a3a7a']]);
-      stars(g, t);
-      g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 1;
-      if (p > 0.15 && p < 0.55) { const q = (p - 0.15) / 0.4; g.beginPath(); g.moveTo(60 + q * 200, 20 + q * 50); g.lineTo(60 + q * 200 - 18, 20 + q * 50 - 7); g.stroke(); }
-      hills(g, t, 190, 6, '#0d1230', 0.004, 140);
-      hills(g, t, 205, 5, '#070a1c', 0.008, 100);
-      ceibo(g, 250 - p * 20, 200, 1.4);
-    },
-  },
-  {
-    dur: 6500,
-    lines: ['Sus costas son recorridas por criaturas', 'que nadan, cantan y esperan la marea.'],
-    draw(g, t, p) {
-      sky(g, [[0, '#2a3a7a'], [0.45, '#e86a4a'], [0.62, '#f8c070'], [0.621, '#2a6ab0'], [1, '#143a68']]);
-      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(230, 132 - p * 14, 18, 0, 7); g.fill();
-      for (let i = 0; i < 16; i++) { g.fillStyle = `rgba(255,224,150,${0.5 - i * 0.025})`; const w = 30 - i * 1.3 + Math.sin(t / 300 + i) * 5; g.fillRect(230 - w / 2, 150 + i * 5, w, 1); }
-      g.fillStyle = 'rgba(255,255,255,0.12)';
-      for (let i = 0; i < 12; i++) g.fillRect((i * 61 + t / 30) % W, 160 + (i * 17) % 70, 18, 1);
-      const bob = Math.sin(t / 500) * 3;
-      g.drawImage(creatureSprite('ballenaplata'), Math.round(60 + p * 40), Math.round(95 + bob), 80, 80); // native size, whole-pixel position
-      if (Math.floor(t / 900) % 2) { g.fillStyle = 'rgba(220,240,255,0.8)'; g.fillRect(70 + p * 40, 104 + bob, 2, 8); g.fillRect(68 + p * 40, 100 + bob, 6, 3); }
-    },
-  },
-  {
-    dur: 6500,
-    lines: ['En sus campos y sierras viven criaturas', 'que acompañan a la gente desde siempre.'],
-    draw(g, t, p) {
-      sky(g, [[0, '#4a90d8'], [0.7, '#bfe4f8'], [1, '#e8f4d0']]);
-      g.fillStyle = 'rgba(255,255,255,0.85)';
-      for (const [x, y, r] of [[40, 40, 14], [150, 28, 10], [250, 54, 16]]) { const cx = (x + t / 60) % (W + 60) - 30; g.beginPath(); g.arc(cx, y, r, 0, 7); g.arc(cx + r, y + 3, r * 0.8, 0, 7); g.arc(cx - r, y + 3, r * 0.7, 0, 7); g.fill(); }
-      hills(g, t, 130, 14, '#7ab860', 0.01, 160);
-      hills(g, t, 160, 10, '#5aa046', 0.02, 120);
-      hills(g, t, 190, 8, '#3a8038', 0.04, 90);
-      const cycle = (t / 18) % (W + 120);
-      g.drawImage(creatureSprite('nandulin'), Math.round(W - cycle), Math.round(130 + Math.abs(Math.sin(t / 120)) * -3), 80, 80);
-      g.drawImage(creatureSprite('teruterito'), Math.round(((t / 26) % (W + 100)) - 60), Math.round(70 + Math.sin(t / 400) * 8), 40, 40);
-      ceibo(g, 60 - p * 30, 188, 1.6);
-    },
-  },
-  {
+  { // 1. The tale by the fire
     dur: 7000,
-    lines: ['Dicen que cuando el Cardenal Azul cruza el cielo,', 'el país entero se detiene a mirarlo.'],
-    draw(g, t, p) {
-      sky(g, [[0, '#14182c'], [0.5, '#3a4466'], [1, '#6a6a7a']]);
-      g.fillStyle = 'rgba(30,34,56,0.9)';
-      for (let i = 0; i < 9; i++) { const x = (i * 47 + t / 25) % (W + 80) - 40; g.beginPath(); g.arc(x, 24 + (i % 3) * 16, 26, 0, 7); g.arc(x + 24, 30 + (i % 3) * 16, 20, 0, 7); g.fill(); }
-      const flash = (Math.floor(t / 700) % 4 === 2) && (t % 700 < 140);
-      if (flash) {
-        g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(0, 0, W, H);
-        g.strokeStyle = '#fff8c0'; g.lineWidth = 2; g.beginPath();
-        let x = 60 + (Math.floor(t / 700) * 53) % 200, y = 30; g.moveTo(x, y);
-        while (y < 170) { x += (Math.sin(y * 3.1 + x) * 9) | 0; y += 14; g.lineTo(x, y); }
-        g.stroke();
-      }
-      hills(g, t, 190, 6, '#1a2030', 0.01, 140);
-      const k = Math.min(1, p * 1.5);
-      g.globalAlpha = 0.35 + 0.65 * k;
-      {
-        const at = (tt) => { const kk = Math.min(1, (p - (t - tt) / 7000) * 1.5); if (kk <= 0) return null; const sc = 0.9 + kk * 1.1; return { x: 120 + (1 - kk) * 160 - 10 + PAMPERO_W * sc * 0.85, y: 40 - kk * 10 + Math.sin(tt / 300) * 4 + PAMPERO_H * sc * 0.5 }; };
-        glitter(g, t, at, 30, 55);
-        const sc = 1; // native size: any other scale makes some art pixels wider than others
-        g.drawImage(pamperoAt(t, 760), Math.round(120 + (1 - k) * 160 - 10), Math.round(40 - k * 10 + Math.sin(t / 300) * 4), PAMPERO_W * sc, PAMPERO_H * sc);
-      }
-      g.globalAlpha = 1;
+    lines: ['Junto al fogón, los viejos todavía cuentan', 'la historia de la tierra de los charrúas.'],
+    draw(g, t, p, el) {
+      sky(g, [[0, '#05071a'], [0.65, '#141c48'], [1, '#2a2350']]);
+      stars(g, t);
+      hills(g, 0, 176, 6, '#0b1030', 0, 160);
+      ombu(g, 392, 200, '#070a1e');
+      hills(g, 0, 198, 3, '#060818', 0, 120);
+      const fx = 240, fy = 202;
+      const fl = 0.85 + Math.sin(t / 90) * 0.06 + Math.sin(t / 37) * 0.04;
+      const glow = g.createRadialGradient(fx, fy - 10, 4, fx, fy - 10, 120 * fl);
+      glow.addColorStop(0, 'rgba(255,170,70,0.55)'); glow.addColorStop(0.5, 'rgba(255,110,40,0.18)'); glow.addColorStop(1, 'rgba(255,90,30,0)');
+      g.fillStyle = glow; g.fillRect(0, 60, W, H - 60);
+      mon(g, tinted('hornerito', '#ff9a40', 0.28), 150, fy, true);
+      mon(g, tinted('mulitin', '#ff9a40', 0.28), 330, fy);
+      mon(g, tinted('teruterito', '#2a1a40', 0.45), 92, fy - 6, true);
+      g.fillStyle = '#2a1408'; g.fillRect(fx - 16, fy - 2, 32, 4); g.fillStyle = '#4a2810'; g.fillRect(fx - 12, fy - 4, 10, 3); g.fillRect(fx + 3, fy - 4, 10, 3);
+      drawVfx(g, 'fogon', fx, fy, el);
+      fireflies(g, t, 10);
     },
   },
-  {
-    dur: 4200,
-    lines: [],
-    draw(g, t, p) {
-      sky(g, [[0, '#1d2a5c'], [0.5, '#e86a4a'], [1, '#f8d070']]);
-      g.save(); g.translate(160, 120); g.rotate(t / 9000); g.fillStyle = 'rgba(248,208,64,0.6)';
-      for (let i = 0; i < 16; i++) { g.rotate(Math.PI / 8); g.beginPath(); g.moveTo(-6, -40); g.lineTo(0, i % 2 ? -110 : -90); g.lineTo(6, -40); g.fill(); }
+  { // 2. Cuchillas, streams and open sky
+    dur: 7000,
+    lines: ['Una tierra de cuchillas, arroyos y cielo abierto,', 'donde las criaturas viven junto a la gente.'],
+    draw(g, t, p, el) {
+      sky(g, [[0, '#3a84d8'], [0.7, '#bfe4f8'], [1, '#e8f4d0']]);
+      g.fillStyle = 'rgba(255,255,255,0.9)';
+      for (const [x, y, r] of [[40, 40, 14], [190, 26, 11], [330, 50, 16], [440, 30, 10]]) { const cx = (x + t / 60) % (W + 60) - 30; g.beginPath(); g.arc(cx, y, r, 0, 7); g.arc(cx + r, y + 3, r * 0.8, 0, 7); g.arc(cx - r, y + 3, r * 0.7, 0, 7); g.fill(); }
+      hills(g, t, 128, 14, '#86c46a', 0.01, 200);
+      hills(g, t, 158, 10, '#5aa046', 0.02, 150);
+      g.fillStyle = '#5ab0e8'; g.fillRect(0, 186, W, 5); g.fillStyle = '#a8e0ff'; for (let i = 0; i < 10; i++) g.fillRect(((i * 53 + t / 20) % W), 187, 8, 1);
+      hills(g, t, 200, 6, '#3a8038', 0.04, 110);
+      ceibo(g, 70, 196, 2);
+      drawVfx(g, 'petalos', 70, 150, el, { alpha: 0.9 });
+      ceibo(g, 420 - p * 10, 172, 1.2);
+      const run = W + 80 - ((el / 9) % (W + 160));
+      for (let i = 1; i <= 4; i++) { g.fillStyle = `rgba(216,196,150,${0.5 - i * 0.1})`; g.beginPath(); g.arc(run + 18 + i * 12, 205 - (i % 2) * 2, 4 + i, 0, 7); g.fill(); }
+      mon(g, creatureSprite('nandulin'), run, 210 - Math.round(Math.abs(Math.sin(el / 110)) * 4));
+      mon(g, creatureSprite('teruterito'), ((el / 14) % (W + 120)) - 60, 110 + Math.round(Math.sin(t / 400) * 8), true);
+      mon(g, creatureSprite('carpincho'), 300, 214);
+    },
+  },
+  { // 3. The coast and the Ballenaplata
+    dur: 7000,
+    lines: ['En sus costas canta la Ballenaplata,', 'y su canto aplaca las tormentas del Plata.'],
+    cues: [[1150, () => sfx('splash')], [4300, () => sfx('splash')]],
+    draw(g, t, p, el) {
+      const wl = 150;
+      sky(g, [[0, '#2a3a7a'], [0.42, '#e86a4a'], [0.55, '#f8c070'], [0.556, '#2a6ab0'], [1, '#123a68']]);
+      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(360, wl - 4 - p * 10, 22, Math.PI, 0); g.fill();
+      for (let i = 0; i < 18; i++) { g.fillStyle = `rgba(255,224,150,${0.5 - i * 0.025})`; const w = 40 - i * 1.6 + Math.sin(t / 300 + i) * 5; g.fillRect(360 - w / 2, wl + 2 + i * 5, w, 1); }
+      g.fillStyle = 'rgba(255,255,255,0.14)';
+      for (let i = 0; i < 16; i++) g.fillRect((i * 61 + t / 30) % W, wl + 8 + (i * 17) % 60, 18, 1);
+      g.fillStyle = '#1a2440'; g.beginPath(); g.moveTo(0, wl); g.lineTo(0, wl - 10); g.lineTo(30, wl - 16); g.lineTo(60, wl - 8); g.lineTo(80, wl); g.fill(); // point on the coast
+      // the whale rises out of the water: the part under the surface is hidden
+      const wx = 170;
+      const rise = Math.min(1, Math.max(0, (el - 900) / 900)) - Math.max(0, (el - 3800) / 600);
+      const wy = Math.round(wl + 30 - rise * 66 + Math.sin(t / 500) * 2);
+      g.save(); g.beginPath(); g.rect(0, 0, W, wl + 6); g.clip();
+      g.drawImage(creatureSprite('ballenaplata'), wx - 40, wy - 40);
       g.restore();
-      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(160, 120, 38, 0, 7); g.fill();
-      const a = Math.min(1, p * 3);
+      if (rise > 0.9 && Math.floor(t / 900) % 2) { g.fillStyle = 'rgba(220,240,255,0.85)'; g.fillRect(wx - 20, wy - 46, 2, 8); g.fillRect(wx - 22, wy - 50, 6, 3); }
+      drawVfx(g, 'splash', wx, wl + 4, el - 1150);
+      drawVfx(g, 'splash', wx, wl + 4, el - 4300);
+      mon(g, creatureSprite('mbigua'), 460 - Math.round(el / 22), 92 + Math.round(Math.sin(t / 350) * 5), true);
+    },
+  },
+  { // 4. The Cardenal Azul brings the pampero
+    dur: 8000,
+    lines: ['Cuando el Cardenal Azul cruza el cielo, sopla el pampero', 'y la niebla se retira de los campos.'],
+    cues: [[2700, () => sfx('crit')], [4400, () => sfx('crit')], [5200, () => sfx('levelup')]],
+    draw(g, t, p, el) {
+      const clear = Math.max(0, Math.min(1, (el - 5000) / 1800));
+      sky(g, [[0, lerpCol('#141a30', '#3a84d8', clear)], [0.55, lerpCol('#3a4466', '#9ad0f0', clear)], [1, lerpCol('#5a5a6a', '#d8f0e0', clear)]]);
+      g.fillStyle = `rgba(30,34,56,${0.92 * (1 - clear)})`;
+      for (let i = 0; i < 12; i++) { const x = (i * 47 + t / 25) % (W + 80) - 40 - clear * 60 * (i % 2 ? 1 : -1); g.beginPath(); g.arc(x, 24 + (i % 3) * 16 - clear * 40, 28, 0, 7); g.arc(x + 26, 30 + (i % 3) * 16 - clear * 40, 22, 0, 7); g.fill(); }
+      if (clear < 1) { g.fillStyle = `rgba(170,190,230,${0.45 * (1 - clear)})`; for (let i = 0; i < 60; i++) g.fillRect((i * 37 + t / 3) % W, (i * 71 + t / 1.5) % H, 1, 6); }
+      hills(g, t, 172, 8, lerpCol('#1a2030', '#5aa046', clear), 0.01, 160);
+      hills(g, t, 196, 6, lerpCol('#121828', '#3a8038', clear), 0.02, 110);
+      fogBands(g, t, 1 - Math.min(1, el / 5600), 150);
+      drawVfx(g, 'rayo', 120, 196, (el - 2200) / 2.5); // played slower than authored so the strike reads in a cinematic
+      drawVfx(g, 'rayo', 370, 192, (el - 3900) / 2.5);
+      const fa = Math.max(0, 1 - Math.abs(el - 2750) / 260) + Math.max(0, 1 - Math.abs(el - 4450) / 260);
+      flash(g, fa * 0.6);
+      cardenal(g, t, (tt) => { const e = el - (t - tt); if (e < 0) return null; const k = Math.min(1, e / 5200); return { x: -120 + k * 300 + Math.max(0, e - 5200) / 12, y: 70 - k * 20 + Math.sin(tt / 300) * 5 }; });
+      drawVfx(g, 'viento', 240, 120, el, { alpha: 0.4 + clear * 0.5 });
+    },
+  },
+  { // 5. But it has not flown for a long time
+    dur: 7000,
+    lines: ['Pero hace tiempo que nadie lo ve volar,', 'y una niebla espesa se queda sobre el país.'],
+    draw(g, t, p, el) {
+      sky(g, [[0, '#2a2a46'], [0.6, '#6a5a78'], [1, '#8a8090']]);
+      g.fillStyle = 'rgba(255,220,180,0.35)'; g.beginPath(); g.arc(120, 120, 16, 0, 7); g.fill();
+      hills(g, 0, 150, 10, '#4a4a60', 0, 190);
+      hills(g, 0, 178, 7, '#3a3a50', 0, 140);
+      const thick = Math.min(1, 0.3 + p * 0.9);
+      mon(g, tinted('venadito', '#3a3a50', 0.4 + thick * 0.4), 150, 196);
+      mon(g, tinted('zorrigris', '#3a3a50', 0.4 + thick * 0.4), 330, 204, true);
+      hills(g, 0, 202, 4, '#2a2a3a', 0, 100);
+      fogBands(g, t, thick, 96, '190,186,200');
+      g.fillStyle = `rgba(170,166,184,${0.35 * thick})`; g.fillRect(0, 0, W, H);
+    },
+  },
+  { // 6. Three creatures wait in Carmelo
+    dur: 8500,
+    lines: ['En Carmelo, el Maestro Tabárez cuida a tres criaturas', 'que esperan a quien se anime a recorrer el Uruguay.'],
+    cues: STARTER_CUE.map((ms): Cue => [ms, () => sfx('confirm')]),
+    draw(g, t, p, el) {
+      sky(g, [[0, '#120e2a'], [0.6, '#2a1f4a'], [1, '#4a2f3a']]);
+      g.save(); g.translate(W / 2, 150); g.rotate(t / 12000); g.fillStyle = 'rgba(248,208,64,0.07)';
+      for (let i = 0; i < 16; i++) { g.rotate(Math.PI / 8); g.beginPath(); g.moveTo(-10, -30); g.lineTo(0, -260); g.lineTo(10, -30); g.fill(); }
+      g.restore();
+      STARTERS.forEach((k, i) => {
+        const x = 140 + i * 100, feet = 196;
+        g.fillStyle = '#3a2a40'; g.beginPath(); g.ellipse(x, feet + 2, 30, 7, 0, 0, 7); g.fill();
+        g.fillStyle = '#5a4060'; g.beginPath(); g.ellipse(x, feet, 26, 5, 0, 0, 7); g.fill();
+        const since = el - STARTER_CUE[i];
+        if (since > 250) {
+          drawVfx(g, STARTER_FX[k], x, k === 'ceibito' ? feet - 40 : feet, since);
+          const bob = Math.round(Math.sin(t / 260 + i) * 2);
+          const a = Math.min(1, (since - 250) / 300);
+          g.globalAlpha = a;
+          mon(g, creatureSprite(k), x, feet + bob);
+          g.globalAlpha = 1;
+        }
+        drawVfx(g, 'solbeam', x, feet + 4, since);
+      });
+    },
+  },
+  { // 7. Title
+    dur: 5200,
+    lines: [],
+    cues: [[250, () => sfx('levelup')]],
+    draw(g, t, p, el) {
+      sky(g, [[0, '#1d2a5c'], [0.5, '#e86a4a'], [1, '#f8d070']]);
+      const sy = 196 - Math.round(Math.min(1, el / 2500) * 16); // the Sol de Mayo rises behind the hills
+      g.save(); g.translate(W / 2, sy); g.rotate(t / 9000); g.fillStyle = 'rgba(248,208,64,0.6)';
+      for (let i = 0; i < 16; i++) { g.rotate(Math.PI / 8); g.beginPath(); g.moveTo(-6, -40); g.lineTo(0, i % 2 ? -170 : -140); g.lineTo(6, -40); g.fill(); }
+      g.restore();
+      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(W / 2, sy, 38, 0, 7); g.fill();
+      hills(g, 0, 214, 5, '#2a1830', 0, 140);
+      drawVfx(g, 'estallido', W / 2, 70, el - 200);
+      drawVfx(g, 'estallido', 110, 56, el - 800);
+      drawVfx(g, 'estallido', 370, 62, el - 1300);
+      const a = Math.min(1, Math.max(0, (el - 250) / 600));
       g.globalAlpha = a;
-      text(g, 'Poke Uruguay', W / 2, 96, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
-      text(g, 'La tierra de los charrúas', W / 2, 132, { size: 8, align: 'center', color: '#fff6c0', shadow: '#2a1830' });
+      text(g, 'Poke Uruguay', W / 2, 62, { size: 20, align: 'center', color: '#fff', shadow: '#1d2a5c' });
+      text(g, 'La tierra de los charrúas', W / 2, 98, { size: 10, align: 'center', color: '#fff6c0', shadow: '#2a1830' });
       g.globalAlpha = 1;
+      cardenal(g, t, (tt) => { const e = el - (t - tt); if (e < 0) return null; return { x: -120 + e / 8, y: 118 + Math.sin(tt / 400) * 6 }; });
     },
   },
 ];
 
 async function playCinematic() {
+  preloadIntroVfx();
   let idx = 0;
   let start = performance.now();
   let skipAll = false;
   setRenderer((g, t) => {
     const sc = CINEMATIC[Math.min(idx, CINEMATIC.length - 1)];
-    const el = performance.now() - start;
+    const el = Math.min(sc.dur, performance.now() - start);
     const p = Math.min(1, el / sc.dur);
     g.imageSmoothingEnabled = false;
-    sc.draw(g, t, p);
+    sc.draw(g, t, p, el);
     if (sc.lines.length) {
       const a = Math.min(1, el / 700) * Math.min(1, (sc.dur - el) / 500 + 0.4);
       g.fillStyle = `rgba(8,8,24,${0.62 * a})`; g.fillRect(0, H - 52, W, 52);
@@ -274,7 +415,12 @@ async function playCinematic() {
   });
   for (idx = 0; idx < CINEMATIC.length && !skipAll; idx++) {
     start = performance.now();
-    while (!skipAll && performance.now() - start < CINEMATIC[idx].dur) await wait(60);
+    const cues: Cue[] = [...((CINEMATIC[idx] as any).cues ?? [])];
+    while (!skipAll && performance.now() - start < CINEMATIC[idx].dur) {
+      const el = performance.now() - start;
+      while (cues.length && el >= cues[0][0]) { const [ms, fn] = cues.shift(); if (el - ms < 400) fn(); } // a skipped scene stays silent
+      await wait(30);
+    }
   }
   off();
   idx = CINEMATIC.length - 1;

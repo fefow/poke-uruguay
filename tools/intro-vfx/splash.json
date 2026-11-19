@@ -1,0 +1,287 @@
+{
+ "frames": [
+  {
+   "filename": "intro-salpicadura-ballena 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 1.png",
+   "frame": {
+    "x": 146,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 2.png",
+   "frame": {
+    "x": 292,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 3.png",
+   "frame": {
+    "x": 438,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 4.png",
+   "frame": {
+    "x": 0,
+    "y": 114,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 5.png",
+   "frame": {
+    "x": 146,
+    "y": 114,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 6.png",
+   "frame": {
+    "x": 292,
+    "y": 114,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 7.png",
+   "frame": {
+    "x": 438,
+    "y": 114,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 8.png",
+   "frame": {
+    "x": 0,
+    "y": 228,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-salpicadura-ballena 9.png",
+   "frame": {
+    "x": 146,
+    "y": 228,
+    "w": 146,
+    "h": 114
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 114
+   },
+   "sourceSize": {
+    "w": 146,
+    "h": 114
+   },
+   "pivot": {
+    "x": 0.5136986301369864,
+    "y": 0.5087719298245614
+   },
+   "duration": 71
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-salpicadura-ballena.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 584,
+   "h": 342
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 75,
+   "y": 58
+  },
+  "frameTags": [
+   {
+    "name": "intro-salpicadura-ballena",
+    "from": 0,
+    "to": 9,
+    "direction": "forward"
+   }
+  ]
+ }
+}

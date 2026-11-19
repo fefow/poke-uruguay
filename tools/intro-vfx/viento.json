@@ -1,0 +1,339 @@
+{
+ "frames": [
+  {
+   "filename": "intro-viento-pampero 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 1.png",
+   "frame": {
+    "x": 209,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 2.png",
+   "frame": {
+    "x": 418,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 3.png",
+   "frame": {
+    "x": 627,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 4.png",
+   "frame": {
+    "x": 0,
+    "y": 109,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 5.png",
+   "frame": {
+    "x": 209,
+    "y": 109,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 6.png",
+   "frame": {
+    "x": 418,
+    "y": 109,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 7.png",
+   "frame": {
+    "x": 627,
+    "y": 109,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 8.png",
+   "frame": {
+    "x": 0,
+    "y": 218,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 9.png",
+   "frame": {
+    "x": 209,
+    "y": 218,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 10.png",
+   "frame": {
+    "x": 418,
+    "y": 218,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-viento-pampero 11.png",
+   "frame": {
+    "x": 627,
+    "y": 218,
+    "w": 209,
+    "h": 109
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 209,
+    "h": 109
+   },
+   "sourceSize": {
+    "w": 209,
+    "h": 109
+   },
+   "pivot": {
+    "x": 0.5167464114832536,
+    "y": 0.45871559633027525
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-viento-pampero.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 836,
+   "h": 327
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 108,
+   "y": 50
+  },
+  "frameTags": [
+   {
+    "name": "intro-viento-pampero",
+    "from": 0,
+    "to": 11,
+    "direction": "forward"
+   }
+  ]
+ }
+}

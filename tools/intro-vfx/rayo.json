@@ -1,0 +1,391 @@
+{
+ "frames": [
+  {
+   "filename": "intro-rayo-cardenal 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 1.png",
+   "frame": {
+    "x": 126,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 2.png",
+   "frame": {
+    "x": 252,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 3.png",
+   "frame": {
+    "x": 378,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 4.png",
+   "frame": {
+    "x": 0,
+    "y": 185,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 5.png",
+   "frame": {
+    "x": 126,
+    "y": 185,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 6.png",
+   "frame": {
+    "x": 252,
+    "y": 185,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 7.png",
+   "frame": {
+    "x": 378,
+    "y": 185,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 8.png",
+   "frame": {
+    "x": 0,
+    "y": 370,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 9.png",
+   "frame": {
+    "x": 126,
+    "y": 370,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 10.png",
+   "frame": {
+    "x": 252,
+    "y": 370,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 11.png",
+   "frame": {
+    "x": 378,
+    "y": 370,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 12.png",
+   "frame": {
+    "x": 0,
+    "y": 555,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  },
+  {
+   "filename": "intro-rayo-cardenal 13.png",
+   "frame": {
+    "x": 126,
+    "y": 555,
+    "w": 126,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 126,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 126,
+    "h": 185
+   },
+   "pivot": {
+    "x": 0.49206349206349204,
+    "y": 0.9621621621621622
+   },
+   "duration": 50
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-rayo-cardenal.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 504,
+   "h": 740
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 62,
+   "y": 178
+  },
+  "frameTags": [
+   {
+    "name": "intro-rayo-cardenal",
+    "from": 0,
+    "to": 13,
+    "direction": "forward"
+   }
+  ]
+ }
+}
