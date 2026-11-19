@@ -15,7 +15,7 @@ import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot, textInput, 
 import { state, setState, newState, settings, badgeCount } from './game/state.ts';
 import { loadMap, updateWorld, worldState, runScript, poisonTick, api as scriptApi } from './game/world.ts';
 import { SCRIPTS } from './data/story.ts';
-import { startTitle, newGameIntro, credits, slotCard, titleRenderer } from './game/scenes.ts';
+import { startTitle, playCinematic, newGameIntro, credits, slotCard, titleRenderer } from './game/scenes.ts';
 import * as menus from './game/menus.ts';
 import * as battle from './game/battle-scene.ts';
 import { openOptions, openMap, openBag, openParty, openDex, openFogMeter } from './game/menus.ts';
@@ -158,6 +158,11 @@ async function boot() {
   sfx('confirm');
   await viewTransition(() => { $('#loader').hidden = true; });
   input.clear();
+  mode = 'title';
+  await playCinematic(); // the intro opens the game (B skips it)
+  input.clear();
+  startTitle();
+  await fadeIn(300);
   await titleScreen();
 }
 

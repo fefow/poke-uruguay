@@ -384,7 +384,10 @@ const CINEMATIC = [
   },
 ];
 
-async function playCinematic() {
+let cinematicSeen = false;
+/** The intro cinematic. Plays when the game opens; a new game shows it only if it has not played yet in this session. */
+export async function playCinematic() {
+  cinematicSeen = true;
   preloadIntroVfx();
   let idx = 0;
   let start = performance.now();
@@ -429,7 +432,7 @@ async function playCinematic() {
 
 // ---------------------------------------------------------------- INTRO
 export async function newGameIntro() {
-  await playCinematic();
+  if (!cinematicSeen) await playCinematic();
   let showProf = true;
   let mon = null;
   setRenderer((g, t) => {

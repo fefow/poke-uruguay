@@ -35,7 +35,7 @@ Notas de lectura: los campos `order` y `badge` dentro de `LEADERS` son heredados
 
 ## Intro (cinemática de nueva partida)
 
-`src/game/scenes.ts` (`CINEMATIC`). Siete escenas narradas como un cuento junto al fogón; efectos hechos con PixelLab (`src/gfx/intro-vfx-data.ts`). A pasa de escena, B salta todo.
+`src/game/scenes.ts` (`CINEMATIC`). Se ve al abrir el juego, antes de la pantalla de título (en una partida nueva no se repite si ya se vio en esa sesión). Siete escenas narradas como un cuento junto al fogón; efectos hechos con PixelLab (`src/gfx/intro-vfx-data.ts`). A pasa de escena, B salta todo.
 
 1. **Fogón** (noche, ombú, tero, hornero y mulita alrededor del fuego): «Junto al fogón, los viejos todavía cuentan / la historia de la tierra de los charrúas.»
 2. **Pradera** (ñandú corriendo, tero volando, carpincho, ceibo con pétalos): «Una tierra de cuchillas, arroyos y cielo abierto, / donde las criaturas viven junto a la gente.»
