@@ -63,6 +63,7 @@ export class SupabaseProvider {
   }
 
   async #req(path, init = {}) {
+    // Signed out => the anon key: RLS then returns nothing and rejects every write.
     const token = (await this.#getToken?.()) ?? this.#anonKey;
     const res = await fetch(`${this.#url}${path}`, {
       ...init,
@@ -75,7 +76,7 @@ export class SupabaseProvider {
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      throw new Error(`Servidor de partidas: ${res.status} ${body.slice(0, 200)}`);
+      throw Object.assign(new Error(`Servidor de partidas: ${res.status} ${body.slice(0, 200)}`), { status: res.status });
     }
     return res.status === 204 ? null : res.json();
   }
@@ -92,7 +93,11 @@ export class SupabaseProvider {
 
   async save(slot, envelope) {
     // RPC so the database function validates before writing.
-    await this.#req('/rest/v1/rpc/submit_save', { method: 'POST', body: JSON.stringify({ p_slot: slot, p_envelope: envelope }) });
+    const out = await this.#req('/rest/v1/rpc/submit_save', { method: 'POST', body: JSON.stringify({ p_slot: slot, p_envelope: envelope }) });
+    // Rule violations come back as a normal result so the server can audit them.
+    if (out && out.ok === false) {
+      throw Object.assign(new Error(`El servidor rechazó la partida: ${(out.reasons ?? []).join('; ')}`), { status: 422, reasons: out.reasons });
+    }
   }
 
   async remove(slot) {
