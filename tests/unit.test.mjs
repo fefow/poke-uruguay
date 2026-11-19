@@ -1013,3 +1013,41 @@ test('map editor patches: doors, signs and warps follow the tiles', async () => 
   applyMapEdits(bad, { a: { tiles: ['#D#', '.S.', '...'], doors: ['x', 'y'] } });
   assert.deepEqual(bad.a.doors, ['x'], 'lista de puertas con otra cantidad: se ignora');
 });
+
+test('account credentials: username and password rules', async () => {
+  const { validateCredentials, signIn, AuthError } = await import('../src/save/auth.ts');
+  assert.equal(validateCredentials('facu_10', 'abcdefgh'), null);
+  assert.match(validateCredentials('ab', 'abcdefgh'), /usuario/);
+  assert.match(validateCredentials('Facu', 'abcdefgh'), /usuario/); // lowercase only
+  assert.match(validateCredentials('facu uy', 'abcdefgh'), /usuario/);
+  assert.match(validateCredentials('a'.repeat(17), 'abcdefgh'), /usuario/);
+  assert.match(validateCredentials('facu', 'short'), /contraseña/);
+  assert.match(validateCredentials('facu', 'x'.repeat(73)), /larga/);
+  // Bad input never reaches the network.
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = () => { throw new Error('should not fetch'); };
+  try { await assert.rejects(signIn('!!', 'x'), AuthError); } finally { globalThis.fetch = realFetch; }
+});
+
+test('account: server errors become Spanish messages and a failed refresh keeps the session on network errors', async () => {
+  const { signUp, signIn, getAccessToken, currentUser, AuthError } = await import('../src/save/auth.ts');
+  const realFetch = globalThis.fetch;
+  const reply = (status, body) => async () => new Response(JSON.stringify(body), { status });
+  try {
+    globalThis.fetch = reply(422, { error_code: 'user_already_exists' });
+    await assert.rejects(signUp('facu', 'abcdefgh'), /ya está en uso/);
+    globalThis.fetch = reply(400, { error_code: 'invalid_credentials' });
+    await assert.rejects(signIn('facu', 'wrongpass'), /incorrectos/);
+    globalThis.fetch = reply(200, { access_token: 'a', refresh_token: 'r', expires_at: 1, expires_in: 1 });
+    assert.equal(await signIn('facu', 'abcdefgh'), 'facu');
+    assert.equal(currentUser(), 'facu');
+    // Expired token + network failure: no token now, but the session survives.
+    globalThis.fetch = () => { throw new TypeError('offline'); };
+    assert.equal(await getAccessToken(), null);
+    assert.equal(currentUser(), 'facu');
+    // Expired token + refresh token rejected: session is dropped.
+    globalThis.fetch = reply(400, { error_code: 'refresh_token_not_found' });
+    assert.equal(await getAccessToken(), null);
+    assert.equal(currentUser(), null);
+  } finally { globalThis.fetch = realFetch; }
+});

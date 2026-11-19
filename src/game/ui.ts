@@ -252,9 +252,9 @@ export function panel(cls, build): Promise<any> {
 }
 
 /** Name entry using a real <input> so mobile keyboards work. */
-export function textInput(label, value = '', placeholder = '') {
-  return new Promise((resolve) => {
-    const field = h('input', { id: 'name-input', class: 'text-input', maxlength: '10', autocomplete: 'off', spellcheck: 'false', value, placeholder });
+export function textInput(label, value = '', placeholder = '', { maxlength = 10, type = 'text', autocomplete = 'off' }: { maxlength?: number; type?: string; autocomplete?: string } = {}) {
+  return new Promise<string>((resolve) => {
+    const field = h('input', { id: 'name-input', class: 'text-input', type, maxlength: String(maxlength), autocomplete, spellcheck: 'false', autocapitalize: 'off', value, placeholder });
     const ok = h('button', { class: 'btn', type: 'button', text: 'Listo' });
     // A <div>, not a <form>: sandboxed iframes block form submission entirely.
     const form = h('div', { class: 'panel panel-name' },

@@ -10,7 +10,7 @@ import { charSprite, LOOKS } from './gfx/characters.ts';
 import { pollGamepads, input, keyName } from './core/input.ts';
 import { initAudio, setVolumes, sfx } from './core/audio.ts';
 import { h, nextFrame, viewTransition, wait } from './core/util.ts';
-import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot } from './game/ui.ts';
+import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot, textInput, ask } from './game/ui.ts';
 import { state, setState, newState, settings, badgeCount } from './game/state.ts';
 import { loadMap, updateWorld, worldState, runScript, poisonTick, api as scriptApi } from './game/world.ts';
 import { SCRIPTS } from './data/story.ts';
@@ -23,7 +23,8 @@ import { mountHud, updateHud, flashSaved } from './game/hud.ts';
 import { mountSidebar, updateSidebar } from './game/sidebar.ts';
 import { VERSION } from './version.ts';
 import { MAPS } from './data/maps.ts';
-import { initSaves, listSaves, loadGame, saveGame, getBuildHash } from './save/index.ts';
+import { initSaves, listSaves, loadGame, saveGame, getBuildHash, setSaveBackend, isCloud, localSavesToMigrate, migrateLocalToCloud } from './save/index.ts';
+import { currentUser, signIn, signUp, signOut, clearSession, AuthError } from './save/auth.ts';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.ts';
 import { SAVE_CONFIG } from './save/config.ts';
 import { mountTouchPad } from './core/touchpad.ts';
@@ -166,18 +167,82 @@ async function titleScreen() {
   press.remove();
   ver.remove();
   sfx('confirm');
+  if (SAVE_CONFIG.backend === 'supabase' && !currentUser()) await accountMenu();
   while (true) {
-    const saves = await listSaves().catch(() => []);
+    let saves = [];
+    try {
+      saves = await listSaves();
+    } catch (err) {
+      // The server no longer accepts this session: sign in again instead of
+      // showing an empty list that looks like lost progress.
+      if (isCloud() && err?.status === 401) {
+        clearSession();
+        await say('Tu sesión venció. Volvé a iniciar sesión.');
+        await accountMenu();
+        continue;
+      }
+    }
     const opts = [];
     if (saves.length) opts.push(['Continuar', 'continue']);
-    opts.push(['Nueva partida', 'new'], ['Opciones', 'options'], ['Créditos', 'credits']);
+    opts.push(['Nueva partida', 'new'], ['Opciones', 'options']);
+    if (SAVE_CONFIG.backend === 'supabase') opts.push(isCloud() ? [`Cerrar sesión (${currentUser()})`, 'logout'] : ['Iniciar sesión', 'login']);
+    opts.push(['Créditos', 'credits']);
     const i = await choose(opts.map((o) => o[0]), { cls: 'menu-title-screen', cancel: false });
     const pick = opts[i][1];
-    if (pick === 'options') await openOptions();
+    if (pick === 'logout') { await signOut(); setSaveBackend('local'); await accountMenu(); }
+    else if (pick === 'login') await accountMenu();
+    else if (pick === 'options') await openOptions();
     else if (pick === 'credits') { await credits(); await fadeIn(300); startTitle(); }
     else if (pick === 'continue') { if (await continueGame(saves)) return; }
     else if (pick === 'new') { if (await startNewGame()) return; }
   }
+}
+
+// ---------------------------------------------------------------- account
+// Username + password. Cloud saves follow the player across devices; "sin cuenta"
+// keeps the old behaviour (saves stay in this browser).
+async function accountMenu() {
+  while (true) {
+    const i = await choose(['Iniciar sesión', 'Crear cuenta', 'Jugar sin cuenta'], { cls: 'menu-title-screen', cancel: false });
+    if (i === 2) {
+      setSaveBackend('local');
+      await say('Vas a jugar sin cuenta: la partida queda solo en este dispositivo. Podés iniciar sesión cuando quieras desde el título.');
+      return;
+    }
+    const creating = i === 1;
+    const username = (await textInput(creating ? 'Elegí un usuario (3 a 16: a-z, 0-9, _)' : 'Usuario', '', 'usuario', { maxlength: 16, autocomplete: 'username' })).trim().toLowerCase();
+    if (!username) continue;
+    const password = await textInput(creating ? 'Elegí una contraseña (mín. 8)' : 'Contraseña', '', 'contraseña', { maxlength: 72, type: 'password', autocomplete: creating ? 'new-password' : 'current-password' });
+    if (!password) continue;
+    try {
+      if (creating) {
+        const again = await textInput('Repetí la contraseña', '', 'contraseña', { maxlength: 72, type: 'password', autocomplete: 'new-password' });
+        if (again !== password) { sfx('bump'); await say('Las contraseñas no coinciden.'); continue; }
+        await signUp(username, password);
+      } else {
+        await signIn(username, password);
+      }
+    } catch (err) {
+      sfx('bump');
+      await say(err instanceof AuthError ? err.message : 'No se pudo completar. Probá de nuevo.');
+      continue;
+    }
+    setSaveBackend('cloud');
+    sfx('confirm');
+    await say(creating
+      ? [`¡Cuenta creada, ${username}! Tu progreso se guarda online.`, 'No hay recuperación de contraseña: anotala en un lugar seguro.']
+      : `¡Hola de nuevo, ${username}!`);
+    await offerMigration();
+    return;
+  }
+}
+
+async function offerMigration() {
+  const pending = await localSavesToMigrate().catch(() => []);
+  if (!pending.length) return;
+  if (!(await ask(`Hay ${pending.length} partida${pending.length > 1 ? 's' : ''} guardada${pending.length > 1 ? 's' : ''} en este dispositivo. ¿La${pending.length > 1 ? 's' : ''} subo a tu cuenta?`))) return;
+  const res = await migrateLocalToCloud();
+  await say([`Se subieron ${res.moved} partida${res.moved === 1 ? '' : 's'}.`, ...res.failed.slice(0, 3)]);
 }
 
 async function continueGame(saves) {
