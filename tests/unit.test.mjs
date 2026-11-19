@@ -1012,6 +1012,7 @@ test('map editor patches: doors, signs and warps follow the tiles', async () => 
   const bad = mk();
   applyMapEdits(bad, { a: { tiles: ['#D#', '.S.', '...'], doors: ['x', 'y'] } });
   assert.deepEqual(bad.a.doors, ['x'], 'lista de puertas con otra cantidad: se ignora');
+});
 
 test('account credentials: username and password rules', async () => {
   const { validateCredentials, signIn, AuthError } = await import('../src/save/auth.ts');
