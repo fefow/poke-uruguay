@@ -1,0 +1,391 @@
+{
+ "frames": [
+  {
+   "filename": "intro-rayo-de-sol 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 1.png",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 2.png",
+   "frame": {
+    "x": 144,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 3.png",
+   "frame": {
+    "x": 216,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 4.png",
+   "frame": {
+    "x": 0,
+    "y": 122,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 5.png",
+   "frame": {
+    "x": 72,
+    "y": 122,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 6.png",
+   "frame": {
+    "x": 144,
+    "y": 122,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 7.png",
+   "frame": {
+    "x": 216,
+    "y": 122,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 8.png",
+   "frame": {
+    "x": 0,
+    "y": 244,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 9.png",
+   "frame": {
+    "x": 72,
+    "y": 244,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 10.png",
+   "frame": {
+    "x": 144,
+    "y": 244,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 11.png",
+   "frame": {
+    "x": 216,
+    "y": 244,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 12.png",
+   "frame": {
+    "x": 0,
+    "y": 366,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  },
+  {
+   "filename": "intro-rayo-de-sol 13.png",
+   "frame": {
+    "x": 72,
+    "y": 366,
+    "w": 72,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8688524590163934
+   },
+   "duration": 71
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-rayo-de-sol.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 288,
+   "h": 488
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 36,
+   "y": 106
+  },
+  "frameTags": [
+   {
+    "name": "intro-rayo-de-sol",
+    "from": 0,
+    "to": 13,
+    "direction": "forward"
+   }
+  ]
+ }
+}

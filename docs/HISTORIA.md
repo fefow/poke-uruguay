@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-13 (v222)
+> Última actualización: 2026-11-19 (v229)
 
 ## Dónde está cada cosa en el código
 
@@ -32,6 +32,20 @@ Notas de lectura: los campos `order` y `badge` dentro de `LEADERS` son heredados
 - El compañero inicial del jugador nació en el laboratorio durante el proyecto: guarda un eco del ciclo del viento, por eso el PP lo persigue (Tabárez lo confiesa en Fray Bentos).
 - La historia es lineal, con pequeñas decisiones de niebla (`fog1` a `fog3`) que solo cambian una línea del final. Facu nunca se une al PP.
 - Reglas de redacción: español rioplatense neutro, tono serio, sin diminutivos; los líderes son jefes de organismos del Estado o figuras históricas de la ciudad; nunca el nombre real de una persona viva en su cargo actual (solo el cargo con nombre de pila).
+
+## Intro (cinemática de nueva partida)
+
+`src/game/scenes.ts` (`CINEMATIC`). Se ve al abrir el juego, antes de la pantalla de título (en una partida nueva no se repite si ya se vio en esa sesión). Siete escenas narradas como un cuento junto al fogón; efectos hechos con PixelLab (`src/gfx/intro-vfx-data.ts`). A pasa de escena, B salta todo.
+
+1. **Fogón** (noche, ombú, tero, hornero y mulita alrededor del fuego): «Junto al fogón, los viejos todavía cuentan / la historia de la tierra de los charrúas.»
+2. **Pradera** (ñandú corriendo, tero volando, carpincho, ceibo con pétalos): «Una tierra de cuchillas, arroyos y cielo abierto, / donde las criaturas viven junto a la gente.»
+3. **Costa** (la Ballenaplata sale del agua y se sumerge, biguá): «En sus costas canta la Ballenaplata, / y su canto aplaca las tormentas del Plata.»
+4. **Pampero** (tormenta y niebla, dos rayos, el Cardenal Azul cruza y el cielo se despeja): «Cuando el Cardenal Azul cruza el cielo, sopla el pampero / y la niebla se retira de los campos.»
+5. **Niebla** (venado y zorro desaparecen en la niebla; anticipa al PP sin nombrarlo): «Pero hace tiempo que nadie lo ve volar, / y una niebla espesa se queda sobre el país.»
+6. **Los tres** (Ceibo, Tejuchispa y Carpincho aparecen con un haz de luz): «En Carmelo, el Maestro Tabárez cuida a tres criaturas / que esperan a quien se anime a recorrer el Uruguay.»
+7. **Título** (Sol de Mayo, estallidos dorados, el Cardenal Azul cruza): «Poke Uruguay / La tierra de los charrúas».
+
+Después sigue la presentación de Tabárez en el laboratorio (sin cambios).
 
 ## Equipo PP
 

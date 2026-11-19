@@ -1,0 +1,339 @@
+{
+ "frames": [
+  {
+   "filename": "intro-brasas-tejuchispa 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 1.png",
+   "frame": {
+    "x": 81,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 2.png",
+   "frame": {
+    "x": 162,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 3.png",
+   "frame": {
+    "x": 243,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 4.png",
+   "frame": {
+    "x": 0,
+    "y": 122,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 5.png",
+   "frame": {
+    "x": 81,
+    "y": 122,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 6.png",
+   "frame": {
+    "x": 162,
+    "y": 122,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 7.png",
+   "frame": {
+    "x": 243,
+    "y": 122,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 8.png",
+   "frame": {
+    "x": 0,
+    "y": 244,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 9.png",
+   "frame": {
+    "x": 81,
+    "y": 244,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 10.png",
+   "frame": {
+    "x": 162,
+    "y": 244,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  },
+  {
+   "filename": "intro-brasas-tejuchispa 11.png",
+   "frame": {
+    "x": 243,
+    "y": 244,
+    "w": 81,
+    "h": 122
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 81,
+    "h": 122
+   },
+   "sourceSize": {
+    "w": 81,
+    "h": 122
+   },
+   "pivot": {
+    "x": 0.4691358024691358,
+    "y": 0.9098360655737705
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "intro-brasas-tejuchispa.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 324,
+   "h": 366
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 38,
+   "y": 111
+  },
+  "frameTags": [
+   {
+    "name": "intro-brasas-tejuchispa",
+    "from": 0,
+    "to": 11,
+    "direction": "forward"
+   }
+  ]
+ }
+}
