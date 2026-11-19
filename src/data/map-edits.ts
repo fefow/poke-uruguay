@@ -6,6 +6,9 @@
 //   items     { id: { x, y } | { remove: true } } for items already in the map
 //   addItems  [{ x, y, item, id }] new items on the ground
 //   ground    base ground behind trees, bushes and other see-through pieces ('.', 's', '=', ... absent = the map's own ground)
+//   doors     [string | { to, req?, deny? }] every door of the map in reading order of its 'D' tiles (only with the matching tile grid)
+//   signs     [string] the text of every 'S' tile, in reading order
+//   warps     [{ x, y, to, tx, ty }] stairs and passages: step on (x, y) and arrive at (tx, ty) of map `to` (replaces the map's list)
 //   weather   'clear' | 'rain' | 'storm' | 'fog' fixed weather for the zone (absent = random)
 // The game applies them after building every map (end of maps.js), so a generator change keeps the edits.
 
@@ -31,13 +34,17 @@ export function applyMapEdits(maps, edits) {
     if (typeof e.ground === 'string') m.ground = e.ground;
     // A map grown on its left or top: everything in it moves by the same amount (the editor's patch uses the new coordinates)
     const sx = Number.isInteger(e.shift?.x) ? e.shift.x : 0, sy = Number.isInteger(e.shift?.y) ? e.shift.y : 0;
-    const grown = Array.isArray(e.tiles) && fitsGrown(m.tiles, e.tiles);
+    const grown = Array.isArray(e.tiles) && fitsGrown(m.tiles, e.tiles, e);
     if (grown && (sx || sy)) {
       for (const n of m.npcs ?? []) { n.x += sx; n.y += sy; }
       for (const it of m.items ?? []) { it.x += sx; it.y += sy; }
       for (const w of m.warps ?? []) { w.x += sx; w.y += sy; }
     }
     if (grown) m.tiles = [...e.tiles];
+    // doors and signs follow the tiles: only taken when there is exactly one entry per 'D' / 'S'
+    if (Array.isArray(e.doors) && e.doors.length === count(m.tiles, 'D') && e.doors.every((d) => (typeof d === 'string' && d) || (d && typeof d.to === 'string'))) m.doors = e.doors.map((d) => (typeof d === 'string' ? d : { ...d }));
+    if (Array.isArray(e.signs) && e.signs.length === count(m.tiles, 'S') && e.signs.every((t) => typeof t === 'string')) m.signs = [...e.signs];
+    if ((!Array.isArray(e.tiles) || grown) && Array.isArray(e.warps) && e.warps.every((w) => w && [w.x, w.y, w.tx, w.ty].every(Number.isInteger) && typeof w.to === 'string')) m.warps = e.warps.map((w) => ({ ...w }));
     if (e.npcs || e.addNpcs) {
       const keys = npcKeys(m.npcs);
       m.npcs = (m.npcs ?? []).flatMap((n, i) => {
@@ -47,6 +54,8 @@ export function applyMapEdits(maps, edits) {
         if (Number.isInteger(p.x) && Number.isInteger(p.y)) { n.x = p.x; n.y = p.y; }
         if (p.dir) n.dir = p.dir;
         if (Array.isArray(p.text) && n.text && !n.script && !n.trainer) n.text = p.text;
+        if (typeof p.look === 'string' && !n.script && !n.trainer && !n.blocker && !n.critter) n.look = p.look;
+        if (typeof p.wander === 'boolean' && !n.script && !n.trainer && !n.blocker && !n.critter) n.wander = p.wander;
         return [n];
       });
       for (const a of e.addNpcs ?? []) m.npcs.push({ x: a.x, y: a.y, look: a.look, dir: a.dir ?? 'down', text: a.text ?? ['…'], ...(a.wander ? { wander: true } : {}) });
@@ -65,10 +74,12 @@ export function applyMapEdits(maps, edits) {
 }
 
 /** Same or bigger map (grown in the editor): rectangular, and the same number of doors and signs. */
-export function fitsGrown(before, after) {
+export function fitsGrown(before, after, extra?: { doors?: unknown[]; signs?: unknown[] }) {
+  // doors and signs may be added or removed when the patch carries their full lists (one entry per tile)
+  const doorsOk = count(after, 'D') === count(before, 'D') || (Array.isArray(extra?.doors) && extra.doors.length === count(after, 'D'));
+  const signsOk = count(after, 'S') === count(before, 'S') || (Array.isArray(extra?.signs) && extra.signs.length === count(after, 'S'));
   return after.length >= before.length && after.length <= 200 && after.every((r) => typeof r === 'string' && r.length === after[0].length && r.length <= 200)
-    && after[0].length >= before[0].length
-    && count(after, 'D') === count(before, 'D') && count(after, 'S') === count(before, 'S');
+    && after[0].length >= before[0].length && doorsOk && signsOk;
 }
 
 /** Same size, and the same number of doors and signs (they are matched to their targets and texts in order). */

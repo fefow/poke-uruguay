@@ -990,3 +990,64 @@ test('map editor grid tools: shapes, stamps, replace and changes', async () => {
   assert.equal(fitZoom(40, 30, 16, 1300, 800), 1);
   assert.equal(fitZoom(20, 15, 16, 1300, 800), 3);
 });
+
+test('map editor patches: doors, signs and warps follow the tiles', async () => {
+  const { applyMapEdits, fitsGrown } = await import('../src/data/map-edits.ts');
+  const mk = () => ({ a: { tiles: ['#D#', '.S.', '...'], doors: ['x'], signs: ['hola'], warps: [{ x: 0, y: 2, to: 'b', tx: 1, ty: 1 }], npcs: [{ look: 'boy', x: 1, y: 2, text: ['hi'] }, { look: 'girl', x: 2, y: 2, script: 's', text: ['s'] }], items: [] } });
+  assert.ok(!fitsGrown(['#D#'], ['#D#', 'DDD']), 'sin lista de puertas no cambia la cantidad');
+  assert.ok(fitsGrown(['#D#'], ['#D#', 'DDD'], { doors: ['a', 'b', 'c', 'd'] }));
+  const maps = mk();
+  applyMapEdits(maps, { a: {
+    tiles: ['#D#', 'DSD', '..S'], doors: ['x', { to: 'y', req: 'f' }, 'z'], signs: ['hola', 'otro'],
+    warps: [{ x: 2, y: 1, to: 'c', tx: 0, ty: 0 }],
+    npcs: { 'look:boy': { look: 'gaucho', wander: true }, 's:s': { look: 'cop' } },
+  } });
+  const m = maps.a;
+  assert.deepEqual(m.doors, ['x', { to: 'y', req: 'f' }, 'z']);
+  assert.deepEqual(m.signs, ['hola', 'otro']);
+  assert.deepEqual(m.warps, [{ x: 2, y: 1, to: 'c', tx: 0, ty: 0 }]);
+  assert.equal(m.npcs[0].look, 'gaucho');
+  assert.equal(m.npcs[0].wander, true);
+  assert.equal(m.npcs[1].look, 'girl', 'los eventos no cambian de aspecto');
+  const bad = mk();
+  applyMapEdits(bad, { a: { tiles: ['#D#', '.S.', '...'], doors: ['x', 'y'] } });
+  assert.deepEqual(bad.a.doors, ['x'], 'lista de puertas con otra cantidad: se ignora');
+});
+
+test('account credentials: username and password rules', async () => {
+  const { validateCredentials, signIn, AuthError } = await import('../src/save/auth.ts');
+  assert.equal(validateCredentials('facu_10', 'abcdefgh'), null);
+  assert.match(validateCredentials('ab', 'abcdefgh'), /usuario/);
+  assert.match(validateCredentials('Facu', 'abcdefgh'), /usuario/); // lowercase only
+  assert.match(validateCredentials('facu uy', 'abcdefgh'), /usuario/);
+  assert.match(validateCredentials('a'.repeat(17), 'abcdefgh'), /usuario/);
+  assert.match(validateCredentials('facu', 'short'), /contraseña/);
+  assert.match(validateCredentials('facu', 'x'.repeat(73)), /larga/);
+  // Bad input never reaches the network.
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = () => { throw new Error('should not fetch'); };
+  try { await assert.rejects(signIn('!!', 'x'), AuthError); } finally { globalThis.fetch = realFetch; }
+});
+
+test('account: server errors become Spanish messages and a failed refresh keeps the session on network errors', async () => {
+  const { signUp, signIn, getAccessToken, currentUser, AuthError } = await import('../src/save/auth.ts');
+  const realFetch = globalThis.fetch;
+  const reply = (status, body) => async () => new Response(JSON.stringify(body), { status });
+  try {
+    globalThis.fetch = reply(422, { error_code: 'user_already_exists' });
+    await assert.rejects(signUp('facu', 'abcdefgh'), /ya está en uso/);
+    globalThis.fetch = reply(400, { error_code: 'invalid_credentials' });
+    await assert.rejects(signIn('facu', 'wrongpass'), /incorrectos/);
+    globalThis.fetch = reply(200, { access_token: 'a', refresh_token: 'r', expires_at: 1, expires_in: 1 });
+    assert.equal(await signIn('facu', 'abcdefgh'), 'facu');
+    assert.equal(currentUser(), 'facu');
+    // Expired token + network failure: no token now, but the session survives.
+    globalThis.fetch = () => { throw new TypeError('offline'); };
+    assert.equal(await getAccessToken(), null);
+    assert.equal(currentUser(), 'facu');
+    // Expired token + refresh token rejected: session is dropped.
+    globalThis.fetch = reply(400, { error_code: 'refresh_token_not_found' });
+    assert.equal(await getAccessToken(), null);
+    assert.equal(currentUser(), null);
+  } finally { globalThis.fetch = realFetch; }
+});

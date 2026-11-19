@@ -24,12 +24,15 @@ Poke Uruguay runs entirely in the browser today, so the honest starting point is
 
 ## What changes with Supabase (server phase)
 
-The save layer is already behind an interface (`src/save/provider.js`). Switching `backend` to `'supabase'` in `src/save/config.js` routes saves to your VPS. The server side is in `supabase/schema.sql`:
+The save layer is behind an interface (`src/save/provider.ts`). With `backend: 'supabase'` in `src/save/config.ts` (the current setting) signed-in players' saves go to the VPS; accounts are username + password (`src/save/auth.ts`). The server side is in `supabase/schema.sql`:
 
 1. **Writes only through `submit_save()`**. Row Level Security lets players read and delete their own saves, but there is no insert/update policy, so the only write path is the database function.
 2. **Server-side rule checks**: money ledger, level/EXP consistency, IV and PP ranges, stored stats forbidden, party size, accepted build fingerprints.
 3. **Progress can only move forward**: play time can't go backwards or run faster than real time between saves; battle count can't decrease.
-4. **Audit log** of every accepted and rejected save (`save_audit`, service-role only), so you can spot cheaters instead of silently trusting them.
+4. **Audit log** of every *rejected* save (`save_audit`, service-role only), so you can spot cheaters instead of silently trusting them. `submit_save` returns rule violations as a result instead of raising, because a raise would roll the audit row back. Accepted autosaves are not logged (they would bloat the table).
+5. **Cloud saves are not verified with the device signature.** The HMAC key is per device, so it can't vouch for a save made on another one. When loading from the cloud the client skips that check, but still runs `validateSave()`; the server's `submit_save` is what vouches for the data.
+
+Operational notes: Postgres/pooler are bound to `127.0.0.1` (Docker bypasses ufw, so never publish `5432` on `0.0.0.0`); Studio sits behind basic auth; CORS only allows the game's origin; the anon key is public by design and every table is protected by RLS plus explicit `revoke`s.
 
 ### Recommended next step: server-authoritative battles
 

@@ -1,11 +1,12 @@
 // Choose where saves live. Switch `backend` to 'supabase' and fill in your
 // VPS details once the self-hosted Supabase is running (see README.md and docs/SECURITY.md).
 export const SAVE_CONFIG = Object.freeze({
-  backend: 'local' as 'local' | 'supabase',
+  backend: 'supabase' as 'local' | 'supabase',
   slots: 3,
   supabase: Object.freeze({
-    url: 'https://your-vps.example.com',
-    anonKey: 'public-anon-key',
+    url: 'https://pokeuy.duckdns.org',
+    // Public by design: it only identifies the project. Access is enforced by RLS.
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzk1MTA3NzEwLCJleHAiOjE5NTI3ODc3MTB9.kdlIFenafJ3QCH4wYhwecNJzgDFgW3KfEga4094lSPw',
   }),
 });
 
@@ -13,7 +14,7 @@ export const SAVE_CONFIG = Object.freeze({
 // read reports from every device in one place. Uses the same Supabase as saves.
 // Only the public anon key is needed (the table is insert-only; see supabase/bug_reports.sql).
 export const REPORT_CONFIG = Object.freeze({
-  enabled: false, // set to true after running supabase/bug_reports.sql
+  enabled: true,
   url: SAVE_CONFIG.supabase.url,
   anonKey: SAVE_CONFIG.supabase.anonKey,
 });

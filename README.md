@@ -56,12 +56,17 @@ Copy `dist/` to any static host (nginx, Caddy…). Serve it over HTTPS so the of
 
 ES modules, private class fields, HMAC save signing with Web Crypto (plus a pure-JS fallback), View Transitions, CSS nesting, `@property` animated HP bars, `oklch()` colors, container query units for a UI that scales with the screen, `@starting-style` entry animations, `dvh` units and safe-area insets, Gamepad API, Pointer Events touch controls with haptics, PWA manifest + service worker, Web Audio synthesis, and a real-clock day/night tint.
 
-## Saves: localStorage now, Supabase later
+## Saves: accounts on a self-hosted Supabase
 
-Saves go through one interface (`list / load / save / remove`). `LocalStorageProvider` is active today. To move to your self-hosted Supabase:
+Saves go through one interface (`list / load / save / remove`). With `backend: 'supabase'` (the default in `src/save/config.ts`) players sign in with **username + password** (`src/save/auth.ts`, plain `fetch` against Supabase Auth; the username maps to a synthetic `name@users.pokeuy.invalid` email, nothing is ever mailed) and their saves live in the `saves` table, so they can continue from any device. "Jugar sin cuenta" keeps the old behaviour (`LocalStorageProvider`), and on first sign-in the game offers to upload the saves found on the device.
 
-1. Run `supabase/schema.sql` in your database and insert the game's build fingerprint into `game_builds` (shown by `getBuildHash()` in `src/save/index.ts`).
-2. Set `backend: 'supabase'` and your URL / anon key in `src/save/config.ts`, and pass a `getAccessToken` that returns the signed-in user's JWT.
-3. Add your Supabase origin to `connect-src` in the Content-Security-Policy in `index.html`.
+Server setup (once, then on every change to the SQL; both files are idempotent):
+
+1. Run `supabase/schema.sql` and `supabase/bug_reports.sql` in the database.
+2. Register the game's build fingerprint, which `submit_save` requires. It only changes when `SPECIES`, `MOVES` or `ITEMS` change. Print it with `getBuildHash()` in `src/save/index.ts`, then: `insert into game_builds (build) values ('<hash>');`
+3. In Auth: email confirmation off, `GOTRUE_PASSWORD_MIN_LENGTH=8`, `SITE_URL` set to the game URL and CORS limited to that origin.
+4. Keep the Supabase origin in `connect-src` of the Content-Security-Policy in `index.html`.
+
+There is no password recovery by design (no email): reset a password from Supabase Studio → Authentication → Users.
 
 See `docs/SECURITY.md` for what is protected today and the plan for server-authoritative validation.
