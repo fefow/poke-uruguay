@@ -906,7 +906,16 @@ export function drawWorld3D(v: WorldView, t: number) {
     if (look === null) continue;
     seen.add(n);
     if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, 0, n.y + 0.5); continue; }
-    if (look === 'ball') { const b = boardFor(n, 'ball', () => board(ballCanvas(), 1)); stand(b, v.entityPos(n)); continue; }
+    if (look === 'ball') {
+      const b = boardFor(n, 'ball', () => board(ballCanvas(), 1));
+      const under = v.tileAt(n.x, n.y);
+      if (under && TILE_INFO[under]?.solid) {
+        // sobre una mesa: la pokebola va arriba del tablero, pegada al dibujo del mueble (como en el mapa 2D)
+        const up = 0.5;
+        b.root.position.set(n.x + 0.5, up * Math.cos(TILT_OBJ), n.y + 1 - up * Math.sin(TILT_OBJ) + 0.06);
+      } else stand(b, v.entityPos(n));
+      continue;
+    }
     if (typeof look === 'string' && look.startsWith('animal:')) {
       // criaturas a lo lejos: su sprite de combate en chico, dan saltitos al moverse
       const cv = creatureSprite(look.slice(7));
