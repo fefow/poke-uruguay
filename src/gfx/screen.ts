@@ -9,7 +9,7 @@ export function mountScreen(el) {
   canvas = el;
   canvas.width = W;
   canvas.height = H;
-  ctx = canvas.getContext('2d', { alpha: false });
+  ctx = canvas.getContext('2d', { alpha: true });
   ctx.imageSmoothingEnabled = false;
   return ctx;
 }

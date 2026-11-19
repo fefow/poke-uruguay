@@ -8,6 +8,8 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { uiIconCanvas } from '../gfx/ui-icons.ts';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
+import { is3D } from '../gfx/world-3d.ts';
+import { drawBattle3D } from '../gfx/battle-3d.ts';
 import { vignette, rain, weatherAt } from '../gfx/fx.ts';
 import { MAPS } from '../data/maps.ts';
 import { pickStyle, drawEffect, FX_MS } from './battle-fx.ts';
@@ -121,6 +123,24 @@ const A: any = {
 function drawBattle(g, t) {
   A.t = t;
   const [s1, s2, g1, g2] = BG[A.bg] ?? BG.field;
+  const in3D = is3D();
+  if (in3D) { g.clearRect(0, 0, W, H); drawBattle3D(A.bg in BG ? A.bg : 'field', [s1, s2, g1, g2], t, A.shakeScreen ?? 0, !NO_TINT.has(A.bg)); }
+  else drawBattleBackdrop(g, t, s1, s2, g1, g2);
+  const sx = A.shakeScreen ? Math.round(Math.sin(t / 20) * A.shakeScreen) : 0;
+  g.save();
+  g.translate(sx, 0);
+  // platforms (in 3D they are part of the scene)
+  if (!in3D) drawPlatforms(g);
+  drawBattleActors(g, t);
+  g.restore();
+  const tint = dayTint();
+  if (tint && !NO_TINT.has(A.bg) && !in3D) { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
+  if (A.weather === 'rain' || A.weather === 'storm') { rain(g, t); if (A.weather === 'storm') rain(g, t * 1.7); }
+  vignette(g, in3D ? 0.6 : 0.9);
+  if (A.tint) { g.fillStyle = A.tint; g.fillRect(0, 0, W, H); }
+}
+
+function drawBattleBackdrop(g, t, s1, s2, g1, g2) {
   let grd = g.createLinearGradient(0, 0, 0, 120);
   grd.addColorStop(0, s1); grd.addColorStop(1, s2);
   g.fillStyle = grd; g.fillRect(0, 0, W, 120);
@@ -132,10 +152,9 @@ function drawBattle(g, t) {
   grd.addColorStop(0, g1); grd.addColorStop(1, g2);
   g.fillStyle = grd; g.fillRect(0, 120, W, H - 120);
   g.save(); g.translate((W - 320) / 2, 0); decorGround(g, t); g.restore();
-  const sx = A.shakeScreen ? Math.round(Math.sin(t / 20) * A.shakeScreen) : 0;
-  g.save();
-  g.translate(sx, 0);
-  // platforms
+}
+
+function drawPlatforms(g) {
   for (const [px, py, rx, ry] of [[236, 104, 52, 12], [84, 178, 64, 13]]) {
     g.save();
     g.translate(px, py);
@@ -152,6 +171,9 @@ function drawBattle(g, t) {
     g.lineWidth = 1;
     g.beginPath(); g.ellipse(px, py - 2, rx * 0.86, ry * 0.7, 0, 0, 7); g.stroke();
   }
+}
+
+function drawBattleActors(g, t) {
   // foe trainer
   if (A.foeTrainer) {
     const spr = charSprite(A.foeTrainer, 'down', 0);
@@ -169,12 +191,6 @@ function drawBattle(g, t) {
   if (A.ball) drawBall(g, A.ball.x, A.ball.y, A.ball.shake, A.ball.item);
   if (A.fx) drawFx(g, A.fx, t);
   drawBursts(g);
-  g.restore();
-  const tint = dayTint();
-  if (tint && !NO_TINT.has(A.bg)) { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
-  if (A.weather === 'rain' || A.weather === 'storm') { rain(g, t); if (A.weather === 'storm') rain(g, t * 1.7); }
-  vignette(g, 0.9);
-  if (A.tint) { g.fillStyle = A.tint; g.fillRect(0, 0, W, H); }
 }
 
 function drawCreature(g, spr, cx, base, size, side, t, phase) {

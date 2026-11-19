@@ -15,6 +15,7 @@ import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts'
 import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
 import { setFx, nightLevel, pixiActive } from '../gfx/pixi-layer.ts';
+import { is3D, drawWorld3D } from '../gfx/world-3d.ts';
 import { input } from '../core/input.ts';
 import { sfx, playMusic, jingle, setAmbience, skippableWait } from '../core/audio.ts';
 import { worldRng } from '../core/rng.ts';
@@ -1710,6 +1711,7 @@ export const api = {
 function drawWorld(g, t) {
   const m = W_.map;
   if (!m) return;
+  if (is3D()) { drawWorld3DFrame(g, t); return; }
   const p = W_.player;
   const ppos = entityPos(p);
   const mw = m.w * T;
@@ -1882,6 +1884,21 @@ function drawWorld(g, t) {
   }
   if (m.dark && !m.indoor) { g.save(); g.scale(Z, Z); drawMachineGlows(g, t, cx, cy, activeMachines()); g.restore(); }
   vignette(g, m.indoor ? 0.7 : 1);
+  if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
+}
+
+// Prueba visual 3D: el mundo lo dibuja Three.js; el canvas 2D queda transparente encima para lluvia, rayos y destellos.
+function drawWorld3DFrame(g, t) {
+  const m = W_.map;
+  const wx = m.dark || m.indoor || m.theme === 'cueva' ? 'clear' : weatherAt(m.id, m.weather);
+  const foggy = wx === 'fog' || activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'));
+  const userZ = Math.min(3, Math.max(1, Math.round(settings.mapZoom ?? 1)));
+  drawWorld3D({ map: m, tiles: W_.tiles, npcs: W_.npcs, items: W_.items, legend: W_.legend, player: W_.player, emote: W_.emote, lit: !!W_.lit, bike: !!W_.bike, flash: W_.flash, look: state().player.look || 'player_m', foggy, zoom: userZ, entityPos, tileAt }, t);
+  g.clearRect(0, 0, W, H);
+  if (wx === 'rain' || wx === 'storm') rain(g, t);
+  if (wx === 'storm') { rain(g, t * 1.7); lightning(g, t); }
+  if (foggy && !m.dark) drawFog(g, t);
+  vignette(g, m.indoor ? 0.5 : 0.7);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
 }
 
