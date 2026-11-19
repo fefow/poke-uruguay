@@ -622,7 +622,7 @@ const BASE_INTERIOR: Record<string, MapDef> = {
       { x: 4, y: 3, look: 'ball', species: 'ceibito', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 5, y: 3, look: 'ball', species: 'tejuchispa', cond: (f) => !f.has_starter, script: 'starter' },
       { x: 6, y: 3, look: 'ball', species: 'carpinchito', cond: (f) => !f.has_starter, script: 'starter' },
-      { x: 9, y: 6, look: 'clerk', dir: 'left', name: 'Gonzalo', text: ['Soy Gonzalo, ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
+      { x: 9, y: 6, look: 'clerk', dir: 'left', id: 'gonzalo_lab', name: 'Gonzalo', text: ['Soy Gonzalo, ayudante del Maestro Tabárez.', 'Estudiamos cómo las criaturas se adaptan al clima del Río de la Plata.'] },
       { x: 2, y: 6, look: 'biologo', dir: 'right', name: 'Martín', text: ['Soy Martín, ayudante del Maestro Tabárez.', 'Medimos el viento del Río de la Plata. El Maestro dice que el pampero tiene un ciclo, como si alguien lo trajera.'] },
       { x: 7, y: 1, look: 'rival', dir: 'down', id: 'rival_lab', cond: (f) => !f.rival1 },
       // Almada comes back to work with his old teacher once he leaves the PP; Facu helps his uncle after the Liga
