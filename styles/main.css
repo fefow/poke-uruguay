@@ -1293,3 +1293,19 @@ body.gb .bag-tabs span { cursor: pointer; pointer-events: auto; padding: 1.4cqi 
 #vista-badge { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); padding: 10px 22px; border-radius: 10px; background: rgb(14 18 40 / 0.82); color: #fff; font: 22px "Press Start 2P", monospace; pointer-events: none; opacity: 0; z-index: 20; }
 #vista-badge.show { animation: vista-badge 1.8s ease forwards; }
 @keyframes vista-badge { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+
+/* "Saltar intro" button over the opening cinematic */
+.intro-skip {
+  position: absolute;
+  right: 2cqi;
+  bottom: 2cqi;
+  font-family: var(--font-pixel);
+  font-size: 1.5cqi;
+  color: var(--paper);
+  background: rgba(8, 8, 24, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  padding: 0.8cqi 1.4cqi;
+  cursor: pointer;
+}
+.intro-skip:hover, .intro-skip:focus-visible { background: rgba(8, 8, 24, 0.85); border-color: #f8d040; outline: none; }
