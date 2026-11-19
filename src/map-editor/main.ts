@@ -25,7 +25,7 @@ const MAX_UNDO = 120;
 const CLIP_KEY = 'pokeuy:map-clip';
 const RECENT_KEY = 'pokeuy:map-recent';
 const ZOOMS = [1, 2, 3, 4, 5, 6];
-const LOCKED = new Set(['D', 'S']); // doors and signs are matched to their targets and texts in order
+const LOCKED = new Set<string>(); // nothing is locked: doors, signs and their data follow the tiles (see reconcile)
 const SOLID = (c) => c === undefined || !!TILE_INFO[c]?.solid;
 const DIRS = [['down', 'Abajo'], ['up', 'Arriba'], ['left', 'Izquierda'], ['right', 'Derecha']];
 const KIND_NAME = { trainer: 'Entrenador', script: 'Evento', critter: 'Animal', blocker: 'Guardia de paso', npc: 'Persona', added: 'Persona nueva' };
@@ -43,16 +43,16 @@ function persist() {
 const patchOf = (id) => (id in drafts ? drafts[id] : base[id]) ?? null;
 
 /** The map as the editor works on it: the original plus its patch, with removed things kept (hidden) so they can come back. */
-function working(id) {
+function working(id, patch?) {
   const o = MAP_ORIGINALS[id];
-  const p: any = patchOf(id) ?? {};
-  const grown = Array.isArray(p.tiles) && fitsGrown(o.tiles, p.tiles);
+  const p: any = patch ?? patchOf(id) ?? {};
+  const grown = Array.isArray(p.tiles) && fitsGrown(o.tiles, p.tiles, p);
   const tiles = (grown ? p.tiles : o.tiles).map((r) => [...r]);
   const shift = grown ? { x: p.shift?.x ?? 0, y: p.shift?.y ?? 0 } : { x: 0, y: 0 };
   const npcs: any[] = o.npcs.map((n0) => {
     const n = { ...n0, x: n0.x + shift.x, y: n0.y + shift.y };
     const q = p.npcs?.[n.key];
-    return { ...n, text: n.text ? [...n.text] : null, ...(q && !q.remove ? { x: q.x ?? n.x, y: q.y ?? n.y, dir: q.dir ?? n.dir, text: q.text && n.text ? [...q.text] : n.text } : {}), removed: !!q?.remove };
+    return { ...n, text: n.text ? [...n.text] : null, ...(q && !q.remove ? { x: q.x ?? n.x, y: q.y ?? n.y, dir: q.dir ?? n.dir, text: q.text && n.text ? [...q.text] : n.text, look: q.look ?? n.look, wander: q.wander ?? n.wander } : {}), removed: !!q?.remove };
   });
   for (const a of p.addNpcs ?? []) npcs.push({ key: null, kind: 'added', x: a.x, y: a.y, look: a.look, dir: a.dir ?? 'down', text: [...(a.text ?? ['…'])], wander: !!a.wander });
   const items = o.items.map((it0) => {
@@ -61,7 +61,31 @@ function working(id) {
     return { ...it, ...(q && !q.remove ? { x: q.x ?? it.x, y: q.y ?? it.y } : {}), removed: !!q?.remove };
   });
   for (const a of p.addItems ?? []) items.push({ ...a, added: true });
-  return { tiles, npcs, items, weather: p.weather ?? 'random', ground: p.ground ?? 'auto', shift };
+  const W: any = { tiles, npcs, items, weather: p.weather ?? 'random', ground: p.ground ?? 'auto', shift };
+  // Doors and signs belong to the 'D' / 'S' tiles in reading order; warps are plain positions.
+  const rows = tiles.map((r) => r.join(''));
+  const doors = Array.isArray(p.doors) && p.doors.length === countOf(rows, 'D') ? p.doors : o.doors;
+  const signs = Array.isArray(p.signs) && p.signs.length === countOf(rows, 'S') ? p.signs : o.signs;
+  W.doors = cellsOf(rows, 'D').map((c, i) => ({ ...c, ...normDoor(doors[i] ?? S.doorTo) }));
+  W.signs = cellsOf(rows, 'S').map((c, i) => ({ ...c, text: signs[i] ?? '…' }));
+  W.warps = (Array.isArray(p.warps) ? p.warps : o.warps.map((w) => ({ ...w, x: w.x + shift.x, y: w.y + shift.y }))).map((w) => ({ ...w }));
+  return W;
+}
+const countOf = (rows: string[], ch: string) => rows.join('').split(ch).length - 1;
+function cellsOf(rows: string[], ch: string) {
+  const out: { x: number; y: number }[] = [];
+  rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === ch) out.push({ x, y }); }));
+  return out;
+}
+const normDoor = (d) => (typeof d === 'string' ? { to: d } : { ...d });
+const doorOut = (d) => { const { x, y, ...rest } = d; return Object.keys(rest).length === 1 ? rest.to : rest; };
+/** After any tile change: one door/sign record per 'D'/'S' tile (new ones get defaults, lost ones disappear). */
+function reconcile(W) {
+  const rows = W.tiles.map((r) => r.join(''));
+  const old = new Map<string, any>(W.doors.map((d) => [`${d.x},${d.y}`, d]));
+  W.doors = cellsOf(rows, 'D').map((c) => old.get(`${c.x},${c.y}`) ?? { ...c, to: S.doorTo });
+  const oldS = new Map<string, any>(W.signs.map((d) => [`${d.x},${d.y}`, d]));
+  W.signs = cellsOf(rows, 'S').map((c) => oldS.get(`${c.x},${c.y}`) ?? { ...c, text: '…' });
 }
 
 /** The patch that turns the original into W, or null when nothing changed. */
@@ -81,6 +105,8 @@ function diff(id, W) {
     if (n.x !== was.x || n.y !== was.y) Object.assign(q, { x: n.x, y: n.y });
     if (n.dir !== was.dir) q.dir = n.dir;
     if (n.text && JSON.stringify(n.text) !== JSON.stringify(was.text)) q.text = n.text;
+    if (n.look !== was.look) q.look = n.look;
+    if (!!n.wander !== !!was.wander) q.wander = !!n.wander;
     if (Object.keys(q).length) npcs[n.key] = q;
   });
   if (Object.keys(npcs).length) p.npcs = npcs;
@@ -96,6 +122,11 @@ function diff(id, W) {
   if (Object.keys(items).length) p.items = items;
   const addItems = W.items.filter((it) => it.added).map(({ x, y, item, id: iid }) => ({ x, y, item, id: iid }));
   if (addItems.length) p.addItems = addItems;
+  const sameJSON = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  if (!sameJSON(W.doors.map(doorOut), o.doors)) p.doors = W.doors.map(doorOut);
+  if (!sameJSON(W.signs.map((s) => s.text), cellsOf(o.tiles, 'S').map((_, i) => o.signs[i] ?? '…'))) p.signs = W.signs.map((s) => s.text);
+  const warps = W.warps.map(({ x, y, to, tx, ty }) => ({ x, y, to, tx, ty }));
+  if (!sameJSON(warps, o.warps.map((w) => ({ ...w, x: w.x + sh.x, y: w.y + sh.y })))) p.warps = warps;
   if (W.weather && W.weather !== 'random') p.weather = W.weather;
   if (W.ground && W.ground !== 'auto') p.ground = W.ground;
   return Object.keys(p).length ? p : null;
@@ -115,6 +146,7 @@ const S: any = {
   pan: null, spaceDown: false, lastPaint: null,
   history: new Map(), // id -> { undo, redo } so switching maps keeps each map's undo
   back: [] as string[], // maps opened before this one (Volver)
+  doorTo: 'casa_jugador', // where a door painted from the palette leads until changed in the inspector
 };
 function loadJSON(k, def) { try { const v = JSON.parse(store.getItem(k) || 'null'); return v ?? def; } catch { return def; } }
 function saveJSON(k, v) { try { store.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } }
@@ -193,6 +225,11 @@ const weatherSel = h('select', { class: 'ed-input', onchange: () => edit(() => {
 const groundSel = h('select', { class: 'ed-input', title: 'Suelo que se ve detrás de árboles, arbustos y piezas con transparencia en este mapa', onchange: () => edit(() => { S.W.ground = groundSel.value; }) },
   TILE_BACKGROUNDS.map(([v, n]) => h('option', { value: v, text: v === 'auto' ? 'Automático (pasto, o el suelo de al lado)' : n })));
 const addLook = h('select', { class: 'ed-input' }, Object.keys(LOOKS).filter((k) => !k.startsWith('leader_') && !k.startsWith('player') && k !== 'rival').map((k) => h('option', { value: k, text: k, selected: k === 'oldman' })));
+function mapSelect(value, onchange) {
+  const ids = Object.keys(MAPS).sort((a, b) => nameOf(a).localeCompare(nameOf(b), 'es'));
+  return h('select', { class: 'ed-input', onchange: (ev) => onchange(ev.target.value) }, ids.map((id) => h('option', { value: id, text: `${nameOf(id)} (${id})`, selected: id === value })));
+}
+const doorToSel = mapSelect('casa_jugador', (v) => { S.doorTo = v; });
 const addItemSel = h('select', { class: 'ed-input' }, ITEM_KEYS.map((k) => h('option', { value: k, text: ITEMS[k].name, selected: k === 'te_marcela' })));
 const sizeInfo = h('p', { class: 'ed-hint' });
 const growIn = (def = 0) => h('input', { class: 'ed-input', type: 'number', min: '0', max: '120', value: String(def), style: { width: '100%' } });
@@ -212,7 +249,10 @@ const right = h('aside', { class: 'me-right' },
     h('p', { class: 'ed-hint', text: 'Máximo 200×200. Las filas nuevas se rellenan con la pieza elegida (por ejemplo árboles o pared para cerrar lo que no uses). Si agrandás por la izquierda o arriba, todo lo que hay en el mapa se corre. Ojo: algunos mapas se conectan con otros por coordenadas fijas, y agrandar por esos lados puede desalinear una entrada; en ese caso preferí agrandar por la derecha o abajo.' })),
   h('section', {}, h('h2', { text: 'Agregar' }),
     h('div', { class: 'me-row' }, addLook, btn('+ Persona', () => addNpc())),
-    h('div', { class: 'me-row' }, addItemSel, btn('+ Objeto', () => addItem()))),
+    h('div', { class: 'me-row' }, addItemSel, btn('+ Objeto', () => addItem())),
+    h('div', { class: 'me-row' }, btn('+ Paso / escalera', () => addWarp(), { title: 'Un punto que lleva a otra casilla de otro mapa o piso' })),
+    h('label', { class: 'me-field' }, 'Las puertas nuevas (pieza «Puerta» de la paleta) llevan a', doorToSel),
+    h('p', { class: 'ed-hint', text: 'Pintá la pieza Puerta o Cartel y después cambiá su destino o texto con Mover. Pisar encima con otra pieza la borra.' })),
   h('section', {}, h('h2', { text: 'Gente y objetos' }), entityList),
   h('section', {}, h('h2', { text: 'Revisión' }), checks));
 root.append(head, h('div', { class: 'ed-body me-body' }, side, center, right));
@@ -313,17 +353,42 @@ function renderEntities() {
   }, h('span', { text: label }), h('small', { text: sub }));
   entityList.replaceChildren(
     ...W.npcs.map((n) => li('npc', n, n.name ?? (n.look ? `${KIND_NAME[n.kind]} (${n.look})` : KIND_NAME[n.kind]), `${KIND_NAME[n.kind]} · ${n.x},${n.y}${n.removed ? ' · borrado' : ''}`)),
-    ...W.items.map((it) => li('item', it, ITEMS[it.item]?.name ?? it.item, `Objeto · ${it.x},${it.y}${it.removed ? ' · borrado' : ''}`)));
+    ...W.items.map((it) => li('item', it, ITEMS[it.item]?.name ?? it.item, `Objeto · ${it.x},${it.y}${it.removed ? ' · borrado' : ''}`)),
+    ...W.warps.map((w) => li('warp', w, `Paso → ${nameOf(w.to)}`, `Paso · ${w.x},${w.y}`)),
+    ...W.doors.map((d) => li('door', d, `Puerta → ${nameOf(d.to)}`, `Puerta · ${d.x},${d.y}`)),
+    ...W.signs.map((sg) => li('sign', sg, `Cartel: ${(sg.text || '').split('\n')[0].slice(0, 26)}`, `Cartel · ${sg.x},${sg.y}`)));
 }
 
 function renderInspector() {
   const sel = S.sel;
-  if (!sel) { inspector.replaceChildren(h('p', { class: 'ed-hint', text: 'Elegí una persona u objeto con la herramienta Mover, o desde la lista de abajo.' })); return; }
+  if (!sel) { inspector.replaceChildren(h('p', { class: 'ed-hint', text: 'Elegí una persona, objeto, puerta, cartel o paso con la herramienta Mover, o desde la lista de abajo.' })); return; }
   const r = sel.ref;
   const rows = [];
+  if (sel.type === 'door' || sel.type === 'sign' || sel.type === 'warp') {
+    rows.push(h('p', {}, h('b', { text: { door: 'Puerta', sign: 'Cartel', warp: 'Paso (escalera)' }[sel.type] }), ` · casilla ${r.x},${r.y}`));
+    if (sel.type === 'sign') {
+      const ta = h('textarea', { class: 'ed-input me-text', rows: 5, text: r.text });
+      ta.addEventListener('change', () => edit(() => { r.text = ta.value; }));
+      rows.push(h('label', { class: 'me-field' }, 'Texto del cartel', ta));
+    } else {
+      const to = mapSelect(r.to, (v) => edit(() => { r.to = v; if (sel.type === 'warp') { r.tx = Math.min(r.tx, MAPS[v].tiles[0].length - 1); r.ty = Math.min(r.ty, MAPS[v].tiles.length - 1); } }));
+      rows.push(h('label', { class: 'me-field' }, sel.type === 'door' ? 'Lleva a' : 'Lleva a (otro piso o mapa)', to));
+      if (sel.type === 'door' && (r.req || r.deny)) rows.push(h('p', { class: 'ed-hint', text: `Esta puerta está cerrada por la historia${r.req ? ` (hasta: ${r.req})` : ''}: esa condición se conserva.` }));
+      if (sel.type === 'warp') {
+        const num = (k, max) => h('input', { class: 'ed-input', type: 'number', min: '0', max: String(max), value: String(r[k]), style: { width: '100%' }, onchange: (ev) => edit(() => { r[k] = Math.max(0, Math.min(max, Math.floor(+ev.target.value || 0))); }) });
+        const tm = MAPS[r.to];
+        rows.push(h('div', { class: 'me-row' }, h('label', { class: 'me-field', style: { flex: '1' } }, 'Llega en X', num('tx', (tm?.tiles[0].length ?? 1) - 1)), h('label', { class: 'me-field', style: { flex: '1' } }, 'Y', num('ty', (tm?.tiles.length ?? 1) - 1))));
+        rows.push(h('p', { class: 'ed-hint', text: 'Pisar esta casilla lleva al jugador a esa casilla del otro mapa. Para una escalera de ida y vuelta, poné un paso en cada piso que apunte al otro.' }));
+      }
+      rows.push(btn('Abrir ese mapa', () => openMap(r.to, true), { class: 'ed-btn ed-mini' }));
+    }
+    rows.push(h('div', { class: 'me-row' }, btn('Borrar', () => removeSel(), { class: 'ed-btn me-danger' })));
+    inspector.replaceChildren(...rows);
+    return;
+  }
   if (sel.type === 'npc') {
     rows.push(h('p', {}, h('b', { text: r.name ?? KIND_NAME[r.kind] }), ` · ${KIND_NAME[r.kind]} · casilla ${r.x},${r.y}`));
-    if (r.kind === 'added') {
+    if (r.kind === 'added' || r.kind === 'npc') {
       const look = h('select', { class: 'ed-input', onchange: () => { if (look.value === 'swimmer' && S.W.tiles[r.y]?.[r.x] !== '~') { look.value = r.look; status('El nadador solo puede estar sobre agua: movelo al agua primero.', 'warn'); return; } edit(() => { r.look = look.value; }); } },
         Object.keys(LOOKS).map((k) => h('option', { value: k, text: k, selected: k === r.look })));
       rows.push(h('label', { class: 'me-field' }, 'Aspecto', look));
@@ -353,7 +418,7 @@ function draw() {
   if (!W) return;
   const m = MAPS[S.id];
   const hgt = W.tiles.length, wid = W.tiles[0].length;
-  const Z = S.zoom;
+  const Z = S.zoom, Zt0 = T;
   canvas.width = wid * T * Z;
   canvas.height = hgt * T * Z;
   g.imageSmoothingEnabled = false;
@@ -364,6 +429,11 @@ function draw() {
   for (const it of W.items) {
     if (it.removed) continue;
     drawItem(g, it.item, it.x * T, it.y * T - 1);
+  }
+  for (const w of W.warps) {
+    g.fillStyle = 'rgba(255,224,90,.28)'; g.fillRect(w.x * Zt0, w.y * Zt0, Zt0, Zt0);
+    g.strokeStyle = '#ffe05a'; g.lineWidth = 1; g.strokeRect(w.x * Zt0 + 0.5, w.y * Zt0 + 0.5, Zt0 - 1, Zt0 - 1);
+    g.fillStyle = '#ffe05a'; g.font = '8px sans-serif'; g.fillText('⇅', w.x * Zt0 + 4, w.y * Zt0 + 12);
   }
   for (const n of W.npcs) {
     if (n.removed) continue;
@@ -390,13 +460,8 @@ function draw() {
     else if (side === 'w') tag(label, 2, canvas.height / 2 - 8, '#ffe05a', 'left');
     else tag(label, canvas.width - 2, canvas.height / 2 - 8, '#ffe05a', 'right');
   }
-  const doors = (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to));
-  let k = 0;
-  rows.forEach((r, y) => [...r].forEach((c, x) => {
-    if (c !== 'D') return;
-    const to = doors[k++];
-    tag(to ? nameOf(to) : '¿?', x * S1 + S1 / 2, y * S1 - 18, '#fff');
-  }));
+  for (const d of W.doors) tag(d.to ? nameOf(d.to) : '¿?', d.x * S1 + S1 / 2, d.y * S1 - 18, '#fff');
+  for (const w of W.warps) tag(`⇅ ${nameOf(w.to)}`, w.x * S1 + S1 / 2, w.y * S1 - 18, '#ffe05a');
   if (S.grid && Z >= 2) {
     g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 1;
     g.beginPath();
@@ -450,7 +515,7 @@ function draw() {
 }
 
 // ---------------------------------------------------------------- editing
-const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift });
+const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift, doors: S.W.doors, signs: S.W.signs, warps: S.W.warps });
 function pushUndo() {
   S.undo.push(snap());
   if (S.undo.length > MAX_UNDO) S.undo.shift();
@@ -482,6 +547,7 @@ function edit(fn) {
   changed();
 }
 function changed() {
+  reconcile(S.W);
   sizeInfo.textContent = `Ahora: ${S.W.tiles[0].length}×${S.W.tiles.length} casillas.`;
   const p = diff(S.id, S.W);
   const was = base[S.id] ?? null;
@@ -496,6 +562,7 @@ function changed() {
   syncPending();
   syncReplaceFrom();
   renderArea();
+  renderLinks();
   undoBtn.disabled = !S.undo.length;
   redoBtn.disabled = !S.redo.length;
 }
@@ -525,7 +592,13 @@ function entityAt(x, y) {
   const n = S.W.npcs.find((o) => !o.removed && o.x === x && o.y === y);
   if (n) return { type: 'npc', ref: n };
   const it = S.W.items.find((o) => !o.removed && o.x === x && o.y === y);
-  return it ? { type: 'item', ref: it } : null;
+  if (it) return { type: 'item', ref: it };
+  const w = S.W.warps.find((o) => o.x === x && o.y === y);
+  if (w) return { type: 'warp', ref: w };
+  const d = S.W.doors.find((o) => o.x === x && o.y === y);
+  if (d) return { type: 'door', ref: d };
+  const sg = S.W.signs.find((o) => o.x === x && o.y === y);
+  return sg ? { type: 'sign', ref: sg } : null;
 }
 const occupied = (x, y, except?) => [...S.W.npcs, ...S.W.items].some((o) => o !== except && !o.removed && o.x === x && o.y === y);
 function select(type, ref) {
@@ -534,11 +607,15 @@ function select(type, ref) {
   renderEntities();
   renderInspector();
 }
+/** What a deleted door or sign turns into: the chosen tile, or plain ground. */
+const LOCKED_FALLBACK = (ch) => (ch === 'D' || ch === 'S' ? '.' : ch);
 function removeSel() {
   const r = S.sel?.ref;
   if (!r) return;
   edit(() => {
-    if (r.kind === 'added') S.W.npcs.splice(S.W.npcs.indexOf(r), 1);
+    if (S.sel.type === 'warp') S.W.warps.splice(S.W.warps.indexOf(r), 1);
+    else if (S.sel.type === 'door' || S.sel.type === 'sign') S.W.tiles[r.y][r.x] = LOCKED_FALLBACK(S.tile);
+    else if (r.kind === 'added') S.W.npcs.splice(S.W.npcs.indexOf(r), 1);
     else if (r.added) S.W.items.splice(S.W.items.indexOf(r), 1);
     else r.removed = true;
     S.sel = null;
@@ -578,6 +655,17 @@ function addNpc() {
   setTool('move');
   status('Persona agregada en el centro: arrastrala con Mover y escribí qué dice.', 'ok');
 }
+function addWarp() {
+  const [x, y] = freeSpot();
+  const to = S.id === 'casa_jugador' ? 'lab' : 'casa_jugador';
+  edit(() => {
+    const w = { x, y, to, tx: 1, ty: 1 };
+    S.W.warps.push(w);
+    S.sel = { type: 'warp', ref: w };
+  });
+  setTool('move');
+  status('Paso agregado en el centro: arrastralo a su lugar y elegí a qué mapa lleva y dónde llega.', 'ok');
+}
 function addItem() {
   const [x, y] = freeSpot();
   const used = new Set(S.W.items.map((it) => it.id));
@@ -616,7 +704,7 @@ function growMap() {
 }
 function resetMap() {
   if (!patchOf(S.id)) return status('Este mapa no tiene cambios.');
-  edit(() => { const o = MAP_ORIGINALS[S.id]; S.W = { tiles: o.tiles.map((r) => [...r]), npcs: o.npcs.map((n) => ({ ...n, text: n.text ? [...n.text] : null, removed: false })), items: o.items.map((it) => ({ ...it, removed: false })), weather: 'random', ground: 'auto', shift: { x: 0, y: 0 } }; S.sel = null; });
+  edit(() => { S.W = working(S.id, {}); S.sel = null; });
   status('Mapa vuelto al original. Si lo guardás, el juego también vuelve al original.', 'ok');
 }
 
@@ -710,27 +798,20 @@ function renderLinks() {
   const items = [];
   if (S.back.length) items.push(btn(`← Volver a ${nameOf(S.back[S.back.length - 1])}`, () => goBack(), { class: 'ed-btn ed-mini is-primary', title: 'Alt + ←' }));
   for (const [side, ex] of Object.entries(m.exits ?? {}) as [string, any][]) items.push(go(ex.to, `${{ n: '↑', s: '↓', w: '←', e: '→' }[side]} ${nameOf(ex.to)}`));
-  const doors = (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d?.to)).filter(Boolean);
-  for (const to of [...new Set(doors)] as string[]) items.push(go(to, `🚪 ${nameOf(to)}`));
+  for (const to of [...new Set(S.W.doors.map((d) => d.to))] as string[]) items.push(go(to, `🚪 ${nameOf(to)}`));
+  for (const to of [...new Set(S.W.warps.map((w) => w.to))] as string[]) items.push(go(to, `⇅ ${nameOf(to)}`));
   if (PARENT[S.id]) items.push(go(PARENT[S.id], `⌂ Salir a ${nameOf(PARENT[S.id])}`));
+  const from = Object.entries(MAPS).filter(([id, mm]: [string, any]) => id !== S.id && ((mm.doors ?? []).some((d) => (typeof d === 'string' ? d : d?.to) === S.id) || (mm.warps ?? []).some((w) => w.to === S.id)) || Object.values(mm.exits ?? {}).some((ex: any) => ex.to === S.id && id !== S.id)).map(([id]) => id);
   linksEl.replaceChildren(...(items.length ? items : [h('p', { class: 'ed-hint', text: 'Este mapa no tiene salidas registradas.' })]),
+    ...(from.length ? [h('p', { class: 'ed-hint', text: 'Se entra desde:' }), ...from.map((id) => go(id, `↳ ${nameOf(id)}`))] : []),
     h('p', { class: 'ed-hint', text: 'Doble clic sobre una puerta del mapa también la abre.' }));
 }
 function goBack() {
   const id = S.back.pop();
   if (id) openMap(id, false);
 }
-/** Door number k (reading order) leads to doors[k]. */
 function doorTarget(x, y) {
-  const m = MAPS[S.id];
-  const doors = (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d?.to));
-  let k = 0;
-  for (let yy = 0; yy < S.W.tiles.length; yy++) for (let xx = 0; xx < S.W.tiles[yy].length; xx++) {
-    if (S.W.tiles[yy][xx] !== 'D') continue;
-    if (xx === x && yy === y) return doors[k] ?? null;
-    k++;
-  }
-  return null;
+  return S.W.doors.find((d) => d.x === x && d.y === y)?.to ?? null;
 }
 
 function setZoom(z, anchor?: { clientX: number; clientY: number }) {
@@ -831,7 +912,7 @@ canvas.addEventListener('pointerdown', (ev) => {
     const e = entityAt(c.x, c.y);
     if (!e) { S.sel = null; draw(); renderEntities(); renderInspector(); return; }
     select(e.type, e.ref);
-    S.drag = { ref: e.ref, before: snap(), moved: false };
+    if (e.type === 'npc' || e.type === 'item' || e.type === 'warp') S.drag = { ref: e.ref, before: snap(), moved: false };
     return;
   }
   if (S.tool === 'fill') {
@@ -977,6 +1058,14 @@ function problemsOf(id, W) {
   for (const n of npcs) if (SOLID(at(n.x, n.y)) && n.look !== 'ball' && n.look !== null) out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} está parado sobre algo que no se pisa.` });
   for (const n of npcs) if (n.look === 'swimmer' && at(n.x, n.y) !== '~') out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} es un nadador y está en tierra: tiene que estar sobre agua.` });
   for (const it of items) if (SOLID(at(it.x, it.y))) out.push({ x: it.x, y: it.y, msg: `${ITEMS[it.item]?.name ?? it.item} está sobre algo que no se pisa.` });
+  for (const d of W.doors) if (!MAPS[d.to]) out.push({ x: d.x, y: d.y, msg: `La puerta lleva a un mapa que no existe (${d.to}).` });
+  for (const w of W.warps) {
+    if (SOLID(at(w.x, w.y))) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} está sobre algo que no se pisa.` });
+    if (!MAPS[w.to]) { out.push({ x: w.x, y: w.y, msg: `El paso lleva a un mapa que no existe (${w.to}).` }); continue; }
+    const land = (w.to === id ? W : working(w.to)).tiles[w.ty]?.[w.tx];
+    if (land === undefined) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega fuera del mapa (${w.tx},${w.ty}).` });
+    else if (SOLID(land)) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega a una casilla que no se pisa (${w.tx},${w.ty}).` });
+  }
   const pass = (x, y) => { const t = at(x, y); return t !== undefined && (!SOLID(t) || t === '%' || t === '~' || t === '\\'); };
   let starts = [];
   if (isOutdoor(id)) {
