@@ -4,7 +4,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { pamperoAt, PAMPERO_W, PAMPERO_H } from '../gfx/pampero.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { DEX_ORDER, SPECIES, STARTERS } from '../data/species.ts';
-import { preloadIntroVfx, drawVfx } from '../gfx/intro-vfx.ts';
+import { preloadIntroVfx, drawVfx, drawIntroBg } from '../gfx/intro-vfx.ts';
 import { playMusic, sfx } from '../core/audio.ts';
 import { input, keyName } from '../core/input.ts';
 import { h, wait, sanitizeName, formatTime } from '../core/util.ts';
@@ -129,34 +129,9 @@ export function startTitle() {
 
 
 // ---------------------------------------------------------------- INTRO CINEMATIC
-// A short cinematic (about 14 s) that opens the game. The creatures are the game's own sprites,
-// animated frame by frame with PixelLab (anim_* sheets); splash, lightning, light beam and the title
-// burst are PixelLab VFX. Camera pans, cuts, shake and light are code. Pixel art stays at native size.
-const sky = (g, stops) => {
-  const grd = g.createLinearGradient(0, 0, 0, H);
-  stops.forEach(([o, c]) => grd.addColorStop(o, c));
-  g.fillStyle = grd;
-  g.fillRect(0, 0, W, H);
-};
-/** Rolling hills drawn as a sine silhouette; `scroll` moves it sideways for parallax. */
-const hills = (g, scroll, y, amp, col, wl = 90) => {
-  g.fillStyle = col;
-  g.beginPath();
-  g.moveTo(0, H);
-  for (let x = 0; x <= W; x += 4) g.lineTo(x, y + Math.sin((x + scroll) / wl * Math.PI * 2) * amp + Math.sin((x + scroll) / (wl * 0.37)) * amp * 0.3);
-  g.lineTo(W, H);
-  g.fill();
-};
-const ceibo = (g, x, y, s = 1) => {
-  g.fillStyle = '#1a2a1a'; g.fillRect(x - 1 * s, y - 14 * s, 2 * s, 14 * s);
-  g.beginPath(); g.arc(x, y - 16 * s, 8 * s, 0, 7); g.fill();
-  g.fillStyle = '#e0263a'; for (const [dx, dy] of [[-4, -18], [3, -20], [0, -14], [5, -15]]) g.fillRect(x + dx * s, y + dy * s, 2 * s, 2 * s);
-};
-const lerpCol = (a, b, k) => {
-  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
-  const ch = (s) => Math.round(((pa >> s) & 255) * (1 - k) + ((pb >> s) & 255) * k);
-  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
-};
+// A short cinematic (about 14 s) that opens the game. Everything drawn is PixelLab pixel art: the backgrounds
+// (256x136, drawn at exactly 2x), the creatures (the game's own sprites animated frame by frame, anim_*) and
+// the splash, lightning, light beam and title burst (VFX). Camera pans, cuts, shake and light are code.
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const ease = (v) => { const k = clamp01(v); return k * k * (3 - 2 * k); };
 /** The Cardenal Azul's flight frames, flying to the right with glitter behind (title shot). */
@@ -173,43 +148,32 @@ function cardenalFlight(g, t, path) {
 
 type Cue = [number, () => void];
 interface Shot { dur: number; cues?: Cue[]; draw: (g: CanvasRenderingContext2D, t: number, e: number) => void }
-const STARTER_X = [150, 240, 330];
+const STARTER_X = [120, 210, 300];
 const STARTER_CUE = [250, 850, 1450];
 
 const SHOTS: Shot[] = [
   { // 1. Dawn on the cuchillas: the ñandú runs past while the camera pans
     dur: 2900,
     draw(g, t, e) {
-      const cam = e * 0.05;
-      sky(g, [[0, '#2a3a7a'], [0.45, '#e8806a'], [0.7, '#f8d090'], [1, '#f8e8c0']]);
-      g.fillStyle = '#fff0b0'; g.beginPath(); g.arc(380 - cam * 0.1, 128, 20, 0, 7); g.fill();
-      hills(g, cam * 0.3, 124, 12, '#9ac080', 220);
-      hills(g, cam * 0.6, 152, 10, '#6aa452', 160);
-      ceibo(g, Math.round(330 - cam * 0.6), 160, 1.4);
-      hills(g, cam * 1.2, 186, 7, '#4a8a3c', 110);
+      const cam = e / 2900 * 32; // the 512 px wide background slides 32 px
+      drawIntroBg(g, 'pradera', -cam, -1);
       const x = W + 50 - e * 0.21;
       for (let i = 1; i <= 5; i++) { // dust kicked up behind it
         const a = 0.45 - i * 0.08; if (a <= 0) continue;
-        g.fillStyle = `rgba(222,200,150,${a})`; g.beginPath(); g.arc(x + 14 + i * 11, 210 - (i % 2) * 3 - i, 3 + i, 0, 7); g.fill();
+        g.fillStyle = `rgba(222,200,150,${a})`; g.beginPath(); g.arc(x + 14 + i * 11, 224 - (i % 2) * 3 - i, 3 + i, 0, 7); g.fill();
       }
-      drawVfx(g, 'anim_nandulin', x, 214, e);
-      g.fillStyle = '#2e6a2a'; // foreground grass passing fast
-      for (let i = 0; i < 18; i++) { const gx = Math.round(((i * 53 - cam * 3) % (W + 40) + W + 40) % (W + 40)) - 20; g.fillRect(gx, 222, 2, 8); g.fillRect(gx + 3, 225, 2, 5); g.fillRect(gx - 3, 226, 2, 4); }
-      g.fillRect(0, 230, W, H - 230);
+      drawVfx(g, 'anim_nandulin', x, 228, e);
+      g.fillStyle = '#24501f'; // foreground grass passing faster than the background
+      for (let i = 0; i < 22; i++) { const gx = Math.round(((i * 47 - e * 0.09) % (W + 40) + W + 40) % (W + 40)) - 20; g.fillRect(gx, 244, 2, 10); g.fillRect(gx + 3, 247, 2, 7); g.fillRect(gx - 3, 249, 2, 5); }
     },
   },
   { // 2. The coast at sunset: the Ballenaplata swims and surfaces
     dur: 3000,
     cues: [[1500, () => sfx('splash')]],
     draw(g, t, e) {
-      const wl = 160;
-      sky(g, [[0, '#2a3a7a'], [0.42, '#e86a4a'], [0.58, '#f8c070'], [0.593, '#2a6ab0'], [1, '#123a68']]);
-      g.fillStyle = '#ffe070'; g.beginPath(); g.arc(380, wl - 2, 24, Math.PI, 0); g.fill();
-      for (let i = 0; i < 18; i++) { g.fillStyle = `rgba(255,224,150,${0.5 - i * 0.025})`; const w = 44 - i * 1.6 + Math.sin(t / 300 + i) * 5; g.fillRect(380 - w / 2, wl + 2 + i * 5, w, 1); }
-      g.fillStyle = 'rgba(255,255,255,0.16)';
-      for (let i = 0; i < 18; i++) g.fillRect((i * 61 + t / 30) % W, wl + 8 + (i * 17) % 70, 18, 1);
-      g.fillStyle = '#1a2440'; g.beginPath(); g.moveTo(0, wl); g.lineTo(0, wl - 12); g.lineTo(36, wl - 18); g.lineTo(70, wl - 8); g.lineTo(94, wl); g.fill();
-      const x = 150 + e * 0.035;
+      drawIntroBg(g, 'costa', -16 + e / 3000 * 12, -1);
+      const wl = 204;
+      const x = 170 + e * 0.035;
       const rise = ease((e - 1100) / 600);
       const feet = Math.round(wl + 62 - rise * 50 + Math.sin(t / 420) * 2);
       g.save(); g.beginPath(); g.rect(0, 0, W, wl + 4); g.clip(); // what is under the surface stays hidden
@@ -227,14 +191,11 @@ const SHOTS: Shot[] = [
       const shake = (Math.max(0, 1 - Math.abs(e - 1150) / 220) + Math.max(0, 1 - Math.abs(e - 2000) / 220)) * 3;
       g.save();
       if (shake > 0.2) g.translate(Math.round(Math.sin(t / 17) * shake), Math.round(Math.cos(t / 13) * shake));
-      sky(g, [[0, lerpCol('#141a30', '#3a84d8', clear)], [0.55, lerpCol('#3a4466', '#9ad0f0', clear)], [1, lerpCol('#5a5a6a', '#d8f0e0', clear)]]);
-      g.fillStyle = `rgba(30,34,56,${0.92 * (1 - clear)})`;
-      for (let i = 0; i < 12; i++) { const cx = (i * 47 + t / 25) % (W + 80) - 40; g.beginPath(); g.arc(cx, 28 + (i % 3) * 16 - clear * 50, 28, 0, 7); g.arc(cx + 26, 34 + (i % 3) * 16 - clear * 50, 22, 0, 7); g.fill(); }
+      drawIntroBg(g, 'tormenta', -16, -1);
+      drawIntroBg(g, 'despejado', -16, -1, clear);
       if (clear < 1) { g.fillStyle = `rgba(170,190,230,${0.45 * (1 - clear)})`; for (let i = 0; i < 70; i++) g.fillRect((i * 37 + t / 3) % W, (i * 71 + t / 1.5) % H, 1, 6); }
-      hills(g, t * 0.01, 182, 8, lerpCol('#1a2030', '#5aa046', clear), 160);
-      hills(g, t * 0.02, 206, 6, lerpCol('#121828', '#3a8038', clear), 110);
-      drawVfx(g, 'rayo', 120, 206, (e - 650) / 2.5); // played slower than authored so each strike reads
-      drawVfx(g, 'rayo', 372, 204, (e - 1500) / 2.5);
+      drawVfx(g, 'rayo', 110, 222, (e - 650) / 2.5); // played slower than authored so each strike reads
+      drawVfx(g, 'rayo', 380, 220, (e - 1500) / 2.5);
       const feet = Math.round(-10 + ease(e / 1500) * 168 + Math.sin(t / 260) * 4);
       drawVfx(g, 'anim_pamperon', W / 2, feet, e);
       g.restore();
@@ -242,21 +203,14 @@ const SHOTS: Shot[] = [
       if (fa > 0) { g.fillStyle = `rgba(230,240,255,${Math.min(0.7, fa * 0.6)})`; g.fillRect(0, 0, W, H); }
     },
   },
-  { // 4. The three starters appear in light, one after the other
+  { // 4. Night in Carmelo, by Tabárez's house: the three starters appear in light, one after the other
     dur: 2700,
     cues: STARTER_CUE.map((ms): Cue => [ms, () => sfx('confirm')]),
     draw(g, t, e) {
-      sky(g, [[0, '#120e2a'], [0.6, '#2a1f4a'], [1, '#4a2f3a']]);
-      g.save(); g.translate(W / 2, 160); g.rotate(t / 12000); g.fillStyle = 'rgba(248,208,64,0.08)';
-      for (let i = 0; i < 16; i++) { g.rotate(Math.PI / 8); g.beginPath(); g.moveTo(-10, -30); g.lineTo(0, -280); g.lineTo(10, -30); g.fill(); }
-      g.restore();
-      const glow = g.createRadialGradient(W / 2, 170, 6, W / 2, 170, 170);
-      glow.addColorStop(0, 'rgba(255,200,110,0.35)'); glow.addColorStop(1, 'rgba(255,160,80,0)');
-      g.fillStyle = glow; g.fillRect(0, 0, W, H);
+      drawIntroBg(g, 'noche', -32 + e / 2700 * 10, -1);
       STARTERS.forEach((k, i) => {
-        const x = STARTER_X[i], feet = 206;
-        g.fillStyle = '#3a2a40'; g.beginPath(); g.ellipse(x, feet + 2, 30, 7, 0, 0, 7); g.fill();
-        g.fillStyle = '#5a4060'; g.beginPath(); g.ellipse(x, feet, 26, 5, 0, 0, 7); g.fill();
+        const x = STARTER_X[i], feet = 236;
+        g.fillStyle = 'rgba(10,14,30,0.45)'; g.beginPath(); g.ellipse(x, feet, 26, 5, 0, 0, 7); g.fill();
         const since = e - STARTER_CUE[i];
         if (since > 220) {
           g.globalAlpha = clamp01((since - 220) / 250);
@@ -267,17 +221,17 @@ const SHOTS: Shot[] = [
       });
     },
   },
-  { // 5. Title
+  { // 5. Title: the Sol de Mayo rises behind the hills
     dur: 2600,
     cues: [[150, () => sfx('levelup')]],
     draw(g, t, e) {
-      sky(g, [[0, '#1d2a5c'], [0.5, '#e86a4a'], [1, '#f8d070']]);
-      const sy = 196 - Math.round(ease(e / 1800) * 16); // the Sol de Mayo rises behind the hills
-      g.save(); g.translate(W / 2, sy); g.rotate(t / 9000); g.fillStyle = 'rgba(248,208,64,0.6)';
+      drawIntroBg(g, 'titulo', -16, -1);
+      const sy = 240 - Math.round(ease(e / 1800) * 36);
+      g.save(); g.translate(W / 2, sy); g.rotate(t / 9000); g.fillStyle = 'rgba(255,220,90,0.35)';
       for (let i = 0; i < 16; i++) { g.rotate(Math.PI / 8); g.beginPath(); g.moveTo(-6, -40); g.lineTo(0, i % 2 ? -170 : -140); g.lineTo(6, -40); g.fill(); }
       g.restore();
       g.fillStyle = '#ffe070'; g.beginPath(); g.arc(W / 2, sy, 38, 0, 7); g.fill();
-      hills(g, 0, 214, 5, '#2a1830', 140);
+      drawIntroBg(g, 'titulo_front', -16, -1);
       drawVfx(g, 'estallido', W / 2, 70, e - 100);
       drawVfx(g, 'estallido', 110, 56, e - 500);
       drawVfx(g, 'estallido', 370, 62, e - 850);

@@ -35,12 +35,12 @@ Notas de lectura: los campos `order` y `badge` dentro de `LEADERS` son heredados
 
 ## Intro (cinemática de apertura)
 
-`src/game/scenes.ts` (`SHOTS`). Se ve al abrir el juego, antes de la pantalla de título; en una partida nueva no se repite si ya se vio en esa sesión. Dura unos 14 segundos, no tiene narración y se corta con cualquier tecla o con el botón «Saltar intro». Las criaturas son los sprites del juego animados cuadro por cuadro con PixelLab (`src/gfx/intro-vfx-data.ts`, hojas `anim_*`).
+`src/game/scenes.ts` (`SHOTS`). Se ve al abrir el juego, antes de la pantalla de título; en una partida nueva no se repite si ya se vio en esa sesión. Dura unos 14 segundos, no tiene narración y se corta con cualquier tecla o con el botón «Saltar intro». Las criaturas son los sprites del juego animados cuadro por cuadro con PixelLab y los fondos son pixel art de PixelLab (`src/gfx/intro-vfx-data.ts`: hojas `anim_*` y `INTRO_BG`).
 
 1. **Amanecer en las cuchillas**: el ñandú cruza corriendo mientras la cámara hace un paneo.
 2. **Costa al atardecer**: la Ballenaplata nada y sale a la superficie con una salpicadura.
-3. **Tormenta**: caen dos rayos, el Cardenal Azul baja aleteando y el cielo se despeja.
-4. **Los tres**: Ceibo, Tejuchispa y Carpincho aparecen uno por uno en un haz de luz.
+3. **Tormenta**: caen dos rayos, el Cardenal Azul baja aleteando y el cielo se despeja (con arcoíris).
+4. **Los tres**: de noche, junto a la casa de Tabárez en Carmelo, Ceibo, Tejuchispa y Carpincho aparecen uno por uno en un haz de luz.
 5. **Título**: sale el Sol de Mayo, hay estallidos dorados y cruza el Cardenal Azul. «Poke Uruguay / La tierra de los charrúas».
 
 Después de elegir Nueva partida sigue la presentación de Tabárez en el laboratorio (sin cambios).
