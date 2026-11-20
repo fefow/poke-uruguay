@@ -84,8 +84,9 @@ export function encounterList(m, biome: Biome, night = 0) {
     }), night);
   }
   if (biome === 'cave') {
+    // Caves are always dark: their creatures follow the night odds whatever the clock says.
     const cave = dry.filter(([sp]) => SPECIES[sp].types.some((t) => CAVE_TYPES.includes(t)));
-    return cave.length ? cave : dry;
+    return byClock(cave.length ? cave : dry, 1);
   }
   return byClock(dry, night);
 }
