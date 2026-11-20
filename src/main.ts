@@ -11,11 +11,11 @@ import { charSprite, LOOKS } from './gfx/characters.ts';
 import { pollGamepads, input, keyName } from './core/input.ts';
 import { initAudio, setVolumes, sfx } from './core/audio.ts';
 import { h, nextFrame, viewTransition, wait } from './core/util.ts';
-import { mountUI, say, choose, closeDialog, fadeIn, fadeOut, uiRoot, textInput, ask } from './game/ui.ts';
+import { mountUI, say, closeDialog, fadeIn, fadeOut, uiRoot, toast } from './game/ui.ts';
 import { state, setState, newState, settings, badgeCount } from './game/state.ts';
 import { loadMap, updateWorld, worldState, runScript, poisonTick, api as scriptApi } from './game/world.ts';
 import { SCRIPTS } from './data/story.ts';
-import { startTitle, playCinematic, newGameIntro, credits, slotCard, titleRenderer } from './game/scenes.ts';
+import { startTitle, playCinematic, newGameIntro, credits, titleRenderer } from './game/scenes.ts';
 import * as menus from './game/menus.ts';
 import * as battle from './game/battle-scene.ts';
 import { openOptions, openMap, openBag, openParty, openDex, openFogMeter } from './game/menus.ts';
@@ -24,7 +24,8 @@ import { mountHud, updateHud, flashSaved } from './game/hud.ts';
 import { mountSidebar, updateSidebar } from './game/sidebar.ts';
 import { VERSION } from './version.ts';
 import { MAPS } from './data/maps.ts';
-import { initSaves, listSaves, loadGame, saveGame, getBuildHash, setSaveBackend, isCloud, localSavesToMigrate, migrateLocalToCloud } from './save/index.ts';
+import { initSaves, listSaves, loadGame, saveGame, getBuildHash, setSaveBackend, isCloud, localSavesToMigrate, migrateLocalToCloud, deleteSave } from './save/index.ts';
+import { authScreen, savesHub, confirmModal } from './game/account-screens.ts';
 import { currentUser, signIn, signUp, signOut, clearSession, AuthError } from './save/auth.ts';
 import { installErrorCapture, setContext, mountDebugPanel } from './core/debuglog.ts';
 import { SAVE_CONFIG } from './save/config.ts';
@@ -180,99 +181,82 @@ async function titleScreen() {
   press.remove();
   ver.remove();
   sfx('confirm');
-  if (SAVE_CONFIG.backend === 'supabase' && !currentUser()) await accountMenu();
+  let notice = '';
+  if (SAVE_CONFIG.backend === 'supabase' && !currentUser()) notice = await accountMenu();
   while (true) {
-    let saves = [];
-    try {
-      saves = await listSaves();
-    } catch (err) {
+    const act = await savesHub({
+      slots: SAVE_CONFIG.slots,
+      account: currentUser(),
+      cloud: isCloud(),
+      canLogin: SAVE_CONFIG.backend === 'supabase',
+      load: () => listSaves(),
+      remove: (slot) => deleteSave(slot),
+      notice,
+      version: VERSION,
+    });
+    notice = '';
+    if (act.type === 'expired') {
       // The server no longer accepts this session: sign in again instead of
       // showing an empty list that looks like lost progress.
-      if (isCloud() && err?.status === 401) {
-        clearSession();
-        await say('Tu sesión venció. Volvé a iniciar sesión.');
-        await accountMenu();
-        continue;
-      }
-    }
-    const opts = [];
-    if (saves.length) opts.push(['Continuar', 'continue']);
-    opts.push(['Nueva partida', 'new'], ['Opciones', 'options']);
-    if (SAVE_CONFIG.backend === 'supabase') opts.push(isCloud() ? [`Cerrar sesión (${currentUser()})`, 'logout'] : ['Iniciar sesión', 'login']);
-    opts.push(['Créditos', 'credits']);
-    const i = await choose(opts.map((o) => o[0]), { cls: 'menu-title-screen', cancel: false });
-    const pick = opts[i][1];
-    if (pick === 'logout') { await signOut(); setSaveBackend('local'); await accountMenu(); }
-    else if (pick === 'login') await accountMenu();
-    else if (pick === 'options') await openOptions();
-    else if (pick === 'credits') { await credits(); await fadeIn(300); startTitle(); }
-    else if (pick === 'continue') { if (await continueGame(saves)) return; }
-    else if (pick === 'new') { if (await startNewGame()) return; }
+      clearSession();
+      setSaveBackend('local');
+      notice = await accountMenu('Tu sesión venció. Volvé a iniciar sesión.');
+    } else if (act.type === 'logout') { await signOut(); setSaveBackend('local'); notice = await accountMenu(); }
+    else if (act.type === 'login') notice = await accountMenu();
+    else if (act.type === 'options') await openOptions();
+    else if (act.type === 'credits') { await credits(); await fadeIn(300); startTitle(); }
+    else if (act.type === 'load') { if (await continueGame(act.save)) return; }
+    else if (act.type === 'new') { if (await startNewGame(act.slot)) return; }
   }
 }
 
 // ---------------------------------------------------------------- account
 // Username + password. Cloud saves follow the player across devices; "sin cuenta"
-// keeps the old behaviour (saves stay in this browser).
-async function accountMenu() {
-  while (true) {
-    const i = await choose(['Iniciar sesión', 'Crear cuenta', 'Jugar sin cuenta'], { cls: 'menu-title-screen', cancel: false });
-    if (i === 2) {
-      setSaveBackend('local');
-      await say('Vas a jugar sin cuenta: la partida queda solo en este dispositivo. Podés iniciar sesión cuando quieras desde el título.');
-      return;
-    }
-    const creating = i === 1;
-    const username = (await textInput(creating ? 'Elegí un usuario (3 a 16: a-z, 0-9, _)' : 'Usuario', '', 'usuario', { maxlength: 16, autocomplete: 'username' })).trim().toLowerCase();
-    if (!username) continue;
-    const password = await textInput(creating ? 'Elegí una contraseña (mín. 8)' : 'Contraseña', '', 'contraseña', { maxlength: 72, type: 'password', autocomplete: creating ? 'new-password' : 'current-password' });
-    if (!password) continue;
-    try {
-      if (creating) {
-        const again = await textInput('Repetí la contraseña', '', 'contraseña', { maxlength: 72, type: 'password', autocomplete: 'new-password' });
-        if (again !== password) { sfx('bump'); await say('Las contraseñas no coinciden.'); continue; }
-        await signUp(username, password);
-      } else {
-        await signIn(username, password);
-      }
-    } catch (err) {
-      sfx('bump');
-      await say(err instanceof AuthError ? err.message : 'No se pudo completar. Probá de nuevo.');
-      continue;
-    }
-    setSaveBackend('cloud');
-    sfx('confirm');
-    await say(creating
-      ? [`¡Cuenta creada, ${username}! Tu progreso se guarda online.`, 'No hay recuperación de contraseña: anotala en un lugar seguro.']
-      : `¡Hola de nuevo, ${username}!`);
-    await offerMigration();
-    return;
+// keeps the old behaviour (saves stay in this browser). Returns a line for the
+// save screen's banner.
+async function accountMenu(notice = '') {
+  const res = await authScreen({ notice, signIn, signUp });
+  if (res.kind === 'local') {
+    setSaveBackend('local');
+    return 'Jugás sin cuenta: las partidas quedan solo en este dispositivo. Podés iniciar sesión cuando quieras.';
   }
+  setSaveBackend('cloud');
+  const hello = res.created ? `¡Cuenta creada, ${res.username}! Tu progreso se guarda online.` : `¡Hola de nuevo, ${res.username}!`;
+  const moved = await offerMigration();
+  return moved ? `${hello} ${moved}` : hello;
 }
 
 async function offerMigration() {
   const pending = await localSavesToMigrate().catch(() => []);
-  if (!pending.length) return;
-  if (!(await ask(`Hay ${pending.length} partida${pending.length > 1 ? 's' : ''} guardada${pending.length > 1 ? 's' : ''} en este dispositivo. ¿La${pending.length > 1 ? 's' : ''} subo a tu cuenta?`))) return;
-  const res = await migrateLocalToCloud();
-  await say([`Se subieron ${res.moved} partida${res.moved === 1 ? '' : 's'}.`, ...res.failed.slice(0, 3)]);
+  if (!pending.length) return '';
+  const n = pending.length;
+  const host = h('div', { class: 'acct acct-hub is-in' });
+  document.querySelector('#screen').append(host);
+  const pop = input.push(() => {});
+  const ok = await confirmModal(host, {
+    title: 'Partidas en este dispositivo',
+    text: `Hay ${n} partida${n > 1 ? 's' : ''} guardada${n > 1 ? 's' : ''} solo en este navegador. ¿La${n > 1 ? 's' : ''} subo a tu cuenta? Se usan las mismas ranuras si están libres.`,
+    ok: 'Subir a mi cuenta', cancel: 'Ahora no',
+  });
+  let out = '';
+  if (ok) {
+    const res = await migrateLocalToCloud();
+    out = `Se subieron ${res.moved} partida${res.moved === 1 ? '' : 's'}.${res.failed.length ? ` ${res.failed.slice(0, 2).join(' ')}` : ''}`;
+  }
+  pop();
+  host.remove();
+  return out;
 }
 
-async function continueGame(saves) {
-  const opts = saves.map((s) => ({ label: `Ranura ${s.slot}`, hint: `${s.summary.name} · ${s.summary.badges} med.` }));
-  const preview = h('div', { class: 'slot-preview' });
-  uiRoot().append(preview);
-  const i = await choose(opts, { cls: 'menu-slots', onMove: (j) => preview.replaceChildren(slotCard(saves[j])) });
-  preview.remove();
-  if (i < 0) return false;
-  const res = await loadGame(saves[i].slot);
+async function continueGame(save) {
+  const res = await loadGame(save.slot);
   if (!res.ok) {
     sfx('bump');
     await say([res.reason, ...(res.errors ?? []).slice(0, 3).map((e) => `• ${e}`)]);
     return false;
   }
   setState(res.state);
-  state().slot = saves[i].slot;
+  state().slot = save.slot;
   if (res.outdated) await say('Esta partida es de una versión anterior del juego. ¡Se adaptó sin problemas!');
   // Saves that went past the Anglo before the Medidor de Niebla existed get it by mail from Tabárez.
   const S = state();
@@ -285,18 +269,8 @@ async function continueGame(saves) {
   return true;
 }
 
-async function startNewGame() {
-  // Autosave needs a slot: use the first free one, or ask which one to replace.
-  const saves = await listSaves().catch(() => []);
-  const used = new Set(saves.map((s) => s.slot));
-  let slot = Array.from({ length: SAVE_CONFIG.slots }, (_, i) => i + 1).find((n) => !used.has(n));
-  if (!slot) {
-    await say('Todas las ranuras están ocupadas. ¿Cuál querés reemplazar con la nueva partida?', { keep: true });
-    const i = await choose([...saves.map((s) => `Ranura ${s.slot} · ${s.summary.name}`), 'Cancelar'], { cls: 'menu-slots' });
-    closeDialog();
-    if (i < 0 || i >= saves.length) return false;
-    slot = saves[i].slot;
-  }
+/** New game in an empty slot picked on the save screen (autosave writes there). */
+async function startNewGame(slot) {
   await fadeOut(300);
   newState({ name: 'Jugador', look: 'player_m' });
   state().slot = slot;
@@ -321,13 +295,18 @@ async function enterGame() {
 // Autosave into the slot in use: every few seconds when something changed,
 // and when the tab is hidden or closed.
 let lastSaved = '';
+let saveFailedAt = 0;
 function autosave(force = false) {
   const S = state();
   if (mode !== 'game' || !S?.slot || worldState.scriptRunning || document.querySelector('.bhud')) return;
   const sig = `${S.pos.map}|${S.pos.x}|${S.pos.y}|${S.stats.steps}|${S.stats.battlesWon}|${S.party.length}|${Object.keys(S.flags).length}|${Math.floor(S.stats.playtime / 60)}`;
   if (!force && sig === lastSaved) return;
   lastSaved = sig;
-  saveGame(S.slot, S).then(() => flashSaved()).catch((err) => console.warn('Autoguardado falló:', err.message));
+  saveGame(S.slot, S).then(() => { flashSaved(); saveFailedAt = 0; }).catch((err) => {
+    console.warn('Autoguardado falló:', err.message);
+    // Tell the player, at most once a minute, instead of losing progress silently.
+    if (Date.now() - saveFailedAt > 60_000) { saveFailedAt = Date.now(); toast(isCloud() ? 'No se pudo guardar online. Se reintenta solo.' : 'No se pudo guardar la partida.', 3500); }
+  });
 }
 setInterval(autosave, 6000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') autosave(true); });

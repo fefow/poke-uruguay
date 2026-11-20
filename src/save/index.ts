@@ -43,6 +43,7 @@ function summaryOf(s) {
     playtime: Math.floor(s.stats.playtime),
     location: MAPS[s.pos.map]?.name ?? '',
     champion: !!s.flags.champion,
+    lead: s.party?.[0]?.species ?? null, // portrait on the save screen
   };
 }
 

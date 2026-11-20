@@ -1051,3 +1051,23 @@ test('account: server errors become Spanish messages and a failed refresh keeps 
     assert.equal(currentUser(), null);
   } finally { globalThis.fetch = realFetch; }
 });
+
+test('save slots: client count matches the server check and the local provider handles all of them', async () => {
+  const { SAVE_CONFIG } = await import('../src/save/config.ts');
+  const { readFileSync } = await import('node:fs');
+  assert.equal(SAVE_CONFIG.slots, 10);
+  const sql = readFileSync(new URL('../supabase/schema.sql', import.meta.url), 'utf8');
+  const checks = [...sql.matchAll(/slot (?:not )?between 1 and (\d+)/g)].map((m) => Number(m[1]));
+  assert.ok(checks.length >= 3);
+  for (const n of checks) assert.equal(n, SAVE_CONFIG.slots);
+
+  const mem = new Map();
+  globalThis.localStorage ??= { get length() { return mem.size; }, key: (i) => [...mem.keys()][i] ?? null, getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) };
+  const { LocalStorageProvider } = await import('../src/save/provider.ts');
+  const p = new LocalStorageProvider();
+  for (const slot of [1, 7, 10]) await p.save(slot, { summary: { name: `S${slot}` }, savedAt: slot });
+  assert.deepEqual((await p.list()).map((s) => s.slot), [1, 7, 10]);
+  await p.remove(7);
+  assert.deepEqual((await p.list()).map((s) => s.slot), [1, 10]);
+  assert.equal(await p.load(7), null);
+});

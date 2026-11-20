@@ -7,13 +7,18 @@
 
 create table if not exists public.saves (
   user_id   uuid        not null default auth.uid() references auth.users on delete cascade,
-  slot      smallint    not null check (slot between 1 and 3),
+  slot      smallint    not null check (slot between 1 and 10),
   envelope  jsonb       not null,
   summary   jsonb       not null,
   build     text        not null,
   saved_at  timestamptz not null default now(),
   primary key (user_id, slot)
 );
+
+-- 10 slots per account (was 3). Tables created before this change keep the old
+-- check until it is replaced here.
+alter table public.saves drop constraint if exists saves_slot_check;
+alter table public.saves add constraint saves_slot_check check (slot between 1 and 10);
 
 create table if not exists public.save_audit (
   id       bigserial primary key,
@@ -71,7 +76,7 @@ declare
   ptime    numeric;
 begin
   if uid is null then raise exception 'auth required'; end if;
-  if p_slot is null or p_slot not between 1 and 3 then raise exception 'bad slot'; end if;
+  if p_slot is null or p_slot not between 1 and 10 then raise exception 'bad slot'; end if;
   if p_envelope is null or jsonb_typeof(p_envelope) <> 'object' then raise exception 'bad format'; end if;
   if octet_length(p_envelope::text) > 1000000 then raise exception 'save too large'; end if;
   if p_envelope ->> 'format' is distinct from 'urumon-save' then raise exception 'bad format'; end if;
