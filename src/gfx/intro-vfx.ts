@@ -1,6 +1,6 @@
 // Plays the PixelLab VFX sheets of the new-game intro (src/gfx/intro-vfx-data.ts) on the 2D canvas.
 // Always at native size and whole-pixel positions, so the pixel art stays crisp.
-import { INTRO_VFX } from './intro-vfx-data.ts';
+import { INTRO_VFX, INTRO_BG } from './intro-vfx-data.ts';
 
 const images = new Map<string, HTMLImageElement>();
 
@@ -12,6 +12,23 @@ export function preloadIntroVfx() {
     img.src = v.src;
     images.set(k, img);
   }
+  for (const [k, src] of Object.entries(INTRO_BG)) {
+    if (images.has(`bg:${k}`)) continue;
+    const img = new Image();
+    img.src = src;
+    images.set(`bg:${k}`, img);
+  }
+}
+
+/** Draws background `name` at exactly 2x with its top-left at (x, y); `alpha` blends it over what is already drawn. */
+export function drawIntroBg(g: CanvasRenderingContext2D, name: string, x = 0, y = 0, alpha = 1) {
+  const img = images.get(`bg:${name}`);
+  if (!img || !img.complete || !img.naturalWidth || alpha <= 0) return;
+  const prev = g.globalAlpha;
+  g.globalAlpha = prev * alpha;
+  g.imageSmoothingEnabled = false;
+  g.drawImage(img, Math.round(x), Math.round(y), img.naturalWidth * 2, img.naturalHeight * 2);
+  g.globalAlpha = prev;
 }
 
 /** Length of a one-shot effect in ms. */
