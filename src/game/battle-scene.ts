@@ -6,6 +6,7 @@ import { TYPES } from '../data/types.ts';
 import { ITEMS } from '../data/items.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite } from '../gfx/characters.ts';
+import { drawPortrait, preloadPortrait } from '../gfx/trainer-portraits.ts';
 import { uiIconCanvas } from '../gfx/ui-icons.ts';
 import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
 import { is3D } from '../gfx/world-3d.ts';
@@ -175,11 +176,12 @@ function drawPlatforms(g) {
 
 function drawBattleActors(g, t) {
   // foe trainer
-  if (A.foeTrainer) {
+  // Trainers: their large battle portrait (same person as the map sprite), or the map sprite at 3x while it loads.
+  if (A.foeTrainer && !drawPortrait(g, A.foeTrainer, 236 + A.trainerX, 110)) {
     const spr = charSprite(A.foeTrainer, 'down', 0);
     g.drawImage(spr, 0, 0, 16, 17, Math.round(236 - 24 + A.trainerX), 104 - 51, 48, 51); // 3x: whole-number scale keeps the pixels square
   }
-  if (A.showPlayerTrainer) {
+  if (A.showPlayerTrainer && !drawPortrait(g, state().player.look, 84 + A.playerTrainerX, 196, true)) {
     const spr = charSprite(state().player.look, 'up', 0);
     g.drawImage(spr, 0, 0, 16, 17, Math.round(60 + A.playerTrainerX), 180 - 51, 48, 51);
   }
@@ -341,6 +343,13 @@ function setBalls(party, show) {
 
 // ---------------------------------------------------------------- RUN
 /** Gym leaders, the Alto Mando, the champion and the PP's top brass get the big entrance and the epic theme. */
+/** "Remero Gonzalo", or just the name when it already starts with the job ("Capataz Olivera", not "Capataz Capataz Olivera"). */
+export function trainerTitle(trainer) {
+  const name = fmt(trainer.name);
+  const cls = String(trainer.cls ?? '').trim();
+  return !cls || name.toLowerCase().startsWith(`${cls.toLowerCase()} `) || name.toLowerCase() === cls.toLowerCase() ? name : `${cls} ${name}`;
+}
+
 function isBoss(trainer) {
   return !!trainer.badge || /Alto Mando|Campe|Admin\. PP|Comandante PP|Jefe PP|Fundador PP|Espíritu/.test(trainer.cls ?? '');
 }
@@ -359,6 +368,8 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
   engine.noFlee = !!S.safari?.contest;
   logInfo(`Batalla ${wild ? 'salvaje' : `vs ${trainer?.name ?? 'entrenador'}`}: ${foes.map((f) => `${f.species} nv${f.level}`).join(', ')}`);
   Object.assign(A, { bg, foe: null, ply: null, foeX: 0, plyX: 0, foeY: 0, plyY: 0, foeSX: 1, foeSY: 1, foeRot: 0, foeGlow: 0, plySX: 1, plySY: 1, plyRot: 0, plyGlow: 0, proj: null, foeVis: true, plyVis: true, foeAlpha: 1, plyAlpha: 1, foeFlash: 0, plyFlash: 0, foeTrainer: null, trainerX: 0, ball: null, fx: null, shakeScreen: 0, tint: null, showPlayerTrainer: true, playerTrainerX: 0 });
+  if (trainer) preloadPortrait(trainer.look ?? 'boy');
+  preloadPortrait(S.player.look, true);
   // Each kind of opponent has its own theme: wild creatures, trainers, the rival, and leaders or bosses.
   if (music === 'battle' && trainer) {
     const id = String(trainer.id ?? '');
@@ -390,18 +401,18 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
       await say(`¡Apareció un ${displayName(foes[0])} salvaje!`, { battle: true, auto: 1400 });
     } else {
       A.foeTrainer = trainer.look ?? 'boy';
-      A.trainerX = 160;
+      A.trainerX = 300;
       setBalls(foes, true);
-      await tween(450, (p) => (A.trainerX = 160 * (1 - p)));
+      await tween(450, (p) => (A.trainerX = 300 * (1 - p)));
       if (trainer.intro) await say(Array.isArray(trainer.intro) ? trainer.intro : [trainer.intro], { battle: true, name: trainer.name });
-      await say(`¡${trainer.cls} ${fmt(trainer.name)} te desafía!`, { battle: true, auto: 1200 });
-      await tween(350, (p) => (A.trainerX = 160 * p));
+      await say(`¡${trainerTitle(trainer)} te desafía!`, { battle: true, auto: 1200 });
+      await tween(350, (p) => (A.trainerX = 300 * p));
       A.foeTrainer = null;
       setBalls(foes, false);
       await sendOutFoe(foes[0]);
       await say(`¡${fmt(trainer.name)} envió a ${displayName(foes[0])}!`, { battle: true, auto: 1100 });
     }
-    await tween(300, (p) => (A.playerTrainerX = -120 * p));
+    await tween(300, (p) => (A.playerTrainerX = -160 * p));
     A.showPlayerTrainer = false;
     await sendOutPlayer(engine.p.c);
     await say(`¡Adelante, ${displayName(engine.p.c)}!`, { battle: true, auto: 900 });
@@ -426,9 +437,9 @@ export async function runBattle({ foes, wild, trainer = null, bg = 'field', canL
     logInfo(`Fin de batalla: ${result}`);
     if (result === 'win' && trainer) {
       A.foeTrainer = trainer.look ?? 'boy';
-      A.trainerX = 160;
+      A.trainerX = 300;
       playMusic('victory');
-      await tween(400, (p) => (A.trainerX = 160 * (1 - p)));
+      await tween(400, (p) => (A.trainerX = 300 * (1 - p)));
       if (trainer.lose) await say(trainer.lose, { battle: true, name: trainer.name });
       const prize = trainer.prize ?? 0;
       if (prize) {

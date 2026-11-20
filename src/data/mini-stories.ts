@@ -280,9 +280,9 @@ export const MINI_STORIES: Story[] = [
       ...([['g1', [14, 14], 'Guitarrero Anselmo', ['planta', 'normal'], 'Me desafinaste el equipo.', 'Cantarle al río es fácil. Lo difícil es que te conteste.'],
         ['g2', [36, 16], 'Guitarrero Rufino', ['agua', 'volador'], 'Perdí el compás.', 'Mi milonga es lenta, pero llega.'],
         ['g3', [28, 30], 'Guitarrera Zulma', ['roca', 'tierra'], 'Esa no me la sabía.', 'Vengo de la sierra. Allá se canta fuerte para que se oiga del otro lado.']] as [string, [number, number], string, string[], string, string][]).map(([part, near, who, types, lose, line]) => ({
-        key: part, at: { map: 'quebrada', near }, look: 'gaucho', name: who,
+        key: part, at: { map: 'quebrada', near }, look: who.startsWith('Guitarrera ') ? 'campesina' : 'gaucho', name: who, // the look follows the person: Zulma is a woman
         lines: [[0, [line]], [2, ['Buen combate. Esta noche canto por vos.']]] as [number, string[]][],
-        acts: [{ at: 1, part, trainer: { name: who, cls: 'Guitarrero', types, n: 3, lose }, say: ['¿Venís por la rueda del festival? Entonces dejo la guitarra un momento.'], fled: ['Volvé cuando quieras. El festival espera.'], then: ['Me ganaste limpio. Decile al organizador que conmigo ya cumpliste.'] }],
+        acts: [{ at: 1, part, trainer: { name: who.split(' ').slice(1).join(' '), cls: who.split(' ')[0], types, n: 3, lose }, say: ['¿Venís por la rueda del festival? Entonces dejo la guitarra un momento.'], fled: ['Volvé cuando quieras. El festival espera.'], then: ['Me ganaste limpio. Decile al organizador que conmigo ya cumpliste.'] }],
       })),
     ],
   },
