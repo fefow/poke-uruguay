@@ -2,7 +2,7 @@
 // VPS details once the self-hosted Supabase is running (see README.md and docs/SECURITY.md).
 export const SAVE_CONFIG = Object.freeze({
   backend: 'supabase' as 'local' | 'supabase',
-  slots: 3,
+  slots: 10, // keep in step with the slot check in supabase/schema.sql
   supabase: Object.freeze({
     url: 'https://pokeuy.duckdns.org',
     // Public by design: it only identifies the project. Access is enforced by RLS.

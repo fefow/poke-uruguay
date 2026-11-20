@@ -88,7 +88,7 @@ await writeFile('dist/texts.html', bust((await readFile('texts.html', 'utf8')).r
 const body = html.split('<!--APP-->')[1].split('<!--/APP-->')[0];
 const single = `<title>Poke Uruguay</title>
 <meta name="description" content="Poke Uruguay: La Leyenda del Pampero. Un juego de criaturas 2D ambientado en el Uruguay.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&family=Outfit:wght@400;500;600;700;800&display=swap">
 <style>
 ${css}
 html, body { height: 100%; }
