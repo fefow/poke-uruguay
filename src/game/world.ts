@@ -22,7 +22,8 @@ import { sfx, playMusic, jingle, setAmbience, skippableWait } from '../core/audi
 import { worldRng } from '../core/rng.ts';
 import { h, wait, clamp, sanitizeName } from '../core/util.ts';
 import { info as logInfo } from '../core/debuglog.ts';
-import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput } from './ui.ts';
+import { say, ask, choose, fmt, fadeOut, fadeIn, uiRoot, closeDialog, toast, textInput, setLineFilter } from './ui.ts';
+import { nightTalk, nightLine } from '../data/night-talk.ts';
 import { sortija, jineteada, slots } from './minigames.ts';
 import { state, flag, setFlag, addItem, hasItem, removeItem, markCaught, markSeen, loseMoney, spend, PARTY_MAX, badgeCount, settings } from './state.ts';
 import { createCreature, heal as healCreature, displayName, maxHp, gainExp, canEvolve } from './creature.ts';
@@ -272,6 +273,12 @@ function fishTimer() {
 export function isCave(m) {
   return !!m && !m.indoor && (m.theme === 'cueva' || !!m.dark);
 }
+
+/** Night under the open sky: people on streets and routes change what they say (indoors and in caves nothing changes). */
+export function outdoorNight(m = W_.map) {
+  return !!m && !m.indoor && !isCave(m) && nightLevel() >= 1;
+}
+setLineFilter((line) => (outdoorNight() ? nightLine(line) : line));
 
 /** What the player should hear around them, from the map's weather, biome and the in-game clock. */
 function updateAmbience() {
@@ -644,7 +651,7 @@ function onStep() {
     const biome = tileBiome(W_.map, tileAt, p.x, p.y);
     const floor = cave && !surfing && !TILE_INFO[ch]?.solid;
     if (biome && (surfing || grass || floor || biome === 'sand')) {
-      const pick = encounterList(W_.map, biome, W_.map.indoor ? 0 : nightLevel());
+      const pick = encounterList(W_.map, biome, isCave(W_.map) ? 1 : W_.map.indoor ? 0 : nightLevel()); // caves: always the night crowd
       const rate = surfing ? Math.max(0.1, base * 0.7) : biome === 'sand' ? Math.min(0.08, base) : floor && !grass ? Math.min(0.1, base) : base;
       if (pick.length && worldRng.chance(rate)) {
         const e = worldRng.weighted(pick.map(([sp, lo, hi, w]) => ({ sp, lo, hi, w })));
@@ -894,8 +901,9 @@ async function talkTo(n) {
   if (d.script) return SCRIPTS[d.script](api, d);
   if (d.text) {
     if (foggyHere() && !d.critter) return say(fogTalk(n));
+    const text = !d.critter && !d.gate && !d.blocker && outdoorNight() ? nightTalk(d.text, d.x, d.y) : d.text;
     const g = localGossip(d);
-    return say(g ? [...(Array.isArray(d.text) ? d.text : [d.text]), g] : d.text);
+    return say(g ? [...(Array.isArray(text) ? text : [text]), g] : text);
   }
 }
 
