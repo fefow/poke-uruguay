@@ -164,9 +164,9 @@ export const EVENT_SCRIPTS: Record<string, (api: any, npc?: any) => Promise<void
     if (!(await api.ask('¿Entrás?', { name: who }))) return;
     const hi = topOf('mercedes');
     const teams: [string, string, string, [string, number][]][] = [
-      ['sailor', 'Remero Gustavo', 'Remero', [['nandulin', hi - 2], ['tuco', hi - 1]]],
-      ['girl', 'Remera Paula', 'Remera', [['hornerito', hi - 1], ['oruga', hi - 1], ['hormiga', hi]]],
-      ['gaucho', 'Comodoro Aldo', 'Comodoro', [['teruterito', hi], ['zorrigris', hi + 1]]],
+      ['sailor', 'Gustavo', 'Remero', [['nandulin', hi - 2], ['tuco', hi - 1]]],
+      ['girl', 'Paula', 'Remera', [['hornerito', hi - 1], ['oruga', hi - 1], ['hormiga', hi]]],
+      ['oldman', 'Aldo', 'Comodoro', [['teruterito', hi], ['zorrigris', hi + 1]]],
     ];
     for (let i = 0; i < teams.length; i++) {
       const [look, name, cls, team] = teams[i];

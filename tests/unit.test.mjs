@@ -1051,3 +1051,37 @@ test('account: server errors become Spanish messages and a failed refresh keeps 
     assert.equal(currentUser(), null);
   } finally { globalThis.fetch = realFetch; }
 });
+
+test('trainers: battle portrait, map sprite and name are the same person', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { MINI_STORIES } = await import('../src/data/mini-stories.ts');
+  const { TRAINER_PORTRAITS } = await import('../src/gfx/trainer-portraits-data.ts');
+  const { FEMALE_LOOKS, MALE_YOUNG, MALE_OLD, FEMALE_YOUNG, FEMALE_OLD } = await import('../src/data/trainer-names.ts');
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const women = new Set([...FEMALE_YOUNG, ...FEMALE_OLD, 'Zulma', 'Paula']);
+  const men = new Set([...MALE_YOUNG, ...MALE_OLD, 'Anselmo', 'Rufino', 'Aldo']);
+  const female = (look) => FEMALE_LOOKS.has(look) || /^leader_(inc|correo|ute|ose|ancap|defensa|dark)$|^elite[13]$|^bruma$/.test(look);
+  const bad = [];
+  let checked = 0;
+  const check = (where, look, name, cls) => {
+    checked++;
+    if (!TRAINER_PORTRAITS[look]) bad.push(`${where}: look '${look}' has no battle portrait`);
+    const first = String(name).replace(/^(Don|Doña)\s+/, '').split(' ')[0];
+    if (female(look) && (men.has(first) || /^Don\s/.test(name))) bad.push(`${where}: ${name} drawn as a woman (${look})`);
+    if (!female(look) && look !== 'swimmer' && (women.has(first) || /^Doña\s/.test(name))) bad.push(`${where}: ${name} drawn as a man (${look})`);
+  };
+  for (const [id, m] of Object.entries(MAPS)) for (const n of m.npcs ?? []) {
+    if (!n.trainer) continue;
+    if ((n.trainer.look ?? n.look) !== n.look) bad.push(`${id}: ${n.trainer.name} looks different on the map and in battle`);
+    check(id, n.trainer.look ?? n.look, n.trainer.name, n.trainer.cls);
+  }
+  for (const s of MINI_STORIES) for (const p of s.people) for (const a of p.acts ?? []) if (a.trainer) check(`ms ${s.id}`, p.look, a.trainer.name, a.trainer.cls);
+  // scripted battles: every look named next to a battle in the story data has a portrait
+  for (const f of readdirSync('src/data').filter((x) => x.endsWith('.ts'))) {
+    const src = readFileSync(`src/data/${f}`, 'utf8');
+    for (const [, look] of src.matchAll(/cls: [^\n]*?look: '([a-z_0-9]+)'/g)) if (!TRAINER_PORTRAITS[look]) bad.push(`${f}: battle look '${look}' has no portrait`);
+  }
+  assert.deepEqual(bad, []);
+  assert.ok(checked > 250, `only ${checked} trainers checked`);
+  assert.ok(TRAINER_PORTRAITS['back:player_m'] && TRAINER_PORTRAITS['back:player_f']);
+});

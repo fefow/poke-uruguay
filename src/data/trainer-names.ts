@@ -15,7 +15,7 @@
  * Trainer ids do not change, so saved games keep every win.
  */
 
-const MALE_YOUNG = [
+export const MALE_YOUNG = [
   'Sebastián', 'Matías', 'Nicolás', 'Santiago', 'Martín', 'Diego', 'Gonzalo', 'Rodrigo', 'Pablo', 'Agustín',
   'Joaquín', 'Lucas', 'Mateo', 'Bruno', 'Thiago', 'Benjamín', 'Felipe', 'Franco', 'Maximiliano', 'Emiliano',
   'Ignacio', 'Andrés', 'Leandro', 'Germán', 'Mauricio', 'Fernando', 'Alejandro', 'Gastón', 'Guillermo', 'Marcos',
@@ -24,21 +24,21 @@ const MALE_YOUNG = [
   'Nahuel', 'Iván', 'Elías', 'Gerónimo', 'Ian', 'Axel', 'Juan Cruz', 'Lorenzo', 'Ramiro', 'Juan Pablo',
   'Federico', 'Marcelo', 'Javier', 'Leonel', 'Brian', 'Hernán', 'Mathías', 'Bryan', 'Juan Martín', 'Dylan',
 ];
-const MALE_OLD = [
+export const MALE_OLD = [
   'Jorge', 'Carlos', 'José', 'Luis', 'Juan', 'Daniel', 'Raúl', 'Walter', 'Nelson', 'Roberto',
   'Ricardo', 'Eduardo', 'Alberto', 'Hugo', 'Mario', 'Óscar', 'Julio', 'Rubén', 'Gustavo', 'Néstor',
   'Héctor', 'Miguel', 'Enrique', 'Ángel', 'Sergio', 'Víctor', 'Alfredo', 'Gerardo', 'Omar', 'Ariel',
   'Pedro', 'Antonio', 'Juan Carlos', 'José Luis', 'Milton', 'Wilson', 'Edgardo', 'Heber', 'Darío', 'Fabián',
   'Ernesto', 'Jesús', 'Luis Alberto', 'Hugo Daniel', 'Marcelo', 'Javier', 'Gonzalo', 'Álvaro', 'Ramiro', 'Gabriel',
 ];
-const FEMALE_YOUNG = [
+export const FEMALE_YOUNG = [
   'Camila', 'Valentina', 'Florencia', 'Agustina', 'Micaela', 'Natalia', 'Carolina', 'Fernanda', 'Victoria', 'Martina',
   'Paula', 'Romina', 'Daniela', 'Andrea', 'Gabriela', 'Belén', 'Josefina', 'Emilia', 'Catalina', 'Julieta',
   'Antonella', 'Melina', 'Rocío', 'Lorena', 'Jimena', 'Tamara', 'Stefanía', 'Mariana', 'Valeria', 'Isabella',
   'Renata', 'Zoe', 'Maite', 'Delfina', 'Pilar', 'Guadalupe', 'Milagros', 'Abril', 'Sabrina', 'Noelia',
   'Leticia', 'Paola', 'Cecilia', 'Verónica', 'Virginia', 'Luciana', 'Carla', 'Alejandra', 'Eugenia', 'Ana Clara',
 ];
-const FEMALE_OLD = [
+export const FEMALE_OLD = [
   'María', 'Ana', 'Laura', 'Silvia', 'Patricia', 'Claudia', 'Graciela', 'Mónica', 'Beatriz', 'Susana',
   'Mirta', 'Rosa', 'Teresa', 'Alicia', 'Gladys', 'Nelly', 'Norma', 'Raquel', 'Cristina', 'Sandra',
   'Adriana', 'Liliana', 'Ana María', 'María José', 'Isabel', 'Mercedes', 'Inés', 'Elsa', 'Olga', 'Margarita',
@@ -49,8 +49,9 @@ const TAKEN = new Set(['Facundo', 'Facu', 'Tomás', 'Federico', 'Teófilo', 'Obd
   'Marta', 'Candelaria', 'Mariela', 'Zoraida', 'Estela', 'Dolores', 'Horacio']);
 
 /** Looks drawn as women (long hair in the character templates). Every other look is drawn as a man. */
-const FEMALE_LOOKS = new Set(['girl', 'maestra', 'campesina', 'artesana', 'abuela']);
+export const FEMALE_LOOKS = new Set(['girl', 'maestra', 'campesina', 'artesana', 'abuela']);
 const OLD_LOOKS = new Set(['oldman', 'abuela', 'almacenero']);
+const HONOR_LOOKS = new Set(['gaucho', 'campesina', 'artesana', 'pescador', 'sailor', 'camionero', 'cartero', 'cocinero']);
 const OLD_CLASS = /veterano|baqueano|caballero|señora|señor|pulper|almacener|paisan|colono|capitán|capitana|astrónomo|ganadero|productor/i;
 /** The woman's look used when a trainer written as a woman was drawn with a man's job look. Swimmers stay as they are. */
 const FEMALE_LOOK_FOR: Record<string, string> = {
@@ -138,7 +139,8 @@ export function nameTrainers(maps: Record<string, any>) {
       const female = look !== 'swimmer' && writtenFemale(t.name ?? '', t.cls ?? '', look);
       if (female && !FEMALE_LOOKS.has(look)) { look = FEMALE_LOOK_FOR[look] ?? 'girl'; n.look = look; t.look = look; }
       if (!female && FEMALE_LOOKS.has(look)) { look = look === 'abuela' ? 'oldman' : 'boy'; n.look = look; t.look = look; }
-      const honor = /^(Don|Doña)\s/.test(t.name ?? '');
+      // Don/Doña only for someone drawn as a grown-up of the countryside or an older person (not a young tourist).
+      const honor = /^(Don|Doña)\s/.test(t.name ?? '') && (OLD_LOOKS.has(look) || HONOR_LOOKS.has(look));
       const old = honor || OLD_LOOKS.has(look) || OLD_CLASS.test(t.cls ?? '');
       const first = next[(female ? 'f' : 'm').replace(/./, (c) => (old ? c.toUpperCase() : c))]();
       t.name = honor ? `${female ? 'Doña' : 'Don'} ${first}` : first;
