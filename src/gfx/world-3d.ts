@@ -10,6 +10,7 @@ import { charSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
 import { canoeCanvas } from './ui-icons.ts';
 import { creatureSprite } from './creatures.ts';
+import { overworldCreature } from './overworld-creatures.ts';
 import { skyHour } from './screen.ts';
 
 const PHI_CAM = Math.atan2(0.95, 0.78); // inclinación de la cámara
@@ -803,11 +804,15 @@ export function drawWorld3D(v: WorldView, t: number) {
     if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, 0, n.y + 0.5); continue; }
     if (look === 'ball') { const b = boardFor(n, 'ball', () => board(ballCanvas(), 1)); stand(b, v.entityPos(n)); continue; }
     if (typeof look === 'string' && look.startsWith('animal:')) {
-      // criaturas a lo lejos: su sprite de combate en chico, dan saltitos al moverse
-      const cv = creatureSprite(look.slice(7));
-      const b = boardFor(n, look, () => board(cv, 1.5));
+      // criaturas a lo lejos: su propio sprite de mapa (mira a la derecha, a tamaño de pixel como los personajes);
+      // las que no tienen usan su sprite de combate en chico (mira a la izquierda). Dan saltitos al moverse.
+      const ow = overworldCreature(look.slice(7), !!n.moving || !!n.fly, t);
+      const b = ow
+        ? boardFor(n, look + ':ow', () => board(ow, ow.width / T))
+        : boardFor(n, look, () => board(creatureSprite(look.slice(7)), 1.5));
+      if (ow) setBoardCanvas(b, ow);
       stand(b, v.entityPos(n));
-      b.root.scale.x = n.dir === 'left' ? -1 : 1;
+      b.root.scale.x = ow ? (n.dir === 'left' ? -1 : 1) : n.dir === 'right' ? -1 : 1;
       b.root.position.y += n.moving ? Math.abs(Math.sin(t / 90)) * 0.12 : 0;
       if (n.fly) {
         const fk = Math.min(1, (performance.now() - n.fly.t0) / n.fly.ms);
@@ -849,13 +854,14 @@ export function drawWorld3D(v: WorldView, t: number) {
   } else if (emoteSprite) emoteSprite.visible = false;
 
   // ---- luz del día
-  const hr = skyHour();
+  const cave = !m.indoor && (m.theme === 'cueva' || !!m.dark); // las cuevas siempre están oscuras, sea la hora que sea
+  const hr = cave ? 0 : skyHour();
   const night = hr >= 20 || hr < 5.5 ? 1 : hr >= 18 ? (hr - 18) / 2 * 0.6 : hr < 7.5 ? 0.35 * (7.5 - hr) / 2 : 0;
   const dusk = hr >= 17 && hr < 20 ? 1 - Math.abs(hr - 18.5) / 1.5 : hr >= 5.5 && hr < 8 ? 1 - Math.abs(hr - 6.5) / 1.5 : 0;
   const dark = !!m.dark && !v.lit;
   const sky = new THREE.Color(0x8ecdf4).lerp(new THREE.Color(0xf2a070), Math.max(0, dusk) * 0.7).lerp(new THREE.Color(0x10183a), night);
   const indoor = !!m.indoor;
-  scene.background = indoor || m.dark ? new THREE.Color(0x0c0c16) : sky;
+  scene.background = indoor || cave ? new THREE.Color(0x0c0c16) : sky;
   lightBoards(dark ? 0 : indoor ? 0.85 : 0.85 * (1 - night * 0.65) * (1 - Math.max(0, dusk) * 0.1), dark);
   hemi.intensity = dark ? 0.06 : indoor ? 1.3 : 1.15 - night * 0.8;
   hemi.color.set(0xcfe8ff).lerp(new THREE.Color(0x6a7ad8), night);
@@ -883,6 +889,7 @@ export function drawWorld3D(v: WorldView, t: number) {
   const dist = (indoor ? 10 : 15) * zoom;
   const camD = Math.hypot(dist * 0.95, dist * 0.78);
   if (dark) scene.fog = new THREE.Fog(0x05050c, camD - 1, camD + 5);
+  else if (cave) scene.fog = new THREE.Fog(0x05050c, camD - 1, camD + 10);
   else if (v.foggy) scene.fog = new THREE.Fog(0xc8d0dc, camD - 2, camD + 7);
   else if (!indoor) scene.fog = new THREE.Fog(sky.getHex(), camD + 10, camD + 34);
   else scene.fog = null;

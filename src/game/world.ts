@@ -11,6 +11,7 @@ import { ITEMS, isKeyItem } from '../data/items.ts';
 import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim, drawGroundEdges } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
+import { overworldCreature } from '../gfx/overworld-creatures.ts';
 import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
 import { CONTEST_CITY, contestScore } from '../data/events.ts';
 import { vignette, shadow, backdrop, mapGlow, motes, grade, weatherAt, rain, lightning } from '../gfx/fx.ts';
@@ -265,6 +266,11 @@ function fishTimer() {
   if (el.textContent !== txt) el.textContent = txt;
   if (left > 0 && left <= 60000 && W_.fishWarned !== C.until) { W_.fishWarned = C.until; sfx('levelup'); toast('Concurso de pesca: queda 1 minuto.', 4000); }
   if (left <= 0 && W_.fishOver !== C.until) { W_.fishOver = C.until; sfx('levelup'); toast('¡Tiempo! Volvé con el juez de pesca.', 6000); }
+}
+
+/** Caves (and dark outdoor tunnels) are always night-dark, unaffected by the in-game clock. */
+export function isCave(m) {
+  return !!m && !m.indoor && (m.theme === 'cueva' || !!m.dark);
 }
 
 /** What the player should hear around them, from the map's weather, biome and the in-game clock. */
@@ -1735,7 +1741,9 @@ function drawWorld(g, t) {
   g.scale(Z, Z);
   if (mw < VW || mh < VH) mapGlow(g, Math.max(0, -cx), Math.max(0, -cy), Math.min(mw, VW), Math.min(mh, VH));
   const frame = Math.floor(t / 400);
-  const night0 = nightLevel();
+  // Caves are always dark: the clock never brightens them (day and night only change the outside).
+  const cave = isCave(m);
+  const night0 = cave ? 1 : nightLevel();
   const x0 = Math.max(0, Math.floor(cx / T));
   const y0 = Math.max(0, Math.floor(cy / T));
   const x1 = Math.min(m.w - 1, Math.ceil((cx + VW) / T));
@@ -1793,12 +1801,19 @@ function drawWorld(g, t) {
       // taking off (npcFlyOff): it climbs away to the north-east while its shadow fades on the ground
       const fk = n.fly ? Math.min(1, (performance.now() - n.fly.t0) / n.fly.ms) : 0;
       const flyX = Math.round(fk * 48), flyY = Math.round(fk * fk * 170);
-      shadow(g, sx + 8, sy + 13, 6 * (1 - fk), 2.4 * (1 - fk));
+      const ow = overworldCreature(look.slice(7), !!n.moving || !!n.fly, t);
+      const sr = ow ? Math.max(6, ow.width * 0.36) : 6;
+      shadow(g, sx + 8, sy + 13, sr * (1 - fk), sr * 0.4 * (1 - fk));
       const hop = n.moving ? Math.abs(Math.sin(t / 90)) * 2 : n.fly ? Math.round(Math.abs(Math.sin(t / 70)) * 3) : 0;
       g.save();
       if (fk) g.globalAlpha = 1 - fk * 0.7;
-      if (n.dir === 'left') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), -flyX, sy - 7 - hop - flyY, 24, 24); }
-      else g.drawImage(creatureSprite(look.slice(7)), sx - 4 + flyX, sy - 7 - hop - flyY, 24, 24);
+      if (ow) {
+        // its own map sprite (faces right): feet on the tile, mirrored when it walks left
+        const ox = sx + 8 - Math.floor(ow.width / 2) + flyX, oy = sy + 14 - ow.height - Math.round(hop / 2) - flyY;
+        if (n.dir === 'left') { g.translate(ox * 2 + ow.width, 0); g.scale(-1, 1); }
+        g.drawImage(ow, ox, oy);
+      } else if (n.dir === 'right') { g.translate(sx + 20, 0); g.scale(-1, 1); g.drawImage(creatureSprite(look.slice(7)), -flyX, sy - 7 - hop - flyY, 24, 24); }
+      else g.drawImage(creatureSprite(look.slice(7)), sx - 4 + flyX, sy - 7 - hop - flyY, 24, 24); // battle sprite (faces left)
       g.restore();
       continue;
     }
@@ -1853,7 +1868,7 @@ function drawWorld(g, t) {
   }
   g.restore();
   if (!m.indoor) {
-    const night = grade(g);
+    const night = grade(g, cave ? 0 : undefined); // hour 0: the night grade, whatever the clock says
     if (!pixiActive()) motes(g, t, { night });
     if (!m.dark && m.theme !== 'cueva') {
       const wx = weatherAt(m.id, m.weather);
@@ -1879,6 +1894,14 @@ function drawWorld(g, t) {
     const gr = g.createRadialGradient(px0, py0, T * 1.3 * Z, px0, py0, T * 3.8 * Z);
     gr.addColorStop(0, 'rgba(6,6,16,0)');
     gr.addColorStop(1, 'rgba(6,6,16,0.97)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, W, H);
+  } else if (cave) {
+    // a cave without the need for a lamp (or one already lit) is still dim: the light fades a few tiles from the player
+    const px0 = (ppos.x - cx + T / 2) * Z, py0 = (ppos.y - cy + T / 2) * Z;
+    const gr = g.createRadialGradient(px0, py0, T * 2.5 * Z, px0, py0, T * 7.5 * Z);
+    gr.addColorStop(0, 'rgba(6,6,16,0.12)');
+    gr.addColorStop(1, 'rgba(6,6,16,0.78)');
     g.fillStyle = gr;
     g.fillRect(0, 0, W, H);
   }
