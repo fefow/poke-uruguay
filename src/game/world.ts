@@ -422,8 +422,6 @@ function tryMove(d) {
   if (tileAt(nx, ny) === 'Ϡ') return void climbFalls(dx, dy, nx, ny);
   const blocker = W_.npcs.find((n) => n.visible && n.x === nx && n.y === ny && n.def.blocker);
   if (blocker) return void runScript(async () => { await say(blocker.def.text, { name: blocker.def.name }); });
-  const inWay = W_.npcs.find((n) => n.visible && !n.moving && n.x === nx && n.y === ny && givesWay(n));
-  if (inWay) return giveWay(inWay, dx, dy);
   if (solidAt(nx, ny, { player: true })) {
     if (tileAt(nx, ny) === '~' && hasItem('canoa') && !flag(badgeOf('rivera'))) hint('La Canoa no aguanta esta corriente todavía: hace falta la Medalla Rivera.');
     return bump();
@@ -434,37 +432,6 @@ function tryMove(d) {
   p.moving = true;
   p.t = 0;
   p.dur = W_.bike ? BIKE_MS : input.held('b') ? RUN_MS : input.held('run') ? SPACE_MS : WALK_MS;
-  p.step++;
-}
-
-/**
- * People who have nothing left to do with the player (beaten trainers, passers-by) never close a corridor: walking
- * into them makes them step aside, or trade places when there is no room (a one-tile corridor between shelves).
- */
-function givesWay(n) {
-  const d = n.def;
-  if (d.blocker || d.gate || d.script || d.critter || d.look === 'ball' || d.look === 'machine' || d.look == null) return false;
-  if (d.trainer) return flag(`tr_${d.trainer.id}`);
-  return !!d.wander;
-}
-function giveWay(n, dx, dy) {
-  const p = W_.player;
-  const free = (x, y) => !solidAt(x, y, { self: n }) && !W_.map.doorWarps?.[`${x},${y}`] && tileAt(x, y) !== 'm';
-  for (const [sx, sy] of [[dy, dx], [-dy, -dx]]) {
-    if (!free(n.x + sx, n.y + sy)) continue;
-    n.dir = sy < 0 ? 'up' : sy > 0 ? 'down' : sx < 0 ? 'left' : 'right';
-    void npcStep(n, sx, sy);
-    return;
-  }
-  // no room at the sides: they walk past the player, who takes their tile
-  n.dir = opposite(p.dir);
-  void npcStep(n, -dx, -dy);
-  p.from = { x: p.x, y: p.y };
-  p.x += dx;
-  p.y += dy;
-  p.moving = true;
-  p.t = 0;
-  p.dur = WALK_MS;
   p.step++;
 }
 

@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-26 (v239)
+> Última actualización: 2026-11-26 (v240)
 >
 > Entrenadores: cada entrenador usa en batalla un retrato grande dibujado a partir de su sprite del mapa, y su nombre, título y sprite corresponden a la misma persona (mujer con nombre y título de mujer, hombre con nombre y título de hombre; Don/Doña solo para gente mayor o de campo).
 
