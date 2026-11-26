@@ -1156,3 +1156,21 @@ test('outdoor NPCs have a night dialogue that never talks about the sun', async 
   }
   assert.ok(own >= total * 0.9, `solo ${own} de ${total} NPC al aire libre tienen diálogo nocturno propio`);
 });
+
+test('map layers: the editor patch adds an "encima" and a collision layer that wins over the tile', async () => {
+  const { applyMapEdits } = await import('../src/data/map-edits.ts');
+  const { collAt, cellSolid } = await import('../src/gfx/tiles.ts');
+  const maps = { a: { name: 'A', tiles: ['#..', '...'], npcs: [], items: [] } };
+  applyMapEdits(maps, { a: { top: ['  #', '   '], coll: ['o x', '   '] } });
+  assert.deepEqual(maps.a.top, ['  #', '   ']);
+  assert.equal(collAt(maps.a, 0, 0), false); // a tree made passable
+  assert.equal(collAt(maps.a, 2, 0), true); // open grass blocked
+  assert.equal(collAt(maps.a, 1, 0), null);
+  assert.equal(cellSolid(maps.a, maps.a.tiles, 0, 0), false);
+  assert.equal(cellSolid(maps.a, maps.a.tiles, 2, 0), true);
+  assert.equal(cellSolid(maps.a, maps.a.tiles, 1, 1), false);
+  // a layer of the wrong size is ignored
+  const maps2 = { b: { name: 'B', tiles: ['...'], npcs: [], items: [] } };
+  applyMapEdits(maps2, { b: { coll: ['xx'] } });
+  assert.equal(maps2.b.coll, undefined);
+});

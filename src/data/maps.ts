@@ -818,7 +818,9 @@ import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
 import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng, block } from './map-gen.ts';
-import { guideMap } from './guide.ts';
+import { guideMap, tidyMap, terraceMap } from './guide.ts';
+import { signRoute, signCity } from './signs.ts';
+import { LEADERS } from './story.ts';
 import { mazeMap } from './maze.ts';
 import { addRouteStory } from './route-stories.ts';
 import { flavorRoute, ROUTE_FLAVOR } from './route-flavor.ts';
@@ -1408,11 +1410,16 @@ for (const n of OUTDOOR.quebrada.npcs ?? []) {
 // The gossip that explains, a little at a time, why the roads are closed.
 addRumors(OUTDOOR);
 
+// Generated routes and localities that get a last tidy pass (see tidyMap) once every obstacle is in place.
+const TIDY = new Set<string>();
+const LOCALITY_IDS = new Set(STOPS.filter((st) => st.kind === 'loc').map((st) => st.id));
 // Routes are guided, not open fields: a trail between tree walls, grass clusters, side pockets and one-way ledges.
 for (const [id, m] of Object.entries(OUTDOOR)) {
   if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
   if (m.maze) { addRouteStory(m, id); continue; }
-  guideMap(m, id, { width: id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3 });
+  const tidy = !MAP_OVERRIDES[id]?.tiles; // maps the editor redrew keep their old generation, so the edits still fit
+  if (tidy) TIDY.add(id);
+  guideMap(m, id, { width: (id === 'r_rosario_sanjose' || id === 'r_ecilda_trinidad' ? 2 : 3) + (tidy ? 2 : 0) });
   flavorRoute(m, id);
   addRouteStory(m, id);
 }
@@ -1421,6 +1428,7 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
 for (const stop of STOPS) {
   if (stop.kind !== 'loc' || !OUTDOOR[stop.id]) continue;
   guideMap(OUTDOOR[stop.id], stop.id, { width: 4, town: true });
+  if (!MAP_OVERRIDES[stop.id]?.tiles) TIDY.add(stop.id);
 }
 
 // Creatures made in the sprite editor join the wild lists of the maps they were given.
@@ -1539,6 +1547,17 @@ const MO_BLOCKS = [
   }
 })();
 
+for (const id of TIDY) {
+  tidyMap(OUTDOOR[id]);
+  if (!LOCALITY_IDS.has(id)) terraceMap(OUTDOOR[id]);
+  signRoute(OUTDOOR[id], id, MAPS);
+}
+// Cities the editor has not redrawn get a sign beside the gym, the Policlínica and the almacén.
+for (const stop of STOPS) {
+  if (stop.kind !== 'city' || !OUTDOOR[stop.id] || MAP_OVERRIDES[stop.id]?.tiles) continue;
+  signCity(OUTDOOR[stop.id], stop.gym ? LEADERS[stop.gym] : undefined);
+}
+
 // What the map editor sees as "the original" (before its own changes), then the editor's changes on top.
 // Scenery over open grass on routes and in localities (before the editor baseline below, so it is not an "edit").
 const LOCALITIES = new Set(STOPS.filter((st) => st.kind === 'loc').map((st) => st.id));
@@ -1552,10 +1571,12 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
   return [id, {
     tiles: [...m.tiles],
     npcs: (m.npcs ?? []).map((n, i) => ({ key: keys[i], x: n.x, y: n.y, look: n.look, dir: n.dir, text: n.text && !n.script && !n.trainer ? [].concat(n.text) : null, kind: n.trainer ? 'trainer' : n.script ? 'script' : n.critter ? 'critter' : n.blocker ? 'blocker' : 'npc', name: n.name ?? n.trainer?.name ?? null, wander: !!n.wander })),
-    items: (m.items ?? []).map((it) => ({ id: it.id, x: it.x, y: it.y, item: it.item })),
+    items: (m.items ?? []).map((it) => ({ id: it.id, x: it.x, y: it.y, item: it.item, ...(it.hidden ? { hidden: true } : {}) })),
     doors: (m.doors ?? []).map((d) => (typeof d === 'string' ? d : { ...d })),
     signs: [...(m.signs ?? [])],
     warps: (m.warps ?? []).map((w) => ({ x: w.x, y: w.y, to: w.to, tx: w.tx, ty: w.ty })),
+    top: m.top ? [...m.top] : undefined as string[] | undefined,
+    coll: m.coll ? [...m.coll] : undefined as string[] | undefined,
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);

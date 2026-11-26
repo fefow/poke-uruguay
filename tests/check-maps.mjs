@@ -13,7 +13,7 @@ for (const [id, m] of Object.entries(MAPS)) {
     if (t == null) bad(`${id} npc out of bounds ${n.x},${n.y}`);
     else if (SOLID.has(t) && !(t === '~' && n.look === 'swimmer') && !(t === 'λ' && n.blocker) && n.look !== 'ball' && n.look !== null) bad(`${id} npc on solid '${t}' at ${n.x},${n.y} (${n.look})`);
   }
-  for (const it of m.items ?? []) { const t = at(it.x, it.y); if (t == null || SOLID.has(t)) bad(`${id} item on '${t}' at ${it.x},${it.y}`); }
+  for (const it of m.items ?? []) { const t = at(it.x, it.y); if (t == null || (SOLID.has(t) && !it.hidden)) bad(`${id} item on '${t}' at ${it.x},${it.y}`); }
   if (m.legend) { const t = at(m.legend.x, m.legend.y); if (t == null || SOLID.has(t)) bad(`${id} legend on '${t}'`); }
   const doors = m.tiles.join('').split('').filter((c) => c === 'D').length;
   if ((m.doors?.length ?? 0) !== doors) bad(`${id} has ${doors} doors but ${m.doors?.length ?? 0} door targets`);
@@ -23,6 +23,7 @@ for (const [id, m] of Object.entries(MAPS)) {
     const edge = side === 'e' ? m.tiles.map((r) => r[w - 1]) : side === 'w' ? m.tiles.map((r) => r[0]) : side === 'n' ? [...m.tiles[0]] : [...m.tiles.at(-1)];
     if (!edge.some((t) => !SOLID.has(t) || t === '%' || t === '~')) bad(`${id} exit ${side} has no walkable edge tile`);
   }
+  for (const k of ['top', 'coll']) if (m[k] && (m[k].length !== m.tiles.length || m[k].some((r) => r.length !== w))) bad(`${id} layer ${k} does not match the map size`);
   if (m.indoor && !m.tiles.join('').includes('m')) bad(`${id} interior without mat`);
   const signs = m.tiles.join('').split('').filter((c) => c === 'S').length;
   if (!m.indoor && (m.signs?.length ?? 0) !== signs) bad(`${id} has ${signs} signs but ${m.signs?.length ?? 0} texts`);
@@ -37,7 +38,7 @@ for (const [id, m] of Object.entries(MAPS)) for (const w of m.warps ?? []) { con
 const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(MAPS).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
 for (const id of Object.keys(INTERIOR)) if (!linked.has(id)) bad(`interior ${id} is not linked from any door`);
 // connectivity: from the first walkable edge tile of an outdoor map, every exit, door front and NPC/item is reachable
-const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); }; // thickets (machete) and water (canoe) count as passable
+const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; const c = m.coll?.[y]?.[x]; if (t !== undefined && c === 'x') return false; if (t !== undefined && c === 'o') return true; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); }; // thickets (machete) and water (canoe) count as passable
 for (const [id, m] of Object.entries(OUTDOOR)) {
   const h = m.tiles.length; const w = m.tiles[0].length;
   const starts = [];
@@ -58,7 +59,7 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   for (const [x, y, side] of starts) if (!seen.has(`${x},${y}`)) bad(`${id} exit ${side} tile ${x},${y} is cut off from the rest of the map`);
   m.tiles.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'D' && !seen.has(`${x},${y + 1}`)) bad(`${id} door at ${x},${y} has no reachable front tile`); }));
   for (const n of m.npcs ?? []) if (n.look !== null && !n.blocker && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
-  for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`)) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
+  for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`) && !(it.hidden && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen.has(`${it.x + dx},${it.y + dy}`)))) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
 }
 // cross references: every script, track, item and species named by the data must exist
 import { readFileSync, readdirSync } from 'node:fs';

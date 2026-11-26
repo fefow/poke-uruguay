@@ -1,4 +1,5 @@
 import { SPECIES } from './species.ts';
+import { MAP_OVERRIDES } from './map-overrides.js';
 
 // Seeded generators for the later maps: routes (wandering paths with grass, trees and ponds)
 // and cities (two streets with the standard gym, Policlínica, shop and house blocks).
@@ -142,6 +143,16 @@ export function route({ seed, w = 30, h = 20, axis = 'h', from, to, base = '.', 
     if (t === 0) c = from;
     if (t === along - 1) c = to;
     pts.push(c);
+  }
+  // straight stretches joined at right angles, like a road drawn by hand (maps the editor redrew keep the old wavy line)
+  if (!MAP_OVERRIDES[seed]?.tiles) {
+    const rs = rng(`${seed}straight`);
+    for (let t = 1, c = from; t < along - 1;) {
+      const len = 5 + Math.floor(rs() * 6);
+      c = t + len >= along - 4 ? to : pts[t];
+      for (let k = t; k < Math.min(along - 1, t + len); k++) pts[k] = c;
+      t += len;
+    }
   }
   for (const [b0, b1] of rivers) for (let t = b0; t <= b1; t++) pts[t] = pts[b0];
   // gates sit on straight stretches so a single guard fills the whole gap
