@@ -743,64 +743,77 @@ function buildBuildings(m, tiles, theme: string | null, parts: THREE.BufferGeome
       pos.push(...p); uv.push(...q); nor.push(n.x, n.y, n.z);
     }
   };
-  // cada edificio (tiles de edificio conectados) comparte una misma altura de caballete: el techo queda parejo
-  const comp = new Int32Array(W * H).fill(-1);
-  const compRidge: number[] = [];
-  const colOf = (x: number, y0: number) => { let y1 = y0; while (isBld(tiles, W, H, x, y1 + 1)) y1++; let F = 0; while (y1 - F >= y0 && kindOf(tiles[y1 - F][x]) !== 'roof') F++; return { y1, F: Math.max(1, F) }; };
-  for (let sy = 0; sy < H; sy++) for (let sx = 0; sx < W; sx++) {
-    if (comp[sy * W + sx] >= 0 || !isBld(tiles, W, H, sx, sy)) continue;
-    const id = compRidge.length;
-    let best = 0;
-    const stack = [[sx, sy]];
-    comp[sy * W + sx] = id;
-    while (stack.length) {
-      const [cx, cy] = stack.pop()!;
-      if (!isBld(tiles, W, H, cx, cy - 1)) { const { y1, F } = colOf(cx, cy); best = Math.max(best, F * FACADE_H + Math.max(0.5, (y1 + 1 - cy) * 0.32)); }
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const nx = cx + dx, ny = cy + dy;
-        if (isBld(tiles, W, H, nx, ny) && comp[ny * W + nx] < 0) { comp[ny * W + nx] = id; stack.push([nx, ny]); }
-      }
-    }
-    compRidge.push(best);
-  }
+  // Cada columna de tiles de edificio se corta en edificios: filas de techo arriba y filas de fachada abajo.
+  // Si debajo de una fachada vuelve a haber techo, ahí empieza otro edificio (una casa pegada detrás de una tienda).
+  type Seg = { y0: number; y1: number; F: number };
+  const segAt: (Seg | null)[] = new Array(W * H).fill(null);
+  const colSegs: Seg[][] = Array.from({ length: W }, () => []);
   for (let x = 0; x < W; x++) {
     let y = 0;
     while (y < H) {
       if (!isBld(tiles, W, H, x, y)) { y++; continue; }
       const y0 = y;
-      while (y < H && isBld(tiles, W, H, x, y)) y++;
+      let wallSeen = false;
+      while (y < H && isBld(tiles, W, H, x, y)) {
+        const roof = kindOf(tiles[y][x]) === 'roof';
+        if (roof && wallSeen) break;
+        if (!roof) wallSeen = true;
+        y++;
+      }
       const y1 = y - 1;
-      // filas de fachada: las de abajo que no son techo
       let F = 0;
       while (y1 - F >= y0 && kindOf(tiles[y1 - F][x]) !== 'roof') F++;
-      if (F === 0) F = 1; // solo techo: la última fila hace de fachada
+      const sg = { y0, y1, F: Math.max(1, F) };
+      colSegs[x].push(sg);
+      for (let yy = y0; yy <= y1; yy++) segAt[yy * W + x] = sg;
+    }
+  }
+  const twin = (x: number, sg: Seg) => (x < 0 || x >= W ? null : colSegs[x].find((o) => o.y0 === sg.y0 && o.y1 === sg.y1) ?? null);
+  // altura de caballete propia de una columna: sube con la profundidad, no más de 1,1 sobre la fachada
+  const ownRidge = (sg: Seg) => sg.F * FACADE_H + Math.min(1.1, Math.max(0.45, (sg.y1 + 1 - sg.y0) * 0.3));
+  // las columnas vecinas con el mismo frente y fondo son el mismo edificio y comparten el caballete
+  const ridgeOf = new Map<Seg, number>();
+  for (let x = 0; x < W; x++) for (const sg of colSegs[x]) {
+    if (ridgeOf.has(sg)) continue;
+    const run: Seg[] = [sg];
+    for (let xx = x + 1, o = twin(xx, sg); o; xx++, o = twin(xx, sg)) run.push(o);
+    const r = Math.max(...run.map(ownRidge));
+    for (const o of run) ridgeOf.set(o, r);
+  }
+  const EAVE = 0.16; // alero: el techo sobresale de la fachada
+  for (let x = 0; x < W; x++) for (const sg of colSegs[x]) {
+      const { y0, y1, F } = sg;
       const R = y1 - y0 + 1 - F;
       for (let yy = y0; yy <= y1; yy++) used.add(yy * W + x);
       const front = y1 + 1, back = y0;
       const top = F * FACADE_H;
-      const D = front - back;
       const zm = (front + back) / 2;
-      const ridge = Math.max(top + 0.3, compRidge[comp[y0 * W + x]] ?? top + Math.max(0.5, D * 0.32));
+      const ridge = Math.max(top + 0.3, ridgeOf.get(sg)!);
+      const left = twin(x - 1, sg), right = twin(x + 1, sg);
       const x0 = x, x1 = x + 1;
       // fachada: una cara por fila, de abajo hacia arriba
       for (let i = 0; i < F; i++) {
         const c = tiles[y1 - i][x];
         quad([x0, (i + 1) * FACADE_H, front], [x1, (i + 1) * FACADE_H, front], [x1, i * FACADE_H, front], [x0, i * FACADE_H, front], cellOf(c));
       }
-      // techo: las filas de techo del 2D van del caballete al alero por la cara de adelante, y repetidas atrás
-      const roofRows = R > 0 ? Array.from({ length: R }, (_, i) => tiles[y0 + i][x]) : [tiles[y0][x]];
+      // techo a dos aguas: las filas de techo del 2D van del caballete al alero por la cara de adelante, y repetidas atrás.
+      // Un bloque sin filas de techo (fábrica, torre) lleva un techo liso del color de su pared.
+      const roofRows = R > 0 ? Array.from({ length: R }, (_, i) => tiles[y0 + i][x]) : ['\u0000cap:' + tiles[y0][x]];
       const n = roofRows.length;
+      const half = front - zm;
+      const kE = 1 + EAVE / half; // el último tramo sigue la pendiente hasta el alero
+      const ex0 = left ? x0 : x0 - EAVE * 0.6, ex1 = right ? x1 : x1 + EAVE * 0.6;
       for (let i = 0; i < n; i++) {
-        const k0 = i / n, k1 = (i + 1) / n;
-        const za = zm + (front - zm) * k0, zb = zm + (front - zm) * k1;
+        const k0 = i / n, k1 = i === n - 1 ? kE : (i + 1) / n;
+        const za = zm + half * k0, zb = zm + half * k1;
         const ha = ridge + (top - ridge) * k0, hb = ridge + (top - ridge) * k1;
-        quad([x0, ha, za], [x1, ha, za], [x1, hb, zb], [x0, hb, zb], cellOf(roofRows[i]));
-        const zc = zm + (back - zm) * k0, zd = zm + (back - zm) * k1;
-        quad([x1, ha, zc], [x0, ha, zc], [x0, hb, zd], [x1, hb, zd], cellOf(roofRows[i]));
+        quad([ex0, ha, za], [ex1, ha, za], [ex1, hb, zb], [ex0, hb, zb], cellOf(roofRows[i]));
+        const zc = zm - half * k0, zd = zm - half * k1;
+        quad([ex1, ha, zc], [ex0, ha, zc], [ex0, hb, zd], [ex1, hb, zd], cellOf(roofRows[i]));
       }
       // paredes de los costados (frontón) y de atrás, del color de la fachada
       const wallCol = avgColor(`f|${theme}|${tiles[y1][x]}`, tileCanvas(tiles[y1][x], 0, theme, false)).clone().multiplyScalar(0.92);
-      const gable = (xs: number, flip: boolean) => {
+      const gable = (xs: number) => {
         const g = new THREE.BufferGeometry();
         const P = [[xs, 0, front], [xs, top, front], [xs, ridge, zm], [xs, top, back], [xs, 0, back]];
         const tri = [[0, 1, 2], [0, 2, 3], [0, 3, 4]];
@@ -809,21 +822,30 @@ function buildBuildings(m, tiles, theme: string | null, parts: THREE.BufferGeome
         g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
         parts.push(paint(g, wallCol, 0.03, xs));
       };
-      const sameRun = (xx: number) => isBld(tiles, W, H, xx, y0) && isBld(tiles, W, H, xx, y1) && !isBld(tiles, W, H, xx, y0 - 1) && !isBld(tiles, W, H, xx, y1 + 1);
-      if (!sameRun(x - 1)) gable(x0, true);
-      if (!sameRun(x + 1)) gable(x1, false);
+      if (!left) gable(x0);
+      if (!right) gable(x1);
       const bw = box(1, top, 0.02);
       parts.push(paint(at(bw, x + 0.5, top / 2, back + 0.01), wallCol, 0.03, x));
       // escalón de la vereda frente a la fachada
-      parts.push(paint(at(box(1, 0.06, 0.18), x + 0.5, 0.03, front + 0.09), groundColor(x, Math.min(H - 1, front)).clone().multiplyScalar(0.85), 0.02, x));
-    }
+      if (!isBld(tiles, W, H, x, front)) parts.push(paint(at(box(1, 0.06, 0.18), x + 0.5, 0.03, front + 0.09), groundColor(x, Math.min(H - 1, front)).clone().multiplyScalar(0.85), 0.02, x));
   }
   if (cells.size) {
     const atlas = document.createElement('canvas');
     atlas.width = atlas.height = 512;
     const g = atlas.getContext('2d')!;
     g.imageSmoothingEnabled = false;
-    for (const [c, i] of cells) g.drawImage(tileCanvas(c, 0, theme, false), (i % 32) * 16, Math.floor(i / 32) * 16);
+    for (const [c, i] of cells) {
+      const cx = (i % 32) * 16, cy = Math.floor(i / 32) * 16;
+      if (c.startsWith('\u0000cap:')) {
+        // techo liso: el color de la pared, más oscuro, con una línea de borde
+        const ch = c.slice(5);
+        const col = avgColor(`f|${theme}|${ch}`, tileCanvas(ch, 0, theme, false)).clone().multiplyScalar(0.7);
+        g.fillStyle = `#${col.getHexString()}`;
+        g.fillRect(cx, cy, 16, 16);
+        g.fillStyle = 'rgba(0,0,0,0.18)';
+        g.fillRect(cx, cy + 15, 16, 1);
+      } else g.drawImage(tileCanvas(c, 0, theme, false), cx, cy);
+    }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
