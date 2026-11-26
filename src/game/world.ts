@@ -703,6 +703,53 @@ async function trainerSpotted(n) {
   playMusic(musicFor(W_.map.id, W_.map));
 }
 
+/** Cells the player can walk to from where they stand, with (bx, by) taken as blocked and `self` out of the way. */
+function reachFromPlayer(bx: number, by: number, self) {
+  const p = W_.player;
+  const seen = new Set<string>([`${p.x},${p.y}`]);
+  const q: [number, number][] = [[p.x, p.y]];
+  for (let i = 0; i < q.length; i++) {
+    const [cx, cy] = q[i];
+    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+      if (seen.has(k) || (nx === bx && ny === by) || solidAt(nx, ny, { self, ignorePlayer: true, player: true })) continue;
+      seen.add(k);
+      q.push([nx, ny]);
+    }
+  }
+  return seen.size;
+}
+/** True when someone standing on (x, y) would cut the player off from part of the map (a one-tile corridor, a doorway). */
+function cutsPlayerOff(x: number, y: number, self, all = reachFromPlayer(-1, -1, self)) {
+  return reachFromPlayer(x, y, self) < all - 1;
+}
+/**
+ * Nobody may leave the player stuck: a trainer who walked up to the player and now stands in a narrow pass
+ * (or anyone else whose spot cuts the way) walks to the nearest tile where it blocks nothing. Called by runScript.
+ */
+async function clearTheWay(n) {
+  const mapId = W_.map.id;
+  if (!n.visible || n.def.gate || n.def.blocker) return;
+  const all = reachFromPlayer(-1, -1, n);
+  if (!cutsPlayerOff(n.x, n.y, n, all)) return;
+  const start = `${n.x},${n.y}`;
+  const prev = new Map<string, string | null>([[start, null]]);
+  const q: [number, number][] = [[n.x, n.y]];
+  let end: string | null = null;
+  for (let i = 0; i < q.length && !end && i < 400; i++) {
+    const [cx, cy] = q[i];
+    for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+      if (prev.has(k) || solidAt(nx, ny, { self: n }) || W_.map.doorWarps?.[k] || tileAt(nx, ny) === 'm' || W_.map.warps?.some((w) => w.x === nx && w.y === ny)) continue;
+      prev.set(k, `${cx},${cy}`);
+      if (!cutsPlayerOff(nx, ny, n, all)) { end = k; break; }
+      q.push([nx, ny]);
+    }
+  }
+  if (!end || W_.map.id !== mapId) return;
+  await walkNpcPath(n, new Set([end]));
+}
+
 const tollPaidAt: Record<string, number> = {};
 const tollTries: Record<string, number> = {};
 const opposite = (d) => ({ up: 'down', down: 'up', left: 'right', right: 'left' })[d];
@@ -1157,6 +1204,10 @@ export async function runScript(fn) {
       loadMap(lh.map, lh.x, lh.y, 'up');
       await fadeIn(300);
     }
+    // Whoever walked somewhere during the scene (a trainer who came up to the player, someone who arrived) must not stay
+    // in a narrow pass: if their spot cuts the player off, they step aside before the player gets control back.
+    refreshEntities();
+    for (const n of W_.npcs) if (n.visible && !n.def.wander && !n.def.patrol && (n.x !== n.def.x || n.y !== n.def.y)) await clearTheWay(n);
   } catch (err) {
     console.error(err);
     await say(`Ups, algo salió mal: ${err.message}`);
