@@ -20,10 +20,11 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   }
   const route = /^(r_|ruta)/.test(id);
   rows.push({ id, route, hand: !!MAP_OVERRIDES[id]?.tiles, size: `${w}x${h}`, walk: (100 * walk) / (w * h), kinds: kinds.size, pieces: pieces.size,
+    levels: new Set((m.elev ?? []).join('').replace(/ /g, '0') || '0').size,
     signs: (m.signs ?? []).filter((s) => !s.hidden).length, hidden: (m.items ?? []).filter((i) => i.hidden).length });
 }
 const avg = (list, k) => (list.reduce((a, r) => a + r[k], 0) / Math.max(1, list.length)).toFixed(1);
 for (const [label, list] of [['rutas', rows.filter((r) => r.route)], ['pueblos y ciudades', rows.filter((r) => !r.route)]]) {
-  console.log(`${label} (${list.length}): caminable ${avg(list, 'walk')}%, tipos de tile ${avg(list, 'kinds')}, piezas ${avg(list, 'pieces')}, carteles ${avg(list, 'signs')}, ocultos ${avg(list, 'hidden')}`);
+  console.log(`${label} (${list.length}): caminable ${avg(list, 'walk')}%, tipos de tile ${avg(list, 'kinds')}, piezas ${avg(list, 'pieces')}, niveles de altura ${avg(list, 'levels')}, carteles ${avg(list, 'signs')}, ocultos ${avg(list, 'hidden')}`);
 }
 if (process.argv.includes('--all')) for (const r of rows) console.log(`${r.id.padEnd(28)} ${r.size.padEnd(7)} ${r.hand ? 'mano' : 'gen '} caminable ${r.walk.toFixed(0)}% tipos ${r.kinds} piezas ${r.pieces}`);

@@ -2890,9 +2890,75 @@ export function drawBuildingTrim(g, tiles, x0: number, y0: number, x1: number, y
  * The collision layer of a map (m.coll, one char per cell, like the collision bits of a classic layout): 'x' blocks
  * the cell, 'o' lets anyone through, anything else leaves it to the tile. Returns null when the layer says nothing.
  */
-export function collAt(m: { coll?: string[] } | null | undefined, x: number, y: number): boolean | null {
+export function collAt(m: { coll?: string[]; elev?: string[]; tiles?: ArrayLike<string> } | null | undefined, x: number, y: number): boolean | null {
   const c = m?.coll?.[y]?.[x];
-  return c === 'x' ? true : c === 'o' ? false : null;
+  if (c === 'x') return true;
+  if (c === 'o') return false;
+  if (m?.elev && m.tiles && cliffAt(m, m.tiles, x, y)) return true;
+  return null;
+}
+
+// ---- elevation: plateaus, cliffs and steps (like the elevation bits of a classic layout) ----
+/** Height of a cell: the map's `elev` layer, one digit per cell ('1'-'3'; blank or '0' is the ground level). */
+export function elevAt(m: { elev?: string[] } | null | undefined, x: number, y: number): number {
+  const c = m?.elev?.[y]?.[x];
+  return c !== undefined && c >= '1' && c <= '9' ? c.charCodeAt(0) - 48 : 0;
+}
+/** Tiles that join two heights: steps cut in the cliff and bridges. */
+export const STEP_TILES = new Set(['ʎ', 'Ӻ', 'b']);
+/** Sides of a raised cell that drop to a lower cell (bits: 1 north, 2 east, 4 south, 8 west); 0 inside a plateau. */
+export function dropSides(m: { elev?: string[] } | null | undefined, x: number, y: number): number {
+  if (!m?.elev) return 0;
+  const e = elevAt(m, x, y);
+  if (!e) return 0;
+  const h = m.elev.length, w = m.elev[0]?.length ?? 0;
+  let mask = 0;
+  ([[0, -1, 1], [1, 0, 2], [0, 1, 4], [-1, 0, 8]] as const).forEach(([dx, dy, bit]) => {
+    const nx = x + dx, ny = y + dy;
+    if (nx >= 0 && ny >= 0 && nx < w && ny < h && elevAt(m, nx, ny) < e) mask |= bit;
+  });
+  return mask;
+}
+/**
+ * The edge of a plateau is its cliff: a raised cell next to a lower one cannot be walked on, unless it holds steps
+ * or a bridge. So every change of height is a wall, and moving never needs to know where it came from.
+ */
+export function cliffAt(m: { elev?: string[] } | null | undefined, tiles: ArrayLike<ArrayLike<string>>, x: number, y: number): boolean {
+  if (!m?.elev) return false;
+  const ch = tiles[y]?.[x];
+  return ch !== undefined && !STEP_TILES.has(ch) && dropSides(m, x, y) !== 0;
+}
+
+/**
+ * Draws the cliffs over the ground pass: the face of the rock where a plateau drops to the south (with the lit lip
+ * of the grass above it), a rock band on the sides that drop east or west, a thin lip where it drops north, and the
+ * shade the cliff casts at its foot. Steps and solid things on the edge keep their own drawing.
+ */
+export function drawElevation(g, m, tiles, x0: number, y0: number, x1: number, y1: number, cx: number, cy: number) {
+  if (!m?.elev) return;
+  const P = (x: number, y: number, col: string, w = 1, h = 1) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const sx = x * T - cx, sy = y * T - cy;
+    // shade at the foot of a cliff
+    if (elevAt(m, x, y - 1) > elevAt(m, x, y) && !STEP_TILES.has(tiles[y - 1]?.[x])) { P(sx, sy, 'rgba(30,20,10,0.28)', T, 3); P(sx, sy + 3, 'rgba(30,20,10,0.12)', T, 2); }
+    const d = dropSides(m, x, y);
+    const ch = tiles[y]?.[x];
+    if (!d || STEP_TILES.has(ch) || (TILE_INFO[ch]?.solid && !TILE_INFO[ch]?.over)) continue;
+    const r = new Rng(x * 7919 + y * 104729);
+    if (d & 4) { // south face: rock courses under a strip of the ground above
+      P(sx, sy + 4, '#8a5e3a', T, T - 4);
+      for (let yy = sy + 5; yy < sy + T - 2; yy += 4) {
+        P(sx, yy, '#b07a4c', T, 1); P(sx, yy + 3, '#6a4428', T, 1);
+        for (let xx = sx + ((yy >> 2) % 2 ? 2 : 6); xx < sx + T; xx += 8) P(xx, yy + 1, '#5a3a22', 1, 2);
+      }
+      for (let i = 0; i < 3; i++) P(sx + r.int(1, 13), sy + r.int(6, 12), '#c8925c', 2, 1);
+      P(sx, sy + 3, '#e8c890', T, 1); P(sx, sy + 4, '#4a2e1a', T, 1); // lit lip and its shadow
+      P(sx, sy + T - 2, '#4a2e1a', T, 2);
+    }
+    if (d & 8) { P(sx, sy, '#8a5e3a', 3, T); P(sx + 3, sy, '#e8c890', 1, T); P(sx, sy, '#5a3a22', 1, T); }
+    if (d & 2) { P(sx + T - 3, sy, '#6a4428', 3, T); P(sx + T - 4, sy, '#e8c890', 1, T); P(sx + T - 1, sy, '#4a2e1a', 1, T); }
+    if (d & 1) { P(sx, sy, '#6a4428', T, 2); P(sx, sy + 2, '#e8c890', T, 1); }
+  }
 }
 /** Whether a cell blocks walking: the collision layer first, then the tile. */
 export function cellSolid(m: { coll?: string[] } | null | undefined, tiles: ArrayLike<ArrayLike<string>>, x: number, y: number) {

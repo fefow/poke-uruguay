@@ -818,7 +818,7 @@ import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
 import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng, block } from './map-gen.ts';
-import { guideMap, tidyMap, terraceMap, openMap, grassBlocks } from './guide.ts';
+import { guideMap, tidyMap, terraceMap, plateauMap, openMap, grassBlocks, offCliffs } from './guide.ts';
 import { signRoute, signCity } from './signs.ts';
 import { LEADERS } from './story.ts';
 import { mazeMap } from './maze.ts';
@@ -1551,8 +1551,9 @@ for (const id of TIDY) {
   tidyMap(OUTDOOR[id]);
   openMap(OUTDOOR[id]);
   grassBlocks(OUTDOOR[id]);
-  if (!LOCALITY_IDS.has(id)) terraceMap(OUTDOOR[id]);
   signRoute(OUTDOOR[id], id, MAPS);
+  // height comes last, once signs and hidden items are in place: terraces across the long routes, plateaus off the way
+  if (!LOCALITY_IDS.has(id)) { terraceMap(OUTDOOR[id]); plateauMap(OUTDOOR[id], id); }
 }
 // Cities the editor has not redrawn get a sign beside the gym, the Policlínica and the almacén.
 for (const stop of STOPS) {
@@ -1568,6 +1569,8 @@ scatterDecor(MAPS, (id) => id.startsWith('r_') || id.startsWith('ruta') || LOCAL
 // Houses get their furniture once every resident is in place (the player wakes up at 6,5 in their own house).
 furnishHouses(INTERIOR, { casa_jugador: [[6, 5]] });
 
+for (const m of Object.values(OUTDOOR)) offCliffs(m);
+
 export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m]) => {
   const keys = npcKeys(m.npcs);
   return [id, {
@@ -1579,6 +1582,7 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
     warps: (m.warps ?? []).map((w) => ({ x: w.x, y: w.y, to: w.to, tx: w.tx, ty: w.ty })),
     top: m.top ? [...m.top] : undefined as string[] | undefined,
     coll: m.coll ? [...m.coll] : undefined as string[] | undefined,
+    elev: m.elev ? [...m.elev] : undefined as string[] | undefined,
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);
@@ -1680,3 +1684,6 @@ addRegionalSpeech(OUTDOOR);
 // Plain, everyday Uruguayan first names for the trainers on the road (after the looks above are final: the name follows the person drawn).
 import { nameTrainers } from './trainer-names.ts';
 nameTrainers(MAPS);
+
+// Last of all: nobody added along the way (stories, festivals, swimmers...) stands on the edge of a plateau.
+for (const m of Object.values(OUTDOOR)) offCliffs(m);

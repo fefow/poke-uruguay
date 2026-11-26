@@ -1204,3 +1204,17 @@ test('edge pieces: neighbour masks and the smart brush', async () => {
   assert.equal(q[1][2], '.');
   void N; void S; void W;
 });
+
+test('elevation: plateau edges are cliffs, steps cross them', async () => {
+  const { cliffAt, dropSides, collAt, elevAt } = await import('../src/gfx/tiles.ts');
+  const m = { tiles: ['.....', '.....', '..ʎ..', '.....'], elev: [' 111 ', ' 111 ', ' 111 ', '     '] };
+  assert.equal(elevAt(m, 2, 1), 1);
+  assert.equal(elevAt(m, 0, 0), 0);
+  assert.equal(dropSides(m, 2, 1), 0); // inside the plateau
+  assert.equal(dropSides(m, 1, 1), 8); // drops to the west
+  assert.equal(cliffAt(m, m.tiles, 1, 1), true);
+  assert.equal(cliffAt(m, m.tiles, 2, 2), false); // the steps
+  assert.equal(cliffAt(m, m.tiles, 0, 0), false); // low ground is never a cliff
+  assert.equal(collAt(m, 3, 2), true);
+  assert.equal(collAt({ ...m, coll: ['     ', '   o ', '     ', '     '] }, 3, 1), false); // the collision layer wins
+});

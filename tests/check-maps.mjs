@@ -1,4 +1,4 @@
-import { TILE_INFO } from '../src/gfx/tiles.ts';
+import { TILE_INFO, collAt } from '../src/gfx/tiles.ts';
 // Static checks on world data: row widths, NPC/item placement, doors, exits.
 import { MAPS, OUTDOOR, INTERIOR } from '../src/data/maps.ts';
 const SOLID = new Set(Object.entries(TILE_INFO).filter(([, v]) => v.solid).map(([k]) => k));
@@ -13,6 +13,7 @@ for (const [id, m] of Object.entries(MAPS)) {
     if (t == null) bad(`${id} npc out of bounds ${n.x},${n.y}`);
     else if (SOLID.has(t) && !(t === '~' && n.look === 'swimmer') && !(t === 'λ' && n.blocker) && n.look !== 'ball' && n.look !== null) bad(`${id} npc on solid '${t}' at ${n.x},${n.y} (${n.look})`);
   }
+  if (m.elev) for (const o of [...(m.npcs ?? []), ...(m.items ?? []).filter((i) => !i.hidden)]) if (collAt(m, o.x, o.y) === true && m.coll?.[o.y]?.[o.x] !== 'x') bad(`${id} person or item on a cliff at ${o.x},${o.y}`);
   for (const it of m.items ?? []) { const t = at(it.x, it.y); if (t == null || (SOLID.has(t) && !it.hidden)) bad(`${id} item on '${t}' at ${it.x},${it.y}`); }
   if (m.legend) { const t = at(m.legend.x, m.legend.y); if (t == null || SOLID.has(t)) bad(`${id} legend on '${t}'`); }
   const doors = m.tiles.join('').split('').filter((c) => c === 'D').length;
@@ -23,7 +24,7 @@ for (const [id, m] of Object.entries(MAPS)) {
     const edge = side === 'e' ? m.tiles.map((r) => r[w - 1]) : side === 'w' ? m.tiles.map((r) => r[0]) : side === 'n' ? [...m.tiles[0]] : [...m.tiles.at(-1)];
     if (!edge.some((t) => !SOLID.has(t) || t === '%' || t === '~')) bad(`${id} exit ${side} has no walkable edge tile`);
   }
-  for (const k of ['top', 'coll']) if (m[k] && (m[k].length !== m.tiles.length || m[k].some((r) => r.length !== w))) bad(`${id} layer ${k} does not match the map size`);
+  for (const k of ['top', 'coll', 'elev']) if (m[k] && (m[k].length !== m.tiles.length || m[k].some((r) => r.length !== w))) bad(`${id} layer ${k} does not match the map size`);
   if (m.indoor && !m.tiles.join('').includes('m')) bad(`${id} interior without mat`);
   const signs = m.tiles.join('').split('').filter((c) => c === 'S').length;
   if (!m.indoor && (m.signs?.length ?? 0) !== signs) bad(`${id} has ${signs} signs but ${m.signs?.length ?? 0} texts`);
@@ -38,7 +39,8 @@ for (const [id, m] of Object.entries(MAPS)) for (const w of m.warps ?? []) { con
 const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(MAPS).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
 for (const id of Object.keys(INTERIOR)) if (!linked.has(id)) bad(`interior ${id} is not linked from any door`);
 // connectivity: from the first walkable edge tile of an outdoor map, every exit, door front and NPC/item is reachable
-const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; const c = m.coll?.[y]?.[x]; if (t !== undefined && c === 'x') return false; if (t !== undefined && c === 'o') return true; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); }; // thickets (machete) and water (canoe) count as passable
+const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; const c = collAt(m, x, y); if (t !== undefined && c === true) return false; if (t !== undefined && c === false) return true; // collision layer, then cliffs (elev)
+  return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); }; // thickets (machete) and water (canoe) count as passable
 for (const [id, m] of Object.entries(OUTDOOR)) {
   const h = m.tiles.length; const w = m.tiles[0].length;
   const starts = [];
