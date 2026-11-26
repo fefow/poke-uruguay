@@ -17,6 +17,23 @@ import { skyHour } from './screen.ts';
 const PHI_CAM = Math.atan2(0.95, 0.78); // inclinación de la cámara
 const RW = 1920, RH = 1080; // resolución completa: los sprites pixel art quedan nítidos
 let renderer: THREE.WebGLRenderer | null = null;
+// Niebla alrededor del jugador (como el degradé del mapa 2D): un THREE.Fog con `near` negativo no se mide desde la
+// cámara sino en el suelo, desde el punto que la cámara mira (el jugador). Así la niebla del PP tapa todo a unos
+// casilleros del jugador también hacia abajo de la pantalla, no solo a lo lejos.
+THREE.ShaderChunk.fog_pars_vertex = '#ifdef USE_FOG\n\tvarying float vFogDepth;\n\tvarying float vFogRing;\n#endif';
+THREE.ShaderChunk.fog_vertex = `#ifdef USE_FOG
+	vFogDepth = - mvPosition.z;
+	vec3 fogW = cameraPosition + transpose( mat3( viewMatrix ) ) * mvPosition.xyz;
+	vec3 fogF = - vec3( viewMatrix[ 0 ][ 2 ], viewMatrix[ 1 ][ 2 ], viewMatrix[ 2 ][ 2 ] );
+	vec3 fogC = cameraPosition + fogF * ( ( cameraPosition.y - 0.4 ) / max( 0.05, - fogF.y ) );
+	vFogRing = length( fogW.xz - fogC.xz ) + max( 0.0, fogW.y - 1.2 ) * 0.5;
+#endif`;
+THREE.ShaderChunk.fog_pars_fragment = THREE.ShaderChunk.fog_pars_fragment.replace('varying float vFogDepth;', 'varying float vFogDepth;\n\tvarying float vFogRing;');
+THREE.ShaderChunk.fog_fragment = THREE.ShaderChunk.fog_fragment.replace(
+  'float fogFactor = smoothstep( fogNear, fogFar, vFogDepth );',
+  'float fogFactor = fogNear < 0.0 ? smoothstep( - fogNear, fogFar, vFogRing ) : smoothstep( fogNear, fogFar, vFogDepth );',
+);
+
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera;
 let sun: THREE.DirectionalLight, hemi: THREE.HemisphereLight, playerLamp: THREE.PointLight;
 let staticGroup: THREE.Group | null = null;
@@ -28,6 +45,8 @@ let lampSpots: { x: number; z: number; y: number; color: number; always: boolean
 const lampPool: THREE.PointLight[] = [];
 const camPos = new THREE.Vector3();
 const camLook = new THREE.Vector3();
+const prevWant = new THREE.Vector3();
+const prevLook = new THREE.Vector3();
 let camReady = false;
 
 const STORE = 'pu-vista-3d';
@@ -413,7 +432,9 @@ function foldBox(tg: TexGeo, r: Rect, tx: number, ty: number, bb: [number, numbe
 // ---------------------------------------------------------------- construir el mapa
 interface WorldView {
   map: any; tiles: string[][] | string[]; npcs: any[]; items: any[]; legend: any; player: any;
-  emote: any; lit: boolean; bike: boolean; flash: number; look: string; foggy: boolean; zoom: number;
+  emote: any; lit: boolean; bike: boolean; flash: number; look: string; zoom: number;
+  /** niebla: 'machine' (máquina del PP encendida, densa), 'story' (Cabo Polonio / Quebrada sin despejar), 'weather' (clima) */
+  fog: 'machine' | 'story' | 'weather' | null;
   entityPos: (e: any) => { x: number; y: number };
   tileAt: (x: number, y: number) => string | null;
 }
@@ -942,24 +963,45 @@ function part(geo: THREE.BufferGeometry, color: string | number, x: number, y: n
 }
 
 interface Board { root: THREE.Object3D; mesh: THREE.Mesh | null; mat: THREE.MeshLambertMaterial | null; key: string; w: number; h: number }
-function board(c: HTMLCanvasElement, wTiles: number, tilt = TILT_CHAR): Board {
+// Sombra redonda bajo los pies (como en el mapa 2D). Un cartel plano que proyecta la sombra del sol cambia de forma con
+// cada paso y se estira de costado; los personajes y criaturas llevan esta en su lugar.
+const blobGeo = new THREE.CircleGeometry(1, 18).rotateX(-Math.PI / 2);
+const blobMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.26, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+function board(c: HTMLCanvasElement, wTiles: number, tilt = TILT_CHAR, blob = 0): Board {
   const w = wTiles, h = (c.height / c.width) * wTiles;
   const mat = boardMat(c);
   const mesh = new THREE.Mesh(boardGeo(w, h, tilt), mat);
-  mesh.castShadow = true;
+  mesh.castShadow = !blob;
   const root = new THREE.Group();
   root.add(mesh);
+  if (blob) {
+    const sh = new THREE.Mesh(blobGeo, blobMat);
+    sh.scale.set(blob, 1, blob * 0.42);
+    sh.position.set(0, 0.07, -0.08);
+    sh.renderOrder = 1;
+    root.add(sh);
+    root.userData.blob = sh;
+  }
   return { root, mesh, mat, key: '', w, h };
 }
 function setBoardCanvas(b: Board, c: HTMLCanvasElement) {
   if (b.mat && b.mat.map?.image !== c) { const t = texOf(c); b.mat.map = t; b.mat.emissiveMap = t; b.mat.needsUpdate = true; }
 }
+// La máquina de niebla no se pierde en su propia niebla: como en el mapa 2D, se ven la caja y sus luces.
+const machMat = (color: number, basic = false) => basic ? new THREE.MeshBasicMaterial({ color, fog: false, toneMapped: false }) : new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.8, fog: false });
 function machineBoard(): Board {
   const root = new THREE.Group();
-  root.add(part(box(0.8, 0.7, 0.6), '#4a4a5a', 0, 0.35, 0), part(new THREE.CylinderGeometry(0.1, 0.12, 0.3, 6), '#2a2a36', 0.2, 0.85, 0));
-  const panel = new THREE.Mesh(box(0.3, 0.16, 0.04), new THREE.MeshBasicMaterial({ color: 0x7af08a }));
+  const body = new THREE.Mesh(box(0.8, 0.7, 0.6), machMat(0x4a4a5a));
+  body.position.set(0, 0.35, 0);
+  body.castShadow = true;
+  const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.3, 6), machMat(0x2a2a36));
+  vent.position.set(0.2, 0.85, 0);
+  const panel = new THREE.Mesh(box(0.3, 0.16, 0.04), machMat(0x7af08a, true));
   panel.position.set(-0.15, 0.45, 0.31);
-  root.add(panel);
+  const led = new THREE.Mesh(box(0.1, 0.1, 0.04), machMat(0xff5a4a, true));
+  led.position.set(0.22, 0.45, 0.31);
+  root.add(body, vent, panel, led);
+  root.userData.led = led;
   return { root, mesh: null, mat: null, key: '', w: 1, h: 1 };
 }
 let ballCv: HTMLCanvasElement | null = null;
@@ -1028,7 +1070,7 @@ export function drawWorld3D(v: WorldView, t: number) {
   const p = v.player;
   const ppos = v.entityPos(p);
   const inCanoe = v.tileAt(p.x, p.y) === '~';
-  const pb = boardFor(p, 'player:' + v.look, () => board(charSprite(v.look, 'down', 0), 1));
+  const pb = boardFor(p, 'player:' + v.look, () => board(charSprite(v.look, 'down', 0), 1, TILT_CHAR, 0.34));
   seen.add(p);
   setBoardCanvas(pb, charSprite(v.look, p.dir, poseOf(p, true, inCanoe)));
   stand(pb, ppos);
@@ -1049,7 +1091,12 @@ export function drawWorld3D(v: WorldView, t: number) {
     const look = n.def.look;
     if (look === null) continue;
     seen.add(n);
-    if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, 0, n.y + 0.5); continue; }
+    if (look === 'machine') {
+      const b = boardFor(n, 'machine', machineBoard);
+      b.root.position.set(n.x + 0.5, 0, n.y + 0.5);
+      (b.root.userData.led.material as THREE.MeshBasicMaterial).color.set(Math.floor(t / 400) % 2 ? 0xff5a4a : 0x8a2a2a);
+      continue;
+    }
     if (look === 'ball') {
       const b = boardFor(n, 'ball', () => board(ballCanvas(), 1));
       const under = v.tileAt(n.x, n.y);
@@ -1065,8 +1112,8 @@ export function drawWorld3D(v: WorldView, t: number) {
       // las que no tienen usan su sprite de combate en chico (mira a la izquierda). Dan saltitos al moverse.
       const ow = overworldCreature(look.slice(7), !!n.moving || !!n.fly, t);
       const b = ow
-        ? boardFor(n, look + ':ow', () => board(ow, ow.width / T))
-        : boardFor(n, look, () => board(creatureSprite(look.slice(7)), 1.5));
+        ? boardFor(n, look + ':ow', () => board(ow, ow.width / T, TILT_CHAR, Math.max(6, ow.width * 0.36) / T))
+        : boardFor(n, look, () => board(creatureSprite(look.slice(7)), 1.5, TILT_CHAR, 0.38));
       if (ow) setBoardCanvas(b, ow);
       stand(b, v.entityPos(n));
       b.root.scale.x = ow ? (n.dir === 'left' ? -1 : 1) : n.dir === 'right' ? -1 : 1;
@@ -1081,7 +1128,7 @@ export function drawWorld3D(v: WorldView, t: number) {
     }
     let lk = look ?? 'boy';
     if (lk === 'swimmer' && v.tileAt(n.x, n.y) !== '~') lk = 'turista';
-    const b = boardFor(n, lk, () => board(charSprite(lk, 'down', 0), 1));
+    const b = boardFor(n, lk, () => board(charSprite(lk, 'down', 0), 1, TILT_CHAR, 0.34));
     setBoardCanvas(b, charSprite(lk, n.dir, poseOf(n, false, false)));
     stand(b, v.entityPos(n));
   }
@@ -1097,7 +1144,12 @@ export function drawWorld3D(v: WorldView, t: number) {
     stand(b, { x: v.legend.x * T, y: v.legend.y * T });
     b.root.position.y = Math.sin(t / 300) * 0.12;
   }
-  for (const [k, b] of boards) if (!seen.has(k)) { dropBoard(b); boards.delete(k); }
+  for (const [k, b] of boards) {
+    if (!seen.has(k)) { dropBoard(b); boards.delete(k); continue; }
+    // la sombra queda en el suelo aunque el sprite salte (desnivel, saltitos, la canoa); se achica al subir
+    const sh = b.root.userData.blob as THREE.Mesh | undefined;
+    if (sh) { const up = b.root.position.y; sh.position.y = 0.07 - up; sh.visible = up < 1.5 && !(k === p && inCanoe); }
+  }
   // emoción "!" sobre un NPC
   if (v.emote) {
     if (!emoteSprite) {
@@ -1146,11 +1198,17 @@ export function drawWorld3D(v: WorldView, t: number) {
   const zoom = v.zoom >= 2 ? 0.8 : 1;
   const dist = (indoor ? 10 : 15) * zoom;
   const camD = Math.hypot(dist * 0.95, dist * 0.78);
+  // Niebla del PP y del clima: medida en el suelo desde el jugador (near negativo, ver fog_vertex arriba), con los
+  // mismos radios que el degradé 2D: la máquina encendida deja ver poco más de un casillero alrededor.
+  const FOG_RING = { machine: [1.1, 4.2], story: [2.5, 8], weather: [4, 12] } as const;
+  const ring = !dark && !cave && !indoor && v.fog ? FOG_RING[v.fog] : null;
+  const fogCol = new THREE.Color(0xc4ccd8).lerp(new THREE.Color(0x3a4258), night * 0.8);
   if (dark) scene.fog = new THREE.Fog(0x05050c, camD - 1, camD + 5);
   else if (cave) scene.fog = new THREE.Fog(0x05050c, camD - 1, camD + 10);
-  else if (v.foggy) scene.fog = new THREE.Fog(0xc8d0dc, camD - 2, camD + 7);
+  else if (ring) scene.fog = new THREE.Fog(fogCol, -ring[0], ring[1]);
   else if (!indoor) scene.fog = new THREE.Fog(sky.getHex(), camD + 10, camD + 34);
   else scene.fog = null;
+  if (ring) scene.background = fogCol;
   let tx = px, tz = pz;
   let want: THREE.Vector3, look: THREE.Vector3;
   if (indoor) {
@@ -1174,9 +1232,12 @@ export function drawWorld3D(v: WorldView, t: number) {
     want = new THREE.Vector3(tx, dist * 0.95, tz + dist * 0.78);
     look = new THREE.Vector3(tx, 0.4, tz + 0.2);
   }
-  if (!camReady) { camPos.copy(want); camLook.copy(look); camReady = true; }
-  camPos.lerp(want, 0.12);
-  camLook.lerp(look, 0.16);
+  // Como en 2D, la cámara va pegada al jugador: si se arrastra detrás, el personaje se desliza por la pantalla al
+  // caminar y vuelve al centro al frenar. Solo los saltos grandes (zoom, salas que se encuadran) se suavizan.
+  if (!camReady) { camPos.copy(want); camLook.copy(look); prevWant.copy(want); prevLook.copy(look); camReady = true; }
+  camPos.add(prevWant.sub(want).negate()); camLook.add(prevLook.sub(look).negate()); // sigue el paso del jugador tal cual
+  camPos.lerp(want, 0.2); camLook.lerp(look, 0.2); // y suaviza solo lo que quedaba de un salto
+  prevWant.copy(want); prevLook.copy(look);
   camera.position.copy(camPos);
   camera.lookAt(camLook);
   renderer.render(scene, camera);
