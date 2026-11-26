@@ -13,7 +13,7 @@ for (const [id, m] of Object.entries(MAPS)) {
     if (t == null) bad(`${id} npc out of bounds ${n.x},${n.y}`);
     else if (SOLID.has(t) && !(t === '~' && n.look === 'swimmer') && !(t === 'λ' && n.blocker) && n.look !== 'ball' && n.look !== null) bad(`${id} npc on solid '${t}' at ${n.x},${n.y} (${n.look})`);
   }
-  for (const it of m.items ?? []) { const t = at(it.x, it.y); if (t == null || SOLID.has(t)) bad(`${id} item on '${t}' at ${it.x},${it.y}`); }
+  for (const it of m.items ?? []) { const t = at(it.x, it.y); if (t == null || (SOLID.has(t) && !it.hidden)) bad(`${id} item on '${t}' at ${it.x},${it.y}`); }
   if (m.legend) { const t = at(m.legend.x, m.legend.y); if (t == null || SOLID.has(t)) bad(`${id} legend on '${t}'`); }
   const doors = m.tiles.join('').split('').filter((c) => c === 'D').length;
   if ((m.doors?.length ?? 0) !== doors) bad(`${id} has ${doors} doors but ${m.doors?.length ?? 0} door targets`);
@@ -58,7 +58,7 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   for (const [x, y, side] of starts) if (!seen.has(`${x},${y}`)) bad(`${id} exit ${side} tile ${x},${y} is cut off from the rest of the map`);
   m.tiles.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'D' && !seen.has(`${x},${y + 1}`)) bad(`${id} door at ${x},${y} has no reachable front tile`); }));
   for (const n of m.npcs ?? []) if (n.look !== null && !n.blocker && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
-  for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`)) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
+  for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`) && !(it.hidden && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => seen.has(`${it.x + dx},${it.y + dy}`)))) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
 }
 // cross references: every script, track, item and species named by the data must exist
 import { readFileSync, readdirSync } from 'node:fs';

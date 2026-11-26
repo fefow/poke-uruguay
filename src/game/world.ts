@@ -991,7 +991,7 @@ async function pickItem(it) {
   addItem(it.item, 1);
   refreshEntities();
   jingle(isKeyItem(it.item) ? 'key' : 'item'); // plays while the text is up; nothing waits for it afterwards
-  await say(`¡Obtuviste ${ITEMS[it.item].name}!`);
+  await say(it.hidden ? `¡Había algo escondido! Obtuviste ${ITEMS[it.item].name}.` : `¡Obtuviste ${ITEMS[it.item].name}!`);
   await questTabHint(it.item);
 }
 
@@ -1779,6 +1779,7 @@ function drawWorld(g, t) {
   }
   // ground items
   for (const it of W_.items) {
+    if (it.hidden) continue; // hidden in a rock or a tree: found only by checking that spot
     shadow(g, it.x * T - cx + 8, it.y * T - cy + 13, 5, 2);
     drawGroundBall(g, it.x * T - cx, it.y * T - cy - 1);
   }

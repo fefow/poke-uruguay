@@ -171,3 +171,48 @@ export function guideMap(m, seed, opts: { width?: number; town?: boolean } = {})
   }
   m.tiles = rows.map((r) => r.join(''));
 }
+
+const WALLS = new Set(['#', 'q', 'R']);
+
+/**
+ * Last pass over a generated route or locality so it reads like a hand-made map instead of tile-by-tile noise:
+ * walls take the tile most of their neighbourhood has (whole stands of trees, ceibos or rock, not a mix per tile),
+ * and lone tall-grass or flower tiles become plain grass (grass comes in patches). Only walls swap for walls and
+ * walkable ground for walkable ground, so nothing that was reachable changes.
+ */
+export function tidyMap(m) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  let rows = m.tiles.map((r) => [...r]);
+  const held = new Set([...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])].map((o) => `${o.x},${o.y}`));
+  for (let pass = 0; pass < 2; pass++) {
+    const next = rows.map((r) => [...r]);
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      if (!WALLS.has(rows[y][x])) continue;
+      const count = new Map();
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+        const c = rows[y + dy]?.[x + dx];
+        if (WALLS.has(c)) count.set(c, (count.get(c) ?? 0) + 1);
+      }
+      let best = rows[y][x], top = count.get(best) ?? 0;
+      for (const [c, n] of count) if (n > top) { best = c; top = n; }
+      next[y][x] = best;
+    }
+    rows = next;
+  }
+  // ceibos grow in small stands at the edge of the woods, not one per tile
+  const rand = rng(`tidy${m.name ?? ''}${w}x${h}`);
+  const edgeTrees = [];
+  for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+    if (rows[y][x] === '#' && D4.some(([dx, dy]) => !solid(rows[y + dy][x + dx]))) edgeTrees.push([x, y]);
+  }
+  for (let k = Math.round((w * h) / 400); k > 0 && edgeTrees.length; k--) {
+    const [cx, cy] = edgeTrees[Math.floor(rand() * edgeTrees.length)];
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (rows[cy + dy]?.[cx + dx] === '#' && cy + dy > 0 && cx + dx > 0 && cy + dy < h - 1 && cx + dx < w - 1) rows[cy + dy][cx + dx] = 'q';
+  }
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const c = rows[y][x];
+    if ((c !== ',' && c !== 'f') || held.has(`${x},${y}`)) continue;
+    if (!D4.some(([dx, dy]) => rows[y + dy][x + dx] === c)) rows[y][x] = '.';
+  }
+  m.tiles = rows.map((r) => r.join(''));
+}

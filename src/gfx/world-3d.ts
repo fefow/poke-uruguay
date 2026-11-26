@@ -829,6 +829,7 @@ export function drawWorld3D(v: WorldView, t: number) {
     stand(b, v.entityPos(n));
   }
   v.items.forEach((it) => {
+    if (it.hidden) return; // hidden in the scenery: nothing to see
     seen.add(it);
     const b = boardFor(it, 'ball', () => board(ballCanvas(), 1));
     stand(b, { x: it.x * T, y: it.y * T });
