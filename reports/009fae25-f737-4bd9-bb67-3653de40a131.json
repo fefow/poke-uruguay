@@ -1,0 +1,2422 @@
+{
+  "app": "poke-uruguay",
+  "exported": "2026-11-26T14:32:41.896Z",
+  "build": "24cd2935740facd4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0",
+  "state": {
+    "mode": "game",
+    "where": "anglo_1 (9,14)",
+    "party": [
+      "carpinchon nv39 127PS",
+      "lobito nv13 36PS",
+      "pibe nv8 26PS"
+    ],
+    "badges": 2,
+    "playtime": 5644
+  },
+  "entries": [
+    {
+      "t": "2026-11-13T15:34:24.329Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:7 faint \"¡Tero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (10,9)"
+    },
+    {
+      "t": "2026-11-13T15:34:28.730Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (10,9)"
+    },
+    {
+      "t": "2026-11-13T15:34:32.167Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "ruta1 (0,9)"
+    },
+    {
+      "t": "2026-11-13T15:34:36.084Z",
+      "level": "info",
+      "msg": "Entró a casa_jugador",
+      "where": "carmelo (10,5)"
+    },
+    {
+      "t": "2026-11-13T15:34:42.867Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "casa_jugador (5,7)"
+    },
+    {
+      "t": "2026-11-13T15:34:45.877Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "carmelo (25,8)"
+    },
+    {
+      "t": "2026-11-13T15:34:52.132Z",
+      "level": "info",
+      "msg": "Batalla salvaje: teruterito nv2",
+      "where": "ruta1 (16,4)"
+    },
+    {
+      "t": "2026-11-13T15:34:54.914Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:11 \"¡Tero salvaje usó Picotazo!\" anim dmg0:2",
+      "where": "ruta1 (16,4)"
+    },
+    {
+      "t": "2026-11-13T15:34:57.340Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:2 faint \"¡Tero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (16,4)"
+    },
+    {
+      "t": "2026-11-13T15:35:00.137Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (16,4)"
+    },
+    {
+      "t": "2026-11-13T15:35:01.059Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hormiga nv3",
+      "where": "ruta1 (16,6)"
+    },
+    {
+      "t": "2026-11-13T15:35:04.766Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:7 \"No es muy eficaz…\" \"¡Hormiga salvaje usó Ascuas!\" anim dmg0:2 \"No es muy eficaz…\"",
+      "where": "ruta1 (16,6)"
+    },
+    {
+      "t": "2026-11-13T15:35:08.894Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:9 \"¡Golpe crítico!\" \"No es muy eficaz…\" faint \"¡Hormiga salvaje se debilitó!\" exp end",
+      "where": "ruta1 (16,6)"
+    },
+    {
+      "t": "2026-11-13T15:35:13.031Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (16,6)"
+    },
+    {
+      "t": "2026-11-13T15:35:13.381Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hornerito nv2",
+      "where": "ruta1 (16,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:16.649Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (16,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:20.104Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (16,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:21.168Z",
+      "level": "info",
+      "msg": "Batalla vs Valentina: nandulin nv4",
+      "where": "ruta1 (17,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:26.282Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 \"¡Ñandú rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Tejuchispa!\"",
+      "where": "ruta1 (17,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:29.590Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Ñandú rival se debilitó!\" exp end",
+      "where": "ruta1 (17,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:32.448Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (17,8)"
+    },
+    {
+      "t": "2026-11-13T15:35:40.507Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hornerito nv2",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:44.263Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:47.099Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:50.230Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hormiga nv3",
+      "where": "ruta1 (11,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:52.440Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:8 \"¡Hormiga salvaje usó Placaje!\" anim dmg0:2",
+      "where": "ruta1 (11,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:53.597Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Hormiga salvaje usó Placaje!\" anim dmg0:2",
+      "where": "ruta1 (11,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:55.901Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:1 faint \"¡Hormiga salvaje se debilitó!\" exp end",
+      "where": "ruta1 (11,15)"
+    },
+    {
+      "t": "2026-11-13T15:35:58.681Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (11,15)"
+    },
+    {
+      "t": "2026-11-13T15:36:00.416Z",
+      "level": "info",
+      "msg": "Batalla salvaje: nandulin nv4",
+      "where": "ruta1 (13,12)"
+    },
+    {
+      "t": "2026-11-13T15:36:03.749Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 \"¡Ñandú salvaje usó Placaje!\" anim dmg0:4",
+      "where": "ruta1 (13,12)"
+    },
+    {
+      "t": "2026-11-13T15:36:06.604Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Ñandú salvaje se debilitó!\" exp end",
+      "where": "ruta1 (13,12)"
+    },
+    {
+      "t": "2026-11-13T15:36:10.747Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (13,12)"
+    },
+    {
+      "t": "2026-11-13T15:36:13.131Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "ruta1 (13,17)"
+    },
+    {
+      "t": "2026-11-13T15:36:14.773Z",
+      "level": "info",
+      "msg": "Batalla vs Don Luis: hormiga nv5, tuco nv6",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:21.214Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Hormiga rival usó Placaje!\" anim dmg0:3",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:23.511Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Hormiga rival usó Placaje!\" anim dmg0:3",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:25.941Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 faint \"¡Hormiga rival se debilitó!\" exp foeNext",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:31.013Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:12 \"¡Tuco rival usó Placaje!\" anim dmg0:3",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:33.820Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:8 \"¡Tuco rival usó Bofetón Lodo!\" anim dmg0:5 \"¡Es súper eficaz!\" stat \"¡Bajó la Precisión de Tejuchispa!\"",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:37.693Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:2 \"¡Golpe crítico!\" faint \"¡Tuco rival se debilitó!\" exp end",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:40.729Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "colonia (16,5)"
+    },
+    {
+      "t": "2026-11-13T15:36:48.373Z",
+      "level": "info",
+      "msg": "Entró a poli_colonia",
+      "where": "colonia (4,13)"
+    },
+    {
+      "t": "2026-11-13T15:36:52.859Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "poli_colonia (5,7)"
+    },
+    {
+      "t": "2026-11-13T15:36:56.711Z",
+      "level": "info",
+      "msg": "Batalla vs Gastón: nandulin nv5, oruga nv5, tuco nv5",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:01.494Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:16 \"¡Ñandú rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Tejuchispa!\"",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:04.757Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Ñandú rival se debilitó!\" exp foeNext",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:11.585Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:10 \"¡Oruga rival usó Placaje!\" anim dmg0:4",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:14.074Z",
+      "level": "info",
+      "msg": "Turno 4: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:10 faint \"¡Oruga rival se debilitó!\" exp foeNext",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:19.006Z",
+      "level": "info",
+      "msg": "Turno 5: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 \"¡Tuco rival usó Bofetón Lodo!\" anim dmg0:5 \"¡Es súper eficaz!\" stat \"¡Bajó la Precisión de Tejuchispa!\"",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:23.402Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:6 faint \"¡Tuco rival se debilitó!\" exp end",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:26.393Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "colonia (8,21)"
+    },
+    {
+      "t": "2026-11-13T15:37:30.969Z",
+      "level": "info",
+      "msg": "Entró a poli_colonia",
+      "where": "colonia (4,13)"
+    },
+    {
+      "t": "2026-11-13T15:37:35.155Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "poli_colonia (5,7)"
+    },
+    {
+      "t": "2026-11-13T15:38:36.636Z",
+      "level": "info",
+      "msg": "Entró a shop_colonia",
+      "where": "colonia (13,20)"
+    },
+    {
+      "t": "2026-11-13T15:38:44.861Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "shop_colonia (4,7)"
+    },
+    {
+      "t": "2026-11-13T15:38:45.450Z",
+      "level": "info",
+      "msg": "Entró a shop_colonia",
+      "where": "colonia (13,20)"
+    },
+    {
+      "t": "2026-11-13T15:39:01.800Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "shop_colonia (4,7)"
+    },
+    {
+      "t": "2026-11-13T15:39:22.635Z",
+      "level": "info",
+      "msg": "Batalla vs Lorena: teruterito nv5, hornerito nv5",
+      "where": "colonia (19,15)"
+    },
+    {
+      "t": "2026-11-13T15:39:27.303Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:4 \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 statusAnim hud \"¡Tero rival está quemado!\" statusAnim dmg1:2 \"Tero rival sufre por la quemadura.\"",
+      "where": "colonia (19,15)"
+    },
+    {
+      "t": "2026-11-13T15:39:32.121Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tero rival usó Ataque Rápido!\" \"¡Tejuchispa esquivó el ataque!\" \"¡Tejuchispa usó Placaje!\" anim dmg1:3 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "colonia (19,15)"
+    },
+    {
+      "t": "2026-11-13T15:39:47.667Z",
+      "level": "info",
+      "msg": "Turno 3: move #3 | \"¡Tejuchispa usó Ataque Rápido!\" anim dmg1:10 \"¡Hornero rival usó Picotazo!\" anim dmg0:4",
+      "where": "colonia (19,15)"
+    },
+    {
+      "t": "2026-11-13T15:39:50.389Z",
+      "level": "info",
+      "msg": "Turno 4: move #3 | \"¡Tejuchispa usó Ataque Rápido!\" anim dmg1:9 faint \"¡Hornero rival se debilitó!\" exp end",
+      "where": "colonia (19,15)"
+    },
+    {
+      "t": "2026-11-13T15:39:53.002Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "colonia (19,15)"
+    },
+    {
+      "t": "2026-11-13T15:44:01.462Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "colonia (25,0)"
+    },
+    {
+      "t": "2026-11-13T15:44:10.894Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "ruta1 (0,9)"
+    },
+    {
+      "t": "2026-11-13T15:44:14.600Z",
+      "level": "info",
+      "msg": "Entró a casa_jugador",
+      "where": "carmelo (10,5)"
+    },
+    {
+      "t": "2026-11-13T15:44:26.609Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "casa_jugador (4,7)"
+    },
+    {
+      "t": "2026-11-13T15:44:29.673Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "carmelo (25,8)"
+    },
+    {
+      "t": "2026-11-13T15:44:35.569Z",
+      "level": "info",
+      "msg": "Batalla salvaje: teruterito nv3",
+      "where": "ruta1 (12,8)"
+    },
+    {
+      "t": "2026-11-13T15:44:39.279Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:14 \"¡Tero salvaje usó Chirrido!\" anim stat \"¡Bajó mucho la Defensa de Tejuchispa!\"",
+      "where": "ruta1 (12,8)"
+    },
+    {
+      "t": "2026-11-13T15:44:41.816Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:1 faint \"¡Tero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (12,8)"
+    },
+    {
+      "t": "2026-11-13T15:44:44.825Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (12,8)"
+    },
+    {
+      "t": "2026-11-13T15:44:47.201Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hornerito nv2",
+      "where": "ruta1 (15,14)"
+    },
+    {
+      "t": "2026-11-13T15:44:50.668Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (15,14)"
+    },
+    {
+      "t": "2026-11-13T15:44:53.520Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (15,14)"
+    },
+    {
+      "t": "2026-11-13T15:44:56.262Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "ruta1 (13,17)"
+    },
+    {
+      "t": "2026-11-13T15:45:14.024Z",
+      "level": "info",
+      "msg": "Entró a casa_colonia2",
+      "where": "colonia (28,6)"
+    },
+    {
+      "t": "2026-11-13T15:45:20.407Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "casa_colonia2 (4,7)"
+    },
+    {
+      "t": "2026-11-13T15:45:22.326Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "colonia (25,0)"
+    },
+    {
+      "t": "2026-11-13T15:45:24.138Z",
+      "level": "info",
+      "msg": "Batalla salvaje: nandulin nv4",
+      "where": "ruta1 (12,11)"
+    },
+    {
+      "t": "2026-11-13T15:45:27.798Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:12 \"¡Ñandú salvaje usó Placaje!\" anim dmg0:3",
+      "where": "ruta1 (12,11)"
+    },
+    {
+      "t": "2026-11-13T15:45:30.164Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 faint \"¡Ñandú salvaje se debilitó!\" exp end",
+      "where": "ruta1 (12,11)"
+    },
+    {
+      "t": "2026-11-13T15:45:32.601Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (12,11)"
+    },
+    {
+      "t": "2026-11-13T15:45:35.900Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "ruta1 (0,9)"
+    },
+    {
+      "t": "2026-11-13T15:45:44.718Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-13T15:45:52.482Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-13T15:46:46.220Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "carmelo (25,8)"
+    },
+    {
+      "t": "2026-11-13T15:46:52.891Z",
+      "level": "info",
+      "msg": "Batalla salvaje: teruterito nv3",
+      "where": "ruta1 (12,13)"
+    },
+    {
+      "t": "2026-11-13T15:46:56.360Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:15 faint \"¡Tero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (12,13)"
+    },
+    {
+      "t": "2026-11-13T15:46:59.287Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (12,13)"
+    },
+    {
+      "t": "2026-11-13T15:47:01.436Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hornerito nv2",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T15:47:04.749Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T15:47:07.795Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T15:55:26.096Z",
+      "level": "info",
+      "msg": "Entró a punta",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-13T15:55:43.393Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "punta (24,34)"
+    },
+    {
+      "t": "2026-11-13T15:55:49.060Z",
+      "level": "info",
+      "msg": "Entró a gym_frb",
+      "where": "fraybentos (26,14)"
+    },
+    {
+      "t": "2026-11-13T15:58:47.164Z",
+      "level": "info",
+      "msg": "Batalla vs Dylan: yararita nv18, carabo nv18",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T15:58:55.866Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Yarará rival usó Mordisco!\" anim dmg0:5 \"¡Escarabajón usó Patada Baja!\" anim dmg1:14 \"No es muy eficaz…\"",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T15:59:03.129Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Yarará rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Escarabajón!\" \"¡Escarabajón usó Facón!\" anim dmg1:29 faint \"¡Yarará rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T15:59:46.496Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:14 \"¡Escarabajón usó Facón!\" anim dmg1:30",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T15:59:54.602Z",
+      "level": "info",
+      "msg": "Turno 4: item | \"Usaste Mate con Carqueja.\" heal hud \"Escarabajón tomó un mate y recuperó 72 PS.\" \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:16",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T15:59:58.440Z",
+      "level": "info",
+      "msg": "Turno 5: move #1 | \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:15 \"¡Escarabajón usó Puño Gaucho!\" anim dmg1:21",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T16:00:01.427Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Cárabo rival usó Sombra Nocturna!\" anim dmg0:14 \"¡Escarabajón usó Patada Baja!\" anim dmg1:3 faint \"¡Cárabo rival se debilitó!\" exp end",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T16:00:05.049Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_frb (8,6)"
+    },
+    {
+      "t": "2026-11-13T16:00:40.154Z",
+      "level": "info",
+      "msg": "Batalla vs Leticia: viuda nv18, cururu nv21",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:00:47.496Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Viuda rival usó Placaje!\" anim dmg0:2 \"No es muy eficaz…\" \"¡Escarabajón usó Puño Gaucho!\" anim dmg1:12 \"No es muy eficaz…\"",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:00:51.290Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Viuda rival usó Gas Venenoso!\" \"¡Pero falló!\" \"¡Escarabajón usó Facón!\" anim dmg1:37 faint \"¡Viuda rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:00:56.977Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Escarabajón usó Patada Baja!\" anim dmg1:10 \"¡Golpe crítico!\" \"No es muy eficaz…\" \"¡Cururú rival usó Gas Venenoso!\" anim statusAnim hud \"¡Escarabajón está envenenado!\" statusAnim dmg0:10 \"Escarabajón sufre por el veneno.\"",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:03.480Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Escarabajón usó Facón!\" anim dmg1:23 \"¡Cururú rival usó Hidropulso!\" anim dmg0:7 statusAnim dmg0:10 \"Escarabajón sufre por el veneno.\"",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:11.080Z",
+      "level": "info",
+      "msg": "Turno 5: item | \"Usaste Mate con Carqueja.\" heal hud \"Escarabajón tomó un mate y recuperó 74 PS.\" \"¡Cururú rival usó Hidropulso!\" anim dmg0:7 statusAnim dmg0:10 \"Escarabajón sufre por el veneno.\"",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:15.191Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Escarabajón usó Facón!\" anim dmg1:21 \"¡Cururú rival usó Hidropulso!\" anim dmg0:7 statusAnim dmg0:10 \"Escarabajón sufre por el veneno.\"",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:18.899Z",
+      "level": "info",
+      "msg": "Turno 7: move #0 | \"¡Escarabajón usó Patada Baja!\" anim dmg1:7 \"No es muy eficaz…\" \"¡Cururú rival usó Hidropulso!\" anim dmg0:7 statusAnim dmg0:10 \"Escarabajón sufre por el veneno.\"",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:23.425Z",
+      "level": "info",
+      "msg": "Turno 8: move #2 | \"¡Escarabajón usó Facón!\" anim dmg1:10 faint \"¡Cururú rival se debilitó!\" exp end",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:27.542Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_frb (21,12)"
+    },
+    {
+      "t": "2026-11-13T16:01:46.202Z",
+      "level": "info",
+      "msg": "Batalla vs Zoraida: yarara nv32, zorromonte nv34, yacaron nv35",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:01:50.321Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Yararacusú rival usó Triturar!\" anim dmg0:32 \"¡Golpe crítico!\" faint \"¡Escarabajón se debilitó!\" needSwitch",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:05.256Z",
+      "level": "info",
+      "msg": "Turno 2: item | \"Usaste Alfajor Triple.\" \"¡Carpinchón se reanimó!\" \"¡Yararacusú rival usó Triturar!\" anim dmg0:23 \"No es muy eficaz…\"",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:11.543Z",
+      "level": "info",
+      "msg": "Turno 3: move #3 | \"¡Yararacusú rival usó Triturar!\" anim dmg0:24 \"No es muy eficaz…\" \"¡Lobo de Crin usó Puño Gaucho!\" anim dmg1:24",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:14.232Z",
+      "level": "info",
+      "msg": "Turno 4: move #0 | \"¡Yararacusú rival usó Triturar!\" anim dmg0:24 \"No es muy eficaz…\" stat \"¡Bajó la Defensa de Lobo de Crin!\" \"¡Lobo de Crin usó Golpe Karate!\" anim dmg1:19",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:23.377Z",
+      "level": "info",
+      "msg": "Turno 5: item | \"Usaste Mate con Carqueja.\" heal hud \"Lobo de Crin tomó un mate y recuperó 71 PS.\" \"¡Yararacusú rival usó Triturar!\" anim dmg0:36 \"No es muy eficaz…\"",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:27.240Z",
+      "level": "info",
+      "msg": "Turno 6: move #3 | \"¡Yararacusú rival usó Triturar!\" anim dmg0:37 \"No es muy eficaz…\" faint \"¡Lobo de Crin se debilitó!\" needSwitch",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:33.649Z",
+      "level": "info",
+      "msg": "Turno 7: move #3 | \"¡Yararacusú rival usó Triturar!\" anim dmg0:52 \"¡Carpinchón usó Hidropulso!\" anim dmg1:14",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:42.726Z",
+      "level": "info",
+      "msg": "Turno 8: item | \"Usaste Alfajor.\" \"¡Escarabajón se reanimó!\" \"¡Yararacusú rival usó Triturar!\" anim dmg0:14 faint \"¡Carpinchón se debilitó!\" needSwitch",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:48.136Z",
+      "level": "info",
+      "msg": "Turno 9: move #2 | \"¡Yararacusú rival usó Mordisco!\" anim dmg0:28 \"¡Escarabajón usó Facón!\" anim dmg1:22",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:53.024Z",
+      "level": "info",
+      "msg": "Turno 10: item | \"Usaste Mate con Carqueja.\" heal hud \"Escarabajón tomó un mate y recuperó 72 PS.\" \"¡Zoraida usó Primer Mate!\" heal hud \"Yararacusú rival tomó un mate y recuperó 79 PS.\"",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:56.504Z",
+      "level": "info",
+      "msg": "Turno 11: move #2 | \"¡Yararacusú rival usó Mordisco!\" anim dmg0:28 \"¡Escarabajón usó Facón!\" anim dmg1:23",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:02:59.246Z",
+      "level": "info",
+      "msg": "Turno 12: move #2 | \"¡Yararacusú rival usó Mordisco!\" anim dmg0:26 \"¡Escarabajón usó Facón!\" anim dmg1:20",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:03:01.442Z",
+      "level": "info",
+      "msg": "Turno 13: move #0 | \"¡Yararacusú rival usó Mordisco!\" anim dmg0:26 \"¡Escarabajón usó Patada Baja!\" anim dmg1:13",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:03:05.371Z",
+      "level": "info",
+      "msg": "Turno 14: item | \"Usaste Mate con Carqueja.\" heal hud \"Escarabajón tomó un mate y recuperó 80 PS.\" \"¡Yararacusú rival usó Mordisco!\" anim dmg0:28",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:03:07.810Z",
+      "level": "info",
+      "msg": "Turno 15: move #2 | \"¡Yararacusú rival usó Mordisco!\" anim dmg0:27 \"¡Escarabajón usó Facón!\" anim dmg1:23",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T16:03:10.403Z",
+      "level": "info",
+      "msg": "Turno 16: move #0 | \"¡Yararacusú rival usó Mordisco!\" anim dmg0:29 \"¡Escarabajón usó Patada Baja!\" anim dmg1:6 faint \"¡Yararacusú rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-13T18:11:32.351Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-13T18:11:36.015Z",
+      "level": "info",
+      "msg": "Batalla salvaje: nandulin nv3",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T18:11:40.807Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:16 faint \"¡Ñandú salvaje se debilitó!\" exp end",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T18:11:43.493Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "ruta1 (15,15)"
+    },
+    {
+      "t": "2026-11-13T18:11:45.323Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "ruta1 (13,17)"
+    },
+    {
+      "t": "2026-11-13T18:11:55.785Z",
+      "level": "info",
+      "msg": "Entró a r_colonia_rosario",
+      "where": "colonia (43,16)"
+    },
+    {
+      "t": "2026-11-13T18:11:57.236Z",
+      "level": "info",
+      "msg": "Batalla salvaje: picaflorin nv5",
+      "where": "r_colonia_rosario (6,18)"
+    },
+    {
+      "t": "2026-11-13T18:12:01.053Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:15 \"¡Picaflor salvaje usó Picotazo!\" anim dmg0:3",
+      "where": "r_colonia_rosario (6,18)"
+    },
+    {
+      "t": "2026-11-13T18:12:04.029Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:4 faint \"¡Picaflor salvaje se debilitó!\" exp end",
+      "where": "r_colonia_rosario (6,18)"
+    },
+    {
+      "t": "2026-11-13T18:12:06.806Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (6,18)"
+    },
+    {
+      "t": "2026-11-13T18:12:09.233Z",
+      "level": "info",
+      "msg": "Batalla vs Andrés: luciernito nv4, tarantula nv6",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-13T18:12:13.575Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:17 \"¡Es súper eficaz!\" faint \"¡Luciérnaga rival se debilitó!\" exp foeNext",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-13T18:12:20.596Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:25 \"¡Es súper eficaz!\" faint \"¡Tarántula rival se debilitó!\" exp end",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-13T18:12:23.507Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-13T18:12:38.459Z",
+      "level": "info",
+      "msg": "Batalla vs Delfina: teruterito nv5, caudillo nv5",
+      "where": "r_colonia_rosario (15,19)"
+    },
+    {
+      "t": "2026-11-13T18:20:36.259Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:19 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "r_colonia_rosario (15,19)"
+    },
+    {
+      "t": "2026-11-13T18:25:26.116Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:21 \"¡Golpe crítico!\" \"¡Lobo de Crin rival usó Barrida!\" anim dmg0:11 \"¡Golpe crítico!\"",
+      "where": "r_colonia_rosario (15,19)"
+    },
+    {
+      "t": "2026-11-13T18:25:29.576Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:2 faint \"¡Lobo de Crin rival se debilitó!\" exp end",
+      "where": "r_colonia_rosario (15,19)"
+    },
+    {
+      "t": "2026-11-13T18:25:33.586Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (15,19)"
+    },
+    {
+      "t": "2026-11-17T17:17:53.004Z",
+      "level": "info",
+      "msg": "Entró a r_ecilda_trinidad",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-17T17:18:01.766Z",
+      "level": "info",
+      "msg": "Batalla vs Álvaro: teruterito nv10, pombero nv10",
+      "where": "r_ecilda_trinidad (17,26)"
+    },
+    {
+      "t": "2026-11-17T17:18:04.123Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Carpinchón usó Placaje!\" anim dmg1:25 \"¡Tero rival usó Chirrido!\" anim stat \"¡Bajó mucho la Defensa de Carpinchón!\"",
+      "where": "r_ecilda_trinidad (17,26)"
+    },
+    {
+      "t": "2026-11-17T17:18:06.790Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:7 \"¡Carpinchón usó Placaje!\" anim dmg1:4 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "r_ecilda_trinidad (17,26)"
+    },
+    {
+      "t": "2026-11-17T17:18:13.916Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:20 \"¡Urutaú rival usó Confusión!\" anim dmg0:7",
+      "where": "r_ecilda_trinidad (17,26)"
+    },
+    {
+      "t": "2026-11-17T17:18:17.187Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:14 faint \"¡Urutaú rival se debilitó!\" exp end",
+      "where": "r_ecilda_trinidad (17,26)"
+    },
+    {
+      "t": "2026-11-17T17:18:19.976Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_ecilda_trinidad (17,26)"
+    },
+    {
+      "t": "2026-11-17T17:24:41.862Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "r_ecilda_trinidad (16,0)"
+    },
+    {
+      "t": "2026-11-17T17:25:11.033Z",
+      "level": "info",
+      "msg": "Entró a gym_trinidad",
+      "where": "trinidad (30,19)"
+    },
+    {
+      "t": "2026-11-17T17:25:17.336Z",
+      "level": "info",
+      "msg": "Batalla vs Ricardo: cangrejo nv10, tuco nv13",
+      "where": "gym_trinidad (10,8)"
+    },
+    {
+      "t": "2026-11-17T17:25:22.010Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:31 \"¡Es súper eficaz!\" faint \"¡Cangrejo rival se debilitó!\" exp foeNext",
+      "where": "gym_trinidad (10,8)"
+    },
+    {
+      "t": "2026-11-17T17:25:28.835Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Carpinchón usó Placaje!\" anim dmg1:15 \"¡Tuco rival usó Placaje!\" anim dmg0:4",
+      "where": "gym_trinidad (10,8)"
+    },
+    {
+      "t": "2026-11-17T17:25:31.586Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:22 \"¡Es súper eficaz!\" faint \"¡Tuco rival se debilitó!\" exp end",
+      "where": "gym_trinidad (10,8)"
+    },
+    {
+      "t": "2026-11-17T17:25:35.423Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_trinidad (10,8)"
+    },
+    {
+      "t": "2026-11-17T17:25:41.081Z",
+      "level": "info",
+      "msg": "Batalla vs Victoria: tuco nv11, hormiguero nv13",
+      "where": "gym_trinidad (5,4)"
+    },
+    {
+      "t": "2026-11-17T17:25:45.762Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:33 \"¡Es súper eficaz!\" faint \"¡Tuco rival se debilitó!\" exp foeNext",
+      "where": "gym_trinidad (5,4)"
+    },
+    {
+      "t": "2026-11-17T17:25:52.093Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:38 \"¡Es súper eficaz!\" \"¡Hormiguero rival usó Bofetón Lodo!\" anim dmg0:4 stat \"¡Bajó la Precisión de Carpinchón!\"",
+      "where": "gym_trinidad (5,4)"
+    },
+    {
+      "t": "2026-11-17T17:25:56.428Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:3 \"¡Es súper eficaz!\" faint \"¡Hormiguero rival se debilitó!\" exp end",
+      "where": "gym_trinidad (5,4)"
+    },
+    {
+      "t": "2026-11-17T17:25:59.511Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_trinidad (5,4)"
+    },
+    {
+      "t": "2026-11-17T17:26:23.346Z",
+      "level": "info",
+      "msg": "Batalla vs Elena: mulitin nv13, tatu nv14",
+      "where": "gym_trinidad (5,2)"
+    },
+    {
+      "t": "2026-11-17T17:26:28.196Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:36 \"¡Es súper eficaz!\" faint \"¡Mulita rival se debilitó!\" exp foeNext",
+      "where": "gym_trinidad (5,2)"
+    },
+    {
+      "t": "2026-11-17T17:26:35.090Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:36 \"¡Es súper eficaz!\" \"¡Tatú rival usó Campo Arado!\" anim dmg0:6",
+      "where": "gym_trinidad (5,2)"
+    },
+    {
+      "t": "2026-11-17T17:26:38.740Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Elena usó Mate!\" heal hud \"Tatú rival tomó un mate y recuperó 36 PS.\" \"¡Carpinchón usó Pistola Agua!\" anim dmg1:39 \"¡Es súper eficaz!\"",
+      "where": "gym_trinidad (5,2)"
+    },
+    {
+      "t": "2026-11-17T17:26:42.762Z",
+      "level": "info",
+      "msg": "Turno 4: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:6 \"¡Es súper eficaz!\" faint \"¡Tatú rival se debilitó!\" exp end",
+      "where": "gym_trinidad (5,2)"
+    },
+    {
+      "t": "2026-11-17T17:26:45.776Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "gym_trinidad (5,2)"
+    },
+    {
+      "t": "2026-11-17T17:27:02.404Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "gym_trinidad (5,11)"
+    },
+    {
+      "t": "2026-11-17T17:27:44.561Z",
+      "level": "info",
+      "msg": "Entró a poli_trinidad",
+      "where": "trinidad (7,15)"
+    },
+    {
+      "t": "2026-11-17T17:27:48.567Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "poli_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-17T17:27:50.077Z",
+      "level": "info",
+      "msg": "Entró a palmitas",
+      "where": "trinidad (0,15)"
+    },
+    {
+      "t": "2026-11-17T17:27:50.532Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "palmitas (25,10)"
+    },
+    {
+      "t": "2026-11-17T17:28:13.011Z",
+      "level": "info",
+      "msg": "Entró a casa_trinidad2",
+      "where": "trinidad (39,15)"
+    },
+    {
+      "t": "2026-11-17T17:28:18.168Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "casa_trinidad2 (4,7)"
+    },
+    {
+      "t": "2026-11-17T17:28:37.087Z",
+      "level": "info",
+      "msg": "Entró a palmitas",
+      "where": "trinidad (0,15)"
+    },
+    {
+      "t": "2026-11-17T17:28:41.747Z",
+      "level": "info",
+      "msg": "Entró a casa_palmitas",
+      "where": "palmitas (17,10)"
+    },
+    {
+      "t": "2026-11-17T17:28:46.745Z",
+      "level": "info",
+      "msg": "Entró a palmitas",
+      "where": "casa_palmitas (5,7)"
+    },
+    {
+      "t": "2026-11-17T17:28:56.008Z",
+      "level": "info",
+      "msg": "Batalla vs Fernanda: hornerito nv13, pararrayo nv15",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:00.633Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Carpinchón usó Placaje!\" \"¡Hornero rival esquivó el ataque!\" \"¡Hornero rival usó Ataque Ala!\" anim dmg0:7",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:03.066Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Carpinchón usó Placaje!\" anim dmg1:18 \"¡Hornero rival usó Ataque Ala!\" anim dmg0:7",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:05.380Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Carpinchón usó Placaje!\" anim dmg1:16 faint \"¡Hornero rival se debilitó!\" exp foeNext",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:11.300Z",
+      "level": "info",
+      "msg": "Turno 4: move #1 | \"¡Carpinchón usó Hidropulso!\" anim dmg1:22 \"¡Martín Pescador rival usó Placaje!\" anim dmg0:4",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:13.609Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Carpinchón usó Placaje!\" anim dmg1:10 \"¡Martín Pescador rival usó Impactrueno!\" anim dmg0:12 \"¡Es súper eficaz!\"",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:16.889Z",
+      "level": "info",
+      "msg": "Turno 6: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:15 \"¡Martín Pescador rival usó Impactrueno!\" anim dmg0:15 \"¡Es súper eficaz!\"",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:20.778Z",
+      "level": "info",
+      "msg": "Turno 7: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:8 faint \"¡Martín Pescador rival se debilitó!\" exp end",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:24.959Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "palmitas (13,3)"
+    },
+    {
+      "t": "2026-11-17T17:29:30.782Z",
+      "level": "info",
+      "msg": "Batalla vs Lucas: teruterito nv12, pombero nv14",
+      "where": "palmitas (3,10)"
+    },
+    {
+      "t": "2026-11-17T17:29:36.289Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:33 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "palmitas (3,10)"
+    },
+    {
+      "t": "2026-11-17T17:29:41.594Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:34 \"¡Golpe crítico!\" \"¡Urutaú rival usó Confusión!\" anim dmg0:8",
+      "where": "palmitas (3,10)"
+    },
+    {
+      "t": "2026-11-17T17:29:45.410Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:9 faint \"¡Urutaú rival se debilitó!\" exp end",
+      "where": "palmitas (3,10)"
+    },
+    {
+      "t": "2026-11-17T17:29:48.209Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "palmitas (3,10)"
+    },
+    {
+      "t": "2026-11-17T17:29:56.270Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "palmitas (25,10)"
+    },
+    {
+      "t": "2026-11-17T17:29:57.966Z",
+      "level": "info",
+      "msg": "Entró a poli_trinidad",
+      "where": "trinidad (7,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:02.284Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "poli_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-17T17:30:17.519Z",
+      "level": "info",
+      "msg": "Entró a palmitas",
+      "where": "trinidad (0,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:19.238Z",
+      "level": "info",
+      "msg": "Entró a casa_palmitas",
+      "where": "palmitas (17,10)"
+    },
+    {
+      "t": "2026-11-17T17:30:24.258Z",
+      "level": "info",
+      "msg": "Entró a palmitas",
+      "where": "casa_palmitas (4,7)"
+    },
+    {
+      "t": "2026-11-17T17:30:27.230Z",
+      "level": "info",
+      "msg": "Entró a r_palmitas_mercedes",
+      "where": "palmitas (0,10)"
+    },
+    {
+      "t": "2026-11-17T17:30:28.547Z",
+      "level": "info",
+      "msg": "Batalla salvaje: cangrejo nv14",
+      "where": "r_palmitas_mercedes (77,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:32.249Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:41 \"¡Es súper eficaz!\" faint \"¡Cangrejo salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (77,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:35.124Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (77,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:37.579Z",
+      "level": "info",
+      "msg": "Batalla salvaje: luciernito nv14",
+      "where": "r_palmitas_mercedes (69,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:41.275Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:28 stat \"¡Bajó la Velocidad de Luciérnaga salvaje!\" \"¡Luciérnaga salvaje usó Impactrueno!\" anim dmg0:11 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (69,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:45.682Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:7 faint \"¡Luciérnaga salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (69,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:48.898Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (69,15)"
+    },
+    {
+      "t": "2026-11-17T17:30:51.886Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv15",
+      "where": "r_palmitas_mercedes (62,9)"
+    },
+    {
+      "t": "2026-11-17T17:30:55.368Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:26 \"¡Alacrán salvaje usó Placaje!\" anim dmg0:5",
+      "where": "r_palmitas_mercedes (62,9)"
+    },
+    {
+      "t": "2026-11-17T17:30:58.569Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:16 faint \"¡Alacrán salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (62,9)"
+    },
+    {
+      "t": "2026-11-17T17:31:01.428Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (62,9)"
+    },
+    {
+      "t": "2026-11-17T17:31:03.923Z",
+      "level": "info",
+      "msg": "Batalla salvaje: crisalida nv13",
+      "where": "r_palmitas_mercedes (62,13)"
+    },
+    {
+      "t": "2026-11-17T17:31:07.353Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:34 \"¡Golpe crítico!\" \"¡Crisálida salvaje usó Placaje!\" anim dmg0:3",
+      "where": "r_palmitas_mercedes (62,13)"
+    },
+    {
+      "t": "2026-11-17T17:31:10.457Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Carpinchón usó Placaje!\" anim dmg1:4 faint \"¡Crisálida salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (62,13)"
+    },
+    {
+      "t": "2026-11-17T17:31:13.069Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (62,13)"
+    },
+    {
+      "t": "2026-11-17T17:31:14.369Z",
+      "level": "info",
+      "msg": "Batalla salvaje: crisalida nv14",
+      "where": "r_palmitas_mercedes (62,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:18.216Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
+      "where": "r_palmitas_mercedes (62,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:18.503Z",
+      "level": "info",
+      "msg": "Fin de batalla: run",
+      "where": "r_palmitas_mercedes (62,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:19.155Z",
+      "level": "info",
+      "msg": "Batalla salvaje: tortugal nv14",
+      "where": "r_palmitas_mercedes (61,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:23.112Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:36 \"¡Es súper eficaz!\" \"¡Tortugal salvaje usó Placaje!\" anim dmg0:4",
+      "where": "r_palmitas_mercedes (61,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:26.508Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Carpinchón usó Hidropulso!\" anim dmg1:12 \"¡Es súper eficaz!\" faint \"¡Tortugal salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (61,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:37.886Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (61,17)"
+    },
+    {
+      "t": "2026-11-17T17:31:39.499Z",
+      "level": "info",
+      "msg": "Batalla vs Bautista: mulitin nv14, cerro nv16",
+      "where": "r_palmitas_mercedes (57,18)"
+    },
+    {
+      "t": "2026-11-17T17:31:43.480Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:39 \"¡Es súper eficaz!\" faint \"¡Mulita rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (57,18)"
+    },
+    {
+      "t": "2026-11-17T17:31:49.072Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:31 \"¡Es súper eficaz!\" \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:10 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (57,18)"
+    },
+    {
+      "t": "2026-11-17T17:31:53.465Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:28 \"¡Es súper eficaz!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (57,18)"
+    },
+    {
+      "t": "2026-11-17T17:31:56.759Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (57,18)"
+    },
+    {
+      "t": "2026-11-17T17:32:02.659Z",
+      "level": "info",
+      "msg": "Batalla vs Daniela: luciernito nv14, cerro nv16",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:08.857Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:32 \"¡Luciérnaga rival usó Onda Trueno!\" anim statusAnim hud \"¡Carpinchón está paralizado!\"",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:13.712Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Luciérnaga rival usó Impactrueno!\" anim dmg0:10 \"¡Es súper eficaz!\" \"¡Carpinchón está paralizado! No se puede mover.\" statusAnim",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:16.720Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Luciérnaga rival usó Impactrueno!\" anim dmg0:12 \"¡Es súper eficaz!\" \"¡Carpinchón usó Golpe Cuerpo!\" anim dmg1:5 faint \"¡Luciérnaga rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:24.394Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:13 \"¡Es súper eficaz!\" \"¡Carpinchón usó Pistola Agua!\" anim dmg1:32 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:30.505Z",
+      "level": "info",
+      "msg": "Turno 5: item | \"Usaste Mate con Carqueja.\" heal hud \"Carpinchón tomó un mate y recuperó 68 PS.\" \"¡Yacaré rival usó Defensa Férrea!\" anim stat \"¡Subió mucho la Defensa de Yacaré rival!\"",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:34.578Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:20 \"¡Golpe crítico!\" \"¡Es súper eficaz!\" \"¡Carpinchón está paralizado! No se puede mover.\" statusAnim",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:37.625Z",
+      "level": "info",
+      "msg": "Turno 7: move #0 | \"¡Yacaré rival usó Lanzarrocas!\" anim dmg0:8 \"¡Carpinchón usó Golpe Cuerpo!\" anim dmg1:6 \"No es muy eficaz…\" statusAnim hud \"¡Yacaré rival está paralizado!\"",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:41.824Z",
+      "level": "info",
+      "msg": "Turno 8: move #2 | \"¡Carpinchón está paralizado! No se puede mover.\" statusAnim \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:13 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:44.800Z",
+      "level": "info",
+      "msg": "Turno 9: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:22 \"¡Es súper eficaz!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:49.380Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (46,13)"
+    },
+    {
+      "t": "2026-11-17T17:32:58.611Z",
+      "level": "info",
+      "msg": "Batalla vs Emiliano: fosil nv15, cerro nv15",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:03.080Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Carpinchón usó Golpe Cuerpo!\" anim dmg1:15 \"No es muy eficaz…\" statusAnim hud \"¡Fósil rival está paralizado!\" \"¡Fósil rival está paralizado! No se puede mover.\" statusAnim",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:07.865Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:31 \"¡Es súper eficaz!\" faint \"¡Fósil rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:14.185Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Yacaré rival usó Látigo Cepa!\" anim dmg0:9 \"¡Es súper eficaz!\" \"¡Carpinchón está paralizado! No se puede mover.\" statusAnim",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:18.017Z",
+      "level": "info",
+      "msg": "Turno 4: move #1 | \"¡Carpinchón usó Hidropulso!\" anim dmg1:47 \"¡Es súper eficaz!\" \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:18 \"¡Golpe crítico!\" \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:22.450Z",
+      "level": "info",
+      "msg": "Turno 5: move #2 | \"¡Carpinchón está paralizado! No se puede mover.\" statusAnim \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:8 \"¡Es súper eficaz!\" faint \"¡Carpinchón se debilitó!\" needSwitch",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:29.231Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Yacaré rival usó Látigo Cepa!\" anim dmg0:4 \"No es muy eficaz…\" \"¡Murciélago usó Ácido!\" anim dmg1:2 \"No es muy eficaz…\"",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:32.979Z",
+      "level": "info",
+      "msg": "Turno 7: move #2 | \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:6 \"No es muy eficaz…\" \"¡Murciélago usó Picotazo!\" \"¡Yacaré rival esquivó el ataque!\"",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:36.281Z",
+      "level": "info",
+      "msg": "Turno 8: move #2 | \"¡Yacaré rival usó Placaje!\" anim dmg0:16 faint \"¡Murciélago se debilitó!\" needSwitch",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:41.785Z",
+      "level": "info",
+      "msg": "Turno 9: move #2 | \"¡Yacaré rival usó Lanzarrocas!\" anim dmg0:25 faint \"¡Cardo se debilitó!\" needSwitch",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:46.160Z",
+      "level": "info",
+      "msg": "Turno 10: move #0 | \"¡Yacaré rival usó Lanzarrocas!\" anim dmg0:23 faint \"¡Butiá se debilitó!\" end",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:47.999Z",
+      "level": "info",
+      "msg": "Fin de batalla: lose",
+      "where": "r_palmitas_mercedes (41,16)"
+    },
+    {
+      "t": "2026-11-17T17:33:52.627Z",
+      "level": "info",
+      "msg": "Batalla vs Emiliano: fosil nv15, cerro nv15",
+      "where": "r_palmitas_mercedes (41,15)"
+    },
+    {
+      "t": "2026-11-17T17:34:00.693Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:46 \"¡Golpe crítico!\" \"¡Es súper eficaz!\" faint \"¡Fósil rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (41,15)"
+    },
+    {
+      "t": "2026-11-17T17:34:07.479Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:32 \"¡Es súper eficaz!\" \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:15 \"¡Golpe crítico!\" \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (41,15)"
+    },
+    {
+      "t": "2026-11-17T17:34:12.007Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:24 \"¡Es súper eficaz!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (41,15)"
+    },
+    {
+      "t": "2026-11-17T17:34:16.548Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (41,15)"
+    },
+    {
+      "t": "2026-11-17T17:34:22.377Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv13",
+      "where": "r_palmitas_mercedes (34,12)"
+    },
+    {
+      "t": "2026-11-17T17:34:25.456Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:38 \"¡Golpe crítico!\" faint \"¡Alacrán salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (34,12)"
+    },
+    {
+      "t": "2026-11-17T17:34:28.538Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (34,12)"
+    },
+    {
+      "t": "2026-11-17T17:34:29.803Z",
+      "level": "info",
+      "msg": "Batalla vs Agustín: mulitin nv14, cerro nv16",
+      "where": "r_palmitas_mercedes (34,10)"
+    },
+    {
+      "t": "2026-11-17T17:34:34.180Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:39 \"¡Es súper eficaz!\" faint \"¡Mulita rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (34,10)"
+    },
+    {
+      "t": "2026-11-17T17:34:39.752Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:30 \"¡Es súper eficaz!\" \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:11 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (34,10)"
+    },
+    {
+      "t": "2026-11-17T17:34:43.296Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:28 \"¡Es súper eficaz!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (34,10)"
+    },
+    {
+      "t": "2026-11-17T17:34:46.468Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (34,10)"
+    },
+    {
+      "t": "2026-11-17T17:34:54.390Z",
+      "level": "info",
+      "msg": "Batalla salvaje: luciernito nv15",
+      "where": "r_palmitas_mercedes (26,19)"
+    },
+    {
+      "t": "2026-11-17T17:34:57.742Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
+      "where": "r_palmitas_mercedes (26,19)"
+    },
+    {
+      "t": "2026-11-17T17:34:58.167Z",
+      "level": "info",
+      "msg": "Fin de batalla: run",
+      "where": "r_palmitas_mercedes (26,19)"
+    },
+    {
+      "t": "2026-11-17T17:34:59.540Z",
+      "level": "info",
+      "msg": "Batalla vs Abril: luciernito nv15, cerro nv15",
+      "where": "r_palmitas_mercedes (26,18)"
+    },
+    {
+      "t": "2026-11-17T17:35:04.351Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:29 \"¡Luciérnaga rival usó Impactrueno!\" anim dmg0:10 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (26,18)"
+    },
+    {
+      "t": "2026-11-17T17:35:08.064Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:10 faint \"¡Luciérnaga rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (26,18)"
+    },
+    {
+      "t": "2026-11-17T17:35:14.747Z",
+      "level": "info",
+      "msg": "Turno 3: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:41 \"¡Es súper eficaz!\" \"¡Yacaré rival usó Hoja Afilada!\" anim dmg0:12 \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (26,18)"
+    },
+    {
+      "t": "2026-11-17T17:35:18.226Z",
+      "level": "info",
+      "msg": "Turno 4: move #1 | \"¡Carpinchón usó Hidropulso!\" anim dmg1:14 \"¡Es súper eficaz!\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (26,18)"
+    },
+    {
+      "t": "2026-11-17T17:35:22.925Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (26,18)"
+    },
+    {
+      "t": "2026-11-17T17:35:25.988Z",
+      "level": "info",
+      "msg": "Batalla salvaje: luciernito nv12",
+      "where": "r_palmitas_mercedes (24,17)"
+    },
+    {
+      "t": "2026-11-17T17:35:29.360Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
+      "where": "r_palmitas_mercedes (24,17)"
+    },
+    {
+      "t": "2026-11-17T17:35:29.816Z",
+      "level": "info",
+      "msg": "Fin de batalla: run",
+      "where": "r_palmitas_mercedes (24,17)"
+    },
+    {
+      "t": "2026-11-17T17:35:32.836Z",
+      "level": "info",
+      "msg": "Batalla salvaje: mulitin nv12",
+      "where": "r_palmitas_mercedes (18,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:35.984Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:35 \"¡Es súper eficaz!\" faint \"¡Mulita salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (18,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:39.006Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (18,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:40.423Z",
+      "level": "info",
+      "msg": "Batalla vs Mathías: guijarro nv14, cerro nv16",
+      "where": "r_palmitas_mercedes (19,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:44.976Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:42 \"¡Es súper eficaz!\" faint \"¡Mulita rival se debilitó!\" exp foeNext",
+      "where": "r_palmitas_mercedes (19,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:51.071Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Carpinchón usó Hidropulso!\" anim dmg1:51 \"¡Es súper eficaz!\" \"¡Yacaré rival usó Defensa Férrea!\" anim stat \"¡Subió mucho la Defensa de Yacaré rival!\"",
+      "where": "r_palmitas_mercedes (19,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:54.930Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Carpinchón usó Golpe Cuerpo!\" anim dmg1:5 \"No es muy eficaz…\" \"¡Yacaré rival usó Látigo Cepa!\" anim dmg0:13 \"¡Golpe crítico!\" \"¡Es súper eficaz!\"",
+      "where": "r_palmitas_mercedes (19,12)"
+    },
+    {
+      "t": "2026-11-17T17:35:57.910Z",
+      "level": "info",
+      "msg": "Turno 4: move #0 | \"¡Carpinchón usó Golpe Cuerpo!\" anim dmg1:3 \"No es muy eficaz…\" faint \"¡Yacaré rival se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (19,12)"
+    },
+    {
+      "t": "2026-11-17T17:36:00.957Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (19,12)"
+    },
+    {
+      "t": "2026-11-17T17:36:04.868Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv14",
+      "where": "r_palmitas_mercedes (17,11)"
+    },
+    {
+      "t": "2026-11-17T17:36:08.471Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchón usó Pistola Agua!\" anim dmg1:31 \"¡Alacrán salvaje usó Telaraña!\" anim dmg0:6",
+      "where": "r_palmitas_mercedes (17,11)"
+    },
+    {
+      "t": "2026-11-17T17:36:11.881Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchón usó Pistola Agua!\" \"¡Alacrán salvaje esquivó el ataque!\" \"¡Alacrán salvaje usó Placaje!\" anim dmg0:4",
+      "where": "r_palmitas_mercedes (17,11)"
+    },
+    {
+      "t": "2026-11-17T17:36:14.834Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Carpinchón usó Golpe Cuerpo!\" anim dmg1:9 faint \"¡Alacrán salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (17,11)"
+    },
+    {
+      "t": "2026-11-17T17:36:17.581Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (17,11)"
+    },
+    {
+      "t": "2026-11-17T17:36:22.028Z",
+      "level": "info",
+      "msg": "Batalla salvaje: alacran nv13",
+      "where": "r_palmitas_mercedes (10,17)"
+    },
+    {
+      "t": "2026-11-17T17:36:25.090Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Carpinchón usó Hidropulso!\" anim dmg1:38 faint \"¡Alacrán salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (10,17)"
+    },
+    {
+      "t": "2026-11-17T17:36:27.860Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (10,17)"
+    },
+    {
+      "t": "2026-11-17T17:36:28.895Z",
+      "level": "info",
+      "msg": "Batalla salvaje: mulitin nv12",
+      "where": "r_palmitas_mercedes (7,17)"
+    },
+    {
+      "t": "2026-11-17T17:36:32.610Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Carpinchón usó Burbuja!\" anim dmg1:35 \"¡Es súper eficaz!\" faint \"¡Mulita salvaje se debilitó!\" exp end",
+      "where": "r_palmitas_mercedes (7,17)"
+    },
+    {
+      "t": "2026-11-17T17:36:37.111Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_palmitas_mercedes (7,17)"
+    },
+    {
+      "t": "2026-11-17T17:36:47.715Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "r_palmitas_mercedes (0,14)"
+    },
+    {
+      "t": "2026-11-17T17:36:53.830Z",
+      "level": "info",
+      "msg": "Entró a casa_mercedes2",
+      "where": "mercedes (39,20)"
+    },
+    {
+      "t": "2026-11-17T17:36:58.555Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "casa_mercedes2 (4,7)"
+    },
+    {
+      "t": "2026-11-17T17:37:00.101Z",
+      "level": "info",
+      "msg": "Entró a casa_mercedes",
+      "where": "mercedes (33,20)"
+    },
+    {
+      "t": "2026-11-19T17:59:08.061Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "casa_mercedes (4,7)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-19T17:59:17.201Z",
+      "level": "info",
+      "msg": "Entró a casa_mercedes",
+      "where": "mercedes (33,20)"
+    },
+    {
+      "t": "2026-11-19T17:59:19.264Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "casa_mercedes (4,7)"
+    },
+    {
+      "t": "2026-11-19T17:59:28.895Z",
+      "level": "info",
+      "msg": "Entró a poli_mercedes",
+      "where": "mercedes (16,20)"
+    },
+    {
+      "t": "2026-11-19T18:00:00.474Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "poli_mercedes (5,7)"
+    },
+    {
+      "t": "2026-11-19T18:01:07.301Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "mercedes (17,22)"
+    },
+    {
+      "t": "2026-11-19T18:01:08.151Z",
+      "level": "info",
+      "msg": "Entró a casa_jugador",
+      "where": "carmelo (10,5)"
+    },
+    {
+      "t": "2026-11-19T18:01:20.422Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "casa_jugador (5,7)"
+    },
+    {
+      "t": "2026-11-19T18:02:10.574Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-19T18:07:32.133Z",
+      "level": "info",
+      "msg": "Entró a r_colonia_rosario",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-19T18:08:03.972Z",
+      "level": "info",
+      "msg": "Entró a gym_frb",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-19T18:08:50.836Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "gym_frb (13,3)"
+    },
+    {
+      "t": "2026-11-19T18:08:59.812Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "fraybentos (17,20)"
+    },
+    {
+      "t": "2026-11-19T18:09:05.364Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)"
+    },
+    {
+      "t": "2026-11-19T18:09:13.917Z",
+      "level": "info",
+      "msg": "Entró a gym_frb",
+      "where": "fraybentos (26,14)"
+    },
+    {
+      "t": "2026-11-19T18:09:45.053Z",
+      "level": "info",
+      "msg": "Batalla vs Zoraida: escolopendra nv32, viudanegra nv34, escuerzo nv35",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:09:50.701Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Escolopendra rival usó Dardo Venenoso!\" anim dmg0:40 \"¡Carpinchón usó Hidropulso!\" anim dmg1:14",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:09:56.380Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡No podés huir de un combate contra un entrenador!\"",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:09:59.117Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Escolopendra rival usó Bomba Lodo!\" anim dmg0:26 faint \"¡Carpinchón se debilitó!\" needSwitch",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:05.271Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Urutaú usó Ataque Ala!\" anim dmg1:16 \"¡Escolopendra rival usó Dardo Venenoso!\" anim dmg0:51",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:08.093Z",
+      "level": "info",
+      "msg": "Turno 4: move #3 | \"¡Urutaú usó Premonición!\" anim dmg1:35 \"¡Es súper eficaz!\" \"¡Escolopendra rival usó Bomba Lodo!\" anim dmg0:14 faint \"¡Urutaú se debilitó!\" needSwitch",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:15.733Z",
+      "level": "info",
+      "msg": "Turno 5: move #1 | \"¡Escolopendra rival usó Aguijón!\" anim dmg0:6 \"No es muy eficaz…\" \"¡Escarabajón usó Puño Gaucho!\" anim dmg1:5 \"No es muy eficaz…\"",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:19.789Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Escolopendra rival usó Aguijón!\" anim dmg0:6 \"No es muy eficaz…\" \"¡Escarabajón usó Facón!\" anim dmg1:18",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:22.758Z",
+      "level": "info",
+      "msg": "Turno 7: move #2 | \"¡Zoraida usó Primer Mate!\" heal hud \"Escolopendra rival tomó un mate y recuperó 88 PS.\" \"¡Escarabajón usó Facón!\" anim dmg1:17",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:25.190Z",
+      "level": "info",
+      "msg": "Turno 8: move #2 | \"¡Escolopendra rival usó Danza Candombe!\" anim stat \"¡Subió el Ataque de Escolopendra rival!\" stat \"¡Subió la Velocidad de Escolopendra rival!\" \"¡Escarabajón usó Facón!\" anim dmg1:16",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:28.605Z",
+      "level": "info",
+      "msg": "Turno 9: move #0 | \"¡Escolopendra rival usó Danza Candombe!\" anim stat \"¡Subió el Ataque de Escolopendra rival!\" stat \"¡Subió la Velocidad de Escolopendra rival!\" \"¡Escarabajón usó Patada Baja!\" anim dmg1:5 \"No es muy eficaz…\"",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:32.974Z",
+      "level": "info",
+      "msg": "Turno 10: move #2 | \"¡Escolopendra rival usó Aguijón!\" anim dmg0:11 \"No es muy eficaz…\" \"¡Escarabajón usó Facón!\" anim dmg1:18",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:35.693Z",
+      "level": "info",
+      "msg": "Turno 11: move #2 | \"¡Escolopendra rival usó Aguijón!\" anim dmg0:12 \"No es muy eficaz…\" \"¡Escarabajón usó Facón!\" anim dmg1:19",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:38.837Z",
+      "level": "info",
+      "msg": "Turno 12: move #2 | \"¡Escolopendra rival usó Aguijón!\" anim dmg0:13 \"No es muy eficaz…\" \"¡Escarabajón usó Facón!\" anim dmg1:17",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:10:41.630Z",
+      "level": "info",
+      "msg": "Turno 13: move #2 | \"¡Escolopendra rival usó Aguijón!\" anim dmg0:11 \"No es muy eficaz…\" \"¡Escarabajón usó Facón!\" anim dmg1:5 faint \"¡Escolopendra rival se debilitó!\" exp foeNext",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:00.669Z",
+      "level": "info",
+      "msg": "Turno 14: move #1 | \"¡Viuda Negra rival usó Triturar!\" anim dmg0:31 faint \"¡Escarabajón se debilitó!\" needSwitch",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:07.869Z",
+      "level": "info",
+      "msg": "Turno 15: move #2 | \"¡Viuda Negra rival usó Dardo Venenoso!\" anim dmg0:64 \"¡Aguaraflama usó Rueda Fuego!\" anim dmg1:22 \"¡Golpe crítico!\"",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:10.776Z",
+      "level": "info",
+      "msg": "Turno 16: move #0 | \"¡Viuda Negra rival usó Dardo Venenoso!\" anim dmg0:4 faint \"¡Aguaraflama se debilitó!\" needSwitch",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:17.016Z",
+      "level": "info",
+      "msg": "Turno 17: move #1 | \"¡Viuda Negra rival usó Bomba Lodo!\" anim dmg0:71 \"¡Es súper eficaz!\" faint \"¡Butiazal se debilitó!\" needSwitch",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:21.423Z",
+      "level": "info",
+      "msg": "Turno 18: move #3 | \"¡Viuda Negra rival usó Dardo Venenoso!\" anim dmg0:50 \"¡Lobo de Crin usó Puño Gaucho!\" anim dmg1:9 \"No es muy eficaz…\"",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:24.446Z",
+      "level": "info",
+      "msg": "Turno 19: move #1 | \"¡Viuda Negra rival usó Dardo Venenoso!\" anim dmg0:23 faint \"¡Lobo de Crin se debilitó!\" end",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:26.110Z",
+      "level": "info",
+      "msg": "Fin de batalla: lose",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:29.042Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "gym_frb (14,2)"
+    },
+    {
+      "t": "2026-11-19T18:11:31.261Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)"
+    },
+    {
+      "t": "2026-11-19T18:11:32.295Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "fraybentos (17,20)"
+    },
+    {
+      "t": "2026-11-19T18:11:36.752Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)"
+    },
+    {
+      "t": "2026-11-19T18:11:47.836Z",
+      "level": "info",
+      "msg": "Entró a terminal_frb",
+      "where": "fraybentos (6,20)"
+    },
+    {
+      "t": "2026-11-19T18:11:48.969Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "terminal_frb (4,7)"
+    },
+    {
+      "t": "2026-11-19T18:11:49.946Z",
+      "level": "info",
+      "msg": "Entró a terminal_frb",
+      "where": "fraybentos (6,20)"
+    },
+    {
+      "t": "2026-11-19T18:11:55.323Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "terminal_frb (5,7)"
+    },
+    {
+      "t": "2026-11-26T13:22:23.910Z",
+      "level": "info",
+      "msg": "Entró a villasoriano",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-26T13:22:55.764Z",
+      "level": "info",
+      "msg": "Entró a r_villasoriano_fraybentos",
+      "where": "villasoriano (0,8)"
+    },
+    {
+      "t": "2026-11-26T13:23:33.779Z",
+      "level": "info",
+      "msg": "Batalla salvaje: novillo nv17",
+      "where": "r_villasoriano_fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-26T13:23:38.281Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchal usó Pistola Agua!\" anim dmg1:41 \"¡Novillo salvaje usó Gruñido!\" anim stat \"¡Bajó el Ataque de Carpinchal!\"",
+      "where": "r_villasoriano_fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-26T13:23:41.947Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:17 faint \"¡Novillo salvaje se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-26T13:23:44.982Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-26T13:24:10.154Z",
+      "level": "info",
+      "msg": "Batalla salvaje: crisalida nv17",
+      "where": "r_villasoriano_fraybentos (38,9)"
+    },
+    {
+      "t": "2026-11-26T13:24:14.457Z",
+      "level": "info",
+      "msg": "Turno 1: run | \"¡Escapaste sin problemas!\" end",
+      "where": "r_villasoriano_fraybentos (38,9)"
+    },
+    {
+      "t": "2026-11-26T13:24:14.889Z",
+      "level": "info",
+      "msg": "Fin de batalla: run",
+      "where": "r_villasoriano_fraybentos (38,9)"
+    },
+    {
+      "t": "2026-11-26T13:24:15.833Z",
+      "level": "info",
+      "msg": "Batalla salvaje: hornerito nv20",
+      "where": "r_villasoriano_fraybentos (37,12)"
+    },
+    {
+      "t": "2026-11-26T13:24:18.913Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchal usó Pistola Agua!\" anim dmg1:46 faint \"¡Hornero salvaje se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (37,12)"
+    },
+    {
+      "t": "2026-11-26T13:24:21.801Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (37,12)"
+    },
+    {
+      "t": "2026-11-26T13:24:29.751Z",
+      "level": "info",
+      "msg": "Batalla salvaje: teruterito nv18",
+      "where": "r_villasoriano_fraybentos (31,22)"
+    },
+    {
+      "t": "2026-11-26T13:24:33.043Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Tero salvaje usó Ataque Rápido!\" anim dmg0:5 \"¡Carpinchal usó Cascada!\" anim dmg1:44 faint \"¡Tero salvaje se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (31,22)"
+    },
+    {
+      "t": "2026-11-26T13:24:36.694Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (31,22)"
+    },
+    {
+      "t": "2026-11-26T13:24:47.135Z",
+      "level": "info",
+      "msg": "Batalla vs Micaela: teruterazo nv19, caudillo nv19",
+      "where": "r_villasoriano_fraybentos (21,27)"
+    },
+    {
+      "t": "2026-11-26T13:24:52.729Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:55 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (21,27)"
+    },
+    {
+      "t": "2026-11-26T13:24:58.787Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:48 \"¡Lobo de Crin rival usó Puño Gaucho!\" anim dmg0:13",
+      "where": "r_villasoriano_fraybentos (21,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:01.971Z",
+      "level": "info",
+      "msg": "Turno 3: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:12 faint \"¡Lobo de Crin rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (21,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:06.030Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (21,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:15.885Z",
+      "level": "info",
+      "msg": "Batalla vs Lorenzo: luciernito nv18, cortadora nv20",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-26T13:25:21.182Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:43 faint \"¡Luciérnaga rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-26T13:25:26.994Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Carpinchal usó Pistola Agua!\" anim dmg1:62 \"¡Es súper eficaz!\" faint \"¡Cortadora rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-26T13:25:30.095Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (15,32)"
+    },
+    {
+      "t": "2026-11-26T13:25:34.487Z",
+      "level": "info",
+      "msg": "Batalla vs Stella: mulitin nv19, talar nv19",
+      "where": "r_villasoriano_fraybentos (12,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:38.714Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:50 \"¡Es súper eficaz!\" faint \"¡Mulita rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (12,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:46.966Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:40 statusAnim hud \"¡Talar rival está paralizado!\" \"¡Talar rival está paralizado! No se puede mover.\" statusAnim",
+      "where": "r_villasoriano_fraybentos (12,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:49.811Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Carpinchal usó Golpe Cuerpo!\" anim dmg1:23 faint \"¡Talar rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (12,27)"
+    },
+    {
+      "t": "2026-11-26T13:25:52.320Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (12,27)"
+    },
+    {
+      "t": "2026-11-26T13:26:05.589Z",
+      "level": "info",
+      "msg": "Batalla vs Cristian: teruterazo nv18, carnero nv20",
+      "where": "r_villasoriano_fraybentos (7,21)"
+    },
+    {
+      "t": "2026-11-26T13:27:07.926Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchal usó Pistola Agua!\" anim dmg1:53 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
+      "where": "r_villasoriano_fraybentos (7,21)"
+    },
+    {
+      "t": "2026-11-26T13:27:15.491Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:38 \"¡Carnero rival usó Griterío!\" anim dmg0:9",
+      "where": "r_villasoriano_fraybentos (7,21)"
+    },
+    {
+      "t": "2026-11-26T13:27:18.738Z",
+      "level": "info",
+      "msg": "Turno 3: move #3 | \"¡Carnero rival usó Ataque Rápido!\" anim dmg0:6 \"¡Carpinchal usó Burbuja!\" anim dmg1:34 faint \"¡Carnero rival se debilitó!\" exp end",
+      "where": "r_villasoriano_fraybentos (7,21)"
+    },
+    {
+      "t": "2026-11-26T13:27:22.233Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_villasoriano_fraybentos (7,21)"
+    },
+    {
+      "t": "2026-11-26T13:27:26.579Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "r_villasoriano_fraybentos (0,22)"
+    },
+    {
+      "t": "2026-11-26T13:27:46.971Z",
+      "level": "info",
+      "msg": "Entró a poli_frb",
+      "where": "fraybentos (17,20)"
+    },
+    {
+      "t": "2026-11-26T14:21:46.987Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "poli_frb (5,7)",
+      "count": 3
+    },
+    {
+      "t": "2026-11-26T14:31:05.152Z",
+      "level": "info",
+      "msg": "Entró a r_villasoriano_fraybentos",
+      "where": "fraybentos (43,20)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-26T14:31:27.546Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "r_villasoriano_fraybentos (0,22)"
+    },
+    {
+      "t": "2026-11-26T14:31:41.741Z",
+      "level": "info",
+      "msg": "Batalla vs Recluta PP: yararita nv19, carabo nv20",
+      "where": "fraybentos (34,14)"
+    },
+    {
+      "t": "2026-11-26T14:31:49.571Z",
+      "level": "info",
+      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:46 faint \"¡Yarará rival se debilitó!\" exp foeNext",
+      "where": "fraybentos (34,14)"
+    },
+    {
+      "t": "2026-11-26T14:31:55.755Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:60 faint \"¡Cárabo rival se debilitó!\" exp end",
+      "where": "fraybentos (34,14)"
+    },
+    {
+      "t": "2026-11-26T14:31:58.286Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "fraybentos (34,14)"
+    },
+    {
+      "t": "2026-11-26T14:32:05.438Z",
+      "level": "info",
+      "msg": "Entró a anglo_1",
+      "where": "fraybentos (36,14)"
+    },
+    {
+      "t": "2026-11-26T14:32:09.075Z",
+      "level": "info",
+      "msg": "Batalla vs Recluta PP: murcielago nv20, carabo nv20",
+      "where": "anglo_1 (9,14)"
+    },
+    {
+      "t": "2026-11-26T14:32:14.259Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Carpinchal usó Pistola Agua!\" anim dmg1:50 faint \"¡Murciélago rival se debilitó!\" exp foeNext",
+      "where": "anglo_1 (9,14)"
+    },
+    {
+      "t": "2026-11-26T14:32:20.147Z",
+      "level": "info",
+      "msg": "Turno 2: move #1 | \"¡Carpinchal usó Cascada!\" anim dmg1:60 \"¡Golpe crítico!\" faint \"¡Cárabo rival se debilitó!\" exp end",
+      "where": "anglo_1 (9,14)"
+    },
+    {
+      "t": "2026-11-26T14:32:24.535Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "anglo_1 (9,14)"
+    },
+    {
+      "t": "2026-11-26T14:32:37.578Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Servidor de partidas: 400 {\"code\":\"P0001\",\"details\":null,\"hint\":null,\"message\":\"too many saves\"}",
+      "where": "anglo_1 (9,14)"
+    }
+  ]
+}
