@@ -57,6 +57,18 @@ export function toggle3D() {
   try { localStorage.setItem(STORE, enabled ? '1' : '0'); } catch { /* sin almacenamiento */ }
   return enabled;
 }
+/** Hay 3D en este equipo (WebGL anduvo) y la vista elegida: la usan las opciones y el botón del celular. */
+export const has3D = () => !!renderer;
+export const view3DOn = () => enabled;
+/** Cambia de vista como la tecla V (opciones, botón 3D/2D del celular) y avisa con el cartelito. */
+export function switchView() {
+  const on = toggle3D();
+  badge(on ? 'Vista 3D' : 'Vista 2D');
+  for (const f of viewListeners) f(on);
+  return on;
+}
+const viewListeners: ((on: boolean) => void)[] = [];
+export const onViewChange = (f: (on: boolean) => void) => { viewListeners.push(f); };
 
 export function mount3D(host: HTMLElement) {
   try {
@@ -90,8 +102,7 @@ export function mount3D(host: HTMLElement) {
     }
     addEventListener('keydown', (e) => {
       if (e.code !== 'KeyV' || e.repeat || (e.target as HTMLElement)?.tagName === 'INPUT') return;
-      const on = toggle3D();
-      badge(on ? 'Vista 3D' : 'Vista 2D');
+      switchView();
     });
     return true;
   } catch (e) {
