@@ -159,6 +159,7 @@ const WATER = new Set(['~', 'ӫ', 'ϸ', 'Ϡ', 'Ӥ', 'Ӣ']);
 const CLIFF = new Set(['K', 'k', 'ϰ', 'ϱ', 'ϳ', 'ϲ', ...Object.values(WALL_CAPS).flat()]);
 const ROOF = new Set(['r', 'u', 'g', 'o', 'v', 'C', 'G', 'J', 'U', 'Ӡ']);
 const WALL = new Set(['ι', 'H', 'w', 'W', 'I', 't', 'h', 'j', 'a', 'd', 'Q', 'ӟ', 'ӡ']);
+const PATHS = new Set(['=', 'c', '_', '0', '-', ':', '/', 's', '?']);
 const kindCache = new Map<string, Kind>();
 function kindOf(ch: string): Kind {
   let k = kindCache.get(ch);
@@ -166,7 +167,7 @@ function kindOf(ch: string): Kind {
   const info = TILE_INFO[ch] ?? {};
   const name: string = (info.name ?? '').toLowerCase();
   const code = ch.charCodeAt(0);
-  if (WATER.has(ch) || name.includes('agua') || name.includes('mar ')) k = 'water';
+  if (WATER.has(ch) || name === 'agua' || name.startsWith('agua ') || name.startsWith('mar ')) k = 'water'; // 'bidón de agua' o 'fachada gimnasio agua' no son agua
   else if (ch === 'p' || name.includes('palmera')) k = 'palm';
   else if (ch === '#' || ch === 'q' || (code >= 0xe040 && code < 0xe080) || name.includes('árbol') || name.includes('ceibo') || name.includes('pino') || name.includes('eucalipto')) k = 'tree';
   else if (name.includes('seto') || name.includes('arbusto') || name.includes('hongos')) k = 'bush';
@@ -240,6 +241,80 @@ export function palm(parts: THREE.BufferGeometry[], x: number, z: number, leaf: 
   }
 }
 
+// ---------------------------------------------------------------- texturas pixel art sobre el low-poly
+// Un atlas por mapa con los tiles 2D que usa: el suelo, los caminos, los árboles, las rocas y los muros
+// llevan su propio dibujo encima de la forma 3D.
+const AT = 1024, CELL = 16, PER = AT / CELL;
+type Rect = [number, number, number, number]; // u0 v0 u1 v1
+class Atlas {
+  canvas = document.createElement('canvas');
+  g: CanvasRenderingContext2D;
+  cells = new Map<string, number>();
+  constructor() { this.canvas.width = this.canvas.height = AT; this.g = this.canvas.getContext('2d')!; this.g.imageSmoothingEnabled = false; }
+  rect(key: string, draw: () => HTMLCanvasElement, fill?: THREE.Color): Rect {
+    let i = this.cells.get(key);
+    if (i == null) {
+      i = this.cells.size;
+      if (i >= PER * PER) i = 0; // atlas lleno (no pasa en mapas reales): reusa la primera celda
+      else {
+        this.cells.set(key, i);
+        const x = (i % PER) * CELL, y = Math.floor(i / PER) * CELL;
+        if (fill) { this.g.fillStyle = '#' + fill.getHexString(THREE.SRGBColorSpace); this.g.fillRect(x, y, CELL, CELL); }
+        this.g.drawImage(draw(), x, y, CELL, CELL);
+      }
+    }
+    const x = (i % PER) * CELL, y = Math.floor(i / PER) * CELL;
+    const e = 0.02;
+    return [(x + e) / AT, 1 - (y + CELL - e) / AT, (x + CELL - e) / AT, 1 - (y + e) / AT];
+  }
+}
+/** Geometría texturizada que se arma de a triángulos (posición, uv y un leve tinte por cara). */
+class TexGeo {
+  pos: number[] = []; uv: number[] = []; col: number[] = [];
+  tri(p: number[][], q: number[][], k = 1) {
+    for (let i = 0; i < 3; i++) { this.pos.push(...p[i]); this.uv.push(...q[i]); this.col.push(k, k, k); }
+  }
+  /** Proyecta el dibujo sobre una forma: 'front' de frente (copas, rocas), 'box' cara por cara (muros, acantilados). */
+  add(geo: THREE.BufferGeometry, r: Rect, mode: 'front' | 'box', box3: { x0: number; y0: number; z0: number; w: number; h: number; d: number }, vr: [number, number] = [0, 1], seed = 0, topR: Rect | null = null) {
+    const g = geo.index ? geo.toNonIndexed() : geo;
+    const P = g.attributes.position;
+    const [u0, v0, u1, v1] = r;
+    const V0 = v0 + (v1 - v0) * vr[0], V1 = v0 + (v1 - v0) * vr[1];
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), n = new THREE.Vector3();
+    for (let i = 0; i < P.count; i += 3) {
+      a.fromBufferAttribute(P, i); b.fromBufferAttribute(P, i + 1); c.fromBufferAttribute(P, i + 2);
+      n.subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
+      const top = mode === 'box' && Math.abs(n.y) > 0.6;
+      const side = mode === 'box' && !top && Math.abs(n.x) > Math.abs(n.z);
+      const uvOf = (p: THREE.Vector3) => {
+        if (top && topR) return [(topR[0] + topR[2]) / 2, (topR[1] + topR[3]) / 2];
+        let s: number, t: number;
+        if (top) { s = (p.x - box3.x0) / box3.w; t = 1 - (p.z - box3.z0) / box3.d; }
+        else { s = side ? (p.z - box3.z0) / box3.d : (p.x - box3.x0) / box3.w; t = (p.y - box3.y0) / box3.h; }
+        s = Math.min(1, Math.max(0, s)); t = Math.min(1, Math.max(0, t));
+        return [u0 + (u1 - u0) * s, V0 + (V1 - V0) * t];
+      };
+      const k = 1 + (rnd(i, seed, 5) - 0.5) * 0.12;
+      this.tri([[a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z]], [uvOf(a), uvOf(b), uvOf(c)], k);
+    }
+  }
+  mesh(atlas: Atlas) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
+    geo.computeVertexNormals();
+    const tex = new THREE.CanvasTexture(atlas.canvas);
+    tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = new THREE.MeshStandardMaterial({ map: tex, vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
+    const m = new THREE.Mesh(geo, mat);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    return m;
+  }
+}
+
 // ---------------------------------------------------------------- construir el mapa
 interface WorldView {
   map: any; tiles: string[][] | string[]; npcs: any[]; items: any[]; legend: any; player: any;
@@ -252,6 +327,7 @@ function build(v: WorldView) {
   if (staticGroup) {
     scene.remove(staticGroup);
     staticGroup.traverse((o: any) => { if (o.geometry !== objGeo) o.geometry?.dispose(); });
+    for (const t of staticTex.splice(0)) { (t.material as any).map?.dispose(); (t.material as any).dispose(); }
   }
   for (const sm of staticMats.splice(0)) { boardMats.delete(sm); sm.map?.dispose(); sm.dispose(); }
   bldMesh = null;
@@ -261,17 +337,20 @@ function build(v: WorldView) {
   const theme = m.theme ?? null;
   const parts: THREE.BufferGeometry[] = [];
   const glow: THREE.BufferGeometry[] = [];
+  const atlas = new Atlas();
+  const tg = new TexGeo();
   const sprites: { c: string; x: number; y: number }[] = [];
   lampSpots = [];
   const ch = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? null : tiles[y][x]);
   const isWater = (x, y) => { const c = ch(x, y); return c != null && kindOf(c) === 'water'; };
   // Suelo: una grilla de vértices con relieve leve; las orillas bajan hacia el agua.
   const gh = (vx: number, vy: number) => {
-    let w = 0, n = 0, hard = false;
+    let w = 0, n = 0, hard = false, paths = 0;
     for (const [dx, dy] of [[-1, -1], [0, -1], [-1, 0], [0, 0]]) {
       const c = ch(vx + dx, vy + dy);
       if (c == null) continue;
       n++;
+      if (PATHS.has(c)) paths++;
       if (kindOf(c) === 'water') w++;
       const k = kindOf(c);
       if (k !== 'ground' && k !== 'grass' && k !== 'flowers' && k !== 'tree') hard = true;
@@ -279,6 +358,7 @@ function build(v: WorldView) {
     }
     if (n && w === n) return -0.32;
     if (w) return -0.1;
+    if (n && paths === n && !m.indoor) return -0.05; // los caminos van apenas hundidos: se marcan solos
     if (m.indoor || hard) return 0;
     return (rnd(vx, vy, 9) - 0.5) * 0.14;
   };
@@ -302,26 +382,36 @@ function build(v: WorldView) {
     const base = m.indoor ? 'i' : '.';
     return avgColor(`g|${theme}|${base}`, tileCanvas(base, 0, theme, false));
   };
-  {
-    const pos: number[] = [];
-    const col: number[] = [];
-    const tmp = new THREE.Color();
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const base = isWater(x, y) ? new THREE.Color(0x3a6ab0) : groundColor(x, y);
-      const h00 = gh(x, y), h10 = gh(x + 1, y), h01 = gh(x, y + 1), h11 = gh(x + 1, y + 1);
-      const tri = (a: number[], b: number[], c: number[], s: number) => {
-        pos.push(...a, ...b, ...c);
-        tmp.copy(base).multiplyScalar(1 + (rnd(x, y, s) - 0.5) * 0.08);
-        for (let i = 0; i < 3; i++) col.push(tmp.r, tmp.g, tmp.b);
-      };
-      const A = [x, h00, y], B = [x + 1, h10, y], C = [x, h01, y + 1], D = [x + 1, h11, y + 1];
-      if ((x + y) % 2) { tri(A, C, B, 1); tri(B, C, D, 2); } else { tri(A, C, D, 1); tri(A, D, B, 2); }
+  // el dibujo 2D del suelo de cada casillero (bajo un objeto, el suelo que lo rodea)
+  const groundTile = (x: number, y: number): [string, () => HTMLCanvasElement] => {
+    const c = tiles[y][x];
+    const k = kindOf(c);
+    if (k === 'water') return ['g|~', () => tileCanvas('~', 0, null, false)];
+    const under = groundFor(tiles, x, y, m.ground, theme);
+    if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') return [`g|${theme}|${c}|${under}`, () => tileCanvas(c, 0, theme, under)];
+    if (typeof under === 'string' && under !== '~') return [`g|${theme}|${under}`, () => tileCanvas(under, 0, theme, false)];
+    for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1], [1, 1], [-1, 1]]) {
+      const n = ch(x + dx, y + dy);
+      if (n != null && (kindOf(n) === 'ground' || kindOf(n) === 'door')) {
+        const u2 = groundFor(tiles, x + dx, y + dy, m.ground, theme);
+        return [`g|${theme}|${n}|${u2}`, () => tileCanvas(n, 0, theme, u2)];
+      }
     }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-    g.computeVertexNormals();
-    parts.push(g);
+    const base = m.indoor ? 'i' : '.';
+    return [`g|${theme}|${base}`, () => tileCanvas(base, 0, theme, false)];
+  };
+  {
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const [gk, gc] = groundTile(x, y);
+      const r = atlas.rect(gk, gc);
+      const h00 = gh(x, y), h10 = gh(x + 1, y), h01 = gh(x, y + 1), h11 = gh(x + 1, y + 1);
+      const [u0, v0, u1, v1] = r;
+      const A = [x, h00, y], B = [x + 1, h10, y], C = [x, h01, y + 1], D = [x + 1, h11, y + 1];
+      const uA = [u0, v1], uB = [u1, v1], uC = [u0, v0], uD = [u1, v0];
+      const k1 = 1 + (rnd(x, y, 1) - 0.5) * 0.06, k2 = 1 + (rnd(x, y, 2) - 0.5) * 0.06;
+      if ((x + y) % 2) { tg.tri([A, C, B], [uA, uC, uB], k1); tg.tri([B, C, D], [uB, uC, uD], k2); }
+      else { tg.tri([A, C, D], [uA, uC, uD], k1); tg.tri([A, D, B], [uA, uD, uB], k2); }
+    }
   }
   // Agua: una lámina que ondula, por encima del lecho.
   const waterGeo: THREE.BufferGeometry[] = [];
@@ -356,14 +446,20 @@ function build(v: WorldView) {
         const [a, b] = colors();
         const leaf = a.getHSL({ h: 0, s: 0, l: 0 }).l > 0.15 ? a : new THREE.Color(0x3f9a3a);
         const trunk = b.r > b.g ? b : new THREE.Color(0x7a4a2a);
-        hostTree(parts, cx, cz, c === 'q' ? new THREE.Color(0xd8343a) : leaf, trunk, h0);
+        const g: THREE.BufferGeometry[] = [];
+        hostTree(g, cx, cz, c === 'q' ? new THREE.Color(0xd8343a) : leaf, trunk, h0);
+        // tronco con su color; las copas llevan las hojas del dibujo 2D del árbol
+        parts.push(g[0]);
+        const r = atlas.rect(objKey, () => tileWithoutGround(c, 0, theme), leaf);
+        for (const q of g.slice(1)) { q.computeBoundingBox(); const bb = q.boundingBox!; tg.add(q, r, 'front', { x0: bb.min.x, y0: bb.min.y, z0: bb.min.z, w: bb.max.x - bb.min.x, h: bb.max.y - bb.min.y, d: bb.max.z - bb.min.z }, [0.35, 1], x + y); }
         break;
       }
       case 'palm': palm(parts, cx, cz, new THREE.Color(0x4aa83a), new THREE.Color(0x9a6a3a), h0); break;
       case 'bush': {
-        const [a, b] = colors();
-        parts.push(paint(at(new THREE.IcosahedronGeometry(0.5, 0), cx, 0.35, cz, rnd(x, y) * 6), a, 0.14, x));
-        parts.push(paint(at(new THREE.IcosahedronGeometry(0.12, 0), cx + 0.25, 0.65, cz + 0.25), b, 0.1, y));
+        const [a] = colors();
+        const r = atlas.rect(objKey, () => tileWithoutGround(c, 0, theme), a);
+        const g = at(new THREE.IcosahedronGeometry(0.5, 0), cx, 0.35, cz, rnd(x, y) * 6);
+        tg.add(g, r, 'front', { x0: cx - 0.5, y0: -0.15, z0: cz - 0.5, w: 1, h: 1, d: 1 }, [0, 1], x);
         break;
       }
       case 'rock': {
@@ -371,15 +467,16 @@ function build(v: WorldView) {
         const s = 0.75 + rnd(x, y, 3) * 0.35;
         const g = new THREE.DodecahedronGeometry(0.45, 0);
         g.scale(1, 0.75, 1);
-        parts.push(paint(at(g, cx, 0.28 * s, cz, rnd(x, y) * 6, s), a, 0.16, x + y));
+        at(g, cx, 0.28 * s, cz, rnd(x, y) * 6, s);
+        const r = atlas.rect(objKey, () => tileWithoutGround(c, 0, theme), a);
+        tg.add(g, r, 'front', { x0: cx - 0.45 * s, y0: 0, z0: cz - 0.45 * s, w: 0.9 * s, h: 0.65 * s, d: 0.9 * s }, [0.1, 0.9], x + y);
         break;
       }
       case 'cliff': {
-        const [a, b] = colors();
+        const [a] = colors();
         const hh = m.indoor ? 1.1 : 1.2 + rnd(x, y, 8) * 0.25;
-        const g = box(1, hh, 1);
-        parts.push(paint(at(g, cx, hh / 2, cz), a, 0.12, x * 3 + y));
-        parts.push(paint(at(box(1.02, 0.12, 1.02), cx, hh, cz), b.clone().lerp(new THREE.Color(0x5aa84a), m.indoor ? 0 : 0.5), 0.1, x));
+        const r = atlas.rect(objKey, () => tileWithoutGround(c, 0, theme), a);
+        tg.add(at(box(1, hh, 1), cx, hh / 2, cz), r, 'box', { x0: x, y0: 0, z0: y, w: 1, h: hh, d: 1 }, [0, 1], x * 3 + y);
         break;
       }
       case 'roof': {
@@ -394,15 +491,18 @@ function build(v: WorldView) {
         break;
       }
       case 'wall': {
-        const [a, b] = colors();
-        const hh = m.indoor ? 1.2 : 1.5;
-        parts.push(paint(at(box(1, hh, 1), cx, hh / 2, cz), a, 0.05, x + y));
-        // ventanas y emblemas: un panel que sobresale en la cara frontal, con el segundo color
-        if (c === 'w' || (TILE_INFO[c]?.name ?? '').includes('ventana')) {
-          glow.push(paint(at(box(0.5, 0.42, 0.06), cx, hh * 0.55, cz + 0.51), new THREE.Color(0xffe8a0), 0));
-        } else if (!m.indoor) {
-          parts.push(paint(at(box(0.6, 0.32, 0.05), cx, hh * 0.55, cz + 0.51), b, 0.05, x));
-        }
+        // muros de interiores (los edificios de afuera los arma buildBuildings): llevan su dibujo, con cuadros y relojes
+        // Solo el muro del fondo de cada sala (con piso adelante) va alto y muestra su dibujo de frente; el resto
+        // queda bajo, como una maqueta cortada, para que ningún muro tape al jugador ni la sala de adelante.
+        const [a] = colors();
+        const below = ch(x, y + 1);
+        const back = !m.indoor || (below != null && !TILE_INFO[below]?.solid);
+        // el muro de fondo de la sala (macizo hasta el borde de arriba) va alto; los tabiques de adentro, a media altura
+        let outer = true;
+        for (let yy = y - 1; yy >= 0 && outer; yy--) if (!TILE_INFO[ch(x, yy) ?? 'x']?.solid) outer = false;
+        const hh = m.indoor ? (back ? (outer ? 1.05 : 0.55) : 0.3) : 1.5;
+        const r = atlas.rect(`w|${theme}|${c}`, () => tileCanvas(c, 0, theme, false), a);
+        tg.add(at(box(1, hh, 1), cx, hh / 2, cz), r, 'box', { x0: x, y0: 0, z0: y, w: 1, h: hh, d: 1 }, [0, 1], x + y);
         break;
       }
       case 'door': {
@@ -436,7 +536,8 @@ function build(v: WorldView) {
       }
       case 'ledge': {
         const [a] = colors();
-        parts.push(paint(at(box(1, 0.22, 0.4), cx, 0.11, y + 0.3), a.clone().multiplyScalar(0.85), 0.05, x));
+        const r = atlas.rect(`l|${theme}|${c}`, () => tileCanvas(c, 0, theme, groundFor(tiles, x, y, m.ground, theme)), a);
+        tg.add(at(box(1, 0.22, 0.4), cx, 0.11, y + 0.3), r, 'box', { x0: x, y0: 0, z0: y + 0.1, w: 1, h: 0.22, d: 0.4 }, [0, 1], x);
         break;
       }
       case 'prop':
@@ -449,12 +550,17 @@ function build(v: WorldView) {
   }
   staticGroup = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
-  const merged = mergeGeometries(parts.map((p) => (p.index ? p.toNonIndexed() : p)).map(onlyPosColor), false);
-  merged.computeVertexNormals();
-  const mesh = new THREE.Mesh(merged, mat);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  staticGroup.add(mesh);
+  if (parts.length) {
+    const merged = mergeGeometries(parts.map((p) => (p.index ? p.toNonIndexed() : p)).map(onlyPosColor), false);
+    merged.computeVertexNormals();
+    const mesh = new THREE.Mesh(merged, mat);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    staticGroup.add(mesh);
+  }
+  const texMesh = tg.mesh(atlas);
+  staticGroup.add(texMesh);
+  staticTex.push(texMesh);
   if (glow.length) {
     const gm = new THREE.Mesh(mergeGeometries(glow.map((p) => (p.index ? p.toNonIndexed() : p)).map(onlyPosColor), false), new THREE.MeshBasicMaterial({ vertexColors: true }));
     staticGroup.add(gm);
@@ -497,6 +603,7 @@ function build(v: WorldView) {
 }
 // ---------------------------------------------------------------- edificios con su pixel art
 let bldMesh: THREE.Mesh | null = null;
+const staticTex: THREE.Mesh[] = [];
 const isBld = (tiles, W: number, H: number, x: number, y: number): boolean => {
   if (x < 0 || y < 0 || x >= W || y >= H) return false;
   const k = kindOf(tiles[y][x]);
@@ -802,7 +909,16 @@ export function drawWorld3D(v: WorldView, t: number) {
     if (look === null) continue;
     seen.add(n);
     if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, 0, n.y + 0.5); continue; }
-    if (look === 'ball') { const b = boardFor(n, 'ball', () => board(ballCanvas(), 1)); stand(b, v.entityPos(n)); continue; }
+    if (look === 'ball') {
+      const b = boardFor(n, 'ball', () => board(ballCanvas(), 1));
+      const under = v.tileAt(n.x, n.y);
+      if (under && TILE_INFO[under]?.solid) {
+        // sobre una mesa: la pokebola va arriba del tablero, pegada al dibujo del mueble (como en el mapa 2D)
+        const up = 0.5;
+        b.root.position.set(n.x + 0.5, up * Math.cos(TILT_OBJ), n.y + 1 - up * Math.sin(TILT_OBJ) + 0.06);
+      } else stand(b, v.entityPos(n));
+      continue;
+    }
     if (typeof look === 'string' && look.startsWith('animal:')) {
       // criaturas a lo lejos: su propio sprite de mapa (mira a la derecha, a tamaño de pixel como los personajes);
       // las que no tienen usan su sprite de combate en chico (mira a la izquierda). Dan saltitos al moverse.
@@ -863,7 +979,7 @@ export function drawWorld3D(v: WorldView, t: number) {
   const indoor = !!m.indoor;
   scene.background = indoor || cave ? new THREE.Color(0x0c0c16) : sky;
   lightBoards(dark ? 0 : indoor ? 0.85 : 0.85 * (1 - night * 0.65) * (1 - Math.max(0, dusk) * 0.1), dark);
-  hemi.intensity = dark ? 0.06 : indoor ? 1.3 : 1.15 - night * 0.8;
+  hemi.intensity = dark ? 0.06 : indoor ? 1.55 : 1.15 - night * 0.8;
   hemi.color.set(0xcfe8ff).lerp(new THREE.Color(0x6a7ad8), night);
   sun.intensity = dark ? 0 : indoor ? 1.2 : 2.6 * (1 - night * 0.85);
   sun.color.set(0xfff2d8).lerp(new THREE.Color(0xff9a50), Math.max(0, dusk) * 0.8).lerp(new THREE.Color(0x8aa0ff), night);
@@ -894,9 +1010,28 @@ export function drawWorld3D(v: WorldView, t: number) {
   else if (!indoor) scene.fog = new THREE.Fog(sky.getHex(), camD + 10, camD + 34);
   else scene.fog = null;
   let tx = px, tz = pz;
-  if (indoor) { tx = (tx * 2 + m.w / 2) / 3; tz = (tz * 2 + m.h / 2) / 3; }
-  const want = new THREE.Vector3(tx, dist * 0.95, tz + dist * 0.78);
-  const look = new THREE.Vector3(tx, 0.4, tz + 0.2);
+  let want: THREE.Vector3, look: THREE.Vector3;
+  if (indoor) {
+    // Interiores: cámara más alta y empinada, alejada lo justo para que entre la sala entera (como en 2D). En salas
+    // más grandes que la pantalla (gimnasios, el depósito) sigue al jugador sin mostrar el vacío de afuera.
+    const pitch = 1.03; // ~59°
+    const fovT = Math.tan((camera.fov * Math.PI) / 360);
+    const aspect = camera.aspect;
+    const maxW = 15.5 / zoom; // ancho máximo de piso a la vista (con zoom, menos)
+    const needW = (m.w + 0.6) / (2 * fovT * aspect);
+    const needH = ((m.h + 1.2) * Math.sin(pitch)) / (2 * fovT);
+    const D = Math.min(Math.max(needW, needH, 9), maxW / (2 * fovT * aspect));
+    const viewW = 2 * D * fovT * aspect;
+    const viewH = (2 * D * fovT) / Math.sin(pitch);
+    const fit = (p: number, size: number, view: number, lo: number) => (view >= size + lo ? size / 2 : Math.min(Math.max(p, view / 2 - lo / 2), size - view / 2 + lo / 2));
+    tx = fit(px, m.w, viewW, 0.4);
+    tz = fit(pz - 0.3, m.h, viewH, 0.8) + 0.25; // el muro del fondo se ve de frente: un poco más de lugar abajo
+    look = new THREE.Vector3(tx, 0, tz);
+    want = new THREE.Vector3(tx, D * Math.sin(pitch), tz + D * Math.cos(pitch));
+  } else {
+    want = new THREE.Vector3(tx, dist * 0.95, tz + dist * 0.78);
+    look = new THREE.Vector3(tx, 0.4, tz + 0.2);
+  }
   if (!camReady) { camPos.copy(want); camLook.copy(look); camReady = true; }
   camPos.lerp(want, 0.12);
   camLook.lerp(look, 0.16);

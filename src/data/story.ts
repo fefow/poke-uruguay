@@ -313,6 +313,15 @@ export const SCRIPTS = {
     }
   },
 
+  /** Si el jugador ya habló con Tabárez e intenta irse sin elegir, Gonzalo camina hasta él y lo frena. */
+  async lab_no_exit(api) {
+    await api.npcWalkToPlayer('gonzalo_lab');
+    api.playerFaceNpc('gonzalo_lab');
+    await api.say(['¡Esperá, {player}!', 'No te vayas sin elegir una Pokeball. El Maestro las preparó para vos.', 'Afuera hay criaturas salvajes en los pastizales: sin compañero no podés cruzarlos.'], { name: 'Gonzalo' });
+    await api.stepBack('up');
+    await api.npcWalkTo('gonzalo_lab', 9, 6);
+  },
+
   async prof(api) {
     if (!api.flag('has_starter')) {
       if (!api.flag('met_prof')) {
