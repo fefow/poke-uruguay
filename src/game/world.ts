@@ -8,7 +8,7 @@ import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, topCanvas, collAt, groundUnder, groundFor, drawBuildingTrim, drawElevation } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, topCanvas, collAt, groundUnder, groundFor, drawBuildingTrim, drawElevation, themeOf } from '../gfx/tiles.ts';
 import { cellCanvas } from '../gfx/edges.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
@@ -1815,7 +1815,7 @@ function drawWorld(g, t) {
   const y1 = Math.min(m.h - 1, Math.ceil((cy + VH) / T));
   for (let y = y0; y <= y1; y++) {
     const row = W_.tiles[y];
-    for (let x = x0; x <= x1; x++) g.drawImage(m.indoor ? tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme)) : cellCanvas(W_.tiles, x, y, frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme), m.ground), x * T - cx, y * T - cy);
+    for (let x = x0; x <= x1; x++) g.drawImage(m.indoor ? tileCanvas(row[x], frame, m.theme, groundFor(W_.tiles, x, y, m.ground, m.theme)) : cellCanvas(W_.tiles, x, y, frame, themeOf(m, row[x]), groundFor(W_.tiles, x, y, m.ground, m.theme), m.ground), x * T - cx, y * T - cy);
   }
   if (!m.indoor) { drawElevation(g, m, W_.tiles, x0, y0, x1, y1, cx, cy); drawBuildingTrim(g, W_.tiles, x0, y0, x1, y1, cx, cy, m.theme); }
   if (!m.indoor) { drawShoreFoam(g, frame, t, x0, y0, x1, y1, cx, cy); drawCastShadows(g, x0, y0, x1, y1, cx, cy); }

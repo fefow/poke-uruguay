@@ -5,7 +5,7 @@
 // El canvas 2D queda encima, transparente, para la lluvia, la niebla y los efectos de pantalla.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { T, TILE_INFO, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt } from './tiles.ts';
+import { T, TILE_INFO, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt, themeOf } from './tiles.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
@@ -532,7 +532,7 @@ function build(v: WorldView) {
     const under = groundFor(tiles, x, y, m.ground, theme);
     if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') {
       // afuera, los bordes de camino, arena y pastizal son piezas propias (ver edges.ts)
-      if (!m.indoor) return [`g|${theme}|${pieceKey(tiles, x, y, theme)}|${under}|${m.ground ?? ''}`, () => cellCanvas(tiles, x, y, 0, theme, under, m.ground ?? null)];
+      if (!m.indoor) { const th = themeOf(m, c); return [`g|${th}|${pieceKey(tiles, x, y, th)}|${under}|${m.ground ?? ''}`, () => cellCanvas(tiles, x, y, 0, th, under, m.ground ?? null)]; }
       return [`g|${theme}|${c}|${under}`, () => tileCanvas(c, 0, theme, under)];
     }
     if (typeof under === 'string' && under !== '~') return [`g|${theme}|${under}`, () => tileCanvas(under, 0, theme, false)];

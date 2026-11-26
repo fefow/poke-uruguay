@@ -3154,3 +3154,74 @@ Object.assign(DRAW, {
     px(g, 7, 2 + bob, '#3a3a44', 2, 4); px(g, 7, 1 + bob, '#f8e860', 2, 2);
   },
 });
+
+// ---- city sets: each city paves its streets its own way (like the secondary tileset of a classic town) ----
+type Pave = 'adoquin' | 'piedra' | 'ladrillo' | 'losa';
+interface CitySet { name: string; pave: Pave; c: [string, string, string, string]; path?: [string, string, string, string]; walk?: [string, string, string] }
+/** base, three stone tones (the first is the lit one), and the grout. */
+export const CITY_SETS: Record<string, CitySet> = {
+  colonia: { name: 'Piedra del Barrio Histórico', pave: 'piedra', c: ['#8a8478', '#c4bcaa', '#a89f8c', '#6e685c'] },
+  carmelo: { name: 'Adoquín del puerto', pave: 'adoquin', c: ['#8c8a84', '#bebab0', '#a6a298', '#6a6862'] },
+  sanjose: { name: 'Adoquín de la plaza', pave: 'adoquin', c: ['#948a7c', '#c8baa2', '#b0a28c', '#6e6458'], walk: ['#d2c8b6', '#b4aa98', '#e2d8c6'] },
+  trinidad: { name: 'Losa clara', pave: 'losa', c: ['#a8a094', '#d8d0c0', '#c2baaa', '#847c70'] },
+  mercedes: { name: 'Adoquín de la rambla', pave: 'adoquin', c: ['#7e8a8c', '#b4c2c4', '#9aa8aa', '#5e6a6c'], walk: ['#c8d0cc', '#aab2ae', '#dae2de'] },
+  paysandu: { name: 'Ladrillo sanducero', pave: 'ladrillo', c: ['#8a4a34', '#d0805c', '#b0644a', '#5e3022'], walk: ['#d8c0a8', '#bca48c', '#e8d4be'] },
+  salto: { name: 'Ladrillo de las termas', pave: 'ladrillo', c: ['#94563a', '#e09a6a', '#c0784e', '#663a26'], path: ['#d8a070', '#c88c5c', '#e8b486', '#b87a4a'] },
+  artigas: { name: 'Losa de amatista', pave: 'losa', c: ['#7a6e86', '#b8a8c8', '#9a8aac', '#5a4e66'], walk: ['#cfc6d6', '#b0a6ba', '#e0d8e6'] },
+  rivera: { name: 'Adoquín de la frontera', pave: 'adoquin', c: ['#8e7c5c', '#cab48a', '#ae9a72', '#6a5a40'] },
+  tacuarembo: { name: 'Piedra de campaña', pave: 'piedra', c: ['#8a6450', '#c8967a', '#aa7c64', '#64463a'], path: ['#c0785a', '#ac684c', '#d08a6a', '#9a5c42'] },
+  melo: { name: 'Adoquín serrano', pave: 'adoquin', c: ['#86806e', '#c0b89c', '#a49c84', '#625c4e'] },
+  quebrada: { name: 'Losa de granito', pave: 'losa', c: ['#7c7c80', '#b8b8bc', '#9c9ca2', '#5a5a60'] },
+  rocha: { name: 'Baldosa de balneario', pave: 'losa', c: ['#b4a88c', '#ece0c2', '#d2c6a8', '#8c8268'], walk: ['#eee6d2', '#d6ccb4', '#fbf4e4'] },
+  punta: { name: 'Baldosa blanca', pave: 'losa', c: ['#b0aca4', '#f0ece4', '#d4d0c8', '#8a8680'], walk: ['#f2f0ea', '#d8d6d0', '#ffffff'] },
+  minas: { name: 'Granito de las sierras', pave: 'piedra', c: ['#6e6e74', '#acacb2', '#8e8e96', '#4e4e56'] },
+  florida: { name: 'Adoquín de la Piedra Alta', pave: 'adoquin', c: ['#848a7a', '#bcc4ae', '#a0a894', '#60665a'] },
+  durazno: { name: 'Ladrillo del Yí', pave: 'ladrillo', c: ['#7e5a44', '#c08c68', '#a07254', '#583e30'] },
+  canelones: { name: 'Adoquín de la chacra', pave: 'adoquin', c: ['#8a7a68', '#c6b296', '#aa9880', '#665a4c'], walk: ['#d6ccb8', '#bab09c', '#e6dcc8'] },
+};
+function pave(g, s: CitySet, r) {
+  const [base, li, mid, grout] = s.c;
+  px(g, 0, 0, grout, T, T);
+  if (s.pave === 'adoquin') {
+    for (let y = 0; y < T; y += 4) for (let x = (y / 4) % 2 ? -3 : 0; x < T; x += 6) { px(g, x, y, r.pick([base, mid, base]), 5, 3); px(g, x, y, li, 4, 1); }
+  } else if (s.pave === 'ladrillo') { // herringbone
+    for (let y = 0; y < T; y += 4) for (let x = 0; x < T; x += 4) {
+      const col = r.pick([base, mid]);
+      if (((x + y) / 4) % 2) { px(g, x, y, col, 3, 4); px(g, x, y, li, 1, 3); } else { px(g, x, y, col, 4, 3); px(g, x, y, li, 3, 1); }
+    }
+  } else if (s.pave === 'losa') { // big slabs with fine grout
+    for (const [x, y] of [[0, 0], [8, 0], [0, 8], [8, 8]]) { px(g, x, y, r.pick([base, mid]), 7, 7); px(g, x, y, li, 7, 1); px(g, x, y, li, 1, 7); }
+    for (let i = 0; i < 5; i++) px(g, r.int(0, 14), r.int(0, 14), grout, 1, 1);
+  } else { // irregular rounded stones
+    px(g, 0, 0, grout, T, T);
+    for (let y = 0; y < T; y += 4) for (let x = ((y / 4) % 2) * 2 - 1; x < T; x += 5) {
+      const w = r.int(3, 4), h = 3;
+      px(g, x + 1, y, r.pick([base, mid, base]), w - 1, h); px(g, x, y + 1, r.pick([base, mid]), w + 1, h - 2);
+      px(g, x + 1, y, li, w - 2, 1);
+    }
+  }
+}
+/**
+ * The drawing theme of a map: its ground theme plus its city set (`m.set`), registered on first use as a theme of
+ * its own ('<ground>+<set>'). Logic that asks what a map is (cave, beach...) keeps reading m.theme.
+ */
+export function drawTheme(m: { theme?: string | null; set?: string | null } | null | undefined): string | null {
+  const base = m?.theme ?? null;
+  const set = m?.set ? CITY_SETS[m.set] : null;
+  if (!set) return base;
+  const name = `${base ?? ''}+${m!.set}`;
+  if (!THEMES[name]) {
+    const own: Record<string, any> = { c: (g, r) => pave(g, set, r) };
+    if (set.path) own['='] = (g, r) => speckle(g, r, set.path![0], set.path!.slice(1), 20);
+    if (set.walk) own['_'] = (g) => { px(g, 0, 0, set.walk![0], T, T); px(g, 0, 7, set.walk![1], T, 1); px(g, 7, 0, set.walk![1], 1, T); px(g, 0, 15, set.walk![1], T, 1); px(g, 15, 0, set.walk![1], 1, T); px(g, 1, 1, set.walk![2], 5, 1); px(g, 9, 9, set.walk![2], 5, 1); };
+    (THEMES as any)[name] = { ...(base ? (THEMES as any)[base] : {}), ...own };
+  }
+  return name;
+}
+/** The theme one cell is drawn with: the city set's theme for the tiles the set redraws, the map's own theme otherwise. */
+export function themeOf(m: { theme?: string | null; set?: string | null } | null | undefined, ch: string): string | null {
+  const name = drawTheme(m);
+  if (!m?.set || name === (m?.theme ?? null)) return name;
+  return SET_TILES.has(ch) && (THEMES as any)[name!]?.[ch] && (ch === 'c' || CITY_SETS[m.set]?.[ch === '=' ? 'path' : 'walk']) ? name : (m.theme ?? null);
+}
+const SET_TILES = new Set(['c', '=', '_']);

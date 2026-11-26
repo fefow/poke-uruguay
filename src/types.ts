@@ -75,7 +75,7 @@ export interface NpcDef {
 export interface MapDef {
   id?: string; name: string; w?: number; h?: number; tiles: string[];
   npcs?: NpcDef[]; items?: { x: number; y: number; item: string; id: string; hidden?: boolean }[];
-  exits?: Record<string, any>; doors?: any[]; signs?: string[]; indoor?: boolean; theme?: string | null;
+  exits?: Record<string, any>; doors?: any[]; signs?: string[]; indoor?: boolean; theme?: string | null; set?: string | null;
   /** extra layers (see data/map-edits.ts): drawn over people, and collision (x blocked, o passable) */
   top?: string[]; coll?: string[];
   /** height of each cell ('1'-'3', blank = ground): plateaus whose edge is a cliff, joined by steps (see tiles.ts) */

@@ -5,13 +5,13 @@ import { T, TILE_INFO, tileCanvas, groundUnder, treeTrunk, treeCrown, TREE_PAL }
 import { override, overrideEntry, overrideHasHoles } from './overrides.ts';
 
 type Tiles = ArrayLike<ArrayLike<string>>;
-export type EdgeFamily = 'water' | 'tall' | 'path' | 'sand' | 'tree' | 'fence';
+export type EdgeFamily = 'water' | 'tall' | 'path' | 'sand' | 'tree' | 'fence' | 'street';
 
 // neighbour bits: set when the neighbour belongs to the same mass
 export const N = 1, NE = 2, E = 4, SE = 8, S = 16, SW = 32, W = 64, NW = 128;
 const DIRS: [number, number, number][] = [[0, -1, N], [1, -1, NE], [1, 0, E], [1, 1, SE], [0, 1, S], [-1, 1, SW], [-1, 0, W], [-1, -1, NW]];
 
-const FAMILY: Record<string, EdgeFamily> = { '~': 'water', ',': 'tall', '=': 'path', s: 'sand', '#': 'tree', q: 'tree', F: 'fence' };
+const FAMILY: Record<string, EdgeFamily> = { '~': 'water', ',': 'tall', '=': 'path', s: 'sand', '#': 'tree', q: 'tree', F: 'fence', c: 'street' };
 const WATERISH = new Set(['~', 'ӫ', 'Ӥ', 'Ӣ', 'b', 'Ϡ']);
 const PATHISH = new Set(['=', 'c', 'D', '_', 'b', 'ʎ', '}', '?']);
 // ground a path or sand border shows against (grass, its plants and the things that stand on it)
@@ -31,6 +31,7 @@ function joins(fam: EdgeFamily, tiles: Tiles, x: number, y: number): boolean {
     case 'tall': return c === ',';
     case 'tree': return c === '#' || c === 'q'; // trees and ceibos share one mass
     case 'fence': return c === 'F';
+    case 'street':
     case 'path': {
       if (PATHISH.has(c)) return true;
       if (TILE_INFO[c]?.over) return groundUnder(tiles, x, y) === '=' || groundUnder(tiles, x, y) === 'c';
@@ -61,7 +62,8 @@ const FULL = 255;
 const GROUND_THEMES = new Set(['arena', 'seca', 'colorada', 'sierra']);
 /** Whether edge pieces apply to this cell: outdoor maps (plain or with a ground theme), tiles not redrawn in the sprite editor. */
 function edgesOn(ch: string, theme: string | null) {
-  if ((theme && !GROUND_THEMES.has(theme)) || !FAMILY[ch]) return false;
+  const base = theme?.split('+')[0] || null; // a city set's theme ('<ground>+<set>') follows its ground theme
+  if ((base && !GROUND_THEMES.has(base)) || !FAMILY[ch]) return false;
   // a tree redrawn in the sprite editor still joins its neighbours when the drawing has see-through parts, and a
   // redrawn tall grass keeps its drawing inside the patch (only the ring round the patch is the border piece)
   if (FAMILY[ch] === 'tree') return overrideHasHoles(`tile:${ch}0`) || (ch === '#' && !overrideEntry('tile:#0'));
@@ -116,6 +118,8 @@ const BORDERS: Partial<Record<EdgeFamily, Border>> = {
   // a path or sand patch: grass 1 px over it, a dark lip and a lit line, rounded corners
   path: { out: 1, R: 4, bands: ['#a8824e', '#f0dcae'] },
   sand: { out: 1, R: 4, bands: ['#d2b070', '#fff2c8'] },
+  // a paved street: a stone curb between the grass and the paving (dark joint, lit kerb, its shaded face)
+  street: { out: 1, R: 2, bands: ['#56524a', '#ece4d2', '#b4ac9a'] },
 };
 
 /** Composes an area piece: `inside` art where the cell is deep in the mass, `outside` ground beyond the border. */
