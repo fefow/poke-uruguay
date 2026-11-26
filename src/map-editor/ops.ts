@@ -119,3 +119,43 @@ export function fitZoom(w: number, h: number, t: number, boxW: number, boxH: num
   for (let k = 2; k <= max; k++) if (w * t * k <= boxW && h * t * k <= boxH) z = k;
   return z;
 }
+
+/** Terrain the smart brush tidies (the tiles that have edge pieces, see gfx/edges.ts) and whether it can be walked on. */
+export const SMART_TERRAIN: Record<string, { walk: boolean }> = { '~': { walk: false }, '#': { walk: false }, ',': { walk: true }, '=': { walk: true }, s: { walk: true } };
+/** Plain ground the smart brush may turn into the painted terrain. */
+const SOFT = new Set(['.', 'f', 'ӝ', ',']);
+
+/**
+ * The smart brush: after a stroke of terrain, tidies the cells round it so every mass gets clean edge pieces, like a
+ * classic tileset's smart path. A ground cell with terrain on 3 or 4 sides becomes terrain (no 1-tile notches), and
+ * for walkable terrain two cells that only touch at a corner get joined (a diagonal path cannot be walked).
+ * `keep(x, y)` protects cells (people, items, doors). Returns the cells it changed.
+ */
+export function smartSmooth(grid: Grid, cells: Cell[], ch: string, keep: (x: number, y: number) => boolean = () => false): Cell[] {
+  const t = SMART_TERRAIN[ch];
+  if (!t) return [];
+  const changed: Cell[] = [];
+  const is = (x: number, y: number) => grid[y]?.[x] === ch;
+  const soft = (x: number, y: number) => grid[y]?.[x] !== undefined && grid[y][x] !== ch && SOFT.has(grid[y][x]) && !keep(x, y);
+  const set = (x: number, y: number) => { grid[y][x] = ch; changed.push({ x, y }); };
+  const area = new Map<string, Cell>();
+  for (const c of cells) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) area.set(`${c.x + dx},${c.y + dy}`, { x: c.x + dx, y: c.y + dy });
+  for (let pass = 0; pass < 3; pass++) {
+    let n = changed.length;
+    for (const { x, y } of area.values()) {
+      if (!soft(x, y)) continue;
+      const sides = +is(x, y - 1) + +is(x + 1, y) + +is(x, y + 1) + +is(x - 1, y);
+      if (sides >= 3) set(x, y);
+    }
+    if (t.walk) for (const { x, y } of area.values()) {
+      if (!is(x, y)) continue;
+      for (const [dx, dy] of [[1, 1], [-1, 1]]) {
+        if (!is(x + dx, y + dy) || is(x + dx, y) || is(x, y + dy)) continue;
+        if (soft(x + dx, y)) set(x + dx, y);
+        else if (soft(x, y + dy)) set(x, y + dy);
+      }
+    }
+    if (changed.length === n) break;
+  }
+  return changed;
+}

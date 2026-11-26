@@ -818,7 +818,7 @@ import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
 import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng, block } from './map-gen.ts';
-import { guideMap, tidyMap, terraceMap } from './guide.ts';
+import { guideMap, tidyMap, terraceMap, openMap, grassBlocks } from './guide.ts';
 import { signRoute, signCity } from './signs.ts';
 import { LEADERS } from './story.ts';
 import { mazeMap } from './maze.ts';
@@ -1549,6 +1549,8 @@ const MO_BLOCKS = [
 
 for (const id of TIDY) {
   tidyMap(OUTDOOR[id]);
+  openMap(OUTDOOR[id]);
+  grassBlocks(OUTDOOR[id]);
   if (!LOCALITY_IDS.has(id)) terraceMap(OUTDOOR[id]);
   signRoute(OUTDOOR[id], id, MAPS);
 }

@@ -317,6 +317,15 @@ function crown(g, pal: [string, string, string, string, string]) {
   px(g, 9, 11, dk, 4, 1); px(g, 5, 11, dk, 2, 1); // shade under the crown
 }
 
+/** The trunk and ground shadow of the common tree '#' (also used by the joined tree masses, see edges.ts). */
+export function treeTrunk(g) {
+  g.fillStyle = 'rgba(20,40,20,0.28)'; g.fillRect(3, 14, 11, 2);
+  px(g, 6, 11, '#2a1a10', 5, 5); px(g, 7, 11, '#8a5a34', 3, 5); px(g, 7, 11, '#b07a48', 1, 5); px(g, 9, 12, '#5a3a20', 1, 4);
+}
+/** The round crown of the common tree '#'. */
+export const TREE_PAL: [string, string, string, string, string] = ['#173f20', '#1f6a2c', '#35a03a', '#62c846', '#a4ec74'];
+export function treeCrown(g) { crown(g, TREE_PAL); }
+
 function speckle(g, rng, base, dots, n) {
   px(g, 0, 0, base, T, T);
   for (let i = 0; i < n; i++) px(g, rng.int(0, 15), rng.int(0, 15), rng.pick(dots));
@@ -521,9 +530,8 @@ const DRAW: Record<string, any> = {
   },
   '#': (g, r) => {
     grass(g, r);
-    g.fillStyle = 'rgba(20,40,20,0.28)'; g.fillRect(3, 14, 11, 2);
-    px(g, 6, 11, '#2a1a10', 5, 5); px(g, 7, 11, '#8a5a34', 3, 5); px(g, 7, 11, '#b07a48', 1, 5); px(g, 9, 12, '#5a3a20', 1, 4);
-    crown(g, ['#173f20', '#1f6a2c', '#35a03a', '#62c846', '#a4ec74']);
+    treeTrunk(g);
+    treeCrown(g);
   },
   q: (g, r) => {
     grass(g, r);
@@ -2812,29 +2820,6 @@ const ROOF_NAMES = /^(techo|emblema|cruz policlínica|toldo tienda|azotea)/;
 const WALL_NAMES = /^(fachada|pared$|ventana$|puerta$|edificio|torre$|pilar$|tribuna$)/;
 let buildingKinds: Map<string, 'roof' | 'wall' | null> | null = null;
 /** 'roof', 'wall' or null for a tile character (worked out from the legend, so custom tiles never count). */
-const EDGE_NEIGHBOURS = new Set(['.', ',', 'f', '#', 'q', 'p', 'F', 'S', 'R', 'λ', 'ʎ', 'K']);
-/**
- * Soft border where a dirt path meets grass, trees or rocks: a dark lip on the path's outer pixel and a lit
- * line inside it, with rounded outer corners. Outdoor maps without a theme only; edited tiles are left alone.
- */
-export function drawGroundEdges(g, tiles, x0: number, y0: number, x1: number, y1: number, cx: number, cy: number, theme: string | null = null) {
-  if (theme) return;
-  for (let y = y0; y <= y1; y++) {
-    for (let x = x0; x <= x1; x++) {
-      if (tiles[y]?.[x] !== '=' || override('tile:=0', T, T)) continue;
-      const edge = (dx: number, dy: number) => EDGE_NEIGHBOURS.has(tiles[y + dy]?.[x + dx]);
-      const n = edge(0, -1), s = edge(0, 1), w = edge(-1, 0), e = edge(1, 0);
-      if (!n && !s && !w && !e) continue;
-      const sx = x * T - cx, sy = y * T - cy;
-      const lip = '#b08a56', lit = '#f0dcae';
-      if (n) { g.fillStyle = lit; g.fillRect(sx, sy + 1, T, 1); g.fillStyle = lip; g.fillRect(sx, sy, T, 1); }
-      if (s) { g.fillStyle = lit; g.fillRect(sx, sy + T - 2, T, 1); g.fillStyle = lip; g.fillRect(sx, sy + T - 1, T, 1); }
-      if (w) { g.fillStyle = lit; g.fillRect(sx + 1, sy, 1, T); g.fillStyle = lip; g.fillRect(sx, sy, 1, T); }
-      if (e) { g.fillStyle = lit; g.fillRect(sx + T - 2, sy, 1, T); g.fillStyle = lip; g.fillRect(sx + T - 1, sy, 1, T); }
-    }
-  }
-}
-
 function buildingKind(ch: string) {
   if (!buildingKinds) buildingKinds = new Map();
   let k = buildingKinds.get(ch);

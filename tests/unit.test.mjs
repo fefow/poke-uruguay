@@ -1174,3 +1174,33 @@ test('map layers: the editor patch adds an "encima" and a collision layer that w
   applyMapEdits(maps2, { b: { coll: ['xx'] } });
   assert.equal(maps2.b.coll, undefined);
 });
+
+test('edge pieces: neighbour masks and the smart brush', async () => {
+  const { edgeMask, pieceKey, N, E, S, W, NE } = await import('../src/gfx/edges.ts');
+  const { smartSmooth } = await import('../src/map-editor/ops.ts');
+  const map = ['.....', '.~~~.', '.~~~.', '.....'];
+  // top-left water cell: open to the north and west, joined east and south (and the diagonal between them)
+  assert.equal(edgeMask(map, 1, 1, 'water'), E | S | 8);
+  // the map edge counts as part of the mass, so a lake at the border has no bank there
+  assert.equal(edgeMask(['~~', '~~'], 0, 0, 'water'), 255);
+  // a diagonal only counts when both sides next to it are in the mass
+  assert.equal(edgeMask(['.~', '~~'], 0, 1, 'water') & NE, 0);
+  assert.equal(pieceKey(['~~~', '~~~', '~~~'], 1, 1), '~');
+  assert.notEqual(pieceKey(map, 1, 1), '~');
+  // fences join only along their four sides
+  assert.equal(edgeMask(['FFF'], 1, 0, 'fence'), E | W);
+  assert.equal(edgeMask(['.F.', '.F.'], 1, 0, 'fence'), S);
+  // smart brush: a notch with terrain on three sides is filled, and a diagonal path gets a joining step
+  const g = ['.....', '.~.~.', '.~~~.', '.....'].map((r) => [...r]);
+  smartSmooth(g, [{ x: 1, y: 1 }], '~');
+  assert.equal(g[1][2], '~');
+  const p = ['=....', '.=...', '.....'].map((r) => [...r]);
+  const ch = smartSmooth(p, [{ x: 1, y: 1 }], '=');
+  assert.equal(ch.length, 1);
+  assert.ok(p[0][1] === '=' || p[1][0] === '=');
+  // protected cells are never painted
+  const q = ['.....', '.~.~.', '.~~~.'].map((r) => [...r]);
+  smartSmooth(q, [{ x: 1, y: 1 }], '~', (x, y) => x === 2 && y === 1);
+  assert.equal(q[1][2], '.');
+  void N; void S; void W;
+});

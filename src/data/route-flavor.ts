@@ -36,13 +36,19 @@ export function flavorRoute(m, id) {
     }
     return seen;
   };
+  // decided on the map as it was before the swap, so a wall turned into grass never makes the next one a
+  // "first layer" too (that used to leave fence and ceibo in a checkerboard)
   const swapWalls = (fn) => {
+    const front = rows.map((r, y) => r.map((c, x) => WALL.has(c) && x > 0 && y > 0 && x < w - 1 && y < h - 1 && frontier(x, y)));
     for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
       if (!WALL.has(rows[y][x])) continue;
-      const c = fn(x, y, frontier(x, y));
+      const c = fn(x, y, front[y][x]);
       if (c) rows[y][x] = c;
     }
   };
+  // one choice per 3x3 block, so swapped walls come in stands (palms, rocks) instead of one tile here and one there
+  const salt = [...id].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) % 9973; // not from rand(): the rest of the route stays as it was
+  const block = (x, y) => { const v = Math.sin(Math.floor(x / 3) * 127.1 + Math.floor(y / 3) * 311.7 + salt) * 43758.5453; return v - Math.floor(v); };
   // blobs of an obstacle/ground tile on open grass, undone when they would cut anything off
   const blobs = (count, rMin, rMax, tile, minDist = 2) => {
     for (let k = 0, done = 0; k < 80 && done < count; k++) {
@@ -74,28 +80,65 @@ export function flavorRoute(m, id) {
   const drifts = (count, tile, rMin, rMax) => blobs(count, rMin, rMax, tile);
 
   if (kind === 'coast') {
-    swapWalls((x, y, f) => (rand() < 0.75 ? 'p' : null));
+    swapWalls((x, y, f) => (rand(), block(x, y) < 0.75 ? 'p' : null)); // rand() still drawn: the rest of the route keeps its layout
     drifts(7, 's', 2, 4);
     blobs(2, 2, 3, '~');
   } else if (kind === 'wetland') {
-    swapWalls((x, y, f) => (f && rand() < 0.35 ? 'q' : null));
+    swapWalls((x, y, f) => (f && (rand(), block(x, y) < 0.35) ? 'q' : null));
     blobs(5, 2, 3, '~');
     drifts(4, 'f', 1, 2);
     dress([','], ',', 0);
   } else if (kind === 'farm') {
     let n = 0;
+    // a hedge of trees along the way and open pasture behind it, with a stand of ceibos here and there
     swapWalls((x, y, f) => {
-      if (!f) return rand() < 0.88 ? '.' : 'q';
+      if (!f) return (rand(), block(x, y) < 0.9) ? '.' : 'q';
       n++;
-      return n % 9 === 0 ? 'q' : 'F';
+      return n % 9 === 0 ? 'q' : null;
     });
     drifts(3, 'f', 1, 2);
+    // corrals out in the pasture: straight fences round a square with one gap, hay bales here and there (only on
+    // pasture the trail cannot reach, so nothing on the way changes)
+    const onWay = reach();
+    const pasture = (x, y) => !edge(x, y) && rows[y][x] === '.' && !onWay.has(`${x},${y}`);
+    for (let k = 0, made = 0; k < 60 && made < 3; k++) {
+      const cw = 5 + Math.floor(rand() * 4), chh = 4 + Math.floor(rand() * 2);
+      const x0 = 2 + Math.floor(rand() * (w - cw - 4)), y0 = 2 + Math.floor(rand() * (h - chh - 4));
+      let ok = true;
+      for (let y = y0 - 1; y <= y0 + chh && ok; y++) for (let x = x0 - 1; x <= x0 + cw && ok; x++) if (!pasture(x, y)) ok = false;
+      if (!ok) continue;
+      const gap = x0 + 1 + Math.floor(rand() * (cw - 2));
+      for (let x = x0; x < x0 + cw; x++) { rows[y0][x] = 'F'; if (x !== gap) rows[y0 + chh - 1][x] = 'F'; }
+      for (let y = y0; y < y0 + chh; y++) { rows[y][x0] = 'F'; rows[y][x0 + cw - 1] = 'F'; }
+      rows[y0 + 1][x0 + 1] = 'Ξ';
+      made++;
+    }
   } else if (kind === 'sierra') {
-    swapWalls((x, y, f) => (rand() < 0.7 ? 'R' : null));
+    swapWalls((x, y, f) => (rand(), block(x, y) < 0.7 ? 'R' : null));
     blobs(6, 1, 2, 'R');
   } else if (kind === 'suburb') {
-    swapWalls((x, y, f) => (f ? (rand() < 0.15 ? 'q' : 'F') : (rand() < 0.5 ? '.' : null)));
+    swapWalls((x, y, f) => (f ? (rand() < 0.15 ? 'q' : 'F') : (rand(), block(x, y) < 0.5) ? '.' : null));
     drifts(6, 'f', 1, 2);
+  }
+  // anyone left behind a new fence or stand gets a gate: the shortest way through the swapped walls opens up
+  const seen = reach();
+  for (const o of objs) {
+    if (seen.has(`${o.x},${o.y}`) || solid(rows[o.y]?.[o.x])) continue;
+    const prev = new Map([[`${o.x},${o.y}`, null]]);
+    const q = [[o.x, o.y]];
+    let end = null;
+    for (let i = 0; i < q.length && !end; i++) {
+      const [x, y] = q[i];
+      for (const [dx, dy] of D4) {
+        const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
+        if (prev.has(k) || edge(nx, ny) || !(rows[ny][nx] === 'F' || WALL.has(rows[ny][nx]) || !solid(rows[ny][nx]))) continue;
+        prev.set(k, `${x},${y}`);
+        if (seen.has(k)) { end = k; break; }
+        q.push([nx, ny]);
+      }
+    }
+    for (let k = end; k; k = prev.get(k)) { const [x, y] = k.split(',').map(Number); if (solid(rows[y][x])) rows[y][x] = '.'; }
+    if (end) for (const k of reach()) seen.add(k);
   }
   m.tiles = rows.map((r) => r.join(''));
 }
