@@ -1,6 +1,6 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-26T14:32:41.896Z",
+  "exported": "2026-11-26T14:32:59.124Z",
   "build": "24cd2935740facd4",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0",
   "state": {
@@ -12,7 +12,7 @@
       "pibe nv8 26PS"
     ],
     "badges": 2,
-    "playtime": 5644
+    "playtime": 5654
   },
   "entries": [
     {
@@ -2413,10 +2413,11 @@
       "where": "anglo_1 (9,14)"
     },
     {
-      "t": "2026-11-26T14:32:37.578Z",
+      "t": "2026-11-26T14:32:55.320Z",
       "level": "warn",
       "msg": "Autoguardado falló: Servidor de partidas: 400 {\"code\":\"P0001\",\"details\":null,\"hint\":null,\"message\":\"too many saves\"}",
-      "where": "anglo_1 (9,14)"
+      "where": "anglo_1 (9,14)",
+      "count": 2
     }
   ]
 }
