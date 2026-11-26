@@ -66,6 +66,10 @@ export function fmt(text) {
 
 const SPEEDS = { 1: 38, 2: 18, 3: 4 };
 
+// The world can swap single lines before they are shown (lines that only make sense by day, said outdoors at night).
+let lineFilter = (line: string) => line;
+export function setLineFilter(f: (line: string) => string) { lineFilter = f; }
+
 /**
  * Show text in the dialog box. Waits for A/B unless opts.auto (ms) is set.
  * opts.keep leaves the box open (used before a choice).
@@ -73,7 +77,8 @@ const SPEEDS = { 1: 38, 2: 18, 3: 4 };
 export async function say(text, opts: { battle?: boolean; keep?: boolean; [k: string]: any } = {}) {
   const lines = Array.isArray(text) ? text : [text];
   for (let li = 0; li < lines.length; li++) {
-    const msg = fmt(TEXT_OVERRIDES[lines[li]] ?? lines[li]);
+    const line = lineFilter(lines[li]);
+    const msg = fmt(TEXT_OVERRIDES[line] ?? line);
     dialog.hidden = false;
     dialog.classList.toggle('is-battle', !!opts.battle);
     dialogName.hidden = !opts.name;

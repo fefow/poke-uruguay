@@ -1105,3 +1105,32 @@ test('trainers: battle portrait, map sprite and name are the same person', async
   assert.ok(checked > 250, `only ${checked} trainers checked`);
   assert.ok(TRAINER_PORTRAITS['back:player_m'] && TRAINER_PORTRAITS['back:player_f']);
 });
+
+test('caves always use the night odds, whatever the clock', async () => {
+  const { encounterList } = await import('../src/data/encounters.ts');
+  const { MAPS } = await import('../src/data/maps.ts');
+  const cave = Object.values(MAPS).find((m) => m.theme === 'cueva' && (m.enc?.list ?? []).some(([sp]) => SPECIES[sp].types.includes('veneno') || SPECIES[sp].types.includes('siniestro')));
+  assert.ok(cave, 'hay una cueva con criaturas nocturnas');
+  assert.deepEqual(encounterList(cave, 'cave', 0), encounterList(cave, 'cave', 1));
+});
+
+test('outdoor NPCs have a night dialogue that never talks about the sun', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { NIGHT_TALK, NIGHT_POOL, NIGHT_SWAP, nightTalk } = await import('../src/data/night-talk.ts');
+  const sunny = /(^|[^\wáéíóúñ])(sol|soleado|calor|caluroso|siesta|buen d[ií]a|buenos d[ií]as|buenas tardes|atardecer|esta tarde)(?![\wáéíóúñ])/i;
+  for (const lines of [...Object.values(NIGHT_TALK), ...NIGHT_POOL, ...Object.values(NIGHT_SWAP).map((s) => [s])]) {
+    for (const l of lines) assert.ok(!sunny.test(l), `línea nocturna con sol: ${l}`);
+  }
+  let total = 0, own = 0;
+  for (const m of Object.values(MAPS)) {
+    if (m.indoor) continue;
+    for (const d of m.npcs ?? []) {
+      if (d.trainer || d.script || d.critter || !d.text || d.blocker || d.gate) continue;
+      total++;
+      const t = Array.isArray(d.text) ? d.text : [d.text];
+      if (NIGHT_TALK[t[0]]) own++;
+      assert.notDeepEqual(nightTalk(d.text, d.x, d.y), t, `${t[0]}: mismo diálogo de día y de noche`);
+    }
+  }
+  assert.ok(own >= total * 0.9, `solo ${own} de ${total} NPC al aire libre tienen diálogo nocturno propio`);
+});
