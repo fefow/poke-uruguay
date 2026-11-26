@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-26 (v238)
+> Última actualización: 2026-11-26 (v241)
 >
 > Entrenadores: cada entrenador usa en batalla un retrato grande dibujado a partir de su sprite del mapa, y su nombre, título y sprite corresponden a la misma persona (mujer con nombre y título de mujer, hombre con nombre y título de hombre; Don/Doña solo para gente mayor o de campo).
 
@@ -66,7 +66,7 @@ Después de elegir Nueva partida sigue la presentación de Tabárez en el labora
 
 Cada pareja de ciudades tiene una localidad en medio. Las ciudades sin gimnasio cierran el camino con una persona (`GATE_STORY`) que se va cuando se cumple su condición.
 
-1. **Carmelo.** Inicio. Tu madre te manda con Tabárez. Hablás con él antes de elegir; elegís inicial entre tres Pokeballs y el rival elige la que le gana a la tuya (Fuego → Agua, Agua → Planta, Planta → Fuego): rodea la mesa caminando, la toma del lado del frente (el mismo que el tuyo) y se da vuelta para mirarte.
+1. **Carmelo.** Inicio. Tu madre te manda con Tabárez. Hablás con él antes de elegir (si después intentás irte sin elegir, el ayudante Gonzalo camina hasta la puerta y te frena: `lab_no_exit`); elegís inicial entre tres Pokeballs y el rival elige la que le gana a la tuya (Fuego → Agua, Agua → Planta, Planta → Fuego): rodea la mesa caminando, la toma del lado del frente (el mismo que el tuyo) y se da vuelta para mirarte.
 2. **Colonia del Sacramento.** Hay que traerle a Tabárez la carta del almacén. A cambio: PokeDex y 5 Pokeballs. Una vecina cierra la Ruta 1 hasta tener la PokeDex.
 3. **Rosario** (localidad). Caña de pescar. En Bosque Grande hay una revancha corta con el rival.
 4. **San José de Mayo.** El recluta **Olivera** se lleva el alambre de la intendencia; se lo vence y se abre el camino. Festival: **Fiesta del Mate**.
