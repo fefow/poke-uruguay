@@ -5,5 +5,10 @@ export const TEXT_OVERRIDES = {
   "Mi hermano ya no está mareado. Gracias por el favor.": "Me aviso mi hermano que lo ayudaste, muchas gracias!",
   "Mi hermano, el capitán, está en su camarote. Llevale un Mate: en el almacén venden.": "Hace un rato estuvimos juntos y andaba mareado, me dejo preocupado ..",
   "Para subir hace falta un ticket, y los reparte alguien de la empresa. Yo solo sé que hay gente de la planta que trabaja en el frigorífico a la fuerza.": "Con lo de mi hermano y la banda del PP que según me contaron esta en el frigorífico ando muy preocupado",
-  "Soy el farero de Fray Bentos. Hace cuarenta años que miro el río desde acá arriba.": "Soy el farero de Fray Bentos. Hace 25 años que miro el río desde acá arriba."
+  "Soy el farero de Fray Bentos. Hace cuarenta años que miro el río desde acá arriba.": "Soy el farero de Fray Bentos. Hace 25 años que miro el río desde acá arriba.",
+  "Un zarzal espeso y espinoso. Con algo filoso se podría abrir paso.": "Pa mano tan grande las chircas. Vamos a precisar tremendo machetazo para pasar",
+  "Un zarzal espeso. Con el Machete se puede abrir paso.": "Altas chircas mono. Con el Machete se puede abrir paso.",
+  "Un zarzal espeso. El Machete no alcanza todavía: hace falta la Medalla Salto.": "Tremendas chircas mano. El Machete no alcanza todavía: hace falta la Medalla Salto.",
+  "Un zarzal espeso. Para usar el Machete hace falta la Medalla de Fray Bentos.": "Tremendas chircas mano. Para usar el Machete hace falta la Medalla de Fray Bentos.",
+  "Un zarzal tapa la entrada. Con un machete se podría pasar.": "Pa mano, están tremendas estas chircas por aca no pasamos ni a palo. "
 };
