@@ -386,7 +386,7 @@ function tryMove(d) {
   // Leaving through the map edge
   if (nx < 0 || ny < 0 || nx >= m.w || ny >= m.h) {
     if (m.indoor) {
-      if (tileAt(p.x, p.y) === 'm') return void runScript(() => exitInterior());
+      if (tileAt(p.x, p.y) === 'm') return void runScript(() => (labGuard() ? SCRIPTS.lab_no_exit(api) : exitInterior()));
       return bump();
     }
     const side = nx < 0 ? 'w' : nx >= m.w ? 'e' : ny < 0 ? 'n' : 's';
@@ -561,6 +561,9 @@ async function enterInterior(id) {
   await doWarp(id, mat.x, mat.y, 'up');
 }
 
+/** Laboratorio: después de hablar con Tabárez no se sale sin elegir compañero (un ayudante te frena). */
+const labGuard = () => W_.map.id === 'lab' && flag('met_prof') && !flag('has_starter');
+
 async function exitInterior() {
   const ex = W_.map.exitTo;
   sfx('door');
@@ -608,7 +611,7 @@ function onStep() {
   if (W_.gp) { W_.gp.steps++; applyGp(); }
   const ch = tileAt(p.x, p.y);
   if (W_.map.indoor && ch === 'm' && p.dir === 'down' && p.from && tileAt(p.from.x, p.from.y) !== 'm') {
-    return void runScript(() => exitInterior());
+    return void runScript(() => (labGuard() ? SCRIPTS.lab_no_exit(api) : exitInterior()));
   }
   if (S.repel > 0) {
     S.repel--;
@@ -1683,10 +1686,10 @@ export const api = {
   tollPaid(id) { tollPaidAt[id] = state().stats.steps; tollTries[id] = 0; },
   tollTry(id) { tollTries[id] = (tollTries[id] ?? 0) + 1; return tollTries[id]; },
   /** Sends the player back to the tile they just came from (fade, same map). */
-  async stepBack() {
+  async stepBack(dir?: string) {
     const p = W_.player;
     const to = p.from ?? { x: p.x, y: p.y };
-    await doWarp(W_.map.id, to.x, to.y, opposite(p.dir));
+    await doWarp(W_.map.id, to.x, to.y, dir ?? opposite(p.dir));
   },
   /** Moves the player to another map with a fade (used when the ferry sails). */
   warp: (map, x, y, dir = 'down') => doWarp(map, x, y, dir),
