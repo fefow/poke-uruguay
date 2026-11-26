@@ -2,6 +2,7 @@
 // right, floating over the full-screen game, MENÚ and ×2 (run) on top. They drive the same actions as the keyboard (see input.ts). Landscape only:
 // in portrait a hint asks to rotate. Desktop (a mouse or any hover device) never sees any of this.
 import { input } from './input.ts';
+import { has3D, view3DOn, switchView, onViewChange } from '../gfx/world-3d.ts';
 
 const TOUCH = '(hover: none) and (pointer: coarse)';
 
@@ -68,6 +69,14 @@ export function mountTouchPad() {
 
   const left = el('div', 'gb-side gb-left');
   const lt = el('div', 'gb-top'); lt.append(button('gb-pill', 'MENÚ', 'start'));
+  if (has3D()) {
+    // 3D/2D: lo mismo que la tecla V; el botón dice a qué vista pasa
+    const v = el('button', 'gb-btn gb-pill gb-view', view3DOn() ? '2D' : '3D') as HTMLButtonElement;
+    v.type = 'button';
+    v.addEventListener('pointerdown', (e) => { e.preventDefault(); buzz(); switchView(); });
+    onViewChange((on) => (v.textContent = on ? '2D' : '3D'));
+    lt.append(v);
+  }
   left.append(lt, dpad);
   const right = el('div', 'gb-side gb-right');
   const rt = el('div', 'gb-top'); rt.append(latch('gb-pill gb-x2', '×2', 'run'));

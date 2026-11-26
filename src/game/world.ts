@@ -1988,13 +1988,21 @@ function drawWorld(g, t) {
 function drawWorld3DFrame(g, t) {
   const m = W_.map;
   const wx = m.dark || m.indoor || m.theme === 'cueva' ? 'clear' : weatherAt(m.id, m.weather);
-  const foggy = wx === 'fog' || activeMachines().length > 0 || (m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'));
+  const machines = !m.dark && !m.indoor && activeMachines().length > 0;
+  const story = (m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'));
+  // the same fog as the 2D map: a running PP machine is thickest, then the story fog, then the weather
+  const fog = machines ? 'machine' : story ? 'story' : wx === 'fog' ? 'weather' : null;
   const userZ = Math.min(3, Math.max(1, Math.round(settings.mapZoom ?? 1)));
-  drawWorld3D({ map: m, tiles: W_.tiles, npcs: W_.npcs, items: W_.items, legend: W_.legend, player: W_.player, emote: W_.emote, lit: !!W_.lit, bike: !!W_.bike, flash: W_.flash, look: state().player.look || 'player_m', foggy, zoom: userZ, entityPos, tileAt }, t);
+  drawWorld3D({ map: m, tiles: W_.tiles, npcs: W_.npcs, items: W_.items, legend: W_.legend, player: W_.player, emote: W_.emote, lit: !!W_.lit, bike: !!W_.bike, flash: W_.flash, look: state().player.look || 'player_m', fog, zoom: userZ, entityPos, tileAt }, t);
   g.clearRect(0, 0, W, H);
   if (wx === 'rain' || wx === 'storm') rain(g, t);
   if (wx === 'storm') { rain(g, t * 1.7); lightning(g, t); }
-  if (foggy && !m.dark) drawFog(g, t);
+  if (fog && !m.dark) {
+    // a thin veil over everything (like the 2D one) and the drifting banks on top
+    g.fillStyle = fog === 'machine' ? 'rgba(196,204,216,0.28)' : fog === 'weather' ? 'rgba(205,212,222,0.18)' : 'rgba(205,212,222,0.1)';
+    g.fillRect(0, 0, W, H);
+    drawFog(g, t);
+  }
   vignette(g, m.indoor ? 0.5 : 0.7);
   if (W_.flash) { g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); }
 }
