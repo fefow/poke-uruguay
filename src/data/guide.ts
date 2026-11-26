@@ -274,3 +274,126 @@ export function terraceMap(m) {
   if (made) m.tiles = rows.map((r) => r.join(''));
   return made;
 }
+
+/**
+ * More room to walk, like the classic routes (about 60% of the map walkable instead of 50%): the tree walls step back
+ * from the open ground, concave corners first so the walls stay smooth, then one tile at a time along the whole edge.
+ * A wall cell only opens when every open cell round it is already in the same reachable area, counting people,
+ * scene triggers, ledges, water and thickets as walls, so no new shortcut appears past a blocker or a gate. The
+ * outer three rows and columns are never touched (exits stay where they are, and the trees at the edge keep their
+ * hidden items).
+ */
+export function openMap(m, target = 0.6) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  const rows = m.tiles.map((r) => [...r]);
+  const people = new Set((m.npcs ?? []).map((o) => `${o.x},${o.y}`));
+  const trig = (x, y) => (m.triggers ?? []).some((t) => x >= t.x && x < t.x + (t.w ?? 1) && y >= t.y && y < t.y + (t.h ?? 1));
+  const open = (x, y) => !solid(rows[y]?.[x]) && !people.has(`${x},${y}`) && !trig(x, y);
+  const total = w * h;
+  let walk = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (!solid(rows[y][x])) walk++;
+  // label the reachable areas
+  const area = new Int32Array(total).fill(-1);
+  let next = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (area[y * w + x] >= 0 || !open(x, y)) continue;
+    const st = [[x, y]];
+    area[y * w + x] = next;
+    while (st.length) {
+      const [cx, cy] = st.pop();
+      for (const [dx, dy] of D4) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h || area[ny * w + nx] >= 0 || !open(nx, ny)) continue;
+        area[ny * w + nx] = next;
+        st.push([nx, ny]);
+      }
+    }
+    next++;
+  }
+  let made = 0;
+  for (let round = 0; round < 8 && walk / total < target; round++) {
+    for (const need of [3, 2, 1]) {
+      const picks = [];
+      for (let y = 3; y < h - 3; y++) for (let x = 3; x < w - 3; x++) {
+        if (!WALLS.has(rows[y][x]) && rows[y][x] !== 'p') continue; // tree, ceibo, rock and palm walls
+        let sides = 0, id = -1, mixed = false;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          const nx = x + dx, ny = y + dy;
+          if (!solid(rows[ny][nx]) && (people.has(`${nx},${ny}`) || trig(nx, ny))) { mixed = true; continue; }
+          const a = area[ny * w + nx];
+          if (!solid(rows[ny][nx]) && a < 0) mixed = true;
+          if (a < 0) continue;
+          if (id >= 0 && a !== id) mixed = true;
+          id = a;
+          if (!dx || !dy) sides++;
+        }
+        // a wall between two different areas, or next to something that is not plain ground, stays
+        if (mixed || id < 0 || sides < need) continue;
+        const N = [rows[y - 1][x], rows[y + 1][x], rows[y][x - 1], rows[y][x + 1]];
+        if (N.some((c) => c === 'λ' || c === 'ʎ' || c === 'K' || c === '~' || c === '%' || c === '\\')) continue;
+        picks.push([x, y, id]);
+      }
+      for (const [x, y, id] of picks) {
+        if (walk / total >= target) break;
+        rows[y][x] = '.';
+        area[y * w + x] = id;
+        walk++;
+        made++;
+      }
+      if (walk / total >= target) break;
+      if (need === 1) break; // one ring per round, so the walls step back evenly
+    }
+  }
+  // bits of fence left standing on their own once the trees behind them stepped back (three tiles or less) go too
+  const seenF = new Set();
+  for (let y = 3; y < h - 3; y++) for (let x = 3; x < w - 3; x++) {
+    if (rows[y][x] !== 'F' || seenF.has(`${x},${y}`)) continue;
+    const comp = [[x, y]];
+    seenF.add(`${x},${y}`);
+    for (let i = 0; i < comp.length; i++) for (const [dx, dy] of D4) {
+      const nx = comp[i][0] + dx, ny = comp[i][1] + dy;
+      if (rows[ny]?.[nx] === 'F' && !seenF.has(`${nx},${ny}`)) { seenF.add(`${nx},${ny}`); comp.push([nx, ny]); }
+    }
+    if (comp.length > 3 || comp.some(([cx, cy]) => cx < 3 || cy < 3 || cx >= w - 3 || cy >= h - 3)) continue;
+    let id = -1, ok = true;
+    for (const [cx, cy] of comp) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const nx = cx + dx, ny = cy + dy, c = rows[ny][nx];
+      if (c === 'F') continue;
+      if (solid(c)) { if (D4.some(([ex, ey]) => ex === dx && ey === dy) && !WALLS.has(c) && c !== 'p') ok = false; continue; }
+      const a = area[ny * w + nx];
+      if (a < 0 || (id >= 0 && a !== id)) ok = false;
+      id = a;
+    }
+    if (!ok || id < 0) continue;
+    for (const [cx, cy] of comp) { rows[cy][cx] = '.'; area[cy * w + cx] = id; made++; }
+  }
+  if (made) m.tiles = rows.map((r) => r.join(''));
+  return made;
+}
+
+/**
+ * Tall grass in clean patches (a classic route paints a block of tall grass, not scattered tiles): a grass tile with
+ * tall grass on three or four sides joins the patch, and a tall-grass tile sticking out on its own (one neighbour or
+ * none) goes back to grass. Only plain grass and tall grass change, never under people or items.
+ */
+export function grassBlocks(m) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  const rows = m.tiles.map((r) => [...r]);
+  const held = new Set([...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])].map((o) => `${o.x},${o.y}`));
+  let made = 0;
+  for (let pass = 0; pass < 3; pass++) {
+    let n = 0;
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      const c = rows[y][x];
+      if ((c !== '.' && c !== ',') || held.has(`${x},${y}`)) continue;
+      const k = D4.filter(([dx, dy]) => rows[y + dy][x + dx] === ',').length;
+      if (c === '.' && k >= 3) { rows[y][x] = ','; n++; }
+      else if (c === ',' && k <= 1) { rows[y][x] = '.'; n++; }
+    }
+    made += n;
+    if (!n) break;
+  }
+  if (made) m.tiles = rows.map((r) => r.join(''));
+  return made;
+}

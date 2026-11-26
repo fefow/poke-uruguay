@@ -7,7 +7,8 @@ import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
-import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, drawGroundEdges, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
+import { cellCanvas } from '../gfx/edges.ts';
+import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -15,7 +16,7 @@ import { charSprite, LOOKS } from '../gfx/characters.ts';
 import { drawItem } from '../gfx/items.ts';
 import { h, safeStorage } from '../core/util.ts';
 import { devToken, isDev, unlockDev, checkToken, lockDev } from '../core/devauth.ts';
-import { rectBetween, rectCells, lineCells, brushCells, copyRegion, flipH, flipV, rotate, pasteStamp, paintCells, replaceAll, changedCells, fitZoom } from './ops.ts';
+import { rectBetween, rectCells, lineCells, brushCells, copyRegion, flipH, flipV, rotate, pasteStamp, paintCells, replaceAll, changedCells, fitZoom, smartSmooth } from './ops.ts';
 
 const REPO = 'fefow/poke-uruguay';
 const FILE = 'src/data/map-overrides.js';
@@ -171,7 +172,7 @@ const S: any = {
   pasting: false, // the clipboard follows the pointer until a click places it
   recent: loadJSON(RECENT_KEY, []) as string[],
   showSolid: false, showChanges: false, onlyEdited: false,
-  pan: null, spaceDown: false, lastPaint: null,
+  pan: null, spaceDown: false, lastPaint: null, smart: true, stroke: [],
   history: new Map(), // id -> { undo, redo } so switching maps keeps each map's undo
   back: [] as string[], // maps opened before this one (Volver)
   doorTo: 'casa_jugador', // where a door painted from the palette leads until changed in the inspector
@@ -232,6 +233,7 @@ const zoomSel = h('select', { class: 'ed-input me-zoom', title: 'Ctrl + rueda de
 const fitBtn = btn('Ajustar', () => setZoom(fitZoom(S.W.tiles[0].length, S.W.tiles.length, T, stage.clientWidth - 24, stage.clientHeight - 24)), { class: 'ed-btn ed-mini me-fit', title: 'El zoom entero más grande en el que entra el mapa entero (tecla 0)' });
 const gridChk = h('input', { type: 'checkbox', checked: S.grid, onchange: () => { S.grid = gridChk.checked; draw(); } });
 const solidChk = h('input', { type: 'checkbox', onchange: () => { S.showSolid = solidChk.checked; draw(); } });
+const smartChk = h('input', { type: 'checkbox', checked: true, onchange: () => { S.smart = smartChk.checked; } });
 const changesChk = h('input', { type: 'checkbox', onchange: () => { S.showChanges = changesChk.checked; draw(); } });
 const brushSel = h('select', { class: 'ed-input me-zoom', title: 'Tamaño del pincel (teclas [ y ])', onchange: () => { S.brush = +brushSel.value; } },
   [1, 2, 3, 5].map((n) => h('option', { value: n, text: `Pincel ${n}×${n}`, selected: n === S.brush })));
@@ -263,6 +265,7 @@ const toolbar = h('div', { class: 'me-toolbar' },
   h('label', { class: 'me-check', title: 'Tecla H' }, gridChk, ' Grilla'),
   h('label', { class: 'me-check', title: 'Marca en rojo lo que no se pisa (tecla P)' }, solidChk, ' Paso'),
   h('label', { class: 'me-check', title: 'Marca las casillas distintas al mapa original (tecla C)' }, changesChk, ' Cambios'),
+  h('label', { class: 'me-check', title: 'Pincel inteligente (tecla J): al pintar agua, árboles, pastizal, camino o arena, completa los huecos de una casilla y une las esquinas sueltas para que cada borde tenga su pieza' }, smartChk, ' Inteligente'),
   fitBtn, zoomSel);
 const stage = h('div', { class: 'me-stage' }, canvas);
 const helpEl = h('div', { class: 'me-help', hidden: true });
@@ -493,8 +496,8 @@ function draw() {
   g.imageSmoothingEnabled = false;
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
-  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme)), x * T, y * T);
-  if (!m.indoor) { drawGroundEdges(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); }
+  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(m.indoor ? tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme)) : cellCanvas(rows, x, y, 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme), S.W.ground), x * T, y * T);
+  if (!m.indoor) { drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); }
   for (const it of W.items) {
     if (it.removed) continue;
     g.globalAlpha = it.hidden ? 0.5 : 1; // hidden in the scenery: the game does not draw it
@@ -655,6 +658,14 @@ function changed() {
   redoBtn.disabled = !S.redo.length;
 }
 
+/** Smart brush: tidies round the painted cells so the terrain gets clean edge pieces (see smartSmooth). */
+function smartTidy(cells) {
+  if (!S.smart || S.layer !== 'tiles' || !cells.length) return;
+  const grid = L();
+  const keep = (x, y) => !!entityAt(x, y) || LOCKED.has(grid[y]?.[x]) || grid[y - 1]?.[x] === 'D';
+  const n = smartSmooth(grid, cells, S.tile, keep).length;
+  if (n) status(`Pincel inteligente: ${n} casilla${n === 1 ? '' : 's'} más para que los bordes queden prolijos.`, 'ok');
+}
 function setTile(x, y, ch) {
   const row = L()[y];
   if (!row || row[x] === undefined || row[x] === ch) return false;
@@ -923,6 +934,7 @@ const HELP: [string, string][] = [
   ['B / L / R / G / M / I / V', 'Pincel, Línea, Rectángulo, Rellenar, Selección, Cuentagotas, Mover'],
   ['K', 'Cambiar de capa: Suelo, Encima, Colisión'],
   ['[ y ]', 'Achicar o agrandar el pincel'],
+  ['J', 'Pincel inteligente: completa huecos y esquinas del agua, árboles, pastizal, camino y arena'],
   ['1 … 9', 'Elegir una de las últimas piezas usadas'],
   ['Clic derecho o Alt + clic', 'Tomar la pieza de la casilla (cuentagotas)'],
   ['Shift + clic (Pincel)', 'Línea recta desde la última casilla pintada'],
@@ -1022,6 +1034,7 @@ canvas.addEventListener('pointerdown', (ev) => {
   S.painting = true;
   const cells = ev.shiftKey && S.lastPaint ? lineCells(S.lastPaint, c).flatMap((p) => brushCells(p, S.brush)) : brushCells(c, S.brush);
   paintCells(L(), cells, S.tile, LOCKED);
+  S.stroke = [...cells];
   if (cells.some((p) => LOCKED.has(L()[p.y]?.[p.x]))) status('Las puertas y los carteles no se pintan: quedaron como estaban.', 'warn');
   S.lastPaint = c;
   draw();
@@ -1040,7 +1053,9 @@ canvas.addEventListener('pointermove', (ev) => {
   if (S.shape) { S.shape.to = cellClamped(ev); S.shape.border = ev.shiftKey; }
   if (S.painting && c && S.tool === 'paint') {
     const from = S.lastPaint ?? c;
-    paintCells(L(), lineCells(from, c).flatMap((p) => brushCells(p, S.brush)), S.tile, LOCKED); // no gaps on fast strokes
+    const more = lineCells(from, c).flatMap((p) => brushCells(p, S.brush));
+    paintCells(L(), more, S.tile, LOCKED); // no gaps on fast strokes
+    S.stroke.push(...more);
     S.lastPaint = c;
   }
   if (S.drag && c && (c.x !== S.drag.ref.x || c.y !== S.drag.ref.y)) {
@@ -1050,13 +1065,13 @@ canvas.addEventListener('pointermove', (ev) => {
   draw();
 });
 const endStroke = (ev?) => {
-  if (S.painting) { S.painting = false; changed(); }
+  if (S.painting) { S.painting = false; smartTidy(S.stroke); S.stroke = []; changed(); }
   if (S.shape) {
     const { from, to } = S.shape;
     const border = !!ev?.shiftKey;
     S.shape = null;
-    if (S.tool === 'line') edit(() => paintCells(L(), lineCells(from, to), S.tile, LOCKED));
-    else if (S.tool === 'rect') edit(() => paintCells(L(), rectCells(from, to, !border), S.tile, LOCKED));
+    if (S.tool === 'line') edit(() => { const cells = lineCells(from, to); paintCells(L(), cells, S.tile, LOCKED); smartTidy(cells); });
+    else if (S.tool === 'rect') edit(() => { const cells = rectCells(from, to, !border); paintCells(L(), cells, S.tile, LOCKED); smartTidy(cells); });
     else if (S.tool === 'select') {
       S.area = rectBetween(from, to);
       status(`Zona ${areaName(S.area)}: Ctrl+C copia, Ctrl+X corta, Supr la rellena con la pieza elegida.`, 'ok');
@@ -1127,6 +1142,7 @@ addEventListener('keydown', (ev) => {
   else if (k === 'k') { const ids = LAYERS.map(([id]) => id); setLayer(ids[(ids.indexOf(S.layer) + 1) % ids.length]); }
   else if (k === 'h') { S.grid = !S.grid; gridChk.checked = S.grid; draw(); }
   else if (k === 'p') { S.showSolid = !S.showSolid; solidChk.checked = S.showSolid; draw(); }
+  else if (k === 'j') { S.smart = !S.smart; smartChk.checked = S.smart; status(S.smart ? 'Pincel inteligente prendido.' : 'Pincel inteligente apagado.'); }
   else if (k === 'c') { S.showChanges = !S.showChanges; changesChk.checked = S.showChanges; draw(); }
   else if (k === '[' || k === ']') { const sizes = [1, 2, 3, 5]; const i = Math.max(0, Math.min(sizes.length - 1, sizes.indexOf(S.brush) + (k === ']' ? 1 : -1))); S.brush = sizes[i]; brushSel.value = String(S.brush); draw(); }
   else if (/^[1-9]$/.test(k) && S.layer === 'tiles' && S.recent[+k - 1]) pickTile(S.recent[+k - 1]);

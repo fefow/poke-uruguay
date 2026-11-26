@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { T, TILE_INFO, tileCanvas, tileWithoutGround, groundFor, WALL_CAPS } from './tiles.ts';
+import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
 import { canoeCanvas } from './ui-icons.ts';
@@ -483,7 +484,11 @@ function build(v: WorldView) {
     const k = kindOf(c);
     if (k === 'water') return ['g|~', () => tileCanvas('~', 0, null, false)];
     const under = groundFor(tiles, x, y, m.ground, theme);
-    if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') return [`g|${theme}|${c}|${under}`, () => tileCanvas(c, 0, theme, under)];
+    if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') {
+      // afuera, los bordes de camino, arena y pastizal son piezas propias (ver edges.ts)
+      if (!m.indoor) return [`g|${theme}|${pieceKey(tiles, x, y, theme)}|${under}|${m.ground ?? ''}`, () => cellCanvas(tiles, x, y, 0, theme, under, m.ground ?? null)];
+      return [`g|${theme}|${c}|${under}`, () => tileCanvas(c, 0, theme, under)];
+    }
     if (typeof under === 'string' && under !== '~') return [`g|${theme}|${under}`, () => tileCanvas(under, 0, theme, false)];
     for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1], [1, 1], [-1, 1]]) {
       const n = ch(x + dx, y + dy);
