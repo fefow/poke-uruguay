@@ -1,0 +1,122 @@
+"""Shrinks the overworld creature sprites to their size next to a person (the player is 16x17 px) and writes
+src/gfx/overworld-creatures-data.ts. Sources (full PixelLab size) stay in this folder as <species>_<frame>.png.
+Pixel-art downscale: each output pixel takes the most common colour of its block (no blending, palette kept),
+the silhouette is decided by coverage and gets the sprite's own dark outline back.
+Run: python3 tools/overworld-creatures/resize.py"""
+import base64, glob, io, os, re
+from collections import Counter
+from PIL import Image
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, '..', '..', 'src', 'gfx', 'overworld-creatures-data.ts')
+
+# Scale of each species against its source sprite, chosen from real size next to a 1.7 m person (16x17 px):
+# horses and the ñandú about as tall as the player, cattle a bit lower, carpincho and sheep half, birds,
+# armadillo, rodents and insects small (never below ~9 px so they still read).
+SCALE = {
+    'criollo': 0.7, 'alazan': 0.7, 'corcel': 0.7,
+    'toro': 0.66, 'novillo': 0.66, 'ternero': 0.66,
+    'nandulin': 0.6, 'venadito': 0.55, 'garza': 0.55,
+    'carpincho': 0.6, 'lobito': 0.6, 'pamperon': 0.65,
+    'oveja': 0.62, 'carnero': 0.62, 'mulitin': 0.55, 'tuco': 0.65,
+    'gatomontes': 0.6, 'pibe': 0.6,
+    'cuervon': 0.6, 'cumulo': 0.6, 'nimbo': 0.6, 'gaviota': 0.6,
+    'avispa': 0.65, 'camoati': 0.65, 'cortadora': 0.6,
+}
+ORDER = list(SCALE)
+
+def lum(c):
+    return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+def shrink(src, w, h):
+    sw, sh = src.size
+    px = src.load()
+    # outline colour: the most common colour on the silhouette edge of the source
+    edge = Counter()
+    for y in range(sh):
+        for x in range(sw):
+            if px[x, y][3] < 128: continue
+            if any(not (0 <= x + dx < sw and 0 <= y + dy < sh) or px[x + dx, y + dy][3] < 128
+                   for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                edge[px[x, y][:3]] += 1
+    outline = min(edge.most_common(4), key=lambda kv: lum(kv[0]))[0] if edge else (20, 20, 20)
+    out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    op = out.load()
+    for oy in range(h):
+        for ox in range(w):
+            x0, x1 = ox * sw / w, (ox + 1) * sw / w
+            y0, y1 = oy * sh / h, (oy + 1) * sh / h
+            cov, tot, cols = 0.0, 0.0, Counter()
+            for y in range(int(y0), min(sh, int(y1 + 0.999))):
+                for x in range(int(x0), min(sw, int(x1 + 0.999))):
+                    a = (min(x + 1, x1) - max(x, x0)) * (min(y + 1, y1) - max(y, y0))
+                    if a <= 0: continue
+                    tot += a
+                    c = px[x, y]
+                    if c[3] >= 128:
+                        cov += a
+                        # inner colours win over the outline so the body keeps its shading
+                        cols[c[:3]] += a * (0.35 if c[:3] == outline else 1)
+            if cov / tot >= 0.45 and cols:
+                op[ox, oy] = cols.most_common(1)[0][0] + (255,)
+    # drop specks (pieces of 1-3 px cut off from the body, like the tip of a thin tail)
+    seen = set()
+    for y in range(h):
+        for x in range(w):
+            if op[x, y][3] == 0 or (x, y) in seen: continue
+            comp, stack = [], [(x, y)]
+            seen.add((x, y))
+            while stack:
+                cx, cy = stack.pop(); comp.append((cx, cy))
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        nx, ny = cx + dx, cy + dy
+                        if 0 <= nx < w and 0 <= ny < h and (nx, ny) not in seen and op[nx, ny][3]:
+                            seen.add((nx, ny)); stack.append((nx, ny))
+            if len(comp) <= 3:
+                for cx, cy in comp: op[cx, cy] = (0, 0, 0, 0)
+    # outline back on the silhouette edge
+    solid = [[op[x, y][3] > 0 for x in range(w)] for y in range(h)]
+    for y in range(h):
+        for x in range(w):
+            if solid[y][x] and any(not (0 <= x + dx < w and 0 <= y + dy < h) or not solid[y + dy][x + dx]
+                                   for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                op[x, y] = outline + (255,)
+    return out
+
+def main(preview=None):
+    lines = []
+    sheet = []
+    for key in ORDER:
+        files = sorted(glob.glob(os.path.join(HERE, f'{key}_[0-9].png')))
+        srcs = [Image.open(f).convert('RGBA') for f in files]
+        s = SCALE[key]
+        w, h = max(1, round(srcs[0].width * s)), max(1, round(srcs[0].height * s))
+        outs = [shrink(im, w, h) for im in srcs]
+        uris = []
+        for im in outs:
+            b = io.BytesIO(); im.save(b, 'PNG', optimize=True)
+            uris.append('"data:image/png;base64,' + base64.b64encode(b.getvalue()).decode() + '"')
+        lines.append(f'  {key}: [{", ".join(uris)}],')
+        sheet.append((key, srcs[0], outs[0]))
+    head = ('// Generated by tools/overworld-creatures/resize.py from the PixelLab sources in tools/overworld-creatures/:\n'
+            '// overworld sprites of the creatures seen on the map, shrunk to their size next to a person.\n'
+            '// Each one faces right; frame 0 stands, frame 1 (when there is one) is the step or wingbeat used while moving.\n')
+    with open(OUT, 'w') as f:
+        f.write(head + 'export const OVERWORLD_CREATURES: Record<string, string[]> = {\n' + '\n'.join(lines) + '\n};\n')
+    if preview:
+        Z = 6
+        rowh = 40 * Z
+        im = Image.new('RGBA', (5 * 68 * Z, ((len(sheet) + 4) // 5) * rowh), (120, 170, 90, 255))
+        player = Image.new('RGBA', (16, 17), (0, 0, 0, 0))  # stand-in for the player: body 10x16
+        player.paste((40, 40, 160, 255), (3, 1, 13, 17))
+        for i, (k, a, b) in enumerate(sheet):
+            cx, cy = (i % 5) * 68 * Z, (i // 5) * rowh
+            im.alpha_composite(b.resize((b.width * Z, b.height * Z), Image.NEAREST), (cx, cy + rowh - b.height * Z - Z))
+            im.alpha_composite(player.resize((16 * Z, 17 * Z), Image.NEAREST), (cx + 22 * Z, cy + rowh - 17 * Z - Z))
+            im.alpha_composite(a.resize((a.width * Z, a.height * Z), Image.NEAREST), (cx + 36 * Z, cy + rowh - a.height * Z - Z))
+        im.save(preview)
+
+if __name__ == '__main__':
+    import sys
+    main(sys.argv[1] if len(sys.argv) > 1 else None)

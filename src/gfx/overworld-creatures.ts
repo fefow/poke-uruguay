@@ -1,4 +1,5 @@
-// Overworld sprites of the creatures that wander on the map (their own small pixel art, not the battle sprite).
+// Overworld sprites of the creatures that wander on the map (their own small pixel art, not the battle sprite),
+// sized against the player (16x17 px) by tools/overworld-creatures/resize.py.
 // They face right; walking left mirrors them. Species without one fall back to the battle sprite at 24 px.
 import { OVERWORLD_CREATURES } from './overworld-creatures-data.ts';
 
