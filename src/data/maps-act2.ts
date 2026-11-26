@@ -512,7 +512,7 @@ const fill = (g: string[][], x1: number, y1: number, x2: number, y2: number, c: 
 function depositoTiles() {
   const g = grid(24, 16);
   fill(g, 1, 1, 22, 14, 'Y');
-  fill(g, 3, 12, 22, 13, 'N');  // estantes: se pasa por la izquierda
+  fill(g, 3, 12, 22, 12, 'N');  // estantes: se pasa por la izquierda (el pasillo de abajo tiene dos baldosas: el recluta no lo tapa)
   fill(g, 1, 8, 20, 9, 'N');    // se pasa por la derecha
   fill(g, 3, 4, 22, 5, 'N');    // se pasa por la izquierda
   for (const [x, y] of [[8, 12], [14, 8], [10, 4], [18, 12]]) g[y][x] = 'ϻ';
@@ -838,7 +838,7 @@ export const ACT2_INTERIOR: Record<string, MapDef> = {
       grunt({ x: 9, y: 5 }, 'an_g7', [49, 50], 'Las oficinas son del Equipo PP.', 'No puede ser.', 'La jefa está en el último piso.', { dir: 'left', sight: 4 }),
       grunt({ x: 15, y: 2 }, 'an_g8', [49, 50], 'Un paso más y llamo a seguridad.', 'Llamé tarde.', 'La escalera al último piso está al fondo a la derecha.', { dir: 'down', sight: 3 }),
       tr({ x: 16, y: 9, dir: 'up' }, 'clerk', 'an_t1', 'Contador Ferrán', 'Contador PP', ['veneno', 'siniestro'], [49, 50], ['Cada planilla de la banda pasa por mi escritorio.', 'Me quedé sin balance.', 'Hay un operario encerrado en la tercera oficina. Ni el PP lo deja salir.'], { sight: 3 }),
-      grunt({ x: 20, y: 2 }, 'an_g9', [50, 50], 'La escalera es solo para personal.', 'Pasá.', 'Arriba están las máquinas de niebla.', { dir: 'down', sight: 2 }),
+      grunt({ x: 20, y: 2 }, 'an_g9', [50, 50], 'La escalera es solo para personal.', 'Pasá.', 'Arriba están las máquinas de niebla.', { dir: 'down', sight: 1 }),
       { x: 8, y: 2, look: 'obrero', dir: 'down', script: 'obrero_anglo', cond: (f) => !f.ferry_done },
     ],
     items: [{ x: 21, y: 9, item: 'ultraesfera', id: 'an_item3' }],
