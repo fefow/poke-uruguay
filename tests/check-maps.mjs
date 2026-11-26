@@ -60,6 +60,67 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
   for (const n of m.npcs ?? []) if (n.look !== null && !n.blocker && !seen.has(`${n.x},${n.y}`)) bad(`${id} npc at ${n.x},${n.y} unreachable`);
   for (const it of m.items ?? []) if (!seen.has(`${it.x},${it.y}`)) bad(`${id} item ${it.id} at ${it.x},${it.y} unreachable`);
 }
+// Nobody may trap the player. An NPC standing on its own spot must never split the doors, stairs, exits and items of a
+// map into separate groups (a one-tile corridor, a doorway). A trainer who walks up to the player may end in a narrow
+// pass, but then the game moves it aside (clearTheWay in world.ts): there must be a tile nearby where it blocks nothing.
+{
+  const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const landings = {};
+  for (const m of Object.values(MAPS)) {
+    for (const w of m.warps ?? []) (landings[w.to] ??= []).push([w.tx, w.ty]);
+    if (m.exitTo) (landings[m.exitTo.map] ??= []).push([m.exitTo.x, m.exitTo.y]);
+  }
+  for (const [id, m] of Object.entries(MAPS)) {
+    const h = m.tiles.length; const w = m.tiles[0].length;
+    const walk = (x, y) => { const t = m.tiles[y]?.[x]; return t !== undefined && (t === 'm' || !SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); };
+    const keyCells = [];
+    m.tiles.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'm') keyCells.push([x, y]); if (c === 'D') keyCells.push([x, y + 1]); }));
+    for (const wp of m.warps ?? []) keyCells.push([wp.x, wp.y]);
+    for (const l of landings[id] ?? []) keyCells.push(l);
+    for (const it of m.items ?? []) keyCells.push([it.x, it.y]);
+    if (!m.indoor) for (const side of Object.keys(m.exits ?? {})) {
+      const cells = side === 'e' ? m.tiles.map((_, y) => [w - 1, y]) : side === 'w' ? m.tiles.map((_, y) => [0, y]) : side === 'n' ? [...m.tiles[0]].map((_, x) => [x, 0]) : [...m.tiles[h - 1]].map((_, x) => [x, h - 1]);
+      keyCells.push(...cells.filter(([x, y]) => walk(x, y)));
+    }
+    const flood = (sx, sy, block) => {
+      const seen = new Set([`${sx},${sy}`]); const q = [[sx, sy]];
+      while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of D4) { const k = `${x + dx},${y + dy}`; if (!seen.has(k) && !block.has(k) && walk(x + dx, y + dy)) { seen.add(k); q.push([x + dx, y + dy]); } } }
+      return seen;
+    };
+    const groups = (block) => {
+      const label = new Map(); let g = 0;
+      for (const [x, y] of keyCells) {
+        const k = `${x},${y}`;
+        if (block.has(k) || label.has(k) || !walk(x, y)) continue;
+        g++; for (const c of flood(x, y, block)) label.set(c, g);
+      }
+      return new Set(keyCells.map(([x, y]) => label.get(`${x},${y}`)).filter(Boolean)).size;
+    };
+    const base = groups(new Set());
+    const people = (m.npcs ?? []).filter((d) => d.look !== null && d.look !== 'ball' && !d.blocker && !d.gate && !d.arrive && d.script !== 'town_gate');
+    for (const d of people) {
+      if (!walk(d.x, d.y)) continue;
+      if (groups(new Set([`${d.x},${d.y}`])) > base) { bad(`${id} ${d.trainer ? `trainer ${d.trainer.id}` : `npc ${d.id ?? d.look}`} at ${d.x},${d.y} blocks the only way through`); continue; }
+      if (!d.trainer || !d.sight || d.wander || d.patrol || d.adjacent) continue;
+      const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[d.face ?? d.dir ?? 'down'];
+      for (let i = 1; i < d.sight; i++) {
+        const ex = d.x + dx * i; const ey = d.y + dy * i; const px = ex + dx; const py = ey + dy;
+        if (!walk(ex, ey) || !walk(px, py)) break;
+        const all = flood(px, py, new Set()).size;
+        const cuts = (x, y) => flood(px, py, new Set([`${x},${y}`])).size < all - 1;
+        if (!cuts(ex, ey)) continue;
+        // the step-aside search of clearTheWay: nearest tile reachable without crossing the player where it blocks nothing
+        const seen = new Set([`${ex},${ey}`, `${px},${py}`]); const q = [[ex, ey]]; let ok = false;
+        for (let j = 0; j < q.length && !ok && j < 400; j++) for (const [ax, ay] of D4) {
+          const nx = q[j][0] + ax; const ny = q[j][1] + ay; const k = `${nx},${ny}`;
+          if (seen.has(k) || !walk(nx, ny) || m.tiles[ny][nx] === 'm' || m.tiles[ny][nx] === '~') continue;
+          seen.add(k); if (!cuts(nx, ny)) { ok = true; break; } q.push([nx, ny]);
+        }
+        if (!ok) bad(`${id} trainer ${d.trainer.id} walking to ${ex},${ey} would trap the player with nowhere to step aside`);
+      }
+    }
+  }
+}
 // cross references: every script, track, item and species named by the data must exist
 import { readFileSync, readdirSync } from 'node:fs';
 import { SCRIPTS } from '../src/data/story.ts';
