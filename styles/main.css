@@ -1173,7 +1173,8 @@ body.gb * { -webkit-touch-callout: none; }
 .gb-dpad { transform: scale(1.15); transform-origin: bottom left; margin-right: auto; margin-bottom: 4px; }
 .gb-ab { transform: scale(1.3); transform-origin: bottom right; margin-left: auto; margin-bottom: 4px; }
 .gb-pad .gb-btn, .gb-pad .gb-dpad { opacity: 0.55; transition: opacity 0.15s; }
-.gb-top { position: absolute; top: 34%; left: 0; right: 0; display: flex; justify-content: center; }
+.gb-top { position: absolute; top: 34%; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; }
+.gb-pill.gb-view { min-width: 56px; }
 .gb-pill { min-width: 88px; min-height: 56px; font-size: 15px; border-radius: 28px; }
 .gb-pill.is-on { background: #f8d040; color: #2a2358; opacity: 0.9; }
 body.gb:has(.dialog:not([hidden]), .menu) .gb-dpad { opacity: 0.1; pointer-events: none; }

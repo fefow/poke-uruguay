@@ -19,6 +19,7 @@ import { saveGame, listSaves } from '../save/index.ts';
 import { MAPS } from '../data/maps.ts';
 import { OUTLINE, PLACES, ROUTES, LINKS, VIEW, BIOMES, DEPARTMENTS, PLACE_DEPT, project } from '../data/atlas.ts';
 import { charSprite } from '../gfx/characters.ts';
+import { has3D, view3DOn, switchView } from '../gfx/world-3d.ts';
 import { itemIcon } from '../gfx/items.ts';
 import { badgeIcon } from '../gfx/badges.ts';
 import { badgeOf } from '../data/route.ts';
@@ -880,6 +881,7 @@ export function openOptions() {
       { label: 'Sonido', hint: 'Panel para ajustar la música, los efectos, el combate y el clima.', get: () => 'Abrir', step: () => { openSound(); }, noArrows: true },
       { label: 'Animaciones de combate', hint: 'Sí: los ataques y golpes se animan en combate. No: el combate muestra los resultados al instante.', get: () => (settings.anims ? 'Sí' : 'No'), step: () => (settings.anims = !settings.anims) },
       { label: 'Zoom del mapa', hint: 'Normal: se ve más del mapa. Cerca: el mapa se ve el doble de grande (los píxeles siguen enteros).', get: () => (settings.mapZoom >= 2 ? 'Cerca' : 'Normal'), step: () => (settings.mapZoom = settings.mapZoom >= 2 ? 1 : 2) },
+      ...(has3D() ? [{ label: 'Vista del mapa', hint: '3D: el mundo en tres dimensiones. 2D: el mapa clásico en pixel art. También con la tecla V.', get: () => (view3DOn() ? '3D' : '2D'), step: () => { switchView(); } }] : []),
       { label: 'Monitor de rendimiento', hint: 'Muestra FPS, tiempo de cuadro y ping arriba a la izquierda. También con F3.', get: () => (settings.perf ? 'Sí' : 'No'), step: async () => { (await import('../core/perf.ts')).togglePerf(); } },
       { label: 'Controles', hint: 'Muestra las teclas del juego.', get: () => 'Ver', step: () => { openControls(); }, noArrows: true },
     ];
