@@ -298,7 +298,7 @@ class TexGeo {
       this.tri([[a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z]], [uvOf(a), uvOf(b), uvOf(c)], k);
     }
   }
-  mesh(atlas: Atlas) {
+  mesh(atlas: Atlas, cutout = false) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2));
@@ -307,12 +307,106 @@ class TexGeo {
     const tex = new THREE.CanvasTexture(atlas.canvas);
     tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false;
     tex.colorSpace = THREE.SRGBColorSpace;
-    const mat = new THREE.MeshStandardMaterial({ map: tex, vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
+    const mat = new THREE.MeshStandardMaterial({ map: tex, vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0, alphaTest: cutout ? 0.5 : 0, side: cutout ? THREE.DoubleSide : THREE.FrontSide });
     const m = new THREE.Mesh(geo, mat);
     m.castShadow = true;
     m.receiveShadow = true;
     return m;
   }
+}
+
+/** Color liso de la tapa de un muro: el color del muro, un poco más oscuro. */
+const capCache = new Map<string, THREE.Color>();
+function wallCap(key: string, c: HTMLCanvasElement) {
+  let col = capCache.get(key);
+  if (!col) { col = avgColor(key + '|avg', c).clone().multiplyScalar(0.72); capCache.set(key, col); }
+  return col;
+}
+function solidCanvas(col: THREE.Color) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 16;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#' + col.getHexString(THREE.SRGBColorSpace);
+  g.fillRect(0, 0, 16, 16);
+  return c;
+}
+// ---------------------------------------------------------------- muebles y objetos con volumen
+// El dibujo 2D de un mueble ya viene en vista 3/4: arriba se ve la tapa y abajo el frente. Se "dobla" el sprite
+// por esa línea y queda una caja: la tapa lleva la parte de arriba del dibujo, el frente la de abajo y los
+// costados repiten el borde. fr = parte del dibujo (en filas con pintura) que es frente; h = alto en casilleros
+// (sin h, sale del dibujo); d = fondo. thin = placa fina (cercos, carteles): todo el dibujo va de frente.
+interface Furn { fr: number; h?: number; d?: number; thin?: boolean }
+const FURN: Record<string, Furn> = {};
+const furn = (chars: string, f: Furn) => { for (const c of chars) FURN[c] = f; };
+furn('TԹЗԿӹ', { fr: 0.4, h: 0.5 }); // mesas y escritorios
+furn('Ը', { fr: 0.55, h: 0.5 }); // sillas
+furn('EՍ', { fr: 0.3, h: 0.34 }); // camas y camillas
+furn('BԶԵՇՆϊϮ', { fr: 0.82, h: 0.95, d: 0.5 }); // bibliotecas, roperos, heladeras, góndolas, vitrinas
+furn('ԳԴnՊՃ', { fr: 0.55, h: 0.58 }); // cocina, mesada, mostradores, cómoda
+furn('ԱԲՌΔד', { fr: 0.5, h: 0.42 }); // sofás y bancos
+furn('ՈՋЭӷϋאΞШγ', { fr: 0.6 }); // cajones, bolsas, fardos, barriles, contenedores
+furn('PϼϻӸ', { fr: 0.62 }); // máquinas
+furn('СΠՏ', { fr: 0.75 }); // cestos, buzones, bidones
+furn('ϒϓϔНЪѢϬ', { fr: 0.5 }); // puestos, tablado, tanques, bebedero, cabina
+furn('Fρ[', { fr: 1, thin: true, d: 0.14 }); // cercos, tapias, barandas
+furn('SחЩЛ<>', { fr: 1, thin: true, d: 0.1 }); // carteles y mojones
+const FURN_NAMES: [RegExp, Furn][] = [
+  [/cerco|reja|baranda|tapia/, { fr: 1, thin: true, d: 0.14 }],
+  [/cartel|mojón/, { fr: 1, thin: true, d: 0.1 }],
+  [/mesa|escritorio/, { fr: 0.4, h: 0.5 }],
+  [/cama|camilla/, { fr: 0.3, h: 0.34 }],
+  [/biblioteca|estante|ropero|heladera|góndola|vitrina|armario|casilleros/, { fr: 0.82, h: 0.95, d: 0.5 }],
+  [/silla|banco|sofá/, { fr: 0.5, h: 0.42 }],
+  [/mostrador|mesada|cocina|cómoda/, { fr: 0.55, h: 0.58 }],
+  [/cajón|caja|barril|fardo|contenedor|máquina|equipo|bidón|cesto|buzón|puesto/, { fr: 0.6 }],
+];
+function furnOf(c: string): Furn | null {
+  if (c in FURN) return FURN[c];
+  const name: string = (TILE_INFO[c]?.name ?? '').toLowerCase();
+  for (const [re, f] of FURN_NAMES) if (re.test(name)) return (FURN[c] = f);
+  return null;
+}
+/** Filas y columnas con pintura de un dibujo de 16×16 (sin suelo). */
+const bbCache = new Map<string, [number, number, number, number] | null>();
+function opaqueBox(key: string, c: HTMLCanvasElement) {
+  if (bbCache.has(key)) return bbCache.get(key)!;
+  const d = pixels(c), w = c.width, h = c.height;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 128) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  const r: [number, number, number, number] | null = x1 < 0 ? null : [x0 * 16 / w, y0 * 16 / h, (x1 + 1) * 16 / w, (y1 + 1) * 16 / h];
+  bbCache.set(key, r);
+  return r;
+}
+/** Caja de un mueble en el casillero (tx, ty), con el dibujo doblado entre tapa y frente. */
+function foldBox(tg: TexGeo, r: Rect, tx: number, ty: number, bb: [number, number, number, number], f: Furn, run = false) {
+  const [px0, py0, px1, py1] = bb;
+  const rows = py1 - py0;
+  const frontPx = f.thin ? rows : Math.max(1, Math.round(rows * f.fr));
+  const fold = py1 - frontPx; // fila donde termina la tapa y empieza el frente
+  // un cerco o tapia que sigue hacia arriba o abajo en el mapa es una tira continua: ocupa todo el casillero
+  // de fondo, baja, y su dibujo 2D (visto desde arriba) va en la tapa
+  const h = run ? 0.45 : f.h ?? Math.min(1.6, (frontPx / 16) * 1.15);
+  const d = run ? 1 : f.d ?? Math.min(0.9, Math.max(0.2, ((fold - py0) / 16) * 1.1));
+  const X0 = tx + px0 / 16, X1 = tx + px1 / 16;
+  const Zf = run ? ty + 1 : f.thin ? ty + 0.5 + d / 2 : Math.min(ty + 0.97, ty + py1 / 16), Zb = Zf - d;
+  const [u0, v0, u1, v1] = r;
+  const U = (px: number) => u0 + (u1 - u0) * (px / 16), V = (py: number) => v1 - (v1 - v0) * (py / 16);
+  const quad = (a: number[], b: number[], c: number[], e: number[], ua: number[], ub: number[], uc: number[], ue: number[], k: number) => {
+    // a b arriba (izq, der), c e abajo (izq, der), mirando la cara de frente
+    tg.tri([a, c, b], [ua, uc, ub], k);
+    tg.tri([b, c, e], [ub, uc, ue], k);
+  };
+  // frente
+  quad([X0, h, Zf], [X1, h, Zf], [X0, 0, Zf], [X1, 0, Zf], [U(px0), V(fold)], [U(px1), V(fold)], [U(px0), V(py1)], [U(px1), V(py1)], 1);
+  // tapa: en una placa fina, la fila de arriba del dibujo; si no, la parte de arriba del sprite
+  const t0 = py0, t1 = run ? py1 : f.thin ? py0 + 1 : Math.max(fold, py0 + 1);
+  quad([X0, h, Zb], [X1, h, Zb], [X0, h, Zf], [X1, h, Zf], [U(px0), V(t0)], [U(px1), V(t0)], [U(px0), V(t1)], [U(px1), V(t1)], 1.06);
+  // costados: repiten la columna del borde del frente
+  const sl = [U(px0), U(Math.min(px1, px0 + 1))], sr = [U(Math.max(px0, px1 - 1)), U(px1)];
+  quad([X0, h, Zb], [X0, h, Zf], [X0, 0, Zb], [X0, 0, Zf], [sl[0], V(fold)], [sl[1], V(fold)], [sl[0], V(py1)], [sl[1], V(py1)], 0.78);
+  quad([X1, h, Zf], [X1, h, Zb], [X1, 0, Zf], [X1, 0, Zb], [sr[0], V(fold)], [sr[1], V(fold)], [sr[0], V(py1)], [sr[1], V(py1)], 0.78);
+  // fondo (afuera la cámara puede verlo de lejos)
+  quad([X1, h, Zb], [X0, h, Zb], [X1, 0, Zb], [X0, 0, Zb], [U(px0), V(fold)], [U(px1), V(fold)], [U(px0), V(py1)], [U(px1), V(py1)], 0.7);
 }
 
 // ---------------------------------------------------------------- construir el mapa
@@ -339,6 +433,7 @@ function build(v: WorldView) {
   const glow: THREE.BufferGeometry[] = [];
   const atlas = new Atlas();
   const tg = new TexGeo();
+  const fg = new TexGeo(); // muebles: su dibujo recortado (con transparencia)
   const sprites: { c: string; x: number; y: number }[] = [];
   lampSpots = [];
   const ch = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? null : tiles[y][x]);
@@ -496,13 +591,17 @@ function build(v: WorldView) {
         // queda bajo, como una maqueta cortada, para que ningún muro tape al jugador ni la sala de adelante.
         const [a] = colors();
         const below = ch(x, y + 1);
-        const back = !m.indoor || (below != null && !TILE_INFO[below]?.solid);
+        // es muro de fondo si adelante no hay otro muro (un mueble contra la pared no lo baja)
+        const back = !m.indoor || (below != null && kindOf(below) !== 'wall' && kindOf(below) !== 'cliff' && kindOf(below) !== 'roof');
         // el muro de fondo de la sala (macizo hasta el borde de arriba) va alto; los tabiques de adentro, a media altura
         let outer = true;
         for (let yy = y - 1; yy >= 0 && outer; yy--) if (!TILE_INFO[ch(x, yy) ?? 'x']?.solid) outer = false;
         const hh = m.indoor ? (back ? (outer ? 1.05 : 0.55) : 0.3) : 1.5;
         const r = atlas.rect(`w|${theme}|${c}`, () => tileCanvas(c, 0, theme, false), a);
-        tg.add(at(box(1, hh, 1), cx, hh / 2, cz), r, 'box', { x0: x, y0: 0, z0: y, w: 1, h: hh, d: 1 }, [0, 1], x + y);
+        // la tapa del muro va lisa: con el dibujo encima, ventanas, cuadros y relojes se veían dos veces
+        const capCol = wallCap(`w|${theme}|${c}`, tileCanvas(c, 0, theme, false));
+        const cap = atlas.rect(`wc|${capCol.getHexString()}`, () => solidCanvas(capCol));
+        tg.add(at(box(1, hh, 1), cx, hh / 2, cz), r, 'box', { x0: x, y0: 0, z0: y, w: 1, h: hh, d: 1 }, [0, 1], x + y, cap);
         break;
       }
       case 'door': {
@@ -515,10 +614,15 @@ function build(v: WorldView) {
       }
       case 'fence':
       case 'sign':
-      case 'lamp':
+      case 'lamp': {
+        const f = k === 'lamp' ? null : furnOf(c);
+        const cv = f && objectCanvas(c, theme);
+        const bb = cv && opaqueBox(`${theme}|${c}`, cv);
+        if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
         sprites.push({ c, x, y });
         if (k === 'lamp') lampSpots.push({ x: cx, y: 0.85, z: y + 0.9, color: 0xffd890, always: false });
         break;
+      }
       case 'grass': {
         const base = groundColor(x, y);
         for (let i = 0; i < 5; i++) {
@@ -541,10 +645,15 @@ function build(v: WorldView) {
         break;
       }
       case 'prop':
-      case 'tallprop':
+      case 'tallprop': {
+        const f = k === 'prop' ? furnOf(c) : null;
+        const cv = f && objectCanvas(c, theme);
+        const bb = cv && opaqueBox(`${theme}|${c}`, cv);
+        if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
         sprites.push({ c, x, y });
         if (c === 'П') lampSpots.push({ x: cx, y: 0.6, z: y + 0.8, color: 0xff9a40, always: true });
         break;
+      }
       default: break;
     }
   }
@@ -561,6 +670,11 @@ function build(v: WorldView) {
   const texMesh = tg.mesh(atlas);
   staticGroup.add(texMesh);
   staticTex.push(texMesh);
+  if (fg.pos.length) {
+    const fm = fg.mesh(atlas, true);
+    staticGroup.add(fm);
+    staticTex.push(fm);
+  }
   if (glow.length) {
     const gm = new THREE.Mesh(mergeGeometries(glow.map((p) => (p.index ? p.toNonIndexed() : p)).map(onlyPosColor), false), new THREE.MeshBasicMaterial({ vertexColors: true }));
     staticGroup.add(gm);
