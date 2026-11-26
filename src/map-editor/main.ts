@@ -8,7 +8,7 @@ import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
 import { cellCanvas } from '../gfx/edges.ts';
-import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
+import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, drawElevation, cliffAt, elevAt, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -29,15 +29,17 @@ const ZOOMS = [1, 2, 3, 4, 5, 6];
 const LOCKED = new Set<string>(); // nothing is locked: doors, signs and their data follow the tiles (see reconcile)
 const SOLID = (c) => c === undefined || !!TILE_INFO[c]?.solid;
 // Layers of a map, as in a classic layout: the ground, what is drawn over people, and the collision.
-type LayerId = 'tiles' | 'top' | 'coll';
+type LayerId = 'tiles' | 'top' | 'coll' | 'elev';
 const LAYERS: [LayerId, string, string][] = [
   ['tiles', 'Suelo', 'Las piezas del mapa: pasto, caminos, árboles, casas. Lo que se ve debajo de la gente.'],
   ['top', 'Encima', 'Piezas que se dibujan por encima de la gente: copas de árboles, techos, arcos, puentes. Borrar deja la casilla vacía.'],
   ['coll', 'Colisión', 'Decide por dónde se camina sin cambiar lo que se ve. Bloqueado o Pasable mandan sobre la pieza; «Según la pieza» lo deja como estaba.'],
+  ['elev', 'Altura', 'Mesetas: cada casilla tiene una altura (suelo, 1, 2 o 3). El borde de una zona más alta es un acantilado que no se pisa; para subir, poné una escalera («escalera de desnivel») en el borde.'],
 ];
+const ELEV_PIECES: [string, string, string][] = [[' ', 'Suelo', 'rgba(255,255,255,.12)'], ['1', 'Altura 1', 'rgba(240,200,90,.55)'], ['2', 'Altura 2', 'rgba(240,140,60,.6)'], ['3', 'Altura 3', 'rgba(220,70,50,.65)']];
 const COLL_PIECES: [string, string, string][] = [[' ', 'Según la pieza', 'rgba(255,255,255,.15)'], ['x', 'Bloqueado', 'rgba(255,40,60,.75)'], ['o', 'Pasable', 'rgba(60,220,110,.75)']];
 /** A cell blocks walking: the collision layer first, then the tile. */
-const solidCell = (W, x, y) => { const c = W.coll?.[y]?.[x]; return c === 'x' ? true : c === 'o' ? false : SOLID(W.tiles[y]?.[x]); };
+const solidCell = (W, x, y) => { const c = W.coll?.[y]?.[x]; return c === 'x' ? true : c === 'o' ? false : cliffAt(W, W.tiles, x, y) || SOLID(W.tiles[y]?.[x]); };
 /** A grid of single chars the size of the map, from a layer saved as strings (blank where it says nothing). */
 function layerGrid(src: string[] | undefined, wid: number, hgt: number, shift = { x: 0, y: 0 }) {
   const out = Array.from({ length: hgt }, () => Array(wid).fill(' '));
@@ -85,6 +87,7 @@ function working(id, patch?) {
   const fitsNow = (a) => Array.isArray(a) && a.length === hgt && a.every((r) => typeof r === 'string' && r.length === wid);
   W.top = fitsNow(p.top) ? layerGrid(p.top, wid, hgt) : layerGrid(o.top, wid, hgt, shift);
   W.coll = fitsNow(p.coll) ? layerGrid(p.coll, wid, hgt) : layerGrid(o.coll, wid, hgt, shift);
+  W.elev = fitsNow(p.elev) ? layerGrid(p.elev, wid, hgt) : layerGrid(o.elev, wid, hgt, shift);
   // Doors and signs belong to the 'D' / 'S' tiles in reading order; warps are plain positions.
   const rows = tiles.map((r) => r.join(''));
   const doors = Array.isArray(p.doors) && p.doors.length === countOf(rows, 'D') ? p.doors : o.doors;
@@ -150,7 +153,7 @@ function diff(id, W) {
   if (!sameJSON(W.signs.map((s) => s.text), cellsOf(o.tiles, 'S').map((_, i) => o.signs[i] ?? '…'))) p.signs = W.signs.map((s) => s.text);
   const warps = W.warps.map(({ x, y, to, tx, ty }) => ({ x, y, to, tx, ty }));
   if (!sameJSON(warps, o.warps.map((w) => ({ ...w, x: w.x + sh.x, y: w.y + sh.y })))) p.warps = warps;
-  for (const k of ['top', 'coll']) {
+  for (const k of ['top', 'coll', 'elev']) {
     const now = W[k].map((r) => r.join(''));
     const was = layerGrid(o[k], now[0].length, now.length, sh).map((r) => r.join(''));
     if (now.some((r, y) => r !== was[y])) p[k] = blankLayer(W[k]) && !o[k] ? undefined : now;
@@ -184,15 +187,18 @@ delete S.tile;
 Object.defineProperty(S, 'tile', { get: () => S.tileBy[S.layer], set: (v) => { S.tileBy[S.layer] = v; } });
 /** The grid of the layer being painted. */
 const L = (): string[][] => S.W[S.layer];
-const pieceName = (ch) => (S.layer === 'coll' ? COLL_PIECES.find(([c]) => c === ch)?.[1] ?? ch : ch === ' ' ? 'Borrar (vacío)' : `${TILE_INFO[ch]?.name ?? ch} "${ch}"`);
+const pieceName = (ch) => (S.layer === 'coll' ? COLL_PIECES.find(([c]) => c === ch)?.[1] ?? ch : S.layer === 'elev' ? ELEV_PIECES.find(([c]) => c === ch)?.[1] ?? ch : ch === ' ' ? 'Borrar (vacío)' : `${TILE_INFO[ch]?.name ?? ch} "${ch}"`);
 /** How a piece of the current layer looks in the palette and in previews. */
 function pieceCanvas(ch, theme) {
-  if (S.layer !== 'coll' && ch !== ' ') return S.layer === 'top' ? topCanvas(ch, 0, theme) : tileCanvas(ch, 0, theme);
+  if (S.layer !== 'coll' && S.layer !== 'elev' && ch !== ' ') return S.layer === 'top' ? topCanvas(ch, 0, theme) : tileCanvas(ch, 0, theme);
   const c = h('canvas', { width: T, height: T }) as HTMLCanvasElement;
   const x = c.getContext('2d');
   if (S.layer === 'coll') {
     x.fillStyle = COLL_PIECES.find(([k]) => k === ch)?.[2] ?? '#888'; x.fillRect(0, 0, T, T);
     x.fillStyle = '#fff'; x.font = 'bold 11px sans-serif'; x.fillText(ch === 'x' ? '✕' : ch === 'o' ? '✓' : '·', 4, 12);
+  } else if (S.layer === 'elev') {
+    x.fillStyle = ELEV_PIECES.find(([k]) => k === ch)?.[2] ?? '#888'; x.fillRect(0, 0, T, T);
+    x.fillStyle = '#fff'; x.font = 'bold 11px sans-serif'; x.fillText(ch === ' ' ? '0' : ch, 5, 12);
   } else { x.strokeStyle = '#f66'; x.lineWidth = 2; x.beginPath(); x.moveTo(2, 2); x.lineTo(14, 14); x.moveTo(14, 2); x.lineTo(2, 14); x.stroke(); }
   return c;
 }
@@ -385,7 +391,7 @@ function renderPalette() {
   for (const [k, b] of Object.entries(layerBtns)) b.classList.toggle('is-active', k === S.layer);
   layerHint.textContent = LAYERS.find(([k]) => k === S.layer)[2];
   if (S.layer !== 'tiles') {
-    const pieces = S.layer === 'coll' ? COLL_PIECES.map(([c]) => c) : [' ', ...Object.keys(TILE_INFO).filter((ch) => !LOCKED.has(ch) && (!S.tileFilter || TILE_INFO[ch].name.toLowerCase().includes(S.tileFilter)))];
+    const pieces = S.layer === 'coll' ? COLL_PIECES.map(([c]) => c) : S.layer === 'elev' ? ELEV_PIECES.map(([c]) => c) : [' ', ...Object.keys(TILE_INFO).filter((ch) => !LOCKED.has(ch) && (!S.tileFilter || TILE_INFO[ch].name.toLowerCase().includes(S.tileFilter)))];
     palette.replaceChildren(...pieces.map((ch) => h('button', { type: 'button', class: `me-tile ${ch === S.tile ? 'is-active' : ''}`, title: pieceName(ch), onclick: () => pickTile(ch) }, pieceCanvas(ch, theme))));
     current.replaceChildren(pieceCanvas(S.tile, theme), h('span', { text: `${LAYERS.find(([k]) => k === S.layer)[1]}: ${pieceName(S.tile)}` }));
     recentEl.replaceChildren();
@@ -497,7 +503,7 @@ function draw() {
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
   for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(m.indoor ? tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme)) : cellCanvas(rows, x, y, 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme), S.W.ground), x * T, y * T);
-  if (!m.indoor) { drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); }
+  if (!m.indoor) { drawElevation(g, { elev: W.elev }, rows, 0, 0, wid - 1, hgt - 1, 0, 0); drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); }
   for (const it of W.items) {
     if (it.removed) continue;
     g.globalAlpha = it.hidden ? 0.5 : 1; // hidden in the scenery: the game does not draw it
@@ -560,6 +566,14 @@ function draw() {
       if (c === 'o') { g.fillStyle = 'rgba(60,220,110,.28)'; g.fillRect(x * Zt, y * Zt, Zt, Zt); }
     }));
   }
+  if (S.layer === 'elev') { // each height tinted, with its number
+    g.font = `bold ${Math.max(8, Zt / 2)}px sans-serif`;
+    W.elev.forEach((r, y) => r.forEach((c, x) => {
+      if (c === ' ') return;
+      g.fillStyle = ELEV_PIECES.find(([k]) => k === c)?.[2] ?? 'rgba(255,255,255,.3)'; g.fillRect(x * Zt, y * Zt, Zt, Zt);
+      g.fillStyle = '#fff'; g.fillText(c, x * Zt + Zt * 0.3, y * Zt + Zt * 0.7);
+    }));
+  }
   if (S.layer === 'top') {
     g.strokeStyle = 'rgba(127,232,255,.8)'; g.lineWidth = 1; g.setLineDash([3, 3]);
     W.top.forEach((r, y) => r.forEach((c, x) => { if (c !== ' ') g.strokeRect(x * Zt + 1.5, y * Zt + 1.5, Zt - 3, Zt - 3); }));
@@ -606,7 +620,7 @@ function draw() {
 }
 
 // ---------------------------------------------------------------- editing
-const snap = () => JSON.stringify({ tiles: S.W.tiles, top: S.W.top, coll: S.W.coll, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift, doors: S.W.doors, signs: S.W.signs, warps: S.W.warps });
+const snap = () => JSON.stringify({ tiles: S.W.tiles, top: S.W.top, coll: S.W.coll, elev: S.W.elev, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift, doors: S.W.doors, signs: S.W.signs, warps: S.W.warps });
 function pushUndo() {
   S.undo.push(snap());
   if (S.undo.length > MAX_UNDO) S.undo.shift();
@@ -795,7 +809,7 @@ function growMap() {
     for (const r of old) rows.push([...Array(n.left).fill(ch), ...r, ...Array(n.right).fill(ch)]);
     for (let y = 0; y < n.bottom; y++) rows.push(blank());
     W.tiles = rows;
-    for (const k of ['top', 'coll']) W[k] = layerGrid(W[k].map((r) => r.join('')), wid, hgt, { x: n.left, y: n.top });
+    for (const k of ['top', 'coll', 'elev']) W[k] = layerGrid(W[k].map((r) => r.join('')), wid, hgt, { x: n.left, y: n.top });
     for (const o of [...W.npcs, ...W.items]) { o.x += n.left; o.y += n.top; }
     W.shift = { x: (W.shift?.x ?? 0) + n.left, y: (W.shift?.y ?? 0) + n.top };
     S.sel = null;
@@ -1048,7 +1062,7 @@ canvas.addEventListener('pointermove', (ev) => {
     const e = entityAt(c.x, c.y);
     const door = ch === 'D' ? doorTarget(c.x, c.y) : null;
     const shape = S.shape ? ` · ${rectBetween(S.shape.from, S.shape.to).w}×${rectBetween(S.shape.from, S.shape.to).h}` : '';
-    hoverEl.textContent = `Casilla ${c.x},${c.y} · ${TILE_INFO[ch]?.name ?? ch} "${ch}"${solidCell(S.W, c.x, c.y) ? ' (no se pisa)' : ''}${S.W.top[c.y][c.x] !== ' ' ? ` · encima: ${TILE_INFO[S.W.top[c.y][c.x]]?.name ?? S.W.top[c.y][c.x]}` : ''}${S.W.coll[c.y][c.x] !== ' ' ? ` · colisión: ${S.W.coll[c.y][c.x] === 'x' ? 'bloqueado' : 'pasable'}` : ''}${door ? ` · lleva a ${nameOf(door)} (doble clic)` : ''}${e ? ` · ${e.type === 'npc' ? (e.ref.name ?? KIND_NAME[e.ref.kind]) : ITEMS[e.ref.item]?.name}` : ''}${shape}`;
+    hoverEl.textContent = `Casilla ${c.x},${c.y} · ${TILE_INFO[ch]?.name ?? ch} "${ch}"${solidCell(S.W, c.x, c.y) ? ' (no se pisa)' : ''}${S.W.top[c.y][c.x] !== ' ' ? ` · encima: ${TILE_INFO[S.W.top[c.y][c.x]]?.name ?? S.W.top[c.y][c.x]}` : ''}${S.W.coll[c.y][c.x] !== ' ' ? ` · colisión: ${S.W.coll[c.y][c.x] === 'x' ? 'bloqueado' : 'pasable'}` : ''}${elevAt(S.W, c.x, c.y) ? ` · altura ${elevAt(S.W, c.x, c.y)}${cliffAt(S.W, S.W.tiles, c.x, c.y) ? ' (acantilado)' : ''}` : ''}${door ? ` · lleva a ${nameOf(door)} (doble clic)` : ''}${e ? ` · ${e.type === 'npc' ? (e.ref.name ?? KIND_NAME[e.ref.kind]) : ITEMS[e.ref.item]?.name}` : ''}${shape}`;
   }
   if (S.shape) { S.shape.to = cellClamped(ev); S.shape.border = ev.shiftKey; }
   if (S.painting && c && S.tool === 'paint') {
@@ -1175,7 +1189,7 @@ function problemsOf(id, W) {
     if (land === undefined) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega fuera del mapa (${w.tx},${w.ty}).` });
     else if (solidCell(WT, w.tx, w.ty)) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega a una casilla que no se pisa (${w.tx},${w.ty}).` });
   }
-  const pass = (x, y) => { const t = at(x, y); const c = W.coll?.[y]?.[x]; if (t !== undefined && c === 'x') return false; if (t !== undefined && c === 'o') return true; return t !== undefined && (!SOLID(t) || t === '%' || t === '~' || t === '\\'); };
+  const pass = (x, y) => { const t = at(x, y); const c = W.coll?.[y]?.[x]; if (t !== undefined && c === 'x') return false; if (t !== undefined && c === 'o') return true; if (cliffAt(W, W.tiles, x, y)) return false; return t !== undefined && (!SOLID(t) || t === '%' || t === '~' || t === '\\'); };
   let starts = [];
   if (isOutdoor(id)) {
     for (const side of Object.keys(m.exits ?? {})) {

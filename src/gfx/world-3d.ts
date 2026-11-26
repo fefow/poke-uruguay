@@ -5,7 +5,7 @@
 // El canvas 2D queda encima, transparente, para la lluvia, la niebla y los efectos de pantalla.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { T, TILE_INFO, tileCanvas, tileWithoutGround, groundFor, WALL_CAPS } from './tiles.ts';
+import { T, TILE_INFO, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt } from './tiles.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
@@ -206,10 +206,15 @@ export function paint(geo: THREE.BufferGeometry, col: THREE.Color, jitter = 0.06
   if (g.attributes.uv) g.deleteAttribute('uv');
   return g;
 }
+// Height of the ground under the cell being built (plateaus of the `elev` layer): every object is lifted by it.
+let LIFT = 0;
+/** Ground height at a point of the current map (0 on flat maps), for people and things that stand on it. */
+let liftAt: (x: number, z: number) => number = () => 0;
+const LEVEL_H = 0.75; // one level of the `elev` layer, in tiles
 export function at(geo: THREE.BufferGeometry, x: number, y: number, z: number, ry = 0, s = 1) {
   if (s !== 1) geo.scale(s, s, s);
   if (ry) geo.rotateY(ry);
-  geo.translate(x, y, z);
+  geo.translate(x, y + LIFT, z);
   return geo;
 }
 export const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
@@ -291,7 +296,7 @@ class TexGeo {
         if (top && topR) return [(topR[0] + topR[2]) / 2, (topR[1] + topR[3]) / 2];
         let s: number, t: number;
         if (top) { s = (p.x - box3.x0) / box3.w; t = 1 - (p.z - box3.z0) / box3.d; }
-        else { s = side ? (p.z - box3.z0) / box3.d : (p.x - box3.x0) / box3.w; t = (p.y - box3.y0) / box3.h; }
+        else { s = side ? (p.z - box3.z0) / box3.d : (p.x - box3.x0) / box3.w; t = (p.y - LIFT - box3.y0) / box3.h; }
         s = Math.min(1, Math.max(0, s)); t = Math.min(1, Math.max(0, t));
         return [u0 + (u1 - u0) * s, V0 + (V1 - V0) * t];
       };
@@ -435,12 +440,20 @@ function build(v: WorldView) {
   const atlas = new Atlas();
   const tg = new TexGeo();
   const fg = new TexGeo(); // muebles: su dibujo recortado (con transparencia)
-  const sprites: { c: string; x: number; y: number }[] = [];
+  const sprites: { c: string; x: number; y: number; lift: number }[] = [];
   lampSpots = [];
   const ch = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? null : tiles[y][x]);
   const isWater = (x, y) => { const c = ch(x, y); return c != null && kindOf(c) === 'water'; };
   // Suelo: una grilla de vértices con relieve leve; las orillas bajan hacia el agua.
+  // Plateaus: a corner of the grid takes the lowest height of the cells round it, so the edge cells (the cliffs)
+  // slope down and the tops stay flat.
+  const lev = (x: number, y: number) => (m.indoor ? 0 : elevAt(m, x, y));
   const gh = (vx: number, vy: number) => {
+    let low = 99;
+    for (const [dx, dy] of [[-1, -1], [0, -1], [-1, 0], [0, 0]]) if (ch(vx + dx, vy + dy) != null) low = Math.min(low, lev(vx + dx, vy + dy));
+    return gh0(vx, vy) + (low === 99 ? 0 : low * LEVEL_H);
+  };
+  const gh0 = (vx: number, vy: number) => {
     let w = 0, n = 0, hard = false, paths = 0;
     for (const [dx, dy] of [[-1, -1], [0, -1], [-1, 0], [0, 0]]) {
       const c = ch(vx + dx, vy + dy);
@@ -483,6 +496,7 @@ function build(v: WorldView) {
     const c = tiles[y][x];
     const k = kindOf(c);
     if (k === 'water') return ['g|~', () => tileCanvas('~', 0, null, false)];
+    if (!m.indoor && cliffAt(m, tiles, x, y)) return ['g|K', () => tileCanvas('K', 0, null, false)]; // a cliff face
     const under = groundFor(tiles, x, y, m.ground, theme);
     if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') {
       // afuera, los bordes de camino, arena y pastizal son piezas propias (ver edges.ts)
@@ -513,6 +527,13 @@ function build(v: WorldView) {
       else { tg.tri([A, C, D], [uA, uC, uD], k1); tg.tri([A, D, B], [uA, uD, uB], k2); }
     }
   }
+  // la altura del suelo en cualquier punto (interpolada entre las esquinas), para lo que se para encima
+  liftAt = m.elev && !m.indoor ? (px: number, pz: number) => {
+    const vx = Math.max(0, Math.min(W - 1, Math.floor(px))), vz = Math.max(0, Math.min(H - 1, Math.floor(pz)));
+    const fx = Math.max(0, Math.min(1, px - vx)), fz = Math.max(0, Math.min(1, pz - vz));
+    const a = gh(vx, vz) * (1 - fx) + gh(vx + 1, vz) * fx, b = gh(vx, vz + 1) * (1 - fx) + gh(vx + 1, vz + 1) * fx;
+    return Math.max(0, a * (1 - fz) + b * fz);
+  } : () => 0;
   // Agua: una lámina que ondula, por encima del lecho.
   const waterGeo: THREE.BufferGeometry[] = [];
   // Edificios afuera: cada columna de techo + fachada se arma como una casa 3D con su propio pixel art
@@ -528,6 +549,7 @@ function build(v: WorldView) {
     const fallback = groundColor(x, y);
     const colors = () => mainColors(objKey, tileWithoutGround(c, 0, theme), fallback);
     const h0 = 0;
+    LIFT = m.elev && !m.indoor && k !== 'water' ? lev(x, y) * LEVEL_H - (cliffAt(m, tiles, x, y) ? LEVEL_H / 2 : 0) : 0;
     switch (k) {
       case 'water': {
         const q = new THREE.PlaneGeometry(1, 1, 2, 2);
@@ -624,7 +646,7 @@ function build(v: WorldView) {
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
         if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
-        sprites.push({ c, x, y });
+        sprites.push({ c, x, y, lift: LIFT });
         if (k === 'lamp') lampSpots.push({ x: cx, y: 0.85, z: y + 0.9, color: 0xffd890, always: false });
         break;
       }
@@ -655,13 +677,14 @@ function build(v: WorldView) {
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
         if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
-        sprites.push({ c, x, y });
+        sprites.push({ c, x, y, lift: LIFT });
         if (c === 'П') lampSpots.push({ x: cx, y: 0.6, z: y + 0.8, color: 0xff9a40, always: true });
         break;
       }
       default: break;
     }
   }
+  LIFT = 0;
   staticGroup = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
   if (parts.length) {
@@ -707,16 +730,29 @@ function build(v: WorldView) {
   }
   if (bldMesh) staticGroup.add(bldMesh);
   // objetos en pixel art: un cartel por tile, agrupados por tipo de tile (una sola llamada de dibujo cada uno)
-  const byChar = new Map<string, { x: number; y: number }[]>();
+  const byChar = new Map<string, { x: number; y: number; lift: number }[]>();
   for (const sp of sprites) (byChar.get(sp.c) ?? byChar.set(sp.c, []).get(sp.c)!).push(sp);
   const mtx = new THREE.Matrix4();
   for (const [c, list] of byChar) {
     const bm = boardMat(objectCanvas(c, theme));
     staticMats.push(bm);
     const im = new THREE.InstancedMesh(objGeo, bm, list.length);
-    list.forEach((sp, i) => im.setMatrixAt(i, mtx.makeTranslation(sp.x + 0.5, 0, sp.y + 1)));
+    list.forEach((sp, i) => im.setMatrixAt(i, mtx.makeTranslation(sp.x + 0.5, sp.lift, sp.y + 1)));
     im.castShadow = true;
     staticGroup.add(im);
+  }
+  // la capa «Encima» (copas, techos, arcos que tapan a la gente en 2D): un cartel por casilla, apenas delante de
+  // quien esté parado ahí, así también lo tapa en 3D
+  if (Array.isArray(m.top)) {
+    const tops = new Map<string, { x: number; y: number }[]>();
+    m.top.forEach((r: string, y: number) => [...r].forEach((c, x) => { if (c !== ' ' && TILE_INFO[c]) (tops.get(c) ?? tops.set(c, []).get(c)!).push({ x, y }); }));
+    for (const [c, list] of tops) {
+      const bm = boardMat(topCanvas(c, 0, theme));
+      staticMats.push(bm);
+      const im = new THREE.InstancedMesh(objGeo, bm, list.length);
+      list.forEach((sp, i) => im.setMatrixAt(i, mtx.makeTranslation(sp.x + 0.5, liftAt(sp.x + 0.5, sp.y + 0.5), sp.y + 1.04)));
+      staticGroup.add(im);
+    }
   }
   scene.add(staticGroup);
 }
@@ -1023,7 +1059,7 @@ export function drawWorld3D(v: WorldView, t: number) {
   // Un personaje se para en el centro de su casillero, un poco hacia adelante (como sus pies en el sprite 2D).
   const stand = (b: Board, pos: { x: number; y: number }) => {
     const x = pos.x / T + 0.5, z = pos.y / T + 0.72;
-    b.root.position.set(x, onWaterAt(x, z - 0.2) ? -0.06 : 0, z);
+    b.root.position.set(x, onWaterAt(x, z - 0.2) ? -0.06 : liftAt(x, z - 0.22), z);
   };
   const p = v.player;
   const ppos = v.entityPos(p);
@@ -1049,7 +1085,7 @@ export function drawWorld3D(v: WorldView, t: number) {
     const look = n.def.look;
     if (look === null) continue;
     seen.add(n);
-    if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, 0, n.y + 0.5); continue; }
+    if (look === 'machine') { const b = boardFor(n, 'machine', machineBoard); b.root.position.set(n.x + 0.5, liftAt(n.x + 0.5, n.y + 0.5), n.y + 0.5); continue; }
     if (look === 'ball') {
       const b = boardFor(n, 'ball', () => board(ballCanvas(), 1));
       const under = v.tileAt(n.x, n.y);

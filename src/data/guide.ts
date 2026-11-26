@@ -217,30 +217,48 @@ export function tidyMap(m) {
   m.tiles = rows.map((r) => r.join(''));
 }
 
+/** A grid of heights for a map (from its `elev` layer), and the cliff test used while the generator edits it. */
+function heights(m) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  return Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_, x) => { const c = m.elev?.[y]?.[x]; return c >= '1' && c <= '9' ? +c : 0; }));
+}
+const STEPS = new Set(['ʎ', 'Ӻ', 'b']);
+function cliffIn(rows, el, x, y) {
+  const e = el[y]?.[x];
+  if (!e || STEPS.has(rows[y][x])) return false;
+  return D4.some(([dx, dy]) => el[y + dy]?.[x + dx] !== undefined && el[y + dy][x + dx] < e);
+}
+function saveHeights(m, el) {
+  if (el.some((r) => r.some((v) => v))) m.elev = el.map((r) => r.map((v) => (v ? String(v) : ' ')).join(''));
+}
+/** Cells reachable from the walkable border cells, with cliffs as walls. */
+function reachFrom(rows, el) {
+  const h = rows.length, w = rows[0].length;
+  const blocked = (x, y) => solid(rows[y]?.[x]) || cliffIn(rows, el, x, y);
+  const seen = new Set<string>();
+  const st = [];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x === 0 || y === 0 || x === w - 1 || y === h - 1) && !blocked(x, y)) { seen.add(`${x},${y}`); st.push([x, y]); }
+  while (st.length) {
+    const [x, y] = st.pop();
+    for (const [dx, dy] of D4) { const nx = x + dx, ny = y + dy, k = `${nx},${ny}`; if (nx >= 0 && ny >= 0 && nx < w && ny < h && !seen.has(k) && !blocked(nx, ny)) { seen.add(k); st.push([nx, ny]); } }
+  }
+  return seen;
+}
+
 /**
- * Raised ground: on routes that run north-south, the way climbs a terrace every so often, a cliff face ('K') across
- * the whole width with a flight of steps ('ʎ') where the trail meets it. The cliff only replaces walkable ground and
- * is kept only if everything stays reachable through the steps.
+ * Raised ground: on routes that run north-south, the way climbs a terrace every so often. Everything north of a
+ * line across the route is one level higher (the `elev` layer), so that line is a cliff, with a flight of steps
+ * ('ʎ') where the trail meets it. Kept only if everything stays reachable through the steps.
  */
 export function terraceMap(m) {
   const h = m.tiles.length, w = m.tiles[0].length;
   if (h <= w || h < 40) return 0;
   const rows = m.tiles.map((r) => [...r]);
+  const el = heights(m);
   const objs = [...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])];
   const near = (x, y) => objs.some((o) => Math.abs(o.x - x) <= 1 && Math.abs(o.y - y) <= 2);
   const trig = (x, y) => (m.triggers ?? []).some((t) => x >= t.x - 1 && x <= t.x + (t.w ?? 1) && y >= t.y - 1 && y <= t.y + (t.h ?? 1));
-  const starts = [];
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x === 0 || y === 0 || x === w - 1 || y === h - 1) && !solid(rows[y][x])) starts.push([x, y]);
-  const reach = () => {
-    const seen = new Set(starts.map(([x, y]) => `${x},${y}`));
-    const st = [...starts];
-    while (st.length) {
-      const [x, y] = st.pop();
-      for (const [dx, dy] of D4) { const nx = x + dx, ny = y + dy, k = `${nx},${ny}`; if (!seen.has(k) && !solid(rows[ny]?.[nx])) { seen.add(k); st.push([nx, ny]); } }
-    }
-    return seen;
-  };
-  let seen = reach();
+  let seen = reachFrom(rows, el);
   const want = Math.floor(h / 30);
   let made = 0;
   for (let k = 1; k <= want; k++) {
@@ -253,7 +271,7 @@ export function terraceMap(m) {
       for (let x = 1; x < w - 1; x++) {
         const c = rows[y][x];
         if (solid(c)) continue;
-        if (!['.', ',', 'f', '='].includes(c) || near(x, y) || trig(x, y) || rows[y - 1][x] === 'λ' || rows[y + 1][x] === 'λ' || rows[y + 1][x] === 'K' || rows[y - 1][x] === 'K') { bad = true; break; }
+        if (!['.', ',', 'f', '='].includes(c) || near(x, y) || trig(x, y) || rows[y - 1][x] === 'λ' || rows[y + 1][x] === 'λ' || el[y][x] !== el[y + 1][x] || el[y][x] !== el[y - 1][x]) { bad = true; break; }
         cells.push(x);
         if (c === '=' && trail < 0) trail = x;
       }
@@ -261,17 +279,68 @@ export function terraceMap(m) {
       if (cells.at(-1) - cells[0] !== cells.length - 1) continue; // one clean span from wall to wall
       // the steps need open ground above and below them
       if (solid(rows[y - 1][trail]) || solid(rows[y + 1][trail])) continue;
-      const saved = cells.map((x) => rows[y][x]);
-      for (const x of cells) rows[y][x] = x === trail ? 'ʎ' : 'K';
-      const after = reach();
+      const savedRow = rows[y][trail];
+      rows[y][trail] = 'ʎ';
+      for (let yy = 0; yy <= y; yy++) for (let x = 0; x < w; x++) el[yy][x]++;
+      const after = reachFrom(rows, el);
       const lost = [...seen].filter((key) => !after.has(key)).length;
-      if (lost > cells.length - 1) { cells.forEach((x, i) => { rows[y][x] = saved[i]; }); continue; }
+      if (lost > cells.length - 1) {
+        rows[y][trail] = savedRow;
+        for (let yy = 0; yy <= y; yy++) for (let x = 0; x < w; x++) el[yy][x]--;
+        continue;
+      }
       seen = after;
       made++;
       break;
     }
   }
-  if (made) m.tiles = rows.map((r) => r.join(''));
+  if (made) { m.tiles = rows.map((r) => r.join('')); saveHeights(m, el); }
+  return made;
+}
+
+/**
+ * Plateaus (mesetas) out on open ground, as a classic route has: a raised block with a cliff all round and steps on
+ * its south side, sometimes with tall grass on top. Only on plain ground away from people, items, signs and scene
+ * triggers, and undone if anything other than the block itself would stop being reachable.
+ */
+export function plateauMap(m, seed) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  const want = Math.min(4, Math.floor((w * h) / 500));
+  if (!want) return 0;
+  const rand = rng(`meseta${seed}`);
+  const rows = m.tiles.map((r) => [...r]);
+  const el = heights(m);
+  const objs = [...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])];
+  // plain ground or a stand of trees or rocks (they stand on the plateau too), away from people, items and triggers
+  const free = (x, y) => ['.', ',', 'f', '#', 'q', 'R', 'p'].includes(rows[y]?.[x]) && !objs.some((o) => Math.abs(o.x - x) <= 1 && Math.abs(o.y - y) <= 1)
+    && !(m.triggers ?? []).some((t) => x >= t.x - 1 && x <= t.x + (t.w ?? 1) && y >= t.y - 1 && y <= t.y + (t.h ?? 1));
+  let seen = reachFrom(rows, el);
+  let made = 0;
+  for (let k = 0; k < 900 && made < want; k++) {
+    const bw = 4 + Math.floor(rand() * 5), bh = 4 + Math.floor(rand() * 3);
+    const x0 = 3 + Math.floor(rand() * Math.max(1, w - bw - 6)), y0 = 3 + Math.floor(rand() * Math.max(1, h - bh - 7));
+    const lvl = el[y0][x0];
+    let ok = true;
+    for (let y = y0 - 1; y <= y0 + bh && ok; y++) for (let x = x0 - 1; x <= x0 + bw && ok; x++) if (!free(x, y) || el[y]?.[x] !== lvl) ok = false;
+    const sx = x0 + 1 + Math.floor(rand() * (bw - 2)), sy = y0 + bh - 1;
+    let open = 0; // some walkable ground on top, and the steps lead to it from the way
+    for (let y = y0 + 1; y < y0 + bh - 1; y++) for (let x = x0 + 1; x < x0 + bw - 1; x++) if (!solid(rows[y][x])) open++;
+    if (!ok || open < 4 || solid(rows[sy - 1]?.[sx]) || solid(rows[sy]?.[sx]) || solid(rows[sy + 1]?.[sx]) || !seen.has(`${sx},${sy + 1}`)) continue;
+    const saved = rows.map((r) => [...r]);
+    for (let y = y0; y < y0 + bh; y++) for (let x = x0; x < x0 + bw; x++) el[y][x] = lvl + 1;
+    rows[sy][sx] = 'ʎ';
+    if (rand() < 0.5) for (let y = y0 + 1; y < y0 + bh - 1; y++) for (let x = x0 + 1; x < x0 + bw - 1; x++) if (rows[y][x] === '.') rows[y][x] = ','; // a patch of tall grass on top
+    const after = reachFrom(rows, el);
+    const inBlock = (key) => { const [x, y] = key.split(',').map(Number); return x >= x0 && x < x0 + bw && y >= y0 && y < y0 + bh; };
+    if ([...seen].some((key) => !after.has(key) && !inBlock(key)) || !after.has(`${sx},${sy - 1}`)) {
+      for (let y = y0; y < y0 + bh; y++) for (let x = x0; x < x0 + bw; x++) el[y][x] = lvl;
+      saved.forEach((r, y) => { rows[y] = r; });
+      continue;
+    }
+    seen = after;
+    made++;
+  }
+  if (made) { m.tiles = rows.map((r) => r.join('')); saveHeights(m, el); }
   return made;
 }
 
@@ -396,4 +465,29 @@ export function grassBlocks(m) {
   }
   if (made) m.tiles = rows.map((r) => r.join(''));
   return made;
+}
+
+/**
+ * People and items placed after the plateaus (folk, critters, route stories) never stand on a cliff: each one on an
+ * edge moves to the nearest free cell that can be reached.
+ */
+export function offCliffs(m) {
+  if (!m.elev) return 0;
+  const rows = m.tiles.map((r) => [...r]);
+  const el = heights(m);
+  const reach = reachFrom(rows, el);
+  const objs = [...(m.npcs ?? []), ...(m.items ?? []).filter((i) => !i.hidden)];
+  const taken = new Set(objs.map((o) => `${o.x},${o.y}`));
+  let moved = 0;
+  for (const o of objs) {
+    if (!cliffIn(rows, el, o.x, o.y) || m.coll?.[o.y]?.[o.x] === 'o') continue;
+    const q = [[o.x, o.y]], seen = new Set([`${o.x},${o.y}`]);
+    for (let i = 0; i < q.length && i < 400; i++) {
+      const [x, y] = q[i];
+      const k = `${x},${y}`;
+      if (reach.has(k) && !taken.has(k) && rows[y][x] !== 'D' && rows[y - 1]?.[x] !== 'D') { taken.delete(`${o.x},${o.y}`); o.x = x; o.y = y; taken.add(k); moved++; break; }
+      for (const [dx, dy] of D4) { const nk = `${x + dx},${y + dy}`; if (rows[y + dy]?.[x + dx] !== undefined && !seen.has(nk)) { seen.add(nk); q.push([x + dx, y + dy]); } }
+    }
+  }
+  return moved;
 }

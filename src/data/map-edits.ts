@@ -12,6 +12,7 @@
 //   weather   'clear' | 'rain' | 'storm' | 'fog' fixed weather for the zone (absent = random)
 //   top       [string] the "encima" layer, same size as the map: a tile char drawn over people, ' ' = nothing
 //   coll      [string] the collision layer, same size as the map: 'x' blocked, 'o' passable, ' ' = as the tile says
+//   elev      [string] the height layer, same size as the map: '1'-'3' raised, ' ' ground level (edges become cliffs)
 // The game applies them after building every map (end of maps.js), so a generator change keeps the edits.
 
 /** A stable name for a person in a map: what it is (trainer id, script or look) and which one of those it is. */
@@ -76,6 +77,7 @@ export function applyMapEdits(maps, edits) {
     const fits = (a) => Array.isArray(a) && a.length === m.tiles.length && a.every((r) => typeof r === 'string' && r.length === m.tiles[0].length);
     if (fits(e.top)) m.top = [...e.top];
     if (fits(e.coll)) m.coll = [...e.coll];
+    if (fits(e.elev)) m.elev = [...e.elev];
   }
 }
 
