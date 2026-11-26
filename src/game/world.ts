@@ -8,7 +8,7 @@ import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, groundUnder, groundFor, drawBuildingTrim, drawGroundEdges } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, topCanvas, collAt, groundUnder, groundFor, drawBuildingTrim, drawGroundEdges } from '../gfx/tiles.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { overworldCreature } from '../gfx/overworld-creatures.ts';
@@ -118,7 +118,9 @@ function solidAt(x, y, { ignorePlayer = false, self = null, player = false } = {
   // With the canoe, the player can sail on water.
   // The canoe is only boarded on purpose (Z facing the water, then "Sí"); once afloat, the player keeps sailing on water.
   const afloat = canoeGo || tileAt(W_.player.x, W_.player.y) === '~';
-  if (TILE_INFO[ch]?.solid && !(player && ch === '~' && afloat && hasItem('canoa') && flag(badgeOf('rivera')))) return true;
+  const layer = collAt(W_.map, x, y); // the map's collision layer, when it says something, wins over the tile
+  if (layer === true) return true;
+  if (layer === null && TILE_INFO[ch]?.solid && !(player && ch === '~' && afloat && hasItem('canoa') && flag(badgeOf('rivera')))) return true;
   if (W_.npcs.some((n) => n !== self && n.visible && n.x === x && n.y === y)) return true;
   if (W_.items.some((it) => it.x === x && it.y === y)) return true;
   if (W_.legend && W_.legend.x === x && W_.legend.y === y) return true;
@@ -538,7 +540,7 @@ async function crossEdge(side, to) {
   y = Math.min(y, m2.h - 1);
   // find nearest walkable tile along the arrival edge
   const afloat = tileAt(p.x, p.y) === '~'; // a sailor arrives on the water of the next map
-  const walk = (cx, cy) => m2.tiles[cy]?.[cx] != null && (!TILE_INFO[m2.tiles[cy][cx]]?.solid || (afloat && m2.tiles[cy][cx] === '~'));
+  const walk = (cx, cy) => m2.tiles[cy]?.[cx] != null && collAt(m2, cx, cy) !== true && (collAt(m2, cx, cy) === false || !TILE_INFO[m2.tiles[cy][cx]]?.solid || (afloat && m2.tiles[cy][cx] === '~'));
   if (!walk(x, y)) {
     for (let d = 1; d < 200; d++) {
       const cand = side === 'e' || side === 'w' ? [[x, y - d], [x, y + d]] : [[x - d, y], [x + d, y]];
@@ -1865,6 +1867,14 @@ function drawWorld(g, t) {
         g.fillStyle = c;
         g.fillRect(Math.round(bx + vx * q), Math.round(by + vy * q + 10 * q * q), 2, 1);
       }
+    }
+  }
+  // The "encima" layer: treetops, roofs and arches drawn over people, as the top layer of a classic map.
+  if (m.top) {
+    for (let y = y0; y <= y1; y++) {
+      const row = m.top[y];
+      if (!row) continue;
+      for (let x = x0; x <= x1; x++) { const ch = row[x]; if (ch && ch !== ' ' && TILE_INFO[ch]) g.drawImage(topCanvas(ch, frame, m.theme), x * T - cx, y * T - cy); }
     }
   }
   if (W_.fishing) drawFishing(g, cx, cy, t);

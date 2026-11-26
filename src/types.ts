@@ -74,8 +74,10 @@ export interface NpcDef {
 
 export interface MapDef {
   id?: string; name: string; w?: number; h?: number; tiles: string[];
-  npcs?: NpcDef[]; items?: { x: number; y: number; item: string; id: string }[];
+  npcs?: NpcDef[]; items?: { x: number; y: number; item: string; id: string; hidden?: boolean }[];
   exits?: Record<string, any>; doors?: any[]; signs?: string[]; indoor?: boolean; theme?: string | null;
+  /** extra layers (see data/map-edits.ts): drawn over people, and collision (x blocked, o passable) */
+  top?: string[]; coll?: string[];
   [extra: string]: any;
 }
 

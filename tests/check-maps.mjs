@@ -23,6 +23,7 @@ for (const [id, m] of Object.entries(MAPS)) {
     const edge = side === 'e' ? m.tiles.map((r) => r[w - 1]) : side === 'w' ? m.tiles.map((r) => r[0]) : side === 'n' ? [...m.tiles[0]] : [...m.tiles.at(-1)];
     if (!edge.some((t) => !SOLID.has(t) || t === '%' || t === '~')) bad(`${id} exit ${side} has no walkable edge tile`);
   }
+  for (const k of ['top', 'coll']) if (m[k] && (m[k].length !== m.tiles.length || m[k].some((r) => r.length !== w))) bad(`${id} layer ${k} does not match the map size`);
   if (m.indoor && !m.tiles.join('').includes('m')) bad(`${id} interior without mat`);
   const signs = m.tiles.join('').split('').filter((c) => c === 'S').length;
   if (!m.indoor && (m.signs?.length ?? 0) !== signs) bad(`${id} has ${signs} signs but ${m.signs?.length ?? 0} texts`);
@@ -37,7 +38,7 @@ for (const [id, m] of Object.entries(MAPS)) for (const w of m.warps ?? []) { con
 const linked = new Set(Object.values(OUTDOOR).flatMap((m) => (m.doors ?? []).map((d) => (typeof d === 'string' ? d : d.to))).concat(Object.values(MAPS).flatMap((m) => (m.warps ?? []).map((w) => w.to))));
 for (const id of Object.keys(INTERIOR)) if (!linked.has(id)) bad(`interior ${id} is not linked from any door`);
 // connectivity: from the first walkable edge tile of an outdoor map, every exit, door front and NPC/item is reachable
-const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); }; // thickets (machete) and water (canoe) count as passable
+const walkable = (m, x, y) => { const t = m.tiles[y]?.[x]; const c = m.coll?.[y]?.[x]; if (t !== undefined && c === 'x') return false; if (t !== undefined && c === 'o') return true; return t !== undefined && (!SOLID.has(t) || t === '%' || t === '~' || t === '\\' || t === 'Ϡ'); }; // thickets (machete) and water (canoe) count as passable
 for (const [id, m] of Object.entries(OUTDOOR)) {
   const h = m.tiles.length; const w = m.tiles[0].length;
   const starts = [];

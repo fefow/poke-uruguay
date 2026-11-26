@@ -1571,10 +1571,12 @@ export const MAP_ORIGINALS = Object.fromEntries(Object.entries(MAPS).map(([id, m
   return [id, {
     tiles: [...m.tiles],
     npcs: (m.npcs ?? []).map((n, i) => ({ key: keys[i], x: n.x, y: n.y, look: n.look, dir: n.dir, text: n.text && !n.script && !n.trainer ? [].concat(n.text) : null, kind: n.trainer ? 'trainer' : n.script ? 'script' : n.critter ? 'critter' : n.blocker ? 'blocker' : 'npc', name: n.name ?? n.trainer?.name ?? null, wander: !!n.wander })),
-    items: (m.items ?? []).map((it) => ({ id: it.id, x: it.x, y: it.y, item: it.item })),
+    items: (m.items ?? []).map((it) => ({ id: it.id, x: it.x, y: it.y, item: it.item, ...(it.hidden ? { hidden: true } : {}) })),
     doors: (m.doors ?? []).map((d) => (typeof d === 'string' ? d : { ...d })),
     signs: [...(m.signs ?? [])],
     warps: (m.warps ?? []).map((w) => ({ x: w.x, y: w.y, to: w.to, tx: w.tx, ty: w.ty })),
+    top: m.top ? [...m.top] : undefined as string[] | undefined,
+    coll: m.coll ? [...m.coll] : undefined as string[] | undefined,
   }];
 }));
 applyMapEdits(MAPS, MAP_OVERRIDES);

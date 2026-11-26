@@ -7,7 +7,7 @@ import { CHAIN } from '../data/route.ts';
 import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
-import { tileCanvas, groundFor, drawBuildingTrim, drawGroundEdges, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
+import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, drawGroundEdges, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -27,6 +27,24 @@ const RECENT_KEY = 'pokeuy:map-recent';
 const ZOOMS = [1, 2, 3, 4, 5, 6];
 const LOCKED = new Set<string>(); // nothing is locked: doors, signs and their data follow the tiles (see reconcile)
 const SOLID = (c) => c === undefined || !!TILE_INFO[c]?.solid;
+// Layers of a map, as in a classic layout: the ground, what is drawn over people, and the collision.
+type LayerId = 'tiles' | 'top' | 'coll';
+const LAYERS: [LayerId, string, string][] = [
+  ['tiles', 'Suelo', 'Las piezas del mapa: pasto, caminos, árboles, casas. Lo que se ve debajo de la gente.'],
+  ['top', 'Encima', 'Piezas que se dibujan por encima de la gente: copas de árboles, techos, arcos, puentes. Borrar deja la casilla vacía.'],
+  ['coll', 'Colisión', 'Decide por dónde se camina sin cambiar lo que se ve. Bloqueado o Pasable mandan sobre la pieza; «Según la pieza» lo deja como estaba.'],
+];
+const COLL_PIECES: [string, string, string][] = [[' ', 'Según la pieza', 'rgba(255,255,255,.15)'], ['x', 'Bloqueado', 'rgba(255,40,60,.75)'], ['o', 'Pasable', 'rgba(60,220,110,.75)']];
+/** A cell blocks walking: the collision layer first, then the tile. */
+const solidCell = (W, x, y) => { const c = W.coll?.[y]?.[x]; return c === 'x' ? true : c === 'o' ? false : SOLID(W.tiles[y]?.[x]); };
+/** A grid of single chars the size of the map, from a layer saved as strings (blank where it says nothing). */
+function layerGrid(src: string[] | undefined, wid: number, hgt: number, shift = { x: 0, y: 0 }) {
+  const out = Array.from({ length: hgt }, () => Array(wid).fill(' '));
+  if (!Array.isArray(src)) return out;
+  src.forEach((r, y) => [...r].forEach((c, x) => { const tx = x + shift.x, ty = y + shift.y; if (out[ty]?.[tx] !== undefined) out[ty][tx] = c; }));
+  return out;
+}
+const blankLayer = (grid: string[][]) => grid.every((r) => r.every((c) => c === ' '));
 const DIRS = [['down', 'Abajo'], ['up', 'Arriba'], ['left', 'Izquierda'], ['right', 'Derecha']];
 const KIND_NAME = { trainer: 'Entrenador', script: 'Evento', critter: 'Animal', blocker: 'Guardia de paso', npc: 'Persona', added: 'Persona nueva' };
 const ITEM_KEYS = Object.keys(ITEMS).filter((k) => !isKeyItem(k));
@@ -62,6 +80,10 @@ function working(id, patch?) {
   });
   for (const a of p.addItems ?? []) items.push({ ...a, added: true });
   const W: any = { tiles, npcs, items, weather: p.weather ?? 'random', ground: p.ground ?? 'auto', shift };
+  const hgt = tiles.length, wid = tiles[0].length;
+  const fitsNow = (a) => Array.isArray(a) && a.length === hgt && a.every((r) => typeof r === 'string' && r.length === wid);
+  W.top = fitsNow(p.top) ? layerGrid(p.top, wid, hgt) : layerGrid(o.top, wid, hgt, shift);
+  W.coll = fitsNow(p.coll) ? layerGrid(p.coll, wid, hgt) : layerGrid(o.coll, wid, hgt, shift);
   // Doors and signs belong to the 'D' / 'S' tiles in reading order; warps are plain positions.
   const rows = tiles.map((r) => r.join(''));
   const doors = Array.isArray(p.doors) && p.doors.length === countOf(rows, 'D') ? p.doors : o.doors;
@@ -127,6 +149,12 @@ function diff(id, W) {
   if (!sameJSON(W.signs.map((s) => s.text), cellsOf(o.tiles, 'S').map((_, i) => o.signs[i] ?? '…'))) p.signs = W.signs.map((s) => s.text);
   const warps = W.warps.map(({ x, y, to, tx, ty }) => ({ x, y, to, tx, ty }));
   if (!sameJSON(warps, o.warps.map((w) => ({ ...w, x: w.x + sh.x, y: w.y + sh.y })))) p.warps = warps;
+  for (const k of ['top', 'coll']) {
+    const now = W[k].map((r) => r.join(''));
+    const was = layerGrid(o[k], now[0].length, now.length, sh).map((r) => r.join(''));
+    if (now.some((r, y) => r !== was[y])) p[k] = blankLayer(W[k]) && !o[k] ? undefined : now;
+    if (p[k] === undefined) delete p[k];
+  }
   if (W.weather && W.weather !== 'random') p.weather = W.weather;
   if (W.ground && W.ground !== 'auto') p.ground = W.ground;
   return Object.keys(p).length ? p : null;
@@ -147,7 +175,26 @@ const S: any = {
   history: new Map(), // id -> { undo, redo } so switching maps keeps each map's undo
   back: [] as string[], // maps opened before this one (Volver)
   doorTo: 'casa_jugador', // where a door painted from the palette leads until changed in the inspector
+  layer: 'tiles' as LayerId, // the layer being painted
+  tileBy: { tiles: '.', top: '#', coll: 'x' } as Record<LayerId, string>, // the chosen piece of each layer
 };
+// S.tile is the chosen piece of the layer being painted
+delete S.tile;
+Object.defineProperty(S, 'tile', { get: () => S.tileBy[S.layer], set: (v) => { S.tileBy[S.layer] = v; } });
+/** The grid of the layer being painted. */
+const L = (): string[][] => S.W[S.layer];
+const pieceName = (ch) => (S.layer === 'coll' ? COLL_PIECES.find(([c]) => c === ch)?.[1] ?? ch : ch === ' ' ? 'Borrar (vacío)' : `${TILE_INFO[ch]?.name ?? ch} "${ch}"`);
+/** How a piece of the current layer looks in the palette and in previews. */
+function pieceCanvas(ch, theme) {
+  if (S.layer !== 'coll' && ch !== ' ') return S.layer === 'top' ? topCanvas(ch, 0, theme) : tileCanvas(ch, 0, theme);
+  const c = h('canvas', { width: T, height: T }) as HTMLCanvasElement;
+  const x = c.getContext('2d');
+  if (S.layer === 'coll') {
+    x.fillStyle = COLL_PIECES.find(([k]) => k === ch)?.[2] ?? '#888'; x.fillRect(0, 0, T, T);
+    x.fillStyle = '#fff'; x.font = 'bold 11px sans-serif'; x.fillText(ch === 'x' ? '✕' : ch === 'o' ? '✓' : '·', 4, 12);
+  } else { x.strokeStyle = '#f66'; x.lineWidth = 2; x.beginPath(); x.moveTo(2, 2); x.lineTo(14, 14); x.moveTo(14, 2); x.lineTo(2, 14); x.stroke(); }
+  return c;
+}
 function loadJSON(k, def) { try { const v = JSON.parse(store.getItem(k) || 'null'); return v ?? def; } catch { return def; } }
 function saveJSON(k, v) { try { store.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } }
 const nameOf = (id) => (MAPS[id]?.name ?? id).replace('{rival}', 'tu rival');
@@ -189,6 +236,17 @@ const changesChk = h('input', { type: 'checkbox', onchange: () => { S.showChange
 const brushSel = h('select', { class: 'ed-input me-zoom', title: 'Tamaño del pincel (teclas [ y ])', onchange: () => { S.brush = +brushSel.value; } },
   [1, 2, 3, 5].map((n) => h('option', { value: n, text: `Pincel ${n}×${n}`, selected: n === S.brush })));
 const toolBtns: Record<string, HTMLElement> = {};
+const layerBtns: Record<string, HTMLElement> = {};
+const layerHint = h('p', { class: 'ed-hint' });
+function setLayer(id: LayerId) {
+  S.layer = id;
+  if (S.pasting) stopPaste();
+  if (id !== 'tiles' && S.tool === 'move') setTool('paint');
+  status(LAYERS.find(([k]) => k === id)[2]);
+  renderPalette();
+  draw();
+}
+const layerBar = h('div', { class: 'me-row', title: 'Capa que se pinta (tecla K cambia de capa)' }, ...LAYERS.map(([id, label, tip]) => (layerBtns[id] = h('button', { class: 'ed-btn ed-mini', type: 'button', title: tip, onclick: () => setLayer(id) }, label))));
 const TOOLS = [
   ['paint', 'Pincel', 'B', 'Pinta casilla por casilla. Shift + clic: línea recta desde la última casilla pintada.'],
   ['line', 'Línea', 'L', 'Arrastrá de una punta a la otra.'],
@@ -235,6 +293,7 @@ const sizeInfo = h('p', { class: 'ed-hint' });
 const growIn = (def = 0) => h('input', { class: 'ed-input', type: 'number', min: '0', max: '120', value: String(def), style: { width: '100%' } });
 const GROW: [string, string, HTMLInputElement][] = [['left', 'Izq.', growIn()], ['top', 'Arriba', growIn()], ['right', 'Der.', growIn()], ['bottom', 'Abajo', growIn()]];
 const right = h('aside', { class: 'me-right' },
+  h('section', {}, h('h2', { text: 'Capa' }), layerBar, layerHint),
   h('section', {}, h('h2', { text: 'Piezas' }), h('a', { class: 'ed-btn ed-mini is-primary', href: 'editor.html#nueva-pieza', target: '_blank', rel: 'noopener', title: 'Abre el editor de sprites para crear y dibujar una pieza nueva; después de guardarla aparece acá', text: '＋ Nueva pieza' }), current, recentEl, tileSearch, palette),
   h('section', {}, h('h2', { text: 'Zona y portapapeles' }), areaBox),
   h('section', {}, h('h2', { text: 'Seleccionado' }), inspector),
@@ -320,6 +379,15 @@ window.addEventListener('focus', () => { loadMine(); renderPalette(); try { draw
 
 function renderPalette() {
   const theme = MAPS[S.id]?.theme ?? null;
+  for (const [k, b] of Object.entries(layerBtns)) b.classList.toggle('is-active', k === S.layer);
+  layerHint.textContent = LAYERS.find(([k]) => k === S.layer)[2];
+  if (S.layer !== 'tiles') {
+    const pieces = S.layer === 'coll' ? COLL_PIECES.map(([c]) => c) : [' ', ...Object.keys(TILE_INFO).filter((ch) => !LOCKED.has(ch) && (!S.tileFilter || TILE_INFO[ch].name.toLowerCase().includes(S.tileFilter)))];
+    palette.replaceChildren(...pieces.map((ch) => h('button', { type: 'button', class: `me-tile ${ch === S.tile ? 'is-active' : ''}`, title: pieceName(ch), onclick: () => pickTile(ch) }, pieceCanvas(ch, theme))));
+    current.replaceChildren(pieceCanvas(S.tile, theme), h('span', { text: `${LAYERS.find(([k]) => k === S.layer)[1]}: ${pieceName(S.tile)}` }));
+    recentEl.replaceChildren();
+    return;
+  }
   const okCh = (ch) => !LOCKED.has(ch) && (!S.tileFilter || TILE_INFO[ch].name.toLowerCase().includes(S.tileFilter));
   const order = [...MINE.filter(okCh), ...Object.keys(TILE_INFO).filter((ch) => !MINE.includes(ch) && okCh(ch))];
   palette.replaceChildren(...order.map((ch) => {
@@ -340,6 +408,7 @@ function renderPalette() {
 function pickTile(ch) {
   if (LOCKED.has(ch)) return status('Las puertas y los carteles no se pintan: van atados a su destino y su texto.', 'warn');
   S.tile = ch;
+  if (S.layer !== 'tiles') { if (S.tool === 'pick' || S.tool === 'move') setTool('paint'); renderPalette(); return; }
   S.recent = [ch, ...S.recent.filter((c) => c !== ch)].slice(0, 10);
   saveJSON(RECENT_KEY, S.recent);
   if (S.tool === 'pick' || S.tool === 'move') setTool('paint');
@@ -428,7 +497,9 @@ function draw() {
   if (!m.indoor) { drawGroundEdges(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); }
   for (const it of W.items) {
     if (it.removed) continue;
+    g.globalAlpha = it.hidden ? 0.5 : 1; // hidden in the scenery: the game does not draw it
     drawItem(g, it.item, it.x * T, it.y * T - 1);
+    g.globalAlpha = 1;
   }
   for (const w of W.warps) {
     g.fillStyle = 'rgba(255,224,90,.28)'; g.fillRect(w.x * Zt0, w.y * Zt0, Zt0, Zt0);
@@ -442,6 +513,10 @@ function draw() {
     if (spr) g.drawImage(spr, n.x * T, n.y * T - 2);
     else { g.fillStyle = n.kind === 'critter' ? 'rgba(200,140,60,.85)' : 'rgba(255,255,255,.7)'; g.fillRect(n.x * T + 4, n.y * T + 4, 8, 8); }
   }
+  // the "encima" layer over people (faded while painting another layer, so the ground stays visible)
+  g.globalAlpha = S.layer === 'top' || S.layer === 'tiles' ? 1 : 0.45;
+  W.top.forEach((r, y) => r.forEach((ch, x) => { if (ch !== ' ' && TILE_INFO[ch]) g.drawImage(topCanvas(ch, 0, m.theme), x * T, y * T); }));
+  g.globalAlpha = 1;
   g.setTransform(1, 0, 0, 1, 0, 0);
   // exits and doors, labelled at screen size so they stay readable at any zoom
   const tag = (text, px, py, color, align = 'center') => {
@@ -470,9 +545,22 @@ function draw() {
     g.stroke();
   }
   const Zt = T * Z;
-  if (S.showSolid) {
+  if (S.showSolid || S.layer === 'coll') {
     g.fillStyle = 'rgba(255,40,60,.32)';
-    rows.forEach((r, y) => [...r].forEach((c, x) => { if (SOLID(c)) g.fillRect(x * Zt, y * Zt, Zt, Zt); }));
+    rows.forEach((r, y) => [...r].forEach((c, x) => { if (solidCell(W, x, y)) g.fillRect(x * Zt, y * Zt, Zt, Zt); }));
+  }
+  if (S.layer === 'coll') { // what the collision layer itself says, on top of the result
+    W.coll.forEach((r, y) => r.forEach((c, x) => {
+      if (c === ' ') return;
+      g.strokeStyle = c === 'x' ? '#ff4a5a' : '#4ae07a'; g.lineWidth = 2;
+      g.strokeRect(x * Zt + 2, y * Zt + 2, Zt - 4, Zt - 4);
+      if (c === 'o') { g.fillStyle = 'rgba(60,220,110,.28)'; g.fillRect(x * Zt, y * Zt, Zt, Zt); }
+    }));
+  }
+  if (S.layer === 'top') {
+    g.strokeStyle = 'rgba(127,232,255,.8)'; g.lineWidth = 1; g.setLineDash([3, 3]);
+    W.top.forEach((r, y) => r.forEach((c, x) => { if (c !== ' ') g.strokeRect(x * Zt + 1.5, y * Zt + 1.5, Zt - 3, Zt - 3); }));
+    g.setLineDash([]);
   }
   if (S.showChanges) {
     g.fillStyle = 'rgba(80,220,255,.35)';
@@ -482,14 +570,14 @@ function draw() {
   // previews: the shape being dragged, or the clipboard under the pointer
   const ghost = (cells, ch) => {
     g.globalAlpha = 0.75;
-    for (const c of cells) if (W.tiles[c.y]?.[c.x] !== undefined) g.drawImage(tileCanvas(ch, 0, m.theme), c.x * Zt, c.y * Zt, Zt, Zt);
+    for (const c of cells) if (W.tiles[c.y]?.[c.x] !== undefined) g.drawImage(pieceCanvas(ch, m.theme), c.x * Zt, c.y * Zt, Zt, Zt);
     g.globalAlpha = 1;
   };
   if (S.shape && S.tool === 'line') ghost(lineCells(S.shape.from, S.shape.to), S.tile);
   if (S.shape && S.tool === 'rect') ghost(rectCells(S.shape.from, S.shape.to, !S.shape.border), S.tile);
   if (S.pasting && S.clip && S.hover) {
     g.globalAlpha = 0.75;
-    S.clip.forEach((r, dy) => r.forEach((ch, dx) => { if (W.tiles[S.hover.y + dy]?.[S.hover.x + dx] !== undefined) g.drawImage(tileCanvas(ch, 0, m.theme), (S.hover.x + dx) * Zt, (S.hover.y + dy) * Zt, Zt, Zt); }));
+    S.clip.forEach((r, dy) => r.forEach((ch, dx) => { if (W.tiles[S.hover.y + dy]?.[S.hover.x + dx] !== undefined) g.drawImage(pieceCanvas(ch, m.theme), (S.hover.x + dx) * Zt, (S.hover.y + dy) * Zt, Zt, Zt); }));
     g.globalAlpha = 1;
     g.setLineDash([6, 4]); g.strokeStyle = '#7fe8ff'; g.lineWidth = 2;
     g.strokeRect(S.hover.x * Zt + 1, S.hover.y * Zt + 1, S.clip[0].length * Zt - 2, S.clip.length * Zt - 2);
@@ -515,7 +603,7 @@ function draw() {
 }
 
 // ---------------------------------------------------------------- editing
-const snap = () => JSON.stringify({ tiles: S.W.tiles, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift, doors: S.W.doors, signs: S.W.signs, warps: S.W.warps });
+const snap = () => JSON.stringify({ tiles: S.W.tiles, top: S.W.top, coll: S.W.coll, npcs: S.W.npcs, items: S.W.items, weather: S.W.weather, ground: S.W.ground, shift: S.W.shift, doors: S.W.doors, signs: S.W.signs, warps: S.W.warps });
 function pushUndo() {
   S.undo.push(snap());
   if (S.undo.length > MAX_UNDO) S.undo.shift();
@@ -568,23 +656,24 @@ function changed() {
 }
 
 function setTile(x, y, ch) {
-  const row = S.W.tiles[y];
+  const row = L()[y];
   if (!row || row[x] === undefined || row[x] === ch) return false;
   if (LOCKED.has(row[x])) { status('Esa casilla es una puerta o un cartel: no se puede pintar encima.', 'warn'); return false; }
   row[x] = ch;
   return true;
 }
 function fill(x0, y0, ch) {
-  const from = S.W.tiles[y0]?.[x0];
+  const grid = L();
+  const from = grid[y0]?.[x0];
   if (from === undefined || from === ch || LOCKED.has(from)) return;
   const q = [[x0, y0]];
   const seen = new Set([`${x0},${y0}`]);
   while (q.length) {
     const [x, y] = q.pop();
-    S.W.tiles[y][x] = ch;
+    grid[y][x] = ch;
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
-      if (!seen.has(k) && S.W.tiles[ny]?.[nx] === from) { seen.add(k); q.push([nx, ny]); }
+      if (!seen.has(k) && grid[ny]?.[nx] === from) { seen.add(k); q.push([nx, ny]); }
     }
   }
 }
@@ -685,7 +774,7 @@ function growMap() {
   if (!n.left && !n.top && !n.right && !n.bottom) return status('Poné cuántas filas o columnas querés agregar.', 'warn');
   const wid = S.W.tiles[0].length + n.left + n.right, hgt = S.W.tiles.length + n.top + n.bottom;
   if (wid > 200 || hgt > 200) return status('El mapa no puede pasar de 200×200 casillas.', 'warn');
-  const ch = LOCKED.has(S.tile) ? '.' : S.tile;
+  const ch = LOCKED.has(S.tileBy.tiles) ? '.' : S.tileBy.tiles;
   edit(() => {
     const W = S.W;
     const old = W.tiles;
@@ -695,6 +784,7 @@ function growMap() {
     for (const r of old) rows.push([...Array(n.left).fill(ch), ...r, ...Array(n.right).fill(ch)]);
     for (let y = 0; y < n.bottom; y++) rows.push(blank());
     W.tiles = rows;
+    for (const k of ['top', 'coll']) W[k] = layerGrid(W[k].map((r) => r.join('')), wid, hgt, { x: n.left, y: n.top });
     for (const o of [...W.npcs, ...W.items]) { o.x += n.left; o.y += n.top; }
     W.shift = { x: (W.shift?.x ?? 0) + n.left, y: (W.shift?.y ?? 0) + n.top };
     S.sel = null;
@@ -712,19 +802,19 @@ function resetMap() {
 const areaName = (r) => `${r.w}×${r.h} desde ${r.x},${r.y}`;
 function copyArea(cut = false) {
   if (!S.area) return status('Marcá una zona con la herramienta Selección (M) primero.', 'warn');
-  S.clip = copyRegion(S.W.tiles, S.area);
+  S.clip = copyRegion(L(), S.area);
   saveJSON(CLIP_KEY, S.clip);
   if (cut) {
     const r = S.area;
-    edit(() => paintCells(S.W.tiles, rectCells({ x: r.x, y: r.y }, { x: r.x + r.w - 1, y: r.y + r.h - 1 }), S.tile, LOCKED));
-    status(`Cortado ${areaName(r)}: quedó rellenado con ${TILE_INFO[S.tile]?.name ?? S.tile}. Ctrl+V para pegar.`, 'ok');
+    edit(() => paintCells(L(), rectCells({ x: r.x, y: r.y }, { x: r.x + r.w - 1, y: r.y + r.h - 1 }), S.tile, LOCKED));
+    status(`Cortado ${areaName(r)}: quedó rellenado con ${pieceName(S.tile)}. Ctrl+V para pegar.`, 'ok');
   } else status(`Copiado ${areaName(S.area)}. Ctrl+V para pegar (sirve también en otro mapa).`, 'ok');
   renderArea();
 }
 function fillArea() {
   if (!S.area) return;
   const r = S.area;
-  edit(() => paintCells(S.W.tiles, rectCells({ x: r.x, y: r.y }, { x: r.x + r.w - 1, y: r.y + r.h - 1 }), S.tile, LOCKED));
+  edit(() => paintCells(L(), rectCells({ x: r.x, y: r.y }, { x: r.x + r.w - 1, y: r.y + r.h - 1 }), S.tile, LOCKED));
 }
 function startPaste() {
   if (!S.clip?.length) return status('No hay nada copiado todavía.', 'warn');
@@ -752,8 +842,8 @@ function transformClip(fn, what) {
 function replaceInMap(from) {
   if (LOCKED.has(from)) return status('Las puertas y los carteles no se reemplazan.', 'warn');
   let n = 0;
-  edit(() => { n = replaceAll(S.W.tiles, from, S.tile, LOCKED, S.area ?? undefined); });
-  status(`${n} casilla${n === 1 ? '' : 's'} de ${TILE_INFO[from]?.name ?? from} cambiada${n === 1 ? '' : 's'} por ${TILE_INFO[S.tile]?.name ?? S.tile}${S.area ? ' dentro de la selección' : ' en todo el mapa'}.`, n ? 'ok' : '');
+  edit(() => { n = replaceAll(L(), from, S.tile, LOCKED, S.area ?? undefined); });
+  status(`${n} casilla${n === 1 ? '' : 's'} de ${pieceName(from)} cambiada${n === 1 ? '' : 's'} por ${pieceName(S.tile)}${S.area ? ' dentro de la selección' : ' en todo el mapa'}.`, n ? 'ok' : '');
 }
 function renderArea() {
   const rows = [];
@@ -831,6 +921,7 @@ function setZoom(z, anchor?: { clientX: number; clientY: number }) {
 
 const HELP: [string, string][] = [
   ['B / L / R / G / M / I / V', 'Pincel, Línea, Rectángulo, Rellenar, Selección, Cuentagotas, Mover'],
+  ['K', 'Cambiar de capa: Suelo, Encima, Colisión'],
   ['[ y ]', 'Achicar o agrandar el pincel'],
   ['1 … 9', 'Elegir una de las últimas piezas usadas'],
   ['Clic derecho o Alt + clic', 'Tomar la pieza de la casilla (cuentagotas)'],
@@ -903,11 +994,11 @@ canvas.addEventListener('pointerdown', (ev) => {
   if (S.pasting) {
     if (ev.button === 2) { stopPaste(); return; }
     let n = 0;
-    edit(() => { n = pasteStamp(S.W.tiles, S.clip, c.x, c.y, LOCKED); });
+    edit(() => { n = pasteStamp(L(), S.clip, c.x, c.y, LOCKED); });
     status(`Pegado (${n} casilla${n === 1 ? '' : 's'}). Seguí haciendo clic para pegar otra vez, o Esc para terminar.`, 'ok');
     return;
   }
-  if (ev.button === 2 || ev.altKey || S.tool === 'pick') { pickTile(S.W.tiles[c.y][c.x]); return; }
+  if (ev.button === 2 || ev.altKey || S.tool === 'pick') { pickTile(L()[c.y][c.x]); return; }
   if (S.tool === 'move') {
     const e = entityAt(c.x, c.y);
     if (!e) { S.sel = null; draw(); renderEntities(); renderInspector(); return; }
@@ -916,7 +1007,7 @@ canvas.addEventListener('pointerdown', (ev) => {
     return;
   }
   if (S.tool === 'fill') {
-    if (ev.shiftKey) { replaceInMap(S.W.tiles[c.y][c.x]); return; }
+    if (ev.shiftKey) { replaceInMap(L()[c.y][c.x]); return; }
     edit(() => fill(c.x, c.y, S.tile));
     return;
   }
@@ -930,8 +1021,8 @@ canvas.addEventListener('pointerdown', (ev) => {
   pushUndo();
   S.painting = true;
   const cells = ev.shiftKey && S.lastPaint ? lineCells(S.lastPaint, c).flatMap((p) => brushCells(p, S.brush)) : brushCells(c, S.brush);
-  paintCells(S.W.tiles, cells, S.tile, LOCKED);
-  if (cells.some((p) => LOCKED.has(S.W.tiles[p.y]?.[p.x]))) status('Las puertas y los carteles no se pintan: quedaron como estaban.', 'warn');
+  paintCells(L(), cells, S.tile, LOCKED);
+  if (cells.some((p) => LOCKED.has(L()[p.y]?.[p.x]))) status('Las puertas y los carteles no se pintan: quedaron como estaban.', 'warn');
   S.lastPaint = c;
   draw();
 });
@@ -944,17 +1035,17 @@ canvas.addEventListener('pointermove', (ev) => {
     const e = entityAt(c.x, c.y);
     const door = ch === 'D' ? doorTarget(c.x, c.y) : null;
     const shape = S.shape ? ` · ${rectBetween(S.shape.from, S.shape.to).w}×${rectBetween(S.shape.from, S.shape.to).h}` : '';
-    hoverEl.textContent = `Casilla ${c.x},${c.y} · ${TILE_INFO[ch]?.name ?? ch} "${ch}"${TILE_INFO[ch]?.solid ? ' (no se pisa)' : ''}${door ? ` · lleva a ${nameOf(door)} (doble clic)` : ''}${e ? ` · ${e.type === 'npc' ? (e.ref.name ?? KIND_NAME[e.ref.kind]) : ITEMS[e.ref.item]?.name}` : ''}${shape}`;
+    hoverEl.textContent = `Casilla ${c.x},${c.y} · ${TILE_INFO[ch]?.name ?? ch} "${ch}"${solidCell(S.W, c.x, c.y) ? ' (no se pisa)' : ''}${S.W.top[c.y][c.x] !== ' ' ? ` · encima: ${TILE_INFO[S.W.top[c.y][c.x]]?.name ?? S.W.top[c.y][c.x]}` : ''}${S.W.coll[c.y][c.x] !== ' ' ? ` · colisión: ${S.W.coll[c.y][c.x] === 'x' ? 'bloqueado' : 'pasable'}` : ''}${door ? ` · lleva a ${nameOf(door)} (doble clic)` : ''}${e ? ` · ${e.type === 'npc' ? (e.ref.name ?? KIND_NAME[e.ref.kind]) : ITEMS[e.ref.item]?.name}` : ''}${shape}`;
   }
   if (S.shape) { S.shape.to = cellClamped(ev); S.shape.border = ev.shiftKey; }
   if (S.painting && c && S.tool === 'paint') {
     const from = S.lastPaint ?? c;
-    paintCells(S.W.tiles, lineCells(from, c).flatMap((p) => brushCells(p, S.brush)), S.tile, LOCKED); // no gaps on fast strokes
+    paintCells(L(), lineCells(from, c).flatMap((p) => brushCells(p, S.brush)), S.tile, LOCKED); // no gaps on fast strokes
     S.lastPaint = c;
   }
   if (S.drag && c && (c.x !== S.drag.ref.x || c.y !== S.drag.ref.y)) {
     if (S.drag.ref.look === 'swimmer' && S.W.tiles[c.y][c.x] !== '~') status('El nadador solo puede estar sobre agua.', 'warn');
-    else if ((S.drag.ref.look === 'swimmer' || !SOLID(S.W.tiles[c.y][c.x])) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
+    else if ((S.drag.ref.look === 'swimmer' || !solidCell(S.W, c.x, c.y)) && !occupied(c.x, c.y, S.drag.ref)) { S.drag.ref.x = c.x; S.drag.ref.y = c.y; S.drag.moved = true; }
   }
   draw();
 });
@@ -964,8 +1055,8 @@ const endStroke = (ev?) => {
     const { from, to } = S.shape;
     const border = !!ev?.shiftKey;
     S.shape = null;
-    if (S.tool === 'line') edit(() => paintCells(S.W.tiles, lineCells(from, to), S.tile, LOCKED));
-    else if (S.tool === 'rect') edit(() => paintCells(S.W.tiles, rectCells(from, to, !border), S.tile, LOCKED));
+    if (S.tool === 'line') edit(() => paintCells(L(), lineCells(from, to), S.tile, LOCKED));
+    else if (S.tool === 'rect') edit(() => paintCells(L(), rectCells(from, to, !border), S.tile, LOCKED));
     else if (S.tool === 'select') {
       S.area = rectBetween(from, to);
       status(`Zona ${areaName(S.area)}: Ctrl+C copia, Ctrl+X corta, Supr la rellena con la pieza elegida.`, 'ok');
@@ -1033,11 +1124,12 @@ addEventListener('keydown', (ev) => {
   if (arrows && S.sel) { ev.preventDefault(); nudge(arrows[0], arrows[1]); return; }
   const tool = { b: 'paint', l: 'line', r: 'rect', g: 'fill', m: 'select', i: 'pick', v: 'move' }[k];
   if (tool) setTool(tool);
+  else if (k === 'k') { const ids = LAYERS.map(([id]) => id); setLayer(ids[(ids.indexOf(S.layer) + 1) % ids.length]); }
   else if (k === 'h') { S.grid = !S.grid; gridChk.checked = S.grid; draw(); }
   else if (k === 'p') { S.showSolid = !S.showSolid; solidChk.checked = S.showSolid; draw(); }
   else if (k === 'c') { S.showChanges = !S.showChanges; changesChk.checked = S.showChanges; draw(); }
   else if (k === '[' || k === ']') { const sizes = [1, 2, 3, 5]; const i = Math.max(0, Math.min(sizes.length - 1, sizes.indexOf(S.brush) + (k === ']' ? 1 : -1))); S.brush = sizes[i]; brushSel.value = String(S.brush); draw(); }
-  else if (/^[1-9]$/.test(k) && S.recent[+k - 1]) pickTile(S.recent[+k - 1]);
+  else if (/^[1-9]$/.test(k) && S.layer === 'tiles' && S.recent[+k - 1]) pickTile(S.recent[+k - 1]);
   else if (k === '+' || k === '=') setZoom(S.zoom + 1);
   else if (k === '-') setZoom(S.zoom - 1);
   else if (k === '0') fitBtn.click();
@@ -1055,18 +1147,19 @@ function problemsOf(id, W) {
   const hgt = rows.length, wid = rows[0].length;
   const out = [];
   const npcs = W.npcs.filter((n) => !n.removed), items = W.items.filter((i) => !i.removed);
-  for (const n of npcs) if (SOLID(at(n.x, n.y)) && n.look !== 'ball' && n.look !== null) out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} está parado sobre algo que no se pisa.` });
+  for (const n of npcs) if (solidCell(W, n.x, n.y) && n.look !== 'ball' && n.look !== null) out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} está parado sobre algo que no se pisa.` });
   for (const n of npcs) if (n.look === 'swimmer' && at(n.x, n.y) !== '~') out.push({ x: n.x, y: n.y, msg: `${n.name ?? KIND_NAME[n.kind]} es un nadador y está en tierra: tiene que estar sobre agua.` });
-  for (const it of items) if (SOLID(at(it.x, it.y))) out.push({ x: it.x, y: it.y, msg: `${ITEMS[it.item]?.name ?? it.item} está sobre algo que no se pisa.` });
+  for (const it of items) if (solidCell(W, it.x, it.y) && !it.hidden) out.push({ x: it.x, y: it.y, msg: `${ITEMS[it.item]?.name ?? it.item} está sobre algo que no se pisa.` });
   for (const d of W.doors) if (!MAPS[d.to]) out.push({ x: d.x, y: d.y, msg: `La puerta lleva a un mapa que no existe (${d.to}).` });
   for (const w of W.warps) {
-    if (SOLID(at(w.x, w.y))) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} está sobre algo que no se pisa.` });
+    if (solidCell(W, w.x, w.y)) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} está sobre algo que no se pisa.` });
     if (!MAPS[w.to]) { out.push({ x: w.x, y: w.y, msg: `El paso lleva a un mapa que no existe (${w.to}).` }); continue; }
-    const land = (w.to === id ? W : working(w.to)).tiles[w.ty]?.[w.tx];
+    const WT = w.to === id ? W : working(w.to);
+    const land = WT.tiles[w.ty]?.[w.tx];
     if (land === undefined) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega fuera del mapa (${w.tx},${w.ty}).` });
-    else if (SOLID(land)) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega a una casilla que no se pisa (${w.tx},${w.ty}).` });
+    else if (solidCell(WT, w.tx, w.ty)) out.push({ x: w.x, y: w.y, msg: `El paso hacia ${nameOf(w.to)} llega a una casilla que no se pisa (${w.tx},${w.ty}).` });
   }
-  const pass = (x, y) => { const t = at(x, y); return t !== undefined && (!SOLID(t) || t === '%' || t === '~' || t === '\\'); };
+  const pass = (x, y) => { const t = at(x, y); const c = W.coll?.[y]?.[x]; if (t !== undefined && c === 'x') return false; if (t !== undefined && c === 'o') return true; return t !== undefined && (!SOLID(t) || t === '%' || t === '~' || t === '\\'); };
   let starts = [];
   if (isOutdoor(id)) {
     for (const side of Object.keys(m.exits ?? {})) {

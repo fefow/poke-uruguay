@@ -10,6 +10,8 @@
 //   signs     [string] the text of every 'S' tile, in reading order
 //   warps     [{ x, y, to, tx, ty }] stairs and passages: step on (x, y) and arrive at (tx, ty) of map `to` (replaces the map's list)
 //   weather   'clear' | 'rain' | 'storm' | 'fog' fixed weather for the zone (absent = random)
+//   top       [string] the "encima" layer, same size as the map: a tile char drawn over people, ' ' = nothing
+//   coll      [string] the collision layer, same size as the map: 'x' blocked, 'o' passable, ' ' = as the tile says
 // The game applies them after building every map (end of maps.js), so a generator change keeps the edits.
 
 /** A stable name for a person in a map: what it is (trainer id, script or look) and which one of those it is. */
@@ -70,6 +72,10 @@ export function applyMapEdits(maps, edits) {
       });
       for (const a of e.addItems ?? []) m.items.push({ x: a.x, y: a.y, item: a.item, id: a.id });
     }
+    // the extra layers only fit a map of their exact size
+    const fits = (a) => Array.isArray(a) && a.length === m.tiles.length && a.every((r) => typeof r === 'string' && r.length === m.tiles[0].length);
+    if (fits(e.top)) m.top = [...e.top];
+    if (fits(e.coll)) m.coll = [...e.coll];
   }
 }
 

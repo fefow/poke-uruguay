@@ -2901,6 +2901,42 @@ export function drawBuildingTrim(g, tiles, x0: number, y0: number, x1: number, y
   }
 }
 
+/**
+ * The collision layer of a map (m.coll, one char per cell, like the collision bits of a classic layout): 'x' blocks
+ * the cell, 'o' lets anyone through, anything else leaves it to the tile. Returns null when the layer says nothing.
+ */
+export function collAt(m: { coll?: string[] } | null | undefined, x: number, y: number): boolean | null {
+  const c = m?.coll?.[y]?.[x];
+  return c === 'x' ? true : c === 'o' ? false : null;
+}
+/** Whether a cell blocks walking: the collision layer first, then the tile. */
+export function cellSolid(m: { coll?: string[] } | null | undefined, tiles: ArrayLike<ArrayLike<string>>, x: number, y: number) {
+  const c = collAt(m, x, y);
+  if (c !== null) return c;
+  const ch = tiles[y]?.[x];
+  return ch === undefined || !!TILE_INFO[ch]?.solid;
+}
+
+/**
+ * A piece of the "encima" layer (drawn over people, like the top layer of a classic metatile): objects keep only
+ * their own drawing, editor drawings keep their see-through parts, anything else is the whole tile.
+ */
+const topCache = new Map<string, HTMLCanvasElement>();
+export function topCanvas(ch: string, frame = 0, theme: string | null = null) {
+  const f = TILE_INFO[ch]?.anim ? frame % 4 : 0;
+  const dk = `tile:${ch}${f}`;
+  if (override(dk, T, T)) return override(dk, T, T);
+  if (!OVER[ch] || (theme && THEMES[theme]?.[ch])) return tileCanvas(ch, frame, theme);
+  const key = `${ch}${f}`;
+  let c = topCache.get(key);
+  if (!c) {
+    c = mk();
+    OVER[ch](c.getContext('2d'), new Rng(ch.charCodeAt(0) * 97 + 13), f);
+    topCache.set(key, c);
+  }
+  return c;
+}
+
 export function tileCanvas(ch, frame = 0, theme: string | null = null, under: string | boolean = false) {
   const info = TILE_INFO[ch];
   const f = info?.anim ? frame % 4 : 0;
