@@ -610,6 +610,28 @@ test('every music track and jingle is made of valid notes and lengths', async ()
   }
 });
 
+test('long songs: every part fills its section exactly and the route theme lasts minutes', async () => {
+  const { SONGS, partLength, pairs, noteMidi, parseChord, arrange } = await import('../src/core/song.ts');
+  for (const [name, song] of Object.entries(SONGS)) {
+    for (const id of song.order) assert.ok(song.sections[id], `${name}: missing section ${id}`);
+    for (const [id, s] of Object.entries(song.sections)) {
+      const want = s.bars * 8;
+      for (const part of ['chords', 'lead', 'counter']) {
+        if (!s[part]) continue;
+        assert.equal(partLength(s[part]), want, `${name}.${id}.${part}: ${partLength(s[part])} eighths, want ${want}`);
+        for (const [n] of pairs(s[part])) {
+          if (part === 'chords') parseChord(n);
+          else if (n !== '-') noteMidi(n);
+        }
+      }
+      if (s.drums) assert.match(s.drums, /^[brh-]+$/, `${name}.${id}.drums`);
+    }
+    const { length } = arrange(song);
+    const secs = (length * 60) / song.bpm / 2;
+    if (name === 'route') assert.ok(secs > 180 && secs < 300, `route lasts ${secs}s`);
+  }
+});
+
 test('night shifts wild odds toward shadowy creatures without removing anyone', async () => {
   const { encounterList } = await import('../src/data/encounters.ts');
   const m = { enc: { list: [['pombero', 5, 7, 10], ['yarara', 5, 7, 10], ['ceibito', 5, 7, 10]] } };

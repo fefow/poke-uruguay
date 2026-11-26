@@ -1,5 +1,6 @@
 // Chiptune audio with WebAudio: sound effects and looping tracks written as
 // note lists. No audio files to download. Starts on the first user gesture.
+import { SONGS, startSong } from './song.ts';
 
 let ctx = null;
 let master, musicGain, duckGain, sfxGain, sfxMain, sfxBattle, ambMain;
@@ -494,8 +495,18 @@ export function playMusic(name, { resume = null } = {}) {
   stopMusic();
   if (resume) pendingResume = resume;
   const track = TRACKS[name];
-  if (!track || !ctx) {
+  if ((!track && !SONGS[name]) || !ctx) {
     current = { name, timer: null, resume: pendingResume };
+    pendingResume = null;
+    return;
+  }
+  if (SONGS[name]) {
+    // Long arranged song (the open-world theme): its own scheduler, same bus and fades as the short loops.
+    const bus = ctx.createGain();
+    bus.gain.value = 1.5; // the soft instruments sit lower than the pulse loops; match their loudness
+    bus.connect(musicGain);
+    const tick = startSong(ctx, bus, SONGS[name]);
+    current = { name, timer: setInterval(tick, 200), bus, resume: pendingResume };
     pendingResume = null;
     return;
   }
