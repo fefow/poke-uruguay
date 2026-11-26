@@ -216,3 +216,61 @@ export function tidyMap(m) {
   }
   m.tiles = rows.map((r) => r.join(''));
 }
+
+/**
+ * Raised ground: on routes that run north-south, the way climbs a terrace every so often, a cliff face ('K') across
+ * the whole width with a flight of steps ('ʎ') where the trail meets it. The cliff only replaces walkable ground and
+ * is kept only if everything stays reachable through the steps.
+ */
+export function terraceMap(m) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  if (h <= w || h < 40) return 0;
+  const rows = m.tiles.map((r) => [...r]);
+  const objs = [...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])];
+  const near = (x, y) => objs.some((o) => Math.abs(o.x - x) <= 1 && Math.abs(o.y - y) <= 2);
+  const trig = (x, y) => (m.triggers ?? []).some((t) => x >= t.x - 1 && x <= t.x + (t.w ?? 1) && y >= t.y - 1 && y <= t.y + (t.h ?? 1));
+  const starts = [];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x === 0 || y === 0 || x === w - 1 || y === h - 1) && !solid(rows[y][x])) starts.push([x, y]);
+  const reach = () => {
+    const seen = new Set(starts.map(([x, y]) => `${x},${y}`));
+    const st = [...starts];
+    while (st.length) {
+      const [x, y] = st.pop();
+      for (const [dx, dy] of D4) { const nx = x + dx, ny = y + dy, k = `${nx},${ny}`; if (!seen.has(k) && !solid(rows[ny]?.[nx])) { seen.add(k); st.push([nx, ny]); } }
+    }
+    return seen;
+  };
+  let seen = reach();
+  const want = Math.floor(h / 30);
+  let made = 0;
+  for (let k = 1; k <= want; k++) {
+    const target = Math.round((h * k) / (want + 1));
+    for (let d = 0; d < 20; d++) {
+      const y = target + (d % 2 ? -1 : 1) * Math.ceil(d / 2);
+      if (y < 6 || y > h - 7) continue;
+      const cells = [];
+      let trail = -1, bad = false;
+      for (let x = 1; x < w - 1; x++) {
+        const c = rows[y][x];
+        if (solid(c)) continue;
+        if (!['.', ',', 'f', '='].includes(c) || near(x, y) || trig(x, y) || rows[y - 1][x] === 'λ' || rows[y + 1][x] === 'λ' || rows[y + 1][x] === 'K' || rows[y - 1][x] === 'K') { bad = true; break; }
+        cells.push(x);
+        if (c === '=' && trail < 0) trail = x;
+      }
+      if (bad || cells.length < 3 || cells.length > 20 || trail < 0) continue;
+      if (cells.at(-1) - cells[0] !== cells.length - 1) continue; // one clean span from wall to wall
+      // the steps need open ground above and below them
+      if (solid(rows[y - 1][trail]) || solid(rows[y + 1][trail])) continue;
+      const saved = cells.map((x) => rows[y][x]);
+      for (const x of cells) rows[y][x] = x === trail ? 'ʎ' : 'K';
+      const after = reach();
+      const lost = [...seen].filter((key) => !after.has(key)).length;
+      if (lost > cells.length - 1) { cells.forEach((x, i) => { rows[y][x] = saved[i]; }); continue; }
+      seen = after;
+      made++;
+      break;
+    }
+  }
+  if (made) m.tiles = rows.map((r) => r.join(''));
+  return made;
+}

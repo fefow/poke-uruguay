@@ -5,7 +5,7 @@ import { CHAIN, STOP_INDEX } from './route.ts';
 
 const TOLL_ROUTES = ['r_rosario_sanjose', 'ruta24', 'r_belen_artigas', 'r_tupambae_melo', 'r_lascano_rocha', 'r_sarandi_durazno', 'r_sanramon_canelones'];
 const TRAIL = new Set(['=', 'b']);
-const SOLID_WALL = new Set(['#', 'F', 'H', 'w', 'R', 'r', 'S']); // a sign already closes its tile
+const SOLID_WALL = new Set(['#', 'F', 'H', 'w', 'R', 'r', 'S', 'K']); // a sign already closes its tile
 
 export function addTolls(maps: Record<string, any>) {
   for (const id of TOLL_ROUTES) {

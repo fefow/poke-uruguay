@@ -818,7 +818,7 @@ import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
 import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng, block } from './map-gen.ts';
-import { guideMap, tidyMap } from './guide.ts';
+import { guideMap, tidyMap, terraceMap } from './guide.ts';
 import { signRoute, signCity } from './signs.ts';
 import { LEADERS } from './story.ts';
 import { mazeMap } from './maze.ts';
@@ -1412,6 +1412,7 @@ addRumors(OUTDOOR);
 
 // Generated routes and localities that get a last tidy pass (see tidyMap) once every obstacle is in place.
 const TIDY = new Set<string>();
+const LOCALITY_IDS = new Set(STOPS.filter((st) => st.kind === 'loc').map((st) => st.id));
 // Routes are guided, not open fields: a trail between tree walls, grass clusters, side pockets and one-way ledges.
 for (const [id, m] of Object.entries(OUTDOOR)) {
   if (!(id.startsWith('r_') || id.startsWith('ruta')) || m.theme === 'cueva' || m.dark || m.safari) continue;
@@ -1546,7 +1547,11 @@ const MO_BLOCKS = [
   }
 })();
 
-for (const id of TIDY) { tidyMap(OUTDOOR[id]); signRoute(OUTDOOR[id], id, MAPS); }
+for (const id of TIDY) {
+  tidyMap(OUTDOOR[id]);
+  if (!LOCALITY_IDS.has(id)) terraceMap(OUTDOOR[id]);
+  signRoute(OUTDOOR[id], id, MAPS);
+}
 // Cities the editor has not redrawn get a sign beside the gym, the Policlínica and the almacén.
 for (const stop of STOPS) {
   if (stop.kind !== 'city' || !OUTDOOR[stop.id] || MAP_OVERRIDES[stop.id]?.tiles) continue;
