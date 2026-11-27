@@ -8,6 +8,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { T, TILE_INFO, THEMES, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt, themeOf, tollBoardCanvas, TOLL_BOARD_H } from './tiles.ts';
 import { TOLL_FLOOR, TOLL_ROOF, TOLL_H, TOLL_V, TOLL_BOARD, tollZone } from '../data/toll-chars.ts';
 import { PROPS_3D, type PropCtx } from './props-3d.ts';
+import { FURN_3D } from './furniture-3d.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite, protestSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
@@ -784,6 +785,11 @@ function build(v: WorldView) {
     if (th && Object.prototype.hasOwnProperty.call(th, c) && !SAME_IN_THEMES.has(c)) return false;
     return gen({ ...propCtx, x, y }) !== false;
   };
+  // Muebles y objetos de uso con modelo propio (furniture-3d.ts); si no tienen (o no en este tema), van doblados (foldBox)
+  const furn3D = (c: string, x: number, y: number) => {
+    const gen = FURN_3D[c];
+    return !!gen && gen({ parts, glow, ch, theme, x, y }) !== false;
+  };
   // Objetos de cada tile
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     if (bld.has(y * W + x)) continue;
@@ -888,6 +894,7 @@ function build(v: WorldView) {
       case 'fence':
       case 'sign':
       case 'lamp': {
+        if (k !== 'lamp' && furn3D(c, x, y)) break;
         const f = k === 'lamp' ? null : furnOf(c);
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
@@ -925,6 +932,7 @@ function build(v: WorldView) {
       }
       case 'prop':
       case 'tallprop': {
+        if (furn3D(c, x, y)) break;
         const f = k === 'prop' ? furnOf(c) : null;
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
