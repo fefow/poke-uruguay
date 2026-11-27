@@ -5,13 +5,17 @@ import { T, TILE_INFO, tileCanvas, groundUnder, treeTrunk, treeCrown, TREE_PAL }
 import { override, overrideEntry, overrideHasHoles } from './overrides.ts';
 
 type Tiles = ArrayLike<ArrayLike<string>>;
-export type EdgeFamily = 'water' | 'tall' | 'path' | 'sand' | 'tree' | 'fence' | 'street';
+export type EdgeFamily = 'water' | 'tall' | 'path' | 'sand' | 'tree' | 'fence' | 'tapia' | 'street';
+/** Families drawn as a line (fences, low stone walls): they join only straight neighbours. */
+const lineFam = (fam: EdgeFamily) => fam === 'fence' || fam === 'tapia';
+/** A line piece only replaces the plain tile when it bends or runs north-south (a stone wall keeps its tile east-west). */
+const plainLine = (fam: EdgeFamily, m: number) => (fam === 'fence' ? m === 0 : !(m & (N | S)));
 
 // neighbour bits: set when the neighbour belongs to the same mass
 export const N = 1, NE = 2, E = 4, SE = 8, S = 16, SW = 32, W = 64, NW = 128;
 const DIRS: [number, number, number][] = [[0, -1, N], [1, -1, NE], [1, 0, E], [1, 1, SE], [0, 1, S], [-1, 1, SW], [-1, 0, W], [-1, -1, NW]];
 
-const FAMILY: Record<string, EdgeFamily> = { '~': 'water', ',': 'tall', '=': 'path', s: 'sand', '#': 'tree', q: 'tree', F: 'fence', c: 'street' };
+const FAMILY: Record<string, EdgeFamily> = { '~': 'water', ',': 'tall', '=': 'path', s: 'sand', '#': 'tree', q: 'tree', F: 'fence', 'ρ': 'tapia', c: 'street' };
 const WATERISH = new Set(['~', 'ӫ', 'Ӥ', 'Ӣ', 'b', 'Ϡ']);
 const PATHISH = new Set(['=', 'c', 'D', '_', 'b', 'ʎ', '}', '?']);
 // ground a path or sand border shows against (grass, its plants and the things that stand on it)
@@ -25,12 +29,13 @@ export function edgeFamily(ch: string | undefined): EdgeFamily | null {
 /** Whether a cell next to a cell of the given family counts as part of the same mass (no border between them). */
 function joins(fam: EdgeFamily, tiles: Tiles, x: number, y: number): boolean {
   const c = tiles[y]?.[x];
-  if (c === undefined) return fam !== 'fence'; // the map edge never draws a border
+  if (c === undefined) return !lineFam(fam); // the map edge never draws a border
   switch (fam) {
     case 'water': return WATERISH.has(c) || groundUnder(tiles, x, y) === '~';
     case 'tall': return c === ',';
     case 'tree': return c === '#' || c === 'q'; // trees and ceibos share one mass
     case 'fence': return c === 'F';
+    case 'tapia': return c === 'ρ';
     case 'street':
     case 'path': {
       if (PATHISH.has(c)) return true;
@@ -49,7 +54,7 @@ function joins(fam: EdgeFamily, tiles: Tiles, x: number, y: number): boolean {
 export function edgeMask(tiles: Tiles, x: number, y: number, fam: EdgeFamily): number {
   let m = 0;
   for (const [dx, dy, bit] of DIRS) if (joins(fam, tiles, x + dx, y + dy)) m |= bit;
-  if (fam === 'fence') return m & (N | E | S | W);
+  if (lineFam(fam)) return m & (N | E | S | W);
   if (!(m & N) || !(m & E)) m &= ~NE;
   if (!(m & S) || !(m & E)) m &= ~SE;
   if (!(m & S) || !(m & W)) m &= ~SW;
@@ -78,7 +83,7 @@ export function pieceKey(tiles: Tiles, x: number, y: number, theme: string | nul
   if (!edgesOn(ch, theme)) return ch;
   const fam = FAMILY[ch];
   const m = edgeMask(tiles, x, y, fam);
-  return m === FULL || (fam === 'fence' && m === 0) ? ch : `${ch}${m}`;
+  return m === FULL || (lineFam(fam) && plainLine(fam, m)) ? ch : `${ch}${m}`;
 }
 
 // ---- drawing ----
@@ -198,6 +203,33 @@ function fencePiece(m: number, ground: HTMLCanvasElement) {
   return c;
 }
 
+/**
+ * A low stone wall that turns or runs north-south: the top of the wall runs toward each wall next to it, and the
+ * stone face only shows where the wall faces south (an east-west stretch or the south end of a north-south one).
+ */
+function tapiaPiece(m: number, ground: HTMLCanvasElement) {
+  const c = mk();
+  const g = c.getContext('2d')!;
+  g.drawImage(ground, 0, 0);
+  const px = (x: number, y: number, col: string, w = 1, h = 1) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  const face = '#9a9488', top = '#b4aea2', dark = '#6e695f', joint = '#7e786c';
+  // east-west stretches: the same face as the plain tile
+  const side = (x0: number) => { px(x0, 6, face, 8, 8); px(x0, 6, top, 8, 2); px(x0, 13, dark, 8, 1); px(x0 + 3, 8, joint, 1, 5); px(x0 + 1, 10, joint, 3, 1); };
+  if (m & W) side(0);
+  if (m & E) side(8);
+  // north-south: the top of the wall seen from above, with its shadow on the east side
+  g.fillStyle = 'rgba(20,40,20,0.25)';
+  if (m & N) g.fillRect(11, 0, 2, 8);
+  if (m & S) g.fillRect(11, 8, 2, 8);
+  if (m & N) { px(4, 0, top, 7, 8); px(4, 0, dark, 1, 8); px(10, 0, joint, 1, 8); px(5, 3, joint, 5, 1); }
+  if (m & S) { px(4, 8, top, 7, 8); px(4, 8, dark, 1, 8); px(10, 8, joint, 1, 8); px(5, 11, joint, 5, 1); }
+  // the middle: the top of the wall, and its stone face when nothing continues south
+  px(4, 6, top, 7, 2);
+  if (!(m & S)) { px(4, 8, face, 7, 6); px(4, 13, dark, 7, 1); px(7, 9, joint, 1, 4); }
+  else px(4, 8, top, 7, 6);
+  return c;
+}
+
 /** The ground a bank or border shows on its outer side: sand or a path next to the water, else the map's ground. */
 function outsideGround(fam: EdgeFamily, tiles: Tiles, x: number, y: number, ground: string | null): string {
   if (fam === 'water') {
@@ -218,15 +250,16 @@ export function cellCanvas(tiles: Tiles, x: number, y: number, frame: number, th
   if (!edgesOn(ch, theme)) return tileCanvas(ch, frame, theme, under);
   const fam = FAMILY[ch];
   const m = edgeMask(tiles, x, y, fam);
-  if (fam === 'fence' ? m === 0 : m === FULL && fam !== 'tree') return tileCanvas(ch, frame, theme, under);
+  if (lineFam(fam) ? plainLine(fam, m) : m === FULL && fam !== 'tree') return tileCanvas(ch, frame, theme, under);
   const f = TILE_INFO[ch]?.anim ? frame % 4 : 0;
-  const og = fam === 'tree' || fam === 'fence' ? (typeof under === 'string' ? under : '.') : outsideGround(fam, tiles, x, y, ground);
+  const og = fam === 'tree' || lineFam(fam) ? (typeof under === 'string' ? under : '.') : outsideGround(fam, tiles, x, y, ground);
   const key = `${theme ?? ''}|${ch}|${m}|${f}|${og}`;
   let c = cache.get(key);
   if (!c) {
     const groundC = tileCanvas(og, f, og === '.' ? theme : null, false);
     if (fam === 'tree') c = treePiece(m, groundC, overrideHasHoles(`tile:${ch}0`) ? override(`tile:${ch}0`, T, T) : null);
     else if (fam === 'fence') c = fencePiece(m, groundC);
+    else if (fam === 'tapia') c = tapiaPiece(m, groundC);
     else c = areaPiece(fam, m, tileCanvas(ch, frame, theme, false), groundC);
     cache.set(key, c);
   }
@@ -238,7 +271,7 @@ export function familyMasks(fam: EdgeFamily): number[] {
   const seen = new Set<number>();
   for (let raw = 0; raw < 256; raw++) {
     let m = raw;
-    if (fam === 'fence') m &= N | E | S | W;
+    if (lineFam(fam)) m &= N | E | S | W;
     else {
       if (!(m & N) || !(m & E)) m &= ~NE;
       if (!(m & S) || !(m & E)) m &= ~SE;

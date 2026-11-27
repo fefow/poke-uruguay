@@ -373,7 +373,7 @@ function solidCanvas(col: THREE.Color) {
 // por esa línea y queda una caja: la tapa lleva la parte de arriba del dibujo, el frente la de abajo y los
 // costados repiten el borde. fr = parte del dibujo (en filas con pintura) que es frente; h = alto en casilleros
 // (sin h, sale del dibujo); d = fondo. thin = placa fina (cercos, carteles): todo el dibujo va de frente.
-interface Furn { fr: number; h?: number; d?: number; thin?: boolean }
+interface Furn { fr: number; h?: number; d?: number; thin?: boolean; rail?: boolean }
 const FURN: Record<string, Furn> = {};
 const furn = (chars: string, f: Furn) => { for (const c of chars) FURN[c] = f; };
 furn('TԹЗԿӹ', { fr: 0.4, h: 0.5 }); // mesas y escritorios
@@ -386,10 +386,10 @@ furn('ՈՋЭӷϋאΞШγ', { fr: 0.6 }); // cajones, bolsas, fardos, barriles, c
 furn('PϼϻӸ', { fr: 0.62 }); // máquinas
 furn('СΠՏ', { fr: 0.75 }); // cestos, buzones, bidones
 furn('ϒϓϔНЪѢϬ', { fr: 0.5 }); // puestos, tablado, tanques, bebedero, cabina
-furn('Fρ[', { fr: 1, thin: true, d: 0.14 }); // cercos, tapias, barandas
+furn('Fρ[', { fr: 1, thin: true, d: 0.14, rail: true }); // cercos, tapias, barandas
 furn('SחЩЛ<>', { fr: 1, thin: true, d: 0.1 }); // carteles y mojones
 const FURN_NAMES: [RegExp, Furn][] = [
-  [/cerco|reja|baranda|tapia/, { fr: 1, thin: true, d: 0.14 }],
+  [/cerco|reja|baranda|tapia/, { fr: 1, thin: true, d: 0.14, rail: true }],
   [/cartel|mojón/, { fr: 1, thin: true, d: 0.1 }],
   [/mesa|escritorio/, { fr: 0.4, h: 0.5 }],
   [/cama|camilla/, { fr: 0.3, h: 0.34 }],
@@ -416,17 +416,15 @@ function opaqueBox(key: string, c: HTMLCanvasElement) {
   return r;
 }
 /** Caja de un mueble en el casillero (tx, ty), con el dibujo doblado entre tapa y frente. */
-function foldBox(tg: TexGeo, r: Rect, tx: number, ty: number, bb: [number, number, number, number], f: Furn, run = false) {
+function foldBox(tg: TexGeo, r: Rect, tx: number, ty: number, bb: [number, number, number, number], f: Furn) {
   const [px0, py0, px1, py1] = bb;
   const rows = py1 - py0;
   const frontPx = f.thin ? rows : Math.max(1, Math.round(rows * f.fr));
   const fold = py1 - frontPx; // fila donde termina la tapa y empieza el frente
-  // un cerco o tapia que sigue hacia arriba o abajo en el mapa es una tira continua: ocupa todo el casillero
-  // de fondo, baja, y su dibujo 2D (visto desde arriba) va en la tapa
-  const h = run ? 0.45 : f.h ?? Math.min(1.6, (frontPx / 16) * 1.15);
-  const d = run ? 1 : f.d ?? Math.min(0.9, Math.max(0.2, ((fold - py0) / 16) * 1.1));
+  const h = f.h ?? Math.min(1.6, (frontPx / 16) * 1.15);
+  const d = f.d ?? Math.min(0.9, Math.max(0.2, ((fold - py0) / 16) * 1.1));
   const X0 = tx + px0 / 16, X1 = tx + px1 / 16;
-  const Zf = run ? ty + 1 : f.thin ? ty + 0.5 + d / 2 : Math.min(ty + 0.97, ty + py1 / 16), Zb = Zf - d;
+  const Zf = f.thin ? ty + 0.5 + d / 2 : Math.min(ty + 0.97, ty + py1 / 16), Zb = Zf - d;
   const [u0, v0, u1, v1] = r;
   const U = (px: number) => u0 + (u1 - u0) * (px / 16), V = (py: number) => v1 - (v1 - v0) * (py / 16);
   const quad = (a: number[], b: number[], c: number[], e: number[], ua: number[], ub: number[], uc: number[], ue: number[], k: number) => {
@@ -437,7 +435,7 @@ function foldBox(tg: TexGeo, r: Rect, tx: number, ty: number, bb: [number, numbe
   // frente
   quad([X0, h, Zf], [X1, h, Zf], [X0, 0, Zf], [X1, 0, Zf], [U(px0), V(fold)], [U(px1), V(fold)], [U(px0), V(py1)], [U(px1), V(py1)], 1);
   // tapa: en una placa fina, la fila de arriba del dibujo; si no, la parte de arriba del sprite
-  const t0 = py0, t1 = run ? py1 : f.thin ? py0 + 1 : Math.max(fold, py0 + 1);
+  const t0 = py0, t1 = f.thin ? py0 + 1 : Math.max(fold, py0 + 1);
   quad([X0, h, Zb], [X1, h, Zb], [X0, h, Zf], [X1, h, Zf], [U(px0), V(t0)], [U(px1), V(t0)], [U(px0), V(t1)], [U(px1), V(t1)], 1.06);
   // costados: repiten la columna del borde del frente
   const sl = [U(px0), U(Math.min(px1, px0 + 1))], sr = [U(Math.max(px0, px1 - 1)), U(px1)];
@@ -445,6 +443,115 @@ function foldBox(tg: TexGeo, r: Rect, tx: number, ty: number, bb: [number, numbe
   quad([X1, h, Zf], [X1, h, Zb], [X1, 0, Zf], [X1, 0, Zb], [sr[0], V(fold)], [sr[1], V(fold)], [sr[0], V(py1)], [sr[1], V(py1)], 0.78);
   // fondo (afuera la cámara puede verlo de lejos)
   quad([X1, h, Zb], [X0, h, Zb], [X1, 0, Zb], [X0, 0, Zb], [U(px0), V(fold)], [U(px1), V(fold)], [U(px0), V(py1)], [U(px1), V(py1)], 0.7);
+}
+
+/**
+ * Cerco, tapia o baranda que dobla o va de norte a sur. El dibujo es el de un tramo este-oeste visto de frente, así que
+ * se arma por mitades: hacia cada vecino igual sale media placa (la mitad oeste del dibujo hacia el oeste o el norte,
+ * la mitad este hacia el este o el sur), y un poste en el medio donde el cerco dobla o termina. Así un tramo vertical
+ * se ve de costado, con sus postes y travesaños a lo largo, y no como una escalera.
+ */
+function railRun(tg: TexGeo, r: Rect, cv: HTMLCanvasElement, tx: number, ty: number, bb: [number, number, number, number], f: Furn, nb: { n: boolean; e: boolean; s: boolean; w: boolean }) {
+  const [px0, py0, px1, py1] = bb;
+  const h = f.h ?? Math.min(1.6, ((py1 - py0) / 16) * 1.15);
+  const d = f.d ?? 0.14;
+  const [u0, v0, u1, v1] = r;
+  const U = (px: number) => u0 + (u1 - u0) * (px / 16), V = (py: number) => v1 - (v1 - v0) * (py / 16);
+  const quad = (a: number[], b: number[], c: number[], e: number[], ua: number[], ub: number[], uc: number[], ue: number[], k: number) => {
+    tg.tri([a, c, b], [ua, uc, ub], k);
+    tg.tri([b, c, e], [ub, uc, ue], k);
+  };
+  const cx = tx + 0.5, cz = ty + 0.5;
+  // media placa entre a y b (en casilleros) a lo largo de x o de z, con las columnas c0..c1 del dibujo
+  const half = (alongX: boolean, c0: number, c1: number) => {
+    c0 = Math.max(c0, px0); c1 = Math.min(c1, px1);
+    if (c1 <= c0) return;
+    const a = c0 / 16, b = c1 / 16;
+    const T = V(py0), B = V(py1), tA = U(c0), tB = U(c1), top0 = V(py0), top1 = V(py0 + 1);
+    if (alongX) {
+      const X0 = tx + a, X1 = tx + b, Zf = cz + d / 2, Zb = cz - d / 2;
+      quad([X0, h, Zf], [X1, h, Zf], [X0, 0, Zf], [X1, 0, Zf], [tA, T], [tB, T], [tA, B], [tB, B], 1);
+      quad([X1, h, Zb], [X0, h, Zb], [X1, 0, Zb], [X0, 0, Zb], [tB, T], [tA, T], [tB, B], [tA, B], 0.7);
+      quad([X0, h, Zb], [X1, h, Zb], [X0, h, Zf], [X1, h, Zf], [tA, top0], [tB, top0], [tA, top1], [tB, top1], 1.06);
+    } else {
+      // de costado va una sola placa en el medio (el material es de dos caras): con dos, los travesaños de una
+      // cara se cruzaban con los de la otra y el tramo parecía un enrejado
+      const Z0 = ty + a, Z1 = ty + b;
+      quad([cx, h, Z1], [cx, h, Z0], [cx, 0, Z1], [cx, 0, Z0], [tB, T], [tA, T], [tB, B], [tA, B], 0.86);
+      // los postes del dibujo, con cuerpo, para que se lean como postes y no como rayas
+      for (const pc of posts) if (pc >= c0 && pc + 2 <= c1) post(cx, ty + (pc + 1) / 16, pc, h);
+      // y los travesaños con un poco de grosor, que de costado una placa sola casi no se ve
+      for (const [r0, r1] of rails) {
+        const yT = h * (py1 - r0) / (py1 - py0), yB = h * (py1 - r1) / (py1 - py0), w = 0.05;
+        const su = U(Math.max(c0, Math.min(c1 - 1, 6))), sv0 = V(r0), sv1 = V(r1);
+        quad([cx + w, yT, Z1], [cx + w, yT, Z0], [cx + w, yB, Z1], [cx + w, yB, Z0], [su, sv0], [su, sv0], [su, sv1], [su, sv1], 0.86);
+        quad([cx - w, yT, Z0], [cx - w, yT, Z1], [cx - w, yB, Z0], [cx - w, yB, Z1], [su, sv0], [su, sv0], [su, sv1], [su, sv1], 0.86);
+        quad([cx - w, yT, Z0], [cx + w, yT, Z0], [cx - w, yT, Z1], [cx + w, yT, Z1], [su, sv0], [su, sv0], [su, sv0], [su, sv0], 1.06);
+      }
+    }
+  };
+  const posts = postColumns(cv, bb);
+  const rails = posts.length ? railRows(cv) : [];
+  const post = (x: number, z: number, pc: number, ph: number) => {
+    const w = 0.13, X0 = x - w / 2, X1 = x + w / 2, Z0 = z - w / 2, Z1 = z + w / 2;
+    const sA = U(pc), sB = U(pc + 2), T = V(py0), B = V(py1);
+    quad([X0, ph, Z1], [X1, ph, Z1], [X0, 0, Z1], [X1, 0, Z1], [sA, T], [sB, T], [sA, B], [sB, B], 1);
+    quad([X1, ph, Z0], [X0, ph, Z0], [X1, 0, Z0], [X0, 0, Z0], [sA, T], [sB, T], [sA, B], [sB, B], 0.7);
+    quad([X1, ph, Z1], [X1, ph, Z0], [X1, 0, Z1], [X1, 0, Z0], [sA, T], [sB, T], [sA, B], [sB, B], 0.86);
+    quad([X0, ph, Z0], [X0, ph, Z1], [X0, 0, Z0], [X0, 0, Z1], [sA, T], [sB, T], [sA, B], [sB, B], 0.86);
+    quad([X0, ph, Z0], [X1, ph, Z0], [X0, ph, Z1], [X1, ph, Z1], [sA, T], [sB, T], [sA, T], [sB, T], 1.06);
+  };
+  if (nb.w) half(true, 0, 8);
+  if (nb.e) half(true, 8, 16);
+  if (nb.n) half(false, 0, 8);
+  if (nb.s) half(false, 8, 16);
+  // poste del medio: donde dobla, termina o se cruza (un tramo recto norte-sur ya trae sus postes en el dibujo)
+  if (nb.n && nb.s && !nb.e && !nb.w) return;
+  post(cx, cz, posts[0] ?? Math.round((px0 + px1) / 2) - 1, h + 0.05);
+}
+/**
+ * Los postes del dibujo: tramos de columnas que pintan de arriba abajo casi tanto como la más pintada (en un cerco,
+ * los postes; los travesaños solo pintan unas filas). Devuelve la primera columna de cada poste.
+ */
+/** Los travesaños del dibujo: tramos de filas pintadas casi de punta a punta, como [fila de arriba, fila de abajo). */
+const railCache = new WeakMap<HTMLCanvasElement, [number, number][]>();
+function railRows(cv: HTMLCanvasElement) {
+  let list = railCache.get(cv);
+  if (list) return list;
+  const d = pixels(cv), w = cv.width, sc = cv.height / 16;
+  const full = (y: number) => { let n = 0; for (let x = 0; x < w; x++) if (d[(Math.floor((y + 0.5) * sc) * w + x) * 4 + 3] > 128) n++; return n >= w * 0.85; };
+  list = [];
+  for (let y = 0; y < 16; y++) if (full(y)) { const last = list[list.length - 1]; if (last && last[1] === y) last[1] = y + 1; else list.push([y, y + 1]); }
+  railCache.set(cv, list);
+  return list;
+}
+const postCache = new WeakMap<HTMLCanvasElement, number[]>();
+function postColumns(cv: HTMLCanvasElement, bb: [number, number, number, number]) {
+  let list = postCache.get(cv);
+  if (list) return list;
+  const d = pixels(cv), w = cv.width, hh = cv.height, sc = w / 16;
+  const count: number[] = [];
+  for (let x = 0; x < 16; x++) {
+    let n = 0;
+    if (x >= Math.floor(bb[0]) && x < Math.ceil(bb[2])) for (let y = 0; y < hh; y++) if (d[(y * w + Math.floor((x + 0.5) * sc)) * 4 + 3] > 128) n++;
+    count.push(n);
+  }
+  const max = Math.max(...count);
+  list = [];
+  for (let x = 0; x < 16; x++) if (count[x] >= max * 0.8 && !(x > 0 && count[x - 1] >= max * 0.8)) list.push(Math.min(x, 14));
+  // una tapia maciza pinta todas sus columnas igual: no tiene postes sueltos
+  if (list.length > 4 || count.filter((n) => n >= max * 0.8).length > 8) list = [];
+  postCache.set(cv, list);
+  return list;
+}
+/** Pone un mueble o placa; los cercos que doblan o van de norte a sur se arman con railRun. */
+function placeFurn(tg: TexGeo, r: Rect, cv: HTMLCanvasElement, tx: number, ty: number, bb: [number, number, number, number], f: Furn, c: string, at: (x: number, y: number) => string | null) {
+  if (f.rail) {
+    const same = (x: number, y: number) => { const o = at(x, y); return o === c || (o != null && !!furnOf(o)?.rail && kindOf(o) === kindOf(c)); };
+    const nb = { n: same(tx, ty - 1), e: same(tx + 1, ty), s: same(tx, ty + 1), w: same(tx - 1, ty) };
+    if (nb.n || nb.s) { railRun(tg, r, cv, tx, ty, bb, f, nb); return; }
+  }
+  foldBox(tg, r, tx, ty, bb, f);
 }
 
 // ---------------------------------------------------------------- construir el mapa
@@ -774,7 +881,7 @@ function build(v: WorldView) {
         const f = k === 'lamp' ? null : furnOf(c);
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
-        if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
+        if (f && bb) { placeFurn(fg, atlas.rect(`o|${theme}|${c}`, () => cv), cv, x, y, bb, f, c, ch); break; }
         if (!lowPoly(c, x, y)) sprites.push({ c, x, y, lift: LIFT });
         if (k === 'lamp') lampSpots.push({ x: cx, y: 0.85, z: y + 0.9, color: 0xffd890, always: false });
         break;
@@ -805,7 +912,7 @@ function build(v: WorldView) {
         const f = k === 'prop' ? furnOf(c) : null;
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
-        if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
+        if (f && bb) { placeFurn(fg, atlas.rect(`o|${theme}|${c}`, () => cv), cv, x, y, bb, f, c, ch); break; }
         if (!lowPoly(c, x, y)) sprites.push({ c, x, y, lift: LIFT });
         if (c === 'П') lampSpots.push({ x: cx, y: 0.6, z: y + 0.8, color: 0xff9a40, always: true });
         break;
