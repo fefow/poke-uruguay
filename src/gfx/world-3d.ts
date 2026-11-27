@@ -584,11 +584,21 @@ function build(v: WorldView) {
     if (m.indoor || hard) return 0;
     return (rnd(vx, vy, 9) - 0.5) * 0.14;
   };
+  // Plantas y cosas chicas del suelo que en 3D tienen su modelo (girasoles, totoras, flores...): su dibujo 2D no va
+  // en la textura del suelo (si no, se ven dos veces); debajo va el suelo que las rodea, como bajo cualquier objeto.
+  const has3D = (c: string) => {
+    const k = kindOf(c);
+    if (k === 'flowers') return true; // las flores se arman en 3D (case 'flowers')
+    if (k !== 'ground' || !PROPS_3D[c]) return false;
+    const th = theme ? (THEMES as any)[theme] : null;
+    return !(th && Object.prototype.hasOwnProperty.call(th, c) && !SAME_IN_THEMES.has(c));
+  };
+  const plainGround = (c: string) => (kindOf(c) === 'ground' || kindOf(c) === 'door') && !has3D(c);
   const groundColor = (x: number, y: number) => {
     const c = tiles[y][x];
     const k = kindOf(c);
     const under = groundFor(tiles, x, y, m.ground, theme);
-    if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') {
+    if ((k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') && !has3D(c)) {
       const key = `g|${theme}|${c}|${under}`;
       return avgColor(key, tileCanvas(c, 0, theme, under));
     }
@@ -596,7 +606,7 @@ function build(v: WorldView) {
     // bajo un objeto va el mismo suelo que lo rodea (en interiores es el piso de la sala, no pasto)
     for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1], [1, 1], [-1, 1]]) {
       const n = ch(x + dx, y + dy);
-      if (n != null && (kindOf(n) === 'ground' || kindOf(n) === 'door')) {
+      if (n != null && plainGround(n)) {
         const u2 = groundFor(tiles, x + dx, y + dy, m.ground, theme);
         return avgColor(`g|${theme}|${n}|${u2}`, tileCanvas(n, 0, theme, u2));
       }
@@ -612,7 +622,7 @@ function build(v: WorldView) {
     if (k === 'water') return ['g|~', () => tileCanvas('~', 0, null, false)];
     if (!m.indoor && cliffAt(m, tiles, x, y)) return ['g|K', () => tileCanvas('K', 0, null, false)]; // a cliff face
     const under = groundFor(tiles, x, y, m.ground, theme);
-    if (k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') {
+    if ((k === 'ground' || k === 'grass' || k === 'flowers' || k === 'door' || k === 'ledge') && !has3D(c)) {
       // afuera, los bordes de camino, arena y pastizal son piezas propias (ver edges.ts)
       if (!m.indoor) { const th = themeOf(m, c); return [`g|${th}|${pieceKey(tiles, x, y, th)}|${under}|${m.ground ?? ''}`, () => cellCanvas(tiles, x, y, 0, th, under, m.ground ?? null)]; }
       return [`g|${theme}|${c}|${under}`, () => tileCanvas(c, 0, theme, under)];
@@ -620,7 +630,7 @@ function build(v: WorldView) {
     if (typeof under === 'string' && under !== '~') return [`g|${theme}|${under}`, () => tileCanvas(under, 0, theme, false)];
     for (const [dx, dy] of [[0, 1], [-1, 0], [1, 0], [0, -1], [1, 1], [-1, 1]]) {
       const n = ch(x + dx, y + dy);
-      if (n != null && (kindOf(n) === 'ground' || kindOf(n) === 'door')) {
+      if (n != null && plainGround(n)) {
         const u2 = groundFor(tiles, x + dx, y + dy, m.ground, theme);
         return [`g|${theme}|${n}|${u2}`, () => tileCanvas(n, 0, theme, u2)];
       }
@@ -788,9 +798,15 @@ function build(v: WorldView) {
         break;
       }
       case 'flowers': {
-        const pal = [0xf2e040, 0xf26a8a, 0xffffff, 0xa86af2];
-        for (let i = 0; i < 4; i++) {
-          parts.push(paint(at(new THREE.OctahedronGeometry(0.07, 0), x + 0.2 + rnd(x, y, i) * 0.6, 0.1, y + 0.2 + rnd(x, y, i + 9) * 0.6), new THREE.Color(pal[(x + y + i) % 4]), 0, i));
+        // el dibujo 2D de las flores ya no va en el suelo (has3D): acá cada flor es tallo, hojita, corola y centro
+        const pal = [0xf2e040, 0xf26a8a, 0xffffff, 0xa86af2, 0xf2903a];
+        for (let i = 0; i < 5; i++) {
+          const fx = x + 0.14 + rnd(x, y, i) * 0.72, fz = y + 0.14 + rnd(x, y, i + 9) * 0.72;
+          const h = 0.18 + rnd(x, y, i + 4) * 0.14;
+          parts.push(paint(at(new THREE.CylinderGeometry(0.012, 0.016, h, 4), fx, h / 2, fz), new THREE.Color(0x3a8a30), 0.05, i));
+          parts.push(paint(at(new THREE.ConeGeometry(0.035, 0.09, 3).rotateZ(1.1), fx + 0.03, h * 0.4, fz, rnd(x, y, i + 7) * 6), new THREE.Color(0x4aa03a), 0.05, i));
+          parts.push(paint(at(new THREE.CylinderGeometry(0.085, 0.06, 0.035, 5).rotateX(0.5), fx, h + 0.015, fz, rnd(x, y, i + 3) * 6), new THREE.Color(pal[(x * 3 + y + i) % 5]), 0.06, i));
+          parts.push(paint(at(new THREE.OctahedronGeometry(0.03, 0), fx, h + 0.045, fz + 0.01), new THREE.Color(0xf8c830), 0, i));
         }
         break;
       }
@@ -810,7 +826,7 @@ function build(v: WorldView) {
         if (c === 'П') lampSpots.push({ x: cx, y: 0.6, z: y + 0.8, color: 0xff9a40, always: true });
         break;
       }
-      case 'ground': lowPoly(c, x, y); break; // girasoles, totoras, paja brava, piedritas
+      case 'ground': lowPoly(c, x, y); break; // girasoles, totoras, paja brava, piedritas (sin su dibujo 2D en el suelo: has3D)
       default: break;
     }
   }
