@@ -5,8 +5,9 @@
 // El canvas 2D queda encima, transparente, para la lluvia, la niebla y los efectos de pantalla.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { T, TILE_INFO, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt, themeOf, tollBoardCanvas, TOLL_BOARD_H } from './tiles.ts';
+import { T, TILE_INFO, THEMES, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt, themeOf, tollBoardCanvas, TOLL_BOARD_H } from './tiles.ts';
 import { TOLL_FLOOR, TOLL_ROOF, TOLL_H, TOLL_V, TOLL_BOARD, tollZone } from '../data/toll-chars.ts';
+import { PROPS_3D, type PropCtx } from './props-3d.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
@@ -652,6 +653,20 @@ function build(v: WorldView) {
   // Edificios afuera: cada columna de techo + fachada se arma como una casa 3D con su propio pixel art
   // (fachada vertical con puerta, ventanas, cruz de la policlínica o emblema del gimnasio; techo a dos aguas).
   const bld = m.indoor ? new Set<number>() : buildBuildings(m, tiles, theme, parts, groundColor);
+  // Objetos low-poly (props-3d.ts) en lugar del cartel pixel art. Si el tema del mapa redibuja ese tile como otra
+  // cosa (la N de los gimnasios no es una maceta), queda el cartel.
+  const propCtx: Omit<PropCtx, 'x' | 'y'> = {
+    parts, glow, water: waterGeo, ch, facadeH: FACADE_H,
+    bldBelow: (x, y) => { let n = 0; while (isBld(tiles, W, H, x, y + 1 + n)) n++; return n; },
+    lamp: (x, y, z, color, always) => { lampSpots.push({ x, y, z, color, always }); },
+  };
+  const lowPoly = (c: string, x: number, y: number) => {
+    const gen = PROPS_3D[c];
+    if (!gen) return false;
+    const th = theme ? (THEMES as any)[theme] : null;
+    if (th && Object.prototype.hasOwnProperty.call(th, c) && !SAME_IN_THEMES.has(c)) return false;
+    return gen({ ...propCtx, x, y }) !== false;
+  };
   // Objetos de cada tile
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     if (bld.has(y * W + x)) continue;
@@ -760,7 +775,7 @@ function build(v: WorldView) {
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
         if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
-        sprites.push({ c, x, y, lift: LIFT });
+        if (!lowPoly(c, x, y)) sprites.push({ c, x, y, lift: LIFT });
         if (k === 'lamp') lampSpots.push({ x: cx, y: 0.85, z: y + 0.9, color: 0xffd890, always: false });
         break;
       }
@@ -791,10 +806,11 @@ function build(v: WorldView) {
         const cv = f && objectCanvas(c, theme);
         const bb = cv && opaqueBox(`${theme}|${c}`, cv);
         if (f && bb) { foldBox(fg, atlas.rect(`o|${theme}|${c}`, () => cv), x, y, bb, f, !!f.thin && (ch(x, y - 1) === c || ch(x, y + 1) === c)); break; }
-        sprites.push({ c, x, y, lift: LIFT });
+        if (!lowPoly(c, x, y)) sprites.push({ c, x, y, lift: LIFT });
         if (c === 'П') lampSpots.push({ x: cx, y: 0.6, z: y + 0.8, color: 0xff9a40, always: true });
         break;
       }
+      case 'ground': lowPoly(c, x, y); break; // girasoles, totoras, paja brava, piedritas
       default: break;
     }
   }
@@ -995,6 +1011,8 @@ const isBld = (tiles, W: number, H: number, x: number, y: number): boolean => {
   return false;
 };
 const FACADE_H = Math.tan(PHI_CAM); // así una fila de fachada se ve en pantalla igual de alta que en el mapa 2D
+/** Tiles que un tema redibuja pero siguen siendo lo mismo (la colmena y el busto de los gimnasios, la cueva). */
+const SAME_IN_THEMES = new Set(['ҳ', 'ϯ', ...Object.keys(PROPS_3D).filter((c) => /^(estalagmita|cristales)$/.test(TILE_INFO[c]?.name ?? ''))]);
 function buildBuildings(m, tiles, theme: string | null, parts: THREE.BufferGeometry[], groundColor: (x: number, y: number) => THREE.Color) {
   const W = m.w, H = m.h;
   const used = new Set<number>();
