@@ -1,602 +1,18 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-26T14:32:59.124Z",
+  "exported": "2026-11-27T14:03:18.130Z",
   "build": "24cd2935740facd4",
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0",
   "state": {
     "mode": "game",
-    "where": "anglo_1 (9,14)",
+    "where": "rosario (19,10)",
     "party": [
-      "carpinchon nv39 127PS",
-      "lobito nv13 36PS",
-      "pibe nv8 26PS"
+      "tejubrasa nv15 24PS"
     ],
-    "badges": 2,
-    "playtime": 5654
+    "badges": 0,
+    "playtime": 2549
   },
   "entries": [
-    {
-      "t": "2026-11-13T15:34:24.329Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:7 faint \"¡Tero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (10,9)"
-    },
-    {
-      "t": "2026-11-13T15:34:28.730Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (10,9)"
-    },
-    {
-      "t": "2026-11-13T15:34:32.167Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "ruta1 (0,9)"
-    },
-    {
-      "t": "2026-11-13T15:34:36.084Z",
-      "level": "info",
-      "msg": "Entró a casa_jugador",
-      "where": "carmelo (10,5)"
-    },
-    {
-      "t": "2026-11-13T15:34:42.867Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "casa_jugador (5,7)"
-    },
-    {
-      "t": "2026-11-13T15:34:45.877Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "carmelo (25,8)"
-    },
-    {
-      "t": "2026-11-13T15:34:52.132Z",
-      "level": "info",
-      "msg": "Batalla salvaje: teruterito nv2",
-      "where": "ruta1 (16,4)"
-    },
-    {
-      "t": "2026-11-13T15:34:54.914Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:11 \"¡Tero salvaje usó Picotazo!\" anim dmg0:2",
-      "where": "ruta1 (16,4)"
-    },
-    {
-      "t": "2026-11-13T15:34:57.340Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:2 faint \"¡Tero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (16,4)"
-    },
-    {
-      "t": "2026-11-13T15:35:00.137Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (16,4)"
-    },
-    {
-      "t": "2026-11-13T15:35:01.059Z",
-      "level": "info",
-      "msg": "Batalla salvaje: hormiga nv3",
-      "where": "ruta1 (16,6)"
-    },
-    {
-      "t": "2026-11-13T15:35:04.766Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:7 \"No es muy eficaz…\" \"¡Hormiga salvaje usó Ascuas!\" anim dmg0:2 \"No es muy eficaz…\"",
-      "where": "ruta1 (16,6)"
-    },
-    {
-      "t": "2026-11-13T15:35:08.894Z",
-      "level": "info",
-      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:9 \"¡Golpe crítico!\" \"No es muy eficaz…\" faint \"¡Hormiga salvaje se debilitó!\" exp end",
-      "where": "ruta1 (16,6)"
-    },
-    {
-      "t": "2026-11-13T15:35:13.031Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (16,6)"
-    },
-    {
-      "t": "2026-11-13T15:35:13.381Z",
-      "level": "info",
-      "msg": "Batalla salvaje: hornerito nv2",
-      "where": "ruta1 (16,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:16.649Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (16,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:20.104Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (16,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:21.168Z",
-      "level": "info",
-      "msg": "Batalla vs Valentina: nandulin nv4",
-      "where": "ruta1 (17,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:26.282Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 \"¡Ñandú rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Tejuchispa!\"",
-      "where": "ruta1 (17,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:29.590Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Ñandú rival se debilitó!\" exp end",
-      "where": "ruta1 (17,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:32.448Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (17,8)"
-    },
-    {
-      "t": "2026-11-13T15:35:40.507Z",
-      "level": "info",
-      "msg": "Batalla salvaje: hornerito nv2",
-      "where": "ruta1 (15,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:44.263Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (15,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:47.099Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (15,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:50.230Z",
-      "level": "info",
-      "msg": "Batalla salvaje: hormiga nv3",
-      "where": "ruta1 (11,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:52.440Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:8 \"¡Hormiga salvaje usó Placaje!\" anim dmg0:2",
-      "where": "ruta1 (11,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:53.597Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Hormiga salvaje usó Placaje!\" anim dmg0:2",
-      "where": "ruta1 (11,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:55.901Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:1 faint \"¡Hormiga salvaje se debilitó!\" exp end",
-      "where": "ruta1 (11,15)"
-    },
-    {
-      "t": "2026-11-13T15:35:58.681Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (11,15)"
-    },
-    {
-      "t": "2026-11-13T15:36:00.416Z",
-      "level": "info",
-      "msg": "Batalla salvaje: nandulin nv4",
-      "where": "ruta1 (13,12)"
-    },
-    {
-      "t": "2026-11-13T15:36:03.749Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 \"¡Ñandú salvaje usó Placaje!\" anim dmg0:4",
-      "where": "ruta1 (13,12)"
-    },
-    {
-      "t": "2026-11-13T15:36:06.604Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Ñandú salvaje se debilitó!\" exp end",
-      "where": "ruta1 (13,12)"
-    },
-    {
-      "t": "2026-11-13T15:36:10.747Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (13,12)"
-    },
-    {
-      "t": "2026-11-13T15:36:13.131Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "ruta1 (13,17)"
-    },
-    {
-      "t": "2026-11-13T15:36:14.773Z",
-      "level": "info",
-      "msg": "Batalla vs Don Luis: hormiga nv5, tuco nv6",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:21.214Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Hormiga rival usó Placaje!\" anim dmg0:3",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:23.511Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Hormiga rival usó Placaje!\" anim dmg0:3",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:25.941Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 faint \"¡Hormiga rival se debilitó!\" exp foeNext",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:31.013Z",
-      "level": "info",
-      "msg": "Turno 4: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:12 \"¡Tuco rival usó Placaje!\" anim dmg0:3",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:33.820Z",
-      "level": "info",
-      "msg": "Turno 5: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:8 \"¡Tuco rival usó Bofetón Lodo!\" anim dmg0:5 \"¡Es súper eficaz!\" stat \"¡Bajó la Precisión de Tejuchispa!\"",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:37.693Z",
-      "level": "info",
-      "msg": "Turno 6: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:2 \"¡Golpe crítico!\" faint \"¡Tuco rival se debilitó!\" exp end",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:40.729Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "colonia (16,5)"
-    },
-    {
-      "t": "2026-11-13T15:36:48.373Z",
-      "level": "info",
-      "msg": "Entró a poli_colonia",
-      "where": "colonia (4,13)"
-    },
-    {
-      "t": "2026-11-13T15:36:52.859Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "poli_colonia (5,7)"
-    },
-    {
-      "t": "2026-11-13T15:36:56.711Z",
-      "level": "info",
-      "msg": "Batalla vs Gastón: nandulin nv5, oruga nv5, tuco nv5",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:01.494Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:16 \"¡Ñandú rival usó Malicioso!\" anim stat \"¡Bajó la Defensa de Tejuchispa!\"",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:04.757Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Ñandú rival se debilitó!\" exp foeNext",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:11.585Z",
-      "level": "info",
-      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:10 \"¡Oruga rival usó Placaje!\" anim dmg0:4",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:14.074Z",
-      "level": "info",
-      "msg": "Turno 4: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:10 faint \"¡Oruga rival se debilitó!\" exp foeNext",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:19.006Z",
-      "level": "info",
-      "msg": "Turno 5: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 \"¡Tuco rival usó Bofetón Lodo!\" anim dmg0:5 \"¡Es súper eficaz!\" stat \"¡Bajó la Precisión de Tejuchispa!\"",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:23.402Z",
-      "level": "info",
-      "msg": "Turno 6: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:6 faint \"¡Tuco rival se debilitó!\" exp end",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:26.393Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "colonia (8,21)"
-    },
-    {
-      "t": "2026-11-13T15:37:30.969Z",
-      "level": "info",
-      "msg": "Entró a poli_colonia",
-      "where": "colonia (4,13)"
-    },
-    {
-      "t": "2026-11-13T15:37:35.155Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "poli_colonia (5,7)"
-    },
-    {
-      "t": "2026-11-13T15:38:36.636Z",
-      "level": "info",
-      "msg": "Entró a shop_colonia",
-      "where": "colonia (13,20)"
-    },
-    {
-      "t": "2026-11-13T15:38:44.861Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "shop_colonia (4,7)"
-    },
-    {
-      "t": "2026-11-13T15:38:45.450Z",
-      "level": "info",
-      "msg": "Entró a shop_colonia",
-      "where": "colonia (13,20)"
-    },
-    {
-      "t": "2026-11-13T15:39:01.800Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "shop_colonia (4,7)"
-    },
-    {
-      "t": "2026-11-13T15:39:22.635Z",
-      "level": "info",
-      "msg": "Batalla vs Lorena: teruterito nv5, hornerito nv5",
-      "where": "colonia (19,15)"
-    },
-    {
-      "t": "2026-11-13T15:39:27.303Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:4 \"¡Tejuchispa usó Ascuas!\" anim dmg1:14 statusAnim hud \"¡Tero rival está quemado!\" statusAnim dmg1:2 \"Tero rival sufre por la quemadura.\"",
-      "where": "colonia (19,15)"
-    },
-    {
-      "t": "2026-11-13T15:39:32.121Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tero rival usó Ataque Rápido!\" \"¡Tejuchispa esquivó el ataque!\" \"¡Tejuchispa usó Placaje!\" anim dmg1:3 faint \"¡Tero rival se debilitó!\" exp foeNext",
-      "where": "colonia (19,15)"
-    },
-    {
-      "t": "2026-11-13T15:39:47.667Z",
-      "level": "info",
-      "msg": "Turno 3: move #3 | \"¡Tejuchispa usó Ataque Rápido!\" anim dmg1:10 \"¡Hornero rival usó Picotazo!\" anim dmg0:4",
-      "where": "colonia (19,15)"
-    },
-    {
-      "t": "2026-11-13T15:39:50.389Z",
-      "level": "info",
-      "msg": "Turno 4: move #3 | \"¡Tejuchispa usó Ataque Rápido!\" anim dmg1:9 faint \"¡Hornero rival se debilitó!\" exp end",
-      "where": "colonia (19,15)"
-    },
-    {
-      "t": "2026-11-13T15:39:53.002Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "colonia (19,15)"
-    },
-    {
-      "t": "2026-11-13T15:44:01.462Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "colonia (25,0)"
-    },
-    {
-      "t": "2026-11-13T15:44:10.894Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "ruta1 (0,9)"
-    },
-    {
-      "t": "2026-11-13T15:44:14.600Z",
-      "level": "info",
-      "msg": "Entró a casa_jugador",
-      "where": "carmelo (10,5)"
-    },
-    {
-      "t": "2026-11-13T15:44:26.609Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "casa_jugador (4,7)"
-    },
-    {
-      "t": "2026-11-13T15:44:29.673Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "carmelo (25,8)"
-    },
-    {
-      "t": "2026-11-13T15:44:35.569Z",
-      "level": "info",
-      "msg": "Batalla salvaje: teruterito nv3",
-      "where": "ruta1 (12,8)"
-    },
-    {
-      "t": "2026-11-13T15:44:39.279Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:14 \"¡Tero salvaje usó Chirrido!\" anim stat \"¡Bajó mucho la Defensa de Tejuchispa!\"",
-      "where": "ruta1 (12,8)"
-    },
-    {
-      "t": "2026-11-13T15:44:41.816Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:1 faint \"¡Tero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (12,8)"
-    },
-    {
-      "t": "2026-11-13T15:44:44.825Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (12,8)"
-    },
-    {
-      "t": "2026-11-13T15:44:47.201Z",
-      "level": "info",
-      "msg": "Batalla salvaje: hornerito nv2",
-      "where": "ruta1 (15,14)"
-    },
-    {
-      "t": "2026-11-13T15:44:50.668Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (15,14)"
-    },
-    {
-      "t": "2026-11-13T15:44:53.520Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (15,14)"
-    },
-    {
-      "t": "2026-11-13T15:44:56.262Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "ruta1 (13,17)"
-    },
-    {
-      "t": "2026-11-13T15:45:14.024Z",
-      "level": "info",
-      "msg": "Entró a casa_colonia2",
-      "where": "colonia (28,6)"
-    },
-    {
-      "t": "2026-11-13T15:45:20.407Z",
-      "level": "info",
-      "msg": "Entró a colonia",
-      "where": "casa_colonia2 (4,7)"
-    },
-    {
-      "t": "2026-11-13T15:45:22.326Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "colonia (25,0)"
-    },
-    {
-      "t": "2026-11-13T15:45:24.138Z",
-      "level": "info",
-      "msg": "Batalla salvaje: nandulin nv4",
-      "where": "ruta1 (12,11)"
-    },
-    {
-      "t": "2026-11-13T15:45:27.798Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:12 \"¡Ñandú salvaje usó Placaje!\" anim dmg0:3",
-      "where": "ruta1 (12,11)"
-    },
-    {
-      "t": "2026-11-13T15:45:30.164Z",
-      "level": "info",
-      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 faint \"¡Ñandú salvaje se debilitó!\" exp end",
-      "where": "ruta1 (12,11)"
-    },
-    {
-      "t": "2026-11-13T15:45:32.601Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (12,11)"
-    },
-    {
-      "t": "2026-11-13T15:45:35.900Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "ruta1 (0,9)"
-    },
-    {
-      "t": "2026-11-13T15:45:44.718Z",
-      "level": "info",
-      "msg": "Entró a lab",
-      "where": "carmelo (15,11)"
-    },
-    {
-      "t": "2026-11-13T15:45:52.482Z",
-      "level": "info",
-      "msg": "Entró a carmelo",
-      "where": "lab (5,8)"
-    },
-    {
-      "t": "2026-11-13T15:46:46.220Z",
-      "level": "info",
-      "msg": "Entró a ruta1",
-      "where": "carmelo (25,8)"
-    },
-    {
-      "t": "2026-11-13T15:46:52.891Z",
-      "level": "info",
-      "msg": "Batalla salvaje: teruterito nv3",
-      "where": "ruta1 (12,13)"
-    },
-    {
-      "t": "2026-11-13T15:46:56.360Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:15 faint \"¡Tero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (12,13)"
-    },
-    {
-      "t": "2026-11-13T15:46:59.287Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (12,13)"
-    },
-    {
-      "t": "2026-11-13T15:47:01.436Z",
-      "level": "info",
-      "msg": "Batalla salvaje: hornerito nv2",
-      "where": "ruta1 (15,15)"
-    },
-    {
-      "t": "2026-11-13T15:47:04.749Z",
-      "level": "info",
-      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:13 faint \"¡Hornero salvaje se debilitó!\" exp end",
-      "where": "ruta1 (15,15)"
-    },
-    {
-      "t": "2026-11-13T15:47:07.795Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ruta1 (15,15)"
-    },
-    {
-      "t": "2026-11-13T15:55:26.096Z",
-      "level": "info",
-      "msg": "Entró a punta",
-      "where": "title"
-    },
-    {
-      "t": "2026-11-13T15:55:43.393Z",
-      "level": "info",
-      "msg": "Entró a fraybentos",
-      "where": "punta (24,34)"
-    },
-    {
-      "t": "2026-11-13T15:55:49.060Z",
-      "level": "info",
-      "msg": "Entró a gym_frb",
-      "where": "fraybentos (26,14)"
-    },
     {
       "t": "2026-11-13T15:58:47.164Z",
       "level": "info",
@@ -2418,6 +1834,590 @@
       "msg": "Autoguardado falló: Servidor de partidas: 400 {\"code\":\"P0001\",\"details\":null,\"hint\":null,\"message\":\"too many saves\"}",
       "where": "anglo_1 (9,14)",
       "count": 2
+    },
+    {
+      "t": "2026-11-26T14:38:15.305Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "anglo_1 (12,15)"
+    },
+    {
+      "t": "2026-11-26T14:38:29.490Z",
+      "level": "info",
+      "msg": "Entró a gym_frb",
+      "where": "fraybentos (26,14)"
+    },
+    {
+      "t": "2026-11-26T14:38:33.856Z",
+      "level": "info",
+      "msg": "Entró a fraybentos",
+      "where": "gym_frb (13,19)"
+    },
+    {
+      "t": "2026-11-26T15:26:22.025Z",
+      "level": "info",
+      "msg": "Entró a casa_jugador",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-26T15:26:31.496Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "casa_jugador (4,7)"
+    },
+    {
+      "t": "2026-11-26T15:26:40.161Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-26T15:26:40.863Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-26T15:26:50.443Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-26T15:26:56.356Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-26T15:26:57.541Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-26T15:26:58.334Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-26T15:26:59.054Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-26T15:27:12.258Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-26T15:27:13.732Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-26T15:27:17.056Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-26T15:27:18.031Z",
+      "level": "info",
+      "msg": "Entró a lab",
+      "where": "carmelo (15,11)"
+    },
+    {
+      "t": "2026-11-26T15:27:18.678Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "lab (5,8)"
+    },
+    {
+      "t": "2026-11-26T16:07:09.748Z",
+      "level": "info",
+      "msg": "Entró a casa_jugador",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-26T16:37:45.060Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "casa_jugador (4,7)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-26T16:37:49.261Z",
+      "level": "info",
+      "msg": "Entró a casa_jugador",
+      "where": "carmelo (10,5)"
+    },
+    {
+      "t": "2026-11-26T16:38:00.717Z",
+      "level": "info",
+      "msg": "Entró a carmelo",
+      "where": "casa_jugador (5,7)"
+    },
+    {
+      "t": "2026-11-26T16:38:16.170Z",
+      "level": "info",
+      "msg": "Entró a ruta1",
+      "where": "carmelo (25,8)"
+    },
+    {
+      "t": "2026-11-26T16:38:40.893Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "ruta1 (13,17)"
+    },
+    {
+      "t": "2026-11-26T16:38:58.598Z",
+      "level": "info",
+      "msg": "Entró a poli_colonia",
+      "where": "colonia (4,13)"
+    },
+    {
+      "t": "2026-11-26T16:39:04.284Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "poli_colonia (5,7)"
+    },
+    {
+      "t": "2026-11-26T16:39:37.471Z",
+      "level": "info",
+      "msg": "Batalla vs Lorena: teruterito nv5, hornerito nv5",
+      "where": "colonia (19,13)"
+    },
+    {
+      "t": "2026-11-26T16:39:42.814Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:10 \"¡Tero rival usó Picotazo!\" anim dmg0:5",
+      "where": "colonia (19,13)"
+    },
+    {
+      "t": "2026-11-26T16:39:46.304Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tero rival usó Ataque Rápido!\" anim dmg0:5 \"¡Tejuchispa usó Ascuas!\" anim dmg1:9 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "colonia (19,13)"
+    },
+    {
+      "t": "2026-11-26T16:39:54.015Z",
+      "level": "info",
+      "msg": "Turno 3: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:11 \"¡Hornero rival usó Picotazo!\" anim dmg0:5",
+      "where": "colonia (19,13)"
+    },
+    {
+      "t": "2026-11-26T16:39:56.847Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:8 faint \"¡Hornero rival se debilitó!\" exp end",
+      "where": "colonia (19,13)"
+    },
+    {
+      "t": "2026-11-26T16:39:59.636Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "colonia (19,13)"
+    },
+    {
+      "t": "2026-11-26T16:40:05.267Z",
+      "level": "info",
+      "msg": "Entró a poli_colonia",
+      "where": "colonia (4,13)"
+    },
+    {
+      "t": "2026-11-26T16:40:10.252Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "poli_colonia (5,7)"
+    },
+    {
+      "t": "2026-11-26T16:40:34.439Z",
+      "level": "info",
+      "msg": "Batalla vs Don Luis: hormiga nv5, tuco nv6",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:39.717Z",
+      "level": "info",
+      "msg": "Turno 1: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 \"¡Hormiga rival usó Placaje!\" anim dmg0:4",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:42.194Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 \"¡Hormiga rival usó Ascuas!\" anim dmg0:2 \"No es muy eficaz…\"",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:45.085Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:6 \"¡Hormiga rival usó Placaje!\" anim dmg0:4",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:47.061Z",
+      "level": "info",
+      "msg": "Turno 4: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:2 faint \"¡Hormiga rival se debilitó!\" exp foeNext",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:53.514Z",
+      "level": "info",
+      "msg": "Turno 5: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:10 \"¡Tuco rival usó Placaje!\" anim dmg0:4",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:56.375Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:12 faint \"¡Tuco rival se debilitó!\" exp end",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:40:59.402Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "colonia (35,22)"
+    },
+    {
+      "t": "2026-11-26T16:41:05.728Z",
+      "level": "info",
+      "msg": "Batalla vs Gastón: nandulin nv5, oruga nv5, tuco nv5",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:10.798Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:20 \"¡Golpe crítico!\" faint \"¡Ñandú rival se debilitó!\" exp foeNext",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:17.032Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:19 \"¡Es súper eficaz!\" faint \"¡Oruga rival se debilitó!\" exp foeNext",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:22.262Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" \"¡Tuco rival esquivó el ataque!\" \"¡Tuco rival usó Placaje!\" anim dmg0:3",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:25.029Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:16 \"¡Tuco rival usó Placaje!\" anim dmg0:3",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:27.712Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:4 faint \"¡Tuco rival se debilitó!\" exp end",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:29.993Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "colonia (30,23)"
+    },
+    {
+      "t": "2026-11-26T16:41:43.486Z",
+      "level": "info",
+      "msg": "Entró a poli_colonia",
+      "where": "colonia (4,13)"
+    },
+    {
+      "t": "2026-11-26T16:41:48.972Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "poli_colonia (5,7)"
+    },
+    {
+      "t": "2026-11-26T16:42:13.339Z",
+      "level": "info",
+      "msg": "Entró a casa_colonia2",
+      "where": "colonia (28,6)"
+    },
+    {
+      "t": "2026-11-26T16:42:15.288Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "casa_colonia2 (4,7)"
+    },
+    {
+      "t": "2026-11-26T16:42:25.049Z",
+      "level": "info",
+      "msg": "Entró a shop_colonia",
+      "where": "colonia (13,20)"
+    },
+    {
+      "t": "2026-11-26T16:42:34.463Z",
+      "level": "info",
+      "msg": "Entró a colonia",
+      "where": "shop_colonia (4,7)"
+    },
+    {
+      "t": "2026-11-27T13:07:53.988Z",
+      "level": "info",
+      "msg": "Entró a r_colonia_rosario",
+      "where": "title",
+      "count": 2
+    },
+    {
+      "t": "2026-11-27T13:08:01.275Z",
+      "level": "info",
+      "msg": "Batalla vs Marcos: luciernito nv4, tarantula nv6",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-27T13:08:06.550Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:17 \"¡Golpe crítico!\" \"¡Es súper eficaz!\" faint \"¡Luciérnaga rival se debilitó!\" exp foeNext",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-27T13:08:13.851Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:22 \"¡Es súper eficaz!\" \"¡Tarántula rival usó Ácido!\" anim dmg0:5",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-27T13:08:17.469Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:3 faint \"¡Tarántula rival se debilitó!\" exp end",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-27T13:08:20.134Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (6,21)"
+    },
+    {
+      "t": "2026-11-27T13:08:33.645Z",
+      "level": "info",
+      "msg": "Batalla vs Delfina: teruterito nv5, caudillo nv5",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:08:39.556Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:18 \"¡Tero rival usó Chirrido!\" anim stat \"¡Bajó mucho la Defensa de Tejuchispa!\"",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:08:43.267Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:1 faint \"¡Tero rival se debilitó!\" exp foeNext",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:08:50.628Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:7 \"¡Lobo de Crin rival usó Barrida!\" anim dmg0:12 stat \"¡Bajó la Velocidad de Tejuchispa!\"",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:08:54.140Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Lobo de Crin rival usó Barrida!\" anim dmg0:12 \"¡Tejuchispa usó Ascuas!\" anim dmg1:14",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:08:59.298Z",
+      "level": "info",
+      "msg": "Turno 5: item | \"Usaste Mate con Carqueja.\" heal hud \"Tejuchispa tomó un mate y recuperó 29 PS.\" \"¡Lobo de Crin rival usó Barrida!\" anim dmg0:12",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:09:03.748Z",
+      "level": "info",
+      "msg": "Turno 6: move #2 | \"¡Lobo de Crin rival usó Barrida!\" anim dmg0:12 \"¡Tejuchispa usó Ascuas!\" anim dmg1:2 faint \"¡Lobo de Crin rival se debilitó!\" exp end",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:09:07.400Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (9,16)"
+    },
+    {
+      "t": "2026-11-27T13:09:47.025Z",
+      "level": "info",
+      "msg": "Batalla salvaje: cuchilla nv4",
+      "where": "r_colonia_rosario (19,18)"
+    },
+    {
+      "t": "2026-11-27T13:09:50.475Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:20 \"¡Golpe crítico!\" \"¡Es súper eficaz!\" faint \"¡Ñandú salvaje se debilitó!\" exp end",
+      "where": "r_colonia_rosario (19,18)"
+    },
+    {
+      "t": "2026-11-27T13:09:54.822Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (19,18)"
+    },
+    {
+      "t": "2026-11-27T13:10:02.028Z",
+      "level": "info",
+      "msg": "Batalla vs Florencia: lobito nv5, mbigua nv5",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:06.988Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Tejuchispa usó Ataque Rápido!\" anim dmg1:11 \"¡Lobo Fino rival usó Gruñido!\" anim stat \"¡Bajó el Ataque de Tejuchispa!\"",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:10.557Z",
+      "level": "info",
+      "msg": "Turno 2: move #3 | \"¡Tejuchispa usó Ataque Rápido!\" anim dmg1:6 \"¡Lobo Fino rival usó Placaje!\" anim dmg0:2",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:13.292Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:3 \"¡Golpe crítico!\" faint \"¡Lobo Fino rival se debilitó!\" exp foeNext",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:18.828Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:8 \"No es muy eficaz…\" \"¡Mbiguá rival usó Pistola Agua!\" anim dmg0:8 \"¡Es súper eficaz!\"",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:22.254Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:8 \"¡Mbiguá rival usó Pistola Agua!\" anim dmg0:9 \"¡Es súper eficaz!\"",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:27.980Z",
+      "level": "info",
+      "msg": "Turno 6: move #0 | \"¡Tejuchispa usó Placaje!\" anim dmg1:5 faint \"¡Mbiguá rival se debilitó!\" exp end",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:30.784Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (21,25)"
+    },
+    {
+      "t": "2026-11-27T13:10:50.227Z",
+      "level": "info",
+      "msg": "Batalla salvaje: cuchilla nv6",
+      "where": "r_colonia_rosario (29,20)"
+    },
+    {
+      "t": "2026-11-27T13:10:53.691Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejuchispa usó Ascuas!\" anim dmg1:25 \"¡Es súper eficaz!\" faint \"¡Ñandú salvaje se debilitó!\" exp end",
+      "where": "r_colonia_rosario (29,20)"
+    },
+    {
+      "t": "2026-11-27T13:13:47.629Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "r_colonia_rosario (29,20)"
+    },
+    {
+      "t": "2026-11-27T14:01:51.794Z",
+      "level": "info",
+      "msg": "Entró a rosario",
+      "where": "r_colonia_rosario (65,18)"
+    },
+    {
+      "t": "2026-11-27T14:01:58.026Z",
+      "level": "info",
+      "msg": "Batalla vs Fernando: pejerrey nv5, sapo nv5",
+      "where": "rosario (7,8)"
+    },
+    {
+      "t": "2026-11-27T14:02:05.769Z",
+      "level": "info",
+      "msg": "Turno 1: move #3 | \"¡Tejubrasa usó Ataque Rápido!\" anim dmg1:18 \"¡Pejerrey rival usó Pistola Agua!\" anim dmg0:8 \"¡Es súper eficaz!\"",
+      "where": "rosario (7,8)"
+    },
+    {
+      "t": "2026-11-27T14:02:09.799Z",
+      "level": "info",
+      "msg": "Turno 2: move #0 | \"¡Tejubrasa usó Placaje!\" anim dmg1:2 faint \"¡Pejerrey rival se debilitó!\" exp foeNext",
+      "where": "rosario (7,8)"
+    },
+    {
+      "t": "2026-11-27T14:02:18.391Z",
+      "level": "info",
+      "msg": "Turno 3: item | \"Usaste Mate con Carqueja.\" heal hud \"Tejubrasa tomó un mate y recuperó 31 PS.\" \"¡Sapo rival usó Ácido!\" anim dmg0:4",
+      "where": "rosario (7,8)"
+    },
+    {
+      "t": "2026-11-27T14:02:21.752Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Tejubrasa usó Ascuas!\" anim dmg1:22 faint \"¡Sapo rival se debilitó!\" exp end",
+      "where": "rosario (7,8)"
+    },
+    {
+      "t": "2026-11-27T14:02:24.412Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "rosario (7,8)"
+    },
+    {
+      "t": "2026-11-27T14:02:29.201Z",
+      "level": "info",
+      "msg": "Batalla vs Gabriela: oveja nv6, ternero nv6",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:02:33.936Z",
+      "level": "info",
+      "msg": "Turno 1: move #2 | \"¡Tejubrasa usó Ascuas!\" anim dmg1:20 \"¡Oveja rival usó Arañazo!\" anim dmg0:4",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:02:36.768Z",
+      "level": "info",
+      "msg": "Turno 2: move #2 | \"¡Tejubrasa usó Ascuas!\" \"¡Oveja rival esquivó el ataque!\" \"¡Oveja rival usó Arañazo!\" anim dmg0:4",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:02:39.538Z",
+      "level": "info",
+      "msg": "Turno 3: move #0 | \"¡Oveja rival usó Ataque Rápido!\" anim dmg0:4 \"¡Tejubrasa usó Placaje!\" anim dmg1:5 faint \"¡Oveja rival se debilitó!\" exp foeNext",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:02:45.104Z",
+      "level": "info",
+      "msg": "Turno 4: move #2 | \"¡Ternero rival usó Ataque Rápido!\" anim dmg0:3 \"¡Tejubrasa usó Ascuas!\" anim dmg1:20",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:02:48.184Z",
+      "level": "info",
+      "msg": "Turno 5: move #0 | \"¡Tejubrasa usó Placaje!\" anim dmg1:3 faint \"¡Ternero rival se debilitó!\" exp end",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:02:52.109Z",
+      "level": "info",
+      "msg": "Fin de batalla: win",
+      "where": "rosario (11,10)"
+    },
+    {
+      "t": "2026-11-27T14:03:13.925Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Servidor de partidas: 400 {\"code\":\"P0001\",\"details\":null,\"hint\":null,\"message\":\"too many saves\"}",
+      "where": "rosario (19,10)"
     }
   ]
 }
