@@ -438,3 +438,48 @@ export function charSprite(look, dir, frame = 0) {
   cache.set(key, c);
   return c;
 }
+
+/**
+ * A protester holding a placard over the head (the protests against the PP fog, see addLeverGate): the character
+ * sprite with 11 rows on top for the board. `sign` picks the design; the slogan itself is read when talking to them.
+ * Seen from behind (dir 'up') only the bare cardboard shows.
+ */
+export const SIGN_ROWS = 11;
+const SIGN_DESIGNS = 5;
+export function protestSprite(look, dir, frame = 0, sign = 0) {
+  const key = `protest|${look}|${dir}|${frame}|${sign % SIGN_DESIGNS}`;
+  let c = cache.get(key);
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = 16;
+  c.height = 17 + SIGN_ROWS;
+  const g = c.getContext('2d');
+  const bob = frame === 0 || frame === 3 ? 1 : 0;
+  const side = dir === 'left' || dir === 'right';
+  const sx = side ? 8 : 12; // the stick: in the right hand, or held in front when seen from the side
+  // the stick goes behind the body: draw it first
+  g.fillStyle = '#5a3a1a';
+  g.fillRect(sx, 8 + bob, 1, SIGN_ROWS + 3);
+  g.drawImage(charSprite(look, dir, frame), 0, SIGN_ROWS);
+  if (!side && dir !== 'up') { g.fillStyle = '#5a3a1a'; g.fillRect(sx, SIGN_ROWS + 9 + bob, 1, 2); } // the hand closes on it
+  const bx = side ? 2 : 4, by = bob, bw = 12, bh = 8;
+  const px = (x, y, col, w = 1, h = 1) => { g.fillStyle = col; g.fillRect(bx + x, by + y, w, h); };
+  const s = sign % SIGN_DESIGNS;
+  const back = dir === 'up';
+  const bg = back ? '#c8a26a' : ['#f4f4ec', '#f8d848', '#9ad4f4', '#f4f4ec', '#5aa84a'][s];
+  px(0, 0, '#2a1a10', bw, bh);
+  px(1, 1, bg, bw - 2, bh - 2);
+  if (back) { px(2, 3, '#a8824a', 8, 1); return (cache.set(key, c), c); }
+  if (s === 0 || s === 2) {
+    // a grey fog cloud, crossed out
+    px(3, 3, '#8a96a6', 6, 2); px(4, 2, '#8a96a6', 3, 1); px(6, 2, '#a8b4c4', 2, 1);
+    if (s === 2) px(2, 1, '#f8d848', 2, 2); // the sun peeking out
+    for (let k = 0; k < 6; k++) px(3 + k, 5 - k, '#e0263a');
+  } else {
+    // two lines of hand-painted letters
+    const ink = s === 3 ? '#e0263a' : s === 4 ? '#ffffff' : '#2a1a10';
+    [[2, 2, 3], [6, 2, 4], [2, 4, 2], [5, 4, 5]].forEach(([x, y, w]) => px(x, y, ink, w, 1));
+  }
+  cache.set(key, c);
+  return c;
+}

@@ -11,7 +11,7 @@ import { ITEMS, isKeyItem } from '../data/items.ts';
 import { T, TILE_INFO, tileCanvas, topCanvas, collAt, groundUnder, groundFor, drawBuildingTrim, drawElevation, themeOf, tollBoardCanvas, TOLL_BOARD_H } from '../gfx/tiles.ts';
 import { TOLL_ROOF, tollZone } from '../data/toll-chars.ts';
 import { cellCanvas } from '../gfx/edges.ts';
-import { charSprite } from '../gfx/characters.ts';
+import { charSprite, protestSprite, SIGN_ROWS } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
 import { overworldCreature } from '../gfx/overworld-creatures.ts';
 import { W, H, setRenderer, getRenderer, text as ctext } from '../gfx/screen.ts';
@@ -990,7 +990,7 @@ async function talkTo(n) {
   if (d.trainer) return trainerTalk(n);
   if (d.script) return SCRIPTS[d.script](api, d);
   if (d.text) {
-    if (foggyHere() && !d.critter) return say(fogTalk(n));
+    if (foggyHere() && !d.critter && !d.protest) return say(fogTalk(n));
     const text = !d.critter && !d.gate && !d.blocker && outdoorNight() ? nightTalk(d.text, d.x, d.y) : d.text;
     const g = localGossip(d);
     return say(g ? [...(Array.isArray(text) ? text : [text]), g] : text);
@@ -1938,7 +1938,8 @@ function drawWorld(g, t) {
       g.drawImage(canoeCanvas(p.dir), Math.round(side ? sx - 4 : sx), Math.round(side ? sy + 4 : sy - 4));
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
-    g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);
+    if (!player && n.def.sign != null && look !== 'swimmer') g.drawImage(protestSprite(look, n.dir, f, n.def.sign), sx, sy - 4 - SIGN_ROWS); // protester with a placard
+    else g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);
     // Tall grass covers your feet, also while walking through it: the tile you are mostly on decides.
     const half = n.moving && n.from && n.t / n.dur < 0.5;
     const tx = half ? n.from.x : n.x;
@@ -1994,7 +1995,7 @@ function drawWorld(g, t) {
       const wx = weatherAt(m.id, m.weather);
       if (wx === 'rain' || wx === 'storm') rain(g, t);
       if (wx === 'storm') { rain(g, t * 1.7); lightning(g, t); }
-      if (wx === 'fog') { drawFog(g, t); g.fillStyle = 'rgba(205,212,222,0.22)'; g.fillRect(0, 0, W, H); }
+      if (wx === 'fog' || plantRunning()) { drawFog(g, t); g.fillStyle = 'rgba(205,212,222,0.22)'; g.fillRect(0, 0, W, H); }
     }
     if ((m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'))) drawFog(g, t);
     // A PP fog machine that is still running fills its zone with thick fog: almost nothing shows except its lit panel.
@@ -2037,7 +2038,7 @@ function drawWorld3DFrame(g, t) {
   const machines = !m.dark && !m.indoor && activeMachines().length > 0;
   const story = (m.id === 'cabo' && !flag('cabo_clear')) || ((m.id === 'quebrada' || m.id === 'quebrada_cuervos') && !flag('quebrada_clear'));
   // the same fog as the 2D map: a running PP machine is thickest, then the story fog, then the weather
-  const fog = machines ? 'machine' : story ? 'story' : wx === 'fog' ? 'weather' : null;
+  const fog = machines ? 'machine' : story ? 'story' : wx === 'fog' || (!m.dark && !m.indoor && plantRunning()) ? 'weather' : null;
   const userZ = Math.min(3, Math.max(1, Math.round(settings.mapZoom ?? 1)));
   drawWorld3D({ map: m, tiles: W_.tiles, npcs: W_.npcs, items: W_.items, legend: W_.legend, player: W_.player, emote: W_.emote, lit: !!W_.lit, bike: !!W_.bike, flash: W_.flash, look: state().player.look || 'player_m', fog, zoom: userZ, entityPos, tileAt }, t);
   g.clearRect(0, 0, W, H);
@@ -2169,6 +2170,11 @@ function drawFishing(g, cx, cy, t) {
     g.fillStyle = '#fff'; g.fillRect(ex, ey, 9, 11);
     g.fillStyle = '#1a1a24'; g.fillRect(ex + 3, ey + 2, 3, 5); g.fillRect(ex + 3, ey + 8, 3, 2);
   }
+}
+
+/** A PP fog plant on this road that the protest wants shut (see addLeverGate): it veils the zone like a foggy day. */
+function plantRunning() {
+  return W_.npcs.some((n) => n.def.script === 'route_palanca' && n.def.crowd?.length && !flag(n.def.doneFlag));
 }
 
 /** PP fog machines in this map that are still running. */

@@ -1,7 +1,7 @@
 # Poke Uruguay: la historia completa
 
 > **Documento vivo.** Es la fuente de consulta de la historia. Cada cambio de historia (jefes, orden de ciudades, diálogos clave, eventos, misiones, MT, objetos de historia) debe actualizar este archivo **en el mismo PR**. Ver `CLAUDE.md`.
-> Última actualización: 2026-11-26 (v241)
+> Última actualización: 2026-11-27 (v252)
 >
 > Entrenadores: cada entrenador usa en batalla un retrato grande dibujado a partir de su sprite del mapa, y su nombre, título y sprite corresponden a la misma persona (mujer con nombre y título de mujer, hombre con nombre y título de hombre; Don/Doña solo para gente mayor o de campo).
 
@@ -176,6 +176,7 @@ Anglo 6, Muelle 4, Represa 10, Radio 3, Torre 8, Aduana 3, Parrilla 3, Ánimas 5
   - **Festival del Olimar (Treinta y Tres).** Inicio: la costumbre manda combatir antes de cantar y nadie se animó con los tres guitarreros. Misión: vencer a los guitarreros Anselmo y Rufino y a la guitarrera Zulma (una paisana), repartidos por la ciudad (tres combates de entrenador, en cualquier orden). Desenlace: el organizador abre el festival; premio 3 Ultraballs, 2 Mates con carqueja y 1 garrapiñada. Flags `ev_ms_olimar_*`.
 - **Día y noche:** de noche (reloj del juego, de 20:00 a 5:30) la gente al aire libre (calles, rutas, localidades) dice otras líneas (`NIGHT_TALK` en `night-talk.ts`); las que dan una pista o un dato de historia lo conservan, así que nadie pierde información por andar de noche. Quien no tiene línea propia usa una frase nocturna genérica (`NIGHT_POOL`). Adentro de los edificios y en las cuevas cada persona tiene un solo diálogo. Ninguna línea nocturna habla de sol, calor de día o playas llenas; las frases sueltas de entrenadores, animales y eventos que solo tienen sentido de día se cambian de noche (`NIGHT_SWAP`, por ejemplo la llamada de candombe sale «esta noche» y el cuero se templa con fuego). Las cuevas son siempre de noche: se ven oscuras y sus criaturas salen con las probabilidades nocturnas, sin importar la hora.
 - **Rutas:** cada ruta conserva una o dos piezas entre compuerta, acertijo, palanca y máquina de niebla; las máquinas de niebla deben bloquear de verdad el camino.
+- **Manifestaciones contra la niebla:** donde una ruta tiene palancas, al costado del camino hay una planta de niebla del PP y una manifestación de vecinos corta el paso (estudiante, productora rural, maestra, camionero, murguista, etc.), cada uno con su cartel («Queremos ver el cielo», «El cielo no se vende»…) y su queja sobre la niebla. La zona queda velada mientras la planta funciona. Un ex operario de la planta, a cada lado, dice qué palanca va primero y cuál al final; al trabar el último cerrojo la planta se apaga y los manifestantes se retiran caminando. La balsa de la Ruta 2 sigue igual. Los peones que cuidan una compuerta de entrenadores ya no son copias: son personas distintas.
 
 ## Pendiente conocido
 

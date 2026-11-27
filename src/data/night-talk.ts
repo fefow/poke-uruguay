@@ -671,12 +671,6 @@ export const NIGHT_TALK: Record<string, string[]> = {
   "Esta posta es de mi familia desde hace tres generaciones.":
     ["Esta posta es de mi familia desde hace tres generaciones. De noche dejamos un farol prendido.",
      "Acá paran los carreros, los viajantes y ahora hasta los entrenadores."],
-  "Esa tranquera la arreglé yo. La traba verde se suelta primero y la roja siempre queda para el final.":
-    ["Esa tranquera la arreglé yo, aunque de noche cuesta ver los colores. La traba verde se suelta primero y la roja siempre queda para el final.",
-     "Si te equivocás, los cerrojos vuelven a su lugar y se empieza de nuevo."],
-  "Esa tranquera la arreglé yo. La traba roja se suelta primero y la azul siempre queda para el final.":
-    ["Esa tranquera la arreglé yo, aunque de noche cuesta ver los colores. La traba roja se suelta primero y la azul siempre queda para el final.",
-     "Si te equivocás, los cerrojos vuelven a su lugar y se empieza de nuevo."],
   "Esa balsa la conozco de memoria. La amarra roja se suelta primero y la verde siempre queda para el final.":
     ["Esa balsa la conozco de memoria, la solté hasta de noche. La amarra roja se suelta primero y la verde siempre queda para el final.",
      "Si te equivocás, las amarras vuelven a tensarse y se empieza de nuevo."],
@@ -710,6 +704,15 @@ export const NIGHT_SWAP: Record<string, string> = {
 };
 
 /** The night dialogue of an outdoor NPC whose day lines are `text` (the same NPC always gets the same pool lines). */
+// The former worker of a PP fog plant (addLeverGate in route-stories.ts): the lever order is kept at night.
+for (const a of ['verde', 'azul', 'roja']) for (const c of ['verde', 'azul', 'roja']) {
+  if (a === c) continue;
+  NIGHT_TALK[`Trabajé en esa planta hasta que la PP me echó. La palanca ${a} se baja primero y la ${c} siempre queda para el final.`] = [
+    `De noche la planta se oye más que de día. La palanca ${a} se baja primero y la ${c} siempre queda para el final.`,
+    'Si te equivocás, los cerrojos se vuelven a abrir y hay que empezar de nuevo. Fijate bien en los colores, que a oscuras se confunden.',
+  ];
+}
+
 export function nightTalk(text: string | string[], x = 0, y = 0): string[] {
   const lines = Array.isArray(text) ? text : [text];
   return NIGHT_TALK[lines[0]] ?? NIGHT_POOL[Math.abs(x * 7 + y * 13) % NIGHT_POOL.length];

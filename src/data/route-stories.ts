@@ -130,6 +130,13 @@ function narrowestCut(m, busy, from = 0.3, to = 0.7, maxCells = 4) {
   return best;
 }
 
+/** People who hold a toll gate together, by the look of the one in charge. */
+const GATE_CREW: Record<string, string[]> = {
+  gaucho: ['gaucho', 'obrero', 'campesina', 'oldman', 'camionero'],
+  sailor: ['sailor', 'pescador', 'obrero', 'camionero'],
+  oldman: ['oldman', 'biologo', 'campesina', 'estudiante'],
+};
+
 /** Who stands on a closed gate: on open water it has to be a swimmer. */
 const blockLook = (m, x, y, look) => (m.tiles[y][x] === '~' ? 'swimmer' : look);
 
@@ -212,7 +219,9 @@ export function addRouteStory(m, id) {
     const lo = trainers.filter((n) => at(n) < edge).map((n) => n.trainer.id);
     const hi = trainers.filter((n) => at(n) > edge).map((n) => n.trainer.id);
     const done = (f) => lo.every((t) => f[`tr_${t}`]) || hi.every((t) => f[`tr_${t}`]);
-    if (lo.length && hi.length) cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: blockLook(m, x, y, look), dir: 'down', blocker: true, fixed: true, name: who, text: [text, 'Todavía quedan entrenadores en el camino.'], cond: (f) => !done(f) }); busy.add(`${x},${y}`); });
+    // the helpers across the road are different people, not copies of the one who talks
+    const crew = GATE_CREW[look] ?? [look, 'obrero', 'campesina', 'boy'];
+    if (lo.length && hi.length) cut.forEach(([x, y], i) => { m.npcs.push({ x, y, look: blockLook(m, x, y, crew[i % crew.length]), dir: 'down', blocker: true, fixed: true, name: who, text: [text, 'Todavía quedan entrenadores en el camino.'], cond: (f) => !done(f) }); busy.add(`${x},${y}`); });
   }
 
   // lost item: points to the clearing with the hidden item
@@ -347,13 +356,51 @@ export function addParaje(m, id) {
 const LEVERS = [['Palanca verde', 'verde'], ['Palanca azul', 'azul'], ['Palanca roja', 'roja']];
 const ORDERS = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
 
-/** A gate held by three levers on each side of it: they must be pulled in the right order, learned from a farmhand. */
+/**
+ * Neighbours protesting against the PP fog: they stand across the road until the PP fog plant beside it is shut. Each
+ * one has a different look, a placard (`sign` picks its design) and their own words; the slogan is read on talking.
+ * [name, look, slogan, remark]
+ */
+const PROTESTERS: [string, string, string, string][] = [
+  ['Estudiante', 'estudiante', 'Queremos ver el cielo', 'Hace un mes que no veo una estrella. La niebla de la PP tapa todo, de día y de noche.'],
+  ['Productora rural', 'campesina', 'Sin cielo no hay cosecha', 'Con esta niebla los tomates no maduran y las abejas no salen de la colmena.'],
+  ['Trabajador', 'obrero', 'Ni humo ni niebla', 'Vengo del turno de noche y no veo ni el camino a mi casa.'],
+  ['Vecina jubilada', 'abuela', 'La niebla enferma', 'Mi nieto tose desde que prendieron esa máquina. El médico dice que es el aire.'],
+  ['Maestra rural', 'maestra', 'Aire limpio para la escuela', 'Suspendimos el recreo tres veces esta semana. Los chicos no se ven de una punta a la otra del patio.'],
+  ['Camionero', 'camionero', 'Devuelvan el horizonte', 'Tuve que frenar a ciegas en la curva. Así no se puede trabajar en la ruta.'],
+  ['Pescador', 'pescador', 'El río no es un depósito', 'La niebla baja al arroyo y los peces se van. Hace días que vuelvo con el balde vacío.'],
+  ['Artesana', 'artesana', 'El cielo no se vende', 'La PP dice que la niebla es un servicio. Nadie de acá la pidió.'],
+  ['Almacenero', 'almacenero', 'Fuera la niebla', 'Cerré el almacén para venir. Si nadie dice nada, la máquina sigue prendida.'],
+  ['Murguista', 'murguero', 'Que vuelva el aire', 'Escribimos una retirada entera sobre la niebla. Hasta que no la apaguen, la cantamos acá.'],
+  ['Vecino', 'oldman', 'Campo vivo, cielo abierto', 'Setenta años en este pago y nunca vi una niebla así en pleno verano. Esto no es del tiempo.'],
+  ['Vecina', 'girl', 'No a la planta de niebla', 'La pusieron sin preguntarle a nadie, al costado del camino.'],
+];
+const PROTEST_SITUATION = [
+  'No nos movemos de acá hasta que esa planta de niebla quede cerrada.',
+  'La planta tiene palancas a los dos lados del camino. Ninguno de nosotros sabe cómo se traba.',
+  'Esto es una manifestación pacífica. Pero el camino lo cortamos hasta que la niebla pare.',
+];
+const PLANT_WORDS = {
+  done: 'La planta de niebla ya está cerrada con sus tres cerrojos.',
+  release: 'Soltaste la palanca. Los cerrojos de la planta vuelven a abrirse.',
+  last: ['Se oye el último cerrojo. La planta deja de largar niebla.', 'A lo lejos se oyen aplausos: la manifestación se desarma y el camino queda libre.'],
+  click: ['Un cerrojo trabó la salida de niebla.', 'Otro cerrojo se cerró.'],
+  reset: 'Algo hizo un ruido seco. Los cerrojos de la planta volvieron a abrirse.',
+};
+
+/**
+ * A PP fog plant beside the road, held by three levers on each side of it: they must be pulled in the right order,
+ * learned from a former worker of the plant. Until then a protest of neighbours against the fog blocks the road; when
+ * the plant is shut they walk away.
+ */
 const BALSA = {
   names: [['Cabrestante verde', 'verde'], ['Cabrestante azul', 'azul'], ['Cabrestante rojo', 'roja']],
   block: ['Balsa', 'sailor', ['La balsa está trabada con tres amarras.', 'Cada orilla tiene un cabrestante por amarra: soltarlas en el orden justo la deja libre.']],
   hand: ['Balsero', 'sailor', (a, c) => [`Esa balsa la conozco de memoria. La amarra ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, las amarras vuelven a tensarse y se empieza de nuevo.']] as [string, string, (a: string, c: string) => string[]],
   words: { done: 'La balsa ya está suelta.', release: 'Soltaste el cabrestante. Las amarras vuelven a tensarse.', last: 'Se oye soltarse la última amarra. La balsa queda libre y atraviesa sola el paso.', click: ['La amarra aflojó.', 'Otra amarra cedió.'], reset: 'Algo crujió. Las amarras volvieron a tensarse.' },
 };
+/** What the former worker of the fog plant says (also used for the night version of the line). */
+export const plantHint = (a: string, c: string) => [`Trabajé en esa planta hasta que la PP me echó. La palanca ${a} se baja primero y la ${c} siempre queda para el final.`, 'Si te equivocás, los cerrojos se vuelven a abrir y hay que empezar de nuevo.'];
 export function addLeverGate(m, id, busy) {
   const w = m.tiles[0].length, h = m.tiles.length;
   if (Math.max(w, h) < 60) return;
@@ -382,11 +429,24 @@ export function addLeverGate(m, id, busy) {
   const balsa = id === 'r_villasoriano_fraybentos';
   const LV = balsa ? BALSA.names : LEVERS;
   const a = LEVERS[order[0]][1], c = LEVERS[order[2]][1];
-  cut.forEach(([x, y]) => { m.npcs.push({ x, y, look: balsa ? 'sailor' : blockLook(m, x, y, 'gaucho'), dir: 'down', blocker: true, fixed: true, name: balsa ? BALSA.block[0] : 'Tranquera', text: balsa ? BALSA.block[2] : ['La tranquera está trabada con tres cerrojos.', 'Cada lado del camino tiene palancas que los mueven.'], cond: (f) => !f[done] }); taken.add(`${x},${y}`); });
+  const crowd: string[] = [];
+  const pseed = [...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 11);
+  cut.forEach(([x, y], i) => {
+    if (balsa) m.npcs.push({ x, y, look: 'sailor', dir: 'down', blocker: true, fixed: true, name: BALSA.block[0], text: BALSA.block[2], cond: (f) => !f[done] });
+    else {
+      // a protest: everyone different, each with a placard and their own words
+      const [name, look, slogan, remark] = PROTESTERS[(pseed + i * 5) % PROTESTERS.length];
+      const pid = `${done}_m${i}`;
+      crowd.push(pid);
+      m.npcs.push({ id: pid, x, y, look: blockLook(m, x, y, look), dir: 'down', blocker: true, fixed: true, protest: true, sign: (pseed + i * 3) % 5, name,
+        text: [`El cartel dice: «${slogan}».`, remark, PROTEST_SITUATION[(pseed + i) % PROTEST_SITUATION.length]], cond: (f) => !f[done] });
+    }
+    taken.add(`${x},${y}`);
+  });
   sides.forEach((list) => {
-    LV.forEach(([name], k) => { const [x, y] = list[k]; m.npcs.push({ x, y, look: 'machine', dir: 'down', name, script: 'route_palanca', routeId: id, lever: k, order, doneFlag: done, ...(balsa ? { words: BALSA.words } : {}) }); taken.add(`${x},${y}`); });
+    LV.forEach(([name], k) => { const [x, y] = list[k]; m.npcs.push({ x, y, look: 'machine', dir: 'down', name, script: 'route_palanca', routeId: id, lever: k, order, doneFlag: done, words: balsa ? BALSA.words : PLANT_WORDS, crowd }); taken.add(`${x},${y}`); });
     const [x, y] = list[3];
     if (balsa) m.npcs.push({ x, y, look: 'sailor', dir: 'down', name: BALSA.hand[0], text: BALSA.hand[2](a, c) });
-    else m.npcs.push({ x, y, look: 'gaucho', dir: 'down', name: 'Peón', text: [`Esa tranquera la arreglé yo. La traba ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, los cerrojos vuelven a su lugar y se empieza de nuevo.'] });
+    else m.npcs.push({ x, y, look: 'obrero', dir: 'down', name: 'Ex operario', text: plantHint(a, c) });
   });
 }
