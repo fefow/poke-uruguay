@@ -715,6 +715,7 @@ function sees(n) {
     n.dir = ax === 1 ? 'right' : ax === -1 ? 'left' : ay === 1 ? 'down' : 'up';
     return true;
   }
+  if (!W_.map.indoor) return seesAround(n);
   const [dx, dy] = DIRS[n.face ?? n.dir]; // patrolling trainers watch the trail even while stepping sideways
   for (let i = 1; i <= n.def.sight; i++) {
     const x = n.x + dx * i;
@@ -725,18 +726,94 @@ function sees(n) {
   return false;
 }
 
+/** True when nothing on (x, y) stops a trainer's eyes: trees, walls, rocks and people do; open water does not. */
+function seeThrough(x: number, y: number, n) {
+  if (tileAt(x, y) === '~') return collAt(W_.map, x, y) !== true && !W_.npcs.some((o) => o !== n && o.visible && o.x === x && o.y === y);
+  return !solidAt(x, y, { ignorePlayer: true, self: n });
+}
+
+/** Clear straight view from the trainer to (tx, ty): every tile the line crosses (both, where it passes a corner) is open. */
+function clearView(n, tx: number, ty: number) {
+  const ax = Math.abs(tx - n.x), ay = Math.abs(ty - n.y), sx = Math.sign(tx - n.x), sy = Math.sign(ty - n.y);
+  let x = n.x, y = n.y, ix = 0, iy = 0;
+  while (ix < ax || iy < ay) {
+    const d = (1 + 2 * ix) * ay - (1 + 2 * iy) * ax; // which edge the line crosses next (0: exactly through a corner)
+    if (d === 0) {
+      if (!(x + sx === tx && y === ty) && !seeThrough(x + sx, y, n)) return false;
+      if (!(x === tx && y + sy === ty) && !seeThrough(x, y + sy, n)) return false;
+      x += sx; y += sy; ix++; iy++;
+    } else if (d < 0) { x += sx; ix++; } else { y += sy; iy++; }
+    if (x === tx && y === ty) return true;
+    if (!seeThrough(x, y, n)) return false;
+  }
+  return true;
+}
+
+/**
+ * Outdoors a trainer sees all around: the player is spotted anywhere within `sight` steps (counted as walking steps,
+ * so the same reach the old straight line had, now in every direction) with a clear view and a way to walk up.
+ * The way is kept on the NPC for trainerSpotted.
+ */
+function seesAround(n) {
+  const p = W_.player, r = n.def.sight;
+  const d = Math.abs(p.x - n.x) + Math.abs(p.y - n.y);
+  if (d < 1 || d > r || !clearView(n, p.x, p.y)) return false;
+  // walkers keep to dry ground when they can; swimmers, and anyone with only water between, cross it
+  const path = (tileAt(n.x, n.y) !== '~' && approachPath(n, p.x, p.y, r + 2, false)) || approachPath(n, p.x, p.y, r + 2, true);
+  if (!path) return false;
+  n.spotPath = path;
+  return true;
+}
+
+/** Shortest walk (at most `max` steps) for a trainer to a tile next to (tx, ty); with `water`, open water counts as a way. */
+function approachPath(n, tx: number, ty: number, max: number, water: boolean): [number, number][] | null {
+  const start = `${n.x},${n.y}`;
+  const near = (x: number, y: number) => Math.abs(x - tx) + Math.abs(y - ty) === 1;
+  if (near(n.x, n.y)) return [];
+  const prev = new Map<string, string | null>([[start, null]]);
+  let layer: [number, number][] = [[n.x, n.y]];
+  for (let step = 0; step < max && layer.length; step++) {
+    const next: [number, number][] = [];
+    for (const [cx, cy] of layer) for (const [dx, dy] of Object.values(DIRS) as number[][]) {
+      const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+      if (prev.has(k) || (nx === tx && ny === ty) || !seeThrough(nx, ny, n) || (!water && tileAt(nx, ny) === '~') || W_.map.doorWarps?.[k] || tileAt(nx, ny) === 'm') continue;
+      prev.set(k, `${cx},${cy}`);
+      if (near(nx, ny)) {
+        const path: [number, number][] = [];
+        for (let c: string | null = k; c && c !== start; c = prev.get(c) ?? null) path.unshift(c.split(',').map(Number) as [number, number]);
+        return path;
+      }
+      next.push([nx, ny]);
+    }
+    layer = next;
+  }
+  return null;
+}
+
 async function trainerSpotted(n) {
   sfx('encounter');
   playMusic('spotted', { resume: musicFor(W_.map.id, W_.map) });
+  if (n.spotPath) faceTile(n, W_.player.x, W_.player.y); // turns to the player before the "!"
   W_.emote = { npc: n, until: performance.now() + 700 };
   await wait(700);
   W_.emote = null;
-  // walk up to the player
-  if (n.face) n.dir = n.face;
-  const [dx, dy] = DIRS[n.dir];
   const p = W_.player;
-  while (Math.abs(p.x - n.x) + Math.abs(p.y - n.y) > 1) {
-    await npcStep(n, dx, dy);
+  if (n.spotPath) {
+    // seen from all around (outdoors): turn to the player, then walk the way found around rocks and trees
+    const path = n.spotPath;
+    n.spotPath = null;
+    for (const [nx, ny] of path) {
+      n.dir = ny < n.y ? 'up' : ny > n.y ? 'down' : nx < n.x ? 'left' : 'right';
+      await npcStep(n, nx - n.x, ny - n.y);
+    }
+    faceTile(n, p.x, p.y);
+  } else {
+    // walk up to the player
+    if (n.face) n.dir = n.face;
+    const [dx, dy] = DIRS[n.dir];
+    while (Math.abs(p.x - n.x) + Math.abs(p.y - n.y) > 1) {
+      await npcStep(n, dx, dy);
+    }
   }
   p.dir = opposite(n.dir);
   await trainerTalk(n);

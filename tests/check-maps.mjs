@@ -105,10 +105,39 @@ for (const [id, m] of Object.entries(OUTDOOR)) {
       if (!walk(d.x, d.y)) continue;
       if (groups(new Set([`${d.x},${d.y}`])) > base) { bad(`${id} ${d.trainer ? `trainer ${d.trainer.id}` : `npc ${d.id ?? d.look}`} at ${d.x},${d.y} blocks the only way through`); continue; }
       if (!d.trainer || !d.sight || d.wander || d.patrol || d.adjacent) continue;
-      const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[d.face ?? d.dir ?? 'down'];
-      for (let i = 1; i < d.sight; i++) {
-        const ex = d.x + dx * i; const ey = d.y + dy * i; const px = ex + dx; const py = ey + dy;
-        if (!walk(ex, ey) || !walk(px, py)) break;
+      // Where the trainer may end up next to the player: indoors along its straight line, outdoors anywhere within its
+      // sight (it sees all around, counted in walking steps) with the player one step farther away.
+      const stops = [];
+      if (m.indoor) {
+        const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[d.face ?? d.dir ?? 'down'];
+        for (let i = 1; i < d.sight; i++) {
+          const ex = d.x + dx * i; const ey = d.y + dy * i;
+          if (!walk(ex, ey) || !walk(ex + dx, ey + dy)) break;
+          stops.push([ex, ey, ex + dx, ey + dy]);
+        }
+      } else {
+        for (let ey = d.y - d.sight + 1; ey <= d.y + d.sight - 1; ey++) for (let ex = d.x - d.sight + 1; ex <= d.x + d.sight - 1; ex++) {
+          const r = Math.abs(ex - d.x) + Math.abs(ey - d.y);
+          if (r < 1 || r > d.sight - 1 || !walk(ex, ey) || m.tiles[ey][ex] === '~') continue;
+          // a tile whose open neighbours stay joined around it can never cut anyone off
+          const ring = [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]].map(([ax, ay]) => walk(ex + ax, ey + ay));
+          // runs of open tiles going round the ring; only runs holding a side neighbour matter
+          let groupsAround = 0;
+          if (ring.every(Boolean)) groupsAround = 1;
+          else for (let i = 0; i < 8; i++) {
+            if (!ring[i] || ring[(i + 7) % 8]) continue; // start of a run
+            let side = false;
+            for (let j = i; ring[j % 8] && j < i + 8; j++) if (j % 2 === 1) side = true;
+            if (side) groupsAround++;
+          }
+          if (groupsAround <= 1) continue;
+          for (const [ax, ay] of D4) {
+            const px = ex + ax; const py = ey + ay;
+            if (Math.abs(px - d.x) + Math.abs(py - d.y) === r + 1 && walk(px, py)) { stops.push([ex, ey, px, py]); break; }
+          }
+        }
+      }
+      for (const [ex, ey, px, py] of stops) {
         const all = flood(px, py, new Set()).size;
         const cuts = (x, y) => flood(px, py, new Set([`${x},${y}`])).size < all - 1;
         if (!cuts(ex, ey)) continue;
