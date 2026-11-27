@@ -8,7 +8,8 @@ import { encounterList, waterTable, tileBiome } from '../data/encounters.ts';
 import { badgeOf, STOPS } from '../data/route.ts';
 import { TYPES } from '../data/types.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
-import { T, TILE_INFO, tileCanvas, topCanvas, collAt, groundUnder, groundFor, drawBuildingTrim, drawElevation, themeOf } from '../gfx/tiles.ts';
+import { T, TILE_INFO, tileCanvas, topCanvas, collAt, groundUnder, groundFor, drawBuildingTrim, drawElevation, themeOf, tollBoardCanvas, TOLL_BOARD_H } from '../gfx/tiles.ts';
+import { TOLL_ROOF, tollZone } from '../data/toll-chars.ts';
 import { cellCanvas } from '../gfx/edges.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { creatureSprite, creatureIcon } from '../gfx/creatures.ts';
@@ -940,6 +941,7 @@ function interact() {
   if (it) return void runScript(() => pickItem(it));
   if (W_.legend && W_.legend.x === tx && W_.legend.y === ty) return void runScript(() => legendEncounter(W_.legend));
   const key = `${p.x + dx},${p.y + dy}`;
+  if (W_.map.toll?.signs?.[key]) return void runScript(() => say(W_.map.toll.signs[key]));
   if (tileAt(p.x + dx, p.y + dy) === 'S' && W_.map.signText?.[key]) {
     return void runScript(() => say(W_.map.signText[key].split('\n').join(' — ')));
   }
@@ -1960,13 +1962,22 @@ function drawWorld(g, t) {
     }
   }
   // The "encima" layer: treetops, roofs and arches drawn over people, as the top layer of a classic map.
+  const underToll = !!m.toll && tollZone(m.toll, p.x, p.y);
   if (m.top) {
     for (let y = y0; y <= y1; y++) {
       const row = m.top[y];
       if (!row) continue;
-      for (let x = x0; x <= x1; x++) { const ch = row[x]; if (ch && ch !== ' ' && TILE_INFO[ch]) g.drawImage(topCanvas(ch, frame, m.theme), x * T - cx, y * T - cy); }
+      for (let x = x0; x <= x1; x++) {
+        const ch = row[x];
+        if (!ch || ch === ' ' || !TILE_INFO[ch]) continue;
+        // a toll's roof goes see-through while the player walks under it (its lights still show)
+        if (underToll && TOLL_ROOF.has(ch)) { g.globalAlpha = 0.42; g.drawImage(topCanvas(ch, frame, m.theme), x * T - cx, y * T - cy); g.globalAlpha = 1; continue; }
+        g.drawImage(topCanvas(ch, frame, m.theme), x * T - cx, y * T - cy);
+      }
     }
   }
+  // the blue board with the toll's name, up on its legs
+  if (m.toll?.board) g.drawImage(tollBoardCanvas(m.toll.name), m.toll.board.x * T - cx, m.toll.board.y * T + 4 - TOLL_BOARD_H - cy);
   if (W_.fishing) drawFishing(g, cx, cy, t);
   if (W_.emote) {
     const pos = entityPos(W_.emote.npc);
