@@ -717,6 +717,74 @@ function build(v: WorldView) {
     }
   }
   LIFT = 0;
+  // Fin del mapa: el terreno se corta en un barranco de tierra que baja al vacío, así se ve dónde termina.
+  // Por las salidas (m.exits) el suelo sigue hacia afuera como una franja, con flechas en el borde.
+  exitMarks = [];
+  const openings: { side: string; a: number; b: number }[] = [];
+  if (!m.indoor) {
+    const walk = (x: number, y: number) => { const c = ch(x, y); return c != null && !!TILE_INFO[c] && !TILE_INFO[c].solid && kindOf(c) !== 'water'; };
+    const quad = (A: number[], B: number[], C: number[], D: number[]) => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute([...A, ...C, ...B, ...B, ...C, ...D], 3));
+      return g;
+    };
+    const earth = new THREE.Color(0x6e4c30), earthDeep = new THREE.Color(0x4a3220);
+    // un lado del borde: de la altura del suelo hasta abajo, con una franja de pasto arriba y tierra abajo
+    const skirt = (x0: number, z0: number, x1: number, z1: number, h0: number, h1: number, top: THREE.Color, seed: number) => {
+      const lip = 0.22;
+      parts.push(paint(quad([x0, h0, z0], [x1, h1, z1], [x0, h0 - lip, z0], [x1, h1 - lip, z1]), top.clone().multiplyScalar(0.72), 0.04, seed));
+      parts.push(paint(quad([x0, h0 - lip, z0], [x1, h1 - lip, z1], [x0, -EDGE_DROP * 0.5, z0], [x1, -EDGE_DROP * 0.5, z1]), earth, 0.08, seed + 1));
+      parts.push(paint(quad([x0, -EDGE_DROP * 0.5, z0], [x1, -EDGE_DROP * 0.5, z1], [x0, -EDGE_DROP, z0], [x1, -EDGE_DROP, z1]), earthDeep, 0.08, seed + 2));
+    };
+    for (let x = 0; x < W; x++) {
+      skirt(x + 1, 0, x, 0, gh(x + 1, 0), gh(x, 0), groundColor(x, 0), x); // norte (mira hacia -z)
+      skirt(x, H, x + 1, H, gh(x, H), gh(x + 1, H), groundColor(x, H - 1), x + 500); // sur
+    }
+    for (let y = 0; y < H; y++) {
+      skirt(0, y, 0, y + 1, gh(0, y), gh(0, y + 1), groundColor(0, y), y + 1000); // oeste
+      skirt(W, y + 1, W, y, gh(W, y + 1), gh(W, y), groundColor(W - 1, y), y + 1500); // este
+    }
+    // aberturas: tramos seguidos de casillas transitables en un lado que tiene salida
+    for (const side of ['n', 's', 'w', 'e']) {
+      if (!m.exits?.[side]) continue;
+      const len = side === 'n' || side === 's' ? W : H;
+      const cell = (i: number): [number, number] => (side === 'n' ? [i, 0] : side === 's' ? [i, H - 1] : side === 'w' ? [0, i] : [W - 1, i]);
+      for (let i = 0; i < len; i++) {
+        if (!walk(...cell(i))) continue;
+        let j = i;
+        while (j + 1 < len && walk(...cell(j + 1))) j++;
+        openings.push({ side, a: i, b: j });
+        i = j;
+      }
+    }
+    // el camino sigue: una franja de suelo que sale por la abertura y se pierde a lo lejos
+    const OUT = 14;
+    for (const o of openings) {
+      const [cx, cy] = (o.side === 'n' ? [o.a, 0] : o.side === 's' ? [o.a, H - 1] : o.side === 'w' ? [0, o.a] : [W - 1, o.a]);
+      const col = groundColor(cx, cy);
+      const vtx = (i: number) => (o.side === 'n' ? [i, 0] : o.side === 's' ? [i, H] : o.side === 'w' ? [0, i] : [W, i]);
+      for (let i = o.a; i <= o.b; i++) {
+        const [ax, az] = vtx(i), [bx, bz] = vtx(i + 1);
+        const ha = gh(ax, az), hb = gh(bx, bz);
+        const [ox, oz] = o.side === 'n' ? [0, -OUT] : o.side === 's' ? [0, OUT] : o.side === 'w' ? [-OUT, 0] : [OUT, 0];
+        // la franja baja apenas hacia el horizonte
+        const ta = [ax, ha, az], tb = [bx, hb, bz], fa = [ax + ox, Math.min(ha, 0) - 0.05, az + oz], fb = [bx + ox, Math.min(hb, 0) - 0.05, bz + oz];
+        const flip = o.side === 's' || o.side === 'w';
+        const c = col.clone().multiplyScalar(0.92);
+        parts.push(paint(flip ? quad(ta, tb, fa, fb) : quad(tb, ta, fb, fa), c, 0.05, i * 7 + 3));
+      }
+      // costados de la franja
+      const [s0x, s0z] = vtx(o.a), [s1x, s1z] = vtx(o.b + 1);
+      const [ox, oz] = o.side === 'n' ? [0, -OUT] : o.side === 's' ? [0, OUT] : o.side === 'w' ? [-OUT, 0] : [OUT, 0];
+      const h0 = gh(s0x, s0z), h1 = gh(s1x, s1z);
+      const side = (px: number, pz: number, h: number, inv: boolean) => {
+        const A = [px, h, pz], B = [px + ox, Math.min(h, 0) - 0.05, pz + oz], C = [px, -EDGE_DROP, pz], D = [px + ox, -EDGE_DROP, pz + oz];
+        parts.push(paint(inv ? quad(B, A, D, C) : quad(A, B, C, D), earth, 0.08, px * 3 + pz));
+      };
+      const n = o.side === 'n' || o.side === 'e';
+      side(s0x, s0z, h0, !n); side(s1x, s1z, h1, n);
+    }
+  }
   staticGroup = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
   if (parts.length) {
@@ -752,13 +820,27 @@ function build(v: WorldView) {
     wm.receiveShadow = true;
     staticGroup.add(wm);
   }
-  // Más allá del borde del mapa: el mismo suelo, más oscuro, que se pierde en la bruma.
+  // Más allá del borde del mapa: el fondo del barranco, oscuro, que se pierde en la bruma.
   if (!m.indoor) {
-    const edge = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: groundColor(0, 0).clone().multiplyScalar(0.55), roughness: 1 }));
+    const edge = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: new THREE.Color(0x1c2636).lerp(groundColor(0, 0).clone().multiplyScalar(0.3), 0.3), roughness: 1 }));
     edge.rotation.x = -Math.PI / 2;
-    edge.position.set(W / 2, -0.4, H / 2);
+    edge.position.set(W / 2, -EDGE_DROP, H / 2);
     edge.receiveShadow = true;
     staticGroup.add(edge);
+    // flechas en el suelo de cada salida, apuntando hacia afuera (se animan en drawWorld3D)
+    const rot = { n: 0, s: Math.PI, e: -Math.PI / 2, w: Math.PI / 2 } as Record<string, number>;
+    const dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] } as Record<string, number[]>;
+    for (const o of openings) {
+      const mid = (o.a + o.b + 1) / 2, wide = Math.min(1.6, (o.b - o.a + 1) * 0.55);
+      const [x, z] = o.side === 'n' ? [mid, 0.55] : o.side === 's' ? [mid, H - 0.55] : o.side === 'w' ? [0.55, mid] : [W - 0.55, mid];
+      for (let k = 0; k < 2; k++) {
+        const g = chevronGeo.clone().scale(wide, 1, wide).rotateY(rot[o.side]);
+        const mk = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
+        mk.renderOrder = 2;
+        staticGroup.add(mk);
+        exitMarks.push({ mesh: mk, x, z, dx: dir[o.side][0], dz: dir[o.side][1], phase: k / 2 });
+      }
+    }
   }
   if (bldMesh) staticGroup.add(bldMesh);
   // objetos en pixel art: un cartel por tile, agrupados por tipo de tile (una sola llamada de dibujo cada uno)
@@ -790,6 +872,15 @@ function build(v: WorldView) {
 }
 // ---------------------------------------------------------------- edificios con su pixel art
 let bldMesh: THREE.Mesh | null = null;
+// ---------------------------------------------------------------- borde del mapa y salidas
+const EDGE_DROP = 2.4; // cuánto baja el barranco del borde del mapa
+// flecha «›» acostada en el suelo, apuntando hacia -z (norte)
+const chevronGeo = (() => {
+  const sh = new THREE.Shape();
+  sh.moveTo(-0.45, -0.15); sh.lineTo(0, 0.25); sh.lineTo(0.45, -0.15); sh.lineTo(0.45, -0.35); sh.lineTo(0, 0.05); sh.lineTo(-0.45, -0.35); sh.closePath();
+  return new THREE.ShapeGeometry(sh).rotateX(-Math.PI / 2);
+})();
+let exitMarks: { mesh: THREE.Mesh; x: number; z: number; dx: number; dz: number; phase: number }[] = [];
 const staticTex: THREE.Mesh[] = [];
 const isBld = (tiles, W: number, H: number, x: number, y: number): boolean => {
   if (x < 0 || y < 0 || x >= W || y >= H) return false;
@@ -1107,6 +1198,14 @@ export function drawWorld3D(v: WorldView, t: number) {
     camReady = false;
   }
   waterTime.value = t / 1000;
+  // flechas de salida: avanzan hacia afuera y se apagan, dos por salida, una detrás de la otra
+  for (const e of exitMarks) {
+    const k = (t / 1400 + e.phase) % 1;
+    const d = k * 0.9 - 0.35;
+    const px = e.x + e.dx * d, pz = e.z + e.dz * d;
+    e.mesh.position.set(px, liftAt(px, pz) + 0.03, pz);
+    (e.mesh.material as THREE.MeshBasicMaterial).opacity = Math.sin(k * Math.PI) * 0.75;
+  }
   const seen = new Set<any>();
   const onWaterAt = (x: number, z: number) => { const c = v.tileAt(Math.floor(x), Math.floor(z)); return c != null && kindOf(c) === 'water'; };
   // Un personaje se para en el centro de su casillero, un poco hacia adelante (como sus pies en el sprite 2D).
