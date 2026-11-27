@@ -1340,7 +1340,10 @@ export const SCRIPTS = {
       if (n === 2) {
         api.setFlag(npc.doneFlag);
         for (let k = 0; k < 3; k++) api.setFlag(key(k), false);
-        return api.say(W?.last ?? 'Se oye el último cerrojo. La tranquera se abre sola.', { name: npc.name });
+        await api.say(W?.last ?? 'Se oye el último cerrojo. La tranquera se abre sola.', { name: npc.name });
+        // the protest against the plant breaks up: everyone walks off, one after another (never vanishing on the spot)
+        await Promise.all((npc.crowd ?? []).map((pid, i) => api.wait(i * 220).then(() => api.npcWalkOff(pid, 10))));
+        return;
       }
       return api.say(W ? `${npc.name}: ${W.click[n === 0 ? 0 : 1]}` : `${npc.name}: algo hizo clic. ${n === 0 ? 'Un cerrojo se soltó.' : 'Otro cerrojo cedió.'}`);
     }

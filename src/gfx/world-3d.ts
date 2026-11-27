@@ -9,7 +9,7 @@ import { T, TILE_INFO, THEMES, tileCanvas, topCanvas, tileWithoutGround, groundF
 import { TOLL_FLOOR, TOLL_ROOF, TOLL_H, TOLL_V, TOLL_BOARD, tollZone } from '../data/toll-chars.ts';
 import { PROPS_3D, type PropCtx } from './props-3d.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
-import { charSprite } from './characters.ts';
+import { charSprite, protestSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
 import { canoeCanvas } from './ui-icons.ts';
 import { creatureSprite } from './creatures.ts';
@@ -1403,8 +1403,11 @@ export function drawWorld3D(v: WorldView, t: number) {
     }
     let lk = look ?? 'boy';
     if (lk === 'swimmer' && v.tileAt(n.x, n.y) !== '~') lk = 'turista';
-    const b = boardFor(n, lk, () => board(charSprite(lk, 'down', 0), 1, TILT_CHAR, 0.34));
-    setBoardCanvas(b, charSprite(lk, n.dir, poseOf(n, false, false)));
+    // manifestante con cartel: un sprite más alto (el cartel va sobre la cabeza)
+    const sign = n.def.sign != null && lk !== 'swimmer' ? n.def.sign : null;
+    const sprite = (dir: string, f: number) => (sign != null ? protestSprite(lk, dir, f, sign) : charSprite(lk, dir, f));
+    const b = boardFor(n, sign != null ? lk + ':sign' : lk, () => board(sprite('down', 0), 1, TILT_CHAR, 0.34));
+    setBoardCanvas(b, sprite(n.dir, poseOf(n, false, false)));
     stand(b, v.entityPos(n));
   }
   v.items.forEach((it) => {
