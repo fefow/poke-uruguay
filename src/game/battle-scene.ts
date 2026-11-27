@@ -8,7 +8,7 @@ import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charSprite } from '../gfx/characters.ts';
 import { drawPortrait, preloadPortrait } from '../gfx/trainer-portraits.ts';
 import { uiIconCanvas } from '../gfx/ui-icons.ts';
-import { setRenderer, getRenderer, W, H, dayTint } from '../gfx/screen.ts';
+import { setRenderer, getRenderer, W, H, dayTint, skyHour } from '../gfx/screen.ts';
 import { is3D } from '../gfx/world-3d.ts';
 import { drawBattle3D } from '../gfx/battle-3d.ts';
 import { vignette, rain, weatherAt } from '../gfx/fx.ts';
@@ -141,10 +141,27 @@ function drawBattle(g, t) {
   if (A.tint) { g.fillStyle = A.tint; g.fillRect(0, 0, W, H); }
 }
 
-function drawBattleBackdrop(g, t, s1, s2, g1, g2) {
+function drawBattleBackdrop(g, t, bs1, bs2, g1, g2) {
+  const hr = skyHour();
+  const open = !NO_TINT.has(A.bg) && A.bg !== 'forest'; // caves, indoors and the forest canopy hide the sky
+  const night = open && (hr >= 20 || hr < 5.5);
+  const dusk = open && hr >= 18 && hr < 20;
+  const dawn = open && hr >= 5.5 && hr < 7.5;
+  const [s1, s2] = night ? ['#0a1030', '#26346a'] : dusk ? ['#5a5a9a', '#f0905a'] : dawn ? ['#8a96c8', '#f4b890'] : [bs1, bs2];
   let grd = g.createLinearGradient(0, 0, 0, 120);
   grd.addColorStop(0, s1); grd.addColorStop(1, s2);
   g.fillStyle = grd; g.fillRect(0, 0, W, 120);
+  if (night) {
+    g.fillStyle = '#fff';
+    for (let i = 0; i < 40; i++) {
+      const x = (i * 97) % W, y = (i * 53) % 80;
+      g.globalAlpha = 0.5 + 0.5 * Math.sin(t / 600 + i);
+      g.fillRect(x, y, 1, 1);
+    }
+    g.globalAlpha = 1;
+    g.fillStyle = '#f4f0d0'; g.beginPath(); g.arc(W - 70, 28, 9, 0, 7); g.fill();
+    g.fillStyle = s1; g.beginPath(); g.arc(W - 65, 25, 8, 0, 7); g.fill();
+  }
   if (A.bg === 'beach') { g.fillStyle = '#3a8fd8'; g.fillRect(0, 96, W, 30); g.fillStyle = '#7ab8f0'; for (let x = (t / 40) % 24; x < W; x += 24) g.fillRect(x, 104, 10, 1); }
   if (A.bg === 'city') { g.fillStyle = '#8a96aa'; for (const [x, w, hh] of [[0, 30, 50], [34, 22, 70], [60, 40, 40], [210, 24, 80], [238, 40, 55], [282, 38, 66]]) g.fillRect(x, 120 - hh, w, hh); }
   if (A.bg === 'canyon') { g.fillStyle = '#8a6a4a'; g.beginPath(); g.moveTo(0, 120); g.lineTo(0, 40); g.lineTo(60, 70); g.lineTo(110, 30); g.lineTo(170, 80); g.lineTo(240, 20); g.lineTo(320, 60); g.lineTo(320, 120); g.fill(); }

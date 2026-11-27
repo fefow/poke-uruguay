@@ -104,6 +104,41 @@ function tileAt(x, y) {
   return (W_.tiles ?? m.tiles)[y][x];
 }
 
+const BG_WATER = new Set(['~', 'ӫ', 'Ӥ', 'Ӣ']);
+const BG_SAND = new Set(['s', 'p']);
+const BG_TREE = new Set(['#', 'q']);
+const BG_ROCK = new Set(['R', 'K', 'ϰ', 'ϱ', 'ϳ', 'ϴ']);
+const BG_GRASS = new Set(['.', ',', 'f']);
+/**
+ * Battle backdrop that matches the ground the player stands on: the terrain within a few tiles decides it
+ * (a meadow with a small pond stays a meadow). The map's own `bg` is only the fallback for indoors, caves,
+ * towns and places where no terrain dominates.
+ */
+function battleBg() {
+  const m = W_.map;
+  if (m.indoor || m.theme === 'cueva' || m.bg === 'cave' || m.bg === 'indoor') return m.bg;
+  const R = 5;
+  let n = 0, water = 0, sand = 0, tree = 0, rock = 0, grass = 0;
+  for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+    const ch = tileAt(W_.player.x + dx, W_.player.y + dy);
+    if (ch == null) continue;
+    n++;
+    if (BG_WATER.has(ch)) water++;
+    else if (BG_SAND.has(ch)) sand++;
+    else if (BG_TREE.has(ch)) tree++;
+    else if (BG_ROCK.has(ch)) rock++;
+    else if (BG_GRASS.has(ch)) grass++;
+  }
+  if (!n) return m.bg;
+  const share = (k) => k / n;
+  if (share(water + sand) >= 0.45 && sand > 0) return 'beach';
+  if (share(water) >= 0.3) return 'wetland';
+  if (share(tree) >= 0.35) return 'forest';
+  if (share(rock) >= 0.3) return m.bg === 'canyon' ? 'canyon' : 'sierra';
+  if (share(grass) >= 0.35) return 'field';
+  return m.bg;
+}
+
 /** Gym mechanisms (gates, valves, lamps, clocks): state lives only while inside the gym (see gym-puzzles.ts). */
 function applyGp() {
   const pz = W_.map.puzzle;
@@ -1059,7 +1094,7 @@ async function legendEncounter(L) {
   await say(L.text);
   sfx('encounter');
   const c = createCreature(L.species, L.level);
-  const res = await runBattle({ foes: [c], wild: true, bg: W_.map.bg, music: 'battle' });
+  const res = await runBattle({ foes: [c], wild: true, bg: battleBg(), music: 'battle' });
   if (res === 'caught') setFlag(L.flag);
   else if (res === 'win') await say(`${SPECIES[L.species].name} desapareció… Quizás vuelva más tarde.`);
   if (res === 'lose') await blackout();
@@ -1176,7 +1211,7 @@ async function fish() {
 
 async function wildBattle(sp, lvl) {
   const c = createCreature(sp, lvl);
-  const res = await runBattle({ foes: [c], wild: true, bg: W_.map.bg });
+  const res = await runBattle({ foes: [c], wild: true, bg: battleBg() });
   if (res === 'lose') await blackout();
 }
 
@@ -1448,13 +1483,13 @@ export const api = {
   /** A wild creature met on purpose (a swarm in a story). Losing sends the party to rest as usual. Returns 'win', 'caught', 'run' or 'lose'. */
   async wildBattle(sp, lvl) {
     const c = createCreature(sp, lvl);
-    const res = await runBattle({ foes: [c], wild: true, bg: W_.map.bg, music: 'battle' });
+    const res = await runBattle({ foes: [c], wild: true, bg: battleBg(), music: 'battle' });
     if (res === 'lose') await blackout();
     return res;
   },
   async battle(trainer, { canLose = false, music }: { canLose?: boolean; music?: string } = {}) {
     const foes = trainer.team.map(([sp, lvl]) => createCreature(sp, lvl));
-    const res = await runBattle({ foes, wild: false, trainer, bg: W_.map.bg, canLose, music });
+    const res = await runBattle({ foes, wild: false, trainer, bg: battleBg(), canLose, music });
     if (res === 'lose') {
       if (canLose) { for (const c of state().party) healCreature(c); W_.sendHome = true; }
       else { await blackout(); }
