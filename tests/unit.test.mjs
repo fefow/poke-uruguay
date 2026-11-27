@@ -1218,3 +1218,22 @@ test('elevation: plateau edges are cliffs, steps cross them', async () => {
   assert.equal(collAt(m, 3, 2), true);
   assert.equal(collAt({ ...m, coll: ['     ', '   o ', '     ', '     '] }, 3, 1), false); // the collision layer wins
 });
+
+test('towns: city sets pave the streets, doors and plazas stay reachable', async () => {
+  const { themeOf, CITY_SETS } = await import('../src/gfx/tiles.ts');
+  const { edgeFamily } = await import('../src/gfx/edges.ts');
+  const { townMap } = await import('../src/data/guide.ts');
+  const { MAPS } = await import('../src/data/maps.ts');
+  // every city set's map uses it, only for the tiles the set redraws
+  for (const id of Object.keys(CITY_SETS)) if (MAPS[id]) assert.equal(MAPS[id].set, id, id);
+  assert.equal(themeOf(MAPS.salto, 'c'), `${MAPS.salto.theme ?? ''}+salto`);
+  assert.equal(themeOf(MAPS.salto, '.'), MAPS.salto.theme ?? null);
+  assert.equal(edgeFamily('c'), 'street');
+  // a door set back from the street gets a paved walk; a plaza goes beside a street
+  const m = { tiles: ['###########', '#.........#', '#.HDH.....#', '#.........#', '#.........#', '#.........#', '#.........#', '#.........#', '#.........#', '#.........#', '#cccccccccc', '###########'] };
+  const st = townMap(m, { city: true, plaza: true });
+  assert.equal(st.walks, 1);
+  assert.equal(m.tiles[3][3], 'c');
+  assert.equal(st.plaza, 1);
+  assert.ok(m.tiles.some((r) => r.includes('Γ')));
+});

@@ -8,7 +8,7 @@ import { MAP_OVERRIDES } from '../data/map-overrides.js';
 import { fitsGrown, mapEditsSource, parseMapEditsSource } from '../data/map-edits.ts';
 import { ITEMS, isKeyItem } from '../data/items.ts';
 import { cellCanvas } from '../gfx/edges.ts';
-import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, drawElevation, cliffAt, elevAt, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
+import { tileCanvas, topCanvas, groundFor, drawBuildingTrim, drawElevation, themeOf, cliffAt, elevAt, TILE_INFO, T, registerCustomTile, TILE_BACKGROUNDS } from '../gfx/tiles.ts';
 import { CUSTOM } from '../data/custom-content.js';
 import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { setOverrides } from '../gfx/overrides.ts';
@@ -502,7 +502,7 @@ function draw() {
   g.imageSmoothingEnabled = false;
   g.setTransform(Z, 0, 0, Z, 0, 0);
   const rows = W.tiles.map((r) => r.join(''));
-  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(m.indoor ? tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme)) : cellCanvas(rows, x, y, 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme), S.W.ground), x * T, y * T);
+  for (let y = 0; y < hgt; y++) for (let x = 0; x < wid; x++) g.drawImage(m.indoor ? tileCanvas(rows[y][x], 0, m.theme, groundFor(rows, x, y, S.W.ground, m.theme)) : cellCanvas(rows, x, y, 0, themeOf(MAPS[S.id], rows[y][x]), groundFor(rows, x, y, S.W.ground, m.theme), S.W.ground), x * T, y * T);
   if (!m.indoor) { drawElevation(g, { elev: W.elev }, rows, 0, 0, wid - 1, hgt - 1, 0, 0); drawBuildingTrim(g, rows, 0, 0, wid - 1, hgt - 1, 0, 0, m.theme); }
   for (const it of W.items) {
     if (it.removed) continue;

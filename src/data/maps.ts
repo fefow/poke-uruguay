@@ -818,7 +818,8 @@ import { ROUTE_OUTDOOR, ROUTE_INTERIOR, rewire } from './maps-route.ts';
 import { CHAIN, STOPS, GYM_STOPS, mapBand, STOP_INDEX, stopBand, gymAce, badgeOf, openFlag } from './route.ts';
 import { fitDown, fitSpecies } from './levels.ts';
 import { fitToMap, wildList, teamOf, rng, block } from './map-gen.ts';
-import { guideMap, tidyMap, terraceMap, plateauMap, openMap, grassBlocks, offCliffs } from './guide.ts';
+import { guideMap, tidyMap, terraceMap, plateauMap, openMap, grassBlocks, offCliffs, townMap } from './guide.ts';
+import { CITY_SETS } from '../gfx/tiles.ts';
 import { signRoute, signCity } from './signs.ts';
 import { LEADERS } from './story.ts';
 import { mazeMap } from './maze.ts';
@@ -1554,6 +1555,15 @@ for (const id of TIDY) {
   signRoute(OUTDOOR[id], id, MAPS);
   // height comes last, once signs and hidden items are in place: terraces across the long routes, plateaus off the way
   if (!LOCALITY_IDS.has(id)) { terraceMap(OUTDOOR[id]); plateauMap(OUTDOOR[id], id); }
+}
+// Towns (hand-drawn ones too): doors open onto the streets, cities get a plaza and localities lose stray wall
+// tiles; each city is paved with its own set (CITY_SETS, drawn through drawTheme).
+for (const stop of STOPS) {
+  const m = OUTDOOR[stop.id];
+  if (!m || (stop.kind !== 'city' && stop.kind !== 'loc')) continue;
+  const city = stop.kind === 'city';
+  townMap(m, { city, plaza: city && stop.id !== 'fraybentos' && stop.id !== 'montevideo' });
+  if (CITY_SETS[stop.id]) m.set = stop.id;
 }
 // Cities the editor has not redrawn get a sign beside the gym, the Policlínica and the almacén.
 for (const stop of STOPS) {

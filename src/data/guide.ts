@@ -491,3 +491,113 @@ export function offCliffs(m) {
   }
   return moved;
 }
+
+const STREET = new Set(['c', '=', '_', 'b', 's']);
+/** Cells reachable from the walkable border cells and from every street cell (towns can be walled all round). */
+function reachTown(rows, el) {
+  const seen = reachFrom(rows, el);
+  const h = rows.length, w = rows[0].length;
+  const blocked = (x, y) => solid(rows[y]?.[x]) || cliffIn(rows, el, x, y);
+  const st = [];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (STREET.has(rows[y][x]) && !blocked(x, y) && !seen.has(`${x},${y}`)) { seen.add(`${x},${y}`); st.push([x, y]); }
+  while (st.length) {
+    const [x, y] = st.pop();
+    for (const [dx, dy] of D4) { const nx = x + dx, ny = y + dy, k = `${nx},${ny}`; if (nx >= 0 && ny >= 0 && nx < w && ny < h && !seen.has(k) && !blocked(nx, ny)) { seen.add(k); st.push([nx, ny]); } }
+  }
+  return seen;
+}
+
+/**
+ * Towns laid out the way the GBA games build them: every front door opens onto the street network (a short paved
+ * walk, cobbles in a city and a dirt path in a locality), cities without one get a small plaza (monument, flower
+ * beds, lamps and a bench) beside a street, and in localities lone wall tiles in open ground go while one-tile
+ * dead-end holes in a wall close up. Nothing reachable before becomes unreachable, and people, items, signs,
+ * doors and triggers keep their cells.
+ */
+export function townMap(m, opts: { city?: boolean; plaza?: boolean } = {}) {
+  const h = m.tiles.length, w = m.tiles[0].length;
+  const rows = m.tiles.map((r) => [...r]);
+  const el = heights(m);
+  const pave = opts.city ? 'c' : '=';
+  const objs = [...(m.npcs ?? []), ...(m.items ?? []), ...(m.legend ? [m.legend] : [])];
+  const near = (x, y, r) => objs.some((o) => Math.abs(o.x - x) <= r && Math.abs(o.y - y) <= r)
+    || (m.triggers ?? []).some((t) => x >= t.x - r && x < t.x + (t.w ?? 1) + r && y >= t.y - r && y < t.y + (t.h ?? 1) + r);
+  const special = (x, y) => { const c = rows[y]?.[x]; return c === 'D' || c === 'S' || rows[y - 1]?.[x] === 'D'; };
+  const stats = { walks: 0, plaza: 0, walls: 0, holes: 0 };
+
+  // 1. a paved walk from each front door to the nearest street, over plain grass only
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    if (rows[y][x] !== 'D') continue;
+    const fx = x, fy = y + 1;
+    if (solid(rows[fy]?.[fx]) || [[0, 0], ...D4].some(([dx, dy]) => STREET.has(rows[fy + dy]?.[fx + dx]))) continue;
+    const prev = new Map<string, string | null>([[`${fx},${fy}`, null]]);
+    const q = [[fx, fy, 0]];
+    let end = null;
+    for (let i = 0; i < q.length && !end; i++) {
+      const [cx, cy, d] = q[i];
+      if (d >= 14) continue;
+      for (const [dx, dy] of D4) {
+        const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;
+        if (prev.has(k) || el[ny]?.[nx] !== el[fy][fx]) continue;
+        const c = rows[ny]?.[nx];
+        if (STREET.has(c) && c !== 's') { prev.set(k, `${cx},${cy}`); end = k; break; }
+        if (c !== '.' || special(nx, ny)) continue;
+        prev.set(k, `${cx},${cy}`);
+        q.push([nx, ny, d + 1]);
+      }
+    }
+    if (!end) continue;
+    for (let k = prev.get(end); k; k = prev.get(k)) { const [px, py] = k.split(',').map(Number); if (rows[py][px] === '.') rows[py][px] = pave; }
+    stats.walks++;
+  }
+
+  // 2. a plaza beside a street (5x5, on plain grass with nobody and nothing on it)
+  const before = reachTown(rows, el);
+  if (opts.plaza && !rows.some((r) => r.includes('Γ'))) {
+    const P = ['ΣcccΣ', 'cΩcΩc', 'ccΓcc', 'cΩcΩc', 'ΣcΔcΣ'];
+    let best = null;
+    for (let y = 2; y + 5 <= h - 2; y++) for (let x = 2; x + 5 <= w - 2; x++) {
+      let ok = true, touch = 0;
+      for (let dy = -1; dy <= 5 && ok; dy++) for (let dx = -1; dx <= 5 && ok; dx++) {
+        const c = rows[y + dy][x + dx], inside = dx >= 0 && dy >= 0 && dx < 5 && dy < 5;
+        if (inside) ok = c === '.' && !near(x + dx, y + dy, 0) && !special(x + dx, y + dy) && !el[y + dy][x + dx];
+        else if (STREET.has(c) && c !== 's' && (dx < 0 || dx > 4) !== (dy < 0 || dy > 4)) touch++;
+        else if (c === 'D') ok = false;
+      }
+      if (!ok || !touch) continue;
+      const score = touch * 4 - Math.abs(x + 2 - w / 2) / w * 10 - Math.abs(y + 2 - h / 2) / h * 10;
+      if (!best || score > best[2]) best = [x, y, score];
+    }
+    if (best) {
+      const [px, py] = best;
+      const keep = rows.map((r) => [...r]);
+      P.forEach((r, dy) => [...r].forEach((c, dx) => { rows[py + dy][px + dx] = c === 'c' ? pave : c; }));
+      const after = reachTown(rows, el);
+      if ([...before].some((k) => { const [x, y] = k.split(',').map(Number); return !solid(rows[y][x]) && !after.has(k); })) rows.splice(0, h, ...keep);
+      else stats.plaza++;
+    }
+  }
+
+  // 3. localities: lone wall tiles in open ground go, one-tile dead-end holes in a wall fill in
+  if (!opts.city) {
+    const wall = (x, y) => WALLS.has(rows[y]?.[x]);
+    for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+      if (!WALLS.has(rows[y][x]) || near(x, y, 1)) continue;
+      const n4 = D4.filter(([dx, dy]) => wall(x + dx, y + dy)).length;
+      const n8 = [[1, 1], [1, -1], [-1, 1], [-1, -1]].filter(([dx, dy]) => wall(x + dx, y + dy)).length + n4;
+      if (n4 === 0 && n8 <= 1 && D4.every(([dx, dy]) => GROUND.has(rows[y + dy][x + dx]))) { rows[y][x] = '.'; stats.walls++; }
+    }
+    const reach = reachTown(rows, el);
+    for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+      if (rows[y][x] !== '.' || near(x, y, 1) || special(x, y) || el[y][x] || [[0, -1], [0, 1]].some(([dx, dy]) => special(x + dx, y + dy))) continue;
+      if (D4.filter(([dx, dy]) => wall(x + dx, y + dy)).length !== 3) continue;
+      const [ox, oy] = D4.map(([dx, dy]) => [x + dx, y + dy]).find(([nx, ny]) => !wall(nx, ny));
+      if (!reach.has(`${ox},${oy}`) || solid(rows[oy][ox])) continue;
+      const nb = D4.map(([dx, dy]) => rows[y + dy][x + dx]).filter((c) => WALLS.has(c));
+      rows[y][x] = nb[0];
+      stats.holes++;
+    }
+  }
+  m.tiles = rows.map((r) => r.join(''));
+  return stats;
+}
