@@ -698,7 +698,7 @@ function build(v: WorldView) {
     if (k === 'flowers') return true; // las flores se arman en 3D (case 'flowers')
     if (k !== 'ground' || !PROPS_3D[c]) return false;
     const th = theme ? (THEMES as any)[theme] : null;
-    return !(th && Object.prototype.hasOwnProperty.call(th, c) && !SAME_IN_THEMES.has(c));
+    return !(th && Object.prototype.hasOwnProperty.call(th, c) && !sameInTheme(theme, c));
   };
   const plainGround = (c: string) => (kindOf(c) === 'ground' || kindOf(c) === 'door') && !has3D(c);
   const groundColor = (x: number, y: number) => {
@@ -781,7 +781,7 @@ function build(v: WorldView) {
     const gen = PROPS_3D[c];
     if (!gen) return false;
     const th = theme ? (THEMES as any)[theme] : null;
-    if (th && Object.prototype.hasOwnProperty.call(th, c) && !SAME_IN_THEMES.has(c)) return false;
+    if (th && Object.prototype.hasOwnProperty.call(th, c) && !sameInTheme(theme, c)) return false;
     return gen({ ...propCtx, x, y }) !== false;
   };
   // Objetos de cada tile
@@ -1133,6 +1133,8 @@ const isBld = (tiles, W: number, H: number, x: number, y: number): boolean => {
   if (k === 'door') { const a = y > 0 ? kindOf(tiles[y - 1][x]) : null; return a === 'roof' || a === 'wall'; }
   return false;
 };
+/** La N es una maceta en la Policlínica (el tema solo le pone el color de la sala): se arma con el modelo 3D. En los gimnasios es otra cosa. */
+const sameInTheme = (theme: string | null, c: string) => SAME_IN_THEMES.has(c) || (c === 'N' && theme === 'poli');
 const FACADE_H = Math.tan(PHI_CAM); // así una fila de fachada se ve en pantalla igual de alta que en el mapa 2D
 /** Tiles que un tema redibuja pero siguen siendo lo mismo (la colmena y el busto de los gimnasios, la cueva). */
 const SAME_IN_THEMES = new Set(['ҳ', 'ϯ', ...Object.keys(PROPS_3D).filter((c) => /^(estalagmita|cristales)$/.test(TILE_INFO[c]?.name ?? ''))]);
