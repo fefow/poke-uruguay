@@ -5,7 +5,8 @@
 // El canvas 2D queda encima, transparente, para la lluvia, la niebla y los efectos de pantalla.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { T, TILE_INFO, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt, themeOf } from './tiles.ts';
+import { T, TILE_INFO, tileCanvas, topCanvas, tileWithoutGround, groundFor, WALL_CAPS, elevAt, cliffAt, themeOf, tollBoardCanvas, TOLL_BOARD_H } from './tiles.ts';
+import { TOLL_FLOOR, TOLL_ROOF, TOLL_H, TOLL_V, TOLL_BOARD, tollZone } from '../data/toll-chars.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
@@ -455,6 +456,84 @@ interface WorldView {
   tileAt: (x: number, y: number) => string | null;
 }
 
+// ---------------------------------------------------------------- peaje (ver data/toll.ts)
+let tollRoof: { mat: THREE.MeshStandardMaterial; k: number } | null = null;
+const TOLL_PAVED = new Set([TOLL_H, TOLL_V].flatMap((s) => [s.island, s.open, s.closed, s.nose, s.paved]));
+const TC = {
+  concrete: new THREE.Color(0xd4d0c4), booth: new THREE.Color(0xf4f6f8), blue: new THREE.Color(0x1f4fa8), glass: new THREE.Color(0x8ac8e8),
+  yellow: new THREE.Color(0xf2c02a), red: new THREE.Color(0xd8302a), white: new THREE.Color(0xf4f2ea), dark: new THREE.Color(0x1a1a22),
+  roof: new THREE.Color(0xdfe3e8), steel: new THREE.Color(0x8a8a92), cone: new THREE.Color(0xf07a1a), green: new THREE.Color(0x4af060), lamp: new THREE.Color(0xf03a3a),
+};
+/**
+ * La plaza de peaje en 3D: islas con su cabina, barreras (bajas en los carriles cerrados, arriba en los abiertos), la valla
+ * de hormigón, las patas del cartel y el techo con su luz por carril (verde abierto, rojo cerrado). Todo se ubica con
+ * r = a lo largo de la fila de cabinas y t = en el sentido de la ruta; en una ruta este-oeste la fila va de norte a sur.
+ */
+function buildToll(m, parts: THREE.BufferGeometry[], glow: THREE.BufferGeometry[], fade: THREE.BufferGeometry[]) {
+  const T0 = m.toll;
+  const V = !!T0.vertical;
+  const P = V ? TOLL_V : TOLL_H;
+  const piece = (list: THREE.BufferGeometry[], cx: number, cz: number, r: number, y: number, t: number, sr: number, sy: number, st: number, col: THREE.Color, jitter = 0.04) => {
+    const g = V ? box(st, sy, sr) : box(sr, sy, st);
+    const x = cx + (V ? t : r), z = cz + (V ? r : t);
+    list.push(paint(at(g, x, liftAt(x, z) + y, z), col, jitter, Math.round(x * 7 + z * 3)));
+  };
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
+    const c = m.tiles[y][x];
+    if (!TOLL_FLOOR.has(c)) continue;
+    const cx = x + 0.5, cz = y + 0.5;
+    if (c === P.island) {
+      piece(parts, cx, cz, 0, 0.06, 0, 0.56, 0.12, 1, TC.concrete);
+      piece(parts, cx, cz, 0, 0.5, 0, 0.46, 0.8, 0.6, TC.booth, 0.02);
+      piece(parts, cx, cz, 0, 0.95, 0, 0.52, 0.1, 0.66, TC.blue, 0.02);
+      for (const s of [-1, 1]) piece(parts, cx, cz, s * 0.235, 0.55, 0, 0.02, 0.32, 0.4, TC.glass, 0);
+    } else if (c === P.nose) {
+      piece(parts, cx, cz, 0, 0.06, 0, 0.46, 0.12, 1, TC.concrete);
+      for (const t of [-0.3, 0, 0.3]) piece(parts, cx, cz, 0, 0.125, t, 0.4, 0.015, 0.12, TC.yellow, 0);
+      parts.push(paint(at(new THREE.CylinderGeometry(0.06, 0.07, 0.42, 6), cx, liftAt(cx, cz) + 0.33, cz), TC.yellow, 0.02, x));
+    } else if (c === P.barrier) {
+      piece(parts, cx, cz, 0, 0.2, 0, 1, 0.4, 0.3, TC.concrete, 0.05);
+      piece(parts, cx, cz, 0, 0.42, 0, 1, 0.06, 0.16, TC.concrete.clone().multiplyScalar(1.08), 0.03);
+    } else if (c === P.open || c === P.closed) {
+      piece(parts, cx, cz, -0.4, 0.3, 0, 0.1, 0.6, 0.1, TC.yellow);
+      if (c === P.closed) {
+        for (let i = 0; i < 4; i++) piece(parts, cx, cz, -0.3 + i * 0.2, 0.52, 0, 0.2, 0.06, 0.06, i % 2 ? TC.white : TC.red, 0);
+        for (const [r, t] of [[-0.1, -0.33], [0.2, 0.33]]) {
+          const px = cx + (V ? t : r), pz = cz + (V ? r : t);
+          parts.push(paint(at(new THREE.ConeGeometry(0.08, 0.24, 6), px, liftAt(px, pz) + 0.12, pz), TC.cone, 0.02, x));
+        }
+      } else for (let i = 0; i < 4; i++) piece(parts, cx, cz, -0.4, 0.66 + i * 0.2, 0, 0.06, 0.2, 0.06, i % 2 ? TC.white : TC.red, 0);
+    }
+  }
+  // patas del cartel azul (el cartel en sí es un plano con su dibujo, ver build)
+  if (T0.board) for (const dx of [0.25, TOLL_BOARD.length - 0.25]) { const x = T0.board.x + dx, z = T0.board.y + 0.5; parts.push(paint(at(box(0.08, 1.1, 0.08), x, liftAt(x, z) + 0.55, z), TC.steel, 0.02, dx)); }
+  // techo: una losa sobre toda la fila, con su frente azul a los dos lados y pilares en las islas
+  const H0 = 1.55;
+  const lo = T0.lo, hi = T0.hi + 1, mid = (lo + hi) / 2, len = hi - lo;
+  const a0 = T0.a + 0.5;
+  const rc = (r: number, t: number) => (V ? [a0 + t, r] : [r, a0 + t]);
+  const [mx, mz] = rc(mid, 0);
+  const base = liftAt(mx, mz);
+  const slab = (r: number, y: number, t: number, sr: number, sy: number, st: number, col: THREE.Color, list = fade) => {
+    const [x, z] = rc(r, t);
+    list.push(paint(at(V ? box(st, sy, sr) : box(sr, sy, st), x, base + y, z), col, 0.02, Math.round(r * 5)));
+  };
+  slab(mid, H0, 0, len + 0.2, 0.1, 1.3, TC.roof);
+  for (const s of [-1, 1]) slab(mid, H0 - 0.04, s * 0.66, len + 0.24, 0.3, 0.06, TC.blue);
+  for (const i of T0.islands) { const r = (V ? i.y : i.x) + 0.5; for (const s of [-1, 1]) slab(r, H0 / 2, s * 0.42, 0.1, H0, 0.1, TC.steel, parts); }
+  // luces de cada carril: en el frente (de los dos lados) y una grande arriba del techo, que se ve desde la cámara
+  for (const l of T0.lanes) {
+    const r = (V ? l.y : l.x) + 0.5;
+    const col = l.open ? TC.green : TC.lamp;
+    for (const s of [-1, 1]) {
+      slab(r, H0 - 0.04, s * 0.7, 0.34, 0.18, 0.04, TC.dark, parts);
+      const [x, z] = rc(r, s * 0.73);
+      glow.push(paint(at(new THREE.SphereGeometry(0.075, 8, 6), x, base + H0 - 0.04, z), col, 0));
+    }
+    const [x, z] = rc(r, 0);
+    glow.push(paint(at(V ? box(0.4, 0.05, 0.3) : box(0.3, 0.05, 0.4), x, base + H0 + 0.08, z), col, 0));
+  }
+}
 function build(v: WorldView) {
   if (staticGroup) {
     scene.remove(staticGroup);
@@ -496,6 +575,7 @@ function build(v: WorldView) {
       const k = kindOf(c);
       if (k !== 'ground' && k !== 'grass' && k !== 'flowers' && k !== 'tree') hard = true;
       if (c === '=' || c === 'c' || c === 'b' || c === '_' || c === '0') hard = true;
+      if (TOLL_FLOOR.has(c)) hard = true;
     }
     if (n && w === n) return -0.32;
     if (w) return -0.1;
@@ -527,6 +607,7 @@ function build(v: WorldView) {
   const groundTile = (x: number, y: number): [string, () => HTMLCanvasElement] => {
     const c = tiles[y][x];
     const k = kindOf(c);
+    if (TOLL_PAVED.has(c)) return [`g|toll|${c}`, () => tileCanvas(c, 0, null, false)]; // el piso del peaje (carriles, islas)
     if (k === 'water') return ['g|~', () => tileCanvas('~', 0, null, false)];
     if (!m.indoor && cliffAt(m, tiles, x, y)) return ['g|K', () => tileCanvas('K', 0, null, false)]; // a cliff face
     const under = groundFor(tiles, x, y, m.ground, theme);
@@ -575,6 +656,7 @@ function build(v: WorldView) {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     if (bld.has(y * W + x)) continue;
     const c: string = tiles[y][x];
+    if (TOLL_FLOOR.has(c)) continue; // el peaje se arma aparte (buildToll)
     const k = kindOf(c);
     const cx = x + 0.5, cz = y + 0.5;
     const objKey = `o|${theme}|${c}`;
@@ -717,6 +799,8 @@ function build(v: WorldView) {
     }
   }
   LIFT = 0;
+  const tollFade: THREE.BufferGeometry[] = [];
+  if (m.toll && !m.indoor) buildToll(m, parts, glow, tollFade);
   // Fin del mapa: el terreno se corta en un barranco de tierra que baja al vacío, así se ve dónde termina.
   // Por las salidas (m.exits) el suelo sigue hacia afuera como una franja, con flechas en el borde.
   exitMarks = [];
@@ -843,6 +927,27 @@ function build(v: WorldView) {
     }
   }
   if (bldMesh) staticGroup.add(bldMesh);
+  // el techo del peaje (se vuelve transparente cuando el jugador pasa por abajo) y el cartel azul con su nombre
+  tollRoof = null;
+  if (tollFade.length) {
+    const tm = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 1 });
+    const mesh = new THREE.Mesh(mergeGeometries(tollFade.map((p) => (p.index ? p.toNonIndexed() : p)).map(onlyPosColor), false), tm);
+    mesh.geometry.computeVertexNormals();
+    mesh.castShadow = true;
+    staticGroup.add(mesh);
+    staticTex.push(mesh);
+    tollRoof = { mat: tm, k: 1 };
+  }
+  if (m.toll?.board) {
+    const bm = boardMat(tollBoardCanvas(m.toll.name));
+    staticMats.push(bm);
+    const bh = TOLL_BOARD_H / T;
+    const g = boardGeo(TOLL_BOARD.length, bh, TILT_OBJ); // inclinado hacia la cámara, como los demás carteles
+    const { x, y } = m.toll.board;
+    const bw = TOLL_BOARD.length / 2;
+    g.translate(x + bw, liftAt(x + bw, y + 0.5) + 1.0, y + 0.56);
+    staticGroup.add(new THREE.Mesh(g, bm));
+  }
   // objetos en pixel art: un cartel por tile, agrupados por tipo de tile (una sola llamada de dibujo cada uno)
   const byChar = new Map<string, { x: number; y: number; lift: number }[]>();
   for (const sp of sprites) (byChar.get(sp.c) ?? byChar.set(sp.c, []).get(sp.c)!).push(sp);
@@ -859,7 +964,7 @@ function build(v: WorldView) {
   // quien esté parado ahí, así también lo tapa en 3D
   if (Array.isArray(m.top)) {
     const tops = new Map<string, { x: number; y: number }[]>();
-    m.top.forEach((r: string, y: number) => [...r].forEach((c, x) => { if (c !== ' ' && TILE_INFO[c]) (tops.get(c) ?? tops.set(c, []).get(c)!).push({ x, y }); }));
+    m.top.forEach((r: string, y: number) => [...r].forEach((c, x) => { if (c !== ' ' && TILE_INFO[c] && !TOLL_ROOF.has(c)) (tops.get(c) ?? tops.set(c, []).get(c)!).push({ x, y }); }));
     for (const [c, list] of tops) {
       const bm = boardMat(topCanvas(c, 0, theme));
       staticMats.push(bm);
@@ -1198,6 +1303,12 @@ export function drawWorld3D(v: WorldView, t: number) {
     camReady = false;
   }
   waterTime.value = t / 1000;
+  if (tollRoof) {
+    const under = tollZone(m.toll, v.player.x, v.player.y);
+    tollRoof.k += ((under ? 0.3 : 1) - tollRoof.k) * 0.15;
+    tollRoof.mat.opacity = tollRoof.k;
+    tollRoof.mat.depthWrite = tollRoof.k > 0.95;
+  }
   // flechas de salida: avanzan hacia afuera y se apagan, dos por salida, una detrás de la otra
   for (const e of exitMarks) {
     const k = (t / 1400 + e.phase) % 1;

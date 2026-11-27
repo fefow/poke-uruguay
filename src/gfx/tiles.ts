@@ -3,6 +3,7 @@ import { CUSTOM } from '../data/custom-content.js';
 import { Rng } from '../core/rng.ts';
 import { override, overrideEntry, overrideHasHoles, generated } from './overrides.ts';
 import { decodeSprite } from './sprite-codec.ts';
+import { TOLL_H, TOLL_V, TOLL_WARN, TOLL_BOARD } from '../data/toll-chars.ts';
 
 export const T = 16;
 
@@ -198,8 +199,29 @@ export const TILE_INFO = {
   'Ц': { name: 'piedritas', over: true },
   'Ш': { name: 'barril', solid: true, over: true },
   'Щ': { name: 'mojón de ruta', solid: true, over: true },
-  'Ѣ': { name: 'cabina de peaje', solid: true, over: true },
-  'Ѳ': { name: 'carril de peaje' },
+  // peaje visto de arriba (ver data/toll.ts): H cruza una ruta norte-sur, V una este-oeste
+  'Ѣ': { name: 'isla de peaje con cabina', solid: true },
+  'Ѳ': { name: 'carril de peaje abierto (luz verde)' },
+  'Ѷ': { name: 'carril de peaje cerrado (luz roja)', solid: true },
+  'Ѹ': { name: 'valla de hormigón del peaje', solid: true, over: true },
+  'Ҏ': { name: 'punta de isla de peaje', solid: true },
+  'Ҩ': { name: 'pavimento del peaje' },
+  'ѹ': { name: 'isla de peaje con cabina (ruta este-oeste)', solid: true },
+  'Ѻ': { name: 'carril de peaje abierto (luz verde, ruta este-oeste)' },
+  'ѻ': { name: 'carril de peaje cerrado (luz roja, ruta este-oeste)', solid: true },
+  'Ѽ': { name: 'valla de hormigón del peaje (ruta este-oeste)', solid: true, over: true },
+  'ҏ': { name: 'punta de isla de peaje (ruta este-oeste)', solid: true },
+  'ҩ': { name: 'pavimento del peaje (ruta este-oeste)' },
+  'ѽ': { name: 'techo del peaje' },
+  'Ѿ': { name: 'techo del peaje con luz verde' },
+  'ѿ': { name: 'techo del peaje con luz roja' },
+  'Ҥ': { name: 'techo del peaje (ruta este-oeste)' },
+  'ҥ': { name: 'techo del peaje con luz verde (ruta este-oeste)' },
+  'Ҧ': { name: 'techo del peaje con luz roja (ruta este-oeste)' },
+  'Ҋ': { name: 'cartel: peaje próximo', solid: true, over: true },
+  'ҋ': { name: 'cartel del peaje (pata izquierda)', solid: true, over: true },
+  'Ҍ': { name: 'cartel del peaje (centro)', solid: true, over: true },
+  'ҍ': { name: 'cartel del peaje (pata derecha)', solid: true, over: true },
   'Э': { name: 'cajón', solid: true, over: true },
   'Ю': { name: 'totoras', over: true },
   'Я': { name: 'girasoles', over: true },
@@ -1200,24 +1222,6 @@ const OVER = {
     px(g, 5, 6, '#c8302a', 6, 3); px(g, 5, 6, '#e0463a', 6, 1);
     px(g, 7, 10, '#3a4a6a', 2, 1); px(g, 6, 11, '#3a4a6a', 4, 1);
     px(g, 4, 14, '#7a766a', 8, 1);
-  },
-  // Toll booth: a small cabin with a striped roof and a window facing the lane
-  'Ѣ': (g) => {
-    px(g, 0, 0, '#5a5a62', 16, 16);
-    px(g, 0, 15, '#3a3a42', 16, 1);
-    px(g, 1, 3, '#e8e6de', 14, 11); px(g, 1, 3, '#c2beb0', 14, 1); px(g, 1, 13, '#a8a496', 14, 1);
-    px(g, 3, 6, '#7ab8d8', 10, 4); px(g, 3, 6, '#b8e0f0', 10, 1); px(g, 3, 9, '#5a98b8', 10, 1);
-    px(g, 0, 0, '#c8302a', 16, 3);
-    for (let x = 1; x < 16; x += 4) px(g, x, 0, '#f4f2ea', 2, 3);
-    px(g, 0, 3, '#7a1a16', 16, 1);
-  },
-  // Toll lane: asphalt with the barrier arm raised beside it
-  'Ѳ': (g) => {
-    px(g, 0, 0, '#6a6a72', 16, 16);
-    px(g, 0, 0, '#7a7a82', 16, 1); px(g, 0, 15, '#5a5a62', 16, 1);
-    px(g, 1, 4, '#f2c02a', 2, 8); px(g, 1, 4, '#3a3a42', 2, 1);
-    for (let k = 0; k < 4; k++) px(g, 3 + k * 3, 6, k % 2 ? '#f4f2ea' : '#c8302a', 3, 2);
-    for (let x = 2; x < 16; x += 4) px(g, x, 14, '#d8d4c0', 2, 1);
   },
   'Ш': (g) => {
     shade(g, 8, 14, 6, 1.4);
@@ -2960,6 +2964,128 @@ export function drawElevation(g, m, tiles, x0: number, y0: number, x1: number, y
     if (d & 1) { P(sx, sy, '#6a4428', T, 2); P(sx, sy + 2, '#e8c890', T, 1); }
   }
 }
+// ---- toll plaza ("peaje", see data/toll.ts), seen from above ----
+// Drawn for a plaza across a north-south road (row of booths east-west); the V pieces are the same drawings turned a quarter.
+const TOLL_BLUE = '#1f4fa8', TOLL_BLUE_HI = '#3a6ad0', TOLL_BLUE_LO = '#163a80';
+const turned = (fn) => (g, r, f) => { g.save(); g.translate(T, 0); g.rotate(Math.PI / 2); fn(g, r, f); g.restore(); };
+const tollIsland = (g, x0, x1) => {
+  px(g, x0, 0, '#d4d0c4', x1 - x0 + 1, T);
+  px(g, x0, 0, '#eceae2', 1, T); px(g, x1, 0, '#a8a496', 1, T);
+};
+const tollBarrierPost = (g, lit) => {
+  px(g, 1, 6, '#2a2a30', 3, 4); px(g, 1, 6, '#f2c02a', 2, 3);
+  px(g, 2, 7, lit, 1, 1);
+};
+const tollFloor = {
+  paved: (g, r) => { asphalt(g, r); px(g, 6, 5, '#45454f', 4, 6); px(g, 7, 6, '#40404a', 2, 4); },
+  island: (g, r) => {
+    asphalt(g, r);
+    tollIsland(g, 3, 12);
+    // the booth, from above: its flat roof with a blue rim and a window on each side, facing both lanes
+    px(g, 5, 13, 'rgba(0,0,0,0.22)', 8, 2);
+    px(g, 4, 3, '#f4f6f8', 8, 10); px(g, 4, 3, TOLL_BLUE, 8, 1); px(g, 4, 12, TOLL_BLUE_LO, 8, 1);
+    px(g, 4, 5, '#8ac8e8', 1, 6); px(g, 11, 5, '#8ac8e8', 1, 6); px(g, 4, 5, '#c8ecf8', 1, 1); px(g, 11, 5, '#c8ecf8', 1, 1);
+    px(g, 6, 6, '#dfe3e8', 4, 4); px(g, 7, 7, '#c6ccd4', 2, 2);
+  },
+  nose: (g, r) => {
+    asphalt(g, r);
+    tollIsland(g, 4, 11);
+    for (let y = 2; y < 14; y += 4) { px(g, 5, y, '#f2c02a', 6, 2); px(g, 5, y + 2, '#2a2a30', 6, 2); }
+    px(g, 7, 7, '#f2c02a', 2, 2); px(g, 7, 7, '#fff2a0', 1, 1);
+  },
+  open: (g, r) => {
+    asphalt(g, r);
+    px(g, 5, 7, '#8a8a92', 6, 2); px(g, 5, 7, '#a2a2aa', 6, 1); // the sensor plate in the middle of the lane
+    tollBarrierPost(g, '#4af060'); // the barrier is up: from above only its post shows
+  },
+  closed: (g, r) => {
+    asphalt(g, r);
+    tollBarrierPost(g, '#f03a3a');
+    for (let x = 4; x < 16; x += 4) { px(g, x, 7, '#d8302a', 2, 2); px(g, x + 2, 7, '#f4f2ea', 2, 2); } // barrier down across the lane
+    for (const [cx, cy] of [[6, 2], [10, 12]]) { px(g, cx - 1, cy - 1, '#f07a1a', 3, 3); px(g, cx, cy, '#f4f2ea', 1, 1); px(g, cx - 1, cy + 2, 'rgba(0,0,0,0.25)', 3, 1); } // cones
+  },
+};
+const tollOver = {
+  // concrete jersey barrier closing the rest of the row
+  barrier: (g) => {
+    px(g, 0, 11, 'rgba(0,0,0,0.22)', T, 2);
+    px(g, 0, 5, '#c8c4b8', T, 6); px(g, 0, 7, '#e6e2d8', T, 2); px(g, 0, 10, '#9a968a', T, 1); px(g, 0, 5, '#dcd8cc', T, 1);
+    for (let x = 2; x < T; x += 8) { px(g, x, 8, '#d8302a', 2, 1); px(g, x + 2, 8, '#f4f2ea', 2, 1); }
+  },
+};
+// roof over the row of booths (encima layer): blue fascia on both edges; over each lane, its light and a signal
+// (green arrow open, red cross closed) so both views show where to go through
+const tollRoof = (g, light) => {
+  px(g, 0, 0, '#dfe3e8', T, T);
+  for (let x = 1; x < T; x += 4) px(g, x, 3, '#c6ccd4', 1, 10);
+  for (const y of [0, 13]) { px(g, 0, y, TOLL_BLUE, T, 3); px(g, 0, y, TOLL_BLUE_HI, T, 1); px(g, 0, y + 2, TOLL_BLUE_LO, T, 1); }
+  if (!light) { // over an island: the lane-type plate standing on the roof
+    px(g, 3, 6, '#f4f6f8', 10, 4); px(g, 3, 9, '#a8b0bc', 10, 1);
+    for (const x of [4, 6, 9, 11]) px(g, x, 7, TOLL_BLUE, 1, 1);
+    px(g, 7, 7, TOLL_BLUE, 1, 1);
+    return;
+  }
+  const [lit, hi, glow] = light === 'open' ? ['#4af060', '#c8ffd0', 'rgba(74,240,96,0.4)'] : ['#f03a3a', '#ffd0c8', 'rgba(240,58,58,0.4)'];
+  for (const y of [0, 13]) { px(g, 5, y, '#1a1a22', 6, 3); px(g, 7, y + 1, lit, 2, 1); px(g, 7, y + 1, hi, 1, 1); }
+  px(g, 6, 3, glow, 4, 1); px(g, 6, 12, glow, 4, 1);
+  px(g, 4, 5, '#1a1a22', 8, 6); px(g, 4, 5, '#2a2a34', 8, 1);
+  if (light === 'open') { px(g, 7, 6, lit, 2, 3); px(g, 5, 8, lit, 6, 1); px(g, 6, 9, lit, 4, 1); px(g, 7, 9, hi, 1, 1); } // arrow
+  else for (let i = 0; i < 4; i++) { px(g, 6 + i, 6 + i, lit, 1, 1); px(g, 9 - i, 6 + i, lit, 1, 1); } // cross
+};
+const tollSigns = {
+  // warning: a blue sign with a white toll (roof, two posts, barrier) on a post
+  [TOLL_WARN]: (g) => {
+    shade(g, 8, 15, 4, 1);
+    px(g, 7, 10, '#8a8a92', 2, 6); px(g, 7, 10, '#b4b4bc', 1, 6);
+    px(g, 1, 0, '#163a80', 14, 11); px(g, 2, 1, TOLL_BLUE, 12, 9); px(g, 2, 1, '#f4f6f8', 12, 1); px(g, 2, 9, '#f4f6f8', 12, 1); px(g, 2, 1, '#f4f6f8', 1, 9); px(g, 13, 1, '#f4f6f8', 1, 9);
+    px(g, 4, 3, '#f4f6f8', 8, 1); px(g, 5, 4, '#f4f6f8', 1, 4); px(g, 10, 4, '#f4f6f8', 1, 4);
+    px(g, 6, 6, '#f03a3a', 1, 1); px(g, 7, 6, '#f4f6f8', 1, 1); px(g, 8, 6, '#f03a3a', 1, 1); px(g, 9, 6, '#f4f6f8', 1, 1);
+    px(g, 4, 7, '#f4f6f8', 8, 1);
+  },
+  // the legs of the name board (the board itself is drawn over the cells above, see tollBoardCanvas)
+  [TOLL_BOARD[0]]: (g) => { shade(g, 4, 15, 3, 1); px(g, 3, 0, '#8a8a92', 2, 15); px(g, 3, 0, '#b4b4bc', 1, 15); },
+  [TOLL_BOARD[1]]: (g) => { px(g, 0, 14, 'rgba(0,0,0,0.12)', T, 1); },
+  [TOLL_BOARD[3]]: (g) => { shade(g, 12, 15, 3, 1); px(g, 11, 0, '#8a8a92', 2, 15); px(g, 11, 0, '#b4b4bc', 1, 15); },
+};
+for (const [P, turn] of [[TOLL_H, (fn) => fn], [TOLL_V, turned]] as [typeof TOLL_H, (fn: any) => any][]) {
+  for (const k of ['paved', 'island', 'nose', 'open', 'closed']) DRAW[P[k]] = turn(tollFloor[k]);
+  OVER[P.barrier] = turn(tollOver.barrier);
+  DRAW[P.roof] = turn((g) => tollRoof(g, null));
+  DRAW[P.roofOpen] = turn((g) => tollRoof(g, 'open'));
+  DRAW[P.roofClosed] = turn((g) => tollRoof(g, 'closed'));
+}
+Object.assign(OVER, tollSigns);
+// 3x5 capitals for the toll's name board
+const FONT35: Record<string, string> = {
+  A: '010101111101101', B: '110101110101110', C: '011100100100011', D: '110101101101110', E: '111100110100111',
+  F: '111100110100100', G: '011100101101011', H: '101101111101101', I: '111010010010111', J: '001001001101010',
+  K: '101101110101101', L: '100100100100111', M: '101111111101101', N: '110101101101101', O: '010101101101010',
+  P: '110101110100100', Q: '010101101110011', R: '110101110101101', S: '011100010001110', T: '111010010010010',
+  U: '101101101101111', V: '101101101101010', W: '101101111111101', X: '101101010101101', Y: '101101010010010',
+  Z: '111001010100111', ' ': '000000000000000',
+};
+const boardCache = new Map<string, HTMLCanvasElement>();
+/** The blue board with a toll's name in white: four cells wide, TOLL_BOARD_H pixels tall (drawn over the cells above its legs). */
+export const TOLL_BOARD_H = 22;
+export function tollBoardCanvas(name: string) {
+  let c = boardCache.get(name);
+  if (c) return c;
+  c = document.createElement('canvas');
+  const BW = T * TOLL_BOARD.length, BH = TOLL_BOARD_H;
+  c.width = BW; c.height = BH;
+  const g = c.getContext('2d')!;
+  px(g, 0, 0, TOLL_BLUE_LO, BW, BH); px(g, 1, 1, TOLL_BLUE, BW - 2, BH - 2);
+  px(g, 2, 2, '#f4f6f8', BW - 4, 1); px(g, 2, BH - 3, '#f4f6f8', BW - 4, 1); px(g, 2, 2, '#f4f6f8', 1, BH - 4); px(g, BW - 3, 2, '#f4f6f8', 1, BH - 4);
+  const line = (text: string, y: number) => {
+    const t = text.toUpperCase().slice(0, 15);
+    const x0 = Math.floor((BW - (t.length * 4 - 1)) / 2);
+    [...t].forEach((ch, i) => { const gl = FONT35[ch] ?? FONT35[' ']; for (let k = 0; k < 15; k++) if (gl[k] === '1') px(g, x0 + i * 4 + (k % 3), y + Math.floor(k / 3), '#f4f6f8'); });
+  };
+  line('PEAJE', 5); line(name, 12);
+  boardCache.set(name, c);
+  return c;
+}
+
 /** Whether a cell blocks walking: the collision layer first, then the tile. */
 export function cellSolid(m: { coll?: string[] } | null | undefined, tiles: ArrayLike<ArrayLike<string>>, x: number, y: number) {
   const c = collAt(m, x, y);
