@@ -9,6 +9,7 @@ import { T, TILE_INFO, THEMES, tileCanvas, topCanvas, tileWithoutGround, groundF
 import { TOLL_FLOOR, TOLL_ROOF, TOLL_H, TOLL_V, TOLL_BOARD, tollZone } from '../data/toll-chars.ts';
 import { PROPS_3D, type PropCtx } from './props-3d.ts';
 import { FURN_3D } from './furniture-3d.ts';
+import { SOIL, FURROW } from '../data/gym-puzzles.ts';
 import { cellCanvas, pieceKey } from './edges.ts';
 import { charSprite, protestSprite } from './characters.ts';
 import { drawGroundBall } from './items.ts';
@@ -567,6 +568,10 @@ interface WorldView {
 
 // ---------------------------------------------------------------- peaje (ver data/toll.ts)
 let tollRoof: { mat: THREE.MeshStandardMaterial; k: number } | null = null;
+/** Surcos de las parcelas (casilla y su malla), que se ven u ocultan cada cuadro según el mapa. */
+let furrows: { x: number; y: number; mesh: THREE.Mesh }[] = [];
+/** Una fila del mapa con los surcos vueltos tierra: lo que el 3D arma de una vez. */
+const unplow = (r: string | string[]) => (typeof r === 'string' ? r : r.join('')).replaceAll(FURROW, SOIL);
 const TOLL_PAVED = new Set([TOLL_H, TOLL_V].flatMap((s) => [s.island, s.open, s.closed, s.nose, s.paved]));
 const TC = {
   concrete: new THREE.Color(0xd4d0c4), booth: new THREE.Color(0xf4f6f8), blue: new THREE.Color(0x1f4fa8), glass: new THREE.Color(0x8ac8e8),
@@ -652,7 +657,8 @@ function build(v: WorldView) {
   for (const sm of staticMats.splice(0)) { boardMats.delete(sm); sm.map?.dispose(); sm.dispose(); }
   bldMesh = null;
   const m = v.map;
-  const tiles = v.tiles as any;
+  // los surcos de las parcelas (Colonización) se prenden y apagan sin rearmar la escena: el suelo es siempre la tierra
+  const tiles = (v.tiles as any[]).map(unplow) as any;
   const W = m.w, H = m.h;
   const theme = m.theme ?? null;
   const parts: THREE.BufferGeometry[] = [];
@@ -1018,6 +1024,25 @@ function build(v: WorldView) {
   }
   staticGroup = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
+  // Surcos: en cada casilla de tierra de una parcela, lomos de tierra con brotes; se ven solo cuando la casilla está arada
+  furrows = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (tiles[y][x] !== SOIL) continue;
+    const gs: THREE.BufferGeometry[] = [];
+    for (let i = 0; i < 3; i++) {
+      const z = y + 0.2 + i * 0.3;
+      const ridge = new THREE.CylinderGeometry(0.09, 0.09, 0.98, 4, 1);
+      ridge.rotateZ(Math.PI / 2); ridge.scale(1, 0.7, 1.15);
+      gs.push(paint(at(ridge, x + 0.5, 0.03, z), new THREE.Color(0x7a4a24), 0.08, x * 7 + i));
+      for (let k = 0; k < 3; k++) if (rnd(x, y, i * 3 + k) > 0.35) gs.push(paint(at(new THREE.ConeGeometry(0.035, 0.12, 3), x + 0.18 + k * 0.32 + (rnd(x, y, k + 9) - 0.5) * 0.08, 0.13, z), new THREE.Color(0x6cc04c), 0.1, k));
+    }
+    const fm = new THREE.Mesh(mergeGeometries(gs.map(onlyPosColor), false), mat);
+    fm.geometry.computeVertexNormals();
+    fm.receiveShadow = true;
+    fm.visible = false;
+    staticGroup.add(fm);
+    furrows.push({ x, y, mesh: fm });
+  }
   if (parts.length) {
     const merged = mergeGeometries(parts.map((p) => (p.index ? p.toNonIndexed() : p)).map(onlyPosColor), false);
     merged.computeVertexNormals();
@@ -1445,7 +1470,7 @@ function poseOf(n: any, player: boolean, rowing: boolean) {
 export function drawWorld3D(v: WorldView, t: number) {
   if (!renderer) return;
   const m = v.map;
-  const key = m.id + '|' + (v.tiles as any[]).map((r) => (typeof r === 'string' ? r : r.join(''))).join('/');
+  const key = m.id + '|' + (v.tiles as any[]).map(unplow).join('/');
   if (key !== builtKey) {
     build(v);
     builtKey = key;
@@ -1454,6 +1479,7 @@ export function drawWorld3D(v: WorldView, t: number) {
     camReady = false;
   }
   waterTime.value = t / 1000;
+  for (const f of furrows) f.mesh.visible = v.tileAt(f.x, f.y) === FURROW;
   if (tollRoof) {
     const under = tollZone(m.toll, v.player.x, v.player.y);
     tollRoof.k += ((under ? 0.3 : 1) - tollRoof.k) * 0.15;
