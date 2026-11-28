@@ -1,151 +1,19 @@
 {
   "app": "poke-uruguay",
-  "exported": "2026-11-20T06:54:23.799Z",
+  "exported": "2026-11-28T04:14:31.760Z",
   "build": "24cd2935740facd4",
-  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:160.0) Gecko/20100101 Firefox/160.0",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:161.0) Gecko/20100101 Firefox/161.0",
   "state": {
     "mode": "game",
-    "where": "mercedes (20,21)",
+    "where": "trinidad (27,21)",
     "party": [
-      "carpinchon nv33 109PS",
-      "lobito nv13 36PS"
+      "tejubrasa nv26 67PS",
+      "butia nv8 26PS"
     ],
     "badges": 1,
-    "playtime": 3482
+    "playtime": 7842
   },
   "entries": [
-    {
-      "t": "2026-11-13T03:50:59.150Z",
-      "level": "info",
-      "msg": "Entró a ferry_c5",
-      "where": "ferry_2 (23,1)"
-    },
-    {
-      "t": "2026-11-13T03:51:04.189Z",
-      "level": "info",
-      "msg": "Entró a ferry_2",
-      "where": "ferry_c5 (3,7)"
-    },
-    {
-      "t": "2026-11-13T03:51:05.907Z",
-      "level": "info",
-      "msg": "Entró a ferry_3",
-      "where": "ferry_2 (27,4)"
-    },
-    {
-      "t": "2026-11-13T03:51:08.061Z",
-      "level": "info",
-      "msg": "Batalla vs Gladys: teruterazo nv19, aguaraflama nv19",
-      "where": "ferry_3 (9,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:11.867Z",
-      "level": "info",
-      "msg": "Turno 1: move #0 | \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:28 \"¡Es súper eficaz!\" \"¡Gato Tigre usó Barrida!\" anim dmg1:28 stat \"¡Bajó la Velocidad de Terogarra rival!\"",
-      "where": "ferry_3 (9,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:16.771Z",
-      "level": "info",
-      "msg": "Turno 2: switch #1 | \"¡Gato Tigre, volvé!\" recall send \"¡Adelante, Carpinchal!\" \"¡Terogarra rival usó Ataque Ala!\" anim dmg0:8",
-      "where": "ferry_3 (9,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:20.924Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Carpinchal usó Cascada!\" anim dmg1:27 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_3 (9,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:27.813Z",
-      "level": "info",
-      "msg": "Turno 4: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:58 \"¡Es súper eficaz!\" faint \"¡Aguaraflama rival se debilitó!\" exp end",
-      "where": "ferry_3 (9,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:31.889Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_3 (9,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:41.578Z",
-      "level": "info",
-      "msg": "Batalla vs Axel: teruterazo nv20, carnero nv20",
-      "where": "ferry_3 (10,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:46.594Z",
-      "level": "info",
-      "msg": "Turno 1: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:54 \"¡Terogarra rival usó Griterío!\" anim dmg0:8",
-      "where": "ferry_3 (10,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:49.916Z",
-      "level": "info",
-      "msg": "Turno 2: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:3 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_3 (10,10)"
-    },
-    {
-      "t": "2026-11-13T03:51:57.172Z",
-      "level": "info",
-      "msg": "Turno 3: move #2 | \"¡Carpinchal usó Cascada!\" anim dmg1:59 \"¡Carnero rival usó Griterío!\" anim dmg0:8",
-      "where": "ferry_3 (10,10)"
-    },
-    {
-      "t": "2026-11-13T03:52:00.479Z",
-      "level": "info",
-      "msg": "Turno 4: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:13 faint \"¡Carnero rival se debilitó!\" exp end",
-      "where": "ferry_3 (10,10)"
-    },
-    {
-      "t": "2026-11-13T03:52:04.376Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_3 (10,10)"
-    },
-    {
-      "t": "2026-11-13T03:52:15.928Z",
-      "level": "info",
-      "msg": "Batalla vs Maitre Ibarra: teruterazo nv19, carnero nv20",
-      "where": "ferry_3 (10,5)"
-    },
-    {
-      "t": "2026-11-13T03:52:21.201Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Hidropulso!\" anim dmg1:55 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_3 (10,5)"
-    },
-    {
-      "t": "2026-11-13T03:52:30.200Z",
-      "level": "info",
-      "msg": "Turno 2: move #1 | \"¡Carpinchal usó Hidropulso!\" anim dmg1:56 \"¡Carnero rival usó Griterío!\" anim dmg0:8",
-      "where": "ferry_3 (10,5)"
-    },
-    {
-      "t": "2026-11-13T03:52:33.644Z",
-      "level": "info",
-      "msg": "Turno 3: move #3 | \"¡Carpinchal usó Burbuja!\" anim dmg1:16 faint \"¡Carnero rival se debilitó!\" exp end",
-      "where": "ferry_3 (10,5)"
-    },
-    {
-      "t": "2026-11-13T03:52:38.244Z",
-      "level": "info",
-      "msg": "Fin de batalla: win",
-      "where": "ferry_3 (10,5)"
-    },
-    {
-      "t": "2026-11-13T03:52:41.620Z",
-      "level": "info",
-      "msg": "Batalla vs Don Jesús: teruterazo nv20, carnero nv20",
-      "where": "ferry_3 (11,5)"
-    },
-    {
-      "t": "2026-11-13T03:53:20.795Z",
-      "level": "info",
-      "msg": "Turno 1: move #1 | \"¡Carpinchal usó Hidropulso!\" anim dmg1:58 faint \"¡Terogarra rival se debilitó!\" exp foeNext",
-      "where": "ferry_3 (11,5)"
-    },
     {
       "t": "2026-11-13T03:53:26.916Z",
       "level": "info",
@@ -2414,6 +2282,141 @@
       "level": "warn",
       "msg": "Autoguardado falló: Servidor de partidas: 400 {\"code\":\"P0001\",\"details\":null,\"hint\":null,\"message\":\"too many saves\"}",
       "where": "mercedes (20,21)"
+    },
+    {
+      "t": "2026-11-20T06:57:53.922Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: NetworkError when attempting to fetch resource.",
+      "where": "mercedes (20,21)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-20T15:10:45.129Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-20T15:10:57.704Z",
+      "level": "info",
+      "msg": "Entró a r_palmitas_mercedes",
+      "where": "mercedes (43,8)"
+    },
+    {
+      "t": "2026-11-20T15:10:58.654Z",
+      "level": "info",
+      "msg": "Entró a mercedes",
+      "where": "r_palmitas_mercedes (0,14)"
+    },
+    {
+      "t": "2026-11-20T15:10:59.322Z",
+      "level": "info",
+      "msg": "Entró a r_palmitas_mercedes",
+      "where": "mercedes (43,8)"
+    },
+    {
+      "t": "2026-11-28T03:27:26.527Z",
+      "level": "info",
+      "msg": "Entró a poli_trinidad",
+      "where": "title"
+    },
+    {
+      "t": "2026-11-28T03:27:30.187Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "poli_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-28T03:27:50.829Z",
+      "level": "info",
+      "msg": "Entró a casa_trinidad",
+      "where": "trinidad (25,12)"
+    },
+    {
+      "t": "2026-11-28T03:27:57.039Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "casa_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-28T03:27:58.299Z",
+      "level": "info",
+      "msg": "Entró a casa_trinidad",
+      "where": "trinidad (25,12)"
+    },
+    {
+      "t": "2026-11-28T03:28:00.933Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "casa_trinidad (4,7)"
+    },
+    {
+      "t": "2026-11-28T03:28:04.290Z",
+      "level": "info",
+      "msg": "Entró a gym_trinidad",
+      "where": "trinidad (30,19)"
+    },
+    {
+      "t": "2026-11-28T03:28:08.542Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "gym_trinidad (6,11)"
+    },
+    {
+      "t": "2026-11-28T03:28:17.250Z",
+      "level": "info",
+      "msg": "Entró a poli_trinidad",
+      "where": "trinidad (7,15)"
+    },
+    {
+      "t": "2026-11-28T04:13:18.586Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "poli_trinidad (5,7)",
+      "count": 2
+    },
+    {
+      "t": "2026-11-28T04:13:20.740Z",
+      "level": "info",
+      "msg": "Entró a poli_trinidad",
+      "where": "trinidad (7,15)"
+    },
+    {
+      "t": "2026-11-28T04:13:24.034Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "poli_trinidad (5,7)"
+    },
+    {
+      "t": "2026-11-28T04:13:29.166Z",
+      "level": "info",
+      "msg": "Entró a casa_trinidad",
+      "where": "trinidad (25,12)"
+    },
+    {
+      "t": "2026-11-28T04:13:35.535Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "casa_trinidad (4,7)"
+    },
+    {
+      "t": "2026-11-28T04:13:39.646Z",
+      "level": "info",
+      "msg": "Entró a gym_trinidad",
+      "where": "trinidad (30,19)"
+    },
+    {
+      "t": "2026-11-28T04:14:23.769Z",
+      "level": "info",
+      "msg": "Entró a trinidad",
+      "where": "gym_trinidad (5,11)"
+    },
+    {
+      "t": "2026-11-28T04:14:28.136Z",
+      "level": "warn",
+      "msg": "Autoguardado falló: Servidor de partidas: 400 {\"code\":\"P0001\",\"details\":null,\"hint\":null,\"message\":\"too many saves\"}",
+      "where": "trinidad (27,21)",
+      "count": 2
     }
   ]
 }
