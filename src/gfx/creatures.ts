@@ -565,8 +565,23 @@ export function flatOutline(c) {
   g.putImageData(img, 0, 0);
 }
 
+/**
+ * Species whose stored art faces RIGHT. The game assumes the front sprite faces left (towards the player),
+ * so these are mirrored on output; the stored art (and the sprite editor) stay untouched.
+ */
+export const FACES_RIGHT: ReadonlySet<string> = new Set([
+  'cuervon', 'cotorrayo', 'picaflorin', 'venadito', 'aguaraflama', 'alazan', 'pejerrey', 'criollo', 'garza', 'tatu',
+  'comadreja', 'zarigueya', 'tonina', 'capitan', 'peon', 'capataz', 'carpintero', 'coati', 'coatimundi', 'tamborilero',
+  'boleador', 'caudillo', 'guijarro',
+]);
+
 /** Front sprite (faces left). back=true returns a mirrored version for the player side. */
 export function creatureSprite(key, { back = false } = {}) {
+  return creatureSpriteRaw(key, { back: FACES_RIGHT.has(key) ? !back : back });
+}
+
+/** Sprite exactly as stored/generated (no facing correction). Used by the sprite editor. */
+export function creatureSpriteRaw(key, { back = false } = {}) {
   const drawn = back ? overrideMirrored(`creature:${key}`, SPRITE, SPRITE) : override(`creature:${key}`, SPRITE, SPRITE);
   if (drawn) return drawn;
   const ck = `${key}|${back}`;
