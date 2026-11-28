@@ -401,10 +401,21 @@ function draw(g, rows, pal, ox, oy, flip) {
   });
 }
 
+/**
+ * Height of a look's sprites: 17, or CHAR_TALL for looks drawn taller (the gym leaders from PixelLab: hats, plumes
+ * and buns stick out above the usual 16x17 body). Feet are always on the last row, so draw a tall one
+ * `charSprite(...).height - 17` pixels higher.
+ */
+export const CHAR_TALL = 24;
+export function charHeight(look) {
+  return override(`char:${look}|down|0`, 16, CHAR_TALL) ? CHAR_TALL : 17;
+}
+
 /** dir: 'down'|'up'|'left'|'right'; frame: 0 stand, 1/2 steps */
 export function charSprite(look, dir, frame = 0) {
   const key = `${look}|${dir}|${frame}`;
-  const drawn = override(`char:${key}`, 16, 17) ?? (frame === 3 ? override(`char:${look}|${dir}|0`, 16, 17) : null); // pose 4 follows pose 1 until it is drawn
+  const one = (k) => override(k, 16, 17) ?? override(k, 16, CHAR_TALL);
+  const drawn = one(`char:${key}`) ?? (frame === 3 ? one(`char:${look}|${dir}|0`) : null); // pose 4 follows pose 1 until it is drawn
   if (drawn) return drawn;
   let c = cache.get(key);
   if (c) return c;

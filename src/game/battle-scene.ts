@@ -195,7 +195,7 @@ function drawBattleActors(g, t) {
   // Trainers: their large battle portrait (same person as the map sprite), or the map sprite at 3x while it loads.
   if (A.foeTrainer && !drawPortrait(g, A.foeTrainer, 236 + A.trainerX, 110)) {
     const spr = charSprite(A.foeTrainer, 'down', 0);
-    g.drawImage(spr, 0, 0, 16, 17, Math.round(236 - 24 + A.trainerX), 104 - 51, 48, 51); // 3x: whole-number scale keeps the pixels square
+    g.drawImage(spr, 0, 0, 16, spr.height, Math.round(236 - 24 + A.trainerX), 104 - spr.height * 3, 48, spr.height * 3); // 3x: whole-number scale keeps the pixels square
   }
   if (A.showPlayerTrainer && !drawPortrait(g, state().player.look, 84 + A.playerTrainerX, 196, true)) {
     const spr = charSprite(state().player.look, 'up', 0);

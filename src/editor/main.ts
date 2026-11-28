@@ -8,7 +8,7 @@ import { CUSTOM } from '../data/custom-content.js';
 import { TYPES } from '../data/types.ts';
 import { OUTDOOR } from '../data/maps.ts';
 import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
-import { charSprite, LOOKS } from '../gfx/characters.ts';
+import { charHeight, charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';
 import { UI_ICONS, uiIconCanvas } from '../gfx/ui-icons.ts';
@@ -80,8 +80,8 @@ const CATS: any[] = [
   {
     id: 'char', make: 'char', name: 'Personajes', hint: '16×17, cuatro direcciones y cuatro pasos cada una (1 y 2 apoyan un pie; 0 y 3 son el paso intermedio).',
     entries: () => [...Object.keys(LOOKS), ...newCustom.looks.map((l) => l.key)].map((look) => ({
-      key: `char:${look}|down|0`, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)), sub: look, w: 16, h: 17, draw: () => charSprite(draftBase(look), 'down', 0), kind: 'char', look,
-      frames: DIRS.flatMap(([d]) => [0, 1, 2, 3].map((f) => ({ key: `char:${look}|${d}|${f}`, dir: d, frame: f, w: 16, h: 17, draw: () => charSprite(draftBase(look), d, f), kind: 'char', look, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)) }))),
+      key: `char:${look}|down|0`, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)), sub: look, w: 16, h: charHeight(look), draw: () => charSprite(draftBase(look), 'down', 0), kind: 'char', look,
+      frames: DIRS.flatMap(([d]) => [0, 1, 2, 3].map((f) => ({ key: `char:${look}|${d}|${f}`, dir: d, frame: f, w: 16, h: charHeight(look), draw: () => charSprite(draftBase(look), d, f), kind: 'char', look, label: (newCustom.looks.find((l) => l.key === look)?.name ?? lookName(look)) }))),
     })),
   },
   {
@@ -618,9 +618,9 @@ function animateWalk() {
     g.fillStyle = '#c8b078'; g.fillRect(0, 40, 192, 34);
     const step = [0, 1, 0, 2][i++ % 4];
     const { look, dir } = S.entry;
-    const cur = S.entry.frame === step ? canvasFromPixels(S.px, 16, 17) : charSprite(look, dir, step);
-    g.drawImage(cur, 80, 22, 32, 34);
-    DIRS.forEach(([d], k) => g.drawImage(charSprite(look, d, 0), 16 + k * 44, 80, 16, 17));
+    const cur = S.entry.frame === step ? canvasFromPixels(S.px, 16, S.entry.h) : charSprite(look, dir, step);
+    g.drawImage(cur, 80, 56 - cur.height * 2, 32, cur.height * 2); // tall looks (gym leaders) grow upwards
+    DIRS.forEach(([d], k) => { const c = charSprite(look, d, 0); g.drawImage(c, 16 + k * 44, 97 - c.height); });
   }, 180);
 }
 
@@ -850,21 +850,22 @@ async function importSheet(file: File) {
   };
   const picks = [];
   for (const d of ['down', 'left', 'right', 'up']) for (let i = 0; i < 4; i++) picks.push({ d, i, box: cell(+dirRow[d].value, +stepCol[i].value) });
+  const keep = S.entry;
   const boxes = picks.map((p) => p.box).filter(Boolean) as any[];
   if (!boxes.length) return status('La hoja no tiene dibujos en esas celdas.', 'warn');
-  const k = Math.min(16 / Math.max(...boxes.map((q) => q.w)), 17 / Math.max(...boxes.map((q) => q.h)), 1);
+  const CH = keep?.h ?? 17; // 24 for tall looks (gym leaders)
+  const k = Math.min(16 / Math.max(...boxes.map((q) => q.w)), CH / Math.max(...boxes.map((q) => q.h)), 1);
   snapshot();
-  const keep = S.entry;
   for (const p of picks) {
     const fr = g.frames.find((q) => q.dir === p.d && q.frame === p.i);
     if (!fr) continue;
-    const out = blank(16, 17), og = out.getContext('2d', { willReadFrequently: true });
+    const out = blank(16, CH), og = out.getContext('2d', { willReadFrequently: true });
     if (p.box) {
       const tw = Math.max(1, Math.round(p.box.w * k)), th = Math.max(1, Math.round(p.box.h * k));
       og.imageSmoothingEnabled = k < 1;
-      og.drawImage(src, p.box.x, p.box.y, p.box.w, p.box.h, Math.floor((16 - tw) / 2), 17 - th, tw, th);
+      og.drawImage(src, p.box.x, p.box.y, p.box.w, p.box.h, Math.floor((16 - tw) / 2), CH - th, tw, th);
     }
-    const px = og.getImageData(0, 0, 16, 17).data;
+    const px = og.getImageData(0, 0, 16, CH).data;
     for (let i = 3; i < px.length; i += 4) px[i] = px[i] >= 128 ? 255 : 0;
     storeDraft(fr, new Uint8ClampedArray(px));
   }
