@@ -69,6 +69,8 @@ function frame(now) {
     if (S) S.stats.playtime += dt / 1000;
     advanceClock(dt);
   }
+  // phones: the on-screen pad only shows while walking the world (hidden on intro, title, login, save slots and in battles)
+  document.body.classList.toggle('gb-off', mode !== 'game' || battle.inBattle());
   updateHud(now);
   updateSidebar(now, mode === 'game');
   render(now);
