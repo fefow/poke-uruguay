@@ -397,8 +397,19 @@ const BALSA = {
   names: [['Cabrestante verde', 'verde'], ['Cabrestante azul', 'azul'], ['Cabrestante rojo', 'roja']],
   block: ['Balsa', 'sailor', ['La balsa está trabada con tres amarras.', 'Cada orilla tiene un cabrestante por amarra: soltarlas en el orden justo la deja libre.']],
   hand: ['Balsero', 'sailor', (a, c) => [`Esa balsa la conozco de memoria. La amarra ${a} se suelta primero y la ${c} siempre queda para el final.`, 'Si te equivocás, las amarras vuelven a tensarse y se empieza de nuevo.']] as [string, string, (a: string, c: string) => string[]],
-  words: { done: 'La balsa ya está suelta.', release: 'Soltaste el cabrestante. Las amarras vuelven a tensarse.', last: 'Se oye soltarse la última amarra. La balsa queda libre y atraviesa sola el paso.', click: ['La amarra aflojó.', 'Otra amarra cedió.'], reset: 'Algo crujió. Las amarras volvieron a tensarse.' },
+  words: { done: 'La balsa ya está suelta.', release: 'Soltaste el cabrestante. Las amarras vuelven a tensarse.', last: ['Se oye soltarse la última amarra. La balsa queda libre y atraviesa sola el paso.', 'La gente que esperaba en la orilla se va caminando.'], click: ['La amarra aflojó.', 'Otra amarra cedió.'], reset: 'Algo crujió. Las amarras volvieron a tensarse.' },
 };
+/** People waiting at the moored raft (Ruta 2): every one different, each with their own words, never a row of copies. [name, look, line] */
+const BALSA_QUEUE: [string, string, string][] = [
+  ['Balsero', 'sailor', 'La balsa no sale hasta que se suelten las tres amarras.'],
+  ['Pescador', 'pescador', 'Vine con la caña y me quedé a esperar. Del otro lado el río pica mejor.'],
+  ['Camionero', 'camionero', 'Con el camión no me animo a cruzar. Espero que la dejen libre para ir a pie.'],
+  ['Campesina', 'campesina', 'Llevo verdura para el mercado de Fray Bentos. Hace una hora que estoy parada acá.'],
+  ['Obrero', 'obrero', 'Si no cruzo hoy pierdo el turno. Alguien tiene que saber cómo se sueltan esas amarras.'],
+  ['Vecino', 'oldman', 'Toda la vida crucé en esa balsa y nunca la vi trabada así.'],
+  ['Estudiante', 'estudiante', 'Tengo examen mañana del otro lado. Si la balsa no sale, me quedo sin rendir.'],
+  ['Almacenero', 'almacenero', 'Esperando la balsa con la mercadería. Los cabrestantes están en cada orilla, dicen.'],
+];
 /** What the former worker of the fog plant says (also used for the night version of the line). */
 export const plantHint = (a: string, c: string) => [`Trabajé en esa planta hasta que la PP me echó. La palanca ${a} se baja primero y la ${c} siempre queda para el final.`, 'Si te equivocás, los cerrojos se vuelven a abrir y hay que empezar de nuevo.'];
 export function addLeverGate(m, id, busy) {
@@ -432,8 +443,13 @@ export function addLeverGate(m, id, busy) {
   const crowd: string[] = [];
   const pseed = [...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 11);
   cut.forEach(([x, y], i) => {
-    if (balsa) m.npcs.push({ x, y, look: 'sailor', dir: 'down', blocker: true, fixed: true, name: BALSA.block[0], text: BALSA.block[2], cond: (f) => !f[done] });
-    else {
+    if (balsa) {
+      // the people queued at the raft: all different, they walk off once it is free
+      const [name, look, line] = BALSA_QUEUE[(pseed + i * 3) % BALSA_QUEUE.length];
+      const pid = `${done}_m${i}`;
+      crowd.push(pid);
+      m.npcs.push({ id: pid, x, y, look: blockLook(m, x, y, look), dir: 'down', blocker: true, fixed: true, name, text: [line, ...BALSA.block[2]], cond: (f) => !f[done] });
+    } else {
       // a protest: everyone different, each with a placard and their own words
       const [name, look, slogan, remark] = PROTESTERS[(pseed + i * 5) % PROTESTERS.length];
       const pid = `${done}_m${i}`;
