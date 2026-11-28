@@ -2023,7 +2023,10 @@ function drawWorld(g, t) {
     }
     if (player && W_.bike) drawBike(g, sx, sy, n.dir);
     if (!player && n.def.sign != null && look !== 'swimmer') g.drawImage(protestSprite(look, n.dir, f, n.def.sign), sx, sy - 4 - SIGN_ROWS); // protester with a placard
-    else g.drawImage(charSprite(look, n.dir, f), sx, sy - 4 - (player && W_.bike ? 2 : 0) - lift);
+    else {
+      const spr = charSprite(look, n.dir, f);
+      g.drawImage(spr, sx, sy - 4 - (spr.height - 17) - (player && W_.bike ? 2 : 0) - lift); // tall looks (gym leaders) grow upwards
+    }
     // Tall grass covers your feet, also while walking through it: the tile you are mostly on decides.
     const half = n.moving && n.from && n.t / n.dur < 0.5;
     const tx = half ? n.from.x : n.x;

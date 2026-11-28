@@ -519,7 +519,7 @@ function draw() {
     if (n.removed) continue;
     let spr = null;
     try { if (n.look && !String(n.look).startsWith('animal:')) spr = charSprite(n.look, n.dir ?? 'down', 0); } catch { spr = null; }
-    if (spr) g.drawImage(spr, n.x * T, n.y * T - 2);
+    if (spr) g.drawImage(spr, n.x * T, n.y * T - 2 - (spr.height - 17)); // tall looks (gym leaders) grow upwards
     else { g.fillStyle = n.kind === 'critter' ? 'rgba(200,140,60,.85)' : 'rgba(255,255,255,.7)'; g.fillRect(n.x * T + 4, n.y * T + 4, 8, 8); }
   }
   // the "encima" layer over people (faded while painting another layer, so the ground stays visible)
