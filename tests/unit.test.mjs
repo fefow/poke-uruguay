@@ -956,10 +956,10 @@ test('Frigorífico Anglo: cuatro pisos, la cámara de frío se resuelve y no dej
 test('gimnasios: cada uno tiene su mecanismo, se resuelve de punta a punta y no deja atrapado', async () => {
   const { MAPS } = await import('../src/data/maps.ts');
   const { TILE_INFO } = await import('../src/gfx/tiles.ts');
-  const { solveLevers, solvePushes } = await import('../src/data/gym-puzzles.ts');
+  const { solveLevers, solvePushes, plowPaths } = await import('../src/data/gym-puzzles.ts');
   const solid = (c) => !!TILE_INFO[c]?.solid;
   const gyms = Object.entries(MAPS).filter(([, m]) => m.puzzle);
-  assert.equal(gyms.length, 9, 'OSE, UTE, Quiroga, ANCAP, INAVI, Defensa, MGAP, Lavalleja y Boiso');
+  assert.equal(gyms.length, 10, 'OSE, UTE, Quiroga, ANCAP, INAVI, Defensa, MGAP, Lavalleja, Boiso y Colonización');
   for (const [id, m] of gyms) {
     const pz = m.puzzle;
     const last = m.tiles.length - 1;
@@ -969,6 +969,17 @@ test('gimnasios: cada uno tiene su mecanismo, se resuelve de punta a punta y no 
     if (m.tiles.join('').match(/[ӽӾ]/)) {
       const r = solvePushes(sim);
       assert.ok(r.solved && r.pushes >= 6, `${id}: se resuelve empujando (${r.pushes} empujes)`);
+      continue;
+    }
+    if (pz.plots) {
+      assert.ok(!solveLevers(sim).solved, `${id}: con las parcelas sin arar las tranqueras cierran el paso`);
+      const done = solveLevers({ ...sim, plowedAll: true });
+      assert.ok(done.solved && !done.softLock && done.steps >= 20, `${id}: con las parcelas aradas se llega al líder (${done.steps} pasos)`);
+      for (const pl of pz.plots) {
+        const n = plowPaths(pl);
+        assert.ok(n >= 1, `${id}: la parcela ${pl.id} se ara entera de una pasada desde su entrada`);
+        assert.ok(pl.tiles.length >= 10, `${id}: la parcela ${pl.id} no es trivial (${pl.tiles.length} casillas)`);
+      }
       continue;
     }
     const r = solveLevers(sim);
@@ -984,6 +995,40 @@ test('gimnasios: cada uno tiene su mecanismo, se resuelve de punta a punta y no 
       assert.ok(!dead.solved, `${id}: sin accionar nada el paso sigue cerrado`);
     }
   }
+});
+
+test('Colonización: la tierra se ara al pisarla, un surco pisado desarma la parcela y cada parcela tiene una sola entrada', async () => {
+  const { MAPS } = await import('../src/data/maps.ts');
+  const { TILE_INFO } = await import('../src/gfx/tiles.ts');
+  const { plowStep, plotDone, gateOpen } = await import('../src/data/gym-puzzles.ts');
+  const m = MAPS.gym_trinidad;
+  const pz = m.puzzle;
+  assert.equal(pz.plots.length, 3);
+  for (const pl of pz.plots) {
+    const cells = new Set(pl.tiles.map(([x, y]) => `${x},${y}`));
+    const gate = pz.gates.find((g) => g.plowed === pl.id).tiles[0];
+    const ways = [];
+    for (const [x, y] of pl.tiles) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const k = `${x + dx},${y + dy}`; const c = m.tiles[y + dy]?.[x + dx];
+      if (!cells.has(k) && c !== undefined && !TILE_INFO[c]?.solid) ways.push(k);
+    }
+    assert.equal(ways.length, 1, `parcela ${pl.id}: una sola entrada (${ways.join(' ')})`);
+    const [wx, wy] = ways[0].split(',').map(Number);
+    assert.equal(Math.abs(wx - pl.entry[0]) + Math.abs(wy - pl.entry[1]), 1, `parcela ${pl.id}: se entra por su casilla de entrada`);
+    assert.ok(pl.tiles.some(([x, y]) => Math.abs(x - gate[0]) + Math.abs(y - gate[1]) === 1), `parcela ${pl.id}: la tranquera da a la parcela`);
+  }
+  const A = pz.plots[0];
+  const plowed = new Set();
+  const st = { on: new Set(), steps: 0, beaten: () => false, plowed };
+  const gA = pz.gates.find((g) => g.plowed === A.id);
+  assert.equal(plowStep(pz, plowed, ...A.tiles[0]), 'plow');
+  assert.equal(plowStep(pz, plowed, ...A.tiles[1]), 'plow');
+  assert.equal(plowStep(pz, plowed, ...A.tiles[0]), 'reset', 'pisar un surco desarma la parcela');
+  assert.equal(plowed.size, 1, 'queda arada solo la casilla donde se está parado');
+  for (const t of A.tiles) plowStep(pz, plowed, ...t);
+  assert.ok(plotDone(A, plowed) && gateOpen(pz, gA, st), 'arada entera, la tranquera se abre');
+  assert.equal(plowStep(pz, plowed, ...A.tiles[0]), null, 'una parcela terminada ya no se desarma');
+  assert.equal(plowStep(pz, plowed, 0, 0), null, 'fuera de las parcelas no pasa nada');
 });
 
 test('map editor grid tools: shapes, stamps, replace and changes', async () => {

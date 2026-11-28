@@ -86,6 +86,13 @@ export const TILE_INFO = {
   'Ԗ': { name: 'hélice', solid: true },
   'ԗ': { name: 'enredadera seca', solid: true },
   'Ԙ': { name: 'barrera del puesto', solid: true },
+  'Ԛ': { name: 'tierra sin arar' },
+  'ԛ': { name: 'surco arado' },
+  'Ԝ': { name: 'cerco de alambre', solid: true },
+  'ԝ': { name: 'tranquera cerrada', solid: true },
+  'Ԟ': { name: 'tranquera abierta' },
+  'ԟ': { name: 'tacurú', solid: true },
+  'Ԡ': { name: 'chacra sembrada', solid: true },
   ϲ: { name: 'pared de roca', solid: true },
   ...Object.fromEntries(Object.values(WALL_CAPS).flat().map((c) => [c, { name: 'extremo de pared de roca', solid: true }])),
   λ: { name: 'desnivel', solid: true, ledge: true },
@@ -2266,6 +2273,86 @@ gymFamily(['&', '*', '+'], { type: 'siniestro', roof: '#2e2e42', roofLight: '#5a
   DRAW['Ԗ'] = (g) => { base(g, '#4a5160'); px(g, 7, 1, '#c8d0da', 2, 14); px(g, 1, 7, '#c8d0da', 14, 2); px(g, 3, 3, '#aab4c0', 2, 2); px(g, 11, 3, '#aab4c0', 2, 2); px(g, 3, 11, '#aab4c0', 2, 2); px(g, 11, 11, '#aab4c0', 2, 2); px(g, 6, 6, '#e84a3a', 4, 4); px(g, 7, 7, '#f4f4f0', 2, 2); };
   DRAW['ԗ'] = (g) => { base(g, '#3e5a2a'); for (const [x, y, w, h] of [[1, 2, 14, 2], [1, 7, 14, 2], [1, 12, 14, 2], [3, 0, 2, 16], [10, 0, 2, 16]]) px(g, x, y, '#6a4a22', w, h); for (const [x, y] of [[2, 1], [6, 6], [11, 8], [4, 11], [13, 3]]) { px(g, x, y, '#c8d0a0', 1, 3); px(g, x - 1, y + 1, '#c8d0a0', 3, 1); } for (const [x, y] of [[8, 4], [5, 9], [12, 13]]) px(g, x, y, '#c83a3a', 2, 2); };
   DRAW['Ԙ'] = (g) => { base(g, '#6a707c'); px(g, 0, 5, '#2a303a', T, 6); for (let x = 0; x < T; x += 4) { px(g, x, 6, '#f4f4f0', 2, 4); px(g, x + 2, 6, '#d83a3a', 2, 4); } px(g, 1, 3, '#2a303a', 2, 12); px(g, 13, 3, '#2a303a', 2, 12); px(g, 1, 1, '#f2c02a', 2, 2); };
+}
+
+// Instituto de Colonización (Trinidad, tierra): un galpón de campo con parcelas para arar. La tierra sin arar se vuelve
+// surco al pisarla; cada parcela está cercada con alambre y se sale por su tranquera. Tacurús adentro de las parcelas,
+// chacras ya sembradas donde no se llega.
+{
+  const soil = (g, r) => {
+    px(g, 0, 0, '#c29a5e', T, T);
+    for (let i = 0; i < 7; i++) px(g, r ? r.int(0, 14) : (i * 5) % 14, r ? r.int(0, 14) : (i * 7) % 14, '#d4b074', 2, 1);
+    // grietas de tierra seca
+    px(g, 2, 4, '#8e6a3a', 4, 1); px(g, 5, 5, '#8e6a3a', 1, 3); px(g, 6, 8, '#8e6a3a', 3, 1);
+    px(g, 10, 2, '#8e6a3a', 1, 3); px(g, 11, 5, '#8e6a3a', 3, 1); px(g, 9, 11, '#8e6a3a', 4, 1); px(g, 12, 12, '#8e6a3a', 1, 2);
+    px(g, 2, 12, '#7aa040', 1, 2); px(g, 3, 11, '#9ac858', 1, 2); px(g, 13, 8, '#7aa040', 1, 2);
+    px(g, 0, 15, '#a8824a', T, 1); px(g, 15, 0, '#a8824a', 1, T);
+  };
+  DRAW['Ԛ'] = soil;
+  DRAW['ԛ'] = (g) => {
+    px(g, 0, 0, '#5a3a1e', T, T);
+    for (let y = 1; y < T; y += 5) {
+      px(g, 0, y, '#8a5a30', T, 2); px(g, 0, y, '#a8723c', T, 1); px(g, 0, y + 2, '#4a2e16', T, 1);
+      for (let x = 2 + ((y >> 2) % 2) * 3; x < T; x += 6) { px(g, x, y - 1, '#6cc04c', 1, 2); px(g, x + 1, y - 1, '#9ae070', 1, 1); }
+    }
+  };
+  const post = (g, x) => { px(g, x, 2, '#3e2a16', 3, 13); px(g, x + 1, 2, '#8a5e34', 1, 12); px(g, x, 1, '#a8784a', 3, 1); };
+  DRAW['Ԝ'] = (g, r) => {
+    soil(g, r);
+    for (const y of [5, 8, 11]) { px(g, 0, y, '#4a4a52', T, 1); px(g, 0, y - 1, '#c8c8d0', T, 1); }
+    post(g, 6); px(g, 5, 14, '#00000040', 5, 1);
+  };
+  DRAW['ԝ'] = (g, r) => {
+    soil(g, r);
+    post(g, 0); post(g, 13);
+    for (const y of [4, 8, 12]) { px(g, 2, y, '#d8b070', 12, 2); px(g, 2, y + 1, '#8a6034', 12, 1); }
+    for (let i = 0; i < 9; i++) px(g, 3 + i, 12 - i, '#c89a5a', 2, 1); // la diagonal de la tranquera
+    px(g, 7, 7, '#f2c02a', 2, 2); // el candado del alambre
+  };
+  DRAW['Ԟ'] = (g, r) => {
+    soil(g, r);
+    post(g, 0); post(g, 13);
+    px(g, 3, 1, '#d8b070', 2, 13); px(g, 3, 1, '#8a6034', 1, 13); // la tranquera abierta, contra el poste
+  };
+  DRAW['ԟ'] = (g, r) => {
+    soil(g, r);
+    px(g, 2, 14, '#00000040', 12, 1);
+    px(g, 3, 8, '#7a4e28', 10, 7); px(g, 4, 5, '#8e5c30', 8, 4); px(g, 5, 3, '#a06a38', 6, 3); px(g, 6, 1, '#b07a44', 4, 3);
+    px(g, 6, 2, '#c8925a', 1, 4); px(g, 5, 7, '#c8925a', 1, 5); px(g, 10, 9, '#5a3618', 1, 4); px(g, 8, 6, '#5a3618', 2, 1);
+    px(g, 3, 13, '#9ac858', 1, 2); px(g, 12, 12, '#9ac858', 1, 3);
+  };
+  DRAW['Ԡ'] = (g) => {
+    px(g, 0, 0, '#6a4424', T, T);
+    for (let y = 0; y < T; y += 4) { px(g, 0, y + 3, '#4a2e16', T, 1); for (let x = 1; x < T; x += 3) { px(g, x, y, '#3f8a34', 2, 3); px(g, x, y, '#7ed858', 1, 1); px(g, x + 1, y + 1, '#c8e060', 1, 1); } }
+  };
+  // el galpón: piso de tablones, paredes de chapa y madera con planos de las colonias y bolsas de semilla
+  const t = (THEMES as any).gym_tierra;
+  const planks = (g, r) => {
+    px(g, 0, 0, '#c8a070', T, T);
+    for (let y = 0; y < T; y += 4) { px(g, 0, y + 3, '#9a7448', T, 1); px(g, ((y * 5) % 13) + 1, y, '#9a7448', 1, 3); }
+    px(g, 3, 1, '#dcb888', 3, 1); px(g, 10, 9, '#dcb888', 3, 1);
+  };
+  const wall = (g) => {
+    px(g, 0, 0, '#7a4e2c', T, T);
+    for (let x = 0; x < T; x += 4) { px(g, x, 0, '#5a3618', 1, 11); px(g, x + 1, 0, '#946238', 1, 11); }
+    px(g, 0, 11, '#3e2a16', T, 5); px(g, 0, 10, '#c89a5a', T, 1); px(g, 0, 12, '#5a3a20', T, 1);
+  };
+  t.Y = planks;
+  t.x = wall;
+  t.N = (g, r) => { planks(g, r); px(g, 3, 14, '#00000040', 10, 1); px(g, 4, 1, '#3e2a16', 8, 14); px(g, 5, 1, '#946238', 6, 13); px(g, 5, 1, '#b07a44', 2, 13); px(g, 3, 3, '#5a3618', 10, 2); px(g, 3, 3, '#c89a5a', 10, 1); };
+  t.m = (g, r) => { planks(g, r); px(g, 1, 3, '#4a2a14', 14, 10); px(g, 2, 4, '#8a5a30', 12, 8); for (let x = 3; x < 13; x += 2) px(g, x, 5, '#c89058', 1, 6); };
+  t['ϻ'] = (g) => { // un plano de las colonias clavado en la pared
+    wall(g);
+    px(g, 2, 1, '#3e2a16', 12, 9); px(g, 3, 2, '#f0e0b8', 10, 7);
+    px(g, 4, 3, '#9ac858', 3, 2); px(g, 8, 3, '#e8c070', 4, 2); px(g, 4, 6, '#e8c070', 2, 2); px(g, 7, 6, '#9ac858', 5, 2);
+    px(g, 7, 3, '#6a4a2a', 1, 5); px(g, 4, 5, '#6a4a2a', 8, 1); px(g, 10, 6, '#d83a3a', 1, 1);
+  };
+  t['ϼ'] = (g, r) => { // bolsas de semilla apiladas
+    planks(g, r);
+    px(g, 1, 7, '#8a7a5a', 7, 8); px(g, 2, 8, '#e8dcc0', 5, 6); px(g, 8, 7, '#8a7a5a', 7, 8); px(g, 9, 8, '#e0d0a8', 5, 6);
+    px(g, 4, 2, '#8a7a5a', 8, 7); px(g, 5, 3, '#f0e6cc', 6, 5); px(g, 6, 4, '#3f8a34', 4, 2); px(g, 7, 4, '#f2c02a', 1, 1);
+    px(g, 3, 10, '#c83a2a', 3, 1); px(g, 10, 10, '#2a6ab0', 3, 1); px(g, 1, 15, '#00000050', 14, 1);
+  };
 }
 
 // Interior cabin / ship door: a wooden door set in the panelled wall.

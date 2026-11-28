@@ -1,6 +1,6 @@
 // Overworld: map loading/linking, movement, NPCs, trainers, encounters,
 // rendering and the script API used by story scripts.
-import { applyPuzzle } from '../data/gym-puzzles.ts';
+import { applyPuzzle, plowStep } from '../data/gym-puzzles.ts';
 import { MAPS, OUTDOOR, INTERIOR, refGymOrder } from '../data/maps.ts';
 import { SCRIPTS } from '../data/story.ts';
 import { SPECIES } from '../data/species.ts';
@@ -144,7 +144,7 @@ function battleBg() {
 function applyGp() {
   const pz = W_.map.puzzle;
   if (!pz || !W_.gp) return;
-  applyPuzzle(W_.tiles, pz, { on: W_.gp.on, steps: W_.gp.steps, beaten: (id) => !!flag(`tr_${id}`) });
+  applyPuzzle(W_.tiles, pz, { on: W_.gp.on, steps: W_.gp.steps, beaten: (id) => !!flag(`tr_${id}`), plowed: W_.gp.plowed });
 }
 
 let canoeGo = false; // true for the single step that boards the canoe
@@ -241,7 +241,7 @@ export function loadMap(id, x, y, dir = 'down') {
   for (const e of (m as any).flagTiles ?? []) if (S.flags[e.flag]) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
   // Scenery that is only there for a while (e.g. the Fiesta de la Patria Gaucha): m.condTiles = [{ cond, x, y, ch }]
   for (const e of (m as any).condTiles ?? []) if (e.cond()) W_.tiles[e.y] = W_.tiles[e.y].slice(0, e.x) + e.ch + W_.tiles[e.y].slice(e.x + 1);
-  W_.gp = m.puzzle ? { on: new Set<string>(), steps: 0 } : null;
+  W_.gp = m.puzzle ? { on: new Set<string>(), steps: 0, plowed: new Set<string>() } : null;
   applyGp();
   if (changed) { W_.npcs = []; W_.lit = hasItem('farol') && !!flag(badgeOf('punta')); } // the Farol lights dark maps by itself
   // The bicycle is never used indoors, and bike-only zones put you on it.
@@ -645,7 +645,14 @@ function onStep() {
   const p = W_.player;
   S.stats.steps++;
   S.pos = { map: W_.map.id, x: p.x, y: p.y, dir: p.dir };
-  if (W_.gp) { W_.gp.steps++; applyGp(); }
+  if (W_.gp) {
+    W_.gp.steps++;
+    // Colonización: la tierra se ara al pisarla; pisar un surco de una parcela sin terminar la deja sin arar
+    const plow = W_.map.puzzle?.plots ? plowStep(W_.map.puzzle, W_.gp.plowed, p.x, p.y) : null;
+    applyGp();
+    if (plow === 'reset') { sfx('bump'); toast('Pisaste un surco y se desarmó: la parcela quedó sin arar.', 3000); }
+    else if (plow === 'done') { sfx('confirm'); toast('¡Parcela arada entera! Se abrió su tranquera.', 3000); }
+  }
   const ch = tileAt(p.x, p.y);
   if (W_.map.indoor && ch === 'm' && p.dir === 'down' && p.from && tileAt(p.from.x, p.from.y) !== 'm') {
     return void runScript(() => (labGuard() ? SCRIPTS.lab_no_exit(api) : exitInterior()));
