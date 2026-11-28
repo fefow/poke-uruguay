@@ -404,6 +404,37 @@ def('ϯ', ({ parts, x, y }) => {
   put(parts, sph(0.13, 7, 5), cx, 0.96, cz, 0xc8c8d8, 0.05);
 });
 
+// ---------------------------------------------------------------- Instituto de Colonización (Trinidad)
+// Tacurú: el montículo de tierra de las hormigas y termitas del campo, más ancho abajo, con terrones.
+def('ԟ', ({ parts, x, y }) => {
+  const cx = x + 0.5, cz = y + 0.5;
+  put(parts, cyl(0.36, 0.44, 0.22, 7), cx, 0.11, cz, 0x7a4e28, 0.08, x);
+  put(parts, cyl(0.24, 0.35, 0.3, 7), cx + 0.02, 0.36, cz - 0.02, 0x8e5c30, 0.08, y);
+  put(parts, cone(0.25, 0.36, 7), cx + 0.03, 0.68, cz - 0.03, 0xa06a38, 0.08, x + y);
+  for (let i = 0; i < 4; i++) put(parts, dod(0.07), cx + (rnd(x, y, i) - 0.5) * 0.6, 0.06 + rnd(x, y, i + 5) * 0.4, cz + 0.2 + rnd(x, y, i + 9) * 0.15, 0x6a4020, 0.06, i);
+  for (let i = 0; i < 3; i++) put(parts, cone(0.03, 0.14, 3), cx - 0.4 + i * 0.4, 0.07, cz + 0.38, 0x7aa040, 0.08, i);
+});
+// Chacra sembrada: surcos oscuros con plantines de maíz.
+def('Ԡ', ({ parts, x, y }) => {
+  for (let i = 0; i < 3; i++) {
+    const z = y + 0.2 + i * 0.3;
+    const ridge = cyl(0.1, 0.1, 0.98, 4).rotateZ(Math.PI / 2).scale(1, 0.7, 1.1);
+    put(parts, ridge, x + 0.5, 0.04, z, 0x5a3a1e, 0.06, x * 3 + i);
+    for (let k = 0; k < 3; k++) {
+      const px = x + 0.18 + k * 0.32, h = 0.28 + rnd(x, y, i * 3 + k) * 0.16;
+      put(parts, cyl(0.015, 0.02, h, 4), px, 0.08 + h / 2, z, 0x4a8a2a, 0.06, k);
+      for (const s of [-1, 1]) put(parts, cone(0.03, 0.2, 3).rotateZ(s * 0.9), px + s * 0.06, 0.1 + h * 0.6, z, 0x6cc04c, 0.08, k + s);
+    }
+  }
+});
+// Tranquera abierta: los dos postes y la tranquera girada contra uno de ellos.
+def('Ԟ', ({ parts, x, y }) => {
+  const cx = x + 0.5, cz = y + 0.5;
+  for (const s of [-1, 1]) put(parts, cyl(0.07, 0.08, 0.95, 6), cx + s * 0.45, 0.47, cz, 0x6a4424, 0.06, s);
+  for (const h of [0.2, 0.38, 0.56, 0.74]) put(parts, box(0.04, 0.06, 0.8), cx - 0.4, h, cz + 0.42, 0xc89a5a, 0.05, h * 10);
+  put(parts, box(0.045, 0.6, 0.05), cx - 0.4, 0.47, cz + 0.8, 0xa87a44, 0.04);
+});
+
 // ---------------------------------------------------------------- ciudad y monumentos
 // Monumento: pedestal escalonado y la estatua de bronce.
 def('Γ', ({ parts, x, y }) => {
