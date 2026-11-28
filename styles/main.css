@@ -1185,6 +1185,7 @@ body.gb:has(.dialog:not([hidden]), .menu) .gb-round { opacity: 0.3; }
 .tb-more, .tb-label, .menu-touchbar { display: none; }
 /* phones: while a list is open the round buttons step aside completely (they used to cover the options under them);
    options are tapped directly and cancelable lists carry their own "Volver" */
+body.gb.gb-off .gb-pad { display: none; }
 body.gb:has(.menu) .gb-pad .gb-round, body.gb:has(.menu) .gb-pad .gb-dpad { opacity: 0; pointer-events: none; }
 body.gb .menu-list li { margin-block: 0.4cqi; background: oklch(0.97 0.015 235); box-shadow: inset 0 0 0 0.25cqi oklch(0.82 0.05 235), 0 0.45cqi 0 oklch(0.78 0.06 235); transition: translate 0.06s, box-shadow 0.06s; }
 body.gb .menu-list li.is-active { background: oklch(0.92 0.05 235); box-shadow: inset 0 0 0 0.35cqi var(--celeste-deep), 0 0.45cqi 0 oklch(0.6 0.1 235); }

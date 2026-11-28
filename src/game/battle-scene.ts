@@ -371,6 +371,8 @@ function isBoss(trainer) {
 }
 
 let engine = null;
+/** True while a battle is running (the on-screen pad hides: everything in a battle is tapped). */
+export const inBattle = () => engine !== null;
 
 /**
  * opts: { foes:[creature], wild:bool, trainer, bg, canLose }
