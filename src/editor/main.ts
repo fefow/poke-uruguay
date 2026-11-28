@@ -7,7 +7,7 @@ import { SPRITE_OVERRIDES } from '../data/sprite-overrides.js';
 import { CUSTOM } from '../data/custom-content.js';
 import { TYPES } from '../data/types.ts';
 import { OUTDOOR } from '../data/maps.ts';
-import { creatureSprite, SPRITE } from '../gfx/creatures.ts';
+import { creatureSpriteRaw as creatureSprite, SPRITE } from '../gfx/creatures.ts';
 import { charHeight, charSprite, LOOKS } from '../gfx/characters.ts';
 import { itemCanvas, WORLD_PROPS } from '../gfx/items.ts';
 import { badgeCanvas } from '../gfx/badges.ts';

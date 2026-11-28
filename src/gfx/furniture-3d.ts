@@ -499,3 +499,51 @@ def('ϋ', (c) => {
   pk(cx - 0.18, 0, cz + 0.1, 0.38, 0.3, 0.1, 1); pk(cx + 0.2, 0, cz + 0.05, 0.34, 0.26, -0.2, 2);
   pk(cx, 0, cz - 0.22, 0.4, 0.34, 0, 3); pk(cx - 0.02, 0.3, cz + 0.05, 0.3, 0.22, 0.35, 4);
 });
+
+// ---------------------------------------------------------------- Instituto de Colonización (Trinidad)
+// Alambrado y tranquera: el alambre se tiende hacia los vecinos que siguen la línea (más alambrado, una tranquera o la
+// pared), con un poste de madera en cada casillero. Bolsas de semilla apiladas en el galpón.
+const LINE = 'ԜԝԞxϻ';
+const joins = (c: FurnCtx) => ([[1, 0], [-1, 0], [0, 1], [0, -1]] as const).filter(([dx, dy]) => LINE.includes(c.ch(c.x + dx, c.y + dy) ?? '·'));
+const POST = 0x6a4424, POST_TOP = 0x8a5e34, WIRE = 0xb8bcc4;
+def('Ԝ', (c) => {
+  const cx = c.x + 0.5, cz = c.y + 0.5;
+  put(c.parts, cyl(0.05, 0.06, 0.78, 6), cx, 0.39, cz, POST, 0.06, c.x + c.y);
+  put(c.parts, cyl(0.065, 0.05, 0.05, 6), cx, 0.8, cz, POST_TOP, 0.04);
+  const sides = joins(c);
+  for (const [dx, dy] of sides.length ? sides : ([[1, 0], [-1, 0]] as const)) {
+    for (const h of [0.26, 0.46, 0.66]) {
+      const wire = dx ? box(0.5, 0.015, 0.015) : box(0.015, 0.015, 0.5);
+      put(c.parts, wire, cx + dx * 0.25, h, cz + dy * 0.25, WIRE, 0.02);
+    }
+  }
+});
+def('ԝ', (c) => {
+  const cx = c.x + 0.5, cz = c.y + 0.5;
+  const j = joins(c);
+  const alongX = !j.length || j.some(([dx]) => dx !== 0); // la tranquera sigue la línea del alambrado
+  const rot = alongX ? 0 : Math.PI / 2;
+  for (const s of [-1, 1]) {
+    const px = alongX ? cx + s * 0.45 : cx, pz = alongX ? cz : cz + s * 0.45;
+    put(c.parts, cyl(0.07, 0.08, 0.95, 6), px, 0.47, pz, POST, 0.06, s);
+  }
+  for (const h of [0.2, 0.38, 0.56, 0.74]) put(c.parts, box(0.84, 0.06, 0.04), cx, h, cz, 0xc89a5a, 0.05, h * 10, rot);
+  for (const s of [-1, 1]) put(c.parts, box(0.05, 0.6, 0.045), cx + (alongX ? s * 0.38 : 0), 0.47, cz + (alongX ? 0 : s * 0.38), 0xa87a44, 0.04, s, rot);
+  const brace = box(0.92, 0.05, 0.035);
+  brace.rotateZ(Math.atan2(0.54, 0.76));
+  put(c.parts, brace, cx, 0.47, cz, 0xb8884c, 0.04, 3, rot);
+  put(c.parts, box(0.07, 0.07, 0.07), cx + (alongX ? 0.36 : 0), 0.5, cz + (alongX ? 0 : 0.36), 0xf2c02a, 0); // el candado del alambre
+});
+def('ϼ', (c) => {
+  if (c.theme !== 'gym_tierra') return false;
+  const cx = c.x + 0.5, cz = c.y + 0.5;
+  const sack = (x: number, y: number, z: number, ry: number, col: number, band: number, s: number) => {
+    put(c.parts, box(0.36, 0.24, 0.26), x, y + 0.12, z, col, 0.06, s, ry);
+    put(c.parts, box(0.3, 0.06, 0.2), x, y + 0.27, z, col, 0.06, s + 1, ry);
+    put(c.parts, box(0.37, 0.05, 0.27), x, y + 0.1, z, band, 0.02, s + 2, ry);
+  };
+  sack(cx - 0.19, 0, cz + 0.12, 0.1, 0xe8dcc0, 0xc83a2a, 1);
+  sack(cx + 0.19, 0, cz + 0.1, -0.15, 0xe0d0a8, 0x2a6ab0, 2);
+  sack(cx, 0.26, cz + 0.02, 0.05, 0xf0e6cc, 0x3f8a34, 3);
+  put(c.parts, box(0.36, 0.2, 0.24), cx + 0.02, 0.1, cz - 0.24, 0xd8c8a0, 0.06, 4);
+});

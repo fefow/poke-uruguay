@@ -1,7 +1,8 @@
 // Mecanismos de los gimnasios. Cada gimnasio tiene un recorrido propio hasta el líder:
 //  - compuertas y válvulas (OSE, ANCAP), tablero de luces (UTE), carros y bloques que se empujan (Quiroga, Lavalleja),
 //    barreras que suben al vencer al guardia (Defensa), riego que seca las enredaderas (MGAP) y obstáculos que cambian
-//    cada tantos pasos (INAVI con enjambres, Boiso con hélices).
+//    cada tantos pasos (INAVI con enjambres, Boiso con hélices), y parcelas que se aran enteras de una sola pasada para
+//    que se abra su tranquera (Colonización).
 // El estado de un gimnasio vive solo mientras se está adentro: al salir y volver a entrar todo vuelve a empezar, así que
 // un carro atascado nunca deja a nadie encerrado. Las reglas son puras para que las pruebas simulen el mismo recorrido.
 export type Gate = {
@@ -12,7 +13,11 @@ export type Gate = {
   allLevers?: string[];       // se abre con todas estas palancas activadas
   allGates?: string[];        // se abre con todas estas compuertas abiertas
   closedPhases?: number[];    // cerrada durante estas fases del reloj de pasos
+  plowed?: string;            // se abre con esta parcela arada entera
 };
+/** Parcela: la tierra se vuelve surco al pisarla; pisar un surco de una parcela sin terminar la deja como al principio. */
+export type Plot = { id: string; tiles: [number, number][]; entry?: [number, number] }; // entry: la casilla por donde se entra (pruebas)
+export const SOIL = 'Ԛ', FURROW = 'ԛ';
 export type Lever = { id: string; x: number; y: number; flips: string[] };
 export type Puzzle = {
   gates: Gate[]; levers: Lever[];
@@ -20,8 +25,24 @@ export type Puzzle = {
   goal: [number, number];               // casilla que alcanza el líder (pruebas)
   hint?: string[];                      // lo que cuenta el guía de la entrada
   use?: [string, string];               // mensaje al accionar una palanca (encendida, apagada)
+  plots?: Plot[];                       // parcelas para arar (Colonización)
 };
-export type PuzzleState = { on: Set<string>; steps: number; beaten: (id: string) => boolean };
+export type PuzzleState = { on: Set<string>; steps: number; beaten: (id: string) => boolean; plowed?: Set<string> };
+
+export const plotDone = (pl: Plot, plowed: Set<string> | undefined) => !!plowed && pl.tiles.every(([x, y]) => plowed.has(`${x},${y}`));
+/**
+ * Un paso del jugador sobre (x, y): ara la tierra de su parcela. Si pisa un surco de una parcela que todavía no está
+ * terminada, la parcela vuelve a quedar sin arar (salvo la casilla donde quedó parado). Devuelve qué pasó.
+ */
+export function plowStep(p: Puzzle, plowed: Set<string>, x: number, y: number): 'plow' | 'reset' | 'done' | null {
+  const pl = p.plots?.find((o) => o.tiles.some(([a, b]) => a === x && b === y));
+  if (!pl || plotDone(pl, plowed)) return null;
+  const k = `${x},${y}`;
+  let res: 'plow' | 'reset' | 'done' = 'plow';
+  if (plowed.has(k)) { for (const [a, b] of pl.tiles) plowed.delete(`${a},${b}`); res = 'reset'; }
+  plowed.add(k);
+  return plotDone(pl, plowed) ? 'done' : res;
+}
 
 export const phaseOf = (p: Puzzle, steps: number) => (p.period ? Math.floor(steps / p.period) % (p.phases ?? 2) : 0);
 
@@ -30,6 +51,7 @@ export function gateOpen(p: Puzzle, g: Gate, st: PuzzleState): boolean {
   if (g.allLevers) return g.allLevers.every((id) => st.on.has(id));
   if (g.allGates) return g.allGates.every((id) => gateOpen(p, p.gates.find((o) => o.id === id)!, st));
   if (g.closedPhases) return !g.closedPhases.includes(phaseOf(p, st.steps));
+  if (g.plowed) { const pl = p.plots?.find((o) => o.id === g.plowed); return !!pl && plotDone(pl, st.plowed); }
   let flips = 0;
   for (const l of p.levers) if (st.on.has(l.id) && l.flips.includes(g.id)) flips++;
   return (g.init === 'open') !== (flips % 2 === 1);
@@ -42,13 +64,14 @@ export function applyPuzzle(rows: string[], p: Puzzle, st: PuzzleState): boolean
   const put = (x: number, y: number, c: string) => { if (rows[y]?.[x] !== undefined && rows[y][x] !== c) { rows[y] = rows[y].slice(0, x) + c + rows[y].slice(x + 1); changed = true; } };
   for (const g of p.gates) { const ch = gateOpen(p, g, st) ? (g.open ?? 'Y') : g.closed; for (const [x, y] of g.tiles) put(x, y, ch); }
   for (const l of p.levers) put(l.x, l.y, leverChar(st.on.has(l.id)));
+  for (const pl of p.plots ?? []) for (const [x, y] of pl.tiles) put(x, y, st.plowed?.has(`${x},${y}`) ? FURROW : SOIL);
   return changed;
 }
 
 // ------------------------------------------------------------------------------------------------ simulation (tests)
 const MOVES: [number, number][] = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 const PUSH = new Set(['ӽ', 'Ӿ']);
-type Sim = { tiles: string[]; blocked: Set<string>; solid: (c: string) => boolean; puzzle: Puzzle; start: [number, number]; beatenAll?: boolean };
+type Sim = { tiles: string[]; blocked: Set<string>; solid: (c: string) => boolean; puzzle: Puzzle; start: [number, number]; beatenAll?: boolean; plowedAll?: boolean };
 
 /** Levers and clock: breadth-first search over (position, levers, clock). Returns steps to the goal, or null, and whether
  *  every reachable state can still reach the goal (no soft lock). */
@@ -58,11 +81,12 @@ export function solveLevers(sim: Sim) {
   const cyc = p.period ? p.period * (p.phases ?? 2) : 1;
   const ids = p.levers.map((l) => l.id);
   const rowsFor = new Map<string, string[]>();
+  const plowed = sim.plowedAll ? new Set((p.plots ?? []).flatMap((pl) => pl.tiles.map(([x, y]) => `${x},${y}`))) : undefined;
   const grid = (mask: number, t: number) => {
     const ph = p.period ? Math.floor(t / p.period) : 0;
     const k = `${mask}/${ph}`;
     let r = rowsFor.get(k);
-    if (!r) { r = sim.tiles.slice(); applyPuzzle(r, p, { on: new Set(ids.filter((_, i) => mask >> i & 1)), steps: ph * (p.period ?? 0), beaten: () => !!sim.beatenAll }); rowsFor.set(k, r); }
+    if (!r) { r = sim.tiles.slice(); applyPuzzle(r, p, { on: new Set(ids.filter((_, i) => mask >> i & 1)), steps: ph * (p.period ?? 0), beaten: () => !!sim.beatenAll, plowed }); rowsFor.set(k, r); }
     return r;
   };
   const key = (x: number, y: number, m: number, t: number) => ((((y * W + x) * 64 + m) * cyc) + t);
@@ -145,3 +169,22 @@ export function solvePushes(sim: Sim, limit = 600000) {
   }
   return { solved: false, pushes: null, states: seen.size };
 }
+
+/** Parcelas: cuántas maneras hay de arar cada una entera de una pasada desde su entrada (`entry`, la primera casilla
+ *  que se pisa), sin volver a pisar un surco (los tacurús no son parte de la parcela). */
+export function plowPaths(pl: Plot, entry: [number, number] = pl.entry!, limit = 5000) {
+  const cells = new Set(pl.tiles.map(([x, y]) => `${x},${y}`));
+  let count = 0;
+  const seen = new Set<string>([`${entry[0]},${entry[1]}`]);
+  const dfs = (x: number, y: number) => {
+    if (count >= limit) return;
+    if (seen.size === cells.size) { count++; return; }
+    for (const [dx, dy] of MOVES) {
+      const k = `${x + dx},${y + dy}`;
+      if (cells.has(k) && !seen.has(k)) { seen.add(k); dfs(x + dx, y + dy); seen.delete(k); }
+    }
+  };
+  if (cells.has(`${entry[0]},${entry[1]}`)) dfs(entry[0], entry[1]);
+  return count;
+}
+

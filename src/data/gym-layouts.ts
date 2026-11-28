@@ -344,11 +344,58 @@ function utePlan(): GymPlan {
   return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 24, y: 7, dir: 'down' }, { x: 3, y: 7, dir: 'down' }], guide: { x: 10, y: 17 }, puzzle };
 }
 
+/**
+ * Instituto de Colonización (Trinidad, tierra): un galpón de campo partido por dos alambrados. Cada tramo tiene una
+ * parcela cercada con una sola entrada; su tranquera se abre cuando la parcela queda arada entera, y la tierra arada no
+ * se vuelve a pisar (si se pisa un surco, la parcela queda sin arar otra vez). Los tacurús obligan a pensar el recorrido.
+ * La última parcela está frente a la oficina de Elena. Lo que no se alcanza son chacras ya sembradas.
+ */
+function incPlan(): GymPlan {
+  const { g, rect, out } = blank();
+  const SOIL = 'Ԛ', FENCE = 'Ԝ', GATE = 'ԝ', TACURU = 'ԟ', CROP = 'Ԡ';
+  // la oficina de Elena
+  rect(10, 1, 17, 4, 'Y'); rect(13, 1, 14, 4, 'A'); for (const [x, y] of [[10, 1], [17, 1], [10, 4], [17, 4]]) g[y][x] = 'N';
+  g[0][13] = 'X'; g[0][14] = 'Z';
+  rect(12, 5, 15, 5, FENCE);
+  // el galpón: tres tramos (sur, medio y norte) separados por alambrados
+  rect(1, 6, 26, 17, 'Y');
+  rect(1, 14, 26, 14, FENCE); rect(1, 10, 26, 10, FENCE);
+  rect(10, 18, 17, 18, 'Y'); g[19][13] = 'm'; g[19][14] = 'm';
+  type Box = { id: string; x1: number; y1: number; x2: number; y2: number; entry: [number, number]; gap: [number, number]; gate: [number, number]; tacurus: [number, number][] };
+  const boxes: Box[] = [
+    { id: 'A', x1: 18, y1: 15, x2: 21, y2: 17, entry: [18, 17], gap: [17, 17], gate: [19, 14], tacurus: [[20, 16]] },
+    { id: 'B', x1: 4, y1: 11, x2: 8, y2: 13, entry: [8, 13], gap: [9, 13], gate: [5, 10], tacurus: [[6, 11]] },
+    { id: 'C', x1: 11, y1: 6, x2: 16, y2: 9, entry: [11, 9], gap: [10, 9], gate: [13, 5], tacurus: [[13, 8], [15, 7]] },
+  ];
+  const plots = boxes.map((b) => {
+    rect(b.x1 - 1, b.y1, b.x1 - 1, b.y2, FENCE); rect(b.x2 + 1, b.y1, b.x2 + 1, b.y2, FENCE);
+    rect(b.x1, b.y1, b.x2, b.y2, SOIL);
+    for (const [x, y] of b.tacurus) g[y][x] = TACURU;
+    g[b.gap[1]][b.gap[0]] = 'Y';
+    const tiles: [number, number][] = [];
+    for (let y = b.y1; y <= b.y2; y++) for (let x = b.x1; x <= b.x2; x++) if (g[y][x] === SOIL) tiles.push([x, y]);
+    return { id: b.id, tiles, entry: b.entry };
+  });
+  // lo que queda del otro lado de cada parcela (no se llega): chacras ya sembradas y algún tacurú
+  rect(23, 15, 26, 17, CROP); rect(1, 11, 2, 13, CROP); rect(18, 6, 26, 9, CROP);
+  for (const [x, y] of [[24, 16], [21, 8], [25, 7]]) g[y][x] = TACURU;
+  // fardos, rollos y bolsas de semilla en lo que se recorre
+  for (const [x, y, c] of [[1, 15, 'א'], [2, 15, 'א'], [1, 17, 'Ξ'], [6, 17, 'ϼ'], [8, 15, 'ϼ'], [25, 11, 'א'], [26, 11, 'Ξ'], [22, 13, 'ϼ'], [1, 6, 'Ξ'], [2, 6, 'א'], [1, 9, 'ϼ']] as [number, number, string][]) g[y][x] = c;
+  // planos de las colonias en la pared del fondo
+  for (const x of [2, 5, 8, 19, 22, 25]) g[5][x] = 'ϻ';
+  const puzzle: Puzzle = {
+    gates: boxes.map((b) => ({ id: `T${b.id}`, tiles: [b.gate], closed: GATE, open: 'Ԟ', plowed: b.id })),
+    levers: [], plots, goal: [13, 4],
+    hint: ['Elena entrega la tierra a quien la trabaja. Cada parcela tiene una tranquera que se abre recién cuando la parcela está arada entera.', 'La tierra arada no se pisa de nuevo: si pisás un surco, la parcela queda como al principio.'],
+  };
+  return { tiles: out(), leader: { x: 13, y: 2 }, trainers: [{ x: 12, y: 11, dir: 'down' }, { x: 8, y: 6, dir: 'down' }], guide: { x: 11, y: 17 }, puzzle };
+}
+
 const FLIP = { left: 'right', right: 'left', up: 'up', down: 'down' };
 
 /** Re-lay a gym interior with plan `i` (0-11): plans 6-11 are the mirror images of 0-5. */
 export function layoutGym(m, i, id = '') {
-  const made = ({ correo: correoPlan, ose: osePlan, anglo: angloPlan, quiroga: quirogaPlan, defensa: defensaPlan, mgap: mgapPlan, lavalleja: lavallejaPlan, boiso: boisoPlan, ancap: ancapPlan, inavi: inaviPlan, ute: utePlan } as Record<string, () => any>)[(m.npcs ?? []).find((n) => n.leader)?.leader];
+  const made = ({ correo: correoPlan, ose: osePlan, anglo: angloPlan, quiroga: quirogaPlan, defensa: defensaPlan, mgap: mgapPlan, lavalleja: lavallejaPlan, boiso: boisoPlan, ancap: ancapPlan, inavi: inaviPlan, ute: utePlan, inc: incPlan } as Record<string, () => any>)[(m.npcs ?? []).find((n) => n.leader)?.leader];
   const bespoke = !!made;
   const plan = made ? (made as any)(id) : PLANS[i % PLANS.length];
   if ((plan as any).warps) m.warps = (plan as any).warps;
