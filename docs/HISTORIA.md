@@ -111,7 +111,7 @@ Cada gimnasio tiene su propio camino hasta el líder. El estado del mecanismo vi
 
 | Gimnasio | Mecanismo |
 |---|---|
-| Trinidad (Tierra) | Plano propio editado a mano (no se re-diseña sin avisar). |
+| Trinidad, Colonización (Tierra) | Un galpón con tres parcelas cercadas con alambre, una por tramo. La tranquera de cada parcela se abre cuando está arada entera; la tierra arada no se vuelve a pisar (pisar un surco deja la parcela sin arar). Los tacurús obligan a pensar el recorrido; la última parcela está frente a la oficina de Elena. |
 | Mercedes, Correo | Cintas transportadoras (única vez que se usan). |
 | Fray Bentos, Centro Toxicológico | Cajas de teletransporte de reactivos. |
 | Salto, Quiroga (Psíquico) | Carros de libros que se empujan (nunca se tiran) y tapan cada hueco entre pasillos. |
